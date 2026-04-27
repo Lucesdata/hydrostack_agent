@@ -60,7 +60,7 @@ const S = {
   page: {
     minHeight: "calc(100vh - 52px)",
     background: "linear-gradient(135deg,#0a1628 0%,#0d2137 60%,#0a1f35 100%)",
-    padding: "52px 28px 80px",
+    padding: "clamp(28px, 6vw, 52px) clamp(16px, 5vw, 28px) 80px",
     fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
   },
   inner: {

@@ -75,8 +75,8 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Terminal card */}
-        <div style={S.heroRight} aria-hidden="true">
+        {/* Terminal card — hidden on mobile */}
+        <div style={S.heroRight} className="hero-terminal" aria-hidden="true">
           <div style={S.terminalCard}>
             <div style={S.terminalBar}>
               <span style={{ ...S.termDot, background: "#ff5f57" }}/>
@@ -172,7 +172,7 @@ const S = {
     minHeight: "calc(100vh - 52px)",
     display: "flex",
     alignItems: "center",
-    padding: "60px 28px",
+    padding: "clamp(40px, 8vw, 80px) clamp(16px, 5vw, 28px)",
     overflow: "hidden",
     background: "linear-gradient(135deg, #020C10 0%, #041820 55%, #020C10 100%)",
   },
@@ -284,7 +284,7 @@ const S = {
   },
 
   /* ── Features ── */
-  section: { padding: "72px 28px" },
+  section: { padding: "clamp(40px, 8vw, 72px) clamp(16px, 5vw, 28px)" },
   sectionInner: { maxWidth: "1100px", margin: "0 auto" },
   featureGrid: {
     display: "grid",
@@ -310,7 +310,7 @@ const S = {
 
   /* ── Modules ── */
   modulesSection: {
-    padding: "72px 28px",
+    padding: "clamp(40px, 8vw, 72px) clamp(16px, 5vw, 28px)",
     background: "rgba(0,0,0,0.25)",
     borderTop: "1px solid rgba(0,245,255,0.06)",
     borderBottom: "1px solid rgba(0,245,255,0.06)",
@@ -361,12 +361,12 @@ const S = {
   /* ── Footer ── */
   footer: {
     borderTop: "1px solid rgba(0,245,255,0.08)",
-    padding: "20px 28px",
+    padding: "20px clamp(16px, 5vw, 28px)",
     background: "rgba(2,12,16,0.8)",
   },
   footerInner: {
     maxWidth: "1100px", margin: "0 auto",
-    display: "flex", alignItems: "center", gap: "12px",
+    display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap",
   },
   footerLogo: {
     fontFamily: "'Orbitron', sans-serif",

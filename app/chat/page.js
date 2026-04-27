@@ -250,7 +250,7 @@ const S = {
   msgArea: {
     flex:      1,
     overflowY: "auto",
-    padding:   "24px 28px",
+    padding:   "16px clamp(12px, 4vw, 28px)",
     display:   "flex",
     flexDirection: "column",
     gap:       "16px",
@@ -295,7 +295,7 @@ const S = {
   inputArea: {
     borderTop:  "1px solid rgba(0,245,255,0.10)",
     background: "rgba(2,12,16,0.85)",
-    padding:    "14px 28px 10px",
+    padding:    "12px clamp(12px, 4vw, 28px) 10px",
     flexShrink: 0,
   },
   inputInner: {

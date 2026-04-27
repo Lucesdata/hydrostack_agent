@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { useLang } from "@/lib/i18n";
 
 export default function Navbar() {
@@ -8,12 +9,15 @@ export default function Navbar() {
   const path = usePathname();
   const isCalc = path.startsWith("/calculators");
   const isChat = path.startsWith("/chat");
+  const [open, setOpen] = useState(false);
+
+  const close = () => setOpen(false);
 
   return (
     <nav style={S.nav}>
       <div style={S.inner}>
         {/* Logo */}
-        <Link href="/" style={S.logo}>
+        <Link href="/" style={S.logo} onClick={close}>
           <span style={S.logoMark}>H</span>
           <span style={S.logoText}>ydroStack</span>
         </Link>
@@ -21,20 +25,12 @@ export default function Navbar() {
         {/* Online status dot */}
         <span style={S.statusDot} className="blink" title="Sistema activo"/>
 
-        {/* Links */}
-        <div style={S.links}>
-          <Link
-            href="/calculators"
-            style={{ ...S.link, ...(isCalc ? S.linkActive : {}) }}
-            className={isCalc ? "" : "nav-link"}
-          >
+        {/* Desktop links */}
+        <div style={S.links} className="hide-mobile">
+          <Link href="/calculators" style={{ ...S.link, ...(isCalc ? S.linkActive : {}) }} className={isCalc ? "" : "nav-link"}>
             {t.nav.calculators}
           </Link>
-          <Link
-            href="/chat"
-            style={{ ...S.link, ...(isChat ? S.linkActive : {}) }}
-            className={isChat ? "" : "nav-link"}
-          >
+          <Link href="/chat" style={{ ...S.link, ...(isChat ? S.linkActive : {}) }} className={isChat ? "" : "nav-link"}>
             {t.nav.assistant}
           </Link>
           <a href="#about" style={S.link} className="nav-link">
@@ -42,8 +38,33 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* Lang toggle */}
-        <button style={S.langBtn} className="btn-ghost" onClick={toggle}>
+        {/* Lang toggle — desktop */}
+        <button style={S.langBtn} className="btn-ghost hide-mobile" onClick={toggle}>
+          {t.nav.lang}
+        </button>
+
+        {/* Hamburger — mobile only */}
+        <button
+          className="nav-hamburger hide-desktop"
+          onClick={() => setOpen(o => !o)}
+          aria-label="Menú"
+        >
+          {open ? "✕" : "☰"}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
+      <div className={`nav-mobile-menu${open ? " open" : ""}`}>
+        <Link href="/calculators" className={`nav-mobile-link${isCalc ? " active" : ""}`} onClick={close}>
+          {t.nav.calculators}
+        </Link>
+        <Link href="/chat" className={`nav-mobile-link${isChat ? " active" : ""}`} onClick={close}>
+          {t.nav.assistant}
+        </Link>
+        <a href="#about" className="nav-mobile-link" onClick={close}>
+          {t.nav.about}
+        </a>
+        <button className="nav-mobile-lang" onClick={() => { toggle(); close(); }}>
           {t.nav.lang}
         </button>
       </div>
