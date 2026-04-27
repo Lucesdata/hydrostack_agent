@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const SYSTEM_PROMPT = `Eres HydroStack Assistant, un ingeniero hidráulico virtual especializado en
