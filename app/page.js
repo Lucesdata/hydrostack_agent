@@ -39,10 +39,11 @@ export default function LandingPage() {
     <div style={S.page}>
 
       {/* ── Hero ── */}
-      <section style={S.hero}>
+      <section style={S.heroWrap} className="hero-section">
         {/* Grid overlay inside hero */}
         <div style={S.heroGrid} aria-hidden="true"/>
 
+        <div style={S.hero}>
         <div style={S.heroContent}>
           {/* Eyebrow */}
           <div style={S.eyebrow} className="fade-up">
@@ -75,7 +76,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Terminal card — hidden on mobile */}
+        {/* Terminal card — hidden on tablet/mobile */}
         <div style={S.heroRight} className="hero-terminal" aria-hidden="true">
           <div style={S.terminalCard}>
             <div style={S.terminalBar}>
@@ -94,9 +95,9 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            {/* Bottom glow line */}
             <div style={S.termGlow}/>
           </div>
+        </div>
         </div>
       </section>
 
@@ -171,8 +172,20 @@ const S = {
     position: "relative",
     minHeight: "calc(100vh - 52px)",
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    gap: "clamp(32px, 5vw, 64px)",
     padding: "clamp(40px, 8vw, 80px) clamp(16px, 5vw, 28px)",
+    maxWidth: "1100px",
+    margin: "0 auto",
+    width: "100%",
+  },
+  heroWrap: {
+    position: "relative",
+    minHeight: "calc(100vh - 52px)",
+    display: "flex",
+    alignItems: "center",
     overflow: "hidden",
     background: "linear-gradient(135deg, #020C10 0%, #041820 55%, #020C10 100%)",
   },
@@ -186,7 +199,10 @@ const S = {
   },
   heroContent: {
     position: "relative", zIndex: 2,
-    maxWidth: "580px",
+    flex: "1 1 0",
+    minWidth: 0,
+    maxWidth: "560px",
+    width: "100%",
   },
   eyebrow: {
     display: "flex", alignItems: "center", gap: "8px",
@@ -247,8 +263,8 @@ const S = {
 
   /* ── Terminal card ── */
   heroRight: {
-    position: "absolute", right: "5%", top: "50%",
-    transform: "translateY(-50%)", zIndex: 2,
+    position: "relative", zIndex: 2,
+    flexShrink: 0,
   },
   terminalCard: {
     background: "rgba(4,24,32,0.9)",
