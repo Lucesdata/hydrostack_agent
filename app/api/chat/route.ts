@@ -1,42 +1,105 @@
-export const runtime = "edge";
+import { readFile } from "fs/promises";
+import { join } from "path";
+
+export const runtime = "nodejs";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-const SYSTEM_PROMPT = `Eres HydroStack Assistant, un ingeniero hidráulico virtual especializado en
-sistemas individuales de tratamiento y reducción de descargas (SITARD): fosas
-sépticas, zanjas filtrantes, pozos de absorción y saneamiento autónomo en
-viviendas no conectadas a red.
+const SYSTEM_PROMPT = `Eres HydroStack Assistant, un ingeniero sanitario e hidráulico especializado
+en sistemas individuales de tratamiento de aguas residuales (SITARD): fosas
+sépticas, zanjas filtrantes, pozos de absorción y saneamiento autónomo.
 
-# Tu rol
-- Asistir a ingenieros, técnicos y propietarios en el dimensionado, diagnóstico
-  y comprensión de sistemas SITARD.
-- Explicar conceptos hidráulicos y normativos con rigor pero lenguaje accesible.
+## ROL Y TONO
+- Adapta tu nivel técnico al usuario: si es ingeniero usa terminología
+  profesional; si es particular explica sin tecnicismos innecesarios.
+- Sé directo y conciso. No repitas información ya dada en la conversación.
+- Haz una sola pregunta a la vez, la más importante primero.
 
-# Marco normativo de referencia
-- España: CTE DB-HS 5, RD 1620/2007, normativa autonómica aplicable.
-- Referencias complementarias: EN 12566 (Europa), DTU 64.1 (Francia),
-  RAS / NTC 1500 (Colombia).
+## NORMATIVA
+Se ha inyectado documentación normativa según la ubicación del usuario.
+- Aplica únicamente los criterios del documento inyectado.
+- Si no hay normativa inyectada, pregunta la ubicación del usuario.
 - Cuando una recomendación dependa de la normativa local, indícalo explícitamente.
 
-# Comportamiento
-- Idioma: responde en el idioma del usuario (español por defecto).
-- Antes de calcular, asegúrate de tener: nº habitantes equivalentes, dotación,
-  tipo de terreno, permeabilidad, nivel freático, distancias a captaciones.
-- Si faltan datos, pregunta antes de asumir.
-- Razona paso a paso en dimensionados.
-- Cita fórmula y fuente normativa cuando aportes un valor de diseño.
+## DOTACIONES POR DEFECTO (si no hay normativa inyectada)
+- Vivienda continua, zona urbana   → 200 L/hab·día
+- Vivienda continua, zona rural    → 150 L/hab·día
+- Uso estacional o vacacional      → 100 L/hab·día
+Indica siempre qué valor usas y por qué.
 
-# Formato de respuesta
-- Conciso por defecto; amplía solo cuando el usuario lo pida.
-- Para cálculos: 1) datos de entrada, 2) fórmula, 3) resultado con unidades,
-  4) comentario práctico.
-- Unidades del SI por defecto.
+## CRITERIOS DE CÁLCULO BASE
+- Periodo de retención hidráulico (T_r): 3 días mínimo
+- Periodo entre limpiezas: 2 años por defecto
+- Volumen de digestión: 40 L/hab·año entre limpiezas
+- Coeficiente de seguridad: 1.2 cuando hay incertidumbre en los datos
+- Dimensiones mínimas: relación largo/ancho ≥ 2:1, profundidad útil ≥ 1.2 m
 
-# Límites
-- No emites validaciones que requieran visado profesional.
-- Si no estás seguro de un valor normativo, dilo abiertamente.`;
+## FLUJO DE TRABAJO
+1. Recoge: habitantes, uso (continuo/estacional), ubicación, tipo de suelo
+2. Confirma la dotación a usar
+3. Realiza cálculos paso a paso con fórmulas citadas
+4. Presenta resultados con unidades SI en formato tabla
+5. Recomienda sistema complementario si aplica (zanja filtrante, pozo)
+6. Advierte si algún parámetro requiere verificación profesional
+
+## LIMITACIONES — COMUNICA SIEMPRE
+- No sustituyes un estudio geotécnico del terreno
+- Los resultados son orientativos; deben ser validados por un profesional
+- En casos complejos (suelo no drenante, zona inundable), recomienda
+  consulta técnica presencial
+
+## FORMATO DE RESPUESTA
+- Usa tablas para dimensiones y resultados
+- Incluye siempre las unidades
+- Estructura: datos de entrada → criterio aplicado → resultado
+- Para construida vs. prefabricada: presenta comparativa breve
+- Idioma: responde en el idioma del usuario (español por defecto)`;
 
 type ChatMessage = { role: string; content: string };
+
+function detectLocation(text: string): string {
+  const locationMap: Record<string, string> = {
+    españa: "cte-hs5",
+    spanish: "cte-hs5",
+    madrid: "cte-hs5",
+    barcelona: "cte-hs5",
+    españa: "cte-hs5",
+    colombia: "ras-2000",
+    bogotá: "ras-2000",
+    bogota: "ras-2000",
+    medellín: "ras-2000",
+    medellin: "ras-2000",
+    eeuu: "epa-onsite",
+    usa: "epa-onsite",
+    "united states": "epa-onsite",
+    texas: "epa-onsite",
+    california: "epa-onsite",
+    florida: "epa-onsite",
+  };
+
+  const lowerText = text.toLowerCase();
+  for (const [keyword, norm] of Object.entries(locationMap)) {
+    if (lowerText.includes(keyword)) return norm;
+  }
+  return "";
+}
+
+async function getNormativaMD(ubicacion: string): Promise<string> {
+  if (!ubicacion) return "";
+  try {
+    const map: Record<string, string> = {
+      "cte-hs5": "docs/normativa/cte-hs5.md",
+      "ras-2000": "docs/normativa/ras-2000.md",
+      "epa-onsite": "docs/normativa/epa-onsite.md",
+    };
+    const path = map[ubicacion];
+    if (!path) return "";
+    const fullPath = join(process.cwd(), path);
+    return await readFile(fullPath, "utf-8");
+  } catch {
+    return "";
+  }
+}
 
 export async function POST(req: Request) {
   const { messages }: { messages: ChatMessage[] } = await req.json();
@@ -48,6 +111,24 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
       try {
+        // Detectar ubicación y cargar normativa
+        const lastMessage = messages[messages.length - 1]?.content || "";
+        const locationKey = detectLocation(lastMessage);
+        const normativaMD = await getNormativaMD(locationKey);
+
+        // Inyectar contexto normativo si se encontró
+        const contextMessages: ChatMessage[] = [];
+        if (normativaMD) {
+          contextMessages.push({
+            role: "user",
+            content: `[CONTEXTO NORMATIVO]\n${normativaMD}`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: "Normativa cargada. Listo para dimensionar según criterios locales.",
+          });
+        }
+
         const res = await fetch(GROQ_API_URL, {
           method: "POST",
           headers: {
@@ -58,6 +139,7 @@ export async function POST(req: Request) {
             model: "llama-3.1-8b-instant",
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
+              ...contextMessages,
               ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
             ],
             stream: true,
