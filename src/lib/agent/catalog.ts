@@ -227,8 +227,8 @@ export const CATALOG: CatalogQuestion[] = [
     route: "materiales",
     text: "¿Cuál debe ser el diámetro de los tubos de entrada y salida?",
     conditions: ["form_calculated"],
-    intent: "Calculadora propone Ø {r.dPipe*1000:.0f} mm basado en caudal máximo {r.Qd*1000/86400:.2f} L/s. Recomendación: mínimo Ø100 mm (entrada) y Ø75 mm (salida). Entrada debe estar sumergida ≥30 cm bajo superficie; salida ≥40 cm. Tubería debe tener pendiente mínima 1–2% para evitar depósitos. // VERIFICAR: diámetros mínimos según RAS/CTE",
-    references: ["RAS Título J §E.4.4", "CTE DB-HS5 §4.3.4"]
+    intent: "Calculadora propone Ø {r.dPipe*1000:.0f} mm calculado desde caudal máximo {r.Qd*1000/86400:.2f} L/s con mínimo de 100 mm. Entrada debe estar sumergida ≥30 cm bajo superficie del agua; salida ≥40 cm bajo la más profunda. Tubería debe tener pendiente mínima 1–2% para evitar depósitos y zonas de turbulencia.",
+    references: ["RAS Título J §E.4.4.1", "CTE DB-HS5 §4.3.4", "EN 12566-1 §3.6"]
   },
 
   {
@@ -245,8 +245,8 @@ export const CATALOG: CatalogQuestion[] = [
     route: "materiales",
     text: "¿Qué registros de inspección debo instalar?",
     conditions: ["form_calculated", "always"],
-    intent: "Mínimo un registro accesible en tapa de cada cámara (Ø0.60 m). Si {r.chambers} cámaras → {r.chambers} registros. Campos de infiltración deben tener cajas de inspección cada 20–30 m para vigilar funcionamiento. Registros facilitan inspección visual, medida de lodos, y trabajos de mantenimiento futuro. // VERIFICAR: diámetro de registro y espaciamiento de cajas",
-    references: ["RAS Título J §E.4.4.3", "EN 12566-1 §5.4"]
+    intent: "Mínimo un registro accesible en tapa de cada cámara. Para {r.chambers} cámara(s) → {r.chambers} registro(s) de acceso mínimo 0.50–0.60 m de diámetro (debe permitir entrada de persona). Campos de infiltración requieren cajas de inspección cada 20–30 m de longitud de zanja para vigilar colmatación y funcionamiento. Registros facilitan inspección visual, medida de lodos, y trabajos de mantenimiento futuro.",
+    references: ["RAS Título J §E.4.4.3", "CTE DB-HS5 §4.4.1", "EN 12566-1 §5.4"]
   },
 
   {
@@ -254,8 +254,8 @@ export const CATALOG: CatalogQuestion[] = [
     route: "materiales",
     text: "¿Qué espesor de hormigón o PEAD se recomienda?",
     conditions: ["form_calculated", "always"],
-    intent: "Hormigón: mínimo 10 cm de pared, 12 cm de fondo. PEAD: espesor depende del fabricante, típicamente 6–8 mm. Ambos deben cumplir norma de envolventes sumergidas y cargas de tierra. Para fosa séptica, la profundidad actual {r.depth}m + borde libre {freeboard}m requiere cálculo de presiones laterales; recomendar revisión con ingeniero estructural si profundidad > 2.0 m. // VERIFICAR: espesores mínimos hormigón según RAS/CTE",
-    references: ["CTE DB-HS5 §4.2.3", "EN 1992-1-1 Hormigón"]
+    intent: "Para fosa séptica prefabricada: Hormigón armado típico 8–10 cm pared, 10–12 cm fondo (debe verificarse con fabricante o ingeniero estructural); PEAD: espesor 8–10 mm según resistencia mecánica. Para fosa in situ de hormigón colado: mínimo 10–15 cm pared y 12–15 cm fondo (depende cálculo de presiones). A profundidad actual {r.depth}m + borde libre {freeboard}m = {r.depth+freeboard}m total, si supera 2.0 m requiere revisión por profesional. Material debe resistir presión hidrostática y cargas de tierra.",
+    references: ["CTE DB-HS5 §4.2.3", "UNE-EN 13369 (Elementos prefabricados)"]
   },
 
   // ─── RUTA: MANTENIMIENTO ─────────────────────────────────────────────────
