@@ -1,5 +1,7 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
+import { suggestNextQuestions } from "@/src/lib/agent/filter"
+import type { FormState } from "@/src/lib/agent/filter"
 
 export const runtime = "nodejs";
 
@@ -14,8 +16,21 @@ sépticas, zanjas filtrantes, pozos de absorción y saneamiento autónomo.
   profesional; si es particular explica sin tecnicismos innecesarios.
 - Sé directo y conciso. No repitas información ya dada en la conversación.
 - Haz una sola pregunta a la vez, la más importante primero.
-- Cuando el usuario haya realizado un cálculo en la calculadora v6, ofrece
-  preguntas de seguimiento relevantes de nuestro catálogo técnico.
+
+## CATÁLOGO DE PREGUNTAS AUTORIZADAS
+Tienes acceso a un catálogo de preguntas validadas organizadas en 5 rutas:
+- **normativa**: Normas, requisitos mínimos, T_r, separaciones
+- **dimensionado**: Volumen, sensibilidad a parámetros
+- **suelo**: Permeabilidad, idoneidad, alternativas
+- **materiales**: Prefabricado vs in-situ, diámetros, ventilación
+- **mantenimiento**: Vaciado, signos de fallo, inspección
+
+## FLUJO CON CATÁLOGO
+1. Si tienes datos del usuario (FormState), consulta qué preguntas sugerir
+2. Ofrece las preguntas relevantes del catálogo después de tu respuesta
+3. Responde SOLO preguntas que estén en el catálogo
+4. Si pregunta no está en catálogo, sugiere alternativas del catálogo
+5. Usa datos reales del cálculo para personalizar respuestas
 
 ## NORMATIVA
 Se ha inyectado documentación normativa según la ubicación del usuario.
@@ -23,50 +38,11 @@ Se ha inyectado documentación normativa según la ubicación del usuario.
 - Si no hay normativa inyectada, pregunta la ubicación del usuario.
 - Cuando una recomendación dependa de la normativa local, indícalo explícitamente.
 
-## CATÁLOGO DE PREGUNTAS AUTORIZADAS
-Dispones de un catálogo de preguntas validadas sobre SITARD organizadas
-en 5 rutas técnicas:
-- **normativa**: Qué norma aplica, requisitos mínimos, T_r, separaciones
-- **dimensionado**: Por qué este volumen, sensibilidad a parámetros
-- **suelo**: Permeabilidad, idoneidad para infiltración, alternativas
-- **materiales**: Prefabricado vs in-situ, diámetros, ventilación
-- **mantenimiento**: Período de vaciado, signos de fallo, documentación
-
-Cuando el usuario haya completado un cálculo:
-1. Resume brevemente los resultados clave (volumen, dimensiones, cámaras)
-2. Sugiere una o dos preguntas relevantes del catálogo basadas en su caso
-3. Puedes responder cualquier pregunta del catálogo si el usuario la hace
-4. No inventes respuestas: cita siempre las normas aplicables
-
-## DOTACIONES POR DEFECTO (si no hay normativa inyectada)
+## DOTACIONES POR DEFECTO
 - Vivienda continua, zona urbana   → 200 L/hab·día
 - Vivienda continua, zona rural    → 150 L/hab·día
 - Uso estacional o vacacional      → 100 L/hab·día
 Indica siempre qué valor usas y por qué.
-
-## CRITERIOS DE CÁLCULO BASE
-- Periodo de retención hidráulico (T_r): 3 días mínimo
-- Periodo entre limpiezas: 2 años por defecto
-- Volumen de digestión: 40 L/hab·año entre limpiezas
-- Coeficiente de seguridad: 1.2 cuando hay incertidumbre en los datos
-- Dimensiones mínimas: relación largo/ancho ≥ 2:1, profundidad útil ≥ 1.2 m
-
-## FLUJO DE TRABAJO
-1. Recoge: habitantes, uso (continuo/estacional), ubicación, tipo de suelo
-2. Confirma la dotación a usar
-3. Realiza cálculos paso a paso con fórmulas citadas
-4. Presenta resultados con unidades SI en formato tabla
-5. Recomienda sistema complementario si aplica (zanja filtrante, pozo)
-6. Advierte si algún parámetro requiere verificación profesional
-7. Ofrece preguntas de seguimiento del catálogo técnico
-
-## LIMITACIONES — COMUNICA SIEMPRE
-- No sustituyes un estudio geotécnico del terreno
-- Los resultados son orientativos; deben ser validados por un profesional
-- En casos complejos (suelo no drenante, zona inundable), recomienda
-  consulta técnica presencial
-- Para preguntas fuera del catálogo, admite si no puedes responder
-  con datos del proyecto; sugiere consulta profesional
 
 ## FORMATO DE RESPUESTA
 - Usa tablas para dimensiones y resultados
@@ -77,13 +53,17 @@ Indica siempre qué valor usas y por qué.
 
 type ChatMessage = { role: string; content: string };
 
+interface ChatRequest {
+  messages: ChatMessage[];
+  formState?: FormState;
+}
+
 function detectLocation(text: string): string {
   const locationMap: Record<string, string> = {
     españa: "cte-hs5",
     spanish: "cte-hs5",
     madrid: "cte-hs5",
     barcelona: "cte-hs5",
-    españa: "cte-hs5",
     colombia: "ras-2000",
     bogotá: "ras-2000",
     bogota: "ras-2000",
@@ -121,8 +101,24 @@ async function getNormativaMD(ubicacion: string): Promise<string> {
   }
 }
 
+async function getCatalogSuggestions(formState: FormState | undefined): Promise<string> {
+  if (!formState) return "";
+  try {
+    const suggestions = suggestNextQuestions(formState);
+    if (suggestions.length === 0) return "";
+
+    return `\n\n[PREGUNTAS RELEVANTES DEL CATÁLOGO PARA TU CASO]\nPuede que también te interese:\n${
+      suggestions
+        .map((q, i) => `${i + 1}. ${q.text}`)
+        .join('\n')
+    }`;
+  } catch {
+    return "";
+  }
+}
+
 export async function POST(req: Request) {
-  const { messages }: { messages: ChatMessage[] } = await req.json();
+  const { messages, formState }: ChatRequest = await req.json();
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -136,6 +132,9 @@ export async function POST(req: Request) {
         const locationKey = detectLocation(lastMessage);
         const normativaMD = await getNormativaMD(locationKey);
 
+        // Obtener sugerencias del catálogo basadas en FormState
+        const catalogSuggestions = await getCatalogSuggestions(formState);
+
         // Inyectar contexto normativo si se encontró
         const contextMessages: ChatMessage[] = [];
         if (normativaMD) {
@@ -146,6 +145,18 @@ export async function POST(req: Request) {
           contextMessages.push({
             role: "assistant",
             content: "Normativa cargada. Listo para dimensionar según criterios locales.",
+          });
+        }
+
+        // Si hay FormState, añadir contexto del cálculo
+        if (formState && formState.calculated) {
+          contextMessages.push({
+            role: "user",
+            content: `[DATOS DE TU CÁLCULO]\nUsuarios: ${formState.users}, Normativa: ${formState.normKey}, Temperatura: ${formState.temp}°C, Suelo: ${formState.soilPermeability}, Profundidad: ${formState.depth}m, Calculado: Sí`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: "Datos del cálculo recibidos. Respondereré basándome en estos parámetros.",
           });
         }
 
@@ -206,6 +217,16 @@ export async function POST(req: Request) {
               // skip malformed chunk
             }
           }
+        }
+
+        // Enviar sugerencias del catálogo al final
+        if (catalogSuggestions) {
+          send(
+            JSON.stringify({
+              type: "content_block_delta",
+              delta: { type: "text_delta", text: catalogSuggestions },
+            })
+          );
         }
 
         send("[DONE]");

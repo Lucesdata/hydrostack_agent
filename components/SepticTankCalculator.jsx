@@ -685,6 +685,23 @@ export default function HydroStack() {
 
   const calculate = () => {
     const r=runCalc(); setRes(r);
+    // Save FormState to localStorage for chat integration
+    const formState = {
+      users, dotacion, retCoef, temp, depth, freeboard, cleanYears, dboIn, ssIn,
+      soilType: soilIdx === SOILS.length - 1 ? "manual" : undefined,
+      soilPermeability: (() => {
+        if (soilIdx === SOILS.length - 1) return undefined; // manual
+        if (soilIdx <= 1) return "high";
+        if (soilIdx <= 3) return "medium";
+        if (soilIdx <= 5) return "low";
+        return "none";
+      })(),
+      normKey: norm,
+      calculated: true
+    };
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hydrostack_formstate", JSON.stringify(formState));
+    }
     if (showComp) {
       const cr={};
       Object.keys(NORMS).forEach(k=>{cr[k]=computeNorm(k,users,dotacion,retCoef,temp,cleanYears,depth);});

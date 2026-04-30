@@ -40,10 +40,19 @@ export default function ChatPage() {
     abortRef.current = new AbortController();
 
     try {
+      // Load FormState from localStorage if available
+      let formState = undefined;
+      try {
+        const stored = localStorage.getItem("hydrostack_formstate");
+        if (stored) formState = JSON.parse(stored);
+      } catch {
+        // ignore localStorage errors
+      }
+
       const res = await fetch("/api/chat", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ messages: nextMessages }),
+        body:    JSON.stringify({ messages: nextMessages, formState }),
         signal:  abortRef.current.signal,
       });
 
