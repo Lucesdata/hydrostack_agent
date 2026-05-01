@@ -42,7 +42,15 @@ export function validateFormState(data: unknown) {
 
 // Validar campo individual
 export function validateField(field: keyof FormState, value: unknown) {
-  const fieldSchema = FormStateSchema.pick({ [field]: true })
-  const result = fieldSchema.safeParse({ [field]: value })
-  return result.success ? null : result.error?.errors[0]?.message
+  try {
+    const fieldSchema = FormStateSchema.pick({ [field]: true })
+    const result = fieldSchema.safeParse({ [field]: value })
+    if (result.success) {
+      return null
+    }
+    const firstError = result.error?.errors?.[0]
+    return firstError?.message || 'Invalid value'
+  } catch (error) {
+    return 'Validation error'
+  }
 }
