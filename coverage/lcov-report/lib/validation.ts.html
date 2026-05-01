@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/21</span>
+                <span class='fraction'>18/20</span>
             </div>
         
             
@@ -117,9 +117,7 @@
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a>
 <a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a>
-<a name='L56'></a><a href='#L56'>56</a>
-<a name='L57'></a><a href='#L57'>57</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -153,8 +151,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -175,10 +171,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { z } from 'zod'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { z } from "zod";
 &nbsp;
-export const NormKeySchema = z.enum(['ras', 'esp', 'eu', 'epa'])
-export type NormKey = z.infer&lt;typeof NormKeySchema&gt;
+export const NormKeySchema = z.enum(["ras", "esp", "eu", "epa"]);
+export type NormKey = z.infer&lt;typeof NormKeySchema&gt;;
 &nbsp;
 export const FormStateSchema = z.object({
   // Obligatorios
@@ -188,47 +184,45 @@ export const FormStateSchema = z.object({
   temp: z.number().min(-10).max(50).optional(),
   depth: z.number().min(0.8).max(5).optional(),
   cleanYears: z.number().int().min(1).max(20).optional(),
-  
+&nbsp;
   // Opcionales
   retCoef: z.number().min(0.5).max(1).optional().default(0.75),
   dboIn: z.number().min(50).max(500).optional().default(250),
   ssIn: z.number().min(50).max(500).optional().default(200),
   freeboard: z.number().min(0).max(1).optional().default(0.3),
   soilType: z.string().optional(),
-  soilPermeability: z.enum(['high', 'medium', 'low', 'none', 'unknown']).optional(),
+  soilPermeability: z.enum(["high", "medium", "low", "none", "unknown"]).optional(),
   calculated: z.boolean().optional().default(false),
-})
+});
 &nbsp;
-export type FormState = z.infer&lt;typeof FormStateSchema&gt;
+export type FormState = z.infer&lt;typeof FormStateSchema&gt;;
 &nbsp;
 // Función de validación con mensajes amigables
 export function validateFormState(data: unknown) {
   try {
-    const parsed = FormStateSchema.parse(data)
-    return { success: true, data: parsed }
+    const parsed = FormStateSchema.parse(data);
+    return { success: true, data: parsed };
   } catch (error) {
     <span class="missing-if-branch" title="else path not taken" >E</span>if (error instanceof z.ZodError) {
-      const messages = error.errors?.map(<span class="fstat-no" title="function not covered" >(e</span>: any) =&gt; 
-<span class="cstat-no" title="statement not covered" >        `${e.path.join('.')}: ${e.message}`</span>
-      ) || []
-      return { success: false, errors: messages }
+      const messages = error.errors?.map(<span class="fstat-no" title="function not covered" >(e</span>: any) =&gt; <span class="cstat-no" title="statement not covered" >`${e.path.join(".")}: ${e.message}`)</span> || [];
+      return { success: false, errors: messages };
     }
-<span class="cstat-no" title="statement not covered" >    return { success: false, errors: ['Error desconocido'] }</span>
+<span class="cstat-no" title="statement not covered" >    return { success: false, errors: ["Error desconocido"] };</span>
   }
 }
 &nbsp;
 // Validar campo individual
 export function validateField(field: keyof FormState, value: unknown) {
   try {
-    const fieldSchema = FormStateSchema.pick({ [field]: true })
-    const result = fieldSchema.safeParse({ [field]: value })
+    const fieldSchema = FormStateSchema.pick({ [field]: true });
+    const result = fieldSchema.safeParse({ [field]: value });
     if (result.success) {
-      return null
+      return null;
     }
-    const firstError = result.error?.errors?.[0]
-    return firstError?.message || 'Invalid value'
+    const firstError = result.error?.errors?.[0];
+    return firstError?.message || "Invalid value";
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    return 'Validation error'</span>
+<span class="cstat-no" title="statement not covered" >    return "Validation error";</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -238,7 +232,7 @@ export function validateField(field: keyof FormState, value: unknown) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-01T11:29:25.614Z
+                at 2026-05-01T11:36:32.900Z
             </div>
         <script src="../prettify.js"></script>
         <script>

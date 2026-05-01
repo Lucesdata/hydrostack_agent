@@ -163,10 +163,7 @@
 <a name='L98'></a><a href='#L98'>98</a>
 <a name='L99'></a><a href='#L99'>99</a>
 <a name='L100'></a><a href='#L100'>100</a>
-<a name='L101'></a><a href='#L101'>101</a>
-<a name='L102'></a><a href='#L102'>102</a>
-<a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L101'></a><a href='#L101'>101</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -185,9 +182,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -269,59 +263,56 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { CATALOG, CatalogQuestion, ConditionKey } from <span class="cstat-no" title="statement not covered" >"./catalog"</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { CATALOG, CatalogQuestion, ConditionKey } from <span class="cstat-no" title="statement not covered" >"./catalog";</span>
 &nbsp;
 export interface FormState {
-  users?: number
-  dotacion?: number
-  retCoef?: number
-  temp?: number
-  depth?: number
-  freeboard?: number
-  cleanYears?: number
-  dboIn?: number
-  ssIn?: number
-  soilType?: string
-  soilPermeability?: "high" | "medium" | "low" | "none" | "unknown"
-  normKey?: "ras" | "esp" | "eu" | "epa"
-  calculated?: boolean
+  users?: number;
+  dotacion?: number;
+  retCoef?: number;
+  temp?: number;
+  depth?: number;
+  freeboard?: number;
+  cleanYears?: number;
+  dboIn?: number;
+  ssIn?: number;
+  soilType?: string;
+  soilPermeability?: "high" | "medium" | "low" | "none" | "unknown";
+  normKey?: "ras" | "esp" | "eu" | "epa";
+  calculated?: boolean;
 }
 &nbsp;
-export function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >evaluateConditions(</span></span>
-  conditions: ConditionKey[],
-  formState: FormState
-): boolean {
-<span class="cstat-no" title="statement not covered" >  return conditions.some(<span class="fstat-no" title="function not covered" >cond =&gt; <span class="cstat-no" title="statement not covered" >m</span>atchesCondition(cond, formState))</span></span>
+export function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >evaluateConditions(</span></span>conditions: ConditionKey[], formState: FormState): boolean {
+<span class="cstat-no" title="statement not covered" >  return conditions.some(<span class="fstat-no" title="function not covered" >(c</span>ond) =&gt; <span class="cstat-no" title="statement not covered" >matchesCondition(cond, formState));</span></span>
 }
 &nbsp;
 function <span class="fstat-no" title="function not covered" >matchesCondition(c</span>ond: ConditionKey, state: FormState): boolean {
 <span class="cstat-no" title="statement not covered" >  switch (cond) {</span>
     case "form_empty":
-<span class="cstat-no" title="statement not covered" >      return !state.users &amp;&amp; !state.dotacion &amp;&amp; !state.normKey</span>
+<span class="cstat-no" title="statement not covered" >      return !state.users &amp;&amp; !state.dotacion &amp;&amp; !state.normKey;</span>
     case "form_partial":
-<span class="cstat-no" title="statement not covered" >      return (state.users || state.dotacion || state.normKey) &amp;&amp; !state.calculated</span>
+<span class="cstat-no" title="statement not covered" >      return (state.users || state.dotacion || state.normKey) &amp;&amp; !state.calculated;</span>
     case "form_calculated":
-<span class="cstat-no" title="statement not covered" >      return state.calculated === true</span>
+<span class="cstat-no" title="statement not covered" >      return state.calculated === true;</span>
     case "norm_ras":
-<span class="cstat-no" title="statement not covered" >      return state.normKey === "ras"</span>
+<span class="cstat-no" title="statement not covered" >      return state.normKey === "ras";</span>
     case "norm_esp":
-<span class="cstat-no" title="statement not covered" >      return state.normKey === "esp"</span>
+<span class="cstat-no" title="statement not covered" >      return state.normKey === "esp";</span>
     case "norm_eu":
-<span class="cstat-no" title="statement not covered" >      return state.normKey === "eu"</span>
+<span class="cstat-no" title="statement not covered" >      return state.normKey === "eu";</span>
     case "norm_epa":
-<span class="cstat-no" title="statement not covered" >      return state.normKey === "epa"</span>
+<span class="cstat-no" title="statement not covered" >      return state.normKey === "epa";</span>
     case "soil_low_perm":
-<span class="cstat-no" title="statement not covered" >      return state.soilPermeability === "low"</span>
+<span class="cstat-no" title="statement not covered" >      return state.soilPermeability === "low";</span>
     case "soil_not_apt":
-<span class="cstat-no" title="statement not covered" >      return state.soilPermeability === "none"</span>
+<span class="cstat-no" title="statement not covered" >      return state.soilPermeability === "none";</span>
     case "soil_manual":
-<span class="cstat-no" title="statement not covered" >      return state.soilType === "manual"</span>
+<span class="cstat-no" title="statement not covered" >      return state.soilType === "manual";</span>
     case "temp_cold":
-<span class="cstat-no" title="statement not covered" >      return state.temp !== undefined &amp;&amp; state.temp &lt; 10</span>
+<span class="cstat-no" title="statement not covered" >      return state.temp !== undefined &amp;&amp; state.temp &lt; 10;</span>
     case "always":
-<span class="cstat-no" title="statement not covered" >      return true</span>
+<span class="cstat-no" title="statement not covered" >      return true;</span>
     default:
-<span class="cstat-no" title="statement not covered" >      return false</span>
+<span class="cstat-no" title="statement not covered" >      return false;</span>
   }
 }
 &nbsp;
@@ -330,47 +321,47 @@ export function <span class="cstat-no" title="statement not covered" ><span clas
   route?: string,
   maxResults?: number
 ): CatalogQuestion[] {
-  let filtered = <span class="cstat-no" title="statement not covered" >CATALOG.filter(<span class="fstat-no" title="function not covered" >q =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    if (route &amp;&amp; q.route !== route) <span class="cstat-no" title="statement not covered" >return false</span></span>
-<span class="cstat-no" title="statement not covered" >    return evaluateConditions(q.conditions, formState)</span>
-  })
+  let filtered = <span class="cstat-no" title="statement not covered" >CATALOG.filter(<span class="fstat-no" title="function not covered" >(q</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (route &amp;&amp; q.route !== route) <span class="cstat-no" title="statement not covered" >return false;</span></span>
+<span class="cstat-no" title="statement not covered" >    return evaluateConditions(q.conditions, formState);</span>
+  });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (filtered.length === 0 &amp;&amp; formState.calculated) {</span>
-<span class="cstat-no" title="statement not covered" >    filtered = CATALOG.filter(<span class="fstat-no" title="function not covered" >q =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >      if (route &amp;&amp; q.route !== route) <span class="cstat-no" title="statement not covered" >return false</span></span>
-<span class="cstat-no" title="statement not covered" >      return q.conditions.includes("always")</span>
-    })
+<span class="cstat-no" title="statement not covered" >    filtered = CATALOG.filter(<span class="fstat-no" title="function not covered" >(q</span>) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      if (route &amp;&amp; q.route !== route) <span class="cstat-no" title="statement not covered" >return false;</span></span>
+<span class="cstat-no" title="statement not covered" >      return q.conditions.includes("always");</span>
+    });
   }
 &nbsp;
-  const limit = <span class="cstat-no" title="statement not covered" >maxResults || 3</span>
-<span class="cstat-no" title="statement not covered" >  return filtered.slice(0, limit)</span>
+  const limit = <span class="cstat-no" title="statement not covered" >maxResults || 3;</span>
+<span class="cstat-no" title="statement not covered" >  return filtered.slice(0, limit);</span>
 }
 &nbsp;
 export function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >suggestNextQuestions(</span></span>
   formState: FormState,
   conversationHistory?: string[]
 ): CatalogQuestion[] {
-  let priorityRoute: string | undefined
+  let priorityRoute: string | undefined;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!formState.calculated) {</span>
-<span class="cstat-no" title="statement not covered" >    priorityRoute = "dimensionado"</span>
+<span class="cstat-no" title="statement not covered" >    priorityRoute = "dimensionado";</span>
   } else <span class="cstat-no" title="statement not covered" >if (formState.soilPermeability === "low" || formState.soilPermeability === "none") {</span>
-<span class="cstat-no" title="statement not covered" >    priorityRoute = "suelo"</span>
+<span class="cstat-no" title="statement not covered" >    priorityRoute = "suelo";</span>
   } else <span class="cstat-no" title="statement not covered" >if (!formState.normKey) {</span>
-<span class="cstat-no" title="statement not covered" >    priorityRoute = "normativa"</span>
+<span class="cstat-no" title="statement not covered" >    priorityRoute = "normativa";</span>
   }
 &nbsp;
-  let suggestions = <span class="cstat-no" title="statement not covered" >filterCatalog(formState, priorityRoute, 2)</span>
+  let suggestions = <span class="cstat-no" title="statement not covered" >filterCatalog(formState, priorityRoute, 2);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (suggestions.length === 0 &amp;&amp; formState.calculated) {</span>
-<span class="cstat-no" title="statement not covered" >    suggestions = filterCatalog(formState, "mantenimiento", 2)</span>
+<span class="cstat-no" title="statement not covered" >    suggestions = filterCatalog(formState, "mantenimiento", 2);</span>
   }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (suggestions.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >    suggestions = CATALOG.filter(<span class="fstat-no" title="function not covered" >q =&gt; <span class="cstat-no" title="statement not covered" >q</span>.conditions.includes("always")).s</span>lice(0, 2)</span>
+<span class="cstat-no" title="statement not covered" >    suggestions = CATALOG.filter(<span class="fstat-no" title="function not covered" >(q</span>) =&gt; <span class="cstat-no" title="statement not covered" >q.conditions.includes("always")).s</span>lice(0, 2);</span>
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return suggestions</span>
+<span class="cstat-no" title="statement not covered" >  return suggestions;</span>
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -379,7 +370,7 @@ export function <span class="cstat-no" title="statement not covered" ><span clas
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-01T11:29:25.614Z
+                at 2026-05-01T11:36:32.900Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -288,27 +288,27 @@ import { computeNorm, type ComputeResult } from "@/lib/norms";
 import { validateFormState, type FormState } from "@/lib/validation";
 &nbsp;
 export function useCalcNorm(initialState?: FormState) {
-  const [formState, setFormState] = useState&lt;FormState&gt;(initialState ?? {})
-  const [result, setResult] = useState&lt;ComputeResult | null&gt;(null)
-  const [validationErrors, setValidationErrors] = useState&lt;Record&lt;string, string&gt;&gt;({})
+  const [formState, setFormState] = useState&lt;FormState&gt;(initialState ?? {});
+  const [result, setResult] = useState&lt;ComputeResult | null&gt;(null);
+  const [validationErrors, setValidationErrors] = useState&lt;Record&lt;string, string&gt;&gt;({});
 &nbsp;
   // Cargar desde localStorage en mount
   useEffect(() =&gt; {
     try {
-      const stored = localStorage.getItem("hydrostack_formstate")
+      const stored = localStorage.getItem("hydrostack_formstate");
       <span class="missing-if-branch" title="if path not taken" >I</span>if (stored) {
-        const parsed = <span class="cstat-no" title="statement not covered" >JSON.parse(stored)</span>
-<span class="cstat-no" title="statement not covered" >        setFormState(parsed)</span>
+        const parsed = <span class="cstat-no" title="statement not covered" >JSON.parse(stored);</span>
+<span class="cstat-no" title="statement not covered" >        setFormState(parsed);</span>
       }
     } catch {
       // ignore localStorage errors
     }
-  }, [])
+  }, []);
 &nbsp;
   // Guardar en localStorage cuando cambie
   useEffect(() =&gt; {
-    localStorage.setItem("hydrostack_formstate", JSON.stringify(formState))
-  }, [formState])
+    localStorage.setItem("hydrostack_formstate", JSON.stringify(formState));
+  }, [formState]);
 &nbsp;
   // Recalcular cuando cambien inputs críticos
   useEffect(() =&gt; {
@@ -320,8 +320,8 @@ export function useCalcNorm(initialState?: FormState) {
       !formState.cleanYears ||
       !formState.normKey
     ) {
-      setResult(null)
-      return
+      setResult(null);
+      return;
     }
 &nbsp;
     const computed = computeNorm(
@@ -332,24 +332,24 @@ export function useCalcNorm(initialState?: FormState) {
       formState.temp,
       formState.cleanYears,
       formState.depth
-    )
+    );
 &nbsp;
     // Add validations
     const CVO =
       computed.Qd &amp;&amp; computed.Vtot
         ? (computed.Qd * 1000 * (formState.dboIn ?? 250)) / computed.Vtot
-        : <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
-    const chkCVO = CVO &lt;= 0.3
-    const chkSRT = computed.SRT &gt;= 20
+        : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
+    const chkCVO = CVO &lt;= 0.3;
+    const chkSRT = computed.SRT &gt;= 20;
 &nbsp;
     setResult({
       ...computed,
       chkCVO,
       chkSRT,
       CVO,
-    })
+    });
 &nbsp;
-    setFormState((prev) =&gt; ({ ...prev, calculated: true }))
+    setFormState((prev) =&gt; ({ ...prev, calculated: true }));
   }, [
     formState.users,
     formState.dotacion,
@@ -359,31 +359,31 @@ export function useCalcNorm(initialState?: FormState) {
     formState.normKey,
     formState.retCoef,
     formState.dboIn,
-  ])
+  ]);
 &nbsp;
   const updateField = useCallback((field: keyof FormState, value: any) =&gt; {
     setFormState((prev) =&gt; {
-      const updated = { ...prev, [field]: value }
-      
+      const updated = { ...prev, [field]: value };
+&nbsp;
       // Validar el estado completo
-      const validation = validateFormState(updated)
+      const validation = validateFormState(updated);
       if (validation.success) {
-        setValidationErrors({})
-        return updated
+        setValidationErrors({});
+        return updated;
       } else <span class="missing-if-branch" title="else path not taken" >E</span>{
         // Si hay error en validación, aún permitir el cambio pero mostrar el error
 <span class="cstat-no" title="statement not covered" >        if (validation.errors) {</span>
-          const errorMap: Record&lt;string, string&gt; = <span class="cstat-no" title="statement not covered" >{}</span>
-<span class="cstat-no" title="statement not covered" >          validation.errors.forEach(<span class="fstat-no" title="function not covered" >err =&gt; {</span></span>
-            const fieldName = <span class="cstat-no" title="statement not covered" >err.split(':')[0]</span>
-<span class="cstat-no" title="statement not covered" >            errorMap[fieldName] = err</span>
-          })
-<span class="cstat-no" title="statement not covered" >          setValidationErrors(errorMap)</span>
+          const errorMap: Record&lt;string, string&gt; = <span class="cstat-no" title="statement not covered" >{};</span>
+<span class="cstat-no" title="statement not covered" >          validation.errors.forEach(<span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
+            const fieldName = <span class="cstat-no" title="statement not covered" >err.split(":")[0];</span>
+<span class="cstat-no" title="statement not covered" >            errorMap[fieldName] = err;</span>
+          });
+<span class="cstat-no" title="statement not covered" >          setValidationErrors(errorMap);</span>
         }
-<span class="cstat-no" title="statement not covered" >        return updated</span>
+<span class="cstat-no" title="statement not covered" >        return updated;</span>
       }
-    })
-  }, [])
+    });
+  }, []);
 &nbsp;
   return {
     formState,
@@ -391,7 +391,7 @@ export function useCalcNorm(initialState?: FormState) {
     updateField,
     validationErrors,
     setFormState,
-  }
+  };
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -400,7 +400,7 @@ export function useCalcNorm(initialState?: FormState) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-01T11:29:25.614Z
+                at 2026-05-01T11:36:32.900Z
             </div>
         <script src="../prettify.js"></script>
         <script>
