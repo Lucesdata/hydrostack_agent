@@ -73,7 +73,12 @@ const iso = {
 const fmt = (v, d = 2) => Number(v).toFixed(d);
 
 // SVG-based isometric diagram
-function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio", designer = "Diseño" }) {
+function SepticSystemIsometric({
+  r,
+  projectName = "Proyecto",
+  location = "Sitio",
+  designer = "Diseño",
+}) {
   const SVG_W = 960;
   const SVG_H = 720;
   const scale = 25; // pixels per meter
@@ -95,33 +100,36 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
   const cy = SVG_H / 2.5;
 
   return (
-    <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-      style={{ background: DS.bgDark, border: `1px solid ${DS.border}`, borderRadius: "4px" }}>
-
+    <svg
+      width={SVG_W}
+      height={SVG_H}
+      viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+      style={{ background: DS.bgDark, border: `1px solid ${DS.border}`, borderRadius: "4px" }}
+    >
       <defs>
         {/* Gradients */}
         <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="rgba(0,245,255,0.4)"/>
-          <stop offset="100%" stopColor="rgba(0,200,255,0.2)"/>
+          <stop offset="0%" stopColor="rgba(0,245,255,0.4)" />
+          <stop offset="100%" stopColor="rgba(0,200,255,0.2)" />
         </linearGradient>
         <linearGradient id="earthGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="rgba(139,90,43,0.6)"/>
-          <stop offset="100%" stopColor="rgba(101,67,33,0.8)"/>
+          <stop offset="0%" stopColor="rgba(139,90,43,0.6)" />
+          <stop offset="100%" stopColor="rgba(101,67,33,0.8)" />
         </linearGradient>
         <pattern id="soilDots" patternUnits="userSpaceOnUse" width="6" height="6">
-          <circle cx="3" cy="3" r="0.8" fill="rgba(139,90,43,0.4)"/>
+          <circle cx="3" cy="3" r="0.8" fill="rgba(139,90,43,0.4)" />
         </pattern>
 
         {/* Arrow markers */}
         <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <polygon points="0,0 8,4 0,8" fill={DS.greenBright}/>
+          <polygon points="0,0 8,4 0,8" fill={DS.greenBright} />
         </marker>
       </defs>
 
       {/* Ground/earth background */}
-      <rect x="0" y={cy + 150} width={SVG_W} height={SVG_H} fill="url(#soilDots)" opacity="0.7"/>
+      <rect x="0" y={cy + 150} width={SVG_W} height={SVG_H} fill="url(#soilDots)" opacity="0.7" />
       <text x="10" y={SVG_H - 10} fontSize="10" fill={DS.textMuted} fontFamily="monospace">
-        VISTA ISOMÉTRICA • ESCALA 1:{Math.round(1/scale * 100)}m
+        VISTA ISOMÉTRICA • ESCALA 1:{Math.round((1 / scale) * 100)}m
       </text>
 
       {/* HOUSE */}
@@ -129,43 +137,122 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
         {/* House body (simple isometric box) */}
         <g transform={`translate(${cx - 300},${cy - 150})`}>
           {/* Foundation */}
-          <path d={iso.box(-houseSize/2, 0, -houseSize/2, houseSize, 0.5, houseSize).front}
-            fill="rgba(180,140,100,0.8)" stroke={DS.textMuted} strokeWidth="1.5"/>
+          <path
+            d={iso.box(-houseSize / 2, 0, -houseSize / 2, houseSize, 0.5, houseSize).front}
+            fill="rgba(180,140,100,0.8)"
+            stroke={DS.textMuted}
+            strokeWidth="1.5"
+          />
 
           {/* Walls */}
-          <path d={iso.box(-houseSize/2, 0.5, -houseSize/2, houseSize, houseHeight, houseSize).front}
-            fill="rgba(210,180,140,0.9)" stroke={DS.cyanDim} strokeWidth="1.5" opacity="0.8"/>
-          <path d={iso.box(-houseSize/2, 0.5, -houseSize/2, houseSize, houseHeight, houseSize).right}
-            fill="rgba(180,150,110,0.8)" stroke={DS.cyanDim} strokeWidth="1.5" opacity="0.6"/>
+          <path
+            d={
+              iso.box(-houseSize / 2, 0.5, -houseSize / 2, houseSize, houseHeight, houseSize).front
+            }
+            fill="rgba(210,180,140,0.9)"
+            stroke={DS.cyanDim}
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
+          <path
+            d={
+              iso.box(-houseSize / 2, 0.5, -houseSize / 2, houseSize, houseHeight, houseSize).right
+            }
+            fill="rgba(180,150,110,0.8)"
+            stroke={DS.cyanDim}
+            strokeWidth="1.5"
+            opacity="0.6"
+          />
 
           {/* Roof */}
-          <path d={iso.box(-houseSize/2, houseHeight+0.5, -houseSize/2, houseSize, 1.2, houseSize).top}
-            fill="rgba(200,100,50,0.9)" stroke={DS.amberBright} strokeWidth="1.5" opacity="0.7"/>
+          <path
+            d={
+              iso.box(-houseSize / 2, houseHeight + 0.5, -houseSize / 2, houseSize, 1.2, houseSize)
+                .top
+            }
+            fill="rgba(200,100,50,0.9)"
+            stroke={DS.amberBright}
+            strokeWidth="1.5"
+            opacity="0.7"
+          />
 
           {/* Door */}
-          <rect x="20" y="120" width="30" height="50" fill="rgba(100,60,30,0.9)" stroke={DS.textMuted} strokeWidth="0.8"/>
+          <rect
+            x="20"
+            y="120"
+            width="30"
+            height="50"
+            fill="rgba(100,60,30,0.9)"
+            stroke={DS.textMuted}
+            strokeWidth="0.8"
+          />
 
           {/* Windows */}
-          <rect x="-50" y="100" width="20" height="20" fill="rgba(100,200,255,0.6)" stroke={DS.cyanBright} strokeWidth="0.8"/>
-          <rect x="40" y="100" width="20" height="20" fill="rgba(100,200,255,0.6)" stroke={DS.cyanBright} strokeWidth="0.8"/>
+          <rect
+            x="-50"
+            y="100"
+            width="20"
+            height="20"
+            fill="rgba(100,200,255,0.6)"
+            stroke={DS.cyanBright}
+            strokeWidth="0.8"
+          />
+          <rect
+            x="40"
+            y="100"
+            width="20"
+            height="20"
+            fill="rgba(100,200,255,0.6)"
+            stroke={DS.cyanBright}
+            strokeWidth="0.8"
+          />
 
           {/* Label */}
-          <text x="0" y="-15" fontSize="11" fontWeight="bold" fill={DS.cyanBright}
-            textAnchor="middle" fontFamily="'Orbitron',sans-serif">VIVIENDA</text>
+          <text
+            x="0"
+            y="-15"
+            fontSize="11"
+            fontWeight="bold"
+            fill={DS.cyanBright}
+            textAnchor="middle"
+            fontFamily="'Orbitron',sans-serif"
+          >
+            VIVIENDA
+          </text>
         </g>
       </g>
 
       {/* DRAINAGE PIPES from house to tank */}
       <g>
         {/* Main pipe line (orange PVC-style) */}
-        <path d={`M${cx - 200},${cy - 80} Q${cx - 100},${cy + 40} ${cx + 100},${cy + 120}`}
-          stroke="#FF8C00" strokeWidth="6" fill="none" opacity="0.8" strokeLinecap="round"/>
-        <path d={`M${cx - 200},${cy - 80} Q${cx - 100},${cy + 40} ${cx + 100},${cy + 120}`}
-          stroke="#FFB020" strokeWidth="2" fill="none" opacity="0.5" strokeDasharray="4,2"/>
+        <path
+          d={`M${cx - 200},${cy - 80} Q${cx - 100},${cy + 40} ${cx + 100},${cy + 120}`}
+          stroke="#FF8C00"
+          strokeWidth="6"
+          fill="none"
+          opacity="0.8"
+          strokeLinecap="round"
+        />
+        <path
+          d={`M${cx - 200},${cy - 80} Q${cx - 100},${cy + 40} ${cx + 100},${cy + 120}`}
+          stroke="#FFB020"
+          strokeWidth="2"
+          fill="none"
+          opacity="0.5"
+          strokeDasharray="4,2"
+        />
 
         {/* Pipe label */}
-        <text x={cx - 80} y={cy - 20} fontSize="9" fill={DS.amberBright} fontFamily="monospace"
-          fontWeight="bold">TUBERÍA PVC Ø 4"</text>
+        <text
+          x={cx - 80}
+          y={cy - 20}
+          fontSize="9"
+          fill={DS.amberBright}
+          fontFamily="monospace"
+          fontWeight="bold"
+        >
+          TUBERÍA PVC Ø 4"
+        </text>
       </g>
 
       {/* SEPTIC TANK (main component) */}
@@ -173,54 +260,209 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
         {/* Tank main body */}
         <g transform={`translate(${cx + 150},${cy + 80})`}>
           {/* Earth around tank (background) */}
-          <path d={iso.box(-tankWidth/2, -1.5, -tankLength/2, tankWidth, tankDepth+2, tankLength).front}
-            fill="url(#earthGrad)" stroke={DS.textMuted} strokeWidth="1.5" opacity="0.6"/>
+          <path
+            d={
+              iso.box(-tankWidth / 2, -1.5, -tankLength / 2, tankWidth, tankDepth + 2, tankLength)
+                .front
+            }
+            fill="url(#earthGrad)"
+            stroke={DS.textMuted}
+            strokeWidth="1.5"
+            opacity="0.6"
+          />
 
           {/* Tank body */}
-          <path d={iso.box(-tankWidth/2, -freeboard, -tankLength/2, tankWidth, tankDepth+freeboard, tankLength).front}
-            fill="rgba(120,140,160,0.9)" stroke={DS.cyanBright} strokeWidth="2"/>
-          <path d={iso.box(-tankWidth/2, -freeboard, -tankLength/2, tankWidth, tankDepth+freeboard, tankLength).right}
-            fill="rgba(100,120,140,0.8)" stroke={DS.cyanBright} strokeWidth="1.5"/>
-          <path d={iso.box(-tankWidth/2, -freeboard, -tankLength/2, tankWidth, tankDepth+freeboard, tankLength).top}
-            fill="rgba(140,160,180,0.7)" stroke={DS.cyanDim} strokeWidth="1.5"/>
+          <path
+            d={
+              iso.box(
+                -tankWidth / 2,
+                -freeboard,
+                -tankLength / 2,
+                tankWidth,
+                tankDepth + freeboard,
+                tankLength
+              ).front
+            }
+            fill="rgba(120,140,160,0.9)"
+            stroke={DS.cyanBright}
+            strokeWidth="2"
+          />
+          <path
+            d={
+              iso.box(
+                -tankWidth / 2,
+                -freeboard,
+                -tankLength / 2,
+                tankWidth,
+                tankDepth + freeboard,
+                tankLength
+              ).right
+            }
+            fill="rgba(100,120,140,0.8)"
+            stroke={DS.cyanBright}
+            strokeWidth="1.5"
+          />
+          <path
+            d={
+              iso.box(
+                -tankWidth / 2,
+                -freeboard,
+                -tankLength / 2,
+                tankWidth,
+                tankDepth + freeboard,
+                tankLength
+              ).top
+            }
+            fill="rgba(140,160,180,0.7)"
+            stroke={DS.cyanDim}
+            strokeWidth="1.5"
+          />
 
           {/* Water level inside tank */}
-          <ellipse cx="0" cy={(-freeboard + (tankDepth * 0.65)) * scale}
-            rx={(tankWidth/2) * scale * 0.85} ry={(tankWidth/4) * scale}
-            fill="url(#waterGrad)" stroke={DS.cyanBright} strokeWidth="1" opacity="0.7"/>
+          <ellipse
+            cx="0"
+            cy={(-freeboard + tankDepth * 0.65) * scale}
+            rx={(tankWidth / 2) * scale * 0.85}
+            ry={(tankWidth / 4) * scale}
+            fill="url(#waterGrad)"
+            stroke={DS.cyanBright}
+            strokeWidth="1"
+            opacity="0.7"
+          />
 
           {/* Internal zones (schematic) */}
-          <text x="0" y="-30" fontSize="10" fontWeight="bold" fill={DS.greenBright}
-            textAnchor="middle" fontFamily="monospace">FOSA SÉPTICA</text>
+          <text
+            x="0"
+            y="-30"
+            fontSize="10"
+            fontWeight="bold"
+            fill={DS.greenBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            FOSA SÉPTICA
+          </text>
 
           {/* Scum layer indicator */}
-          <path d={`M${-tankWidth/2*scale*0.8},${-5} L${tankWidth/2*scale*0.8},${-5}`}
-            stroke={DS.amberBright} strokeWidth="2" opacity="0.6"/>
-          <text x="0" y="-12" fontSize="8" fill={DS.amberBright} textAnchor="middle" fontFamily="monospace">NATA</text>
+          <path
+            d={`M${(-tankWidth / 2) * scale * 0.8},${-5} L${(tankWidth / 2) * scale * 0.8},${-5}`}
+            stroke={DS.amberBright}
+            strokeWidth="2"
+            opacity="0.6"
+          />
+          <text
+            x="0"
+            y="-12"
+            fontSize="8"
+            fill={DS.amberBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            NATA
+          </text>
 
           {/* Liquid zone */}
-          <text x="0" y="25" fontSize="8" fill={DS.cyanBright} textAnchor="middle" fontFamily="monospace">LÍQUIDO</text>
+          <text
+            x="0"
+            y="25"
+            fontSize="8"
+            fill={DS.cyanBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            LÍQUIDO
+          </text>
 
           {/* Sludge zone */}
-          <text x="0" y="55" fontSize="8" fill={DS.textMuted} textAnchor="middle" fontFamily="monospace">LODOS</text>
+          <text
+            x="0"
+            y="55"
+            fontSize="8"
+            fill={DS.textMuted}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            LODOS
+          </text>
 
           {/* Inlet */}
-          <circle cx={-tankWidth/2*scale*0.6} cy="-8" r="4" fill={DS.greenBright} stroke={DS.greenBright} strokeWidth="1"/>
-          <text x={-tankWidth/2*scale*0.6} y="8" fontSize="7" fill={DS.greenBright} textAnchor="middle" fontFamily="monospace">ENT</text>
+          <circle
+            cx={(-tankWidth / 2) * scale * 0.6}
+            cy="-8"
+            r="4"
+            fill={DS.greenBright}
+            stroke={DS.greenBright}
+            strokeWidth="1"
+          />
+          <text
+            x={(-tankWidth / 2) * scale * 0.6}
+            y="8"
+            fontSize="7"
+            fill={DS.greenBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            ENT
+          </text>
 
           {/* Outlet */}
-          <circle cx={tankWidth/2*scale*0.6} cy="15" r="4" fill={DS.amberBright} stroke={DS.amberBright} strokeWidth="1"/>
-          <text x={tankWidth/2*scale*0.6} y="28" fontSize="7" fill={DS.amberBright} textAnchor="middle" fontFamily="monospace">SAL</text>
+          <circle
+            cx={(tankWidth / 2) * scale * 0.6}
+            cy="15"
+            r="4"
+            fill={DS.amberBright}
+            stroke={DS.amberBright}
+            strokeWidth="1"
+          />
+          <text
+            x={(tankWidth / 2) * scale * 0.6}
+            y="28"
+            fontSize="7"
+            fill={DS.amberBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            SAL
+          </text>
 
           {/* Vent */}
-          <rect x="-6" y={-30} width="12" height="8" fill={DS.cyanDim} stroke={DS.cyanBright} strokeWidth="1"/>
-          <text x="0" y="-18" fontSize="6" fill={DS.cyanBright} textAnchor="middle" fontFamily="monospace">VENT</text>
+          <rect
+            x="-6"
+            y={-30}
+            width="12"
+            height="8"
+            fill={DS.cyanDim}
+            stroke={DS.cyanBright}
+            strokeWidth="1"
+          />
+          <text
+            x="0"
+            y="-18"
+            fontSize="6"
+            fill={DS.cyanBright}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            VENT
+          </text>
 
           {/* Dimensions */}
-          <text x={-tankWidth*scale/2 - 40} y="45" fontSize="8" fill={DS.textMuted} fontFamily="monospace">
+          <text
+            x={(-tankWidth * scale) / 2 - 40}
+            y="45"
+            fontSize="8"
+            fill={DS.textMuted}
+            fontFamily="monospace"
+          >
             {fmt(tankWidth)}m
           </text>
-          <text x="50" y={tankDepth*scale/2} fontSize="8" fill={DS.textMuted} fontFamily="monospace">
+          <text
+            x="50"
+            y={(tankDepth * scale) / 2}
+            fontSize="8"
+            fill={DS.textMuted}
+            fontFamily="monospace"
+          >
             {fmt(tankDepth)}m
           </text>
           <text x={10} y={-40} fontSize="8" fill={DS.textMuted} fontFamily="monospace">
@@ -233,106 +475,277 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
       <g>
         <g transform={`translate(${cx + 350},${cy + 200})`}>
           {/* Field boundary */}
-          <rect x={-fieldWidth*scale/2} y="0" width={fieldWidth*scale} height={fieldDepth*scale}
-            fill="rgba(139,90,43,0.4)" stroke={DS.cyanDim} strokeWidth="1.5" strokeDasharray="4,4"/>
+          <rect
+            x={(-fieldWidth * scale) / 2}
+            y="0"
+            width={fieldWidth * scale}
+            height={fieldDepth * scale}
+            fill="rgba(139,90,43,0.4)"
+            stroke={DS.cyanDim}
+            strokeWidth="1.5"
+            strokeDasharray="4,4"
+          />
 
           {/* Trenches */}
           {Array.from({ length: Math.floor(fieldDepth / trenchSpacing) }).map((_, i) => (
             <g key={i}>
-              <line x1={-fieldWidth*scale/2 + 20} y1={i * trenchSpacing * scale}
-                x2={fieldWidth*scale/2 - 20} y2={i * trenchSpacing * scale}
-                stroke="#FF8C00" strokeWidth="3" opacity="0.7"/>
-              <circle cx={-fieldWidth*scale/2 + 15} cy={i * trenchSpacing * scale} r="2.5" fill="#FFB020" opacity="0.6"/>
+              <line
+                x1={(-fieldWidth * scale) / 2 + 20}
+                y1={i * trenchSpacing * scale}
+                x2={(fieldWidth * scale) / 2 - 20}
+                y2={i * trenchSpacing * scale}
+                stroke="#FF8C00"
+                strokeWidth="3"
+                opacity="0.7"
+              />
+              <circle
+                cx={(-fieldWidth * scale) / 2 + 15}
+                cy={i * trenchSpacing * scale}
+                r="2.5"
+                fill="#FFB020"
+                opacity="0.6"
+              />
             </g>
           ))}
 
           {/* Label */}
-          <text x={fieldWidth*scale/2 - 10} y={fieldDepth*scale + 20} fontSize="10" fontWeight="bold"
-            fill={DS.greenBright} fontFamily="monospace">CAMPO DE INFILTRACIÓN</text>
+          <text
+            x={(fieldWidth * scale) / 2 - 10}
+            y={fieldDepth * scale + 20}
+            fontSize="10"
+            fontWeight="bold"
+            fill={DS.greenBright}
+            fontFamily="monospace"
+          >
+            CAMPO DE INFILTRACIÓN
+          </text>
 
           {/* Dimensions */}
-          <text x="0" y={fieldDepth*scale + 35} fontSize="8" fill={DS.textMuted} textAnchor="middle"
-            fontFamily="monospace">
+          <text
+            x="0"
+            y={fieldDepth * scale + 35}
+            fontSize="8"
+            fill={DS.textMuted}
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
             {fmt(fieldWidth)}m × {fmt(fieldDepth)}m
           </text>
         </g>
       </g>
 
       {/* CONNECTION ARROW from tank to field */}
-      <path d={`M${cx + 280},${cy + 220} L${cx + 340},${cy + 240}`}
-        stroke={DS.greenBright} strokeWidth="2" markerEnd="url(#arrowGreen)" opacity="0.7"/>
-      <text x={cx + 310} y={cy + 215} fontSize="8" fill={DS.greenBright} fontFamily="monospace">EFLUENTE</text>
+      <path
+        d={`M${cx + 280},${cy + 220} L${cx + 340},${cy + 240}`}
+        stroke={DS.greenBright}
+        strokeWidth="2"
+        markerEnd="url(#arrowGreen)"
+        opacity="0.7"
+      />
+      <text x={cx + 310} y={cy + 215} fontSize="8" fill={DS.greenBright} fontFamily="monospace">
+        EFLUENTE
+      </text>
 
       {/* DATA PANEL (right side) */}
       <g>
-        <rect x={SVG_W - 260} y="20" width="240" height="280" fill={DS.bgCard} stroke={DS.border} strokeWidth="1" rx="3"/>
+        <rect
+          x={SVG_W - 260}
+          y="20"
+          width="240"
+          height="280"
+          fill={DS.bgCard}
+          stroke={DS.border}
+          strokeWidth="1"
+          rx="3"
+        />
 
         {/* Panel title */}
-        <text x={SVG_W - 130} y="45" fontSize="12" fontWeight="bold" fill={DS.cyanBright}
-          textAnchor="middle" fontFamily="'Orbitron',sans-serif">PARÁMETROS TÉCNICOS</text>
+        <text
+          x={SVG_W - 130}
+          y="45"
+          fontSize="12"
+          fontWeight="bold"
+          fill={DS.cyanBright}
+          textAnchor="middle"
+          fontFamily="'Orbitron',sans-serif"
+        >
+          PARÁMETROS TÉCNICOS
+        </text>
 
         {/* Data rows */}
-        <text x={SVG_W - 250} y="70" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Usuarios:</text>
-        <text x={SVG_W - 30} y="70" fontSize="9" fill={DS.cyanBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="70" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          Usuarios:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="70"
+          fontSize="9"
+          fill={DS.cyanBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {r.users || 5}
         </text>
 
-        <text x={SVG_W - 250} y="90" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Vol. Fosa:</text>
-        <text x={SVG_W - 30} y="90" fontSize="9" fill={DS.greenBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="90" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          Vol. Fosa:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="90"
+          fontSize="9"
+          fill={DS.greenBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.Vtot)} m³
         </text>
 
-        <text x={SVG_W - 250} y="110" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Profundidad:</text>
-        <text x={SVG_W - 30} y="110" fontSize="9" fill={DS.cyanBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="110" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          Profundidad:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="110"
+          fontSize="9"
+          fill={DS.cyanBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.depth)} m
         </text>
 
-        <text x={SVG_W - 250} y="130" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Largo × Ancho:</text>
-        <text x={SVG_W - 30} y="130" fontSize="9" fill={DS.cyanBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="130" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          Largo × Ancho:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="130"
+          fontSize="9"
+          fill={DS.cyanBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.L)} × {fmt(r.W)} m
         </text>
 
-        <text x={SVG_W - 250} y="150" fontSize="9" fill={DS.textMuted} fontFamily="monospace">TRH:</text>
-        <text x={SVG_W - 30} y="150" fontSize="9" fill={DS.amberBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="150" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          TRH:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="150"
+          fontSize="9"
+          fill={DS.amberBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.trhDays, 1)} días
         </text>
 
-        <text x={SVG_W - 250} y="170" fontSize="9" fill={DS.textMuted} fontFamily="monospace">SRT:</text>
-        <text x={SVG_W - 30} y="170" fontSize="9" fill={DS.greenBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="170" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          SRT:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="170"
+          fontSize="9"
+          fill={DS.greenBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.SRT)} días
         </text>
 
-        <text x={SVG_W - 250} y="190" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Caudal:</text>
-        <text x={SVG_W - 30} y="190" fontSize="9" fill={DS.cyanBright} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="190" fontSize="9" fill={DS.textMuted} fontFamily="monospace">
+          Caudal:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="190"
+          fontSize="9"
+          fill={DS.cyanBright}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {fmt(r.Qd * 1000)} L/día
         </text>
 
         {/* Project info */}
-        <line x1={SVG_W - 250} y1="210" x2={SVG_W - 30} y2="210" stroke={DS.border} strokeWidth="0.5"/>
+        <line
+          x1={SVG_W - 250}
+          y1="210"
+          x2={SVG_W - 30}
+          y2="210"
+          stroke={DS.border}
+          strokeWidth="0.5"
+        />
 
-        <text x={SVG_W - 250} y="230" fontSize="8" fill={DS.textMuted} fontFamily="monospace">Proyecto:</text>
-        <text x={SVG_W - 30} y="230" fontSize="8" fill={DS.textMain} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="230" fontSize="8" fill={DS.textMuted} fontFamily="monospace">
+          Proyecto:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="230"
+          fontSize="8"
+          fill={DS.textMain}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {projectName.substring(0, 20)}
         </text>
 
-        <text x={SVG_W - 250} y="250" fontSize="8" fill={DS.textMuted} fontFamily="monospace">Sitio:</text>
-        <text x={SVG_W - 30} y="250" fontSize="8" fill={DS.textMain} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="250" fontSize="8" fill={DS.textMuted} fontFamily="monospace">
+          Sitio:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="250"
+          fontSize="8"
+          fill={DS.textMain}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {location.substring(0, 20)}
         </text>
 
-        <text x={SVG_W - 250} y="270" fontSize="8" fill={DS.textMuted} fontFamily="monospace">Diseño:</text>
-        <text x={SVG_W - 30} y="270" fontSize="8" fill={DS.cyanDim} fontFamily="monospace" textAnchor="end">
+        <text x={SVG_W - 250} y="270" fontSize="8" fill={DS.textMuted} fontFamily="monospace">
+          Diseño:
+        </text>
+        <text
+          x={SVG_W - 30}
+          y="270"
+          fontSize="8"
+          fill={DS.cyanDim}
+          fontFamily="monospace"
+          textAnchor="end"
+        >
           {designer.substring(0, 20)}
         </text>
 
         {/* Certification */}
-        <text x={SVG_W - 130} y="290" fontSize="6" fill={DS.textMuted} textAnchor="middle" fontFamily="monospace">
+        <text
+          x={SVG_W - 130}
+          y="290"
+          fontSize="6"
+          fill={DS.textMuted}
+          textAnchor="middle"
+          fontFamily="monospace"
+        >
           EN 12566-1 • RAS 2017
         </text>
       </g>
 
       {/* Bottom status bar */}
-      <rect x="0" y={SVG_H - 30} width={SVG_W} height="30" fill={DS.bgCard} stroke={DS.border} strokeWidth="1"/>
+      <rect
+        x="0"
+        y={SVG_H - 30}
+        width={SVG_W}
+        height="30"
+        fill={DS.bgCard}
+        stroke={DS.border}
+        strokeWidth="1"
+      />
       <text x="20" y={SVG_H - 8} fontSize="9" fill={DS.textMuted} fontFamily="monospace">
         Isometric View • Sistema de Tratamiento de Aguas Residuales
       </text>
@@ -445,60 +858,75 @@ Style: Professional CAD-style technical illustration, detailed, clear labeling, 
       </button>
 
       {error && (
-        <div style={{
-          background: "rgba(255, 50, 50, 0.1)",
-          border: `1px solid rgba(255, 50, 50, 0.3)`,
-          color: "#FF6B6B",
-          padding: "12px",
-          borderRadius: "4px",
-          fontSize: "13px",
-          fontFamily: "monospace",
-        }}>
+        <div
+          style={{
+            background: "rgba(255, 50, 50, 0.1)",
+            border: `1px solid rgba(255, 50, 50, 0.3)`,
+            color: "#FF6B6B",
+            padding: "12px",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontFamily: "monospace",
+          }}
+        >
           ❌ Error: {error}
         </div>
       )}
 
       {imageUrl && (
-        <div style={{
-          background: DS.bgCard,
-          border: `1px solid ${DS.border}`,
-          padding: "12px",
-          borderRadius: "4px",
-          overflow: "auto",
-          maxHeight: "600px",
-        }}>
-          <img src={imageUrl} alt="Isometric Diagram" style={{
-            maxWidth: "100%",
-            height: "auto",
-            borderRadius: "3px",
-            display: "block",
-          }} />
-          <a href={imageUrl} download style={{
-            display: "block",
-            marginTop: "12px",
-            color: DS.cyanBright,
-            textDecoration: "none",
-            fontSize: "12px",
-            fontFamily: "monospace",
-            textAlign: "center",
-          }}>
+        <div
+          style={{
+            background: DS.bgCard,
+            border: `1px solid ${DS.border}`,
+            padding: "12px",
+            borderRadius: "4px",
+            overflow: "auto",
+            maxHeight: "600px",
+          }}
+        >
+          <img
+            src={imageUrl}
+            alt="Isometric Diagram"
+            style={{
+              maxWidth: "100%",
+              height: "auto",
+              borderRadius: "3px",
+              display: "block",
+            }}
+          />
+          <a
+            href={imageUrl}
+            download
+            style={{
+              display: "block",
+              marginTop: "12px",
+              color: DS.cyanBright,
+              textDecoration: "none",
+              fontSize: "12px",
+              fontFamily: "monospace",
+              textAlign: "center",
+            }}
+          >
             ⬇️ Descargar imagen
           </a>
         </div>
       )}
 
       {!imageUrl && !loading && (
-        <div style={{
-          background: DS.bgCard,
-          border: `1px solid ${DS.border}`,
-          padding: "24px",
-          borderRadius: "4px",
-          textAlign: "center",
-          color: DS.textMuted,
-          fontSize: "13px",
-          fontFamily: "monospace",
-        }}>
-          Haz clic en "Generar Imagen Fotorrealista" para crear una visualización detallada en alta calidad
+        <div
+          style={{
+            background: DS.bgCard,
+            border: `1px solid ${DS.border}`,
+            padding: "24px",
+            borderRadius: "4px",
+            textAlign: "center",
+            color: DS.textMuted,
+            fontSize: "13px",
+            fontFamily: "monospace",
+          }}
+        >
+          Haz clic en "Generar Imagen Fotorrealista" para crear una visualización detallada en alta
+          calidad
         </div>
       )}
     </div>
@@ -506,7 +934,12 @@ Style: Professional CAD-style technical illustration, detailed, clear labeling, 
 }
 
 // Main IsometricDiagram component
-export default function IsometricDiagram({ r, projectName = "Proyecto", location = "Sitio", designer = "Diseño" }) {
+export default function IsometricDiagram({
+  r,
+  projectName = "Proyecto",
+  location = "Sitio",
+  designer = "Diseño",
+}) {
   const [mode, setMode] = useState("svg"); // "svg" or "image"
   const [isGenerating, setIsGenerating] = useState(false);
   const svgRef = useRef(null);
@@ -532,21 +965,25 @@ export default function IsometricDiagram({ r, projectName = "Proyecto", location
   const fmt = (v, d = 2) => Number(v).toFixed(d);
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "16px",
-      padding: "0",
-      height: "100%",
-      overflow: "hidden",
-    }}>
-      {/* Mode toggle */}
-      <div style={{
+    <div
+      style={{
         display: "flex",
-        gap: "12px",
-        padding: "0 20px 12px 20px",
-        borderBottom: `1px solid ${DS.border}`,
-      }}>
+        flexDirection: "column",
+        gap: "16px",
+        padding: "0",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      {/* Mode toggle */}
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          padding: "0 20px 12px 20px",
+          borderBottom: `1px solid ${DS.border}`,
+        }}
+      >
         <button
           onClick={() => setMode("svg")}
           style={{
@@ -611,14 +1048,16 @@ export default function IsometricDiagram({ r, projectName = "Proyecto", location
       </div>
 
       {/* Content area */}
-      <div style={{
-        flex: 1,
-        overflow: "auto",
-        padding: "20px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
-      }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: "20px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
         {mode === "svg" ? (
           <div ref={svgRef} style={{ width: "100%", maxWidth: "1000px" }}>
             <SepticSystemIsometric

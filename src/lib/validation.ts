@@ -1,7 +1,7 @@
-import { z } from 'zod'
+import { z } from "zod";
 
-export const NormKeySchema = z.enum(['ras', 'esp', 'eu', 'epa'])
-export type NormKey = z.infer<typeof NormKeySchema>
+export const NormKeySchema = z.enum(["ras", "esp", "eu", "epa"]);
+export type NormKey = z.infer<typeof NormKeySchema>;
 
 export const FormStateSchema = z.object({
   // Obligatorios
@@ -11,46 +11,44 @@ export const FormStateSchema = z.object({
   temp: z.number().min(-10).max(50).optional(),
   depth: z.number().min(0.8).max(5).optional(),
   cleanYears: z.number().int().min(1).max(20).optional(),
-  
+
   // Opcionales
   retCoef: z.number().min(0.5).max(1).optional().default(0.75),
   dboIn: z.number().min(50).max(500).optional().default(250),
   ssIn: z.number().min(50).max(500).optional().default(200),
   freeboard: z.number().min(0).max(1).optional().default(0.3),
   soilType: z.string().optional(),
-  soilPermeability: z.enum(['high', 'medium', 'low', 'none', 'unknown']).optional(),
+  soilPermeability: z.enum(["high", "medium", "low", "none", "unknown"]).optional(),
   calculated: z.boolean().optional().default(false),
-})
+});
 
-export type FormState = z.infer<typeof FormStateSchema>
+export type FormState = z.infer<typeof FormStateSchema>;
 
 // Función de validación con mensajes amigables
 export function validateFormState(data: unknown) {
   try {
-    const parsed = FormStateSchema.parse(data)
-    return { success: true, data: parsed }
+    const parsed = FormStateSchema.parse(data);
+    return { success: true, data: parsed };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const messages = error.errors?.map((e: any) => 
-        `${e.path.join('.')}: ${e.message}`
-      ) || []
-      return { success: false, errors: messages }
+      const messages = error.errors?.map((e: any) => `${e.path.join(".")}: ${e.message}`) || [];
+      return { success: false, errors: messages };
     }
-    return { success: false, errors: ['Error desconocido'] }
+    return { success: false, errors: ["Error desconocido"] };
   }
 }
 
 // Validar campo individual
 export function validateField(field: keyof FormState, value: unknown) {
   try {
-    const fieldSchema = FormStateSchema.pick({ [field]: true })
-    const result = fieldSchema.safeParse({ [field]: value })
+    const fieldSchema = FormStateSchema.pick({ [field]: true });
+    const result = fieldSchema.safeParse({ [field]: value });
     if (result.success) {
-      return null
+      return null;
     }
-    const firstError = result.error?.errors?.[0]
-    return firstError?.message || 'Invalid value'
+    const firstError = result.error?.errors?.[0];
+    return firstError?.message || "Invalid value";
   } catch (error) {
-    return 'Validation error'
+    return "Validation error";
   }
 }

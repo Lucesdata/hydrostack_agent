@@ -13,7 +13,12 @@ const DS = {
   border: "rgba(0, 245, 255, 0.12)",
 };
 
-export default function IsometricDiagram3D({ r, projectName = "Proyecto", location = "Sitio", designer = "Diseño" }) {
+export default function IsometricDiagram3D({
+  r,
+  projectName = "Proyecto",
+  location = "Sitio",
+  designer = "Diseño",
+}) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null);
 
@@ -31,7 +36,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
 
     // ===== LIGHTING =====
     // Ambient light
-    const ambientLight = new BABYLON.HemisphericLight("ambient", new BABYLON.Vector3(0, 1, 0), scene);
+    const ambientLight = new BABYLON.HemisphericLight(
+      "ambient",
+      new BABYLON.Vector3(0, 1, 0),
+      scene
+    );
     ambientLight.intensity = 0.7;
     ambientLight.specular = new BABYLON.Color3(0.2, 0.2, 0.2);
 
@@ -52,21 +61,33 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     const houseGroup = new BABYLON.TransformNode("houseGroup", scene);
 
     // House base
-    const houseBase = BABYLON.MeshBuilder.CreateBox("houseBase", { width: 8, height: 0.5, depth: 8 }, scene);
+    const houseBase = BABYLON.MeshBuilder.CreateBox(
+      "houseBase",
+      { width: 8, height: 0.5, depth: 8 },
+      scene
+    );
     houseBase.position = new BABYLON.Vector3(-15, 0.25, 0);
     const houseBmat = new BABYLON.StandardMaterial("houseBmat", scene);
     houseBmat.diffuse = new BABYLON.Color3(0.6, 0.4, 0.2); // Wood color
     houseBase.material = houseBmat;
 
     // House walls
-    const houseWalls = BABYLON.MeshBuilder.CreateBox("houseWalls", { width: 8, height: 6, depth: 8 }, scene);
+    const houseWalls = BABYLON.MeshBuilder.CreateBox(
+      "houseWalls",
+      { width: 8, height: 6, depth: 8 },
+      scene
+    );
     houseWalls.position = new BABYLON.Vector3(-15, 3, 0);
     const houseWmat = new BABYLON.StandardMaterial("houseWmat", scene);
     houseWmat.diffuse = new BABYLON.Color3(0.85, 0.75, 0.65); // Light tan
     houseWalls.material = houseWmat;
 
     // House roof
-    const roofPyramid = BABYLON.MeshBuilder.CreateCylinder("roof", { diameter: 10, height: 3, tessellation: 4 }, scene);
+    const roofPyramid = BABYLON.MeshBuilder.CreateCylinder(
+      "roof",
+      { diameter: 10, height: 3, tessellation: 4 },
+      scene
+    );
     roofPyramid.position = new BABYLON.Vector3(-15, 9, 0);
     roofPyramid.rotation.z = Math.PI / 4;
     const roofMat = new BABYLON.StandardMaterial("roofMat", scene);
@@ -74,7 +95,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     roofPyramid.material = roofMat;
 
     // Door
-    const door = BABYLON.MeshBuilder.CreateBox("door", { width: 1.5, height: 2.5, depth: 0.2 }, scene);
+    const door = BABYLON.MeshBuilder.CreateBox(
+      "door",
+      { width: 1.5, height: 2.5, depth: 0.2 },
+      scene
+    );
     door.position = new BABYLON.Vector3(-15, 2, 4.1);
     const doorMat = new BABYLON.StandardMaterial("doorMat", scene);
     doorMat.diffuse = new BABYLON.Color3(0.3, 0.15, 0.05); // Dark brown
@@ -82,8 +107,12 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
 
     // Windows (2)
     for (let i = 0; i < 2; i++) {
-      const window = BABYLON.MeshBuilder.CreateBox("window_" + i, { width: 1.2, height: 1, depth: 0.15 }, scene);
-      window.position = new BABYLON.Vector3(-15 + (i * 3), 4.5, 4.05);
+      const window = BABYLON.MeshBuilder.CreateBox(
+        "window_" + i,
+        { width: 1.2, height: 1, depth: 0.15 },
+        scene
+      );
+      window.position = new BABYLON.Vector3(-15 + i * 3, 4.5, 4.05);
       const winMat = new BABYLON.StandardMaterial("winMat_" + i, scene);
       winMat.diffuse = new BABYLON.Color3(0.4, 0.8, 1); // Light blue
       winMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
@@ -98,12 +127,16 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     for (let i = 0; i <= 20; i++) {
       const t = i / 20;
       const x = -15 + t * 20;
-      const y = 1 + t * 0.5 - (t * t) * 0.3; // Curved down
+      const y = 1 + t * 0.5 - t * t * 0.3; // Curved down
       const z = -t * 8;
       tubeArray.push(new BABYLON.Vector3(x, y, z));
     }
 
-    const tubePath = BABYLON.MeshBuilder.CreateTube("pipe", { path: tubeArray, radius: 0.15, updatable: false }, scene);
+    const tubePath = BABYLON.MeshBuilder.CreateTube(
+      "pipe",
+      { path: tubeArray, radius: 0.15, updatable: false },
+      scene
+    );
     const pipeMat = new BABYLON.StandardMaterial("pipeMat", scene);
     pipeMat.diffuse = new BABYLON.Color3(1, 0.55, 0); // Orange PVC
     pipeMat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
@@ -118,7 +151,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     const tankD = (r.depth || 1.4) * 2;
 
     // Buried tank body
-    const tank = BABYLON.MeshBuilder.CreateBox("tank", { width: tankW, height: tankD, depth: tankL }, scene);
+    const tank = BABYLON.MeshBuilder.CreateBox(
+      "tank",
+      { width: tankW, height: tankD, depth: tankL },
+      scene
+    );
     tank.position = new BABYLON.Vector3(10, -tankD / 2, -8);
     const tankMat = new BABYLON.StandardMaterial("tankMat", scene);
     tankMat.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5); // Concrete gray
@@ -126,7 +163,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     tank.material = tankMat;
 
     // Tank lid (top)
-    const lid = BABYLON.MeshBuilder.CreateBox("lid", { width: tankW + 0.2, height: 0.3, depth: tankL + 0.2 }, scene);
+    const lid = BABYLON.MeshBuilder.CreateBox(
+      "lid",
+      { width: tankW + 0.2, height: 0.3, depth: tankL + 0.2 },
+      scene
+    );
     lid.position = new BABYLON.Vector3(10, tankD / 2 + 0.15, -8);
     const lidMat = new BABYLON.StandardMaterial("lidMat", scene);
     lidMat.diffuse = new BABYLON.Color3(0.4, 0.4, 0.4);
@@ -134,7 +175,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
 
     // Water inside tank (semi-transparent blue)
     const waterLevel = tankD * 0.65;
-    const water = BABYLON.MeshBuilder.CreateBox("water", { width: tankW - 0.4, height: waterLevel, depth: tankL - 0.4 }, scene);
+    const water = BABYLON.MeshBuilder.CreateBox(
+      "water",
+      { width: tankW - 0.4, height: waterLevel, depth: tankL - 0.4 },
+      scene
+    );
     water.position = new BABYLON.Vector3(10, -tankD / 2 + waterLevel / 2, -8);
     const waterMat = new BABYLON.StandardMaterial("waterMat", scene);
     waterMat.diffuse = new BABYLON.Color3(0, 0.6, 0.8);
@@ -149,7 +194,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     vent.material = ventMat;
 
     // Inlet pipe
-    const inletPipe = BABYLON.MeshBuilder.CreateCylinder("inlet", { diameter: 0.1, height: 0.3 }, scene);
+    const inletPipe = BABYLON.MeshBuilder.CreateCylinder(
+      "inlet",
+      { diameter: 0.1, height: 0.3 },
+      scene
+    );
     inletPipe.position = new BABYLON.Vector3(10 - tankW / 2 - 0.2, 0, -8);
     inletPipe.rotation.z = Math.PI / 2;
     const inletMat = new BABYLON.StandardMaterial("inletMat", scene);
@@ -157,7 +206,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     inletPipe.material = inletMat;
 
     // Outlet pipe
-    const outletPipe = BABYLON.MeshBuilder.CreateCylinder("outlet", { diameter: 0.1, height: 0.3 }, scene);
+    const outletPipe = BABYLON.MeshBuilder.CreateCylinder(
+      "outlet",
+      { diameter: 0.1, height: 0.3 },
+      scene
+    );
     outletPipe.position = new BABYLON.Vector3(10 + tankW / 2 + 0.2, -tankD / 3, -8);
     outletPipe.rotation.z = Math.PI / 2;
     const outletMat = new BABYLON.StandardMaterial("outletMat", scene);
@@ -168,7 +221,11 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
     const fieldGroup = new BABYLON.TransformNode("fieldGroup", scene);
 
     // Field border
-    const fieldBorder = BABYLON.MeshBuilder.CreateGround("fieldBorder", { width: 12, height: 10 }, scene);
+    const fieldBorder = BABYLON.MeshBuilder.CreateGround(
+      "fieldBorder",
+      { width: 12, height: 10 },
+      scene
+    );
     fieldBorder.position = new BABYLON.Vector3(30, 0.05, -8);
     const fieldBorderMat = new BABYLON.StandardMaterial("fieldBorderMat", scene);
     fieldBorderMat.diffuse = new BABYLON.Color3(0.6, 0.5, 0.3); // Sand color
@@ -304,10 +361,19 @@ export default function IsometricDiagram3D({ r, projectName = "Proyecto", locati
           <span style={{ color: DS.textMuted }}>Caudal:</span>
           <div style={{ color: DS.cyanBright, fontWeight: "bold" }}>{fmt(r.Qd * 1000)} L/día</div>
         </div>
-        <div style={{ gridColumn: "1 / -1", borderTop: `1px solid ${DS.border}`, paddingTop: "8px", marginTop: "8px" }}>
+        <div
+          style={{
+            gridColumn: "1 / -1",
+            borderTop: `1px solid ${DS.border}`,
+            paddingTop: "8px",
+            marginTop: "8px",
+          }}
+        >
           <div style={{ color: DS.textMuted, marginBottom: "4px" }}>Proyecto:</div>
           <div style={{ color: DS.textMain }}>{projectName}</div>
-          <div style={{ color: DS.textMuted, marginTop: "6px", marginBottom: "4px" }}>Ubicación:</div>
+          <div style={{ color: DS.textMuted, marginTop: "6px", marginBottom: "4px" }}>
+            Ubicación:
+          </div>
           <div style={{ color: DS.textMain }}>{location}</div>
           <div style={{ color: DS.textMuted, marginTop: "6px", marginBottom: "4px" }}>Diseño:</div>
           <div style={{ color: DS.textMain }}>{designer}</div>

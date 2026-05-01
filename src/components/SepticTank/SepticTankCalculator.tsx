@@ -11,7 +11,9 @@ export function SepticTankCalculator() {
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
       <div style={{ marginBottom: "20px" }}>
         <h1 style={{ color: "#00F5FF", margin: "0 0 8px 0" }}>Fosa Séptica</h1>
-        <p style={{ color: "#7ab8c8", margin: 0 }}>Dimensionamiento completo: volúmenes, cámaras y verificaciones</p>
+        <p style={{ color: "#7ab8c8", margin: 0 }}>
+          Dimensionamiento completo: volúmenes, cámaras y verificaciones
+        </p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>

@@ -11,11 +11,11 @@ const MODULES = [
     titleKey: "septicTitle",
     descKey: "septicDesc",
   },
-  { slug: "imhoff",  icon: "🏗", ready: false, titleKey: "imhoffTitle", descKey: "imhoffDesc" },
-  { slug: "lodos",   icon: "🔬", ready: false, titleKey: "lodsTitle",   descKey: "lodsDesc"   },
-  { slug: "uasb",    icon: "⚗️",  ready: false, titleKey: "uasbTitle",   descKey: "uasbDesc"   },
-  { slug: "filtro",  icon: "🧱", ready: false, titleKey: "filterTitle", descKey: "filterDesc" },
-  { slug: "potable", icon: "💧", ready: false, titleKey: "potTitle",    descKey: "potDesc"    },
+  { slug: "imhoff", icon: "🏗", ready: false, titleKey: "imhoffTitle", descKey: "imhoffDesc" },
+  { slug: "lodos", icon: "🔬", ready: false, titleKey: "lodsTitle", descKey: "lodsDesc" },
+  { slug: "uasb", icon: "⚗️", ready: false, titleKey: "uasbTitle", descKey: "uasbDesc" },
+  { slug: "filtro", icon: "🧱", ready: false, titleKey: "filterTitle", descKey: "filterDesc" },
+  { slug: "potable", icon: "💧", ready: false, titleKey: "potTitle", descKey: "potDesc" },
 ];
 
 export default function CalculatorsPage() {
@@ -32,7 +32,7 @@ export default function CalculatorsPage() {
         </div>
 
         <div style={S.grid}>
-          {MODULES.map((m, i) => (
+          {MODULES.map((m, i) =>
             m.ready ? (
               <Link key={i} href={`/calculators/${m.slug}`} style={S.card(true)}>
                 <div style={S.cardIcon}>{m.icon}</div>
@@ -43,13 +43,13 @@ export default function CalculatorsPage() {
               </Link>
             ) : (
               <div key={i} style={S.card(false)}>
-                <div style={{...S.cardIcon, opacity:0.3}}>{m.icon}</div>
-                <div style={{...S.cardTitle, opacity:0.4}}>{tc[m.titleKey]}</div>
-                <div style={{...S.cardDesc, opacity:0.3}}>{tc[m.descKey]}</div>
+                <div style={{ ...S.cardIcon, opacity: 0.3 }}>{m.icon}</div>
+                <div style={{ ...S.cardTitle, opacity: 0.4 }}>{tc[m.titleKey]}</div>
+                <div style={{ ...S.cardDesc, opacity: 0.3 }}>{tc[m.descKey]}</div>
                 <div style={S.cardSoon}>{tc.soon}</div>
               </div>
             )
-          ))}
+          )}
         </div>
       </div>
     </div>

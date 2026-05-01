@@ -13,10 +13,19 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
     <div style={{ padding: "20px", backgroundColor: "#041820", borderRadius: "8px" }}>
       <h2 style={{ marginTop: 0, color: "#00F5FF" }}>Parámetros de Entrada</h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
+      >
         {/* Normativa */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Normativa
           </label>
           <select
@@ -43,7 +52,9 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
 
         {/* Usuarios */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Usuarios (habitantes)
           </label>
           <input
@@ -65,7 +76,9 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
 
         {/* Dotación */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Dotación (L/hab·día)
           </label>
           <input
@@ -87,7 +100,9 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
 
         {/* Temperatura */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Temperatura (°C)
           </label>
           <input
@@ -110,7 +125,9 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
 
         {/* Profundidad */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Profundidad útil (m)
           </label>
           <input
@@ -133,7 +150,9 @@ export function SepticForm({ formState, onUpdate }: SepticFormProps) {
 
         {/* Período de limpieza */}
         <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}>
+          <label
+            style={{ display: "block", fontSize: "12px", color: "#7ab8c8", marginBottom: "4px" }}
+          >
             Limpieza (años)
           </label>
           <input

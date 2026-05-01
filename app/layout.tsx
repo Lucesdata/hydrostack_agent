@@ -5,8 +5,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "HydroStack — Water & Sanitation Engineering",
-  description: "Technical calculation tools for water and sanitation engineering. Septic tanks, Imhoff tanks, activated sludge, UASB reactors and more.",
-  keywords: "septic tank calculator, fosa septica, water treatment, wastewater design, RAS Colombia, EN 12566",
+  description:
+    "Technical calculation tools for water and sanitation engineering. Septic tanks, Imhoff tanks, activated sludge, UASB reactors and more.",
+  keywords:
+    "septic tank calculator, fosa septica, water treatment, wastewater design, RAS Colombia, EN 12566",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -22,9 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {/* Fixed background grid */}
-        <div className="bg-grid" aria-hidden="true"/>
+        <div className="bg-grid" aria-hidden="true" />
         {/* CRT scanline */}
-        <div className="scanline" aria-hidden="true"/>
+        <div className="scanline" aria-hidden="true" />
         <LangProvider>
           <Navbar />
           <main style={{ position: "relative", zIndex: 1 }}>{children}</main>

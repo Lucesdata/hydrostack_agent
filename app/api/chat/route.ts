@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { suggestNextQuestions } from "@/src/lib/agent/filter"
-import type { FormState } from "@/src/lib/agent/filter"
+import { suggestNextQuestions } from "@/src/lib/agent/filter";
+import type { FormState } from "@/src/lib/agent/filter";
 
 export const runtime = "nodejs";
 
@@ -107,11 +107,9 @@ async function getCatalogSuggestions(formState: FormState | undefined): Promise<
     const suggestions = suggestNextQuestions(formState);
     if (suggestions.length === 0) return "";
 
-    return `\n\n[PREGUNTAS RELEVANTES DEL CATÁLOGO PARA TU CASO]\nPuede que también te interese:\n${
-      suggestions
-        .map((q, i) => `${i + 1}. ${q.text}`)
-        .join('\n')
-    }`;
+    return `\n\n[PREGUNTAS RELEVANTES DEL CATÁLOGO PARA TU CASO]\nPuede que también te interese:\n${suggestions
+      .map((q, i) => `${i + 1}. ${q.text}`)
+      .join("\n")}`;
   } catch {
     return "";
   }
@@ -123,8 +121,7 @@ export async function POST(req: Request) {
   const readable = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
-      const send = (data: string) =>
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+      const send = (data: string) => controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
       try {
         // Detectar ubicación y cargar normativa

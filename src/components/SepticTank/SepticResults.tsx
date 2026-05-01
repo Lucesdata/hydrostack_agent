@@ -19,7 +19,9 @@ export function SepticResults({ result }: SepticResultsProps) {
         }}
       >
         <div style={{ fontSize: "48px", opacity: 0.1, marginBottom: "12px" }}>🧮</div>
-        <p style={{ color: "#2a5070", margin: 0 }}>Completa todos los parámetros para ver resultados</p>
+        <p style={{ color: "#2a5070", margin: 0 }}>
+          Completa todos los parámetros para ver resultados
+        </p>
       </div>
     );
   }
@@ -69,7 +71,9 @@ export function SepticResults({ result }: SepticResultsProps) {
           <div style={{ fontSize: "28px", color: "#00F5FF", fontWeight: "bold" }}>
             {result.Vtot?.toFixed(2) || "—"}
           </div>
-          <div style={{ fontSize: "12px", color: "#00F5FF", fontWeight: "600" }}>m³ VOLUMEN TOTAL</div>
+          <div style={{ fontSize: "12px", color: "#00F5FF", fontWeight: "600" }}>
+            m³ VOLUMEN TOTAL
+          </div>
           {result.minA && (
             <div style={{ fontSize: "10px", color: "#b0a060", marginTop: "4px" }}>
               (mín. normativo aplicado)
@@ -79,17 +83,34 @@ export function SepticResults({ result }: SepticResultsProps) {
       </div>
 
       {/* Dimensiones */}
-      <div style={{ backgroundColor: "#041820", padding: "16px", borderRadius: "6px", marginBottom: "20px" }}>
+      <div
+        style={{
+          backgroundColor: "#041820",
+          padding: "16px",
+          borderRadius: "6px",
+          marginBottom: "20px",
+        }}
+      >
         <h3 style={{ color: "#00F5FF", margin: "0 0 12px 0" }}>Dimensiones</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", fontSize: "14px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "12px",
+            fontSize: "14px",
+          }}
+        >
           <div>
-            <span style={{ color: "#7ab8c8" }}>Largo:</span> <span style={{ color: "#00F5FF" }}>{result.L?.toFixed(2)}m</span>
+            <span style={{ color: "#7ab8c8" }}>Largo:</span>{" "}
+            <span style={{ color: "#00F5FF" }}>{result.L?.toFixed(2)}m</span>
           </div>
           <div>
-            <span style={{ color: "#7ab8c8" }}>Ancho:</span> <span style={{ color: "#00F5FF" }}>{result.W?.toFixed(2)}m</span>
+            <span style={{ color: "#7ab8c8" }}>Ancho:</span>{" "}
+            <span style={{ color: "#00F5FF" }}>{result.W?.toFixed(2)}m</span>
           </div>
           <div>
-            <span style={{ color: "#7ab8c8" }}>Área:</span> <span style={{ color: "#00F5FF" }}>{result.Area?.toFixed(2)}m²</span>
+            <span style={{ color: "#7ab8c8" }}>Área:</span>{" "}
+            <span style={{ color: "#00F5FF" }}>{result.Area?.toFixed(2)}m²</span>
           </div>
           <div>
             <span style={{ color: "#7ab8c8" }}>Cámaras:</span>{" "}

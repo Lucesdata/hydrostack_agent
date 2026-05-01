@@ -48,10 +48,7 @@ export const NORMS_METADATA: Record<string, NormMetadata> = {
   },
 };
 
-export function getParams(
-  normKey: "ras" | "esp" | "eu" | "epa",
-  temp: number
-): NormParams {
+export function getParams(normKey: "ras" | "esp" | "eu" | "epa", temp: number): NormParams {
   if (normKey === "ras") {
     if (temp >= 20)
       return {
