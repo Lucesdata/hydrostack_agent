@@ -5,12 +5,12 @@ export type NormKey = z.infer<typeof NormKeySchema>
 
 export const FormStateSchema = z.object({
   // Obligatorios
-  normKey: NormKeySchema,
-  users: z.number().int().min(1).max(10000),
-  dotacion: z.number().min(10).max(500),
-  temp: z.number().min(-10).max(50),
-  depth: z.number().min(0.8).max(5),
-  cleanYears: z.number().int().min(1).max(20),
+  normKey: NormKeySchema.optional(),
+  users: z.number().int().min(1).max(10000).optional(),
+  dotacion: z.number().min(10).max(500).optional(),
+  temp: z.number().min(-10).max(50).optional(),
+  depth: z.number().min(0.8).max(5).optional(),
+  cleanYears: z.number().int().min(1).max(20).optional(),
   
   // Opcionales
   retCoef: z.number().min(0.5).max(1).optional().default(0.75),
@@ -31,9 +31,9 @@ export function validateFormState(data: unknown) {
     return { success: true, data: parsed }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const messages = error.errors.map(e => 
+      const messages = error.errors?.map((e: any) => 
         `${e.path.join('.')}: ${e.message}`
-      )
+      ) || []
       return { success: false, errors: messages }
     }
     return { success: false, errors: ['Error desconocido'] }
@@ -44,5 +44,5 @@ export function validateFormState(data: unknown) {
 export function validateField(field: keyof FormState, value: unknown) {
   const fieldSchema = FormStateSchema.pick({ [field]: true })
   const result = fieldSchema.safeParse({ [field]: value })
-  return result.success ? null : result.error.errors[0]?.message
+  return result.success ? null : result.error?.errors[0]?.message
 }
