@@ -3,18 +3,12 @@ export async function POST(request) {
     const { prompt, systemParams } = await request.json();
 
     if (!prompt) {
-      return Response.json(
-        { error: "Prompt is required" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Prompt is required" }, { status: 400 });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return Response.json(
-        { error: "ANTHROPIC_API_KEY not configured" },
-        { status: 500 }
-      );
+      return Response.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
     }
 
     // Call Claude API directly via HTTP
@@ -59,7 +53,8 @@ Formatea como una descripción visual detallada adecuada para un modelo de gener
     return Response.json({
       description,
       systemParams,
-      message: "Image generation description created successfully. Connect to DALL-E or Midjourney for final image.",
+      message:
+        "Image generation description created successfully. Connect to DALL-E or Midjourney for final image.",
       imageUrl: null,
       note: "Para generar la imagen final, integra este endpoint con DALL-E (OpenAI) o Midjourney API",
     });

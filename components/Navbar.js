@@ -23,14 +23,22 @@ export default function Navbar() {
         </Link>
 
         {/* Online status dot */}
-        <span style={S.statusDot} className="blink" title="Sistema activo"/>
+        <span style={S.statusDot} className="blink" title="Sistema activo" />
 
         {/* Desktop links */}
         <div style={S.links} className="hide-mobile">
-          <Link href="/calculators" style={{ ...S.link, ...(isCalc ? S.linkActive : {}) }} className={isCalc ? "" : "nav-link"}>
+          <Link
+            href="/calculators"
+            style={{ ...S.link, ...(isCalc ? S.linkActive : {}) }}
+            className={isCalc ? "" : "nav-link"}
+          >
             {t.nav.calculators}
           </Link>
-          <Link href="/chat" style={{ ...S.link, ...(isChat ? S.linkActive : {}) }} className={isChat ? "" : "nav-link"}>
+          <Link
+            href="/chat"
+            style={{ ...S.link, ...(isChat ? S.linkActive : {}) }}
+            className={isChat ? "" : "nav-link"}
+          >
             {t.nav.assistant}
           </Link>
           <a href="#about" style={S.link} className="nav-link">
@@ -46,7 +54,7 @@ export default function Navbar() {
         {/* Hamburger — mobile only */}
         <button
           className="nav-hamburger hide-desktop"
-          onClick={() => setOpen(o => !o)}
+          onClick={() => setOpen((o) => !o)}
           aria-label="Menú"
         >
           {open ? "✕" : "☰"}
@@ -55,7 +63,11 @@ export default function Navbar() {
 
       {/* Mobile dropdown */}
       <div className={`nav-mobile-menu${open ? " open" : ""}`}>
-        <Link href="/calculators" className={`nav-mobile-link${isCalc ? " active" : ""}`} onClick={close}>
+        <Link
+          href="/calculators"
+          className={`nav-mobile-link${isCalc ? " active" : ""}`}
+          onClick={close}
+        >
           {t.nav.calculators}
         </Link>
         <Link href="/chat" className={`nav-mobile-link${isChat ? " active" : ""}`} onClick={close}>
@@ -64,7 +76,13 @@ export default function Navbar() {
         <a href="#about" className="nav-mobile-link" onClick={close}>
           {t.nav.about}
         </a>
-        <button className="nav-mobile-lang" onClick={() => { toggle(); close(); }}>
+        <button
+          className="nav-mobile-lang"
+          onClick={() => {
+            toggle();
+            close();
+          }}
+        >
           {t.nav.lang}
         </button>
       </div>
