@@ -1,14 +1,15 @@
+import type { Metadata } from "next";
 import { LangProvider } from "@/lib/i18n";
-import Navbar from "@/components/Navbar";
+import Navbar from "../components/Navbar";
 import "./globals.css";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "HydroStack — Water & Sanitation Engineering",
   description: "Technical calculation tools for water and sanitation engineering. Septic tanks, Imhoff tanks, activated sludge, UASB reactors and more.",
   keywords: "septic tank calculator, fosa septica, water treatment, wastewater design, RAS Colombia, EN 12566",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>

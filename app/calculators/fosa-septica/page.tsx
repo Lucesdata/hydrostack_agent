@@ -1,6 +1,7 @@
-import SepticTankCalculator from "@/components/SepticTankCalculator";
+import type { Metadata } from "next";
+import { SepticTankCalculator } from "@/components/SepticTank/SepticTankCalculator";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Fosa Séptica — HydroStack",
   description: "Calculadora de fosa séptica. Dimensionamiento según RAS Colombia, España (CTE), EN 12566 y EPA. Volúmenes, cámaras, diseño hidráulico y campo de infiltración.",
 };
