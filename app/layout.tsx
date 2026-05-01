@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LangProvider } from "@/lib/i18n";
-import Navbar from "../components/Navbar";
+import Navbar from "@/components/Common/Navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
