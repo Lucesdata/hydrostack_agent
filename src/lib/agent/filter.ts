@@ -12,7 +12,7 @@ export interface FormState {
   ssIn?: number
   soilType?: string
   soilPermeability?: "high" | "medium" | "low" | "none" | "unknown"
-  normKey?: "ras" | "esp" | "eu" | "epa"
+  normKey?: "epa" | "uk" | "asnzs" | "cte" | "ras"
   calculated?: boolean
 }
 
@@ -31,14 +31,14 @@ function matchesCondition(cond: ConditionKey, state: FormState): boolean {
       return (state.users || state.dotacion || state.normKey) && !state.calculated
     case "form_calculated":
       return state.calculated === true
-    case "norm_ras":
-      return state.normKey === "ras"
-    case "norm_esp":
-      return state.normKey === "esp"
-    case "norm_eu":
-      return state.normKey === "eu"
     case "norm_epa":
       return state.normKey === "epa"
+    case "norm_uk":
+      return state.normKey === "uk"
+    case "norm_asnzs":
+      return state.normKey === "asnzs"
+    case "norm_cte":
+      return state.normKey === "cte"
     case "soil_low_perm":
       return state.soilPermeability === "low"
     case "soil_not_apt":
