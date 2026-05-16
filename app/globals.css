@@ -223,6 +223,20 @@ input, select { font-family: var(--mono); }
 .hs-calc:hover { box-shadow: 0 0 24px rgba(0,245,255,0.35) !important; transform: translateY(-1px); }
 .hs-pBtn:hover { background: var(--cyan) !important; color: var(--deep1) !important; }
 
+/* ── Hydro_Agent ────────────────────────────────────────────────────────────── */
+.chip-prompt { transition: all 0.18s; }
+.chip-prompt:hover {
+  background: rgba(0,245,255,0.10) !important;
+  border-color: rgba(0,245,255,0.45) !important;
+  color: #E8F8FF !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,245,255,0.10);
+}
+.chip-prompt:focus-visible {
+  outline: 2px solid #00F5FF;
+  outline-offset: 2px;
+}
+
 /* ── Scrollbar ──────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
