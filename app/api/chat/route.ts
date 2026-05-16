@@ -2,10 +2,13 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import { suggestNextQuestions } from "@/src/lib/agent/filter"
 import type { FormState } from "@/src/lib/agent/filter"
+import { TOOL_DEFS, runTool } from "@/src/lib/agent/tools";
 
 export const runtime = "nodejs";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL   = "llama-3.1-8b-instant";
+const MAX_TOOL_ROUNDS = 3; // safety: max recursive tool-use rounds (tank → infiltration → final text)
 
 const SYSTEM_PROMPT = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
 in on-site wastewater treatment systems (OWTS): septic tanks, leach fields,
@@ -16,6 +19,39 @@ absorption wells, and decentralized wastewater treatment.
   explain clearly without unnecessary jargon for non-technical users.
 - Be direct and concise. Don't repeat information already provided in the conversation.
 - Ask one question at a time, starting with the most important.
+
+## TOOLS (FUNCTION CALLING)
+You have access to these tools. Use them when the user asks for a concrete
+sizing instead of calculating by hand.
+
+**\`size_septic_tank\`** — sizes the septic tank (volumes, dimensions, SRT,
+chambers) per RAS Colombia, Spain (CTE DB-HS 5), Europe (EN 12566), or
+EPA (USA).
+- Use it when the user asks for a tank sizing and has provided at least the
+  number of equivalent inhabitants.
+- If parameters are missing, assume reasonable defaults (norm='esp',
+  temp_c=18, return_coef=0.80, clean_years=2, depth_m=1.5) and say so in
+  your reply.
+
+**\`evaluate_soil_infiltration\`** — sizes the infiltration field (soakaway
+trenches) that receives the tank effluent.
+- Use it when the user asks about land area needed, leach trenches, soakaway,
+  or the effect of soil permeability.
+- If you have Qd from a prior size_septic_tank call, pass it directly.
+  Otherwise pass 'users' and the flow will be estimated.
+- If the user ran a percolation test on site, use soil_type='manual' with
+  perc_test_min_per_cm. If the user describes the soil in plain words
+  (gravel, sand, clay…), pick the closest enum key.
+- If soil_type='clay' or perc_test > 30 min/cm, the soil is NOT suitable
+  and the tool will return alternative recommendations (sand filter,
+  constructed wetland, controlled discharge). Communicate this clearly.
+
+**Common rules**:
+- You can chain several tools in sequence (e.g. size the tank → evaluate
+  infiltration) if the user asks for both in the same message.
+- After receiving the result, DO NOT repeat the full numeric table — the
+  user already sees it rendered. Interpret the results: explain what they
+  mean, flag checks and warnings, and suggest next steps.
 
 ## AUTHORIZED QUESTIONS CATALOG
 You have access to a catalog of validated questions organized in 5 routes:
@@ -51,7 +87,13 @@ Always specify which rate you're using and why.
 - For comparison of system types: present brief comparative analysis
 - Language: respond in the user's language (English by default)`;
 
-type ChatMessage = { role: string; content: string };
+type ChatMessage = {
+  role: string;
+  content: string | null;
+  tool_call_id?: string;
+  tool_calls?: any[];
+  name?: string;
+};
 
 interface ChatRequest {
   messages: ChatMessage[];
@@ -67,7 +109,7 @@ function detectLocation(text: string): string {
     texas: "epa-onsite",
     california: "epa-onsite",
     florida: "epa-onsite",
-    new york: "epa-onsite",
+    "new york": "epa-onsite",
     uk: "uk-building-regs",
     "united kingdom": "uk-building-regs",
     england: "uk-building-regs",
@@ -98,11 +140,11 @@ async function getNormativaMD(ubicacion: string): Promise<string> {
   if (!ubicacion) return "";
   try {
     const map: Record<string, string> = {
-      "epa-onsite": "docs/normativa/epa-onsite.md",
+      "epa-onsite":       "docs/normativa/epa-onsite.md",
       "uk-building-regs": "docs/normativa/uk-building-regs.md",
-      "as-nzs-1547": "docs/normativa/as-nzs-1547.md",
-      "cte-hs5": "docs/normativa/cte-hs5.md",
-      "ras-2000": "docs/normativa/ras-2000.md",
+      "as-nzs-1547":      "docs/normativa/as-nzs-1547.md",
+      "cte-hs5":          "docs/normativa/cte-hs5.md",
+      "ras-2000":         "docs/normativa/ras-2000.md",
     };
     const path = map[ubicacion];
     if (!path) return "";
@@ -118,14 +160,126 @@ async function getCatalogSuggestions(formState: FormState | undefined): Promise<
   try {
     const suggestions = suggestNextQuestions(formState);
     if (suggestions.length === 0) return "";
-
     return `\n\n[RELEVANT QUESTIONS FROM CATALOG]\nYou might also be interested in:\n${
-      suggestions
-        .map((q, i) => `${i + 1}. ${q.text}`)
-        .join('\n')
+      suggestions.map((q, i) => `${i + 1}. ${q.text}`).join('\n')
     }`;
   } catch {
     return "";
+  }
+}
+
+/**
+ * Stream one round of Groq completion. If the model returns tool_calls,
+ * recursively run them and stream the follow-up. Returns when the model
+ * finishes with stop / length.
+ */
+async function streamRound(
+  messages: ChatMessage[],
+  send: (data: string) => void,
+  depth: number,
+): Promise<void> {
+  const res = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages,
+      stream: true,
+      max_tokens: 2048,
+      tools: TOOL_DEFS,
+      tool_choice: depth >= MAX_TOOL_ROUNDS ? "none" : "auto",
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    send(JSON.stringify({ type: "error", error: err }));
+    return;
+  }
+
+  const reader  = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let finishReason: string | null = null;
+  const toolCalls: any[] = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() ?? "";
+
+    for (const part of parts) {
+      if (!part.startsWith("data: ")) continue;
+      const raw = part.slice(6).trim();
+      if (raw === "[DONE]") continue;
+
+      try {
+        const chunk  = JSON.parse(raw);
+        const choice = chunk.choices?.[0];
+        const delta  = choice?.delta;
+
+        if (delta?.content) {
+          send(JSON.stringify({
+            type:  "content_block_delta",
+            delta: { type: "text_delta", text: delta.content },
+          }));
+        }
+
+        if (delta?.tool_calls) {
+          for (const tc of delta.tool_calls) {
+            const idx = tc.index ?? 0;
+            if (!toolCalls[idx]) {
+              toolCalls[idx] = {
+                id:   tc.id ?? `call_${idx}`,
+                type: "function",
+                function: { name: "", arguments: "" },
+              };
+            }
+            if (tc.id)                  toolCalls[idx].id = tc.id;
+            if (tc.function?.name)      toolCalls[idx].function.name      = tc.function.name;
+            if (tc.function?.arguments) toolCalls[idx].function.arguments += tc.function.arguments;
+          }
+        }
+
+        if (choice?.finish_reason) finishReason = choice.finish_reason;
+      } catch { /* skip malformed chunk */ }
+    }
+  }
+
+  if (finishReason === "tool_calls" && toolCalls.length > 0 && depth < MAX_TOOL_ROUNDS) {
+    const assistantMsg: ChatMessage = {
+      role: "assistant",
+      content: null,
+      tool_calls: toolCalls,
+    };
+
+    const toolMsgs: ChatMessage[] = toolCalls.map(tc => {
+      const result = runTool(tc.function.name, tc.function.arguments);
+      let parsedArgs: any = {};
+      try { parsedArgs = JSON.parse(tc.function.arguments || "{}"); } catch { /* keep raw */ }
+
+      // Emit custom event so the UI can render a structured calculation card.
+      send(JSON.stringify({
+        type:   "tool_result",
+        tool:   tc.function.name,
+        args:   parsedArgs,
+        result,
+      }));
+
+      return {
+        role: "tool",
+        tool_call_id: tc.id,
+        name: tc.function.name,
+        content: JSON.stringify(result),
+      };
+    });
+
+    await streamRound([...messages, assistantMsg, ...toolMsgs], send, depth + 1);
   }
 }
 
@@ -139,15 +293,11 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
       try {
-        // Detectar ubicación y cargar normativa
-        const lastMessage = messages[messages.length - 1]?.content || "";
-        const locationKey = detectLocation(lastMessage);
-        const normativaMD = await getNormativaMD(locationKey);
+        const lastMessage  = messages[messages.length - 1]?.content || "";
+        const locationKey  = detectLocation(lastMessage);
+        const normativaMD  = await getNormativaMD(locationKey);
+        const catalogSuggs = await getCatalogSuggestions(formState);
 
-        // Obtener sugerencias del catálogo basadas en FormState
-        const catalogSuggestions = await getCatalogSuggestions(formState);
-
-        // Inject regulatory context if found
         const contextMessages: ChatMessage[] = [];
         if (normativaMD) {
           contextMessages.push({
@@ -160,7 +310,6 @@ export async function POST(req: Request) {
           });
         }
 
-        // If FormState exists, add calculation context
         if (formState && formState.calculated) {
           contextMessages.push({
             role: "user",
@@ -172,78 +321,24 @@ export async function POST(req: Request) {
           });
         }
 
-        const res = await fetch(GROQ_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "llama-3.1-8b-instant",
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              ...contextMessages,
-              ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
-            ],
-            stream: true,
-            max_tokens: 2048,
-          }),
-        });
+        const initialMessages: ChatMessage[] = [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...contextMessages,
+          ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
+        ];
 
-        if (!res.ok) {
-          const err = await res.text();
-          send(JSON.stringify({ type: "error", error: err }));
-          controller.close();
-          return;
-        }
+        await streamRound(initialMessages, send, 0);
 
-        const reader = res.body!.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split("\n\n");
-          buffer = parts.pop() ?? "";
-
-          for (const part of parts) {
-            if (!part.startsWith("data: ")) continue;
-            const raw = part.slice(6).trim();
-            if (raw === "[DONE]") continue;
-
-            try {
-              const chunk = JSON.parse(raw);
-              const text = chunk.choices?.[0]?.delta?.content;
-              if (text) {
-                send(
-                  JSON.stringify({
-                    type: "content_block_delta",
-                    delta: { type: "text_delta", text },
-                  })
-                );
-              }
-            } catch {
-              // skip malformed chunk
-            }
-          }
-        }
-
-        // Enviar sugerencias del catálogo al final
-        if (catalogSuggestions) {
-          send(
-            JSON.stringify({
-              type: "content_block_delta",
-              delta: { type: "text_delta", text: catalogSuggestions },
-            })
-          );
+        if (catalogSuggs) {
+          send(JSON.stringify({
+            type:  "content_block_delta",
+            delta: { type: "text_delta", text: catalogSuggs },
+          }));
         }
 
         send("[DONE]");
       } catch (err: any) {
-        send(JSON.stringify({ type: "error", error: err.message ?? "Error de API" }));
+        send(JSON.stringify({ type: "error", error: err?.message ?? "API error" }));
       } finally {
         controller.close();
       }
