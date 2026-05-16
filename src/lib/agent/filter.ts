@@ -82,17 +82,17 @@ export function suggestNextQuestions(
   let priorityRoute: string | undefined
 
   if (!formState.calculated) {
-    priorityRoute = "dimensionado"
+    priorityRoute = "sizing"
   } else if (formState.soilPermeability === "low" || formState.soilPermeability === "none") {
-    priorityRoute = "suelo"
+    priorityRoute = "soil"
   } else if (!formState.normKey) {
-    priorityRoute = "normativa"
+    priorityRoute = "standards"
   }
 
   let suggestions = filterCatalog(formState, priorityRoute, 2)
 
   if (suggestions.length === 0 && formState.calculated) {
-    suggestions = filterCatalog(formState, "mantenimiento", 2)
+    suggestions = filterCatalog(formState, "maintenance", 2)
   }
 
   if (suggestions.length === 0) {

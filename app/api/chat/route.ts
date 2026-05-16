@@ -7,49 +7,49 @@ export const runtime = "nodejs";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-const SYSTEM_PROMPT = `Eres HydroStack Assistant, un ingeniero sanitario e hidráulico especializado
-en sistemas individuales de tratamiento de aguas residuales (SITARD): fosas
-sépticas, zanjas filtrantes, pozos de absorción y saneamiento autónomo.
+const SYSTEM_PROMPT = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
+in on-site wastewater treatment systems (OWTS): septic tanks, leach fields,
+absorption wells, and decentralized wastewater treatment.
 
-## ROL Y TONO
-- Adapta tu nivel técnico al usuario: si es ingeniero usa terminología
-  profesional; si es particular explica sin tecnicismos innecesarios.
-- Sé directo y conciso. No repitas información ya dada en la conversación.
-- Haz una sola pregunta a la vez, la más importante primero.
+## ROLE AND TONE
+- Adapt your technical level to the user: use professional terminology with engineers;
+  explain clearly without unnecessary jargon for non-technical users.
+- Be direct and concise. Don't repeat information already provided in the conversation.
+- Ask one question at a time, starting with the most important.
 
-## CATÁLOGO DE PREGUNTAS AUTORIZADAS
-Tienes acceso a un catálogo de preguntas validadas organizadas en 5 rutas:
-- **normativa**: Normas, requisitos mínimos, T_r, separaciones
-- **dimensionado**: Volumen, sensibilidad a parámetros
-- **suelo**: Permeabilidad, idoneidad, alternativas
-- **materiales**: Prefabricado vs in-situ, diámetros, ventilación
-- **mantenimiento**: Vaciado, signos de fallo, inspección
+## AUTHORIZED QUESTIONS CATALOG
+You have access to a catalog of validated questions organized in 5 routes:
+- **standards**: Codes, minimum requirements, retention time, setbacks, design flows
+- **sizing**: Tank volume, sensitivity analysis, treatment capacity
+- **soil**: Percolation rate, suitability, alternative configurations
+- **materials**: Prefabricated vs. constructed, pipe diameters, ventilation requirements
+- **maintenance**: Pumping schedules, failure signs, inspection protocols
 
-## FLUJO CON CATÁLOGO
-1. Si tienes datos del usuario (FormState), consulta qué preguntas sugerir
-2. Ofrece las preguntas relevantes del catálogo después de tu respuesta
-3. Responde SOLO preguntas que estén en el catálogo
-4. Si pregunta no está en catálogo, sugiere alternativas del catálogo
-5. Usa datos reales del cálculo para personalizar respuestas
+## CATALOG WORKFLOW
+1. If you have user data (FormState), check which questions to suggest
+2. Offer relevant catalog questions after your response
+3. Only answer questions that are in the catalog
+4. If question isn't in catalog, suggest catalog alternatives
+5. Use actual calculation data to personalize responses
 
-## NORMATIVA
-Se ha inyectado documentación normativa según la ubicación del usuario.
-- Aplica únicamente los criterios del documento inyectado.
-- Si no hay normativa inyectada, pregunta la ubicación del usuario.
-- Cuando una recomendación dependa de la normativa local, indícalo explícitamente.
+## APPLICABLE STANDARDS
+Regulatory documentation has been injected based on the user's location.
+- Apply only the criteria from the injected document.
+- If no standards are injected, ask the user's location/jurisdiction.
+- When a recommendation depends on local regulations, state this explicitly.
 
-## DOTACIONES POR DEFECTO
-- Vivienda continua, zona urbana   → 200 L/hab·día
-- Vivienda continua, zona rural    → 150 L/hab·día
-- Uso estacional o vacacional      → 100 L/hab·día
-Indica siempre qué valor usas y por qué.
+## DEFAULT LOADING RATES
+- Residential (full occupancy, standard use)  → 150-200 gpd/person
+- Residential (seasonal/vacation use)         → 75-100 gpd/person
+- Commercial/institutional                    → varies by use type
+Always specify which rate you're using and why.
 
-## FORMATO DE RESPUESTA
-- Usa tablas para dimensiones y resultados
-- Incluye siempre las unidades
-- Estructura: datos de entrada → criterio aplicado → resultado
-- Para construida vs. prefabricada: presenta comparativa breve
-- Idioma: responde en el idioma del usuario (español por defecto)`;
+## RESPONSE FORMAT
+- Use tables for dimensions and calculation results
+- Always include units (imperial and metric where relevant)
+- Structure: input data → applicable standard/criterion → result
+- For comparison of system types: present brief comparative analysis
+- Language: respond in the user's language (English by default)`;
 
 type ChatMessage = { role: string; content: string };
 
@@ -60,6 +60,21 @@ interface ChatRequest {
 
 function detectLocation(text: string): string {
   const locationMap: Record<string, string> = {
+    // Anglo-Saxon jurisdictions (primary)
+    usa: "epa-onsite",
+    "united states": "epa-onsite",
+    american: "epa-onsite",
+    texas: "epa-onsite",
+    california: "epa-onsite",
+    florida: "epa-onsite",
+    new york: "epa-onsite",
+    uk: "uk-building-regs",
+    "united kingdom": "uk-building-regs",
+    england: "uk-building-regs",
+    scotland: "uk-building-regs",
+    australia: "as-nzs-1547",
+    "new zealand": "as-nzs-1547",
+    // Other jurisdictions (secondary)
     españa: "cte-hs5",
     spanish: "cte-hs5",
     madrid: "cte-hs5",
@@ -69,28 +84,25 @@ function detectLocation(text: string): string {
     bogota: "ras-2000",
     medellín: "ras-2000",
     medellin: "ras-2000",
-    eeuu: "epa-onsite",
-    usa: "epa-onsite",
-    "united states": "epa-onsite",
-    texas: "epa-onsite",
-    california: "epa-onsite",
-    florida: "epa-onsite",
   };
 
   const lowerText = text.toLowerCase();
   for (const [keyword, norm] of Object.entries(locationMap)) {
     if (lowerText.includes(keyword)) return norm;
   }
-  return "";
+  // Default to EPA (USA) if no location detected
+  return "epa-onsite";
 }
 
 async function getNormativaMD(ubicacion: string): Promise<string> {
   if (!ubicacion) return "";
   try {
     const map: Record<string, string> = {
+      "epa-onsite": "docs/normativa/epa-onsite.md",
+      "uk-building-regs": "docs/normativa/uk-building-regs.md",
+      "as-nzs-1547": "docs/normativa/as-nzs-1547.md",
       "cte-hs5": "docs/normativa/cte-hs5.md",
       "ras-2000": "docs/normativa/ras-2000.md",
-      "epa-onsite": "docs/normativa/epa-onsite.md",
     };
     const path = map[ubicacion];
     if (!path) return "";
@@ -107,7 +119,7 @@ async function getCatalogSuggestions(formState: FormState | undefined): Promise<
     const suggestions = suggestNextQuestions(formState);
     if (suggestions.length === 0) return "";
 
-    return `\n\n[PREGUNTAS RELEVANTES DEL CATÁLOGO PARA TU CASO]\nPuede que también te interese:\n${
+    return `\n\n[RELEVANT QUESTIONS FROM CATALOG]\nYou might also be interested in:\n${
       suggestions
         .map((q, i) => `${i + 1}. ${q.text}`)
         .join('\n')
@@ -135,28 +147,28 @@ export async function POST(req: Request) {
         // Obtener sugerencias del catálogo basadas en FormState
         const catalogSuggestions = await getCatalogSuggestions(formState);
 
-        // Inyectar contexto normativo si se encontró
+        // Inject regulatory context if found
         const contextMessages: ChatMessage[] = [];
         if (normativaMD) {
           contextMessages.push({
             role: "user",
-            content: `[CONTEXTO NORMATIVO]\n${normativaMD}`,
+            content: `[REGULATORY STANDARDS]\n${normativaMD}`,
           });
           contextMessages.push({
             role: "assistant",
-            content: "Normativa cargada. Listo para dimensionar según criterios locales.",
+            content: "Standards loaded. Ready to assist with sizing per local code requirements.",
           });
         }
 
-        // Si hay FormState, añadir contexto del cálculo
+        // If FormState exists, add calculation context
         if (formState && formState.calculated) {
           contextMessages.push({
             role: "user",
-            content: `[DATOS DE TU CÁLCULO]\nUsuarios: ${formState.users}, Normativa: ${formState.normKey}, Temperatura: ${formState.temp}°C, Suelo: ${formState.soilPermeability}, Profundidad: ${formState.depth}m, Calculado: Sí`,
+            content: `[YOUR CALCULATION DATA]\nOccupants: ${formState.users}, Standard: ${formState.normKey}, Temperature: ${formState.temp}°C, Soil: ${formState.soilPermeability}, Depth: ${formState.depth}m, Calculated: Yes`,
           });
           contextMessages.push({
             role: "assistant",
-            content: "Datos del cálculo recibidos. Respondereré basándome en estos parámetros.",
+            content: "Calculation data received. I will answer based on these parameters.",
           });
         }
 

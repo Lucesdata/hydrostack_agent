@@ -4,59 +4,76 @@ import LaminaTecnica from "./LaminaTecnica";
 import IsometricDiagram3D from "./IsometricDiagram3D";
 
 const NORMS = {
-  ras: { name:"RAS Colombia", flag:"🇨🇴", ref:"Título J — RAS 2017",   dotacion:120 },
-  esp: { name:"España",       flag:"🇪🇸", ref:"NTE-ISD / CTE DB-HS5",  dotacion:160 },
-  eu:  { name:"Europa",       flag:"🇪🇺", ref:"EN 12566-1",             dotacion:150 },
-  epa: { name:"EE.UU.",       flag:"🇺🇸", ref:"EPA Onsite Wastewater",  dotacion:190 },
+  epa: { name:"EPA (USA)",           flag:"🇺🇸", ref:"EPA 625/R-06/003",     dotacion:75, unit:"GPD/bed" },
+  uk:  { name:"UK Building Regs",    flag:"🇬🇧", ref:"UK Part H",            dotacion:200, unit:"L/person/day" },
+  au:  { name:"AS/NZS 1547 (AU/NZ)", flag:"🇦🇺", ref:"AS/NZS 1547:2012",     dotacion:200, unit:"L/person/day" },
+  esp: { name:"Spain (CTE)",         flag:"🇪🇸", ref:"CTE DB-HS5",           dotacion:160, unit:"L/person/day" },
+  ras: { name:"Colombia (RAS)",      flag:"🇨🇴", ref:"RAS 2017 Título J",    dotacion:120, unit:"L/person/day" },
 };
 
 const getParams = (norm, temp) => {
-  if (norm==="ras") {
-    if (temp>=20) return {trhDays:1.5,sludgeRate:40,scumFactor:0.30,minVolume:1.0,minDepth:1.2,minWidth:0.6, minLength:1.5,tempLabel:"T ≥ 20°C"};
-    if (temp>=10) return {trhDays:2.0,sludgeRate:50,scumFactor:0.30,minVolume:1.0,minDepth:1.2,minWidth:0.6, minLength:1.5,tempLabel:"T 10–19°C"};
-    return           {trhDays:2.5,sludgeRate:60,scumFactor:0.30,minVolume:1.0,minDepth:1.2,minWidth:0.6, minLength:1.5,tempLabel:"T < 10°C"};
+  // EPA (USA) - temperatures in Celsius converted from Fahrenheit
+  if (norm==="epa") {
+    if (temp>=20)      return {trhDays:1.5, sludgeRate:65, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"≥68°F (≥20°C)"};
+    if (temp>=10)      return {trhDays:2.0, sludgeRate:80, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"50–66°F (10–19°C)"};
+    return             {trhDays:2.5, sludgeRate:95, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"<50°F (<10°C)"};
   }
+  // UK Building Regulations - Part H
+  if (norm==="uk") {
+    if (temp>=15)      return {trhDays:1.5, sludgeRate:50, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
+    if (temp>=10)      return {trhDays:2.0, sludgeRate:65, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"50–58°F (10–14°C)"};
+    return             {trhDays:2.5, sludgeRate:75, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"<50°F (<10°C)"};
+  }
+  // AS/NZS 1547 (Australia/New Zealand)
+  if (norm==="au") {
+    if (temp>=15)      return {trhDays:1.5, sludgeRate:55, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
+    if (temp>=10)      return {trhDays:2.0, sludgeRate:70, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"50–58°F (10–14°C)"};
+    if (temp>=5)       return {trhDays:2.5, sludgeRate:85, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"41–49°F (5–9°C)"};
+    return             {trhDays:3.0, sludgeRate:100, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"<41°F (<5°C)"};
+  }
+  // Spain (CTE DB-HS5) - legacy
   if (norm==="esp") {
-    if (temp>=15) return {trhDays:1.0,sludgeRate:50,scumFactor:0.25,minVolume:1.5,minDepth:1.0,minWidth:0.75,minLength:1.5,tempLabel:"T ≥ 15°C"};
-    return           {trhDays:1.5,sludgeRate:60,scumFactor:0.25,minVolume:1.5,minDepth:1.0,minWidth:0.75,minLength:1.5,tempLabel:"T < 15°C"};
+    if (temp>=15)      return {trhDays:1.0, sludgeRate:50, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
+    return             {trhDays:1.5, sludgeRate:60, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"<59°F (<15°C)"};
   }
-  if (norm==="eu") {
-    if (temp>=15) return {trhDays:2.0,sludgeRate:55,scumFactor:0.30,minVolume:2.0,minDepth:1.2,minWidth:0.75,minLength:1.5,tempLabel:"T ≥ 15°C"};
-    if (temp>=5)  return {trhDays:3.0,sludgeRate:70,scumFactor:0.30,minVolume:2.0,minDepth:1.2,minWidth:0.75,minLength:1.5,tempLabel:"T 5–14°C"};
-    return           {trhDays:4.0,sludgeRate:85,scumFactor:0.30,minVolume:2.0,minDepth:1.2,minWidth:0.75,minLength:1.5,tempLabel:"T < 5°C"};
+  // RAS Colombia - legacy
+  if (norm==="ras") {
+    if (temp>=20)      return {trhDays:1.5, sludgeRate:40, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"≥68°F (≥20°C)"};
+    if (temp>=10)      return {trhDays:2.0, sludgeRate:50, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"50–67°F (10–19°C)"};
+    return             {trhDays:2.5, sludgeRate:60, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"<50°F (<10°C)"};
   }
-  if (temp>=15) return {trhDays:1.5,sludgeRate:65,scumFactor:0.25,minVolume:3.785,minDepth:1.0,minWidth:0.9,minLength:1.8,tempLabel:"T ≥ 15°C"};
-  return           {trhDays:2.0,sludgeRate:80,scumFactor:0.25,minVolume:3.785,minDepth:1.0,minWidth:0.9,minLength:1.8,tempLabel:"T < 15°C"};
+  // Default to EPA if unrecognized
+  return {trhDays:1.5, sludgeRate:65, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"≥68°F (≥20°C)"};
 };
 
 const USE_TYPES = {
-  dom:   {label:"Doméstico",  icon:"🏠", dotacion:120, dboIn:250, ssIn:280, note:"Vivienda uni/multifamiliar"},
-  com:   {label:"Comercial",  icon:"🏢", dotacion:60,  dboIn:150, ssIn:150, note:"Oficinas, tiendas, restaurantes"},
-  edu:   {label:"Educativo",  icon:"🏫", dotacion:30,  dboIn:200, ssIn:220, note:"Escuelas y universidades"},
-  hosp:  {label:"Hospital",   icon:"🏥", dotacion:500, dboIn:350, ssIn:350, note:"Hospitales y centros de salud"},
-  hotel: {label:"Hotel",      icon:"🏨", dotacion:220, dboIn:250, ssIn:280, note:"Hoteles y establecimientos"},
-  ind:   {label:"Industrial", icon:"🏭", dotacion:100, dboIn:400, ssIn:450, note:"Áreas administrativas"},
+  dom:   {label:"Residential",    icon:"🏠", dotacion:75, dboIn:200, ssIn:225, note:"Single/multi-family home (75 GPD/bedroom)"},
+  com:   {label:"Commercial",     icon:"🏢", dotacion:50, dboIn:150, ssIn:150, note:"Office, retail, restaurant (50 GPD/person)"},
+  edu:   {label:"Educational",    icon:"🏫", dotacion:20, dboIn:200, ssIn:220, note:"School, university (20 GPD/person)"},
+  hosp:  {label:"Healthcare",     icon:"🏥", dotacion:75, dboIn:350, ssIn:350, note:"Hospital, clinic (75 GPD/patient)"},
+  hotel: {label:"Hospitality",    icon:"🏨", dotacion:60, dboIn:250, ssIn:280, note:"Hotel, B&B (60 GPD/guest)"},
+  ind:   {label:"Industrial/Admin", icon:"🏭", dotacion:30, dboIn:400, ssIn:450, note:"Industrial office (30 GPD/person)"},
 };
 
 const SOILS = [
-  {label:"Grava / Arena gruesa", T:0.5,  q:80, ok:true },
-  {label:"Arena",                T:2.0,  q:60, ok:true },
-  {label:"Arena limosa",         T:5.0,  q:40, ok:true },
-  {label:"Limo arenoso",         T:10.0, q:25, ok:true },
-  {label:"Limo / Franco",        T:18.0, q:15, ok:true },
-  {label:"Arcilla limosa",       T:30.0, q:8,  ok:true },
-  {label:"Arcilla (no apto)",    T:99.0, q:0,  ok:false},
-  {label:"Manual (test perc.)",  T:null, q:null,ok:true },
+  {label:"Gravel / Coarse sand",  T:0.5,  q:100, ok:true, desc:"Excellent drainage (ASTM D6391: <2 min)" },
+  {label:"Medium sand",           T:2.0,  q:70,  ok:true, desc:"Good drainage (2–4 min)" },
+  {label:"Fine sand",             T:5.0,  q:50,  ok:true, desc:"Moderate drainage (4–8 min)" },
+  {label:"Sandy loam",            T:10.0, q:30,  ok:true, desc:"Moderate-poor drainage (8–16 min)" },
+  {label:"Silt / Loam",           T:18.0, q:15,  ok:true, desc:"Poor drainage (16–32 min)" },
+  {label:"Clay loam / Silt clay", T:40.0, q:5,   ok:false, desc:"Very poor (>32 min) – marginal" },
+  {label:"Clay (unsuitable)",     T:99.0, q:0,   ok:false, desc:"Not suitable for infiltration" },
+  {label:"Manual (perc. test)",   T:null, q:null,ok:true,  desc:"Enter results from ASTM D6391 test" },
 ];
 
 const EDU = {
-  Qd:  "El caudal de aguas residuales (Q_AR) = usuarios × dotación × coeficiente de retorno. El coeficiente C (0.75–0.85) representa la fracción de agua que retorna al sistema; el resto se pierde por evapotranspiración y otros usos.",
-  Vl:  "El volumen líquido (Vl) = Q × TRH. El Tiempo de Retención Hidráulico varía con la temperatura: a mayor temperatura, la digestión anaerobia es más rápida y se necesita menos tiempo.",
-  Vs:  "El volumen de lodos (Vs) = N × tasa de acumulación × años de limpieza. La tasa de acumulación depende de la temperatura: a mayor temperatura, los microorganismos digieren más lodos.",
-  Vn:  "El volumen de natas (Vn) es la capa flotante de grasas y materiales ligeros. Representa un 25–30% del volumen líquido y debe incluirse en el volumen total de diseño.",
-  CVO: "La Carga Volumétrica Orgánica (CVO) indica cuánta DBO₅ recibe la fosa por m³ y día. Por encima de 0.30 kg/m³·día el sistema puede colapsar por sobrecarga anaerobia.",
-  SRT: "El SRT (tiempo de retención de sólidos) indica cuántos días permanecen los lodos. Un SRT ≥ 20 días garantiza suficiente actividad microbiana para la digestión anaerobia.",
-  Inf: "El campo de infiltración recibe el efluente de la fosa. El área se calcula dividiendo el caudal diario entre la tasa hidráulica del suelo (determinada por ensayo de percolación in situ).",
+  Qd:  "Design flow (Qd) = occupants × daily rate × return coefficient. Coefficient C (0.75–0.85) is the fraction of water returning to the system; rest is lost to evapotranspiration and other uses.",
+  Vl:  "Liquid volume (Vl) = flow × hydraulic retention time (HRT). HRT varies with temperature: warmer = faster anaerobic digestion = shorter HRT needed. Cold climates require longer retention.",
+  Vs:  "Sludge volume (Vs) = occupants × sludge rate (kg/person/year) × years between pumpings. Rate increases in cold climates where digestion is slower.",
+  Vn:  "Scum volume (Vn) is the floating layer of grease and light materials. Typically 25–30% of liquid volume; must be included in total tank design.",
+  OVL: "Organic volumetric loading (OVL) = (BOD₅ in × daily flow) / tank volume. Maximum safe: 0.30 kg BOD₅/m³·day. Above this, anaerobic digestion becomes overloaded.",
+  SRT: "Solids retention time (SRT) = sludge volume / daily sludge production (days). Minimum 20 days ensures microorganisms have time for complete digestion. If SRT < 20d, sludge accumulates faster.",
+  Inf: "Leach field absorbs septic tank effluent. Area = daily flow / soil infiltration rate (from percolation test). If soil is poor, field becomes very large or secondary treatment needed.",
 };
 
 const computeNorm = (normKey, users, dotacion, retCoef, temp, cleanYears, depth) => {
@@ -199,13 +216,13 @@ function DetailedSchematic({ r, freeboard }) {
       {/* Liquid zone */}
       <rect x={x0+1} y={yNataB} width={tW-2} height={yLiqB-yNataB} fill="rgba(0,140,200,0.09)"/>
       <text x={x0+tW/2} y={(yNataB+yLiqB)/2+4} fill="#3a7fa5" fontSize="7" textAnchor="middle" fontFamily="monospace">
-        ZONA LÍQUIDA (Vl) — {fmt(r.Vl)} m³ — TRH = {r.p.trhDays} días — h ≈ {fmt(hLiq,2)} m
+        LIQUID ZONE (Vl) — {fmt(r.Vl)} m³ — HRT = {r.p.trhDays} days — h ≈ {fmt(hLiq,2)} m
       </text>
 
       {/* Sludge zone */}
       <rect x={x0+1} y={yLiqB} width={tW-2} height={ySludB-yLiqB} fill="rgba(100,65,30,0.25)"/>
       <text x={x0+tW/2} y={(yLiqB+ySludB)/2+4} fill="#7a5030" fontSize="7" textAnchor="middle" fontFamily="monospace">
-        LODOS (Vs) — {fmt(r.Vs)} m³ — {r.p.sludgeRate} L/hab·año — h ≈ {fmt(hSludge,2)} m
+        SLUDGE (Vs) — {fmt(r.Vs)} m³ — {r.p.sludgeRate} L/person·year — h ≈ {fmt(hSludge,2)} m
       </text>
 
       {/* Buffer zone (if min volume applied) */}
@@ -221,10 +238,10 @@ function DetailedSchematic({ r, freeboard }) {
         <g>
           <rect x={div1-4} y={y0} width={8} height={tH} fill="url(#crossHatch)" stroke="#1e4060" strokeWidth="1"/>
           <text x={(x0+div1)/2} y={y0+16} fill="#4a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">
-            CÁM. 1 — {fmt(r.chambers===3?r.L*0.5:r.L*2/3)}m
+            CHAMBER 1 — {fmt(r.chambers===3?r.L*0.5:r.L*2/3)}m
           </text>
           <text x={div2?(div1+div2)/2:div1+(x0+tW-div1)/2} y={y0+16} fill="#4a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">
-            CÁM. 2 — {fmt(r.chambers===3?r.L*0.25:r.L*1/3)}m
+            CHAMBER 2 — {fmt(r.chambers===3?r.L*0.25:r.L*1/3)}m
           </text>
         </g>
       )}
@@ -232,12 +249,12 @@ function DetailedSchematic({ r, freeboard }) {
         <g>
           <rect x={div2-4} y={y0} width={8} height={tH} fill="url(#crossHatch)" stroke="#1e4060" strokeWidth="1"/>
           <text x={(div2+x0+tW)/2} y={y0+16} fill="#4a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">
-            CÁM. 3 — {fmt(r.L*0.25)}m
+            CHAMBER 3 — {fmt(r.L*0.25)}m
           </text>
         </g>
       )}
       {r.chambers===1 && (
-        <text x={x0+tW/2} y={y0+16} fill="#4a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">CÁMARA ÚNICA</text>
+        <text x={x0+tW/2} y={y0+16} fill="#4a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">SINGLE CHAMBER</text>
       )}
 
       {/* ── T-pipe ENTRADA ── */}
@@ -245,18 +262,18 @@ function DetailedSchematic({ r, freeboard }) {
       <line x1={x0} y1={pipeY_in} x2={x0} y2={pipeY_in+subIn} stroke="#00d4ff" strokeWidth="3.5" strokeLinecap="round"/>
       {/* arrow */}
       <polygon points={`${x0-36},${pipeY_in-4} ${x0-24},${pipeY_in} ${x0-36},${pipeY_in+4}`} fill="#00d4ff"/>
-      <text x={x0-38} y={pipeY_in-6} fill="#00d4ff" fontSize="7" textAnchor="end" fontFamily="monospace">ENTRADA</text>
+      <text x={x0-38} y={pipeY_in-6} fill="#00d4ff" fontSize="7" textAnchor="end" fontFamily="monospace">INLET</text>
       <text x={x0-38} y={pipeY_in+6} fill="#4a7fa5" fontSize="6" textAnchor="end" fontFamily="monospace">Ø{pipeD}mm</text>
       {/* submergence annotation */}
       <line x1={x0+6} y1={pipeY_in} x2={x0+6} y2={pipeY_in+subIn} stroke="#00a0c0" strokeWidth="0.8" strokeDasharray="2,2"
         markerStart="url(#arrowN)" markerEnd="url(#arrowS)"/>
-      <text x={x0+9} y={pipeY_in+subIn/2+3} fill="#3a8090" fontSize="6" fontFamily="monospace">30 cm</text>
+      <text x={x0+9} y={pipeY_in+subIn/2+3} fill="#3a8090" fontSize="6" fontFamily="monospace">12" (30cm)</text>
 
-      {/* ── T-pipe SALIDA ── */}
+      {/* ── T-pipe OUTLET ── */}
       <line x1={x0+tW} y1={pipeY_out+5} x2={x0+tW+36} y2={pipeY_out+5} stroke="#4ab0c0" strokeWidth="3.5" strokeLinecap="round"/>
       <line x1={x0+tW} y1={pipeY_out+5} x2={x0+tW} y2={pipeY_out+5+subOut} stroke="#4ab0c0" strokeWidth="3.5" strokeLinecap="round"/>
       <polygon points={`${x0+tW+36},${pipeY_out+1} ${x0+tW+24},${pipeY_out+5} ${x0+tW+36},${pipeY_out+9}`} fill="#4ab0c0"/>
-      <text x={x0+tW+38} y={pipeY_out-1} fill="#4ab0c0" fontSize="7" fontFamily="monospace">SALIDA</text>
+      <text x={x0+tW+38} y={pipeY_out-1} fill="#4ab0c0" fontSize="7" fontFamily="monospace">OUTLET</text>
       <text x={x0+tW+38} y={pipeY_out+11} fill="#4a7fa5" fontSize="6" fontFamily="monospace">Ø{pipeD}mm</text>
       <line x1={x0+tW-6} y1={pipeY_out+5} x2={x0+tW-6} y2={pipeY_out+5+subOut} stroke="#2a8090" strokeWidth="0.8" strokeDasharray="2,2"
         markerStart="url(#arrowN)" markerEnd="url(#arrowS)"/>
@@ -273,17 +290,17 @@ function DetailedSchematic({ r, freeboard }) {
       ))}
 
       {/* ── COTAS ── */}
-      {/* Cota total depth (far left) */}
+      {/* Total depth (far left) */}
       <DimLine x1={x0} y1={y0} x2={x0} y2={yBot} label={`H=${fmt(r.hT)}m`} offset={-60} orient="v" color="#3a6080"/>
-      {/* Cota useful depth (left) */}
+      {/* Useful depth (left) */}
       <DimLine x1={x0} y1={yWater} x2={x0} y2={yBot} label={`h=${fmt(r.depth)}m`} offset={-35} orient="v" color="#2a7090"/>
-      {/* Cota freeboard (left, small) */}
-      <DimLine x1={x0} y1={y0} x2={x0} y2={yWater} label={`BL=${fmt(freeboard)}m`} offset={-35} orient="v" color="#2a5060"/>
-      {/* Cota length (bottom) */}
+      {/* Freeboard (left, small) */}
+      <DimLine x1={x0} y1={y0} x2={x0} y2={yWater} label={`FB=${fmt(freeboard)}m`} offset={-35} orient="v" color="#2a5060"/>
+      {/* Length (bottom) */}
       <DimLine x1={x0} y1={yBot} x2={x0+tW} y2={yBot} label={`L = ${fmt(r.L)} m`} offset={28} orient="h" color="#3a6080"/>
-      {/* Cota width label */}
+      {/* Width label */}
       <text x={x0+tW/2} y={yBot+50} fill="#2a5070" fontSize="7" textAnchor="middle" fontFamily="monospace">
-        W = {fmt(r.W)} m   ·   Área = {fmt(r.Vtot/r.depth,2)} m²
+        W = {fmt(r.W)} m   ·   Area = {fmt(r.Vtot/r.depth,2)} m²
       </text>
 
       {/* Zone height annotations (right side) */}
@@ -437,16 +454,16 @@ function HydraulicProfile({ r, freeboard }) {
       ))}
 
       {/* Zone labels */}
-      <text x={(xInWall+xOutWall)/2} y={toY(elBot)+14} fill="#5a3520" fontSize="6" textAnchor="middle" fontFamily="monospace">LODOS ({fmt(hSludge,2)}m)</text>
-      <text x={(xInWall+(xCh1||xOutWall))/2} y={toY(elSludS+hLiq/2)+3} fill="#3a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">ZONA LÍQUIDA ({fmt(hLiq,2)}m)</text>
-      <text x={(xInWall+xOutWall)/2} y={toY(elLiqS+hNata/2)+3} fill="#9a8040" fontSize="6" textAnchor="middle" fontFamily="monospace">NATAS ({fmt(hNata,2)}m)</text>
-      <text x={(xInWall+xOutWall)/2} y={toY(elWS+freeboard/2)+3} fill="#3a5070" fontSize="6" textAnchor="middle" fontFamily="monospace">BORDE LIBRE ({fmt(freeboard,2)}m)</text>
+      <text x={(xInWall+xOutWall)/2} y={toY(elBot)+14} fill="#5a3520" fontSize="6" textAnchor="middle" fontFamily="monospace">SLUDGE ({fmt(hSludge,2)}m)</text>
+      <text x={(xInWall+(xCh1||xOutWall))/2} y={toY(elSludS+hLiq/2)+3} fill="#3a7fa5" fontSize="6" textAnchor="middle" fontFamily="monospace">LIQUID ZONE ({fmt(hLiq,2)}m)</text>
+      <text x={(xInWall+xOutWall)/2} y={toY(elLiqS+hNata/2)+3} fill="#9a8040" fontSize="6" textAnchor="middle" fontFamily="monospace">SCUM ({fmt(hNata,2)}m)</text>
+      <text x={(xInWall+xOutWall)/2} y={toY(elWS+freeboard/2)+3} fill="#3a5070" fontSize="6" textAnchor="middle" fontFamily="monospace">FREEBOARD ({fmt(freeboard,2)}m)</text>
 
       {/* Legend */}
       <line x1={x0} y1={y0+pH+38} x2={x0+18} y2={y0+pH+38} stroke="#ff8c00" strokeWidth="1.5" strokeDasharray="4,2"/>
-      <text x={x0+20} y={y0+pH+41} fill="#ff8c00" fontSize="6" fontFamily="monospace">Línea de gradiente hidráulico (LGH)</text>
+      <text x={x0+20} y={y0+pH+41} fill="#ff8c00" fontSize="6" fontFamily="monospace">Energy Grade Line (EGL)</text>
       <line x1={x0+130} y1={y0+pH+38} x2={x0+148} y2={y0+pH+38} stroke="#00d4ff" strokeWidth="1.2" strokeDasharray="5,2"/>
-      <text x={x0+150} y={y0+pH+41} fill="#00d4ff" fontSize="6" fontFamily="monospace">Nivel líquido (NL)</text>
+      <text x={x0+150} y={y0+pH+41} fill="#00d4ff" fontSize="6" fontFamily="monospace">Water Level (WL)</text>
     </svg>
   );
 }
@@ -558,15 +575,15 @@ const C = {
 };
 
 export default function HydroStack() {
-  const [norm,       setNorm]       = useState("ras");
+  const [norm,       setNorm]       = useState("epa");
   const [useType,    setUseType]    = useState("dom");
-  const [users,      setUsers]      = useState(10);
-  const [dotacion,   setDotacion]   = useState(120);
-  const [retCoef,    setRetCoef]    = useState(0.80);
+  const [users,      setUsers]      = useState(4);
+  const [dotacion,   setDotacion]   = useState(75);
+  const [retCoef,    setRetCoef]    = useState(0.85);
   const [cleanYears, setCleanYears] = useState(3);
-  const [depth,      setDepth]      = useState(1.5);
+  const [depth,      setDepth]      = useState(1.2);
   const [freeboard,  setFreeboard]  = useState(0.30);
-  const [temp,       setTemp]       = useState(22);
+  const [temp,       setTemp]       = useState(20);
   const [dboIn,      setDboIn]      = useState(250);
   const [ssIn,       setSsIn]       = useState(280);
   const [soilIdx,    setSoilIdx]    = useState(2);
@@ -616,60 +633,60 @@ export default function HydroStack() {
     const V2=chambers===3?Vtot*0.25:chambers===2?Vtot*1/3:0;
     const V3=chambers===3?Vtot*0.25:0;
 
-    // ── Diseño hidráulico ─────────────────────────────────────────────────────
-    // Viscosidad cinemática del agua según temperatura (Vogel approx.) m²/s
+    // ── Hydraulic design ──────────────────────────────────────────────────────
+    // Kinematic viscosity of water per temperature (Vogel approx.) m²/s
     const nu = 1.792e-6 / (1 + 0.03368*temp + 0.000221*temp*temp);
 
-    // Sección transversal de flujo (zona líquida): W × hLiq
-    const hLiq_m = Vl / Area;                        // altura zona líquida (m)
+    // Cross-sectional flow area (liquid zone): W × hLiq
+    const hLiq_m = Vl / Area;                        // liquid zone height (m)
     const Aflow  = W * hLiq_m;                        // m²
 
-    // Velocidad horizontal media de flujo
+    // Average horizontal flow velocity
     const Vflow  = Qs / Aflow;                        // m/s
-    const chkVflow = Vflow <= 0.005;                  // criterio: v < 5 mm/s
+    const chkVflow = Vflow <= 0.005;                  // criterion: v < 5 mm/s
 
-    // Número de Reynolds hidráulico (Dh = 4A/P, sección rectangular)
+    // Hydraulic Reynolds number (Dh = 4A/P, rectangular section)
     const Dh = (4 * Aflow) / (2*(W + hLiq_m));
     const Re = Vflow * Dh / nu;
-    const chkRe = Re < 500;                           // criterio laminar
+    const chkRe = Re < 500;                           // laminar criterion
 
-    // Número de Froude (Fr = v / sqrt(g·h))
+    // Froude number (Fr = v / sqrt(g·h))
     const g  = 9.81;
     const Fr = Vflow / Math.sqrt(g * hLiq_m);
-    const chkFr = Fr < 0.1;                          // criterio: Fr << 1 (subcrítico profundo)
+    const chkFr = Fr < 0.1;                          // criterion: Fr << 1 (deep subcritical)
 
-    // Pérdida de carga — metodología por componentes (Manning + pérdidas locales)
-    // 1. Pérdida en tubería de entrada (Darcy-Weisbach, f≈0.02 asumido PVC L=0.5m)
-    const vPipe = Qs / (Math.PI * dPipe*dPipe / 4);  // velocidad en tubería
+    // Head loss — component-based methodology (Manning + local losses)
+    // 1. Loss in inlet pipe (Darcy-Weisbach, f≈0.02 assumed PVC L=0.5m)
+    const vPipe = Qs / (Math.PI * dPipe*dPipe / 4);  // pipe flow velocity
     const hf_entrada = 0.02 * (0.5 / dPipe) * (vPipe*vPipe / (2*g));
 
-    // 2. Pérdida de entrada a la fosa (coeficiente K=0.5, contracción brusca)
+    // 2. Loss entering tank (coefficient K=0.5, abrupt contraction)
     const hf_contraccion = 0.5 * vPipe*vPipe / (2*g);
 
-    // 3. Pérdida por flujo a través de la fosa (Manning, n=0.013, Dh hidráulico)
+    // 3. Loss through tank flow (Manning, n=0.013, hydraulic Dh)
     const n_mann = 0.013;
     const Sf = Math.pow(vPipe * Math.pow(Dh, -2/3) * n_mann, 2);
     const hf_fosa = Sf * L;
 
-    // 4. Pérdida en tabiques internos (K=0.3 por tabique, flujo bajo tabique)
+    // 4. Loss at internal baffles (K=0.3 per baffle, under-baffle flow)
     const hf_tabiques = (chambers - 1) * 0.3 * vPipe*vPipe / (2*g);
 
-    // 5. Pérdida de salida (K=1.0, expansión brusca)
+    // 5. Loss at outlet (K=1.0, abrupt expansion)
     const hf_salida = 1.0 * vPipe*vPipe / (2*g);
 
     const hf_total = hf_entrada + hf_contraccion + hf_fosa + hf_tabiques + hf_salida;
     const hf_cm    = hf_total * 100; // en centímetros
 
-    // Velocidad de sedimentación (Stokes) — partícula referencia SS 50µm, ρ=1050 kg/m³
-    const dp   = 50e-6;           // m, diámetro partícula típica SS
+    // Settling velocity (Stokes) — reference particle TSS 50µm, ρ=1050 kg/m³
+    const dp   = 50e-6;           // m, typical TSS particle diameter
     const rhoP = 1050;            // kg/m³
-    const rhoW = 1000 - 0.003*Math.max(temp-4,0);  // aprox. densidad agua
+    const rhoW = 1000 - 0.003*Math.max(temp-4,0);  // approx. water density
     const vs   = (g * Math.pow(dp,2) * (rhoP-rhoW)) / (18 * nu * rhoW); // m/s
-    const chkSed = vs > Vflow;    // la partícula debe sedimentar más rápido que sube
+    const chkSed = vs > Vflow;    // particle must settle faster than rise
 
-    // Eficiencia de remoción de SS por sedimentación (Camp, 1946)
-    const vsc  = Qs / Area;       // velocidad de desbordamiento (m/s → m/día arriba)
-    const vs_mday = vs * 86400;   // convertir a m/día
+    // TSS removal efficiency by sedimentation (Camp, 1946)
+    const vsc  = Qs / Area;       // overflow velocity (m/s → m/day above)
+    const vs_mday = vs * 86400;   // convert to m/day
     const remSS_camp = Math.min(vs_mday / (Qd / Area) * 100, 99); // %
 
     return {Qd,Qs,Vl,Vs,Vn,Vtot,V1,V2,V3,chambers,L,W,depth,hT,Area,dPipe,dVent,
@@ -721,13 +738,13 @@ export default function HydroStack() {
   const EduNote = ({text}) => eduMode ? <div style={C.eduBox}>💡 {text}</div> : null;
 
   const TABS = [
-    {id:"resumen",        label:"Resumen"},
-    {id:"corte",          label:"Corte transversal"},
-    {id:"hidraulica",     label:"Hidráulica"},
-    {id:"verificaciones", label:"Verificaciones"},
-    ...(showComp && compRes ? [{id:"comparativa", label:"Comparativa"}] : []),
-    {id:"diagrama3d",     label:"Diagrama 3D"},
-    {id:"lamina",         label:"Lámina Técnica"},
+    {id:"resumen",        label:"Summary"},
+    {id:"corte",          label:"Longitudinal Section"},
+    {id:"hidraulica",     label:"Hydraulics"},
+    {id:"verificaciones", label:"Code Checks"},
+    ...(showComp && compRes ? [{id:"comparativa", label:"Comparison"}] : []),
+    {id:"diagrama3d",     label:"3D Diagram"},
+    {id:"lamina",         label:"Technical Sheet"},
   ];
 
   return (
@@ -764,7 +781,7 @@ export default function HydroStack() {
               ))}
             </div>
 
-            <div style={C.slab}>Normativa</div>
+            <div style={C.slab}>Standards</div>
             <div style={C.ngn}>
               {Object.entries(NORMS).map(([k,v])=>(
                 <button key={k} style={C.nbn(norm===k)} className="hs-nbt" onClick={()=>handleNorm(k)}>
@@ -774,18 +791,18 @@ export default function HydroStack() {
               ))}
             </div>
 
-            <div style={C.slab}>Parámetros</div>
+            <div style={C.slab}>Parameters</div>
             <div style={{...C.g2,gap:"8px"}}>
               {[
-                {lbl:"Usuarios (hab)",     val:users,      set:setUsers,      min:1,   step:1},
-                {lbl:"Dotación (L/hab·d)", val:dotacion,   set:setDotacion,   min:10,  step:5},
-                {lbl:"Coef. retorno",      val:retCoef,    set:setRetCoef,    min:0.5, step:0.01},
-                {lbl:"Temperatura (°C)",   val:temp,       set:setTemp,       min:-5,  step:1},
-                {lbl:"Prof. útil (m)",     val:depth,      set:setDepth,      min:0.8, step:0.1},
-                {lbl:"Borde libre (m)",    val:freeboard,  set:setFreeboard,  min:0.1, step:0.05},
-                {lbl:"Limpieza (años)",    val:cleanYears, set:setCleanYears, min:1,   step:1},
-                {lbl:"DBO₅ entrada",       val:dboIn,      set:setDboIn,      min:50,  step:10},
-                {lbl:"SS entrada",         val:ssIn,       set:setSsIn,       min:50,  step:10},
+                {lbl:"Occupants (persons)", val:users,      set:setUsers,      min:1,   step:1},
+                {lbl:norm==="epa"?"Design Flow (GPD/bed)":"Daily Allowance (L/person/d)", val:dotacion,   set:setDotacion,   min:10,  step:5},
+                {lbl:"Return Coefficient",  val:retCoef,    set:setRetCoef,    min:0.5, step:0.01},
+                {lbl:"Temperature (°C)",    val:temp,       set:setTemp,       min:-5,  step:1},
+                {lbl:"Depth - Useful (m)",  val:depth,      set:setDepth,      min:0.8, step:0.1},
+                {lbl:"Freeboard (m)",       val:freeboard,  set:setFreeboard,  min:0.1, step:0.05},
+                {lbl:"Pumping Interval (years)", val:cleanYears, set:setCleanYears, min:1,   step:1},
+                {lbl:"BOD₅ Inlet",          val:dboIn,      set:setDboIn,      min:50,  step:10},
+                {lbl:"TSS Inlet",           val:ssIn,       set:setSsIn,       min:50,  step:10},
               ].map((f,i)=>(
                 <div key={i} style={C.ig}>
                   <label style={C.lbl}>{f.lbl}</label>
@@ -795,27 +812,27 @@ export default function HydroStack() {
               ))}
             </div>
 
-            <div style={C.slab}>Suelo — infiltración</div>
+            <div style={C.slab}>Soil — Infiltration</div>
             <div style={C.ig}>
               <select style={C.sel} className="hs-sel" value={soilIdx} onChange={e=>{setSoilIdx(+e.target.value);setRes(null);}}>
                 {SOILS.map((s,i)=><option key={i} value={i}>{s.label}</option>)}
               </select>
-              <span style={C.inote}>{isManual?"Ingresa tiempo →":soil.ok?`q = ${soil.q} L/m²·día`:"Suelo no apto"}</span>
+              <span style={C.inote}>{isManual?"Enter time →":soil.ok?`q = ${soil.q} L/m²·day`:"Soil unsuitable"}</span>
             </div>
             {isManual&&(
               <div style={{...C.ig,marginTop:"8px"}}>
-                <label style={C.lbl}>Tiempo perc. (min/cm)</label>
+                <label style={C.lbl}>Perc. Time (min/cm)</label>
                 <input style={C.inp} type="number" min={0.1} step={0.5} value={percT}
                   onChange={e=>{setPercT(+e.target.value);setRes(null);}}/>
-                <span style={C.inote}>q ≈ {fmt(Math.min(70/Math.sqrt(Math.max(percT,0.1)),80),0)} L/m²·día</span>
+                <span style={C.inote}>q ≈ {fmt(Math.min(70/Math.sqrt(Math.max(percT,0.1)),80),0)} L/m²·day</span>
               </div>
             )}
 
-            <div style={C.slab}>Proyecto (lámina)</div>
+            <div style={C.slab}>Project (Technical Sheet)</div>
             {[
-              {lbl:"Nombre proyecto", val:projectName, set:setProjectName, ph:"Ej. PTARD Vereda..."},
-              {lbl:"Ubicación",       val:location,    set:setLocation,    ph:"Municipio, Dpto."},
-              {lbl:"Elaboró",         val:designer,    set:setDesigner,    ph:"Ing. Nombre"},
+              {lbl:"Project Name",    val:projectName, set:setProjectName, ph:"E.g., Residential OWTS..."},
+              {lbl:"Location",        val:location,    set:setLocation,    ph:"City, State/Region"},
+              {lbl:"Designer/Prepared By", val:designer, set:setDesigner, ph:"Eng. Name"},
             ].map((f,i)=>(
               <div key={i} style={{...C.ig,marginBottom:"5px"}}>
                 <label style={C.lbl}>{f.lbl}</label>
@@ -825,19 +842,19 @@ export default function HydroStack() {
             ))}
 
             <div style={{display:"flex",gap:"6px",marginTop:"12px"}} className="no-print">
-              <button style={{...C.tBtn(eduMode,"0,200,140"),flex:1,fontSize:"10px"}} onClick={()=>setEduMode(!eduMode)}>📚 Educativo</button>
-              <button style={{...C.tBtn(showComp,"150,120,255"),flex:1,fontSize:"10px"}} onClick={handleCompare}>⚖ Normas</button>
+              <button style={{...C.tBtn(eduMode,"0,200,140"),flex:1,fontSize:"10px"}} onClick={()=>setEduMode(!eduMode)}>📚 Educational</button>
+              <button style={{...C.tBtn(showComp,"150,120,255"),flex:1,fontSize:"10px"}} onClick={handleCompare}>⚖ Standards</button>
             </div>
 
           </div>
 
-          {/* Botón calcular fijo al fondo del sidebar */}
+          {/* Calculate button fixed at bottom of sidebar */}
           <div style={C.calcWrap} className="no-print">
             <button
               style={{background:"transparent",border:"1px solid #00F5FF",color:"#00F5FF",fontSize:"10px",fontWeight:"700",letterSpacing:"0.14em",textTransform:"uppercase",cursor:"pointer",padding:"11px",borderRadius:"4px",width:"100%",fontFamily:"'Orbitron',sans-serif",transition:"all 0.2s"}}
               className="hs-calc"
               onClick={calculate}
-            >▶ Calcular diseño</button>
+            >▶ Calculate Design</button>
           </div>
         </div>
 
@@ -846,8 +863,8 @@ export default function HydroStack() {
           {!res ? (
             <div style={C.empty}>
               <div style={{fontSize:"56px",opacity:0.15}}>🧮</div>
-              <div style={{fontSize:"15px",color:"#2a5070",fontWeight:"500"}}>Configura los parámetros</div>
-              <div style={{fontSize:"11px",color:"#1a3050"}}>Los resultados aparecerán aquí</div>
+              <div style={{fontSize:"15px",color:"#2a5070",fontWeight:"500"}}>Configure parameters</div>
+              <div style={{fontSize:"11px",color:"#1a3050"}}>Results will appear here</div>
             </div>
           ) : (()=>{
             const r=res;
@@ -864,91 +881,91 @@ export default function HydroStack() {
 
                 <div style={C.content} className="hs-content">
 
-                  {/* ── TAB: RESUMEN ── */}
+                  {/* ── TAB: SUMMARY ── */}
                   {activeTab==="resumen"&&(
                     <>
-                      <div style={C.sec}><span>Volúmenes de diseño</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Design Volumes</span><div style={C.ln}/></div>
                       <div style={{...C.g3,marginBottom:"10px"}}>
-                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vl)}</div><div style={C.ru}>m³</div><div style={C.rl}>Vol. líquido (Vl)<br/>TRH={r.p.trhDays}d · {r.p.tempLabel}</div></div>
-                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vs)}</div><div style={C.ru}>m³</div><div style={C.rl}>Vol. lodos (Vs)<br/>{r.p.sludgeRate}L/hab·año×{cleanYears}a</div></div>
-                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vn)}</div><div style={C.ru}>m³</div><div style={C.rl}>Vol. natas (Vn)<br/>{(r.p.scumFactor*100).toFixed(0)}%×Vl</div></div>
+                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vl)}</div><div style={C.ru}>m³</div><div style={C.rl}>Liquid Volume (Vl)<br/>HRT={r.p.trhDays}d · {r.p.tempLabel}</div></div>
+                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vs)}</div><div style={C.ru}>m³</div><div style={C.rl}>Sludge Volume (Vs)<br/>{r.p.sludgeRate}L/person/year×{cleanYears}a</div></div>
+                        <div style={C.ri(false)}><div style={C.rv(false)}>{fmt(r.Vn)}</div><div style={C.ru}>m³</div><div style={C.rl}>Scum Volume (Vn)<br/>{(r.p.scumFactor*100).toFixed(0)}%×Vl</div></div>
                       </div>
-                      <div style={C.ri(true)}><div style={C.rv(true)}>{fmt(r.Vtot)} m³ · {fmtI(r.Vtot*1000)} L</div><div style={C.rl}>VOLUMEN TOTAL {r.minA&&<span style={{color:"#b0a060"}}> — mín. normativo aplicado</span>}</div></div>
+                      <div style={C.ri(true)}><div style={C.rv(true)}>{fmt(r.Vtot)} m³ · {fmtI(r.Vtot*1000)} L</div><div style={C.rl}>TOTAL VOLUME {r.minA&&<span style={{color:"#b0a060"}}> — min. standard applied</span>}</div></div>
                       <EduNote text={`${EDU.Vl} ${EDU.Vs} ${EDU.Vn}`}/>
 
-                      <div style={C.sec}><span>Dimensiones y cámaras</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Dimensions &amp; Chambers</span><div style={C.ln}/></div>
                       <div style={C.dr}>
                         {[{l:"Largo",v:`${fmt(r.L)}m`},{l:"×"},{l:"Ancho",v:`${fmt(r.W)}m`},{l:"×"},{l:"Prof. útil",v:`${fmt(r.depth)}m`},{l:"+"},{l:"BL",v:`${fmt(freeboard)}m`},{l:"="},{l:"Prof. total",v:`${fmt(r.hT)}m`,hi:true},{l:"·"},{l:"Área",v:`${fmt(r.Area)}m²`}]
                           .map((d,i)=>d.v?<div key={i} style={C.db}><div style={C.dl}>{d.l}</div><div style={{...C.dv,color:d.hi?"#00d4ff":"#7dd8f0"}}>{d.v}</div></div>:<div key={i} style={{color:"#1e4060",fontSize:"13px"}}>{d.l}</div>)}
                         <div style={{marginLeft:"auto",textAlign:"center"}}>
-                          <div style={C.tag("0,212,255")}>{r.chambers} CÁM.</div>
-                          <div style={{fontSize:"9px",color:"#4a7fa5",marginTop:"4px"}}>{r.chambers===1?"Única":r.chambers===2?"2/3+1/3":"1/2+1/4+1/4"}</div>
+                          <div style={C.tag("0,212,255")}>{r.chambers} CHM.</div>
+                          <div style={{fontSize:"9px",color:"#4a7fa5",marginTop:"4px"}}>{r.chambers===1?"Single":r.chambers===2?"2/3+1/3":"1/2+1/4+1/4"}</div>
                         </div>
                       </div>
 
-                      <div style={C.sec}><span>Carga orgánica y SRT</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Organic Load & Solids Retention</span><div style={C.ln}/></div>
                       <div style={C.g4}>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.Corg,3)}</div><div style={C.ku}>kg DBO₅/día</div><div style={C.kl}>Carga orgánica</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkCVO?"#00c864":"#ff5050")}>{fmt(r.CVO,4)}</div><div style={C.ku}>kg/m³·día</div><div style={C.kl}>CVO ≤ 0.30</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkSRT?"#00c864":"#ff5050")}>{fmtI(r.SRT)}</div><div style={C.ku}>días</div><div style={C.kl}>SRT ≥ 20d</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.Gs_day*1000,2)}</div><div style={C.ku}>L/día</div><div style={C.kl}>Prod. lodos</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.Corg,3)}</div><div style={C.ku}>kg BOD₅/day</div><div style={C.kl}>Organic Load</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkCVO?"#00c864":"#ff5050")}>{fmt(r.CVO,4)}</div><div style={C.ku}>kg/m³·day</div><div style={C.kl}>OVL ≤ 0.30</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkSRT?"#00c864":"#ff5050")}>{fmtI(r.SRT)}</div><div style={C.ku}>days</div><div style={C.kl}>SRT ≥ 20d</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.Gs_day*1000,2)}</div><div style={C.ku}>L/day</div><div style={C.kl}>Sludge Prod.</div></div>
                       </div>
 
-                      <div style={C.sec}><span>Tuberías y ventilación</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Piping &amp; Ventilation</span><div style={C.ln}/></div>
                       <div style={C.pr}>
-                        <div style={C.pc}><div style={C.pt}>T-pipe entrada</div><div style={C.pv}>Ø {fmtI(r.dPipe*1000)} mm</div><div style={C.ps}>Sumergencia ≥ 30 cm · Q={fmt(r.Qd*1000/86400,2)} L/s</div></div>
-                        <div style={C.pc}><div style={C.pt}>T-pipe salida</div><div style={C.pv}>Ø {fmtI(r.dPipe*1000)} mm</div><div style={C.ps}>Sumergencia ≥ 40 cm · más profunda</div></div>
-                        <div style={C.pc}><div style={C.pt}>Ventilación</div><div style={C.pv}>Ø {fmtI(r.dVent*1000)} mm</div><div style={C.ps}>{r.chambers} tubo{r.chambers>1?"s":""} · ≥0.5m sobre cubierta</div></div>
+                        <div style={C.pc}><div style={C.pt}>Inlet T-pipe</div><div style={C.pv}>Ø {fmtI(r.dPipe*1000)} mm</div><div style={C.ps}>Submerged ≥ 30 cm · Q={fmt(r.Qd*1000/86400,2)} L/s</div></div>
+                        <div style={C.pc}><div style={C.pt}>Outlet T-pipe</div><div style={C.pv}>Ø {fmtI(r.dPipe*1000)} mm</div><div style={C.ps}>Submerged ≥ 40 cm · deepest point</div></div>
+                        <div style={C.pc}><div style={C.pt}>Ventilation</div><div style={C.pv}>Ø {fmtI(r.dVent*1000)} mm</div><div style={C.ps}>{r.chambers} pipe{r.chambers>1?"s":""} · ≥0.5m above roof</div></div>
                       </div>
 
-                      <div style={C.sec}><span>Calidad del efluente</span><div style={C.ln}/></div>
-                      {[{lbl:"DBO₅",inV:dboIn,outV:r.dboOut,rem:r.dboR},{lbl:"SS",inV:ssIn,outV:r.ssOut,rem:r.ssR}].map((e,i)=>(
+                      <div style={C.sec}><span>Effluent Quality</span><div style={C.ln}/></div>
+                      {[{lbl:"BOD₅",inV:dboIn,outV:r.dboOut,rem:r.dboR},{lbl:"TSS",inV:ssIn,outV:r.ssOut,rem:r.ssR}].map((e,i)=>(
                         <div key={i} style={C.er}>
-                          <div style={C.eb("200,100,50")}><div style={{...C.ev,color:"#d08050"}}>{fmtI(e.inV)}</div><div style={C.el}>{e.lbl} entrada (mg/L)</div></div>
+                          <div style={C.eb("200,100,50")}><div style={{...C.ev,color:"#d08050"}}>{fmtI(e.inV)}</div><div style={C.el}>{e.lbl} inlet (mg/L)</div></div>
                           <div style={C.ea}><div style={{fontSize:"8px",color:"#4a7fa5",marginBottom:"1px"}}>−{fmtI(e.rem*100)}%</div>→</div>
-                          <div style={C.eb("0,180,100")}><div style={{...C.ev,color:"#00c864"}}>{fmtI(e.outV)}</div><div style={C.el}>{e.lbl} efluente (mg/L)</div></div>
+                          <div style={C.eb("0,180,100")}><div style={{...C.ev,color:"#00c864"}}>{fmtI(e.outV)}</div><div style={C.el}>{e.lbl} outlet (mg/L)</div></div>
                         </div>
                       ))}
-                      <div style={C.warn}>⚠ Eficiencias estimadas. El efluente requiere tratamiento complementario.</div>
+                      <div style={C.warn}>⚠ Estimated removal efficiencies. Effluent requires secondary treatment before disposal.</div>
                       <div style={C.foot}>HYDROSTACK · WATER &amp; SANITATION ENGINEERING · v6.0</div>
                     </>
                   )}
 
-                  {/* ── TAB: CORTE ── */}
+                  {/* ── TAB: SCHEMATIC ── */}
                   {activeTab==="corte"&&(
                     <>
-                      <div style={C.sec}><span>Dimensiones y corte longitudinal</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Dimensions &amp; Longitudinal Section</span><div style={C.ln}/></div>
                       <div style={C.dr}>
-                        {[{l:"Largo",v:`${fmt(r.L)}m`},{l:"×"},{l:"Ancho",v:`${fmt(r.W)}m`},{l:"×"},{l:"Prof. útil",v:`${fmt(r.depth)}m`},{l:"+"},{l:"BL",v:`${fmt(freeboard)}m`},{l:"="},{l:"Prof. total",v:`${fmt(r.hT)}m`,hi:true}]
+                        {[{l:"Length",v:`${fmt(r.L)}m`},{l:"×"},{l:"Width",v:`${fmt(r.W)}m`},{l:"×"},{l:"Depth (useful)",v:`${fmt(r.depth)}m`},{l:"+"},{l:"FB",v:`${fmt(freeboard)}m`},{l:"="},{l:"Height (total)",v:`${fmt(r.hT)}m`,hi:true}]
                           .map((d,i)=>d.v?<div key={i} style={C.db}><div style={C.dl}>{d.l}</div><div style={{...C.dv,color:d.hi?"#00d4ff":"#7dd8f0"}}>{d.v}</div></div>:<div key={i} style={{color:"#1e4060",fontSize:"13px"}}>{d.l}</div>)}
                       </div>
                       <DetailedSchematic r={r} freeboard={freeboard}/>
                     </>
                   )}
 
-                  {/* ── TAB: HIDRÁULICA ── */}
+                  {/* ── TAB: HYDRAULICS ── */}
                   {activeTab==="hidraulica"&&(
                     <>
-                      <div style={C.sec}><span>Perfil hidráulico</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Hydraulic Profile</span><div style={C.ln}/></div>
                       <HydraulicProfile r={r} freeboard={freeboard}/>
-                      <div style={{...C.inote,marginTop:"8px",color:"#3a6080",marginBottom:"16px"}}>LGH: Línea de Gradiente Hidráulico. Pérdida total estimada: ~{fmt(r.hf_cm,1)} cm.</div>
+                      <div style={{...C.inote,marginTop:"8px",color:"#3a6080",marginBottom:"16px"}}>EGL: Energy Grade Line. Total head loss estimate: ~{fmt(r.hf_cm,1)} cm.</div>
 
-                      <div style={C.sec}><span>KPIs hidráulicos</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Hydraulic KPIs</span><div style={C.ln}/></div>
                       <div style={C.g4}>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkVflow?"#00c864":"#ff5050")}>{fmt(r.Vflow*1000,3)}</div><div style={C.ku}>mm/s</div><div style={C.kl}>Vel. flujo · &lt;5mm/s</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkVflow?"#00c864":"#ff5050")}>{fmt(r.Vflow*1000,3)}</div><div style={C.ku}>mm/s</div><div style={C.kl}>Flow velocity · &lt;5 mm/s</div></div>
                         <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkRe?"#00c864":"#ff5050")}>{fmtI(r.Re)}</div><div style={C.ku}>—</div><div style={C.kl}>Reynolds · &lt;500</div></div>
                         <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkFr?"#00c864":"#ff5050")}>{r.Fr.toExponential(2)}</div><div style={C.ku}>—</div><div style={C.kl}>Froude · &lt;0.10</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.hf_cm,2)}</div><div style={C.ku}>cm</div><div style={C.kl}>Pérd. carga total</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.hf_cm,2)}</div><div style={C.ku}>cm</div><div style={C.kl}>Total head loss</div></div>
                       </div>
 
-                      <div style={C.sec}><span>Desglose pérdidas de carga</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Head Loss Breakdown</span><div style={C.ln}/></div>
                       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid #1e4060",borderRadius:"8px",padding:"14px 16px",marginBottom:"16px"}}>
                         {[
-                          {lbl:"Tubería entrada (Darcy-W.)",        v:r.hf_entrada,     pct:r.hf_entrada/r.hf_total*100},
-                          {lbl:"Contracción brusca (K=0.5)",        v:r.hf_contraccion, pct:r.hf_contraccion/r.hf_total*100},
-                          {lbl:"Flujo a través de la fosa",         v:r.hf_fosa,        pct:r.hf_fosa/r.hf_total*100},
-                          {lbl:`Tabiques internos (${r.chambers-1}×K=0.3)`,v:r.hf_tabiques,pct:r.hf_tabiques/r.hf_total*100},
-                          {lbl:"Expansión salida (K=1.0)",          v:r.hf_salida,      pct:r.hf_salida/r.hf_total*100},
+                          {lbl:"Inlet pipe (Darcy-W.)",              v:r.hf_entrada,     pct:r.hf_entrada/r.hf_total*100},
+                          {lbl:"Contraction (K=0.5)",              v:r.hf_contraccion, pct:r.hf_contraccion/r.hf_total*100},
+                          {lbl:"Flow through tank",                v:r.hf_fosa,        pct:r.hf_fosa/r.hf_total*100},
+                          {lbl:`Internal baffles (${r.chambers-1}×K=0.3)`,v:r.hf_tabiques,pct:r.hf_tabiques/r.hf_total*100},
+                          {lbl:"Outlet expansion (K=1.0)",          v:r.hf_salida,      pct:r.hf_salida/r.hf_total*100},
                         ].map((row,i)=>(
                           <div key={i} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
                             <div style={{fontSize:"10px",color:"#6a9bbf",flex:1}}>{row.lbl}</div>
@@ -964,64 +981,64 @@ export default function HydroStack() {
                         </div>
                       </div>
 
-                      <div style={C.sec}><span>Sedimentación y flujo</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Sedimentation &amp; Flow</span><div style={C.ln}/></div>
                       <div style={C.g4}>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.vs_mday,2)}</div><div style={C.ku}>m/día</div><div style={C.kl}>Vel. sed. Stokes<br/>T={temp}°C</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.qS,3)}</div><div style={C.ku}>m/día</div><div style={C.kl}>Vel. desbordamiento<br/>Q/Área</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkSed?"#00c864":"#ff5050")}>{fmt(r.remSS_camp,1)}</div><div style={C.ku}>%</div><div style={C.kl}>Efic. SS<br/>Camp (1946)</div></div>
-                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{(r.nu*1e6).toFixed(3)}</div><div style={C.ku}>×10⁻⁶ m²/s</div><div style={C.kl}>Viscosidad ν<br/>f(T)</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.vs_mday,2)}</div><div style={C.ku}>m/day</div><div style={C.kl}>Stokes Vel.<br/>T={temp}°C</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{fmt(r.qS,3)}</div><div style={C.ku}>m/day</div><div style={C.kl}>Overflow Rate<br/>Q/Area</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv(r.chkSed?"#00c864":"#ff5050")}>{fmt(r.remSS_camp,1)}</div><div style={C.ku}>%</div><div style={C.kl}>TSS Removal<br/>Camp (1946)</div></div>
+                        <div style={C.kpi} className="hs-kpi"><div style={C.kv("#a0c8e0")}>{(r.nu*1e6).toFixed(3)}</div><div style={C.ku}>×10⁻⁶ m²/s</div><div style={C.kl}>Kinematic Visc.<br/>f(T)</div></div>
                       </div>
                     </>
                   )}
 
-                  {/* ── TAB: VERIFICACIONES ── */}
+                  {/* ── TAB: CHECKS ── */}
                   {activeTab==="verificaciones"&&(
                     <>
-                      <div style={C.sec}><span>Verificaciones normativas — {n.ref}</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Code Compliance Checks — {n.ref}</span><div style={C.ln}/></div>
                       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid #1e4060",borderRadius:"8px",padding:"14px",marginBottom:"14px"}}>
                         {[
-                          {ok:r.chkD,  t:"Profundidad útil mínima",    v:`${fmt(r.depth)}m ≥ ${r.p.minDepth}m`},
-                          {ok:r.chkW,  t:"Ancho mínimo",                v:`${fmt(r.W)}m ≥ ${r.p.minWidth}m`},
-                          {ok:r.chkL,  t:"Largo mínimo",                v:`${fmt(r.L)}m ≥ ${r.p.minLength}m`},
-                          {ok:r.chkS,  t:"Carga superficial ≤ 1.5 m/d", v:`${fmt(r.qS,3)} m/d`},
-                          {ok:r.chkCVO,t:"CVO ≤ 0.30 kg/m³·día",       v:`${fmt(r.CVO,4)}`},
-                          {ok:r.chkSRT,t:"SRT ≥ 20 días",               v:`${fmtI(r.SRT)} d`},
-                          {ok:!r.minA, t:"Volumen ≥ mín. normativo",    v:r.minA?`Mín: ${fmt(r.p.minVolume)}m³`:`${fmt(r.Vtot)}m³`},
+                          {ok:r.chkD,  t:"Minimum depth (useful)",       v:`${fmt(r.depth)}m ≥ ${r.p.minDepth}m`},
+                          {ok:r.chkW,  t:"Minimum width",               v:`${fmt(r.W)}m ≥ ${r.p.minWidth}m`},
+                          {ok:r.chkL,  t:"Minimum length",              v:`${fmt(r.L)}m ≥ ${r.p.minLength}m`},
+                          {ok:r.chkS,  t:"Surface loading ≤ 1.5 m/d",   v:`${fmt(r.qS,3)} m/d`},
+                          {ok:r.chkCVO,t:"OVL ≤ 0.30 kg/m³·day",        v:`${fmt(r.CVO,4)}`},
+                          {ok:r.chkSRT,t:"SRT ≥ 20 days",               v:`${fmtI(r.SRT)} d`},
+                          {ok:!r.minA, t:"Volume ≥ min. standard",      v:r.minA?`Min: ${fmt(r.p.minVolume)}m³`:`${fmt(r.Vtot)}m³`},
                         ].map((c,i)=>(
                           <div key={i} style={C.ck(c.ok)}><span style={C.ci(c.ok)}>{c.ok?"✓":"✗"}</span><span style={C.ct}>{c.t}</span><span style={C.cv(c.ok)}>{c.v}</span></div>
                         ))}
                       </div>
 
-                      <div style={C.sec}><span>Verificaciones hidráulicas</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Hydraulic Checks</span><div style={C.ln}/></div>
                       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid #1e4060",borderRadius:"8px",padding:"14px",marginBottom:"14px"}}>
                         {[
-                          {ok:r.chkVflow, t:"Velocidad horizontal ≤ 5 mm/s",      v:`${fmt(r.Vflow*1000,3)} mm/s`},
-                          {ok:r.chkRe,    t:"Reynolds < 500 (laminar)",            v:`Re = ${fmtI(r.Re)}`},
-                          {ok:r.chkFr,    t:"Froude < 0.10 (subcrítico)",          v:`Fr = ${r.Fr.toExponential(2)}`},
-                          {ok:r.chkSed,   t:"Vel. sedim. > Vel. desbordamiento",   v:`${fmt(r.vs_mday,2)} > ${fmt(r.qS,3)} m/d`},
-                          {ok:r.hf_cm<15, t:"Pérdida de carga total < 15 cm",      v:`${fmt(r.hf_cm,2)} cm`},
+                          {ok:r.chkVflow, t:"Horizontal velocity ≤ 5 mm/s",       v:`${fmt(r.Vflow*1000,3)} mm/s`},
+                          {ok:r.chkRe,    t:"Reynolds < 500 (laminar)",           v:`Re = ${fmtI(r.Re)}`},
+                          {ok:r.chkFr,    t:"Froude < 0.10 (subcritical)",        v:`Fr = ${r.Fr.toExponential(2)}`},
+                          {ok:r.chkSed,   t:"Settling vel. > Overflow rate",      v:`${fmt(r.vs_mday,2)} > ${fmt(r.qS,3)} m/d`},
+                          {ok:r.hf_cm<15, t:"Total head loss < 15 cm",            v:`${fmt(r.hf_cm,2)} cm`},
                         ].map((c,i)=>(
                           <div key={i} style={C.ck(c.ok)}><span style={C.ci(c.ok)}>{c.ok?"✓":"✗"}</span><span style={C.ct}>{c.t}</span><span style={C.cv(c.ok)}>{c.v}</span></div>
                         ))}
                       </div>
 
-                      <div style={C.sec}><span>Campo de infiltración</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Leach Field Design</span><div style={C.ln}/></div>
                       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid #1e4060",borderRadius:"8px",padding:"14px",marginBottom:"14px"}}>
                         {r.soilOk&&r.A_inf?(
                           <>
                             <div style={{...C.g3,marginBottom:"10px"}}>
-                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.q_inf,0)}</div><div style={C.ku}>L/m²·día</div><div style={C.kl}>Tasa hidráulica</div></div>
-                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.A_inf,1)}</div><div style={C.ku}>m²</div><div style={C.kl}>Área infiltración</div></div>
-                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.L_zanjas,1)}</div><div style={C.ku}>m lineales</div><div style={C.kl}>Long. zanjas (0.6m)</div></div>
+                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.q_inf,0)}</div><div style={C.ku}>L/m²·day</div><div style={C.kl}>Infiltration Rate</div></div>
+                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.A_inf,1)}</div><div style={C.ku}>m²</div><div style={C.kl}>Leach Field Area</div></div>
+                              <div style={C.kpi} className="hs-kpi"><div style={C.kv("#00d4ff")}>{fmt(r.L_zanjas,1)}</div><div style={C.ku}>m length</div><div style={C.kl}>Trench length (0.6m)</div></div>
                             </div>
-                            <div style={C.warn}>Verificar con ensayo in situ. Distancia mín. a fuentes de agua: 30m (RAS), 15m (EPA).</div>
+                            <div style={C.warn}>Verify with in-situ percolation test. Min. distance to water supply: 50 m (EPA); 30 m (UK/AU).</div>
                           </>
                         ):(
-                          <div style={C.ck(false)}><span style={C.ci(false)}>✗</span><span style={C.ct}>Suelo no apto. Usar sistema alternativo.</span></div>
+                          <div style={C.ck(false)}><span style={C.ci(false)}>✗</span><span style={C.ct}>Soil unsuitable for direct infiltration. Use alternative system.</span></div>
                         )}
                       </div>
 
-                      <div style={C.sec}><span>Memoria de cálculo</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Calculation Summary</span><div style={C.ln}/></div>
                       <div style={C.fml}>
                         <div>📐 <strong style={{color:"#7ab0d0"}}>{n.ref}</strong> — {USE_TYPES[useType].icon} {USE_TYPES[useType].label} · T={temp}°C ({r.p.tempLabel}) · {r.chambers}C</div>
                         <div>Q={users}×{dotacion}×{retCoef}/1000=<strong style={{color:"#a0c8e0"}}>{fmt(r.Qd,4)}m³/d ({fmt(r.Qd*1000/86400,2)}L/s)</strong></div>
@@ -1033,26 +1050,26 @@ export default function HydroStack() {
                     </>
                   )}
 
-                  {/* ── TAB: COMPARATIVA ── */}
+                  {/* ── TAB: COMPARISON ── */}
                   {activeTab==="comparativa"&&showComp&&compRes&&(
                     <>
-                      <div style={C.sec}><span>Comparativa de las 4 normas</span><div style={C.ln}/></div>
+                      <div style={C.sec}><span>Comparison: 5 Standards</span><div style={C.ln}/></div>
                       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid #1e4060",borderRadius:"8px",padding:"14px"}}>
                         <table style={C.tbl}>
                           <thead><tr>
-                            <th style={C.th0}>Parámetro</th>
+                            <th style={C.th0}>Parameter</th>
                             {Object.entries(NORMS).map(([k,v])=>(<th key={k} style={{...C.th,color:k===norm?"#00d4ff":"#4a7fa5"}}>{v.flag} {v.name}</th>))}
                           </tr></thead>
                           <tbody>
                             {[
-                              {lbl:"TRH (días)",  fn:r=>fmt(r.trhDays,1)},
-                              {lbl:"Vl (m³)",     fn:r=>fmt(r.Vl)},
-                              {lbl:"Vs (m³)",     fn:r=>fmt(r.Vs)},
-                              {lbl:"Vtotal (m³)", fn:r=>fmt(r.Vtot),hi:true},
-                              {lbl:"L (m)",       fn:r=>fmt(r.L)},
-                              {lbl:"W (m)",       fn:r=>fmt(r.W)},
-                              {lbl:"SRT (días)",  fn:r=>fmtI(r.SRT)},
-                              {lbl:"Cámaras",     fn:r=>r.chambers},
+                              {lbl:"HRT (days)",     fn:r=>fmt(r.trhDays,1)},
+                              {lbl:"Vl (m³)",        fn:r=>fmt(r.Vl)},
+                              {lbl:"Vs (m³)",        fn:r=>fmt(r.Vs)},
+                              {lbl:"Vtotal (m³)",    fn:r=>fmt(r.Vtot),hi:true},
+                              {lbl:"L (m)",          fn:r=>fmt(r.L)},
+                              {lbl:"W (m)",          fn:r=>fmt(r.W)},
+                              {lbl:"SRT (days)",     fn:r=>fmtI(r.SRT)},
+                              {lbl:"Chambers",       fn:r=>r.chambers},
                             ].map((row,i)=>(
                               <tr key={i}><td style={C.td0}>{row.lbl}</td>
                                 {Object.keys(NORMS).map(k=>(<td key={k} style={k===norm&&row.hi?C.tdHi:k===norm?{...C.td,color:"#7ab0d0"}:C.td}>{row.fn(compRes[k])}</td>))}

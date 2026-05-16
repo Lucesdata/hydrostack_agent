@@ -218,12 +218,12 @@ function CrossSection({ r, freeboard, x, y, w, h }) {
       <rect x={x0+wt} y={yLiqB} width={tW-wt*2} height={ySldB-yLiqB} fill={DS.sludge}/>
       {/* Zone labels */}
       <text x={x0+tW/2} y={(yWtr+yNatB)/2+3} fill="#9a8040" fontSize="8.5"
-        textAnchor="middle" fontFamily={FONT}>SCUM — Scum Volume = {F(r.Vn)} m³</text>
+        textAnchor="middle" fontFamily={FONT}>NATAS — Vn = {F(r.Vn)} m³</text>
       <text x={x0+tW/2} y={(yNatB+yLiqB)/2+3} fill="#3a8090" fontSize="8.5"
-        textAnchor="middle" fontFamily={FONT}>LIQUID ZONE — Liquid Volume = {F(r.Vl)} m³</text>
+        textAnchor="middle" fontFamily={FONT}>ZONA LÍQUIDA — Vl = {F(r.Vl)} m³</text>
       {ySldB-yLiqB>16&&(
         <text x={x0+tW/2} y={(yLiqB+ySldB)/2+3} fill="#8a5a28" fontSize="8.5"
-          textAnchor="middle" fontFamily={FONT}>SLUDGE — Sludge Volume = {F(r.Vs)} m³</text>
+          textAnchor="middle" fontFamily={FONT}>LODOS — Vs = {F(r.Vs)} m³</text>
       )}
       {/* Dividers */}
       {divs.map((dx,i)=>(
@@ -271,11 +271,11 @@ function HydraulicProfile({ r, x, y, w, h }) {
   const x0=x+ML, y0=y+TH+MT;
 
   const bars=[
-    {lbl:"Inlet",  sub:"Ks=0.5", v:r.hf_entrada},
+    {lbl:"Entrada",  sub:"Ks=0.5", v:r.hf_entrada},
     {lbl:"Contrac.", sub:"Kc=0.5", v:r.hf_contraccion},
-    {lbl:"Tank",     sub:"H-W",    v:r.hf_fosa},
+    {lbl:"Fosa",     sub:"H-W",    v:r.hf_fosa},
     {lbl:"Tabiques", sub:"Kt=0.3", v:r.hf_tabiques},
-    {lbl:"Outlet",   sub:"Ks=1.0", v:r.hf_salida},
+    {lbl:"Salida",   sub:"Ks=1.0", v:r.hf_salida},
   ];
   const maxV=Math.max(...bars.map(b=>b.v),0.0001);
   const bW=(cW/bars.length)*0.55, bGap=cW/bars.length;
@@ -326,7 +326,7 @@ function HydraulicProfile({ r, x, y, w, h }) {
   );
 }
 
-// ── 4. SYSTEM SCHEME ─────────────────────────────────────────────────────────
+// ── 4. ESQUEMA SITARD ─────────────────────────────────────────────────────────
 function SitardScheme({ r, x, y, w, h }) {
   const TH=17, padX=22, padY=28;
   const x0=x+padX, y0=y+TH+padY;
@@ -334,18 +334,18 @@ function SitardScheme({ r, x, y, w, h }) {
   const mid=y0+cH*0.40;
 
   const items=[
-    {lbl:"DWELLING",     sub:`${r.users||"—"} hab`,       det:`Q=${F(r.Qd||0)} m³/d`, col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🏠"},
-    {lbl:"GREASE TRAP",sub:"③ L+G",                    det:"retention",             col:"#8ab020", bg:"rgba(130,180,20,0.07)",icon:"🧱"},
-    {lbl:"SEPTIC TANK", sub:`Vtot=${F(r.Vtot)} m³`,     det:`${r.chambers} chamber(s)`,col:DS.cyan,  bg:"rgba(0,245,255,0.07)",icon:"⬛"},
-    {lbl:"ANAEROBIC FILTER",  sub:"⑥ anaerobic",             det:"biofilm media",      col:"#A78BFA", bg:"rgba(167,139,250,0.07)",icon:"🔲"},
-    {lbl:"INSPECTION BOX",   sub:"⑦ cleanout",              det:"periodic inspection",        col:DS.amber,  bg:"rgba(255,176,32,0.07)", icon:"⬜"},
-    {lbl:"LEACH FIELD", sub:r.A_inf?`A≈${F(r.A_inf)}m²`:"see soil study",det:"field ⑧",col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🌱"},
+    {lbl:"VIVIENDA",     sub:`${r.users||"—"} hab`,       det:`Q=${F(r.Qd||0)} m³/d`, col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🏠"},
+    {lbl:"TRAMPA GRASAS",sub:"③ L+G",                    det:"retención",             col:"#8ab020", bg:"rgba(130,180,20,0.07)",icon:"🧱"},
+    {lbl:"FOSA SÉPTICA", sub:`Vtot=${F(r.Vtot)} m³`,     det:`${r.chambers} cámara(s)`,col:DS.cyan,  bg:"rgba(0,245,255,0.07)",icon:"⬛"},
+    {lbl:"FAFA/FILTRO",  sub:"⑥ anaerobio",             det:"lecho bacteriano",      col:"#A78BFA", bg:"rgba(167,139,250,0.07)",icon:"🔲"},
+    {lbl:"CAJA INSP.",   sub:"⑦ registro",              det:"rev. periódica",        col:DS.amber,  bg:"rgba(255,176,32,0.07)", icon:"⬜"},
+    {lbl:"INFILTRACIÓN", sub:r.A_inf?`A≈${F(r.A_inf)}m²`:"ver estudio",det:"campo ⑧",col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🌱"},
   ];
   const segW=cW/items.length, boxW=Math.min(segW*0.72,118), boxH=66;
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="4" label="SYSTEM SCHEME — ONSITE WASTEWATER TREATMENT"/>
+      <SecTitle x={x} y={y} w={w} num="4" label="ESQUEMA SITARD — SISTEMA INTEGRAL DE TRATAMIENTO"/>
       {/* Ground */}
       <rect x={x0} y={mid-boxH*0.4-10} width={cW} height={10} fill="url(#la-gnd)" opacity="0.3"/>
       <line x1={x0} y1={mid-boxH*0.4} x2={x0+cW} y2={mid-boxH*0.4}
@@ -391,7 +391,7 @@ function SitardScheme({ r, x, y, w, h }) {
         stroke="rgba(0,245,255,0.15)" strokeWidth="0.5"/>
       <text x={x0+cW/2} y={y0+cH-7} fill={DS.muted} fontSize="8.5"
         textAnchor="middle" fontFamily={FONT}>
-        DBO₅: {r.dboIn||250} mg/L  →  ≈{F(r.dboOut||0)} mg/L outlet |  SS: {r.ssIn||280} mg/L  →  ≈{F(r.ssOut||0)} mg/L  |  Remoción ≈{r.chambers===1?"60":"68"}%
+        DBO₅: {r.dboIn||250} mg/L  →  ≈{F(r.dboOut||0)} mg/L salida  |  SS: {r.ssIn||280} mg/L  →  ≈{F(r.ssOut||0)} mg/L  |  Remoción ≈{r.chambers===1?"60":"68"}%
       </text>
     </g>
   );
@@ -405,22 +405,22 @@ function DataTable({ r, x, y, w, h }) {
   const rows=[
     {lbl:"L — Longitud total",      val:`${F(r.L)} m`,                 hi:true },
     {lbl:"A — Ancho interior",       val:`${F(r.W)} m`,                 hi:true },
-    {lbl:"Hu — Useful Depth",          val:`${F(r.depth)} m`,             hi:true },
+    {lbl:"Hu — Prof. útil",          val:`${F(r.depth)} m`,             hi:true },
     {lbl:"BL — Borde libre",         val:`${F(r.hT-r.depth,2)} m`,     hi:false},
     {lbl:"H — Prof. total",          val:`${F(r.hT)} m`,               hi:false},
-    {lbl:"Vtot — Design Volume",       val:`${F(r.Vtot)} m³`,             hi:true },
-    {lbl:"Vl — Liquid Volume",        val:`${F(r.Vl)} m³`,              hi:false},
+    {lbl:"Vtot — Vol. diseño",       val:`${F(r.Vtot)} m³`,             hi:true },
+    {lbl:"Vl — Vol. líquido",        val:`${F(r.Vl)} m³`,              hi:false},
     {lbl:"Vs — Vol. lodos",          val:`${F(r.Vs)} m³`,              hi:false},
     {lbl:"Vn — Vol. natas",          val:`${F(r.Vn)} m³`,              hi:false},
     {lbl:"Ø Tub. E/S",               val:`${FI(r.dPipe*1000)} mm`,     hi:false},
-    {lbl:"Ø Ventilation Pipe",       val:`${FI(r.dVent*1000)} mm`,     hi:false},
-    {lbl:"Number of Chambers",               val:`${r.chambers}`,               hi:false},
-    {lbl:"Hydraulic Head Loss",            val:`${(r.hf_total*100).toFixed(1)} cm`, hi:false},
+    {lbl:"Ø Tub. ventilación",       val:`${FI(r.dVent*1000)} mm`,     hi:false},
+    {lbl:"N° Cámaras",               val:`${r.chambers}`,               hi:false},
+    {lbl:"Hf hidráulica",            val:`${(r.hf_total*100).toFixed(1)} cm`, hi:false},
   ];
 
   const legend=[
-    ["①","Inlet pipe (T-pipe)"],["②","Outlet pipe (T-pipe)"],
-    ["③","Grease trap"],        ["④","Septic tank"],
+    ["①","Tubería entrada (T-pipe)"],["②","Tubería salida (T-pipe)"],
+    ["③","Trampa de grasas"],        ["④","Fosa séptica"],
     ["⑤","Tubería ventilación"],     ["⑥","Filtro / FAFA"],
     ["⑦","Caja de inspección"],      ["⑧","Campo infiltración"],
   ];
@@ -433,7 +433,7 @@ function DataTable({ r, x, y, w, h }) {
       <rect x={px-4} y={py} width={aW} height={tableH} fill="rgba(4,24,32,0.6)" rx="2"/>
       {/* Header */}
       <rect x={px-4} y={py} width={aW} height={14} fill="rgba(0,245,255,0.10)" rx="2"/>
-      <text x={px+2} y={py+10} fill={DS.muted} fontSize="8" fontFamily={FONT}>PARAMETER</text>
+      <text x={px+2} y={py+10} fill={DS.muted} fontSize="8" fontFamily={FONT}>PARÁMETRO</text>
       <text x={px+aW-6} y={py+10} fill={DS.muted} fontSize="8"
         textAnchor="end" fontFamily={FONT}>VALOR</text>
       {rows.map((row,i)=>(
@@ -467,19 +467,19 @@ function DataTable({ r, x, y, w, h }) {
 // ── Cajetín ───────────────────────────────────────────────────────────────────
 function Cajétin({ meta, W, H, cajeH }) {
   const y0=H-cajeH;
-  const today=new Date().toLocaleDateString("en",
+  const today=new Date().toLocaleDateString("es-CO",
     {day:"2-digit",month:"2-digit",year:"numeric"});
 
   const row1=[
-    {lbl:"PROJECT",  val:meta.projectName||"—",              x:W*0.28+10, y:y0+16},
-    {lbl:"PREPARED BY",   val:meta.designer||"—",                 x:W*0.56+10, y:y0+16},
-    {lbl:"STANDARD",     val:meta.normRef||"EPA / UK / AU",   x:W*0.73+10, y:y0+16},
-    {lbl:"DRAWING NO.",  val:"HID-01",                            x:W*0.87+10, y:y0+16},
+    {lbl:"PROYECTO",  val:meta.projectName||"—",              x:W*0.28+10, y:y0+16},
+    {lbl:"ELABORÓ",   val:meta.designer||"—",                 x:W*0.56+10, y:y0+16},
+    {lbl:"NORMA",     val:meta.normRef||"RAS 2017 Tít. J",   x:W*0.73+10, y:y0+16},
+    {lbl:"PLANO N°",  val:"HID-01",                            x:W*0.87+10, y:y0+16},
   ];
   const row2=[
-    {lbl:"LOCATION", val:meta.location||"—",  x:W*0.28+10, y:y0+cajeH/2+16},
-    {lbl:"DATE",     val:today,                x:W*0.56+10, y:y0+cajeH/2+16},
-    {lbl:"SCALE",    val:"S / E",              x:W*0.73+10, y:y0+cajeH/2+16},
+    {lbl:"UBICACIÓN", val:meta.location||"—",  x:W*0.28+10, y:y0+cajeH/2+16},
+    {lbl:"FECHA",     val:today,                x:W*0.56+10, y:y0+cajeH/2+16},
+    {lbl:"ESCALA",    val:"S / E",              x:W*0.73+10, y:y0+cajeH/2+16},
     {lbl:"REV",       val:"A",                  x:W*0.87+10, y:y0+cajeH/2+16},
   ];
 
@@ -506,7 +506,7 @@ function Cajétin({ meta, W, H, cajeH }) {
       <text x={W*0.14} y={y0+32} fill={DS.muted} fontSize="8.5"
         textAnchor="middle" fontFamily={FONT}>Ingeniería Sanitaria</text>
       <text x={W*0.14} y={y0+44} fill="rgba(74,122,138,0.6)" fontSize="8"
-        textAnchor="middle" fontFamily={FONT}>SEPTIC TANK — Drawing HID-01</text>
+        textAnchor="middle" fontFamily={FONT}>FOSA SÉPTICA — Plano HID-01</text>
       {/* Fields */}
       {[...row1,...row2].map((f,i)=>(
         <g key={i}>
@@ -541,7 +541,7 @@ export default function LaminaTecnica({ r, freeboard, meta }) {
     const url=URL.createObjectURL(blob);
     const a=Object.assign(document.createElement("a"),{
       href:url,
-      download:`HID-01_FosaSeptica_${(meta.projectName||"Project").replace(/\s+/g,"_")}.svg`
+      download:`HID-01_FosaSeptica_${(meta.projectName||"Proyecto").replace(/\s+/g,"_")}.svg`
     });
     a.click(); URL.revokeObjectURL(url);
   };

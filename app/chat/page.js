@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { useLang } from "@/lib/i18n";
 
 const WELCOME = {
+  en: "Hello. I'm HydroStack Assistant, your virtual hydraulic engineer specialized in on-site wastewater treatment systems. I can help you design and size septic tanks, leach fields, absorption wells, and drainage systems, or explain applicable engineering standards (EPA, UK Building Regulations, AS/NZS 1547). What can I help you with today?",
   es: "Hola. Soy HydroStack Assistant, tu ingeniero hidráulico virtual especializado en sistemas SITARD. Puedo ayudarte a dimensionar fosas sépticas, zanjas filtrantes y pozos de absorción, o explicarte la normativa aplicable (CTE DB-HS 5, EN 12566, RAS Colombia). ¿En qué trabajamos hoy?",
-  en: "Hello. I'm HydroStack Assistant, your virtual hydraulic engineer specialized in SITARD systems. I can help you size septic tanks, soakaway trenches, and absorption wells, or explain the applicable standards (CTE DB-HS 5, EN 12566, RAS Colombia). What are we working on today?",
 };
 
 export default function ChatPage() {
@@ -58,7 +58,7 @@ export default function ChatPage() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const reader  = res.body.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer    = "";
 
@@ -113,7 +113,7 @@ export default function ChatPage() {
           const copy = [...prev];
           copy[copy.length - 1] = {
             role: "assistant",
-            content: "Error al conectar con el asistente. Inténtalo de nuevo.",
+            content: "Error connecting to the assistant. Please try again.",
           };
           return copy;
         });
@@ -149,7 +149,7 @@ export default function ChatPage() {
         <div style={S.headerInner}>
           <span style={S.headerDot} className="blink" />
           <span style={S.headerTitle}>HydroStack Assistant</span>
-          <span style={S.headerSub}>SITARD · CTE · EN 12566 · RAS</span>
+          <span style={S.headerSub}>EPA · UK BR H · AS/NZS 1547 · CTE</span>
         </div>
       </div>
 
@@ -183,7 +183,7 @@ export default function ChatPage() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={lang === "en" ? "Ask a SITARD question…" : "Escribe tu consulta SITARD…"}
+            placeholder={lang === "en" ? "Ask about system design, sizing, standards, or maintenance…" : "Escribe tu consulta sobre SITARD…"}
             rows={1}
             disabled={loading}
           />
@@ -202,7 +202,7 @@ export default function ChatPage() {
           )}
         </div>
         <div style={S.hint}>
-          Enter para enviar · Shift+Enter para nueva línea
+          Enter to send · Shift+Enter for new line
         </div>
       </div>
     </div>
