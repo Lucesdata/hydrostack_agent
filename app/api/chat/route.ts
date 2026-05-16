@@ -7,8 +7,14 @@ import { TOOL_DEFS, runTool } from "@/src/lib/agent/tools";
 export const runtime = "nodejs";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL   = "llama-3.1-8b-instant";
-const MAX_TOOL_ROUNDS = 3; // safety: max recursive tool-use rounds (tank → infiltration → final text)
+// llama-3.3-70b-versatile respects the OpenAI tool-calls protocol reliably.
+// llama-3.1-8b-instant emits tool calls as pseudo-XML text instead of structured
+// tool_calls, which breaks the streaming flow.
+const GROQ_MODEL   = "llama-3.3-70b-versatile";
+const MAX_TOOL_ROUNDS     = 2;    // max tool-use rounds (initial → tool result → final text)
+const MAX_TOKENS_ROUND0   = 700;  // input round; bigger budget for the initial reasoning
+const MAX_TOKENS_FOLLOWUP = 400;  // post-tool round; only needs to summarise the result
+const MAX_NORMATIVA_CHARS = 2200; // ~550 tokens — keeps total request under Groq free-tier TPM
 
 const SYSTEM_PROMPT = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
 in on-site wastewater treatment systems (OWTS): septic tanks, leach fields,
@@ -149,7 +155,9 @@ async function getNormativaMD(ubicacion: string): Promise<string> {
     const path = map[ubicacion];
     if (!path) return "";
     const fullPath = join(process.cwd(), path);
-    return await readFile(fullPath, "utf-8");
+    const raw = await readFile(fullPath, "utf-8");
+    if (raw.length <= MAX_NORMATIVA_CHARS) return raw;
+    return raw.slice(0, MAX_NORMATIVA_CHARS) + "\n\n[…regulation excerpt truncated; ask for specific sections if needed…]";
   } catch {
     return "";
   }
@@ -168,6 +176,21 @@ async function getCatalogSuggestions(formState: FormState | undefined): Promise<
   }
 }
 
+// Strip the heavy regulatory context block once the model has already seen
+// it (depth > 0). The model can recall standards from the round-0 system /
+// tool exchange without re-reading the full doc each turn. Keeps us under
+// Groq's free-tier TPM (6000) on multi-round tool flows.
+function stripNormativaContext(messages: ChatMessage[]): ChatMessage[] {
+  return messages.filter(m => {
+    if (m.role !== "user" || typeof m.content !== "string") return true;
+    return !m.content.startsWith("[REGULATORY STANDARDS]");
+  }).filter((m, _i, arr) => {
+    // Also drop the auto-reply that paired with the now-removed regulatory block.
+    if (m.role !== "assistant" || typeof m.content !== "string") return true;
+    return !m.content.startsWith("Standards loaded.");
+  });
+}
+
 /**
  * Stream one round of Groq completion. If the model returns tool_calls,
  * recursively run them and stream the follow-up. Returns when the model
@@ -178,6 +201,8 @@ async function streamRound(
   send: (data: string) => void,
   depth: number,
 ): Promise<void> {
+  const outboundMessages = depth === 0 ? messages : stripNormativaContext(messages);
+
   const res = await fetch(GROQ_API_URL, {
     method: "POST",
     headers: {
@@ -186,11 +211,13 @@ async function streamRound(
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      messages,
+      messages: outboundMessages,
       stream: true,
-      max_tokens: 2048,
-      tools: TOOL_DEFS,
-      tool_choice: depth >= MAX_TOOL_ROUNDS ? "none" : "auto",
+      // Round 0: tools available, larger response budget.
+      // Round 1+ (post-tool): no tool defs (saves ~500 tok), shorter response.
+      // This keeps the cumulative TPM low enough for Groq's free tier (6000).
+      max_tokens: depth === 0 ? MAX_TOKENS_ROUND0 : MAX_TOKENS_FOLLOWUP,
+      ...(depth === 0 ? { tools: TOOL_DEFS, tool_choice: "auto" } : {}),
     }),
   });
 
