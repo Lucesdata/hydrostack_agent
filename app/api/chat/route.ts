@@ -16,16 +16,52 @@ const MAX_TOKENS_ROUND0   = 700;  // input round; bigger budget for the initial 
 const MAX_TOKENS_FOLLOWUP = 400;  // post-tool round; only needs to summarise the result
 const MAX_NORMATIVA_CHARS = 2200; // ~550 tokens — keeps total request under Groq free-tier TPM
 
-const SYSTEM_PROMPT = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
+function getSystemPrompt(userProfile?: string): string {
+  const basePrompt = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
 in on-site wastewater treatment systems (OWTS): septic tanks, leach fields,
-absorption wells, and decentralized wastewater treatment.
+absorption wells, and decentralized wastewater treatment.`;
 
+  const profileRoles = {
+    owner: `
+## ROLE AND TONE (HOMEOWNER)
+- Use plain, conversational language. Avoid jargon like "percolation", "SRT", "infiltration field"
+- Start by asking about their situation in simple terms: "Tell me about your house and where it's located"
+- Explain what's happening before diving into numbers
+- Guide them step-by-step without assuming technical knowledge
+- After giving advice, check if they understand`,
+
+    professional: `
+## ROLE AND TONE (PROFESSIONAL/ENGINEER)
+- Use full technical terminology and regulatory references
+- Dive directly into calculations, design criteria, and verification checks
+- Assume familiarity with concepts like SRT, percolation rates, hydraulic loads
+- Reference specific code sections and design standards`,
+
+    contractor: `
+## ROLE AND TONE (CONTRACTOR/INSTALLER)
+- Use practical, hands-on language focused on execution
+- Provide specific technical guidance for design verification
+- Include material specs, installation details, and common gotchas
+- Answer concrete questions about field conditions and troubleshooting`,
+
+    exploring: `
+## ROLE AND TONE (EXPLORING)
+- Start with a 3-sentence explanation of what HydroStack does
+- Keep explanations high-level and conceptual
+- Offer to dive deeper into specific areas if they're curious
+- Invite them to explore specific topics`,
+  };
+
+  const defaultRole = `
 ## ROLE AND TONE
 - Adapt your technical level to the user: use professional terminology with engineers;
   explain clearly without unnecessary jargon for non-technical users.
 - Be direct and concise. Don't repeat information already provided in the conversation.
-- Ask one question at a time, starting with the most important.
+- Ask one question at a time, starting with the most important.`;
 
+  const roleSection = profileRoles[userProfile as keyof typeof profileRoles] || defaultRole;
+
+  const restOfPrompt = `
 ## TOOLS (FUNCTION CALLING)
 You have access to these tools. Use them when the user asks for a concrete
 sizing instead of calculating by hand.
@@ -93,6 +129,11 @@ Always specify which rate you're using and why.
 - For comparison of system types: present brief comparative analysis
 - Language: respond in the user's language (English by default)`;
 
+  return basePrompt + roleSection + restOfPrompt;
+}
+
+const SYSTEM_PROMPT = getSystemPrompt();
+
 type ChatMessage = {
   role: string;
   content: string | null;
@@ -104,6 +145,7 @@ type ChatMessage = {
 interface ChatRequest {
   messages: ChatMessage[];
   formState?: FormState;
+  userProfile?: string;
 }
 
 function detectLocation(text: string): string {
@@ -311,7 +353,7 @@ async function streamRound(
 }
 
 export async function POST(req: Request) {
-  const { messages, formState }: ChatRequest = await req.json();
+  const { messages, formState, userProfile }: ChatRequest = await req.json();
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -348,8 +390,9 @@ export async function POST(req: Request) {
           });
         }
 
+        const systemPrompt = getSystemPrompt(userProfile);
         const initialMessages: ChatMessage[] = [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           ...contextMessages,
           ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
         ];

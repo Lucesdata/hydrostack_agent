@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { renderMarkdown } from "./markdown";
 import ToolResultCard from "./ToolResultCard";
+import ProfileDetector from "./ProfileDetector";
 
 /**
  * HydroAgent — centerpiece chat surface.
@@ -22,6 +23,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
   const [input, setInput]         = useState("");
   const [loading, setLoading]     = useState(false);
   const [errored, setErrored]     = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   const scrollRef = useRef(null);
   const inputRef  = useRef(null);
@@ -33,13 +35,29 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  // Load profile from localStorage on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem("hydrostack_profile");
+    if (stored) setUserProfile(stored);
+  }, []);
+
   // Focus the input on mount (desktop). Avoids opening mobile keyboard.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!userProfile) return; // Only focus after profile is selected
     if (window.matchMedia && window.matchMedia("(min-width: 1024px)").matches) {
       inputRef.current?.focus();
     }
-  }, []);
+  }, [userProfile]);
+
+  function handleProfileSelect(profileId) {
+    setUserProfile(profileId);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hydrostack_profile", profileId);
+    }
+    inputRef.current?.focus();
+  }
 
   const send = useCallback(async (textOverride) => {
     const text = (textOverride ?? input).trim();
@@ -69,7 +87,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
       const res = await fetch("/api/chat", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ messages: next, formState }),
+        body:    JSON.stringify({ messages: next, formState, userProfile }),
         signal:  abortRef.current.signal,
       });
 
@@ -173,6 +191,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
 
   const hasMessages = messages.length > 0;
   const isLanding   = variant === "landing";
+  const profileOpts = a.profileOptions || [];
 
   return (
     <section
@@ -219,7 +238,15 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
         aria-label={a.ariaMessages}
       >
         <div style={S.msgInner}>
-          {!hasMessages && (
+          {!hasMessages && !userProfile && (
+            <ProfileDetector
+              profileOptions={profileOpts}
+              onSelect={handleProfileSelect}
+              isLanding={isLanding}
+            />
+          )}
+
+          {!hasMessages && userProfile && (
             <EmptyState
               welcome={a.welcome}
               suggestionsLabel={a.suggestionsLabel}
