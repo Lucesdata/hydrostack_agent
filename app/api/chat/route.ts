@@ -3,6 +3,7 @@ import { join } from "path";
 import { suggestNextQuestions } from "@/src/lib/agent/filter"
 import type { FormState } from "@/src/lib/agent/filter"
 import { TOOL_DEFS, runTool } from "@/src/lib/agent/tools";
+import { detectSubscenario } from "@/src/lib/agent/subscenario-detector";
 
 export const runtime = "nodejs";
 
@@ -393,6 +394,15 @@ export async function POST(req: Request) {
         const orientationMD = await getOrientationGuidance(userProfile);
         const catalogSuggs = await getCatalogSuggestions(formState);
 
+        // Auto-detect subscenario for homeowners (only if not already set)
+        let detectedSubscenario = null;
+        if (userProfile === "owner" && !formState?.subscenario) {
+          const detection = detectSubscenario(lastMessage);
+          if (detection.subscenario && detection.confidence > 50) {
+            detectedSubscenario = detection.subscenario;
+          }
+        }
+
         const contextMessages: ChatMessage[] = [];
         if (normativaMD) {
           contextMessages.push({
@@ -414,6 +424,28 @@ export async function POST(req: Request) {
             role: "assistant",
             content: "Orientation guidance loaded. I'll structure advice around the homeowner's specific situation and provide country-specific next steps.",
           });
+        }
+
+        // Inject auto-detected subscenario context
+        if (detectedSubscenario) {
+          const subscenarioDescriptions: Record<string, string> = {
+            installation: "The homeowner is planning a NEW INSTALLATION on virgin land. They need guidance on soil evaluation, permitting, site planning, and design criteria.",
+            active_failure: "The homeowner is experiencing an ACTIVE FAILURE or critical issue (odors, backups, pooling). This is URGENT. Prioritize immediate troubleshooting and emergency steps.",
+            preventive: "The homeowner wants PREVENTIVE MAINTENANCE or routine inspection of an existing system that's working. Focus on inspection frequency, pumping schedules, and care practices.",
+            abandoned: "The homeowner owns a CLOSED/ABANDONED property and is preparing to REOCCUPY it. The system likely needs inspection before reuse. Focus on assessing current condition and readiness.",
+          };
+          contextMessages.push({
+            role: "user",
+            content: `[DETECTED HOMEOWNER SITUATION]\nSubscenario: ${detectedSubscenario.toUpperCase()}\n${subscenarioDescriptions[detectedSubscenario]}\n\nUse this context to tailor your guidance specifically to this situation. Do NOT ask what situation they're in—you already know.`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: `Understood. I've identified that you're in a ${detectedSubscenario} situation. I'll tailor my guidance accordingly.`,
+          });
+          // Update formState to persist the detection
+          if (formState) {
+            formState.subscenario = detectedSubscenario as any;
+          }
         }
 
         if (formState && formState.calculated) {

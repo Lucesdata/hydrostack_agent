@@ -72,7 +72,16 @@ Antes de orientar, ubica al usuario en UNO de estos cuatro sub-escenarios:
 - **Sistema viejo sin falla**: Prevención y mantenimiento. Inspección periódica.
 - **Casa abandonada o sin uso**: Revisión previa a habitarla. Bacterias e infiltración comprometidas.
 
-Si no es claro, pregunta una sola vez con opciones simples (ver archivo `docs/orientation-guidance.md`).
+#### Auto-detección de Sub-escenario
+
+El agente **detecta automáticamente** el sub-escenario usando análisis de palabras clave en español e inglés:
+
+- **Instalación nueva**: "construir", "obra nueva", "terreno", "proyecto", "desde cero", "new construction", "new property"
+- **Falla activa**: "olor", "apesta", "urgente", "agua subiendo", "rebosa", "smell", "stink", "urgent", "backup"
+- **Prevención**: "revisión", "mantenimiento", "cada cuánto", "funciona bien", "inspection", "maintenance", "how often"
+- **Casa abandonada**: "abandonada", "vacía", "8 años", "quiero habitarla", "abandoned", "empty", "unopened for years"
+
+Si se detecta con confianza > 50%, el agente **no pregunta** el sub-escenario y procede directamente a orientación específica. Si no se detecta claramente, pregunta una sola vez con opciones simples (ver archivo `docs/orientation-guidance.md`).
 
 ### Orientación por sub-escenario y país
 
@@ -151,11 +160,30 @@ Guarda el perfil detectado en memoria para futuras referencias en la sesión.
 
 ---
 
-## 5. Configuración Técnica
+## 5. Implementación Técnica — Auto-detección
 
-- **Modelo de inferencia**: Groq (llama-3.3-70b) para rapidez
+La auto-detección de sub-escenarios se implementa con:
+
+- **Archivo**: `src/lib/agent/subscenario-detector.ts`
+- **Función**: `detectSubscenario(userMessage: string)` → `{subscenario, confidence, detectedKeywords}`
+- **Inyección**: En `app/api/chat/route.ts` POST
+- **Umbral**: Confianza > 50% para activar detección
+- **Idiomas**: Español e inglés (palabras clave combinadas)
+
+**Flujo**:
+1. Mensaje del usuario llega a `/api/chat`
+2. Se detecta el sub-escenario si `userProfile === "owner"` y no hay uno previo
+3. Si se detecta con confianza > 50%, se inyecta como contexto al agente
+4. El agente NO pregunta por el sub-escenario; procede directamente a orientación
+
+---
+
+## 6. Configuración Técnica
+
+- **Modelo de inferencia**: Groq (llama-3.3-70b-versatile) para rapidez
 - **Respuestas**: Breves, concretas, sin explicaciones innecesarias a menos que se solicite
-- **API Key Groq**: Almacenada en memoria del proyecto
+- **API Key Groq**: Almacenada en variables de entorno
+- **Framework**: Next.js 15 con React
 
 ---
 
@@ -164,3 +192,4 @@ Guarda el perfil detectado en memoria para futuras referencias en la sesión.
 Estas instrucciones son **obligatorias** y definen el comportamiento del agente. Cualquier cambio debe documentarse aquí y actualizarse en memoria.
 
 Última actualización: 2026-05-18
+**Auto-detección de sub-escenarios**: Agregada en fase 1 de mejoras de propietarios (2026-05-18)
