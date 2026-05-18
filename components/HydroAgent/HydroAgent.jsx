@@ -5,6 +5,7 @@ import { useLang } from "@/lib/i18n";
 import { renderMarkdown } from "./markdown";
 import ToolResultCard from "./ToolResultCard";
 import ProfileDetector from "./ProfileDetector";
+import { getOwnerState, saveOwnerState, updateOwnerStateFromResponse } from "@/lib/owner-state";
 
 /**
  * HydroAgent — centerpiece chat surface.
@@ -24,6 +25,8 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
   const [loading, setLoading]     = useState(false);
   const [errored, setErrored]     = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [ownerState, setOwnerState] = useState(null);
+  const [showPhaseResume, setShowPhaseResume] = useState(false);
 
   const scrollRef = useRef(null);
   const inputRef  = useRef(null);
@@ -35,11 +38,20 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  // Load profile from localStorage on mount
+  // Load profile and ownerstate from localStorage on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = localStorage.getItem("hydrostack_profile");
-    if (stored) setUserProfile(stored);
+    const storedProfile = localStorage.getItem("hydrostack_profile");
+    if (storedProfile) setUserProfile(storedProfile);
+
+    if (storedProfile === "owner") {
+      const state = getOwnerState();
+      if (state) {
+        setOwnerState(state);
+        // Show resume of previous phase on first render
+        setShowPhaseResume(true);
+      }
+    }
   }, []);
 
   // Focus the input on mount (desktop). Avoids opening mobile keyboard.
@@ -77,6 +89,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
 
     try {
       let formState = undefined;
+      let currentOwnerState = ownerState;
       try {
         const stored = typeof localStorage !== "undefined"
           ? localStorage.getItem("hydrostack_formstate")
@@ -87,7 +100,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
       const res = await fetch("/api/chat", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ messages: next, formState, userProfile }),
+        body:    JSON.stringify({ messages: next, formState, userProfile, ownerState: currentOwnerState }),
         signal:  abortRef.current.signal,
       });
 
@@ -164,7 +177,15 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
       setMessages(prev => {
         const copy = [...prev];
         const last = copy[copy.length - 1];
-        if (last?.streaming) copy[copy.length - 1] = { ...last, streaming: false };
+        if (last?.streaming) {
+          copy[copy.length - 1] = { ...last, streaming: false };
+          // Update ownerState based on agent response (for owner profile)
+          if (userProfile === "owner" && last?.content) {
+            const updated = updateOwnerStateFromResponse(ownerState || {}, last.content);
+            setOwnerState(updated);
+            saveOwnerState(updated);
+          }
+        }
         return copy;
       });
       setLoading(false);
@@ -186,6 +207,8 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     if (loading) abortRef.current?.abort();
     setMessages([]);
     setErrored(false);
+    setShowPhaseResume(false);
+    // Keep ownerstate but reset phase resume
     inputRef.current?.focus();
   }
 
@@ -246,7 +269,21 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
             />
           )}
 
-          {!hasMessages && userProfile && (
+          {!hasMessages && userProfile && ownerState && showPhaseResume && (
+            <PhaseResume
+              ownerState={ownerState}
+              onContinue={() => setShowPhaseResume(false)}
+              onReset={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("hydrostack_ownerstate");
+                }
+                setOwnerState(null);
+                setShowPhaseResume(false);
+              }}
+            />
+          )}
+
+          {!hasMessages && userProfile && (!ownerState || !showPhaseResume) && (
             <EmptyState
               welcome={a.welcome}
               suggestionsLabel={a.suggestionsLabel}
@@ -381,6 +418,63 @@ function Bubble({ role, content, tools, streaming, errored, labelUser, labelAssi
         }
       </div>
     </article>
+  );
+}
+
+function PhaseResume({ ownerState, onContinue, onReset }) {
+  const phaseLabels = {
+    initial: "Initial diagnosis",
+    explanation: "Explaining how systems work",
+    orientation: "Providing next steps",
+    detail: "Deep dive details",
+  };
+
+  const subscenarioLabels = {
+    installation: "Planning a new installation",
+    active_failure: "Experiencing an active failure",
+    preventive: "Preventive maintenance",
+    abandoned: "Reopening an abandoned property",
+  };
+
+  const phaseText = ownerState.phase ? phaseLabels[ownerState.phase] : "Starting fresh";
+  const subscenarioText = ownerState.subscenario ? subscenarioLabels[ownerState.subscenario] : null;
+
+  return (
+    <div style={S.phaseResume}>
+      <div style={S.phaseResumeBadge} className="fade-up">
+        <span style={S.phaseResumeDot} className="blink" aria-hidden="true" />
+        <span style={S.phaseResumeBadgeText}>continuing session</span>
+      </div>
+      <div style={S.phaseResumeTitle} className="fade-up-1">
+        Welcome back
+      </div>
+      <div style={S.phaseResumeText} className="fade-up-2">
+        {subscenarioText && (
+          <>
+            I see you were working on <strong>{subscenarioText}</strong>.
+            <br />
+            {ownerState.country && <span>Location: {ownerState.country}</span>}
+          </>
+        )}
+        {!subscenarioText && <span>Ready to continue where we left off.</span>}
+      </div>
+      <div style={S.phaseResumeActions} className="fade-up-3">
+        <button
+          type="button"
+          onClick={onContinue}
+          style={{ ...S.phaseResumeBtn, ...S.phaseResumeBtnContinue }}
+        >
+          Continue ✓
+        </button>
+        <button
+          type="button"
+          onClick={onReset}
+          style={{ ...S.phaseResumeBtn, ...S.phaseResumeBtnReset }}
+        >
+          Start fresh
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -638,5 +732,73 @@ const S = {
     letterSpacing: "0.06em",
     textAlign: "right",
     fontFamily: "'IBM Plex Mono', monospace",
+  },
+
+  /* Phase Resume */
+  phaseResume: {
+    maxWidth: "640px",
+    margin: "min(10vh, 80px) auto 24px",
+    textAlign: "center",
+    padding: "0 12px",
+  },
+  phaseResumeBadge: {
+    display: "inline-flex", alignItems: "center", gap: "6px",
+    border: "1px solid rgba(255,180,0,0.35)",
+    borderRadius: "3px",
+    padding: "4px 10px",
+    marginBottom: "18px",
+  },
+  phaseResumeDot: {
+    width: "5px", height: "5px", borderRadius: "50%",
+    background: "#FFB400", boxShadow: "0 0 6px #FFB400",
+  },
+  phaseResumeBadgeText: {
+    fontSize: "9px",
+    color: "#FFB400",
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    fontFamily: "'IBM Plex Mono', monospace",
+  },
+  phaseResumeTitle: {
+    fontSize: "clamp(18px, 2.5vw, 24px)",
+    fontWeight: 600,
+    color: "#E8F8FF",
+    marginBottom: "12px",
+    fontFamily: "'Inter', sans-serif",
+  },
+  phaseResumeText: {
+    fontSize: "13px",
+    color: "#8ab8c8",
+    lineHeight: 1.6,
+    marginBottom: "20px",
+    fontFamily: "'Inter', sans-serif",
+  },
+  phaseResumeActions: {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+  phaseResumeBtn: {
+    padding: "8px 16px",
+    borderRadius: "3px",
+    fontSize: "12px",
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontWeight: 600,
+    cursor: "pointer",
+    border: "1px solid",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    transition: "all 0.15s",
+  },
+  phaseResumeBtnContinue: {
+    background: "rgba(0,245,255,0.12)",
+    color: "#00F5FF",
+    borderColor: "rgba(0,245,255,0.25)",
+  },
+  phaseResumeBtnReset: {
+    background: "transparent",
+    color: "#2a5070",
+    borderColor: "rgba(0,245,255,0.12)",
   },
 };

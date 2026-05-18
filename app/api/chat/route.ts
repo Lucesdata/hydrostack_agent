@@ -159,6 +159,15 @@ interface ChatRequest {
   messages: ChatMessage[];
   formState?: FormState;
   userProfile?: string;
+  ownerState?: {
+    phase: string | null;
+    subscenario: string | null;
+    explanationOffered: boolean;
+    country: string | null;
+    occupants: number | null;
+    systemAge: number | null;
+    lastUpdated: string;
+  };
 }
 
 function detectLocation(text: string): string {
@@ -379,7 +388,7 @@ async function streamRound(
 }
 
 export async function POST(req: Request) {
-  const { messages, formState, userProfile }: ChatRequest = await req.json();
+  const { messages, formState, userProfile, ownerState }: ChatRequest = await req.json();
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -423,6 +432,25 @@ export async function POST(req: Request) {
           contextMessages.push({
             role: "assistant",
             content: "Orientation guidance loaded. I'll structure advice around the homeowner's specific situation and provide country-specific next steps.",
+          });
+        }
+
+        // Inject previous session context (ownerState)
+        if (ownerState && ownerState.subscenario) {
+          const subscenarioLabels = {
+            installation: "planning a new installation",
+            active_failure: "dealing with an active failure",
+            preventive: "doing preventive maintenance",
+            abandoned: "reopening an abandoned property",
+          };
+          const label = subscenarioLabels[ownerState.subscenario as keyof typeof subscenarioLabels] || "working on their septic system";
+          contextMessages.push({
+            role: "user",
+            content: `[PREVIOUS SESSION CONTEXT]\nThis homeowner was ${label}. They may have already received some guidance or explanations. Continue from where we left off, but be ready to clarify or expand if they ask.`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: `I see we've been working on this together. Let me continue helping with your ${ownerState.subscenario} situation.`,
           });
         }
 

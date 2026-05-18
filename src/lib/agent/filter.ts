@@ -22,6 +22,29 @@ export interface FormState {
   explanationOffered?: boolean
 }
 
+// Owner state — persisted between sessions
+export interface OwnerState {
+  phase: "initial" | "explanation" | "orientation" | "detail" | null
+  subscenario: "installation" | "active_failure" | "preventive" | "abandoned" | null
+  explanationOffered: boolean
+  country: "colombia" | "spain" | "usa" | "other" | null
+  occupants: number | null
+  systemAge: number | null // years
+  lastUpdated: string // ISO8601 timestamp
+}
+
+export function createEmptyOwnerState(): OwnerState {
+  return {
+    phase: null,
+    subscenario: null,
+    explanationOffered: false,
+    country: null,
+    occupants: null,
+    systemAge: null,
+    lastUpdated: new Date().toISOString(),
+  }
+}
+
 export function evaluateConditions(
   conditions: ConditionKey[],
   formState: FormState
