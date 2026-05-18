@@ -14,6 +14,12 @@ export interface FormState {
   soilPermeability?: "high" | "medium" | "low" | "none" | "unknown"
   normKey?: "epa" | "uk" | "asnzs" | "cte" | "ras"
   calculated?: boolean
+  // Flow phases for homeowners
+  phase?: "initial" | "explanation" | "orientation" | "detail"
+  // Detected subscenario for orientation
+  subscenario?: "installation" | "active_failure" | "preventive" | "abandoned"
+  // Whether explanation was offered
+  explanationOffered?: boolean
 }
 
 export function evaluateConditions(

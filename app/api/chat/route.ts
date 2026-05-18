@@ -28,7 +28,19 @@ absorption wells, and decentralized wastewater treatment.`;
 - Start by asking about their situation in simple terms: "Tell me about your house and where it's located"
 - Explain what's happening before diving into numbers
 - Guide them step-by-step without assuming technical knowledge
-- After giving advice, check if they understand`,
+- After giving advice, check if they understand
+
+## ORIENTATION FLOW FOR HOMEOWNERS
+After diagnosis and optional explanation, move to practical next steps guidance:
+
+1. **Identify the subscenario**: Installation, active failure, preventive maintenance, or abandoned house
+2. **Ask clarifying questions if needed**: Use the single 4-option question (see orientation context below)
+3. **Deliver step-by-step guidance**: Specific to their situation and country
+4. **Adapt by country**: Name correct professionals and regulatory requirements per jurisdiction
+5. **End with control question**: "Want details on any of these steps, or help preparing questions for the [professional]?"
+
+Never push the user to the next phase. They decide when to deepen or move forward.
+If the user doesn't fit the 4 subscenarios, ask clarifying questions before forcing orientation.`,
 
     professional: `
 ## ROLE AND TONE (PROFESSIONAL/ENGINEER)
@@ -205,6 +217,19 @@ async function getNormativaMD(ubicacion: string): Promise<string> {
   }
 }
 
+async function getOrientationGuidance(userProfile?: string): Promise<string> {
+  // Only inject orientation guidance for homeowner profile
+  if (userProfile !== "owner") return "";
+  try {
+    // Use compact version to stay within token budget
+    const fullPath = join(process.cwd(), "docs/orientation-guidance-compact.md");
+    const raw = await readFile(fullPath, "utf-8");
+    return raw;
+  } catch {
+    return "";
+  }
+}
+
 async function getCatalogSuggestions(formState: FormState | undefined): Promise<string> {
   if (!formState) return "";
   try {
@@ -365,6 +390,7 @@ export async function POST(req: Request) {
         const lastMessage  = messages[messages.length - 1]?.content || "";
         const locationKey  = detectLocation(lastMessage);
         const normativaMD  = await getNormativaMD(locationKey);
+        const orientationMD = await getOrientationGuidance(userProfile);
         const catalogSuggs = await getCatalogSuggestions(formState);
 
         const contextMessages: ChatMessage[] = [];
@@ -376,6 +402,17 @@ export async function POST(req: Request) {
           contextMessages.push({
             role: "assistant",
             content: "Standards loaded. Ready to assist with sizing per local code requirements.",
+          });
+        }
+
+        if (orientationMD) {
+          contextMessages.push({
+            role: "user",
+            content: `[ORIENTATION GUIDANCE FOR HOMEOWNERS]\n${orientationMD}`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: "Orientation guidance loaded. I'll structure advice around the homeowner's specific situation and provide country-specific next steps.",
           });
         }
 
