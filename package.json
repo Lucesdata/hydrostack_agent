@@ -14,11 +14,13 @@
     "@google/generative-ai": "^0.24.1",
     "babylonjs": "^9.4.1",
     "next": "14.2.3",
+    "pdfkit": "^0.18.0",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "25.6.0",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "19.2.14",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
