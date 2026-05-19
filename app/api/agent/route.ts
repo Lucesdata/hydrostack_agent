@@ -132,6 +132,69 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Helper: auto-inject outputs from previous tool calls
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * When the LLM calls validate_against_cte or generate_pdf_report, it sometimes
+ * passes the INPUT of a previous tool (e.g., {habitantes_equivalentes, tipo_uso})
+ * instead of its OUTPUT (e.g., {volumen_util_litros, dimensiones, ...}).
+ *
+ * This helper detects that case and replaces the input field with the actual
+ * tool output from the toolCalls history.
+ */
+function injectPreviousOutputs(
+  toolName: string,
+  input: Record<string, unknown>,
+  previousCalls: ToolCallRecord[]
+): Record<string, unknown> {
+  if (toolName !== 'validate_against_cte' && toolName !== 'generate_pdf_report') {
+    return input;
+  }
+
+  const result = { ...input };
+
+  // Helper to find last successful tool output by name
+  const findOutput = (name: string): unknown => {
+    for (let i = previousCalls.length - 1; i >= 0; i--) {
+      if (previousCalls[i].name === name) {
+        const out = previousCalls[i].output as Record<string, unknown> | null;
+        if (out && !('error' in out)) return out;
+      }
+    }
+    return null;
+  };
+
+  // Aggressive strategy: if a previous tool was successfully called, ALWAYS use its
+  // real output for septic_tank/drainage_field/validation fields. The LLM tends to
+  // hallucinate fields (e.g., "anchura" instead of "ancho_zanja_m") or pass inputs
+  // instead of outputs. We don't trust the LLM to relay structured data correctly.
+
+  const realSepticTank = findOutput('calculate_septic_tank');
+  if (realSepticTank && 'septic_tank' in result) {
+    result.septic_tank = realSepticTank;
+    console.log(`[agent] auto-injected septic_tank output into ${toolName}`);
+  }
+
+  const realDrainageField = findOutput('calculate_drainage_field');
+  if (realDrainageField && 'drainage_field' in result) {
+    result.drainage_field = realDrainageField;
+    console.log(`[agent] auto-injected drainage_field output into ${toolName}`);
+  }
+
+  // For generate_pdf_report: also inject validation if there was a previous call
+  if (toolName === 'generate_pdf_report') {
+    const realValidation = findOutput('validate_against_cte');
+    if (realValidation) {
+      result.validation = realValidation;
+      console.log(`[agent] auto-injected validation output into ${toolName}`);
+    }
+  }
+
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Agent loop with multi-tool composition
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -188,6 +251,11 @@ async function runAgentLoop(userMessage: string): Promise<AgentResponse> {
         } catch {
           toolInput = { raw: toolCall.function.arguments };
         }
+
+        // Auto-inject outputs from previous tools when the model passes incomplete data.
+        // This handles the case where the LLM passes the INPUT of a previous tool instead
+        // of its OUTPUT for tools like validate_against_cte and generate_pdf_report.
+        toolInput = injectPreviousOutputs(toolName, toolInput, toolCalls);
 
         const startTime = Date.now();
         let result: unknown;
