@@ -2,7 +2,7 @@
  * Central registry for all Hydro_Agent tools.
  *
  * This module:
- * - Exports all tool definitions for Anthropic SDK
+ * - Exports all tool definitions for Groq (OpenAI format)
  * - Provides a toolExecutors map for dynamic tool invocation by name
  * - Scales easily as more tools are added in future phases
  */
@@ -14,7 +14,7 @@ import {
 } from './calculateSepticTank';
 
 // ─────────────────────────────────────────────────────────────────────────
-// Tool definitions for Anthropic SDK
+// Tool definitions for Groq (OpenAI format)
 // ─────────────────────────────────────────────────────────────────────────
 
 export const tools = [calculateSepticTankTool];

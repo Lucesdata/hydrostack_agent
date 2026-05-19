@@ -1,5 +1,5 @@
 /**
- * Tool definition for calculate_septic_tank in Anthropic SDK format.
+ * Tool definition for calculate_septic_tank in OpenAI format (Groq compatible).
  *
  * This tool allows the Hydro_Agent to invoke septic tank sizing calculations
  * according to CTE DB-HS 5 (Spain) and RD 1620/2007 standards.
@@ -8,12 +8,14 @@
 import { calculateSepticTank, SepticTankInput, SepticTankResult } from '@/lib/calculations/septicTank';
 
 // ─────────────────────────────────────────────────────────────────────────
-// Tool definition for Anthropic SDK
+// Tool definition for OpenAI / Groq API format
 // ─────────────────────────────────────────────────────────────────────────
 
 export const calculateSepticTankTool = {
-  name: 'calculate_septic_tank',
-  description: `
+  type: 'function',
+  function: {
+    name: 'calculate_septic_tank',
+    description: `
 **Qué hace:** Calcula el volumen y dimensiones de una fosa séptica según la normativa española CTE DB-HS 5 (Código Técnico de la Edificación, Documento Básico de Salubridad, Sección 5) y RD 1620/2007 (Regulación de sistemas individuales de tratamiento).
 
 **Cuándo USAR:**
@@ -30,49 +32,50 @@ export const calculateSepticTankTool = {
 - Se aplican automáticamente mínimos CTE DB-HS 5 (vivienda unifamiliar: 5 h-e mínimo, 200 L/hab·día dotación, 1–2 días retención).
 - El usuario recibe avisos en "validacion_cte.avisos" indicando qué valores fueron normalizados.
 `,
-  input_schema: {
-    type: 'object',
-    properties: {
-      habitantes_equivalentes: {
-        type: 'integer',
-        description: 'Número de habitantes equivalentes (h-e). Mínimo 1. CTE DB-HS 5: vivienda unifamiliar requiere mín. 5 h-e.',
-        minimum: 1,
-        maximum: 500,
+    parameters: {
+      type: 'object',
+      properties: {
+        habitantes_equivalentes: {
+          type: 'integer',
+          description: 'Número de habitantes equivalentes (h-e). Mínimo 1. CTE DB-HS 5: vivienda unifamiliar requiere mín. 5 h-e.',
+          minimum: 1,
+          maximum: 500,
+        },
+        tipo_uso: {
+          type: 'string',
+          enum: [
+            'vivienda_unifamiliar',
+            'vivienda_colectiva',
+            'restaurante',
+            'hotel',
+            'camping',
+            'oficina',
+            'industrial',
+          ],
+          description: 'Tipo de uso/instalación. Define dotación y mínimos CTE por defecto.',
+        },
+        dotacion_litros_hab_dia: {
+          type: 'number',
+          description:
+            'Dotación diaria en L/hab·día. Por defecto: 200 (España). Rango típico: 100–250.',
+          minimum: 50,
+          maximum: 500,
+        },
+        tiempo_retencion_dias: {
+          type: 'number',
+          description:
+            'Tiempo de retención hidráulica (HRT) en días. Por defecto: 2. Mínimo CTE: 1. Recomendado: 2.',
+          minimum: 1,
+          maximum: 5,
+        },
+        numero_compartimentos: {
+          type: 'integer',
+          enum: [2, 3],
+          description: 'Número de cámaras de sedimentación. Por defecto: 2. Usar 3 para cargas altas.',
+        },
       },
-      tipo_uso: {
-        type: 'string',
-        enum: [
-          'vivienda_unifamiliar',
-          'vivienda_colectiva',
-          'restaurante',
-          'hotel',
-          'camping',
-          'oficina',
-          'industrial',
-        ],
-        description: 'Tipo de uso/instalación. Define dotación y mínimos CTE por defecto.',
-      },
-      dotacion_litros_hab_dia: {
-        type: 'number',
-        description:
-          'Dotación diaria en L/hab·día. Por defecto: 200 (España). Rango típico: 100–250.',
-        minimum: 50,
-        maximum: 500,
-      },
-      tiempo_retencion_dias: {
-        type: 'number',
-        description:
-          'Tiempo de retención hidráulica (HRT) en días. Por defecto: 2. Mínimo CTE: 1. Recomendado: 2.',
-        minimum: 1,
-        maximum: 5,
-      },
-      numero_compartimentos: {
-        type: 'integer',
-        enum: [2, 3],
-        description: 'Número de cámaras de sedimentación. Por defecto: 2. Usar 3 para cargas altas.',
-      },
+      required: ['habitantes_equivalentes', 'tipo_uso'],
     },
-    required: ['habitantes_equivalentes', 'tipo_uso'],
   },
 };
 

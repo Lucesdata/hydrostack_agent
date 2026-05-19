@@ -1,5 +1,5 @@
 /**
- * Hydro_Agent endpoint — tool use loop implementation
+ * Hydro_Agent endpoint with Groq (OpenAI-compatible API)
  *
  * POST /api/agent
  * Body: { message: string }
@@ -7,45 +7,37 @@
  * Returns: { reply: string, toolCalls: Array<{name, input, output}> }
  */
 
-import { Anthropic } from '@anthropic-ai/sdk';
 import { tools, executeTool } from '@/lib/agent/tools';
 
-// ─────────────────────────────────────────────────────────────────────────
-// Initialize Anthropic client
-// ─────────────────────────────────────────────────────────────────────────
+export const runtime = 'nodejs';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('❌ ANTHROPIC_API_KEY not set. Agent endpoint will fail.');
-}
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const MAX_TOOL_ROUNDS = 3;
+const MAX_TOKENS = 1024;
 
 // ─────────────────────────────────────────────────────────────────────────
 // System prompt for Hydro_Agent
 // ─────────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
-Eres Hydro_Agent, un asistente técnico especializado en sistemas individuales de tratamiento de aguas residuales (SITARD) en España.
+const SYSTEM_PROMPT = `You are Hydro_Agent, a technical assistant specialized in individual wastewater treatment systems (SITARD) in Spain.
 
-Tu objetivo es ayudar a propietarios, profesionales y contratistas a:
-1. Dimensionar fosas sépticas según CTE DB-HS 5 y RD 1620/2007
-2. Diseñar campos de drenaje/infiltración
-3. Entender la normativa y requisitos técnicos
+Your objective is to help homeowners, professionals, and contractors to:
+1. Size septic tanks according to CTE DB-HS 5 and RD 1620/2007
+2. Design drainage/infiltration fields
+3. Understand regulations and technical requirements
 
-Comportamiento:
-- Responde en el idioma del usuario (español o inglés detectado automáticamente).
-- Cita siempre la normativa aplicable (CTE DB-HS 5, RD 1620/2007, Confederación Hidrográfica).
-- Usa los tools disponibles para hacer cálculos reales, no recomendaciones vagas.
-- Cuando el usuario describa un caso en lenguaje natural, extrae los parámetros y llama al tool apropiado.
-- Interpreta el resultado del tool y explica qué significa en contexto del caso del usuario.
+Behavior:
+- Detect user language (Spanish or English) automatically; respond in the same language
+- Always cite applicable standards (CTE DB-HS 5, RD 1620/2007, Confederación Hidrográfica)
+- Use available tools for real calculations, not vague recommendations
+- When user describes a case in natural language, extract parameters and call the appropriate tool
+- Interpret tool results and explain what they mean in context
 
-Tono:
-- Profesional pero accesible.
-- Sin jerga innecesaria; si la usas, define términos.
-- Proporciona contexto: por qué se calcula así, qué significa el resultado, próximos pasos.
-`;
+Tone:
+- Professional but accessible
+- No unnecessary jargon; if used, define terms
+- Provide context: why calculated this way, what the result means, next steps`;
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
@@ -60,6 +52,11 @@ interface ToolCall {
 interface AgentResponse {
   reply: string;
   toolCalls: ToolCall[];
+}
+
+interface GroqMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -78,9 +75,9 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return Response.json(
-        { error: 'ANTHROPIC_API_KEY not configured' },
+        { error: 'GROQ_API_KEY not configured' },
         { status: 500 }
       );
     }
@@ -101,11 +98,11 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Agent loop with tool use
+// Agent loop with tool use (Groq OpenAI format)
 // ─────────────────────────────────────────────────────────────────────────
 
 async function runAgentLoop(userMessage: string): Promise<AgentResponse> {
-  const messages: Anthropic.Messages.MessageParam[] = [
+  const messages: GroqMessage[] = [
     {
       role: 'user',
       content: userMessage,
@@ -114,92 +111,71 @@ async function runAgentLoop(userMessage: string): Promise<AgentResponse> {
 
   const toolCalls: ToolCall[] = [];
 
-  // Tool use loop (max 10 iterations to prevent infinite loops)
-  for (let iteration = 0; iteration < 10; iteration++) {
-    const response = await client.messages.create({
-      model: 'claude-opus-4-7',
-      max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      tools: tools as unknown as Anthropic.Messages.Tool[],
-      messages,
-    });
+  // Tool use loop (max iterations to prevent infinite loops)
+  for (let iteration = 0; iteration < MAX_TOOL_ROUNDS; iteration++) {
+    const response = await callGroqAPI(messages);
 
-    // If response ends with text, add it to messages for context
-    let assistantContent: Anthropic.Messages.ContentBlockParam[] = [];
-
-    for (const block of response.content) {
-      if (block.type === 'text') {
-        assistantContent.push({
-          type: 'text',
-          text: block.text,
-        });
-      } else if (block.type === 'tool_use') {
-        assistantContent.push({
-          type: 'tool_use',
-          id: block.id,
-          name: block.name,
-          input: block.input as Record<string, unknown>,
-        });
-      }
+    if (!response.ok) {
+      throw new Error(
+        `Groq API error: ${response.status} ${response.statusText}`
+      );
     }
 
-    // Add assistant's response to message history
+    const data = await response.json();
+    const choice = data.choices?.[0];
+
+    if (!choice) {
+      throw new Error('No choice in Groq response');
+    }
+
+    const assistantMessage = choice.message;
+
+    // Add assistant message to history
     messages.push({
       role: 'assistant',
-      content: assistantContent,
+      content: assistantMessage.content || '',
     });
 
-    // Check if we need to process tool calls
-    if (response.stop_reason === 'tool_use') {
-      // Find all tool_use blocks and execute them
-      const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
+    // Check for tool calls
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      const toolResults: string[] = [];
 
-      for (const block of response.content) {
-        if (block.type === 'tool_use') {
-          try {
-            const result = await executeTool(block.name, block.input as Record<string, unknown>);
+      for (const toolCall of assistantMessage.tool_calls) {
+        const toolName = toolCall.function.name;
+        const toolInput = JSON.parse(toolCall.function.arguments);
 
-            // Record the tool call for the response
-            toolCalls.push({
-              name: block.name,
-              input: block.input as Record<string, unknown>,
-              output: result,
-            });
+        try {
+          const result = await executeTool(toolName, toolInput);
 
-            // Add tool result to message history
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: JSON.stringify(result),
-            });
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
+          // Record the tool call
+          toolCalls.push({
+            name: toolName,
+            input: toolInput,
+            output: result,
+          });
 
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: `Error executing tool: ${errorMessage}`,
-              is_error: true,
-            });
-          }
+          // Add tool result to message history (Groq format)
+          toolResults.push(
+            `{"tool_call_id": "${toolCall.id}", "role": "tool", "name": "${toolName}", "content": ${JSON.stringify(result)}}`
+          );
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
+          toolResults.push(
+            `{"tool_call_id": "${toolCall.id}", "role": "tool", "name": "${toolName}", "content": "Error: ${errorMessage}"}`
+          );
         }
       }
 
-      // Add tool results to message history
+      // Add tool results as user message (Groq format)
       messages.push({
         role: 'user',
-        content: toolResults,
+        content: `[Tool Results]\n${toolResults.join('\n')}`,
       });
     } else {
-      // Model finished (stop_reason === 'end_turn')
-      // Extract final text reply
-      let reply = '';
-      for (const block of response.content) {
-        if (block.type === 'text') {
-          reply += block.text;
-        }
-      }
-
+      // No tool calls → model finished with text response
+      const reply = assistantMessage.content || '';
       return {
         reply: reply.trim(),
         toolCalls,
@@ -207,9 +183,32 @@ async function runAgentLoop(userMessage: string): Promise<AgentResponse> {
     }
   }
 
-  // If we exit the loop without an end_turn, return what we have
+  // If we exit the loop without a final text response
   return {
-    reply: '(Agent loop exceeded max iterations)',
+    reply:
+      '(Agent reached max tool use rounds. Please check logs for details.)',
     toolCalls,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Groq API call
+// ─────────────────────────────────────────────────────────────────────────
+
+async function callGroqAPI(messages: GroqMessage[]): Promise<Response> {
+  return fetch(GROQ_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      max_tokens: MAX_TOKENS,
+      messages,
+      tools: tools as unknown[],
+      tool_choice: 'auto',
+      temperature: 0.7,
+    }),
+  });
 }

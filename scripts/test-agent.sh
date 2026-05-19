@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Test script for Hydro_Agent endpoint
-# Usage: ANTHROPIC_API_KEY=sk-ant-... ./scripts/test-agent.sh
+# Test script for Hydro_Agent endpoint with Groq
+# Usage: GROQ_API_KEY=gsk_... ./scripts/test-agent.sh
 
 set -e
 
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-  echo "❌ ANTHROPIC_API_KEY not set."
-  echo "   Export it: export ANTHROPIC_API_KEY=sk-ant-..."
+if [ -z "$GROQ_API_KEY" ]; then
+  echo "❌ GROQ_API_KEY not set."
+  echo "   Export it: export GROQ_API_KEY=gsk_..."
   exit 1
 fi
 
