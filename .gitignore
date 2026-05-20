@@ -6,3 +6,7 @@ node_modules/
 .DS_Store
 .claude/
 .vercel
+
+# Generated PDF reports (runtime artifacts)
+/public/reports/*.pdf
+tsconfig.tsbuildinfo
