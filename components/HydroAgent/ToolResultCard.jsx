@@ -4,181 +4,132 @@ import { useLang } from "@/lib/i18n";
 
 /**
  * Renders the inline result of a tool call inside the chat.
- * Currently supports: `size_septic_tank`, `evaluate_soil_infiltration`.
+ * Supports the modular tool suite: calculate_septic_tank,
+ * calculate_drainage_field, validate_against_cte, generate_pdf_report.
  */
-export default function ToolResultCard({ tool, args, result }) {
-  const { t, lang } = useLang();
-  const a = t.agent;
 
-  if (tool === "size_septic_tank") {
-    return <SepticCard args={args} result={result} a={a} />;
-  }
-  if (tool === "evaluate_soil_infiltration") {
-    return <InfiltrationCard args={args} result={result} a={a} lang={lang} />;
-  }
+const L = {
+  es: {
+    inputs: "Datos", results: "Resultados", checks: "Verificaciones",
+    errorTitle: "Error", openCalc: "Abrir calculadora",
+    septicTitle: "Fosa Séptica", septicSub: "Dimensionado · CTE DB-HS 5",
+    qd: "Caudal diario", vutil: "Volumen útil", vtotal: "Volumen total",
+    trh: "Retención", chambers: "Compartimentos", dims: "Dim. L×An×Al",
+    altoTotal: "Altura total", warnings: "Avisos CTE",
+    drainTitle: "Campo de Drenaje", drainSub: "Infiltración · CTE DB-HS 5 Anejo G",
+    tipoSistema: "Tipo de sistema", perm: "Permeabilidad (K)", carga: "Carga hidráulica",
+    superficie: "Superficie infiltración", profundidad: "Profundidad",
+    longZanjas: "Longitud de zanjas", numZanjas: "Nº de zanjas",
+    sepZanjas: "Separación", anchoZanja: "Ancho de zanja",
+    validTitle: "Validación Normativa", validSub: "CTE DB-HS 5 · RD 1620/2007",
+    cumple: "CUMPLE NORMATIVA", noCumple: "NO CUMPLE", blockers: "Bloqueantes",
+    advert: "Advertencias", allOk: "Sin bloqueantes ni advertencias.",
+    pdfTitle: "Memoria Técnica", pdfSub: "Informe PDF generado",
+    download: "Descargar PDF", reportId: "ID del informe",
+  },
+  en: {
+    inputs: "Data", results: "Results", checks: "Checks",
+    errorTitle: "Error", openCalc: "Open calculator",
+    septicTitle: "Septic Tank", septicSub: "Sizing · CTE DB-HS 5",
+    qd: "Daily flow", vutil: "Useful volume", vtotal: "Total volume",
+    trh: "Retention", chambers: "Chambers", dims: "Dim. L×W×H",
+    altoTotal: "Total height", warnings: "CTE notices",
+    drainTitle: "Drainage Field", drainSub: "Infiltration · CTE DB-HS 5 Annex G",
+    tipoSistema: "System type", perm: "Permeability (K)", carga: "Hydraulic load",
+    superficie: "Infiltration area", profundidad: "Depth",
+    longZanjas: "Trench length", numZanjas: "Trench count",
+    sepZanjas: "Spacing", anchoZanja: "Trench width",
+    validTitle: "Regulatory Validation", validSub: "CTE DB-HS 5 · RD 1620/2007",
+    cumple: "MEETS CODE", noCumple: "DOES NOT MEET CODE", blockers: "Blocking issues",
+    advert: "Warnings", allOk: "No blocking issues or warnings.",
+    pdfTitle: "Technical Report", pdfSub: "PDF report generated",
+    download: "Download PDF", reportId: "Report ID",
+  },
+};
+
+export default function ToolResultCard({ tool, args, result }) {
+  const { lang } = useLang();
+  const tx = L[lang === "en" ? "en" : "es"];
+
+  if (tool === "calculate_septic_tank") return <SepticCard result={result} tx={tx} />;
+  if (tool === "calculate_drainage_field") return <DrainageCard result={result} tx={tx} />;
+  if (tool === "validate_against_cte") return <ValidationCard result={result} tx={tx} />;
+  if (tool === "generate_pdf_report") return <PdfCard result={result} tx={tx} />;
   return null;
 }
 
-function SepticCard({ args, result, a }) {
-  const T = a?.tool?.sizeSeptic;
-  if (!T) return null;
-
-  if (!result?.ok) {
-    return (
-      <div style={S.card}>
-        <div style={S.header}>
-          <span style={S.tag}>tool · size_septic_tank</span>
-          <span style={S.errorTag}>{T.errorTitle}</span>
-        </div>
-        <div style={S.errorBody}>{result?.error || a.toolError}</div>
-      </div>
-    );
-  }
-
-  const inputs  = result.inputs   || {};
-  const norm    = result.norm     || {};
-  const res     = result.results  || {};
-  const checks  = result.checks   || {};
-
+function ToolError({ toolName, message, tx }) {
   return (
-    <div style={S.card} role="region" aria-label={T.title}>
-      {/* Header */}
+    <div style={S.card}>
       <div style={S.header}>
-        <div style={S.headerLeft}>
-          <span style={S.toolDot} className="blink" aria-hidden="true" />
-          <span style={S.tag}>tool · size_septic_tank</span>
-        </div>
-        <span style={S.normPill}>
-          {norm.flag} {norm.name}
-        </span>
+        <span style={S.tag}>tool · {toolName}</span>
+        <span style={S.errorTag}>{tx.errorTitle}</span>
       </div>
-
-      <h3 style={S.title}>{T.title}</h3>
-      <div style={S.subtitle}>{T.subtitle} · {norm.ref}</div>
-
-      {/* Inputs */}
-      <div style={S.sectionLabel}>{T.inputs}</div>
-      <div style={S.kvGrid}>
-        <KV k={T.users}      v={`${inputs.users}`} />
-        <KV k={T.norm}       v={norm.flag + " " + norm.key?.toUpperCase()} />
-        <KV k={T.temp}       v={`${inputs.temp_c} °C`} sub={norm.temp_band} />
-        <KV k={T.dotacion}   v={`${inputs.dotacion_lpd} L/p·d`} />
-        <KV k={T.retCoef}    v={inputs.return_coef} />
-        <KV k={T.cleanYears} v={`${inputs.clean_years} a`} />
-        <KV k={T.depth}      v={`${inputs.depth_m} m`} />
-      </div>
-
-      {/* Results */}
-      <div style={S.sectionLabel}>{T.results}</div>
-      <div style={S.kvGrid}>
-        <KV k={T.qd}    v={`${res.Q_AR_m3_day} m³/d`} highlight />
-        <KV k={T.vl}    v={`${res.Vl_m3} m³`} />
-        <KV k={T.vs}    v={`${res.Vs_m3} m³`} />
-        <KV k={T.vn}    v={`${res.Vn_m3} m³`} />
-        <KV
-          k={T.vtot}
-          v={`${res.Vtot_m3} m³`}
-          sub={`${res.Vtot_liters?.toLocaleString?.() ?? res.Vtot_liters} L`}
-          highlight
-        />
-        <KV k={T.length}   v={`${res.length_m} m`} />
-        <KV k={T.width}    v={`${res.width_m} m`} />
-        <KV k={T.area}     v={`${res.area_m2} m²`} />
-        <KV k={T.chambers} v={`${res.chambers}`} />
-        <KV k={T.srt}      v={`${res.SRT_days} d`} />
-      </div>
-      {res.min_volume_applied && (
-        <div style={S.warning}>⚠ {T.minVolApplied}</div>
-      )}
-
-      {/* Checks */}
-      <div style={S.sectionLabel}>{T.checks}</div>
-      <div style={S.checksRow}>
-        <Check ok={checks.depth_ok}  label={T.checkDepth} />
-        <Check ok={checks.width_ok}  label={T.checkWidth} />
-        <Check ok={checks.length_ok} label={T.checkLength} />
-        <Check ok={checks.srt_ok}    label={T.checkSrt} />
-      </div>
-
-      {/* Footer */}
-      <div style={S.footer}>
-        <Link href="/calculators/fosa-septica" style={S.openLink} className="btn-ghost">
-          {T.openCalculator}
-        </Link>
-      </div>
+      <div style={S.errorBody}>{message || "—"}</div>
     </div>
   );
 }
 
-function InfiltrationCard({ args, result, a, lang }) {
-  const T = a?.tool?.infiltration;
-  if (!T) return null;
-
-  if (!result?.ok) {
-    return (
-      <div style={S.card}>
-        <div style={S.header}>
-          <span style={S.tag}>tool · evaluate_soil_infiltration</span>
-          <span style={S.errorTag}>{T.errorTitle}</span>
-        </div>
-        <div style={S.errorBody}>{result?.error || a.toolError}</div>
-      </div>
-    );
-  }
-
-  const inputs = result.inputs  || {};
-  const soil   = result.soil    || {};
-  const res    = result.results;
-  const recs   = result.recommendations || [];
-  const soilLabel = lang === "en" ? soil.label_en : soil.label_es;
-
+function CardShell({ toolName, pill, pillStyle, title, subtitle, children }) {
   return (
-    <div style={S.card} role="region" aria-label={T.title}>
+    <div style={S.card} role="region" aria-label={title}>
       <div style={S.header}>
         <div style={S.headerLeft}>
           <span style={S.toolDot} className="blink" aria-hidden="true" />
-          <span style={S.tag}>tool · evaluate_soil_infiltration</span>
+          <span style={S.tag}>tool · {toolName}</span>
         </div>
-        <span style={soil.suitable ? S.suitablePill : S.notSuitablePill}>
-          {soil.suitable ? "✓ " + T.suitable : "✗ " + T.notSuitable}
-        </span>
+        {pill && <span style={pillStyle || S.normPill}>{pill}</span>}
       </div>
+      <h3 style={S.title}>{title}</h3>
+      <div style={S.subtitle}>{subtitle}</div>
+      {children}
+    </div>
+  );
+}
 
-      <h3 style={S.title}>{T.title}</h3>
-      <div style={S.subtitle}>{T.subtitle}</div>
+function SepticCard({ result, tx }) {
+  if (!result || result.error) {
+    return <ToolError toolName="calculate_septic_tank" message={result?.error} tx={tx} />;
+  }
+  const d = result.dimensiones || {};
+  const v = result.validacion_cte || {};
+  const avisos = Array.isArray(v.avisos) ? v.avisos : [];
 
-      {/* Inputs */}
-      <div style={S.sectionLabel}>{T.inputs}</div>
+  return (
+    <CardShell
+      toolName="calculate_septic_tank"
+      pill="🇪🇸 CTE DB-HS 5"
+      title={tx.septicTitle}
+      subtitle={tx.septicSub}
+    >
+      <div style={S.sectionLabel}>{tx.results}</div>
       <div style={S.kvGrid}>
+        <KV k={tx.qd} v={`${fmt(result.caudal_diario_litros)} L/d`} highlight />
+        <KV k={tx.vutil} v={`${fmt(result.volumen_util_litros)} L`} />
         <KV
-          k={T.qd}
-          v={`${inputs.Qd_m3_day} m³/d`}
-          sub={inputs.qd_source === "from_users" ? T.qdSourceUsers : T.qdSourceDirect}
+          k={tx.vtotal}
+          v={`${fmt(result.volumen_total_litros)} L`}
+          sub={result.volumen_total_litros ? `${(result.volumen_total_litros / 1000).toFixed(2)} m³` : undefined}
+          highlight
         />
-        <KV k={T.soilType} v={soilLabel || soil.type} />
-        <KV k={T.percTest} v={`${inputs.perc_test_min_per_cm} min/cm`} />
-        <KV k={T.trenchWidth} v={`${inputs.trench_width_m} m`} />
+        <KV k={tx.trh} v={`${result.tiempo_retencion_dias} d`} />
+        <KV k={tx.chambers} v={`${result.num_compartimentos}`} />
+        <KV k={tx.dims} v={`${d.largo_m}×${d.ancho_m}×${d.alto_util_m} m`} />
+        <KV k={tx.altoTotal} v={`${d.alto_total_m} m`} />
       </div>
 
-      {/* Results */}
-      {res && (
-        <>
-          <div style={S.sectionLabel}>{T.results}</div>
-          <div style={S.kvGrid}>
-            <KV k={T.q_inf}      v={`${res.hydraulic_rate_l_m2_day} L/m²·d`} />
-            <KV k={T.A_inf}      v={`${res.A_inf_m2} m²`} highlight />
-            <KV k={T.L_tren}     v={`${res.L_trenches_m} m`} highlight />
-            <KV k={T.n_trenches} v={`${res.n_trenches_25m}`} />
-          </div>
-        </>
-      )}
+      <div style={S.sectionLabel}>{tx.checks}</div>
+      <div style={S.checksRow}>
+        <Check ok={v.cumple_minimo_he} label="h-e" />
+        <Check ok={v.cumple_retencion} label="TRH" />
+        <Check ok={v.cumple_profundidad} label={tx.profundidad} />
+      </div>
 
-      {/* Recommendations */}
-      {recs.length > 0 && (
+      {avisos.length > 0 && (
         <>
-          <div style={S.sectionLabel}>{T.recommendations}</div>
+          <div style={S.sectionLabel}>{tx.warnings}</div>
           <ul style={S.recList}>
-            {recs.map((r, i) => (
+            {avisos.map((r, i) => (
               <li key={i} style={S.recItem}>
                 <span style={S.recDot} aria-hidden="true">▸</span>
                 <span>{r}</span>
@@ -187,8 +138,148 @@ function InfiltrationCard({ args, result, a, lang }) {
           </ul>
         </>
       )}
-    </div>
+
+      <div style={S.footer}>
+        <Link href="/calculators/fosa-septica" style={S.openLink} className="btn-ghost">
+          {tx.openCalc}
+        </Link>
+      </div>
+    </CardShell>
   );
+}
+
+function DrainageCard({ result, tx }) {
+  if (!result || result.error) {
+    return <ToolError toolName="calculate_drainage_field" message={result?.error} tx={tx} />;
+  }
+  const d = result.dimensiones || {};
+  const val = result.validacion || {};
+  const blockers = Array.isArray(val.bloqueantes) ? val.bloqueantes : [];
+  const notices = Array.isArray(val.avisos) ? val.avisos : [];
+  const suitable = val.ok !== false;
+
+  return (
+    <CardShell
+      toolName="calculate_drainage_field"
+      pill={suitable ? "✓ OK" : "✗"}
+      pillStyle={suitable ? S.suitablePill : S.notSuitablePill}
+      title={tx.drainTitle}
+      subtitle={tx.drainSub}
+    >
+      <div style={S.sectionLabel}>{tx.results}</div>
+      <div style={S.kvGrid}>
+        <KV k={tx.tipoSistema} v={String(result.tipo_sistema || "—").replace(/_/g, " ")} />
+        <KV k={tx.perm} v={`${result.permeabilidad_suelo_m_dia} m/d`} />
+        <KV k={tx.carga} v={`${result.carga_hidraulica_m_dia} m/d`} />
+        <KV k={tx.superficie} v={`${d.superficie_infiltracion_m2} m²`} highlight />
+        <KV k={tx.profundidad} v={`${d.profundidad_m} m`} />
+        {d.longitud_total_zanjas_m != null && (
+          <>
+            <KV k={tx.longZanjas} v={`${d.longitud_total_zanjas_m} m`} highlight />
+            <KV k={tx.numZanjas} v={`${d.num_zanjas}`} />
+            <KV k={tx.sepZanjas} v={`${d.separacion_zanjas_m} m`} />
+            <KV k={tx.anchoZanja} v={`${d.ancho_zanja_m} m`} />
+          </>
+        )}
+      </div>
+
+      {(blockers.length > 0 || notices.length > 0) && (
+        <>
+          <div style={S.sectionLabel}>{blockers.length > 0 ? tx.blockers : tx.advert}</div>
+          <ul style={S.recList}>
+            {[...blockers, ...notices].map((r, i) => (
+              <li key={i} style={S.recItem}>
+                <span style={S.recDot} aria-hidden="true">▸</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </CardShell>
+  );
+}
+
+function ValidationCard({ result, tx }) {
+  if (!result || result.error) {
+    return <ToolError toolName="validate_against_cte" message={result?.error} tx={tx} />;
+  }
+  const cumple = result.cumple === true;
+  const blockers = Array.isArray(result.bloqueantes) ? result.bloqueantes : [];
+  const warnings = Array.isArray(result.advertencias) ? result.advertencias : [];
+
+  return (
+    <CardShell
+      toolName="validate_against_cte"
+      pill={cumple ? "✓ " + tx.cumple : "✗ " + tx.noCumple}
+      pillStyle={cumple ? S.suitablePill : S.notSuitablePill}
+      title={tx.validTitle}
+      subtitle={tx.validSub}
+    >
+      {blockers.length > 0 && (
+        <>
+          <div style={{ ...S.sectionLabel, color: "#ff6060" }}>{tx.blockers}</div>
+          <ul style={S.recList}>
+            {blockers.map((b, i) => (
+              <li key={i} style={S.recItem}>
+                <span style={{ ...S.recDot, color: "#ff6060" }} aria-hidden="true">▸</span>
+                <span><strong>[{b.codigo}] {b.articulo}</strong> — {b.descripcion}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {warnings.length > 0 && (
+        <>
+          <div style={{ ...S.sectionLabel, color: "#FFB020" }}>{tx.advert}</div>
+          <ul style={S.recList}>
+            {warnings.map((w, i) => (
+              <li key={i} style={S.recItem}>
+                <span style={{ ...S.recDot, color: "#FFB020" }} aria-hidden="true">▸</span>
+                <span><strong>[{w.codigo}] {w.articulo}</strong> — {w.descripcion}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {blockers.length === 0 && warnings.length === 0 && (
+        <div style={{ ...S.checkOk, marginTop: "4px" }}>
+          <span style={{ fontWeight: 700 }}>✓</span>
+          <span>{tx.allOk}</span>
+        </div>
+      )}
+    </CardShell>
+  );
+}
+
+function PdfCard({ result, tx }) {
+  if (!result || result.error) {
+    return <ToolError toolName="generate_pdf_report" message={result?.error} tx={tx} />;
+  }
+  return (
+    <CardShell
+      toolName="generate_pdf_report"
+      title={tx.pdfTitle}
+      subtitle={tx.pdfSub}
+    >
+      <div style={S.kvGrid}>
+        <KV k={tx.reportId} v={String(result.report_id || "—").slice(0, 8)} />
+      </div>
+      {result.download_url && (
+        <div style={S.footer}>
+          <a href={result.download_url} target="_blank" rel="noopener noreferrer"
+             style={S.openLink} className="btn-ghost">
+            ⬇ {tx.download}
+          </a>
+        </div>
+      )}
+    </CardShell>
+  );
+}
+
+function fmt(n) {
+  if (typeof n !== "number") return n ?? "—";
+  return n.toLocaleString("es-ES");
 }
 
 function KV({ k, v, sub, highlight }) {
@@ -305,7 +396,6 @@ const S = {
     flexShrink: 0,
     fontWeight: 700,
   },
-
   title: {
     fontSize: "16px",
     fontWeight: 700,
@@ -322,7 +412,6 @@ const S = {
     fontFamily: "'IBM Plex Mono', monospace",
     letterSpacing: "0.04em",
   },
-
   sectionLabel: {
     fontSize: "9px",
     letterSpacing: "0.18em",
@@ -331,7 +420,6 @@ const S = {
     margin: "10px 0 8px",
     fontFamily: "'IBM Plex Mono', monospace",
   },
-
   kvGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
@@ -376,19 +464,6 @@ const S = {
     fontFamily: "'IBM Plex Mono', monospace",
     letterSpacing: "0.04em",
   },
-
-  warning: {
-    marginTop: "10px",
-    fontSize: "11px",
-    color: "#FFB020",
-    background: "rgba(255,176,32,0.08)",
-    border: "1px solid rgba(255,176,32,0.25)",
-    borderRadius: "4px",
-    padding: "6px 10px",
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: "0.02em",
-  },
-
   checksRow: {
     display: "flex", flexWrap: "wrap", gap: "8px",
   },
@@ -414,7 +489,6 @@ const S = {
     fontFamily: "'IBM Plex Mono', monospace",
     letterSpacing: "0.04em",
   },
-
   footer: {
     marginTop: "14px",
     paddingTop: "10px",

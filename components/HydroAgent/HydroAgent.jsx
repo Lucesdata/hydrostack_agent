@@ -97,7 +97,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
         if (stored) formState = JSON.parse(stored);
       } catch { /* ignore */ }
 
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/agent", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ messages: next, formState, userProfile, ownerState: currentOwnerState }),
