@@ -1,11 +1,11 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/src/lib/i18n";
 import { renderMarkdown } from "./markdown";
 import ToolResultCard from "./ToolResultCard";
 import ProfileDetector from "./ProfileDetector";
-import { getOwnerState, saveOwnerState, updateOwnerStateFromResponse } from "@/lib/owner-state";
+import { getOwnerState, saveOwnerState, updateOwnerStateFromResponse } from "@/src/lib/owner-state";
 
 /**
  * HydroAgent — centerpiece chat surface.

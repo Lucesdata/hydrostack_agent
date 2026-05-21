@@ -9,7 +9,7 @@ import {
   calculateDrainageField,
   DrainageFieldInput,
   DrainageFieldResult,
-} from '@/lib/calculations/drainageField';
+} from '@/src/lib/calculations/drainageField';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tool definition for Groq (OpenAI format)

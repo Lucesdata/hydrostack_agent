@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useLang } from "@/lib/i18n";
-import HydroAgent from "@/components/HydroAgent";
+import { useLang } from "@/src/lib/i18n";
+import HydroAgent from "@/src/components/HydroAgent";
 
 const MODULES = [
   { slug: "fosa-septica", labelEs: "Fosa Séptica",      labelEn: "Septic Tank",      ready: true  },

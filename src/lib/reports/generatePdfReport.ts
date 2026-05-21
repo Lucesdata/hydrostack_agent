@@ -12,9 +12,9 @@ import PDFDocument from 'pdfkit';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
-import type { SepticTankResult } from '@/lib/calculations/septicTank';
-import type { DrainageFieldResult } from '@/lib/calculations/drainageField';
-import type { CteValidationResult } from '@/lib/validation/cteValidator';
+import type { SepticTankResult } from '@/src/lib/calculations/septicTank';
+import type { DrainageFieldResult } from '@/src/lib/calculations/drainageField';
+import type { CteValidationResult } from '@/src/lib/validation/cteValidator';
 
 export interface ProjectInfo {
   nombre: string;

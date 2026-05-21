@@ -166,12 +166,12 @@ La auto-detección de sub-escenarios se implementa con:
 
 - **Archivo**: `src/lib/agent/subscenario-detector.ts`
 - **Función**: `detectSubscenario(userMessage: string)` → `{subscenario, confidence, detectedKeywords}`
-- **Inyección**: En `app/api/chat/route.ts` POST
+- **Inyección**: En `app/api/agent/route.ts` POST
 - **Umbral**: Confianza > 50% para activar detección
 - **Idiomas**: Español e inglés (palabras clave combinadas)
 
 **Flujo**:
-1. Mensaje del usuario llega a `/api/chat`
+1. Mensaje del usuario llega a `/api/agent`
 2. Se detecta el sub-escenario si `userProfile === "owner"` y no hay uno previo
 3. Si se detecta con confianza > 50%, se inyecta como contexto al agente
 4. El agente NO pregunta por el sub-escenario; procede directamente a orientación

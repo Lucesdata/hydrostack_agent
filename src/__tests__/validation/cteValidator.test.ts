@@ -8,9 +8,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validateAgainstCte } from '@/lib/validation/cteValidator';
-import { calculateSepticTank } from '@/lib/calculations/septicTank';
-import { calculateDrainageField } from '@/lib/calculations/drainageField';
+import { validateAgainstCte } from '@/src/lib/validation/cteValidator';
+import { calculateSepticTank } from '@/src/lib/calculations/septicTank';
+import { calculateDrainageField } from '@/src/lib/calculations/drainageField';
 
 describe('validateAgainstCte', () => {
   it('should validate a fully compliant design', () => {

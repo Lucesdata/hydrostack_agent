@@ -1,5 +1,5 @@
 "use client";
-import HydroAgent from "@/components/HydroAgent";
+import HydroAgent from "@/src/components/HydroAgent";
 
 export default function ChatPage() {
   return <HydroAgent variant="page" />;

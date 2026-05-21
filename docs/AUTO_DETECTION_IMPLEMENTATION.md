@@ -45,11 +45,11 @@ detectSubscenario(userMessage: string): DetectionResult
 
 ### 2. Inyección en Route (`route.ts`)
 
-**Ubicación**: `app/api/chat/route.ts`
+**Ubicación**: `app/api/agent/route.ts`
 
 **Flujo**:
 ```
-POST /api/chat
+POST /api/agent
   ↓
 Leer último mensaje del usuario
   ↓

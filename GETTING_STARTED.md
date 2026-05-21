@@ -112,7 +112,7 @@ vercel
 | `src/lib/calculations/` | Engineering formulas |
 | `src/lib/i18n.tsx` | Spanish/English translations |
 | `src/components/IsometricDiagram.tsx` | 3D diagram generator |
-| `app/api/chat/route.ts` | AI agent endpoint |
+| `app/api/agent/route.ts` | AI agent endpoint |
 | `CLAUDE.md` | Agent behavior rules |
 
 ---

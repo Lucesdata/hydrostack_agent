@@ -195,7 +195,7 @@ Code exploration in src/
 
 | Endpoint | Purpose | Use Case |
 |----------|---------|----------|
-| `POST /api/chat` | Chat with AI agent | User queries |
+| `POST /api/agent` | Chat with AI agent | User queries |
 | `GET /api/agent/suggest` | Get next steps | Agent suggestions |
 | `POST /api/generate-isometric` | Generate 3D diagrams | Image generation |
 

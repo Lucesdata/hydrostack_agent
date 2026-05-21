@@ -9,7 +9,7 @@ import {
   validateAgainstCte,
   CteValidatorInput,
   CteValidationResult,
-} from '@/lib/validation/cteValidator';
+} from '@/src/lib/validation/cteValidator';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tool definition for Groq (OpenAI format)

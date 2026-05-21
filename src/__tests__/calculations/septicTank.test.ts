@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateSepticTank, SepticTankResult } from '@/lib/calculations/septicTank';
+import { calculateSepticTank, SepticTankResult } from '@/src/lib/calculations/septicTank';
 
 describe('calculateSepticTank', () => {
   // ─────────────────────────────────────────────────────────────────────

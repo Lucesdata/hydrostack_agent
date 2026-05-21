@@ -5,7 +5,7 @@
  * according to CTE DB-HS 5 (Spain) and RD 1620/2007 standards.
  */
 
-import { calculateSepticTank, SepticTankInput, SepticTankResult } from '@/lib/calculations/septicTank';
+import { calculateSepticTank, SepticTankInput, SepticTankResult } from '@/src/lib/calculations/septicTank';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tool definition for OpenAI / Groq API format

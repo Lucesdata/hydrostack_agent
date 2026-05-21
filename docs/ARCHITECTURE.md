@@ -191,7 +191,7 @@ User Message
     ├─ User type (owner/prof/contractor)
     └─ Expertise level
     ↓
-[HTTP POST /api/chat]
+[HTTP POST /api/agent]
     ↓
 [Server Processing]
     ├─ Collect context
@@ -318,12 +318,12 @@ interface IsometricDiagramProps {
 ### Agent Integration
 
 **Endpoints:**
-- `POST /api/chat` — Chat messages
+- `POST /api/agent` — Chat messages
 - `GET /api/agent/suggest` — Next steps
 
 **Client Usage:**
 ```typescript
-const response = await fetch('/api/chat', {
+const response = await fetch('/api/agent', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({

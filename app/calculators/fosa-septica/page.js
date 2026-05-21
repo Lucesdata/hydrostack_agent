@@ -1,4 +1,4 @@
-import SepticTankCalculator from "@/components/SepticTankCalculator";
+import SepticTankCalculator from "@/src/components/SepticTankCalculator";
 
 export const metadata = {
   title: "Fosa Séptica — HydroStack",

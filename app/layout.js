@@ -1,5 +1,5 @@
-import { LangProvider } from "@/lib/i18n";
-import Navbar from "@/components/Navbar";
+import { LangProvider } from "@/src/lib/i18n";
+import Navbar from "@/src/components/Navbar";
 import "./globals.css";
 
 export const metadata = {

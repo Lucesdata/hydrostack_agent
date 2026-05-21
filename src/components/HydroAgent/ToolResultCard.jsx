@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/src/lib/i18n";
 
 /**
  * Renders the inline result of a tool call inside the chat.

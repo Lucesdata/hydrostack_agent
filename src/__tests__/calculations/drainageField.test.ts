@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateDrainageField } from '@/lib/calculations/drainageField';
+import { calculateDrainageField } from '@/src/lib/calculations/drainageField';
 
 describe('calculateDrainageField', () => {
   // K = 1e-5 m/s = ~0.864 m/day → medium (zanjas)

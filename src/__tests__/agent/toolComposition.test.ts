@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { executeTool, listToolNames, tools } from '@/lib/agent/tools';
+import { executeTool, listToolNames, tools } from '@/src/lib/agent/tools';
 
 describe('Tool registry', () => {
   it('should register exactly 4 tools', () => {

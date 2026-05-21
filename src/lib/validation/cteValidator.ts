@@ -8,8 +8,8 @@
  * This module does NOT recalculate anything. It only validates existing results.
  */
 
-import type { SepticTankResult } from '@/lib/calculations/septicTank';
-import type { DrainageFieldResult } from '@/lib/calculations/drainageField';
+import type { SepticTankResult } from '@/src/lib/calculations/septicTank';
+import type { DrainageFieldResult } from '@/src/lib/calculations/drainageField';
 
 export interface ValidationContext {
   /** Distance from system to dwelling in meters */

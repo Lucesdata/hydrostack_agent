@@ -71,7 +71,7 @@ updateOwnerStateFromResponse(currentState, agentContent) → OwnerState
    
 5. Usuario escribe mensaje
    ↓
-6. Enviar a /api/chat CON ownerstate
+6. Enviar a /api/agent CON ownerstate
    ↓
 7. Recibir respuesta del agente
    ↓
@@ -85,7 +85,7 @@ updateOwnerStateFromResponse(currentState, agentContent) → OwnerState
 ### 4. Flujo en el Servidor (route.ts)
 
 ```
-1. POST /api/chat recibe:
+1. POST /api/agent recibe:
    ├─ messages (historial de chat)
    ├─ formState (datos de cálculo)
    ├─ userProfile (owner/professional/etc)
@@ -203,7 +203,7 @@ PhaseResume se muestra:
   ↓
 Usuario: [Continue ✓]
   ↓
-Envía primer mensaje nuevo + ownerstate anterior a /api/chat
+Envía primer mensaje nuevo + ownerstate anterior a /api/agent
   ↓
 route.ts inyecta: "[PREVIOUS SESSION CONTEXT] agente estaba en active_failure"
   ↓
@@ -294,7 +294,7 @@ if (ageHours > AGE_HOURS) {
 3. **Sesión 2 (continuación)**:
    ```
    Escribir nuevo mensaje
-   ✓ ownerstate anterior se envía a /api/chat
+   ✓ ownerstate anterior se envía a /api/agent
    ✓ Agente continúa desde contexto anterior
    ✓ Localización y otros campos se actualizan
    ```

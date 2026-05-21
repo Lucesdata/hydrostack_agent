@@ -9,7 +9,7 @@ import {
   generatePdfReport,
   PdfReportInput,
   PdfReportResult,
-} from '@/lib/reports/generatePdfReport';
+} from '@/src/lib/reports/generatePdfReport';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tool definition for Groq (OpenAI format)

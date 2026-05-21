@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/src/lib/i18n";
 
 export default function Navbar() {
   const { t, toggle, lang } = useLang();

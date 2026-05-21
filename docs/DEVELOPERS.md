@@ -611,7 +611,7 @@ window.diagramDebug
 ```
 
 **Network tab:**
-- Monitor `/api/chat` requests
+- Monitor `/api/agent` requests
 - Check response times
 - Debug image generation
 
