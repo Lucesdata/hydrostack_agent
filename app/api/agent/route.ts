@@ -20,7 +20,18 @@ const MAX_NORMATIVA_CHARS = 2200; // ~550 tokens — keeps total request under G
 function getSystemPrompt(userProfile?: string): string {
   const basePrompt = `You are HydroStack Assistant, a sanitary and hydraulic engineer specialized
 in on-site wastewater treatment systems (OWTS): septic tanks, leach fields,
-absorption wells, and decentralized wastewater treatment.`;
+absorption wells, and decentralized wastewater treatment.
+
+## CRITICAL RULE — WHEN TO USE TOOLS (READ FIRST)
+Only call a calculation tool (calculate_septic_tank, calculate_drainage_field,
+validate_against_cte, generate_pdf_report) when the user has EXPLICITLY given
+concrete input data — at minimum the number of residents (habitantes) AND the
+type of use (vivienda, restaurante, etc.).
+If the user greets you, makes small talk, or asks a general/conceptual question
+WITHOUT providing concrete numbers: DO NOT call any tool. Reply conversationally,
+briefly introduce what you can do, and ask for the data you need.
+NEVER invent, assume, or default input values just to be able to call a tool.
+A greeting like "hola" must be answered with a greeting — never with a calculation.`;
 
   const profileRoles = {
     owner: `
@@ -146,7 +157,9 @@ Always specify which rate you're using and why.
 - Always include units (imperial and metric where relevant)
 - Structure: input data → applicable standard/criterion → result
 - For comparison of system types: present brief comparative analysis
-- Language: respond in the user's language (English by default)`;
+- Language: ALWAYS reply in the SAME language as the user's message. If the user
+  writes in Spanish (even a short "hola"), reply entirely in Spanish. If in English,
+  reply in English. Never mix languages in a single reply.`;
 
   return basePrompt + roleSection + restOfPrompt;
 }
@@ -282,6 +295,27 @@ function stripNormativaContext(messages: ChatMessage[]): ChatMessage[] {
 const MAX_RATE_LIMIT_RETRIES = 3;  // Groq free-tier TPM bursts on multi-tool chains
 
 /**
+ * Heuristic gate: decide whether the user's turn warrants offering calculation
+ * tools at all. The model (llama-3.3-70b) with tool_choice "auto" tends to call
+ * tools — and invent input data — even for a plain greeting. When this returns
+ * false, round 0 is run WITHOUT tools, forcing a conversational reply.
+ *
+ * Returns true if the message contains a digit or an explicit action verb
+ * (dimensiona, calcula, valida, genera informe…). Topic words alone ("fosa",
+ * "vivienda") do NOT trigger tools — a conceptual question stays conversational.
+ */
+function wantsCalculation(text: string): boolean {
+  const t = (text || "").toLowerCase();
+  if (/\d/.test(t)) return true;
+  const actionKw = [
+    "dimensiona", "dimension", "calcul", "size", "sizing", "valida", "validate",
+    "memoria", "informe", "pdf", "report", "diseña", "diseńa", "disena",
+    "design", "genera",
+  ];
+  return actionKw.some(k => t.includes(k));
+}
+
+/**
  * The LLM relays structured data between tools unreliably — it often passes a
  * tool's INPUT instead of its OUTPUT, or hallucinates field names. For the
  * validate_against_cte and generate_pdf_report tools we therefore ALWAYS replace
@@ -330,6 +364,7 @@ async function streamRound(
   send: (data: string) => void,
   depth: number,
   retriesLeft: number = MAX_RATE_LIMIT_RETRIES,
+  allowTools: boolean = true,
 ): Promise<void> {
   const outboundMessages = depth === 0 ? messages : stripNormativaContext(messages);
 
@@ -348,8 +383,11 @@ async function streamRound(
       // stripNormativaContext drops the heavy regulatory block on depth>0,
       // which offsets the tool-def tokens and keeps us within Groq's TPM.
       max_tokens: depth === 0 ? MAX_TOKENS_ROUND0 : MAX_TOKENS_FOLLOWUP,
-      tools,
-      tool_choice: "auto",
+      // Tools are offered only when the user's turn warrants a calculation
+      // (allowTools, round 0) or when a tool chain is already in progress
+      // (depth > 0). Otherwise the model can only reply conversationally —
+      // this is what stops a plain "hola" from triggering a fake calculation.
+      ...((depth > 0 || allowTools) ? { tools, tool_choice: "auto" } : {}),
     }),
   });
 
@@ -362,7 +400,7 @@ async function streamRound(
 
     if (waitSec <= 30 && retriesLeft > 0) {
       await new Promise(r => setTimeout(r, Math.ceil(waitSec * 1000) + 600));
-      return streamRound(messages, send, depth, retriesLeft - 1);
+      return streamRound(messages, send, depth, retriesLeft - 1, allowTools);
     }
 
     send(JSON.stringify({
@@ -475,7 +513,7 @@ async function streamRound(
       });
     }
 
-    await streamRound([...messages, assistantMsg, ...toolMsgs], send, depth + 1);
+    await streamRound([...messages, assistantMsg, ...toolMsgs], send, depth + 1, MAX_RATE_LIMIT_RETRIES, allowTools);
   }
 }
 
@@ -512,7 +550,7 @@ export async function POST(req: Request) {
           });
           contextMessages.push({
             role: "assistant",
-            content: "Standards loaded. Ready to assist with sizing per local code requirements.",
+            content: "Noted — I'll keep these standards as reference if the user later requests a sizing.",
           });
         }
 
@@ -586,7 +624,7 @@ export async function POST(req: Request) {
           ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
         ];
 
-        await streamRound(initialMessages, send, 0);
+        await streamRound(initialMessages, send, 0, MAX_RATE_LIMIT_RETRIES, wantsCalculation(lastMessage));
 
         if (catalogSuggs) {
           send(JSON.stringify({
