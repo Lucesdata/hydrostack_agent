@@ -2,9 +2,13 @@
  * Pure function for septic tank calculation according to CTE DB-HS 5 (Spain)
  * and RD 1620/2007.
  *
- * This module extracts the core hydraulic calculations from SepticTankCalculator.jsx
- * and provides a testable, type-safe interface for tool use and future integrations.
+ * This is the conservative engine used by the agent's calculate_septic_tank tool:
+ * fixed sludge rate, 2-day retention, no return coefficient. Numeric constants
+ * for CTE are read from the shared NormativeRegistry so they cannot drift apart
+ * from the calculator UI's multi-norm engine.
  */
+
+import { getNormative } from '@/src/lib/config/normativeRegistry';
 
 export type TipoUso =
   | 'vivienda_unifamiliar'
@@ -76,21 +80,29 @@ const DEFAULTS_POR_TIPO: Record<TipoUso, { dotacion: number; min_he: number }> =
   industrial: { dotacion: 100, min_he: 5 },
 };
 
-// CTE DB-HS 5 minimum parameters
+// Shared CTE numeric defaults — read from the registry so the calculator UI
+// and this engine cannot drift apart.
+const CTE_DEFAULTS = getNormative('cte').defaults;
+
+// Sludge accumulation rate, L/(person·year). Motor 1 uses the warm-temperature
+// value (50 for CTE) as a single conservative constant; the calculator UI
+// applies temperature-dependent rates by calling CTE_DEFAULTS.sludgeRate(t).
+const TASA_LODOS = CTE_DEFAULTS.sludgeRate(15);
+
+// Scum factor (Vn as a fraction of Vl).
+const FACTOR_NATAS = CTE_DEFAULTS.scumFactor;
+
+// CTE DB-HS 5 minimum parameters. Dimensional minimums come from the registry;
+// the retention defaults stay local because they encode this engine's
+// conservative-design choice (minimum 1d, recommended 2d).
 const CTE_MINIMOS = {
-  profundidad_util: 1.0, // metros
-  ancho_minimo: 0.75, // metros
-  largo_minimo: 1.5, // metros
-  tiempo_retencion_minimo: 1, // días
-  tiempo_retencion_recomendado: 2, // días
-  tablero_seguridad_minimo: 0.30, // metros (freeboard)
+  profundidad_util: CTE_DEFAULTS.minDepthM,
+  ancho_minimo: CTE_DEFAULTS.minWidthM,
+  largo_minimo: CTE_DEFAULTS.minLengthM,
+  tiempo_retencion_minimo: 1,        // days — CTE absolute minimum
+  tiempo_retencion_recomendado: 2,   // days — conservative design choice
+  tablero_seguridad_minimo: 0.30,    // metres — freeboard per CTE Anejo G
 };
-
-// Sludge accumulation rate per CTE DB-HS 5 (kg/(person·year))
-const TASA_LODOS = 50; // kg/(person·year)
-
-// Scum factor (relative to liquid volume)
-const FACTOR_NATAS = 0.25; // 25% of liquid volume
 
 // ─────────────────────────────────────────────────────────────────────────
 // Main calculation function

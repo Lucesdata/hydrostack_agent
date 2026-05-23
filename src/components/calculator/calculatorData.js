@@ -1,5 +1,14 @@
 // Calculator reference data and pure helpers.
-// Extracted verbatim from SepticTankCalculator.jsx during the modular refactor.
+// Numeric per-norm cost factors (sludge rate, retention, dimensional minimums)
+// are read from the shared NormativeRegistry so this engine and the agent's
+// calculate_septic_tank tool cannot drift apart.
+
+import { getNormative } from "@/src/lib/config/normativeRegistry";
+
+// Calculator UI norm codes ↔ canonical NormativeRegistry codes.
+// (The calculator inherited shorter "au"/"esp" codes; the registry uses
+// "asnzs"/"cte" everywhere else.)
+const CALC_TO_REGISTRY = { epa: "epa", uk: "uk", au: "asnzs", esp: "cte", ras: "ras" };
 
 const NORMS = {
   epa: { name:"EPA (USA)",           flag:"🇺🇸", ref:"EPA 625/R-06/003",     dotacion:75, unit:"GPD/bed" },
@@ -10,38 +19,18 @@ const NORMS = {
 };
 
 const getParams = (norm, temp) => {
-  // EPA (USA) - temperatures in Celsius converted from Fahrenheit
-  if (norm==="epa") {
-    if (temp>=20)      return {trhDays:1.5, sludgeRate:65, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"≥68°F (≥20°C)"};
-    if (temp>=10)      return {trhDays:2.0, sludgeRate:80, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"50–66°F (10–19°C)"};
-    return             {trhDays:2.5, sludgeRate:95, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"<50°F (<10°C)"};
-  }
-  // UK Building Regulations - Part H
-  if (norm==="uk") {
-    if (temp>=15)      return {trhDays:1.5, sludgeRate:50, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
-    if (temp>=10)      return {trhDays:2.0, sludgeRate:65, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"50–58°F (10–14°C)"};
-    return             {trhDays:2.5, sludgeRate:75, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"<50°F (<10°C)"};
-  }
-  // AS/NZS 1547 (Australia/New Zealand)
-  if (norm==="au") {
-    if (temp>=15)      return {trhDays:1.5, sludgeRate:55, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
-    if (temp>=10)      return {trhDays:2.0, sludgeRate:70, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"50–58°F (10–14°C)"};
-    if (temp>=5)       return {trhDays:2.5, sludgeRate:85, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"41–49°F (5–9°C)"};
-    return             {trhDays:3.0, sludgeRate:100, scumFactor:0.30, minVolume:1.5, minDepth:1.2, minWidth:0.9, minLength:1.5, tempLabel:"<41°F (<5°C)"};
-  }
-  // Spain (CTE DB-HS5) - legacy
-  if (norm==="esp") {
-    if (temp>=15)      return {trhDays:1.0, sludgeRate:50, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"≥59°F (≥15°C)"};
-    return             {trhDays:1.5, sludgeRate:60, scumFactor:0.25, minVolume:1.5, minDepth:1.0, minWidth:0.75, minLength:1.5, tempLabel:"<59°F (<15°C)"};
-  }
-  // RAS Colombia - legacy
-  if (norm==="ras") {
-    if (temp>=20)      return {trhDays:1.5, sludgeRate:40, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"≥68°F (≥20°C)"};
-    if (temp>=10)      return {trhDays:2.0, sludgeRate:50, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"50–67°F (10–19°C)"};
-    return             {trhDays:2.5, sludgeRate:60, scumFactor:0.30, minVolume:1.0, minDepth:1.2, minWidth:0.6, minLength:1.5, tempLabel:"<50°F (<10°C)"};
-  }
-  // Default to EPA if unrecognized
-  return {trhDays:1.5, sludgeRate:65, scumFactor:0.25, minVolume:3.785, minDepth:1.0, minWidth:0.9, minLength:1.8, tempLabel:"≥68°F (≥20°C)"};
+  const code = CALC_TO_REGISTRY[norm] ?? "epa";
+  const d = getNormative(code).defaults;
+  return {
+    trhDays:    d.retentionDays(temp),
+    sludgeRate: d.sludgeRate(temp),
+    scumFactor: d.scumFactor,
+    minVolume:  d.minVolumeM3,
+    minDepth:   d.minDepthM,
+    minWidth:   d.minWidthM,
+    minLength:  d.minLengthM,
+    tempLabel:  d.tempLabel(temp),
+  };
 };
 
 const USE_TYPES = {

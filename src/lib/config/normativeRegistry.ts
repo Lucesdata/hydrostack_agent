@@ -18,6 +18,37 @@ export type NormCode = 'cte' | 'epa' | 'uk' | 'asnzs' | 'ras';
 /** Country bucket used by the homeowner orientation flow. */
 export type Country = 'colombia' | 'spain' | 'usa' | 'other';
 
+/**
+ * Numeric calculation defaults per norm — the single source of truth used by
+ * BOTH calculation engines (the agent's calculate_septic_tank tool and the
+ * standalone calculator UI). The two engines implement different algorithms
+ * (conservative-CTE vs. multi-norm with return coefficient), but they MUST
+ * agree on the underlying constants of each standard so they never drift.
+ */
+export interface NormCalculationDefaults {
+  /** Sludge accumulation rate in L/(person·year). Depends on temperature
+   *  because anaerobic digestion slows in colder tanks. */
+  sludgeRate(tempC: number): number;
+  /** Scum (Vn) factor as a fraction of liquid volume (Vl). */
+  scumFactor: number;
+  /** Hydraulic retention time in days. Depends on temperature. */
+  retentionDays(tempC: number): number;
+  /** Minimum total tank volume in m³. */
+  minVolumeM3: number;
+  /** Minimum useful depth in meters. */
+  minDepthM: number;
+  /** Minimum width in meters. */
+  minWidthM: number;
+  /** Minimum length in meters. */
+  minLengthM: number;
+  /** Default daily allowance for design flow. Unit per dotacionUnit. */
+  defaultDotacion: number;
+  /** Unit label for defaultDotacion (e.g. "L/person/day" or "GPD/bed"). */
+  dotacionUnit: string;
+  /** Human label for the temperature band a given temperature falls into. */
+  tempLabel(tempC: number): string;
+}
+
 export interface NormativeInfo {
   /** Canonical code used everywhere in the codebase. */
   code: NormCode;
@@ -35,6 +66,8 @@ export interface NormativeInfo {
   country: Country;
   /** Lowercase keywords that, if found in user text, select this norm. */
   detectionKeywords: string[];
+  /** Calculation defaults — shared by both calculation engines. */
+  defaults: NormCalculationDefaults;
 }
 
 /**
@@ -54,6 +87,19 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
       'usa', 'united states', 'american', 'epa',
       'texas', 'california', 'florida', 'new york',
     ],
+    defaults: {
+      sludgeRate: (t) => (t >= 20 ? 65 : t >= 10 ? 80 : 95),
+      scumFactor: 0.25,
+      retentionDays: (t) => (t >= 20 ? 1.5 : t >= 10 ? 2.0 : 2.5),
+      minVolumeM3: 3.785,
+      minDepthM: 1.0,
+      minWidthM: 0.9,
+      minLengthM: 1.8,
+      defaultDotacion: 75,
+      dotacionUnit: 'GPD/bed',
+      tempLabel: (t) =>
+        t >= 20 ? '≥68°F (≥20°C)' : t >= 10 ? '50–66°F (10–19°C)' : '<50°F (<10°C)',
+    },
   },
   uk: {
     code: 'uk',
@@ -66,6 +112,19 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
     detectionKeywords: [
       'uk', 'united kingdom', 'england', 'scotland', 'wales', 'britain',
     ],
+    defaults: {
+      sludgeRate: (t) => (t >= 15 ? 50 : t >= 10 ? 65 : 75),
+      scumFactor: 0.25,
+      retentionDays: (t) => (t >= 15 ? 1.5 : t >= 10 ? 2.0 : 2.5),
+      minVolumeM3: 1.5,
+      minDepthM: 1.0,
+      minWidthM: 0.75,
+      minLengthM: 1.5,
+      defaultDotacion: 200,
+      dotacionUnit: 'L/person/day',
+      tempLabel: (t) =>
+        t >= 15 ? '≥59°F (≥15°C)' : t >= 10 ? '50–58°F (10–14°C)' : '<50°F (<10°C)',
+    },
   },
   asnzs: {
     code: 'asnzs',
@@ -78,6 +137,21 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
     detectionKeywords: [
       'australia', 'new zealand', 'sydney', 'melbourne', 'auckland',
     ],
+    defaults: {
+      sludgeRate: (t) => (t >= 15 ? 55 : t >= 10 ? 70 : t >= 5 ? 85 : 100),
+      scumFactor: 0.30,
+      retentionDays: (t) => (t >= 15 ? 1.5 : t >= 10 ? 2.0 : t >= 5 ? 2.5 : 3.0),
+      minVolumeM3: 1.5,
+      minDepthM: 1.2,
+      minWidthM: 0.9,
+      minLengthM: 1.5,
+      defaultDotacion: 200,
+      dotacionUnit: 'L/person/day',
+      tempLabel: (t) =>
+        t >= 15 ? '≥59°F (≥15°C)' :
+        t >= 10 ? '50–58°F (10–14°C)' :
+        t >= 5  ? '41–49°F (5–9°C)' : '<41°F (<5°C)',
+    },
   },
   cte: {
     code: 'cte',
@@ -90,6 +164,18 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
     detectionKeywords: [
       'españa', 'espana', 'spain', 'spanish', 'madrid', 'barcelona',
     ],
+    defaults: {
+      sludgeRate: (t) => (t >= 15 ? 50 : 60),
+      scumFactor: 0.25,
+      retentionDays: (t) => (t >= 15 ? 1.0 : 1.5),
+      minVolumeM3: 1.5,
+      minDepthM: 1.0,
+      minWidthM: 0.75,
+      minLengthM: 1.5,
+      defaultDotacion: 160,
+      dotacionUnit: 'L/person/day',
+      tempLabel: (t) => (t >= 15 ? '≥59°F (≥15°C)' : '<59°F (<15°C)'),
+    },
   },
   ras: {
     code: 'ras',
@@ -102,6 +188,19 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
     detectionKeywords: [
       'colombia', 'bogotá', 'bogota', 'medellín', 'medellin', 'cali',
     ],
+    defaults: {
+      sludgeRate: (t) => (t >= 20 ? 40 : t >= 10 ? 50 : 60),
+      scumFactor: 0.30,
+      retentionDays: (t) => (t >= 20 ? 1.5 : t >= 10 ? 2.0 : 2.5),
+      minVolumeM3: 1.0,
+      minDepthM: 1.2,
+      minWidthM: 0.6,
+      minLengthM: 1.5,
+      defaultDotacion: 120,
+      dotacionUnit: 'L/person/day',
+      tempLabel: (t) =>
+        t >= 20 ? '≥68°F (≥20°C)' : t >= 10 ? '50–67°F (10–19°C)' : '<50°F (<10°C)',
+    },
   },
 };
 
