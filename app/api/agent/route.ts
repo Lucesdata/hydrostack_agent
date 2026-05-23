@@ -4,6 +4,11 @@ import { suggestNextQuestions } from "@/src/lib/agent/filter"
 import type { FormState } from "@/src/lib/agent/filter"
 import { tools, executeTool } from "@/src/lib/agent/tools";
 import { detectSubscenario } from "@/src/lib/agent/subscenario-detector";
+import {
+  detectNormative,
+  getNormativeDocFile,
+  type NormCode,
+} from "@/src/lib/config/normativeRegistry";
 
 export const runtime = "nodejs";
 
@@ -189,55 +194,12 @@ interface ChatRequest {
   };
 }
 
-function detectLocation(text: string): string {
-  const locationMap: Record<string, string> = {
-    // Anglo-Saxon jurisdictions (primary)
-    usa: "epa-onsite",
-    "united states": "epa-onsite",
-    american: "epa-onsite",
-    texas: "epa-onsite",
-    california: "epa-onsite",
-    florida: "epa-onsite",
-    "new york": "epa-onsite",
-    uk: "uk-building-regs",
-    "united kingdom": "uk-building-regs",
-    england: "uk-building-regs",
-    scotland: "uk-building-regs",
-    australia: "as-nzs-1547",
-    "new zealand": "as-nzs-1547",
-    // Other jurisdictions (secondary)
-    españa: "cte-hs5",
-    spanish: "cte-hs5",
-    madrid: "cte-hs5",
-    barcelona: "cte-hs5",
-    colombia: "ras-2000",
-    bogotá: "ras-2000",
-    bogota: "ras-2000",
-    medellín: "ras-2000",
-    medellin: "ras-2000",
-  };
+// Location / jurisdiction detection lives in src/lib/config/normativeRegistry.ts
+// so route.ts and clientStore share one keyword set.
 
-  const lowerText = text.toLowerCase();
-  for (const [keyword, norm] of Object.entries(locationMap)) {
-    if (lowerText.includes(keyword)) return norm;
-  }
-  // Default to EPA (USA) if no location detected
-  return "epa-onsite";
-}
-
-async function getNormativaMD(ubicacion: string): Promise<string> {
-  if (!ubicacion) return "";
+async function getNormativaMD(norm: NormCode): Promise<string> {
   try {
-    const map: Record<string, string> = {
-      "epa-onsite":       "docs/normativa/epa-onsite.md",
-      "uk-building-regs": "docs/normativa/uk-building-regs.md",
-      "as-nzs-1547":      "docs/normativa/as-nzs-1547.md",
-      "cte-hs5":          "docs/normativa/cte-hs5.md",
-      "ras-2000":         "docs/normativa/ras-2000.md",
-    };
-    const path = map[ubicacion];
-    if (!path) return "";
-    const fullPath = join(process.cwd(), path);
+    const fullPath = join(process.cwd(), getNormativeDocFile(norm));
     const raw = await readFile(fullPath, "utf-8");
     if (raw.length <= MAX_NORMATIVA_CHARS) return raw;
     return raw.slice(0, MAX_NORMATIVA_CHARS) + "\n\n[…regulation excerpt truncated; ask for specific sections if needed…]";
@@ -528,8 +490,8 @@ export async function POST(req: Request) {
 
       try {
         const lastMessage  = messages[messages.length - 1]?.content || "";
-        const locationKey  = detectLocation(lastMessage);
-        const normativaMD  = await getNormativaMD(locationKey);
+        const normCode     = detectNormative(lastMessage);
+        const normativaMD  = await getNormativaMD(normCode);
         const orientationMD = await getOrientationGuidance(userProfile);
         const catalogSuggs = await getCatalogSuggestions(formState);
 
