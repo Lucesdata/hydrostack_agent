@@ -5,6 +5,19 @@ import { useLang } from "@/src/lib/i18n";
 import ProfileDetector from "./ProfileDetector";
 import { S } from "./styles";
 import { EmptyState, Bubble, PhaseResume } from "./HydroAgentParts";
+
+// Chips that bypass LLM and show a scripted response + form
+const SCRIPTED_CHIPS = {
+  "Necesito construir un sistema séptico para mi casa": "build_system",
+  "I need to build a septic system for my house": "build_system",
+};
+
+const SCRIPTED_RESPONSES = {
+  build_system: {
+    es: "Perfecto. Para diseñar tu sistema séptico necesito algunos datos básicos:",
+    en: "Perfect. To design your septic system I need a few basic details:",
+  },
+};
 import {
   getProfile,
   setProfile,
@@ -14,6 +27,7 @@ import {
   updateOwnerStateFromResponse,
   getFormState,
 } from "@/src/lib/state/clientStore";
+import { calculateSepticSystem } from "@/src/lib/septic/calculator";
 
 /**
  * HydroAgent — centerpiece chat surface.
@@ -76,12 +90,29 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     inputRef.current?.focus();
   }
 
-  const send = useCallback(async (textOverride) => {
+  const send = useCallback(async (textOverride, apiOptions = {}) => {
     const text = (textOverride ?? input).trim();
     if (!text || loading) return;
 
+    // Scripted chip — respond immediately without calling the LLM
+    if (SCRIPTED_CHIPS[text] && !apiOptions.flowMode) {
+      const flowType = SCRIPTED_CHIPS[text];
+      const scriptedText = SCRIPTED_RESPONSES[flowType][lang] ?? SCRIPTED_RESPONSES[flowType].en;
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: scriptedText, flow: flowType },
+      ]);
+      setInput("");
+      return;
+    }
+
     const userMsg = { role: "user", content: text };
-    const next = [...messages, userMsg];
+    // If coming from a flow, clear flow cards before appending the new message
+    const base = apiOptions.flowMode
+      ? messages.map(m => m.flow ? { ...m, flow: null } : m)
+      : messages;
+    const next = [...base, userMsg];
     setMessages(next);
     setInput("");
     setLoading(true);
@@ -99,7 +130,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
       const res = await fetch("/api/agent", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ messages: next, formState, userProfile, ownerState: currentOwnerState }),
+        body:    JSON.stringify({ messages: next, formState, userProfile, ownerState: currentOwnerState, ...apiOptions }),
         signal:  abortRef.current.signal,
       });
 
@@ -129,7 +160,7 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
                 const copy = [...prev];
                 copy[copy.length - 1] = {
                   role: "assistant",
-                  content: `${a.error}\n\n\`${evt.error}\``,
+                  content: evt.error || a.error,
                 };
                 return copy;
               });
@@ -142,6 +173,15 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
                 const last = copy[copy.length - 1];
                 if (last?.role === "assistant") {
                   copy[copy.length - 1] = { ...last, content: last.content + evt.delta.text };
+                }
+                return copy;
+              });
+            } else if (evt.type === "catalog_suggestions") {
+              setMessages(prev => {
+                const copy = [...prev];
+                const last = copy[copy.length - 1];
+                if (last?.role === "assistant") {
+                  copy[copy.length - 1] = { ...last, suggestions: evt.suggestions };
                 }
                 return copy;
               });
@@ -190,6 +230,39 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
       setLoading(false);
     }
   }, [input, loading, messages, a.error]);
+
+  const handleFlowSubmit = useCallback((flowType, data) => {
+    if (flowType === "build_system") {
+      const { personas, personasLabel, tipoUso, ubicacion, suelo, norm } = data;
+
+      const soilLabel = {
+        es: { high: "arena", medium: "franco", low: "arcilla", unknown: "desconocido" },
+        en: { high: "sand",  medium: "loam",   low: "clay",    unknown: "unknown" },
+      }[lang]?.[suelo] ?? suelo;
+
+      const useTypeLabel = {
+        es: { vivienda: "vivienda familiar", hospedaje: "alquiler de habitaciones", hotel: "hotel o pensión", vacacional: "centro vacacional", restaurante: "restaurante", oficinas: "oficinas/comercial", institucional: "colegio/institución", otro: "otro uso" },
+        en: { vivienda: "family home", hospedaje: "room rental / lodging", hotel: "hotel or guesthouse", vacacional: "vacation resort", restaurante: "restaurant", oficinas: "office / commercial", institucional: "school / institution", otro: "other use" },
+      }[lang]?.[tipoUso] ?? tipoUso;
+
+      const displayPersonas = personasLabel ?? personas;
+      const userMsg = lang === "es"
+        ? `${displayPersonas} personas, uso: ${useTypeLabel}, ubicación: ${ubicacion}, suelo: ${soilLabel}`
+        : `${displayPersonas} people, use: ${useTypeLabel}, location: ${ubicacion}, soil: ${soilLabel}`;
+
+      // ── Deterministic calculation — 0 LLM tokens ──────────────────────────
+      const results = calculateSepticSystem({ personas, tipoUso, norm, suelo });
+      results.ubicacion = ubicacion; // attach for display
+
+      const base = messages.map(m => m.flow ? { ...m, flow: null } : m);
+      setMessages([
+        ...base,
+        { role: "user",      content: userMsg },
+        { role: "assistant", content: "", results },
+      ]);
+      setInput("");
+    }
+  }, [lang, messages]);
 
   function handleKey(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -299,6 +372,12 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
               streaming={m.streaming}
               content={m.content}
               tools={m.tools}
+              suggestions={m.suggestions}
+              onSuggestionPick={send}
+              flow={m.flow}
+              onFlowSubmit={handleFlowSubmit}
+              results={m.results}
+              lang={lang}
               errored={errored && i === messages.length - 1}
             />
           ))}

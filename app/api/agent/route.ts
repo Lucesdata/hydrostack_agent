@@ -183,6 +183,7 @@ interface ChatRequest {
   messages: ChatMessage[];
   formState?: FormState;
   userProfile?: string;
+  flowMode?: string;
   ownerState?: {
     phase: string | null;
     subscenario: string | null;
@@ -221,16 +222,26 @@ async function getOrientationGuidance(userProfile?: string): Promise<string> {
   }
 }
 
-async function getCatalogSuggestions(formState: FormState | undefined): Promise<string> {
-  if (!formState) return "";
+function detectLang(messages: ChatMessage[]): "es" | "en" {
+  const spanishPattern = /[áéíóúñü¿¡]|(\b(hola|gracias|tengo|quiero|necesito|casa|cuanto|como|que|agua|sistema|fosa|tanque|campo|suelo|vivienda|personas|habitant|municipio|corregimiento|departamento|norma|ubicacion|ubicación|colombia|mexico|españa|argentina|chile|peru|venezuela|ecuador|bolivia|paraguay|uruguay|latin|disenar|diseñar|calcular|dimensionar|saneamiento|alcantarillado|construccion|proyecto|rural|urbano|region|región|valle|cauca|bogota|medellin|cali|barranquilla)\b)/i;
+  for (const m of messages) {
+    if (m.role === "user" && typeof m.content === "string") {
+      if (spanishPattern.test(m.content)) return "es";
+    }
+  }
+  return "en";
+}
+
+async function getCatalogSuggestions(formState: FormState | undefined, lang: "es" | "en"): Promise<{ text: string; route?: string }[]> {
+  if (!formState) return [];
   try {
     const suggestions = suggestNextQuestions(formState);
-    if (suggestions.length === 0) return "";
-    return `\n\n[RELEVANT QUESTIONS FROM CATALOG]\nYou might also be interested in:\n${
-      suggestions.map((q, i) => `${i + 1}. ${q.text}`).join('\n')
-    }`;
+    return suggestions.map(q => ({
+      text: lang === "es" && q.textEs ? q.textEs : q.text,
+      route: q.route,
+    }));
   } catch {
-    return "";
+    return [];
   }
 }
 
@@ -327,7 +338,7 @@ async function streamRound(
   depth: number,
   retriesLeft: number = MAX_RATE_LIMIT_RETRIES,
   allowTools: boolean = true,
-): Promise<void> {
+): Promise<boolean> {
   const outboundMessages = depth === 0 ? messages : stripNormativaContext(messages);
 
   const res = await fetch(GROQ_API_URL, {
@@ -367,16 +378,14 @@ async function streamRound(
 
     send(JSON.stringify({
       type: "error",
-      error: `Groq rate limit reached — try again in ~${Math.ceil(waitSec / 60)} min `
-        + `(free-tier daily token quota). ${errText}`,
+      error: `El servicio está ocupado. Intenta de nuevo en ~${Math.ceil(waitSec / 60)} min.`,
     }));
-    return;
+    return false;
   }
 
   if (!res.ok) {
-    const err = await res.text();
-    send(JSON.stringify({ type: "error", error: err }));
-    return;
+    send(JSON.stringify({ type: "error", error: "Error al conectar con el servicio. Intenta de nuevo." }));
+    return false;
   }
 
   const reader  = res.body!.getReader();
@@ -475,12 +484,14 @@ async function streamRound(
       });
     }
 
-    await streamRound([...messages, assistantMsg, ...toolMsgs], send, depth + 1, MAX_RATE_LIMIT_RETRIES, allowTools);
+    return streamRound([...messages, assistantMsg, ...toolMsgs], send, depth + 1, MAX_RATE_LIMIT_RETRIES, allowTools);
   }
+
+  return true;
 }
 
 export async function POST(req: Request) {
-  const { messages, formState, userProfile, ownerState }: ChatRequest = await req.json();
+  const { messages, formState, userProfile, ownerState, flowMode }: ChatRequest = await req.json();
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -493,7 +504,8 @@ export async function POST(req: Request) {
         const normCode     = detectNormative(lastMessage);
         const normativaMD  = await getNormativaMD(normCode);
         const orientationMD = await getOrientationGuidance(userProfile);
-        const catalogSuggs = await getCatalogSuggestions(formState);
+        const lang         = detectLang(messages);
+        const catalogSuggs = await getCatalogSuggestions(formState, lang);
 
         // Auto-detect subscenario for homeowners (only if not already set)
         let detectedSubscenario = null;
@@ -579,19 +591,22 @@ export async function POST(req: Request) {
           });
         }
 
-        const systemPrompt = getSystemPrompt(userProfile);
+        const systemPrompt = flowMode === "build_system"
+          ? `You are HydroStack. The user provided data for a septic system. Call calculate_septic_tank with the provided number of inhabitants and location. Then briefly explain the result in 3-4 sentences in the same language as the user's message. Be concise.`
+          : getSystemPrompt(userProfile);
+
         const initialMessages: ChatMessage[] = [
           { role: "system", content: systemPrompt },
           ...contextMessages,
           ...messages.map(({ role, content }: ChatMessage) => ({ role, content })),
         ];
 
-        await streamRound(initialMessages, send, 0, MAX_RATE_LIMIT_RETRIES, wantsCalculation(lastMessage));
+        const ok = await streamRound(initialMessages, send, 0, MAX_RATE_LIMIT_RETRIES, wantsCalculation(lastMessage));
 
-        if (catalogSuggs) {
+        if (ok && catalogSuggs.length > 0) {
           send(JSON.stringify({
-            type:  "content_block_delta",
-            delta: { type: "text_delta", text: catalogSuggs },
+            type: "catalog_suggestions",
+            suggestions: catalogSuggs,
           }));
         }
 

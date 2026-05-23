@@ -3,6 +3,8 @@
 
 import { renderMarkdown } from "./markdown";
 import ToolResultCard from "./ToolResultCard";
+import BuildSystemFlow from "./BuildSystemFlow";
+import SepticResults from "./SepticResults";
 import { S } from "./styles";
 
 function EmptyState({ welcome, suggestionsLabel, suggestions, onPick, isLanding }) {
@@ -35,10 +37,13 @@ function EmptyState({ welcome, suggestionsLabel, suggestions, onPick, isLanding 
   );
 }
 
-function Bubble({ role, content, tools, streaming, errored, labelUser, labelAssistant }) {
+function Bubble({ role, content, tools, suggestions, onSuggestionPick, flow, onFlowSubmit, results, lang, streaming, errored, labelUser, labelAssistant }) {
   const isUser = role === "user";
   const hasTools = !isUser && tools && tools.length > 0;
-  const showEmptyCursor = streaming && !content && !hasTools;
+  const hasSuggestions = !isUser && suggestions && suggestions.length > 0;
+  const hasFlow = !isUser && !!flow;
+  const hasResults = !isUser && !!results;
+  const showEmptyCursor = streaming && !content && !hasTools && !hasResults;
 
   return (
     <article
@@ -70,6 +75,62 @@ function Bubble({ role, content, tools, streaming, errored, labelUser, labelAssi
             )
         }
       </div>
+
+      {hasFlow && (
+        <BuildSystemFlow
+          lang={lang}
+          onSubmit={(data) => onFlowSubmit(flow, data)}
+        />
+      )}
+
+      {hasResults && (
+        <SepticResults
+          results={results}
+          lang={lang}
+          ubicacion={results.ubicacion}
+        />
+      )}
+
+      {hasSuggestions && (
+        <div style={{
+          marginTop: "14px",
+          paddingTop: "12px",
+          borderTop: "1px solid rgba(0,245,255,0.1)",
+          background: "rgba(0,10,14,0.4)",
+          borderRadius: "0 0 6px 6px",
+          marginLeft: "-18px",
+          marginRight: "-18px",
+          marginBottom: "-14px",
+          paddingLeft: "18px",
+          paddingRight: "18px",
+          paddingBottom: "12px",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
+        }}>
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onSuggestionPick(s.text)}
+              style={{
+                background: "rgba(0,245,255,0.06)",
+                border: "1px solid rgba(0,245,255,0.2)",
+                borderRadius: "4px",
+                padding: "5px 10px",
+                fontSize: "11px",
+                color: "#7ab8c8",
+                fontFamily: "'IBM Plex Mono', monospace",
+                cursor: "pointer",
+                textAlign: "left",
+                lineHeight: "1.4",
+              }}
+            >
+              {s.text}
+            </button>
+          ))}
+        </div>
+      )}
     </article>
   );
 }
