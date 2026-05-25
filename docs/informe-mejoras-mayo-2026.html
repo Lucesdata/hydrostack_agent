@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HydroStack — Informe de Mejoras · Mayo 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:        #07131a;
+      --surface:   #0d2030;
+      --border:    rgba(0,245,255,0.15);
+      --cyan:      #00F5FF;
+      --cyan-dim:  #4a9aaa;
+      --text:      #d4eaf2;
+      --text-dim:  #6a96a8;
+      --green:     #00FF88;
+      --amber:     #FFB400;
+      --red:       #ff6060;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'Inter', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13.5px;
+      line-height: 1.75;
+      padding: 0;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; color: #111; font-size: 12px; }
+      .cover { background: #07131a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      section { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+      .decision-block { page-break-inside: avoid; }
+    }
+
+    /* ── Cover ── */
+    .cover {
+      background: linear-gradient(145deg, #041018 0%, #0d2030 55%, #041018 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 72px 64px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 80% 50%, rgba(0,245,255,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(0,255,136,0.3);
+      border-radius: 3px;
+      padding: 4px 12px;
+      margin-bottom: 28px;
+    }
+    .cover-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+    .cover-badge-text {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+    .cover-logo {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      margin-bottom: 10px;
+    }
+    .cover-title {
+      font-family: var(--mono);
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .cover-subtitle {
+      font-size: 15px;
+      color: var(--text-dim);
+      max-width: 560px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+    .cover-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .cover-meta-item {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+    .cover-meta-item strong {
+      display: block;
+      color: var(--text);
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    /* ── Layout ── */
+    .content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 56px 48px 80px;
+    }
+
+    /* ── Section ── */
+    section {
+      margin-bottom: 56px;
+    }
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 0.06em;
+      margin: 24px 0 10px;
+    }
+    p {
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Decision blocks ── */
+    .decision-block {
+      background: rgba(13,32,48,0.7);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 6px 6px 0;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .decision-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0,245,255,0.08);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 3px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .decision-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .decision-file {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--cyan-dim);
+      margin-top: 3px;
+    }
+    .decision-body p {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .label-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .label-problem  { background: rgba(255,96,96,0.1);  color: #ff9090; border: 1px solid rgba(255,96,96,0.2); }
+    .label-solution { background: rgba(0,245,255,0.08); color: var(--cyan); border: 1px solid rgba(0,245,255,0.2); }
+    .label-argument { background: rgba(0,255,136,0.07); color: var(--green); border: 1px solid rgba(0,255,136,0.18); }
+    .label-files    { background: rgba(255,180,0,0.07); color: var(--amber); border: 1px solid rgba(255,180,0,0.2); }
+
+    /* ── Inline code ── */
+    code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: rgba(0,245,255,0.07);
+      border: 1px solid rgba(0,245,255,0.12);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--cyan);
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+    th {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      background: rgba(0,245,255,0.05);
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(0,245,255,0.06);
+      color: var(--text-dim);
+      vertical-align: top;
+    }
+    td:first-child {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── Status pills ── */
+    .pill {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+    .pill-done    { background: rgba(0,255,136,0.1);  color: var(--green);  border: 1px solid rgba(0,255,136,0.25); }
+    .pill-pending { background: rgba(255,180,0,0.1);  color: var(--amber);  border: 1px solid rgba(255,180,0,0.25); }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 120px;
+      background: rgba(13,32,48,0.8);
+      border: 1px solid var(--border);
+      padding: 14px 12px;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--cyan);
+      font-size: 14px;
+      z-index: 1;
+    }
+    .flow-step-num {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .flow-step-label {
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .flow-step-sub {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+
+    /* ── Callout ── */
+    .callout {
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.15);
+      border-radius: 5px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .callout-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .callout p {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    /* ── Print button ── */
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,245,255,0.1);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 4px;
+      padding: 10px 20px;
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-bottom: 40px;
+      transition: background 0.15s;
+    }
+    .print-btn:hover { background: rgba(0,245,255,0.16); }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    ul.styled {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 12px;
+    }
+    ul.styled li {
+      padding: 4px 0 4px 20px;
+      color: var(--text-dim);
+      font-size: 13px;
+      position: relative;
+    }
+    ul.styled li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 48px;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-badge">
+    <span class="cover-dot"></span>
+    <span class="cover-badge-text">Informe Técnico de Sesión</span>
+  </div>
+  <div class="cover-logo">HydroStack — SITARD</div>
+  <div class="cover-title">Mejoras de Experiencia<br>de Asesoría de Ingeniería</div>
+  <div class="cover-subtitle">
+    Documento que resume las decisiones de diseño, implementación técnica y argumentos detrás de las mejoras realizadas al agente HydroStack en la sesión del 23 de mayo de 2026.
+  </div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <strong>Fecha</strong>23 de mayo de 2026
+    </div>
+    <div class="cover-meta-item">
+      <strong>Proyecto</strong>HydroStack 2 — Next.js 14 + Groq
+    </div>
+    <div class="cover-meta-item">
+      <strong>Versión del agente</strong>llama-3.3-70b-versatile
+    </div>
+    <div class="cover-meta-item">
+      <strong>Tipo</strong>Sesión de mejora de producto
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- PRINT BUTTON -->
+  <button class="print-btn no-print" onclick="window.print()">
+    ⬇ Guardar como PDF
+  </button>
+
+  <!-- 1. CONTEXTO -->
+  <section>
+    <div class="section-tag">01 — Contexto del proyecto</div>
+    <h2>¿Qué es HydroStack?</h2>
+    <p>
+      <strong>HydroStack</strong> es una herramienta web de ingeniería hidráulica y sanitaria orientada al dimensionamiento de sistemas de tratamiento de aguas residuales individuales (SITARD): fosas sépticas, campos de infiltración, tanques Imhoff, reactores UASB, filtros percoladores y plantas de potabilización.
+    </p>
+    <p>
+      La aplicación está construida con <strong>Next.js 14 (App Router)</strong>, sin base de datos ni autenticación. Usa <strong>JavaScript</strong> para páginas y componentes, y <strong>TypeScript</strong> únicamente en rutas API. El diseño visual usa estilos en línea con un tema HMI/industrial. El motor de IA es <strong>Groq con el modelo llama-3.3-70b-versatile</strong>, el único con créditos activos en el entorno de desarrollo.
+    </p>
+    <p>
+      El componente central es <strong>HydroAgent</strong>: un asistente conversacional con herramientas de cálculo (<code>calculate_septic_tank</code>, <code>calculate_drainage_field</code>, <code>validate_against_cte</code>, <code>generate_pdf_report</code>) encadenables mediante <em>tool calling</em>.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Archivo / Módulo</th><th>Rol</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>app/api/agent/route.ts</td><td>API route SSE — system prompt, streaming Groq, tool chaining</td></tr>
+        <tr><td>src/components/HydroAgent/HydroAgent.jsx</td><td>Componente principal de chat — estado, flujo, envío de mensajes</td></tr>
+        <tr><td>src/components/HydroAgent/HydroAgentParts.jsx</td><td>Subcomponentes de UI — EmptyState, Bubble, PhaseResume</td></tr>
+        <tr><td>src/components/HydroAgent/BuildSystemFlow.jsx</td><td>Formulario de captura de datos para dimensionamiento</td></tr>
+        <tr><td>src/components/HydroAgent/SepticResults.jsx</td><td>Tarjeta de resultados del cálculo determinista</td></tr>
+        <tr><td>src/lib/state/clientStore.ts</td><td>Persistencia de perfil y estado del propietario en localStorage</td></tr>
+        <tr><td>src/lib/i18n.js</td><td>Sistema de traducción ES/EN con LangProvider + useLang()</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2. DIAGNÓSTICO -->
+  <section>
+    <div class="section-tag">02 — Diagnóstico inicial</div>
+    <h2>¿Cuál era el problema?</h2>
+    <p>
+      Al revisar la aplicación en ejecución, se identificó que técnicamente funcionaba bien: los cálculos eran correctos, la integración con Groq operaba, y el sistema de perfiles de usuario existía. Sin embargo, la <strong>experiencia de usuario no transmitía la sensación de estar siendo asesorado por un ingeniero</strong>.
+    </p>
+    <div class="callout">
+      <div class="callout-title">Problema central</div>
+      <p>La aplicación funcionaba como una <strong>calculadora pasiva</strong>: el usuario debía adivinar qué preguntar, recibía datos técnicos sin interpretación, y el flujo de asesoría terminaba abruptamente en los resultados sin guiar los pasos siguientes. No había sensación de acompañamiento de principio a fin.</p>
+    </div>
+    <p>Se identificaron cuatro fallas específicas:</p>
+    <ul class="styled">
+      <li><strong>Inicio pasivo:</strong> Tras seleccionar su perfil, el usuario veía una pantalla vacía con chips genéricos. El agente no tomaba la iniciativa.</li>
+      <li><strong>Post-cálculo vacío:</strong> Después de mostrar la tarjeta técnica, el sistema mostraba "¿Tienes preguntas? Escríbelas abajo →". Sin interpretación, sin pasos siguientes.</li>
+      <li><strong>Perfil persistido sin escape:</strong> El perfil de usuario se guardaba en <code>localStorage</code> y no se limpiaba al hacer "nuevo chat", impidiendo que el flujo de asesoría se repitiera.</li>
+      <li><strong>Desconexión entre flujos:</strong> El flujo de asesoría del propietario iba al LLM como texto libre, mientras que el calculador tenía su propio camino separado. Ambos nunca se tocaban.</li>
+    </ul>
+  </section>
+
+  <!-- 3. DECISIONES -->
+  <section>
+    <div class="section-tag">03 — Decisiones de diseño e implementación</div>
+    <h2>Mejoras implementadas</h2>
+    <p>Se implementaron seis mejoras en la sesión, cada una dirigida a una falla específica. A continuación se explica cada una con su contexto, decisión y argumento.</p>
+
+    <!-- D1 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D1</span>
+        <div>
+          <div class="decision-title">Mensaje de bienvenida activo por perfil de usuario</div>
+          <div class="decision-file">HydroAgent.jsx — handleProfileSelect()</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> Al seleccionar un perfil (propietario, profesional, contratista, explorando), el usuario llegaba a una pantalla en blanco con chips genéricos. El agente no decía nada. La iniciativa recaía 100% en el usuario.</p>
+        <p><strong>Solución:</strong> Se creó el objeto <code>PROFILE_WELCOMES</code> con mensajes diferenciados por perfil e idioma. Cuando <code>handleProfileSelect(profileId)</code> se invoca, se inyecta un mensaje inicial en el array de mensajes <em>sin llamar al LLM</em>. El mensaje es instantáneo y abre la consulta como lo haría un ingeniero real.</p>
+        <p><strong>Argumento:</strong> Un consultor profesional nunca espera a que el cliente hable primero en una reunión de diagnóstico. El primer mensaje marca el tono de toda la consulta. Usar un mensaje <em>scripted</em> (sin LLM) garantiza velocidad instantánea y cero latencia en el momento más crítico: la primera impresión. Los mensajes son diferentes por perfil porque el asesoramiento a un propietario sin conocimiento técnico es radicalmente distinto al de un ingeniero con datos en mano.</p>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D2</span>
+        <div>
+          <div class="decision-title">Opciones clicables numeradas para el flujo del propietario</div>
+          <div class="decision-file">HydroAgent.jsx — OWNER_OPTIONS · HydroAgentParts.jsx — Bubble</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> El mensaje de bienvenida inicial incluía las 4 opciones de situación (nueva instalación, falla activa, mantenimiento, propiedad abandonada) como texto en markdown. El renderizador los convertía en bullets con un triángulo, no en elementos interactivos. El usuario tenía que leer, copiar mentalmente y escribir su situación.</p>
+        <p><strong>Solución:</strong> Se separaron las 4 opciones del texto principal y se añadieron como <code>suggestions</code> en el objeto del mensaje inicial. El componente <code>Bubble</code> ya renderizaba suggestions como chips; se rediseñaron para que sean botones de ancho completo, apilados verticalmente, con número de opción en cian y texto en blanco. Un clic envía el texto al agente automáticamente.</p>
+        <p><strong>Argumento:</strong> El usuario propietario típico no es técnico. Pedirle que escriba su situación introduce fricción innecesaria y errores de formulación que afectan la detección automática de sub-escenario. Las opciones clicables eliminan esa fricción, garantizan que el texto sea exactamente el que el sistema espera, y hacen la interfaz accesible en móvil (donde escribir es más difícil). El número visible (1. 2. 3. 4.) es una convención de menú que el usuario entiende sin instrucción.</p>
+      </div>
+    </div>
+
+    <!-- D3 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D3</span>
+        <div>
+          <div class="decision-title">Asesoría post-cálculo obligatoria en el system prompt</div>
+          <div class="decision-file">app/api/agent/route.ts — getSystemPrompt()</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> El system prompt existente instruía al modelo sobre qué herramientas usar y cuándo, pero no indicaba qué hacer <em>después</em> de mostrar resultados. El LLM tendía a mostrar los números y callarse, esperando la siguiente pregunta del usuario.</p>
+        <p><strong>Solución:</strong> Se añadió la sección <code>## MANDATORY POST-CALCULATION ADVISORY</code> al system prompt. Esta sección instruye al modelo que, tras cualquier resultado de herramienta, debe siempre: (1) interpretar los números en lenguaje cotidiano, (2) señalar consideraciones específicas al caso, (3) listar pasos siguientes concretos adaptados al país, y (4) terminar con una pregunta de seguimiento para mantener la consulta activa.</p>
+        <p><strong>Argumento:</strong> El LLM sin instrucción explícita sigue el comportamiento de mínimo esfuerzo: responde lo mínimo necesario para parecer útil. Un ingeniero real nunca entrega un plano sin explicarlo. Las instrucciones en el system prompt son la única palanca confiable para modificar el comportamiento del modelo en producción; las instrucciones vagas ("sé útil") no producen comportamientos consistentes. Hacerlo obligatorio y estructurado (4 pasos específicos) garantiza coherencia independientemente del caso o el idioma.</p>
+      </div>
+    </div>
+
+    <!-- D4 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D4</span>
+        <div>
+          <div class="decision-title">Sección "Próximos Pasos" en la tarjeta de resultados</div>
+          <div class="decision-file">SepticResults.jsx — getNextSteps() + render</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> La tarjeta <code>SepticResults</code> mostraba los datos técnicos y terminaba con la nota "Diseño preliminar orientativo. Requiere estudio de suelo…" — un disclaimer legalista sin acción concreta. El usuario no sabía qué hacer con esos números.</p>
+        <p><strong>Solución:</strong> Se creó el objeto <code>NEXT_STEPS</code> con 5 pasos concretos para Colombia, España, USA y un caso genérico. La función <code>getNextSteps(ubicacion, lang)</code> detecta el país a partir de la cadena de ubicación (búsqueda de palabras clave: "colombia", "bogot", "españa", "madrid", etc.) y devuelve los pasos correspondientes. Estos se renderizan al final de la tarjeta, antes del disclaimer, numerados con estilo consistente.</p>
+        <p><strong>Argumento:</strong> La tarjeta de resultados es el momento de mayor atención del usuario. Dejar ese momento sin acción es un fracaso de diseño. Los pasos están adaptados al país porque los procesos de permisología, los profesionales involucrados y los requisitos legales son radicalmente distintos entre Colombia (CAR/PSMV), España (CTE/ayuntamientos) y USA (condados/perc test). Un paso genérico "contrate un profesional" aporta menos valor que "tramite concepto favorable del PSMV ante la CAR o autoridad ambiental del municipio".</p>
+      </div>
+    </div>
+
+    <!-- D5 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D5</span>
+        <div>
+          <div class="decision-title">Corrección de persistencia: clearProfile() en "nuevo chat"</div>
+          <div class="decision-file">clientStore.ts — clearProfile() · HydroAgent.jsx — clearChat()</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> El perfil de usuario se guardaba en <code>localStorage</code> bajo la clave <code>hydrostack_profile</code> y se cargaba en el estado React al montar el componente. Cuando el usuario hacía clic en "⟲ nuevo chat", la función <code>clearChat()</code> borraba los mensajes pero <em>no</em> el perfil. En la siguiente carga, el agente saltaba directamente al EmptyState genérico, sin pasar por la selección de perfil ni inyectar el mensaje de bienvenida.</p>
+        <p><strong>Solución:</strong> Se añadió <code>clearProfile()</code> a <code>clientStore.ts</code> (usa <code>localStorage.removeItem</code> sobre la clave de perfil) y se llamó desde <code>clearChat()</code> junto con <code>clearOwnerState()</code>. Ahora "nuevo chat" reinicia toda la sesión: mensajes, perfil, estado del propietario.</p>
+        <p><strong>Argumento:</strong> "Nuevo chat" debe significar exactamente eso: una consulta nueva sin contexto previo. Mantener el perfil produce una sesión inconsistente donde el usuario ve la interfaz de un perfil que nunca seleccionó en esa sesión. Además, sin reiniciar el perfil, el mensaje de bienvenida de D1 nunca se activa en sesiones subsiguientes, haciendo que las mejoras D1 y D2 sean invisibles para usuarios recurrentes.</p>
+      </div>
+    </div>
+
+    <!-- D6 -->
+    <div class="decision-block">
+      <div class="decision-header">
+        <span class="decision-num">D6</span>
+        <div>
+          <div class="decision-title">Conexión lógica: flujo de instalación → calculadora</div>
+          <div class="decision-file">HydroAgent.jsx — SCRIPTED_CHIPS · SCRIPTED_RESPONSES</div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label label-problem">Problema</span>
+        <span class="label label-solution">Solución</span>
+        <span class="label label-argument">Argumento</span>
+      </div>
+      <div class="decision-body">
+        <p><strong>Problema:</strong> Existían dos mundos separados: (a) el flujo de asesoría del propietario que iba al LLM como chat libre, y (b) el calculador con su formulario propio (<code>BuildSystemFlow</code>). Un usuario que hacía clic en "Voy a instalar un sistema nuevo…" recibía una respuesta conversacional del LLM que empezaba a hacer preguntas una a una, pero nunca llegaba al formulario ni a los resultados calculados. El ciclo nunca cerraba.</p>
+        <p><strong>Solución:</strong> Se añadió la opción de instalación a <code>SCRIPTED_CHIPS</code> apuntando al tipo de flujo <code>"build_system"</code>. Esto hace que al hacer clic en esa opción se muestre una respuesta scripted (sin LLM, instantánea) y se renderice el formulario <code>BuildSystemFlow</code> directamente. Al completarlo, se ejecuta el cálculo determinista y aparece <code>SepticResults</code> con los próximos pasos. Se actualizó también el texto de respuesta scripted para que suene como el asesor, no como un formulario.</p>
+        <p><strong>Argumento:</strong> El path "nueva instalación" es el único de los cuatro casos del propietario que tiene un resultado calculable inmediato. Los otros tres (falla activa, mantenimiento, propiedad abandonada) son situaciones de diagnóstico y orientación que requieren conversación libre con el LLM, no un formulario. Conectar solo el path de instalación al calculador mantiene la distinción correcta: cálculo cuando se puede calcular, conversación cuando se necesita diagnosticar. Usar un flujo scripted en vez del LLM garantiza velocidad y control total sobre el formulario presentado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FLUJO RESULTANTE -->
+  <section>
+    <div class="section-tag">04 — Arquitectura resultante</div>
+    <h2>Flujo completo del propietario tras las mejoras</h2>
+    <p>El siguiente diagrama ilustra el recorrido de un usuario propietario desde el primer contacto hasta recibir orientación accionable:</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div class="flow-step-label">Selección de perfil</div>
+        <div class="flow-step-sub">ProfileDetector</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div class="flow-step-label">Bienvenida activa</div>
+        <div class="flow-step-sub">Scripted · sin LLM</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div class="flow-step-label">Selección de situación</div>
+        <div class="flow-step-sub">Chips clicables</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">04a</div>
+        <div class="flow-step-label">Formulario datos</div>
+        <div class="flow-step-sub">BuildSystemFlow</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <div class="flow-step-label">Resultados + pasos</div>
+        <div class="flow-step-sub">SepticResults</div>
+      </div>
+    </div>
+
+    <p style="margin-top:8px; font-size:12px; color: var(--text-dim)">* El paso 04a aplica al path de instalación nueva. Los paths de falla, mantenimiento y propiedad abandonada van al paso 04b (LLM conversacional + orientación adaptada).</p>
+
+    <hr class="divider" />
+
+    <h3>Separación de responsabilidades por componente</h3>
+    <table>
+      <thead>
+        <tr><th>Capa</th><th>Componente</th><th>Responsabilidad</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Onboarding</td>
+          <td>ProfileDetector</td>
+          <td>Captura el perfil del usuario. Muestra las 4 categorías con título y subtítulo.</td>
+        </tr>
+        <tr>
+          <td>Apertura de consulta</td>
+          <td>HydroAgent.jsx → handleProfileSelect</td>
+          <td>Inyecta el mensaje de bienvenida scripted. Para "owner" añade chips de situación.</td>
+        </tr>
+        <tr>
+          <td>Navegación de situación</td>
+          <td>HydroAgentParts.jsx → Bubble.suggestions</td>
+          <td>Renderiza opciones como botones clicables numerados. Un clic envía el texto al agente.</td>
+        </tr>
+        <tr>
+          <td>Captura de datos</td>
+          <td>BuildSystemFlow</td>
+          <td>Formulario de personas, ubicación y suelo. Solo aparece en el path de instalación.</td>
+        </tr>
+        <tr>
+          <td>Cálculo</td>
+          <td>src/lib/septic/calculator.js</td>
+          <td>Cálculo determinista (sin LLM). Devuelve volumen, dimensiones, campo de infiltración.</td>
+        </tr>
+        <tr>
+          <td>Presentación de resultados</td>
+          <td>SepticResults.jsx</td>
+          <td>Tarjeta técnica + sección "Próximos Pasos" adaptada al país detectado.</td>
+        </tr>
+        <tr>
+          <td>Asesoría post-cálculo</td>
+          <td>route.ts → system prompt</td>
+          <td>El LLM interpreta resultados, señala consideraciones y propone el siguiente paso.</td>
+        </tr>
+        <tr>
+          <td>Persistencia de sesión</td>
+          <td>clientStore.ts</td>
+          <td>Perfil y estado del propietario en localStorage. clearProfile() limpia al reiniciar.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 5. ESTADO DEL PROYECTO -->
+  <section>
+    <div class="section-tag">05 — Estado del proyecto</div>
+    <h2>Módulos y tareas</h2>
+
+    <table>
+      <thead>
+        <tr><th>Módulo / Tarea</th><th>Estado</th><th>Notas</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Landing page</td>
+          <td><span class="pill pill-done">Listo</span></td>
+          <td>HydroAgent como centerpiece, secciones de features y módulos</td>
+        </tr>
+        <tr>
+          <td>Calculadora Fosa Séptica</td>
+          <td><span class="pill pill-done">Listo</span></td>
+          <td>RAS · España CTE · EN 12566 · EPA — normas completas</td>
+        </tr>
+        <tr>
+          <td>HydroAgent — Flujo propietario</td>
+          <td><span class="pill pill-done">Listo</span></td>
+          <td>Bienvenida activa, opciones clicables, conexión a calculadora</td>
+        </tr>
+        <tr>
+          <td>HydroAgent — Asesoría post-cálculo</td>
+          <td><span class="pill pill-done">Listo</span></td>
+          <td>System prompt con interpretación + pasos por país</td>
+        </tr>
+        <tr>
+          <td>Próximos Pasos en tarjeta</td>
+          <td><span class="pill pill-done">Listo</span></td>
+          <td>Colombia, España, USA, genérico — detección por ubicación</td>
+        </tr>
+        <tr>
+          <td>Calculadora Tanque Imhoff</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>Segundo módulo más demandado — misma arquitectura que fosa</td>
+        </tr>
+        <tr>
+          <td>Calculadora Lodos Activados</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>Proceso biológico aerobio — mayor complejidad de cálculo</td>
+        </tr>
+        <tr>
+          <td>Calculadora Reactor UASB</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>Flujo ascendente anaeróbico</td>
+        </tr>
+        <tr>
+          <td>Calculadora Filtro Percolador</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>Tratamiento secundario biológico</td>
+        </tr>
+        <tr>
+          <td>Calculadora Potabilización</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>PTAP — coagulación, floculación, sedimentación, filtración, desinfección</td>
+        </tr>
+        <tr>
+          <td>Deploy a Vercel</td>
+          <td><span class="pill pill-pending">Pendiente</span></td>
+          <td>Variables de entorno: GROQ_API_KEY configurada en proyecto</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. PRINCIPIOS -->
+  <section>
+    <div class="section-tag">06 — Principios de diseño aplicados</div>
+    <h2>Decisiones transversales</h2>
+
+    <h3>Scripted vs. LLM</h3>
+    <p>
+      A lo largo de las mejoras se tomó la decisión deliberada de usar respuestas scripted (sin LLM) en los momentos de mayor importancia para la primera impresión: la bienvenida por perfil y la apertura del formulario. Esto garantiza <strong>latencia cero</strong> en los momentos donde el usuario está más atento y propenso a abandonar si espera. El LLM se usa donde la variabilidad y el razonamiento añaden valor: diagnóstico de fallas, orientación de pasos, interpretación de resultados.
+    </p>
+
+    <h3>Separación calculadora ↔ LLM</h3>
+    <p>
+      El cálculo determinista (<code>calculator.js</code>) y el razonamiento del LLM son capas separadas e independientes. El cálculo no depende del LLM para ser correcto, y el LLM no recalcula cuando ya tiene los resultados; solo los interpreta. Esto garantiza reproducibilidad del cálculo (el mismo input siempre da el mismo output) y evita que el LLM "invente" valores numéricos.
+    </p>
+
+    <h3>Adaptación por país sin base de datos</h3>
+    <p>
+      La detección del país para los próximos pasos y la normativa aplicable se hace mediante búsqueda de palabras clave en el texto de ubicación ingresado por el usuario. No requiere geolocalización, base de datos ni APIs externas. Es suficientemente precisa para el rango de países actualmente cubiertos (Colombia, España, USA) y extensible sin cambios de arquitectura.
+    </p>
+
+    <h3>Bilingüismo ES/EN sin i18n externo</h3>
+    <p>
+      Todo el contenido de traducción está en <code>src/lib/i18n.js</code> usando un objeto de traducciones plano y el hook <code>useLang()</code>. No se usa ninguna librería de i18n externa (next-intl, react-i18next, etc.) porque el volumen de contenido no lo justifica y la dependencia adicional introduciría complejidad sin beneficio proporcional.
+    </p>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>HydroStack — SITARD · Informe interno de sesión</span>
+  <span>23 mayo 2026 · Generado con Claude Code (claude-sonnet-4-6)</span>
+</div>
+
+</body>
+</html>

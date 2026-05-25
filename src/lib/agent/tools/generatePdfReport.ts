@@ -53,23 +53,35 @@ export const generatePdfReportTool = {
         },
         proyecto: {
           type: 'object',
-          description: 'Información del proyecto.',
+          description: 'Información del proyecto y profesional responsable.',
           properties: {
             nombre: {
               type: 'string',
-              description: 'Nombre del proyecto (ej. "Vivienda Rural Pirineo").',
+              description: 'Nombre del proyecto (ej. "Vivienda Rural Pirineo", "Finca San Pedro").',
             },
             ubicacion: {
               type: 'string',
-              description: 'Ubicación del proyecto (ej. "Pirineo, Huesca").',
+              description: 'Ubicación del proyecto (ej. "Bogotá, Cundinamarca", "Pirineo, Huesca").',
+            },
+            propietario: {
+              type: 'string',
+              description: 'Nombre del propietario o cliente (ej. "Juan García López"). Opcional.',
+            },
+            redactor: {
+              type: 'string',
+              description: 'Nombre y título del profesional responsable (ej. "Ing. María Pérez"). Opcional.',
+            },
+            matricula: {
+              type: 'string',
+              description: 'Matrícula profesional (COPNIA para Colombia, colegio equivalente). Ej. "MP 123456". Opcional.',
+            },
+            numero_memoria: {
+              type: 'string',
+              description: 'Número de referencia de la memoria técnica (ej. "MT-2026-001"). Auto-generado si se omite.',
             },
             fecha: {
               type: 'string',
               description: 'Fecha de la memoria (formato libre). Por defecto: fecha actual.',
-            },
-            redactor: {
-              type: 'string',
-              description: 'Nombre del redactor o entidad. Opcional.',
             },
           },
           required: ['nombre', 'ubicacion'],
@@ -91,8 +103,11 @@ export interface ExecuteGeneratePdfReportInput {
   proyecto?: {
     nombre?: string;
     ubicacion?: string;
-    fecha?: string;
+    propietario?: string;
     redactor?: string;
+    matricula?: string;
+    numero_memoria?: string;
+    fecha?: string;
   };
 }
 
@@ -138,8 +153,11 @@ export async function executeGeneratePdfReport(
     proyecto: {
       nombre: input.proyecto.nombre!,
       ubicacion: input.proyecto.ubicacion!,
-      fecha: input.proyecto.fecha,
+      propietario: input.proyecto.propietario,
       redactor: input.proyecto.redactor,
+      matricula: input.proyecto.matricula,
+      numero_memoria: input.proyecto.numero_memoria,
+      fecha: input.proyecto.fecha,
     },
   });
 

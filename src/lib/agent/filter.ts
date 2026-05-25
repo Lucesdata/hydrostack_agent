@@ -14,6 +14,17 @@ export interface FormState {
   soilPermeability?: "high" | "medium" | "low" | "none" | "unknown"
   normKey?: "epa" | "uk" | "asnzs" | "cte" | "ras"
   calculated?: boolean
+  // Geospatial / site checks (Fase 2)
+  distPozos?: number
+  distCuerpoAgua?: number
+  distEdific?: number
+  distArboles?: number
+  aguasAbajo?: "si" | "no"
+  nivelFreatico?: number
+  profInstal?: number
+  geoChecked?: boolean
+  geoBloqueantes?: number
+  geoAlertas?: number
   // Flow phases for homeowners
   phase?: "initial" | "explanation" | "orientation" | "detail"
   // Detected subscenario for orientation

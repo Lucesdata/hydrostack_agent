@@ -1,8 +1,9 @@
 /**
  * Tool definition for calculate_septic_tank in OpenAI format (Groq compatible).
  *
- * This tool allows the Hydro_Agent to invoke septic tank sizing calculations
- * according to CTE DB-HS 5 (Spain) and RD 1620/2007 standards.
+ * Phase 1: adds coeficiente_retorno (Cr=0.85 default), temperatura_agua_c
+ * (TRH correction via Van't Hoff), intervalo_limpieza_anos (default 3),
+ * full flow suite (Q_max, Q_min), and norm_code selection.
  */
 
 import { calculateSepticTank, SepticTankInput, SepticTankResult } from '@/src/lib/calculations/septicTank';
@@ -57,21 +58,52 @@ export const calculateSepticTankTool = {
         dotacion_litros_hab_dia: {
           type: 'number',
           description:
-            'Dotación diaria en L/hab·día. Por defecto: 200 (España). Rango típico: 100–250.',
+            'Dotación diaria en L/hab·día. Por defecto: 200 (Res. 0330/2017 Art. 134). Rango típico: 100–250.',
           minimum: 50,
           maximum: 500,
         },
         tiempo_retencion_dias: {
           type: 'number',
           description:
-            'Tiempo de retención hidráulica (HRT) en días. Por defecto: 2. Mínimo CTE: 1. Recomendado: 2.',
+            'TRH en días. Si se omite, se calcula automáticamente con corrección por temperatura. ' +
+            'Mínimo Colombia (Res. 0330/2017 Art. 138): 1.5 días (2.0 días en clima frío, e.g. Bogotá).',
           minimum: 1,
           maximum: 5,
+        },
+        coeficiente_retorno: {
+          type: 'number',
+          description:
+            'Fracción del agua suministrada que retorna como aguas residuales. ' +
+            'Por defecto: 0.85 (RAS 2000 y literatura estándar). Usar 1.00 solo si hay retorno total.',
+          minimum: 0.5,
+          maximum: 1.0,
+        },
+        temperatura_agua_c: {
+          type: 'number',
+          description:
+            'Temperatura media del agua residual en °C. Afecta el TRH mínimo por cinética anaerobia (Van\'t Hoff). ' +
+            'Bogotá: 14–16°C → TRH aumenta a 2.0 días. Clima cálido (>20°C): TRH = 1.5 días.',
+          minimum: 5,
+          maximum: 35,
+        },
+        intervalo_limpieza_anos: {
+          type: 'integer',
+          description:
+            'Intervalo de extracción de lodos en años. Por defecto: 3 (Res. 0330/2017 Art. 139). ' +
+            'Afecta directamente el volumen de lodos V_S y por tanto el V_diseño total.',
+          minimum: 1,
+          maximum: 10,
+        },
+        norm_code: {
+          type: 'string',
+          enum: ['ras', 'cte', 'epa', 'uk', 'asnzs'],
+          description:
+            'Código normativo. "ras" = Colombia (Res. 0330/2017, default). "cte" = España. "epa" = EE.UU.',
         },
         numero_compartimentos: {
           type: 'integer',
           enum: [2, 3],
-          description: 'Número de cámaras de sedimentación. Por defecto: 2. Usar 3 para cargas altas.',
+          description: 'Número de cámaras de sedimentación. Por defecto: 2. Usar 3 para cargas altas (>10 h-e).',
         },
       },
       required: ['habitantes_equivalentes', 'tipo_uso'],
@@ -88,6 +120,10 @@ export interface ExecuteToolInput {
   tipo_uso?: string;
   dotacion_litros_hab_dia?: number;
   tiempo_retencion_dias?: number;
+  coeficiente_retorno?: number;
+  temperatura_agua_c?: number;
+  intervalo_limpieza_anos?: number;
+  norm_code?: string;
   numero_compartimentos?: number;
 }
 
@@ -150,6 +186,28 @@ export async function executeCalculateSepticTank(input: ExecuteToolInput): Promi
     }
   }
 
+  // Validate new Phase 1 fields
+  if (input.coeficiente_retorno !== undefined) {
+    if (typeof input.coeficiente_retorno !== 'number' ||
+        input.coeficiente_retorno < 0.5 || input.coeficiente_retorno > 1.0) {
+      throw new Error('coeficiente_retorno debe estar entre 0.5 y 1.0.');
+    }
+  }
+
+  if (input.temperatura_agua_c !== undefined) {
+    if (typeof input.temperatura_agua_c !== 'number' ||
+        input.temperatura_agua_c < 5 || input.temperatura_agua_c > 35) {
+      throw new Error('temperatura_agua_c debe estar entre 5 y 35 °C.');
+    }
+  }
+
+  if (input.intervalo_limpieza_anos !== undefined) {
+    if (typeof input.intervalo_limpieza_anos !== 'number' ||
+        input.intervalo_limpieza_anos < 1 || input.intervalo_limpieza_anos > 10) {
+      throw new Error('intervalo_limpieza_anos debe estar entre 1 y 10 años.');
+    }
+  }
+
   // Call the pure calculation function
   const result = calculateSepticTank({
     habitantes_equivalentes: input.habitantes_equivalentes,
@@ -163,6 +221,10 @@ export async function executeCalculateSepticTank(input: ExecuteToolInput): Promi
       | 'industrial',
     dotacion_litros_hab_dia: input.dotacion_litros_hab_dia,
     tiempo_retencion_dias: input.tiempo_retencion_dias,
+    coeficiente_retorno: input.coeficiente_retorno,
+    temperatura_agua_c: input.temperatura_agua_c,
+    intervalo_limpieza_anos: input.intervalo_limpieza_anos,
+    norm_code: input.norm_code,
     numero_compartimentos: input.numero_compartimentos as 2 | 3 | undefined,
   });
 

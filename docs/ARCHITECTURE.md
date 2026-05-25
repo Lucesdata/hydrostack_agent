@@ -7,45 +7,45 @@
 ## 📐 System Overview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   Browser (React 18)                     │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │              UI Components                          │ │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │ │
-│  │  │ Calculator│  │  3D Diag │  │ Chat Interface   │ │ │
-│  │  └──────────┘  └──────────┘  └──────────────────┘ │ │
-│  └────────────────────────────────────────────────────┘ │
-│               ↓ API calls / Events ↓                     │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │         Client-Side Logic (src/lib/)               │ │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │ │
-│  │  │Calculations│ │Validation │ │ i18n / State     │ │ │
-│  │  └──────────┘  └──────────┘  └──────────────────┘ │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
-              ↓ HTTP requests ↓
-┌─────────────────────────────────────────────────────────┐
-│              Next.js API Server (Node)                   │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │            API Routes (app/api/)                    │ │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │ │
-│  │  │/chat      │  │/agent    │  │/generate-isometric│ │ │
-│  │  └──────────┘  └──────────┘  └──────────────────┘ │ │
-│  └────────────────────────────────────────────────────┘ │
-│               ↓ External APIs ↓                          │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │    Anthropic Claude API (Image Generation)         │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                  Browser (React 18)                      │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │            UI Components                           │  │
+│  │  ┌────────────┐  ┌───────────┐  ┌──────────────┐ │  │
+│  │  │ Calculator │  │ 3D Diagr. │  │ Chat Agent   │ │  │
+│  │  │  (Septic)  │  │ (Isometric│  │ (Streaming)  │ │  │
+│  │  └────────────┘  └───────────┘  └──────────────┘ │  │
+│  └───────────────────────────────────────────────────┘  │
+│              ↓ HTTP (SSE for streaming) ↓               │
+└──────────────────────────────────────────────────────────┘
+              ↓
+┌──────────────────────────────────────────────────────────┐
+│              Next.js API Server (Node 18+)               │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │    Single Unified Endpoint: POST /api/agent       │  │
+│  │                                                    │  │
+│  │  ├─ Message history & context                     │  │
+│  │  ├─ User profile detection (owner/prof/...)       │  │
+│  │  ├─ Subscenario auto-detection                    │  │
+│  │  └─ Tool chaining (4 modular tools)               │  │
+│  └───────────────────────────────────────────────────┘  │
+│         ↓ External API Integration ↓                    │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │  Groq API (llama-3.3-70b-versatile)               │  │
+│  │  + Streaming SSE responses + Tool execution       │  │
+│  └───────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### Key Principles
 
-1. **Client-Side First** — All calculations happen in the browser
-2. **Stateless API** — Server handles I/O only (API calls, image gen)
-3. **Zero Database** — No persistence layer (user downloads if needed)
-4. **Type-Safe** — Full TypeScript throughout
-5. **Bilingual** — Spanish/English support everywhere
+1. **Agent-Centric** — Conversational UI drives the system (chat interface)
+2. **Server-Side LLM** — Groq inference on every message, tool orchestration
+3. **Modular Tools** — 4 chainable tools (tank → drainage → validation → PDF)
+4. **Streaming First** — SSE responses for real-time user feedback
+5. **Zero Database** — No persistence (results downloadable)
+6. **Type-Safe** — Full TypeScript in all server tools
+7. **Bilingual** — Spanish/English auto-detected from message
 
 ---
 
@@ -56,174 +56,215 @@
 **Location:** `src/components/`
 
 **Responsibilities:**
-- Render UI
+- Render chat UI and calculator
 - Handle user input
-- Display results
+- Stream messages via SSE
+- Display calculation results
 - Manage local component state
 
 **Key Components:**
 ```
 components/
-├── Calculators/
-│   ├── SepticTankCalculator.tsx     # Main calculator
-│   ├── SepticForm.tsx               # Input form
-│   └── SepticResults.tsx            # Results display
-├── Common/
-│   ├── Navbar.tsx                   # Navigation
-│   └── LanguageSwitcher.tsx          # Language selection
-├── IsometricDiagram.tsx             # 3D diagram renderer
-└── HydroAgent/
-    ├── ChatWindow.tsx               # Chat UI
-    └── MessageList.tsx              # Message display
+├── SepticTankCalculator.jsx         # Main calculator UI
+├── IsometricDiagram.jsx             # 2D/isometric SVG diagram
+├── IsometricDiagram3D.jsx           # 3D Babylon.js viewer
+├── LaminaTecnica.jsx                # Technical report view
+├── Navbar.js                        # Navigation + language switcher
+└── HydroAgent/                      # Chat agent UI
+    ├── index.js                     # Main chat component
+    ├── markdown.js                  # Markdown rendering for responses
+    └── [other message components]
 ```
 
 **State Management:**
 - Local component state (useState)
-- Props drilling for simple data flow
+- SSE event listeners for streaming responses
+- Message history in state
 - No global state library needed
 
-### 2. Business Logic Layer (Client-Side)
+### 2. Business Logic Layer (Server-Side + Shared)
 
 **Location:** `src/lib/`
 
 **Responsibilities:**
-- Calculations
-- Validation
-- Data transformation
-- Language handling
+- LLM orchestration (agent logic)
+- Tool execution & chaining
+- Calculation engines
+- Validation rules
+- PDF report generation
+- Language detection
 
 **Modules:**
 
 ```
 lib/
+├── agent/
+│   ├── tools/                       # 4 modular tools
+│   │   ├── calculateSepticTank.ts   # Tank sizing (CTE DB-HS 5)
+│   │   ├── calculateDrainageField.ts # Field sizing
+│   │   ├── validateAgainstCte.ts    # Regulatory validation
+│   │   ├── generatePdfReport.ts     # Multi-page PDF output
+│   │   └── index.ts                 # Tool registry & executor
+│   ├── subscenario-detector.ts      # Auto-detect user scenario
+│   ├── filter.ts                    # Response formatting
+│   └── catalog.ts                   # Static reference data
 ├── calculations/
-│   ├── septic.ts                    # Tank calculations
-│   ├── infiltration.ts              # Field calculations
-│   └── norms.ts                     # Standard-specific logic
+│   ├── septicTank.ts                # Pure tank calculation logic
+│   └── drainageField.ts             # Pure field calculation logic
 ├── validation/
-│   └── inputs.ts                    # Parameter validation
-├── i18n.tsx                         # Translation strings
-└── agent/
-    ├── subscenario-detector.ts      # Auto-detection logic
-    ├── filter.ts                    # Response filtering
-    └── catalog.ts                   # Agent data catalog
+│   └── cteValidator.ts              # CTE DB-HS 5 / RD 1620/2007 rules
+├── reports/
+│   └── generatePdfReport.ts         # PDF generation (pdfkit)
+├── i18n.js                          # Translation strings (ES/EN)
+└── owner-state.js                   # User profile persistence
 ```
 
 **Design Principles:**
-- Pure functions where possible
-- Single responsibility
-- Easy to test
-- No side effects
+- Pure calculation functions (no side effects)
+- Tools are async & chain results
+- Single responsibility per tool
+- Validation rules isolated
+- Tests in `src/__tests__/` mirroring structure
 
-### 3. API Layer (Server-Side)
+### 3. API Layer (Server-Side Only)
 
 **Location:** `app/api/`
 
 **Responsibilities:**
-- Handle HTTP requests
-- Call external APIs (Anthropic)
-- Generate images/responses
-- Error handling
+- Handle HTTP requests from frontend
+- Manage Groq API connection
+- Stream SSE responses
+- Execute tools sequentially
+- Error handling & retries
 
 **Endpoints:**
 
 ```
 api/
-├── chat/route.ts                    # Agent chat
-├── agent/
-│   └── suggest/route.ts             # Next steps
-└── generate-isometric/
-    └── route.ts                     # Image generation
+└── agent/
+    └── route.ts                     # POST — streaming chat endpoint
+                                      # Input: { messages, userProfile, etc }
+                                      # Output: SSE stream of agent responses
 ```
 
-**Request/Response Handling:**
-- JSON bodies
-- TypeScript types
-- Error responses
-- Rate limiting (future)
+**Architecture:**
+- **Single endpoint** — `/api/agent` handles all chat
+- **Streaming SSE** — Real-time response chunks
+- **Tool Chaining** — Injects tool results into next LLM round
+- **Retry Logic** — Exponential backoff for Groq 429 (rate limit)
+- **Token Budget** — Fixed max_tokens per round to stay under Groq free tier
+
+**Key Implementation:**
+- Groq model: `llama-3.3-70b-versatile` (respects OpenAI tool format)
+- Tool definitions sent in EVERY round (not just round 0)
+- `injectPreviousOutputs()` substitutes real tool results before next LLM call
+- Max 6 tool rounds allows chaining: tank → drainage → validation → PDF
 
 ### 4. External Services
 
-**Anthropic Claude API:**
-- Image generation prompts
-- Optional AI enhancement
-- Requires API key
+**Groq API:**
+- Primary LLM: `llama-3.3-70b-versatile`
+- Function calling (tool execution)
+- Streaming completions
+- Free tier: 100k tokens/day, ~14.4 RPM
+
+**Optional (installed but not required):**
+- Anthropic Claude API (for image generation)
+- Google Generative AI
+- Babylon.js (3D rendering)
 
 ---
 
 ## 🔄 Data Flow
 
-### Calculation Flow
+### Calculator Flow (Standalone)
 
 ```
-User Input
+User Input in SepticTankCalculator.jsx
+    ├─ users, dotacion, temperature, depth, norm, ...
     ↓
-[Form Validation]
-    ↓ Invalid? → Show error
-    ↓ Valid
-[Client-Side Calculations]
-    ├─ Tank volume calculation
-    ├─ Field area calculation
-    ├─ TRH calculation
-    ├─ Compliance check
+[Client-side validation]
+    ├─ Check ranges (users >= 1, depth > 0, ...)
+    └─ Show errors if invalid
+    ↓
+[Pure calculation functions]
+    ├─ calculateSepticTank() from septicTank.ts
+    ├─ calculateDrainageField() from drainageField.ts
     └─ Format results
     ↓
 [Display Results]
-    ├─ Text summary
-    ├─ Data table
-    ├─ 3D diagram SVG
-    └─ Export options
+    ├─ Text summary (volumes, dimensions, ...)
+    ├─ Data table with key values
+    ├─ SVG diagram (IsometricDiagram.jsx)
+    ├─ Optional: 3D viewer (IsometricDiagram3D.jsx with Babylon.js)
+    └─ Optional: Technical report view (LaminaTecnica.jsx)
+    
+Note: Calculator is fully offline (no API calls).
+Tool chain in agent is alternative, conversational path.
 ```
 
-### Chat Flow
+### Chat Flow (Agent-Driven)
 
 ```
-User Message
+User Message in HydroAgent UI
     ↓
-[Language Detection]
+[Client detects language: ES or EN]
     ↓
-[Scenario Detection]
-    ├─ Keyword analysis
-    ├─ Context evaluation
-    └─ Confidence scoring
+[POST /api/agent]
+├─ body: { messages: [...history], userProfile?: 'owner'|'prof'|..., ... }
+│
+[Server: /api/agent/route.ts]
+│   ├─ Detect subscenario (if owner + not yet detected)
+│   ├─ Build system prompt (role-specific instructions)
+│   ├─ Send to Groq with tools
+│   │
+│   └─ Groq Response Loop (max 6 rounds):
+│       ├─ Round 0: User message → agent thinks
+│       ├─ Agent decides: need tools?
+│       │   ├─ YES → Round 1: execute calculate_septic_tank
+│       │   │         ↓ inject result
+│       │   │         Round 2: execute calculate_drainage_field
+│       │   │         ↓ inject result
+│       │   │         Round 3: execute validate_against_cte
+│       │   │         ↓ inject result
+│       │   │         Round 4: execute generate_pdf_report
+│       │   │         ↓ inject result
+│       │   │         Round 5: summarize for user
+│       │   │
+│       │   └─ NO → Direct text response to user
+│       │
+│       └─ Exit on: tool exec error OR no more tool calls
     ↓
-[Profile Determination]
-    ├─ User type (owner/prof/contractor)
-    └─ Expertise level
+[Stream response as SSE chunks]
     ↓
-[HTTP POST /api/agent]
-    ↓
-[Server Processing]
-    ├─ Collect context
-    ├─ Call Claude API
-    └─ Format response
-    ↓
-[Response Display]
-    ├─ Render message
-    ├─ Update state
-    └─ Store history
+[Frontend HydroAgent receives chunks]
+    ├─ Append to message history
+    ├─ Render markdown
+    ├─ Parse tool outputs if present
+    └─ Display final response
 ```
 
-### Image Generation Flow
+### PDF Report Generation (via Tool Chain)
 
 ```
-[SVG Diagram Ready]
+User asks agent: "Dame un reporte PDF para presentar"
     ↓
-[User clicks "Generar Imagen"]
+[Agent executes tool chain in /api/agent]
+    ├─ Tool 1: calculate_septic_tank → volume, dims
+    ├─ Tool 2: calculate_drainage_field → area, depth
+    ├─ Tool 3: validate_against_cte → warnings, passed
+    └─ Tool 4: generate_pdf_report → binary PDF + base64
     ↓
-[HTTP POST /api/generate-isometric]
-    ├─ Include diagram data
-    └─ Include design context
-    ↓
-[Server Processing]
-    ├─ Generate description
-    ├─ Call Claude API
-    └─ Create image prompt
-    ↓
-[Response with Image Info]
-    ├─ Status/URL
-    ├─ Further instructions
-    └─ Alternative services
+[Server returns PDF to client via SSE]
+    ├─ Encoded in response chunk
+    └─ Frontend decodes and offers download
+    
+Report includes:
+- Project info & design inputs
+- Tank & field calculations
+- CTE compliance matrix
+- Technical diagrams (SVG embedded)
+- Regulatory references
 ```
 
 ---
@@ -234,128 +275,165 @@ User Message
 
 ```
 project/
-├── app/                         # Next.js App Router pages
+├── app/                         # Next.js App Router
+│   ├── page.tsx                 # Home page (list of routes)
+│   ├── layout.tsx               # Global layout
+│   ├── api/
+│   │   └── agent/
+│   │       └── route.ts         # POST /api/agent (SSE streaming)
+│   └── calculators/
+│       └── fosa-septica/
+│           └── page.tsx         # Calculator page
 ├── src/
-│   ├── components/              # React components
-│   ├── lib/                     # Business logic
-│   ├── types/                   # TypeScript definitions
-│   └── __tests__/               # Tests
+│   ├── components/              # React UI components (JSX/JS)
+│   ├── lib/                     # Business logic (TS)
+│   └── __tests__/               # Tests (TS/TSX)
 ├── public/                      # Static assets
 ├── docs/                        # Documentation
-└── [config files]
+└── [config files: tsconfig.json, next.config.js, package.json, ...]
 ```
 
-### Calculation Modules
+### Agent Tools (4 Modular)
 
-`src/lib/calculations/septic.ts`:
+`src/lib/agent/tools/`:
 ```typescript
-interface CalculationInput {
-  users: number              // Number of users
-  dotacion: number           // L/person/day
-  temperatura: number        // °C
-  profundidad: number        // m
-  norm: string              // Standard ID
-  // ...
-}
+// Each tool: definition + executor
 
-interface CalculationResult {
-  volumeM3: number
-  fieldAreaM2: number
-  trh: number              // hours
-  // ... many more fields
-}
+calculateSepticTank.ts
+├─ calculateSepticTankTool     // OpenAI format def
+├─ executeCalculateSepticTank  // Async executor
+└─ types: ExecuteToolInput
 
-export function runCalc(input: CalculationInput): CalculationResult
+calculateDrainageField.ts
+├─ calculateDrainageFieldTool
+├─ executeCalculateDrainageField
+└─ types: ExecuteDrainageFieldInput
+
+validateAgainstCte.ts
+├─ validateAgainstCteTool      // Read-only check
+├─ executeValidateAgainstCte
+└─ types: ExecuteValidateAgainstCteInput
+
+generatePdfReport.ts
+├─ generatePdfReportTool       // PDF generation
+├─ executeGeneratePdfReport
+└─ types: ExecuteGeneratePdfReportInput
+
+index.ts
+├─ tools[]                      // All definitions for Groq
+├─ toolExecutors{}              // Registry for execution
+└─ executeTool(name, input)     // Router function
+```
+
+### Calculation Engine
+
+`src/lib/calculations/`:
+```typescript
+septicTank.ts
+├─ interface TankInput
+├─ interface TankResult
+├─ calculateSepticTank(input): TankResult   // Pure function
+└─ helper functions for subcomponents
+
+drainageField.ts
+├─ interface FieldInput
+├─ interface FieldResult
+├─ calculateDrainageField(input): FieldResult
+└─ helper functions
 ```
 
 ### Component Structure
 
-`src/components/Calculators/SepticTankCalculator.tsx`:
-```typescript
-export default function SepticTankCalculator() {
-  const [input, setInput] = useState<CalcInput>(defaults)
-  const [results, setResults] = useState<CalcResult | null>(null)
-  const [tab, setTab] = useState<'form' | 'results' | 'diagram'>('form')
+`src/components/SepticTankCalculator.jsx`:
+```javascript
+// Single-file calculator with:
+// - Form input handlers
+// - Calculation trigger
+// - Result state
+// - Tab switching (form → results → diagram)
+// - Imports IsometricDiagram.jsx
+```
 
-  const handleCalculate = () => {
-    const r = runCalc(input)
-    setResults(r)
-    setTab('results')
-  }
-
-  return (
-    <div style={styles.container}>
-      {tab === 'form' && <SepticForm ... />}
-      {tab === 'results' && <SepticResults ... />}
-      {tab === 'diagram' && <IsometricDiagram ... />}
-    </div>
-  )
-}
+`src/components/HydroAgent/index.js`:
+```javascript
+// Chat UI component
+// - Message input field
+// - Message history display
+// - SSE listener for streaming responses
+// - Message rendering with markdown.js
 ```
 
 ---
 
 ## 🔌 Integration Points
 
-### 3D Diagram Integration
+### Diagram Integration
 
-**Component:** `IsometricDiagram.tsx`
+**Component:** `IsometricDiagram.jsx`
 
 **Props:**
-```typescript
-interface IsometricDiagramProps {
-  r: CalculationResult          // Calculation results
-  projectName?: string
-  location?: string
+```javascript
+{
+  r: { volumeM3, dimensions, ... },  // Result object
+  projectName?: string,
+  location?: string,
   designer?: string
 }
 ```
 
 **Used in:**
-- `SepticTankCalculator` (built-in)
-- Can be copied to other calculators
+- `SepticTankCalculator` — Shows diagram in results tab
+- Standalone: `<IsometricDiagram r={results} />`
+
+**Variants:**
+- `IsometricDiagram.jsx` — 2D SVG (fast, responsive)
+- `IsometricDiagram3D.jsx` — 3D Babylon.js viewer (optional, heavy)
 
 ### Agent Integration
 
-**Endpoints:**
-- `POST /api/agent` — Chat messages
-- `GET /api/agent/suggest` — Next steps
+**Single Endpoint:** `POST /api/agent`
 
-**Client Usage:**
-```typescript
-const response = await fetch('/api/agent', {
+**Client:**
+```javascript
+const eventSource = new EventSource('/api/agent', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    message: userMessage,
-    history: chatHistory,
-    userProfile: profile,
-    detectedScenario: scenario
+    messages: [{ role: 'user', content: '...' }, ...],
+    userProfile: 'owner',                // optional
+    // country, language auto-detected
   })
 })
-```
 
-### API Generation Integration
-
-**Endpoint:** `POST /api/generate-isometric`
-
-**Request:**
-```json
-{
-  "prompt": "SVG diagram description",
-  "context": { ...designContext },
-  "format": "jpeg" | "png"
+eventSource.onmessage = (event) => {
+  // Append event.data to chat history
+  // Parse tool outputs if present
 }
 ```
 
-**Response:**
-```json
-{
-  "status": "ready" | "generating" | "pending",
-  "imageUrl": "...",
-  "instructions": "..."
-}
+**Response Format (SSE chunks):**
 ```
+data: {"type":"message","content":"Hello..."}
+data: {"type":"tool_call","tool":"calculate_septic_tank",...}
+data: {"type":"tool_result","output":{...}}
+...
+data: {"type":"done"}
+```
+
+### Tool Execution Chain
+
+**Frontend → /api/agent:**
+- Sends user message + history
+
+**Server → Groq:**
+- Round 0: User query → agent decides
+- Round 1-5: Tool execution loop
+  - If agent calls `calculate_septic_tank` → execute locally, return result
+  - If agent calls `calculate_drainage_field` → inject prev result, execute
+  - etc.
+
+**Server → Frontend (SSE):**
+- Streams each tool call, result, and final message
 
 ---
 
@@ -363,34 +441,36 @@ const response = await fetch('/api/agent', {
 
 ### Local State (Component Level)
 
-**Used for:**
-- Form inputs
-- Tab selection
-- UI toggles
-- Temporary values
+**Calculator (SepticTankCalculator.jsx):**
+```javascript
+const [input, setInput] = useState({ users, dotacion, ... })
+const [results, setResults] = useState(null)
+const [tab, setTab] = useState('form')  // form | results | diagram
+```
 
-**Pattern:**
-```typescript
-const [input, setInput] = useState<Input>(initialValue)
+**Chat (HydroAgent/index.js):**
+```javascript
+const [messages, setMessages] = useState([])
 const [loading, setLoading] = useState(false)
+const [subscenario, setSubscenario] = useState(null)
 ```
 
 ### Session State (Browser)
 
-**Used for:**
-- User profile (owner/professional)
-- Chat history
-- Language preference
-- Recent calculations
+**Persisted by:**
+- `src/lib/owner-state.js` — User profile, language preference
+- localStorage in HydroAgent — Chat history (optional)
 
-**Storage:**
-- sessionStorage (current session)
-- localStorage (persistent)
+**Data:**
+- `userProfile` (owner|prof|contractor|exploring)
+- `language` (es|en, auto-detected)
+- `subscenario` (installation|active-failure|preventive|abandoned)
 
-**No Global State:**
-- Don't need Redux/Zustand for this app
-- Simple data flow
-- Props drilling manageable
+### No Global State Manager
+
+- Props drilling is minimal
+- Each page (calculator, chat) is isolated
+- No shared Redux/Zustand needed
 
 ---
 
@@ -493,34 +573,35 @@ describe('SepticForm', () => {
 
 ## 📈 Performance Considerations
 
+### Calculator Performance
+
+**Client-side only:**
+- No network latency
+- O(n) math operations (linear time)
+- Results instant (<100ms)
+- Diagram rendering: SVG optimized (~50ms)
+
+### Agent Performance
+
+**Groq API constraints:**
+- Free tier: 100k tokens/day, ~14.4 requests/min
+- First response: 3-8s (LLM thinking + tool chain)
+- Tool execution: 0.5-2s per tool
+- SSE streaming: real-time chunks visible
+
+**Budget management:**
+- `MAX_TOKENS_ROUND0 = 700` (input reasoning)
+- `MAX_TOKENS_FOLLOWUP = 500` (post-tool summary)
+- `MAX_NORMATIVA_CHARS = 2200` (limit context)
+
 ### Bundle Optimization
 
-- Lazy load calculator pages
-- No external dependencies (React + TS only)
+- No external UI library
+- Lazy load 3D viewer (Babylon.js)
+- CSS-in-JS only
 - Tree-shake unused code
-- Minify CSS-in-JS
 
-**Target:** <200 KB minified
-
-### Calculation Performance
-
-- Client-side only (no network latency)
-- O(n) operations (linear time)
-- All results instant (<100ms)
-
-### Rendering Performance
-
-- React.memo for expensive calculations
-- Controlled re-renders
-- SVG rendering optimized
-
-**Target:** 60 FPS interactions
-
-### API Performance
-
-- Short response times (<5s)
-- Image generation async (user feedback)
-- Proper error handling
+**Typical bundle:** ~250 KB (Next.js optimized)
 
 ---
 
@@ -528,168 +609,253 @@ describe('SepticForm', () => {
 
 ### Input Validation
 
-```typescript
-// All user inputs validated before calculation
-const validatedInput = validateCalculatorInput(userInput)
-if (!validatedInput.valid) {
-  return { error: validatedInput.errors }
-}
-```
+**Calculator:**
+- Range checks (users >= 1, depth > 0.5m, etc.)
+- Numeric type validation
+- Standard validation (norm exists)
+- `src/lib/validation/cteValidator.ts`
+
+**Agent:**
+- Message length limits (prevent token exhaustion)
+- Tool output sanitization
+- No raw SQL/command construction
 
 ### API Security
 
-- HTTPS only
-- No sensitive data in URLs
-- API keys in environment (never exposed)
-- Request validation
-- Error messages safe
+**Environment:**
+- `.env.local` (dev) / environment vars (prod)
+- `GROQ_API_KEY` required
+- `ANTHROPIC_API_KEY` optional
+- Never exposed in client
+
+**Groq API:**
+- Streaming over HTTPS
+- Rate limiting (free tier enforced)
+- Error messages are safe (no stack traces)
 
 ### Data Privacy
 
-- No server-side persistence
-- Client-side calculations only
-- No cookies for tracking
-- GDPR compliant
+- **No database** — calculations never stored
+- **Client-side calculations** — calculator fully offline
+- **Agent chats** — not persisted (in-memory only, session-scoped)
+- **No tracking cookies** — user privacy preserved
+- **GDPR compliant** — no PII collection
 
 ---
 
 ## 🔄 Extension Points
 
-### Adding a New Calculator
+### Adding a New Tool to Agent
 
-1. **Create calculation logic:** `src/lib/calculations/new-calc.ts`
-2. **Create component:** `src/components/Calculators/NewCalc.tsx`
-3. **Create page:** `app/calculators/new-slug/page.tsx`
-4. **Register:** Add to module list
+1. **Create executor:** `src/lib/agent/tools/myNewTool.ts`
+   - Export tool definition (OpenAI format)
+   - Export async executor function
+2. **Register:** Update `src/lib/agent/tools/index.ts`
+   - Add to `tools[]` array
+   - Add to `toolExecutors{}` map
+3. **Add to system prompt:** `app/api/agent/route.ts`
+   - Document when to use it
+   - Add to TOOLS section
+4. **Test:** Create test in `src/__tests__/agent/`
 
-### Adding a New Standard
+### Adding a New Standard/Norm
 
-1. **Add norms:** `src/lib/calculations/norms.ts`
-2. **Create procedures:** `docs/normativa/new-standard.md`
-3. **Update validation:** `src/lib/validation/inputs.ts`
-4. **Test:** Add test cases
+1. **Update logic:** `src/lib/calculations/septicTank.ts` or `drainageField.ts`
+   - Add new norm ID to switch/if
+   - Implement calculation differences
+2. **Update validation:** `src/lib/validation/cteValidator.ts`
+   - Add norm-specific rules
+3. **Update system prompt:** `app/api/agent/route.ts`
+   - Document the standard
+4. **Test:** Add cases in `src/__tests__/`
 
-### Customizing Agent
+### Customizing Agent Behavior
 
-1. **Edit rules:** `CLAUDE.md`
-2. **Update detection:** `src/lib/agent/subscenario-detector.ts`
-3. **Add responses:** `src/lib/agent/catalog.ts`
+1. **Rules:** Edit `CLAUDE.md` (project instructions)
+   - Changes apply to all new conversations
+2. **Profile detection:** `src/lib/agent/subscenario-detector.ts`
+   - Modify keywords or confidence logic
+3. **Response formatting:** `src/lib/agent/filter.ts`
+   - Add response filters or post-processing
 
 ---
 
 ## 📊 Dependencies
 
-### Runtime
-- `react` — UI framework
-- `next` — App framework
-- (That's it!)
+### Runtime (Essential)
+- `react@18` — UI framework
+- `next@14.2.3` — App framework
+
+### Runtime (Agent & Calculations)
+- `pdfkit@0.18.0` — PDF report generation
+  - Note: `.afm` font files need `serverComponentsExternalPackages` in next.config.js
+
+### Runtime (Optional, Installed but Not Required)
+- `@anthropic-ai/sdk` — Claude API (for image generation)
+- `@babylonjs/core`, `babylonjs` — 3D rendering
+- `@google/generative-ai` — Google Gemini (alternative LLM)
 
 ### Dev
 - `typescript` — Type safety
-- `vitest` — Testing
-- `@types/react`, `@types/node` — Type definitions
+- `vitest` — Test runner
+- `@types/react`, `@types/node`, `@types/pdfkit` — Type defs
+- `eslint`, `eslint-config-next` — Linting
 
-**Zero external UI libraries** — Pure CSS/React
+**Zero external UI libraries** — CSS-in-JS inline styles only
 
 ---
 
 ## 🚀 Deployment Architecture
 
 ### Development
-```
+```bash
 npm run dev
-→ http://localhost:3000
-→ Hot reload enabled
-→ Full source maps
+# Runs on http://localhost:3000
+# Hot reload enabled (HMR)
+# Full source maps
+# Groq API: use .env.local GROQ_API_KEY
 ```
 
 ### Production Build
-```
+```bash
 npm run build
-→ Next.js optimization
-→ Minification
-→ Code splitting
-→ Asset optimization
+# Next.js optimization
+# Minification + tree-shaking
+# Code splitting per page
+# Output: .next/ folder
+
+npm run start
+# Serves optimized build
+# Closest to production behavior
 ```
 
-### Deployment
-```
-Vercel (recommended)
-├─ Auto-deploy on push
-├─ Edge functions
-├─ CDN globally distributed
-└─ Zero config needed
+### Deployment Options
 
-OR
-
-Self-hosted
-├─ npm run build
-├─ npm run start
-└─ Node.js server
+**Vercel (Recommended):**
 ```
+- Auto-deploy on git push
+- Edge Functions available
+- CDN globally distributed
+- Environment variables via dashboard
+- Zero-config setup
+```
+
+**Self-Hosted:**
+```bash
+# Requirements: Node.js 18+, npm/yarn
+npm run build
+npm run start  # or use PM2, systemd, Docker
+# Env vars: GROQ_API_KEY (required)
+```
+
+**Docker (Self-Hosted):**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install && npm run build
+ENV GROQ_API_KEY=your-key
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+### Environment Configuration
+
+**Required:**
+- `GROQ_API_KEY` — Groq API key for LLM
+
+**Optional:**
+- `ANTHROPIC_API_KEY` — Claude API (for image gen)
+- `GOOGLE_API_KEY` — Google Generative AI
+
+All must be set before `npm run dev` or deployment
 
 ---
 
 ## 📝 Architecture Decisions
 
-### Why No Database?
-- All results calculated in real-time
-- No need for persistence
-- Users can export/download if needed
-- Simpler, more secure
+### Single `/api/agent` Endpoint
+- **Why:** Unified LLM interface + tool orchestration
+- **Tradeoff:** Requires streaming SSE on frontend
+- **Alternative rejected:** Separate endpoints per tool = more complex routing
 
-### Why No Global State Manager?
-- Simple prop drilling sufficient
-- Each feature self-contained
-- Avoids over-engineering
-- Faster development
+### Groq over Anthropic/OpenAI
+- **Why:** Free tier 100k tokens/day, faster responses, low cost
+- **Constraint:** Max 14.4 RPM on free tier
+- **Token budget:** Fixed per round to stay under free limit
+- **Alternative:** Could use Anthropic API (installed, optional)
 
-### Why CSS-in-JS Only?
-- Single source of truth
-- Dynamic styling easy
-- Smaller bundle
-- Component-scoped styles
+### Tool Definitions in Every Round
+- **Why:** llama-3.3-70b respects OpenAI tool format reliably
+  - Alternative (llama-3.1-8b) emits tool calls as pseudo-XML text
+- **Cost:** Adds ~100 tokens per round
+- **Benefit:** 100% tool call parsing success
 
-### Why TypeScript Everywhere?
-- Catches errors early
-- Self-documenting code
-- Better IDE support
-- Refactoring confidence
+### `injectPreviousOutputs()` Substitution
+- **Why:** Groq transmits tool results unreliably in subsequent context
+- **Solution:** Replace with actual results before next LLM call
+- **Limitation:** Adds complexity to streaming loop
 
-### Why Next.js?
-- Hybrid rendering (static + dynamic)
-- Built-in API routes
-- Automatic code splitting
-- Simple deployment
+### Client-Side Calculator + Agent Tools as Separate Paths
+- **Why:** Users can calculate offline OR ask agent for help
+- **Tradeoff:** Code duplication (pure calc functions + tool wrappers)
+- **Benefit:** Two UX paths (direct calc vs conversational)
 
 ---
 
 ## 🔍 Debugging
 
 ### Browser Console
-```javascript
-// In calculator
-window.lastCalcInput
-window.lastCalcResult
 
-// In diagram
-window.diagramDebug = { scale: 25, svg: ... }
+**Calculator:**
+```javascript
+// Check calculation state
+window.lastInput
+window.lastResult
+```
+
+**Chat Agent:**
+```javascript
+// Check streaming messages
+window.messageHistory  // if stored globally
+// Network tab → /api/agent → Response → see SSE chunks
 ```
 
 ### Server Logs
+
 ```bash
 npm run dev
-# Logs appear in terminal
-# Check request/response details
+# Logs in terminal:
+# - Next.js build messages
+# - API route execution
+# - Tool execution logs
+# - Groq API requests/responses
+
+# With debug output:
+DEBUG=* npm run dev
 ```
 
-### Network Tab
-- Inspect API calls
-- Check response times
-- Debug image generation
+### Network Tab (DevTools)
+
+- **POST /api/agent** — Main chat endpoint
+  - Request body: messages, userProfile, etc.
+  - Response: SSE stream (text/event-stream)
+  - Each chunk contains: type, content, tool info
+- **Check SSE format** — `data: {...}\n\n` separates chunks
+
+### Common Issues
+
+| Error | Check |
+|-------|-------|
+| "Groq API key not set" | `.env.local` has `GROQ_API_KEY` |
+| "Tool not found" | `/api/agent/route.ts` imports correct tools |
+| "PDF generation fails" | `pdfkit` in `serverComponentsExternalPackages` |
+| "Calculator won't compute" | Browser console errors in `septicTank.ts` |
+| "Chat freezes" | Check Groq rate limit (429 errors) |
 
 ---
 
 **Last Updated:** May 2026
 
 For implementation details, see [DEVELOPERS.md](./DEVELOPERS.md)
+For usage, see [../README.md](../README.md) and [../GETTING_STARTED.md](../GETTING_STARTED.md)

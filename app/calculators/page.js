@@ -4,12 +4,28 @@ import { useLang } from "@/src/lib/i18n";
 
 const MODULES = [
   {
+    slug: "geo",
+    icon: "📍",
+    norms: "OSM · Open-Meteo · Ley 99/1993",
+    ready: true,
+    titleKey: "geoTitle",
+    descKey: "geoDesc",
+  },
+  {
     slug: "fosa-septica",
     icon: "🪣",
     norms: "RAS · España · EN 12566 · EPA",
     ready: true,
     titleKey: "septicTitle",
     descKey: "septicDesc",
+  },
+  {
+    slug: "mantenimiento",
+    icon: "🔧",
+    norms: "Res. 0330/2017 · RAS 2017",
+    ready: true,
+    titleKey: "maintTitle",
+    descKey: "maintDesc",
   },
   { slug: "imhoff",  icon: "🏗", ready: false, titleKey: "imhoffTitle", descKey: "imhoffDesc" },
   { slug: "lodos",   icon: "🔬", ready: false, titleKey: "lodsTitle",   descKey: "lodsDesc"   },

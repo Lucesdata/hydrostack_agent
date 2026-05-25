@@ -26,9 +26,10 @@ function renderInline(text, baseKey) {
   let idx = 0;
 
   const patterns = [
-    { re: /`([^`]+)`/,        type: "code"   },
-    { re: /\*\*([^*]+)\*\*/,  type: "bold"   },
-    { re: /\*([^*\n]+)\*/,    type: "italic" },
+    { re: /`([^`]+)`/,                     type: "code"   },
+    { re: /\*\*([^*]+)\*\*/,               type: "bold"   },
+    { re: /\*([^*\n]+)\*/,                 type: "italic" },
+    { re: /\[([^\]]+)\]\(([^)]+)\)/,       type: "link"   },
   ];
 
   while (rest.length > 0) {
@@ -58,8 +59,23 @@ function renderInline(text, baseKey) {
       out.push(<code key={k} style={inlineStyles.code}>{inner}</code>);
     } else if (bestType === "bold") {
       out.push(<strong key={k} style={inlineStyles.bold}>{inner}</strong>);
-    } else {
+    } else if (bestType === "italic") {
       out.push(<em key={k} style={inlineStyles.italic}>{inner}</em>);
+    } else if (bestType === "link") {
+      const href = best[2];
+      const isCalc = href.startsWith("/calculators");
+      out.push(
+        <a key={k} href={href} style={isCalc ? {
+          display: "inline-flex", alignItems: "center", gap: "5px",
+          background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.2)",
+          borderRadius: "4px", padding: "3px 10px", margin: "2px 1px",
+          color: "#00F5FF", textDecoration: "none",
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px",
+          fontWeight: "700", letterSpacing: "0.04em",
+        } : { color: "#00d4ff", textDecoration: "underline" }}>
+          {inner}
+        </a>
+      );
     }
 
     rest = rest.slice(best.index + best[0].length);

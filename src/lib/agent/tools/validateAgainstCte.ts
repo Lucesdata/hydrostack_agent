@@ -54,21 +54,68 @@ Este tool NO recalcula nada. Solo valida los resultados que recibe como input. S
         },
         contexto: {
           type: 'object',
-          description: 'Información adicional del emplazamiento.',
+          description: 'Información básica del emplazamiento.',
           properties: {
             distancia_vivienda_m: {
               type: 'number',
-              description: 'Distancia desde el sistema a la vivienda en metros (mínimo CTE: 5 m).',
+              description: 'Distancia desde el sistema a la vivienda (m). Mínimo: 5 m (Res. 0330/2017 Art. 143).',
             },
             distancia_pozo_m: {
               type: 'number',
-              description: 'Distancia al pozo de agua en metros (mínimo CTE: 30 m).',
+              description: 'Distancia al pozo de abastecimiento (m). Mínimo: 30 m.',
             },
             zona_protegida_bool: {
               type: 'boolean',
-              description: 'True si el emplazamiento está en zona protegida (acuíferos, reservas hídricas, etc.).',
+              description: 'True si el predio está en zona de protección ambiental o hídrica.',
             },
           },
+        },
+        geoespacial: {
+          type: 'object',
+          description:
+            'Verificaciones geoespaciales detalladas del sitio (Fase 1). ' +
+            'Devuelve estado OK/ALERTA/BLOQUEANTE por cada restricción, ' +
+            'y sugiere tecnologías alternativas si el nivel freático es alto.',
+          properties: {
+            distancia_pozos_m: {
+              type: 'number',
+              description: 'Distancia a pozos de abastecimiento de agua (m). Mínimo: 30 m (Art. 143).',
+            },
+            distancia_cuerpo_agua_m: {
+              type: 'number',
+              description: 'Distancia a cuerpos de agua o ronda hídrica (m). Mínimo: 30 m (Art. 144).',
+            },
+            distancia_edificaciones_m: {
+              type: 'number',
+              description: 'Distancia a edificaciones y linderos (m). Mínimo: 5 m (Art. 143).',
+            },
+            distancia_arboles_m: {
+              type: 'number',
+              description: 'Distancia a árboles de raíz profunda (m). Mínimo: 3 m (Art. 143).',
+            },
+            aguas_abajo_captaciones: {
+              type: 'boolean',
+              description: 'True si el sistema está hidráulicamente aguas abajo de todas las captaciones de agua.',
+            },
+            nivel_freatico_medido_m: {
+              type: 'number',
+              description:
+                'Profundidad medida al nivel freático máximo estacional desde la superficie (m). ' +
+                'El fondo de la zanja debe quedar a ≥ 1.20 m sobre el N.F. máximo (Art. 144). ' +
+                'Si N.F. < 1.5 m, el agente sugerirá tecnologías alternativas.',
+            },
+            profundidad_instalacion_m: {
+              type: 'number',
+              description:
+                'Profundidad desde la superficie al fondo de la zanja de infiltración (m). ' +
+                'Típico: 0.60–0.90 m para zanjas filtrantes. Usado para calcular distancia al N.F.',
+            },
+          },
+        },
+        norm_code: {
+          type: 'string',
+          enum: ['ras', 'cte', 'epa', 'uk', 'asnzs'],
+          description: '"ras" = Colombia (Res. 0330/2017, default). "cte" = España.',
         },
       },
       required: [],
@@ -88,6 +135,16 @@ export interface ExecuteValidateAgainstCteInput {
     distancia_pozo_m?: number;
     zona_protegida_bool?: boolean;
   };
+  geoespacial?: {
+    distancia_pozos_m?: number;
+    distancia_cuerpo_agua_m?: number;
+    distancia_edificaciones_m?: number;
+    distancia_arboles_m?: number;
+    aguas_abajo_captaciones?: boolean;
+    nivel_freatico_medido_m?: number;
+    profundidad_instalacion_m?: number;
+  };
+  norm_code?: string;
 }
 
 export async function executeValidateAgainstCte(
@@ -129,6 +186,12 @@ export async function executeValidateAgainstCte(
     }
   }
 
-  const result = validateAgainstCte(input as CteValidatorInput);
+  const result = validateAgainstCte({
+    septic_tank: input.septic_tank,
+    drainage_field: input.drainage_field,
+    contexto: input.contexto,
+    geoespacial: input.geoespacial,
+    norm_code: input.norm_code,
+  } as CteValidatorInput);
   return result;
 }

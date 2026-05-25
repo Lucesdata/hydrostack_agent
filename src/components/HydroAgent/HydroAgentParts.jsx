@@ -103,10 +103,10 @@ function Bubble({ role, content, tools, suggestions, onSuggestionPick, flow, onF
           marginBottom: "-14px",
           paddingLeft: "18px",
           paddingRight: "18px",
-          paddingBottom: "12px",
+          paddingBottom: "14px",
           display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
+          flexDirection: "column",
+          gap: "7px",
         }}>
           {suggestions.map((s, i) => (
             <button
@@ -114,18 +114,30 @@ function Bubble({ role, content, tools, suggestions, onSuggestionPick, flow, onF
               type="button"
               onClick={() => onSuggestionPick(s.text)}
               style={{
-                background: "rgba(0,245,255,0.06)",
-                border: "1px solid rgba(0,245,255,0.2)",
-                borderRadius: "4px",
-                padding: "5px 10px",
-                fontSize: "11px",
-                color: "#7ab8c8",
-                fontFamily: "'IBM Plex Mono', monospace",
+                background: "rgba(0,245,255,0.05)",
+                border: "1px solid rgba(0,245,255,0.18)",
+                borderRadius: "5px",
+                padding: "10px 14px",
+                fontSize: "13px",
+                color: "#c8e8f0",
+                fontFamily: "'Inter', sans-serif",
                 cursor: "pointer",
                 textAlign: "left",
-                lineHeight: "1.4",
+                lineHeight: "1.45",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "background 0.15s, border-color 0.15s",
               }}
             >
+              <span style={{
+                fontSize: "9px",
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: "#00F5FF",
+                fontWeight: 700,
+                flexShrink: 0,
+                minWidth: "16px",
+              }}>{i + 1}.</span>
               {s.text}
             </button>
           ))}

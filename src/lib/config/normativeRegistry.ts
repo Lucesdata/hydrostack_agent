@@ -179,20 +179,27 @@ export const NORMATIVE_REGISTRY: Record<NormCode, NormativeInfo> = {
   },
   ras: {
     code: 'ras',
-    name: 'RAS 2000 (Colombia)',
+    name: 'Res. 0330/2017 (Colombia)',
     region: 'Colombia',
     flag: '\u{1F1E8}\u{1F1F4}',
-    reference: 'RAS 2000 / RAS 2017',
+    // Res. 0330/2017 is the primary norm (Art. 134–145 for SITARD).
+    // Dec. 1076/2015 governs the environmental permit (vertimientos).
+    // Res. 0631/2015 sets effluent quality limits.
+    // RAS 2000 Título E remains valid as a technical calculation reference only.
+    reference: 'Res. 0330/2017 MinVivienda (Art. 134–145) · Dec. 1076/2015 · Res. 0631/2015',
     docFile: 'docs/normativa/ras-2000.md',
     country: 'colombia',
     detectionKeywords: [
       'colombia', 'bogotá', 'bogota', 'medellín', 'medellin', 'cali',
+      'barranquilla', 'bucaramanga', 'cartagena', 'cundinamarca', 'antioquia',
     ],
     defaults: {
       sludgeRate: (t) => (t >= 20 ? 40 : t >= 10 ? 50 : 60),
       scumFactor: 0.30,
+      // Res. 0330/2017 Art. 138 — TRH mínimo 1.5 días para vivienda
       retentionDays: (t) => (t >= 20 ? 1.5 : t >= 10 ? 2.0 : 2.5),
-      minVolumeM3: 1.0,
+      // Res. 0330/2017 Art. 138 — Volumen mínimo absoluto 1,500 L = 1.5 m³
+      minVolumeM3: 1.5,
       minDepthM: 1.2,
       minWidthM: 0.6,
       minLengthM: 1.5,

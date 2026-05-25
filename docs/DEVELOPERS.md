@@ -6,149 +6,277 @@
 
 ## 🎯 Quick Start for Developers
 
+### Prerequisites
+
+1. Node.js 18+
+2. npm or yarn
+3. Code editor (VS Code recommended)
+4. Groq API key (free tier: https://console.groq.com)
+
 ### Before Reading This
 
 1. Read [../README.md](../README.md) — Project overview
-2. Read [../GETTING_STARTED.md](../GETTING_STARTED.md) — Get it running
+2. Read [../GETTING_STARTED.md](../GETTING_STARTED.md) — Get it running locally
 3. Read [ARCHITECTURE.md](./ARCHITECTURE.md) — System design
-4. Come back here
+4. Come back here for development tasks
 
 ---
 
-## 📁 Project Structure Review
+## 📁 Real Project Structure
 
 ```
-src/
-├── components/                # React components
-│   ├── Calculators/          # Calculator UIs
-│   ├── Common/               # Shared components
-│   └── HydroAgent/           # Chat UI
-├── lib/
-│   ├── calculations/         # Engineering logic
-│   ├── validation/           # Input validation
-│   ├── agent/                # Agent logic
-│   └── i18n.tsx              # Translations
-├── types/
-│   └── index.ts              # TypeScript definitions
-└── __tests__/                # Test files
-
-app/
-├── page.tsx                  # Home page
-├── layout.tsx                # Global layout
-├── api/                      # API routes
-│   ├── chat/
-│   ├── agent/
-│   └── generate-isometric/
-└── calculators/              # Calculator pages
-    └── fosa-septica/
+hydrostack-2/
+├── app/                           # Next.js App Router
+│   ├── page.tsx                   # Home (route list)
+│   ├── layout.tsx                 # Root layout
+│   ├── api/
+│   │   └── agent/
+│   │       └── route.ts           # POST /api/agent (SSE streaming)
+│   └── calculators/
+│       └── fosa-septica/
+│           └── page.tsx
+├── src/
+│   ├── components/                # React UI (JSX/JS)
+│   │   ├── SepticTankCalculator.jsx
+│   │   ├── IsometricDiagram.jsx
+│   │   ├── IsometricDiagram3D.jsx
+│   │   ├── LaminaTecnica.jsx
+│   │   ├── Navbar.js
+│   │   └── HydroAgent/
+│   │       ├── index.js
+│   │       ├── markdown.js
+│   │       └── [other components]
+│   ├── lib/
+│   │   ├── agent/                 # LLM + tools
+│   │   │   ├── tools/             # 4 modular tools
+│   │   │   │   ├── calculateSepticTank.ts
+│   │   │   │   ├── calculateDrainageField.ts
+│   │   │   │   ├── validateAgainstCte.ts
+│   │   │   │   ├── generatePdfReport.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── subscenario-detector.ts
+│   │   │   ├── filter.ts
+│   │   │   └── catalog.ts
+│   │   ├── calculations/          # Pure logic
+│   │   │   ├── septicTank.ts
+│   │   │   └── drainageField.ts
+│   │   ├── validation/
+│   │   │   └── cteValidator.ts
+│   │   ├── reports/
+│   │   │   └── generatePdfReport.ts
+│   │   ├── i18n.js                # Translations (ES/EN)
+│   │   └── owner-state.js         # User profile
+│   └── __tests__/
+│       ├── agent/
+│       ├── calculations/
+│       └── validation/
+├── public/                        # Static assets
+├── docs/                          # Documentation
+├── package.json
+├── tsconfig.json
+├── next.config.js
+└── [env files]
 ```
 
 ---
 
 ## 🛠️ Common Development Tasks
 
-### Task 1: Add a New Input Field to Calculator
+### Task 1: Modify the Calculator Form
 
-**File:** `src/components/Calculators/SepticForm.tsx`
+**File:** `src/components/SepticTankCalculator.jsx`
 
-1. Add to state:
-```typescript
-const [profundidad, setProfundidad] = useState(1.2)
+This is a **single monolithic component**. It contains:
+- Input state (users, dotacion, temperatura, etc.)
+- Calculation trigger
+- Result display
+- Diagram rendering
+
+**To add an input field:**
+
+1. Find the state section (~line 30):
+```javascript
+const [users, setUsers] = useState(4)
+const [dotacion, setDotacion] = useState(150)
+// Add your new field:
+const [newField, setNewField] = useState(defaultValue)
 ```
 
-2. Add to JSX:
-```jsx
+2. Add input element in the form section:
+```javascript
 <label style={styles.label}>
-  Profundidad (m)
+  My Field (units)
   <input
     type="number"
-    value={profundidad}
-    onChange={(e) => setProfundidad(parseFloat(e.target.value))}
+    value={newField}
+    onChange={(e) => setNewField(parseFloat(e.target.value))}
     style={styles.input}
   />
 </label>
 ```
 
-3. Pass to calculation:
-```typescript
-const result = runCalc({
+3. Pass to calculation function:
+```javascript
+const result = calculateSepticTank({
+  users, dotacion, temperatura, // existing
+  newField,                      // add this
   // ... other params
-  profundidad: profundidad
 })
 ```
 
+4. Update calculation logic:
+   - Modify `src/lib/calculations/septicTank.ts` to use `newField`
+   - Add tests in `src/__tests__/calculations/septicTank.test.ts`
+
 ### Task 2: Modify a Calculation Formula
 
-**File:** `src/lib/calculations/septic.ts`
+**File:** `src/lib/calculations/septicTank.ts`
 
-Find the calculation:
+Find the formula:
 ```typescript
-function calculateTankVolume(users, dotacion, trh) {
-  return (users * dotacion * trh) / 1440  // liters to m³
+export function calculateSepticTank(input: TankInput): TankResult {
+  // Calculation logic here
+  const volumeM3 = (input.users * input.dotacion * trh) / 1440
+  // ... more calculations
 }
 ```
 
-Update formula:
+**To change the formula:**
+
+1. Find the specific calculation (e.g., TRH, volume, etc.)
+2. Update the logic:
 ```typescript
-// Old: return (users * dotacion * trh) / 1440
-// New: return (users * dotacion * trh) / 1200  // changed divisor
+// Old formula
+const volumeM3 = (input.users * input.dotacion * trh) / 1440
+
+// New formula (example: different divisor)
+const volumeM3 = (input.users * input.dotacion * trh) / 1200
 ```
 
-**Don't forget:**
-1. Update related calculations
-2. Update tests if any
-3. Document change in comments
-4. Test with different values
+3. **Don't forget:**
+   - Update related calculations (field size depends on tank volume)
+   - Update validation rules in `cteValidator.ts` if needed
+   - Add test cases in `src/__tests__/calculations/septicTank.test.ts`
+   - Run `npm test` to verify
+   - Test with different inputs in browser
 
-### Task 3: Add Support for a New Standard
+4. **Example test:**
+```typescript
+describe('Tank volume calculation', () => {
+  it('calculates correctly with new formula', () => {
+    const result = calculateSepticTank({
+      users: 4,
+      dotacion: 150,
+      temperatura: 20,
+      norm: 'CTE',
+      profundidad: 1.2
+    })
+    expect(result.volumeM3).toBeCloseTo(2.4, 1)  // Adjust expected value
+  })
+})
+```
 
-**Files to modify:**
-1. `src/lib/calculations/norms.ts` — Add norm definition
-2. `src/lib/validation/inputs.ts` — Add validation rules
-3. `docs/normativa/new-standard.md` — Document the standard
+### Task 3: Add a New Agent Tool
+
+**This is the main pattern for extending the agent. Each tool has:**
+- Definition (OpenAI format for Groq)
+- Executor function (async, returns JSON)
+- TypeScript types
 
 **Step-by-step:**
 
-1. **Define norm** in `norms.ts`:
+1. **Create tool file:** `src/lib/agent/tools/myNewTool.ts`
+
 ```typescript
-const NORMS = {
-  // ... existing norms
-  'my-standard': {
-    name: 'My Standard Name',
-    country: 'My Country',
-    minTRH: 24,            // hours
-    maxLoading: 0.15,      // m³/m²/day
-    sludgeRate: 0.05,      // m³/person/year
-    tankMargin: 0.30       // 30% safety margin
+import type { ToolInput } from './index';
+
+// OpenAI format definition
+export const myNewToolDef = {
+  type: 'function',
+  function: {
+    name: 'my_new_tool',
+    description: 'What this tool does',
+    parameters: {
+      type: 'object',
+      properties: {
+        param1: { type: 'string', description: '...' },
+        param2: { type: 'number', description: '...' }
+      },
+      required: ['param1']
+    }
   }
+};
+
+// Type for this tool's input
+export interface ExecuteMyNewToolInput {
+  param1: string;
+  param2?: number;
+}
+
+// Executor function (called by agent)
+export async function executeMyNewTool(
+  input: ExecuteMyNewToolInput
+): Promise<{ result: string; data: unknown }> {
+  // Your logic here
+  const output = doSomething(input.param1);
+  return { result: 'success', data: output };
 }
 ```
 
-2. **Add validation** in `validation.ts`:
+2. **Register in tool registry:** Update `src/lib/agent/tools/index.ts`
+
 ```typescript
-const normSpecificRules = {
-  'my-standard': {
-    maxDepth: 3.0,
-    minVolume: 1.5,
-    maxUsers: 100
-  }
-}
+import { myNewToolDef, executeMyNewTool, ExecuteMyNewToolInput } from './myNewTool';
+
+// Add to tools array
+export const tools = [
+  // ... existing
+  myNewToolDef,  // Add this
+];
+
+// Add to executor map
+export const toolExecutors: Record<string, ToolExecutor> = {
+  // ... existing
+  my_new_tool: async (input: ToolInput) => {
+    return executeMyNewTool(input as ExecuteMyNewToolInput);
+  },
+};
 ```
 
-3. **Create documentation:**
-Create `docs/normativa/my-standard.md` with:
-- Standard name & reference
-- Design requirements
-- TRH specifications
-- Field loading rates
-- Local contact info
+3. **Add to system prompt:** Update `app/api/agent/route.ts`
 
-### Task 4: Customize Colors
-
-**File:** `src/components/IsometricDiagram.tsx`
-
-Find design system (lines 10-30):
+Find the TOOLS section and add:
 ```typescript
+**\`my_new_tool\`** — What it does.
+- When to use: Describe when agent should call this.
+- Inputs: param1 (string), param2 (optional number).
+- Output: Returns { result, data }.
+```
+
+4. **Test it:** Create `src/__tests__/agent/myNewTool.test.ts`
+
+```typescript
+import { executeMyNewTool } from '@/src/lib/agent/tools/myNewTool';
+
+describe('myNewTool', () => {
+  it('executes successfully', async () => {
+    const result = await executeMyNewTool({ param1: 'test' });
+    expect(result.result).toBe('success');
+  });
+});
+```
+
+5. **Run tests:**
+```bash
+npm test -- myNewTool.test.ts
+```
+
+### Task 4: Customize Diagram Colors
+
+**File:** `src/components/IsometricDiagram.jsx`
+
+Find the design system object at the top:
+```javascript
 const DS = {
   house: '#f5f5f5',
   tank: '#06b6d4',
@@ -159,19 +287,60 @@ const DS = {
 }
 ```
 
-Change any colors:
-```typescript
+Change any color:
+```javascript
 const DS = {
-  house: '#ffffff',      // Changed to white
-  tank: '#3b82f6',       // Changed to blue
-  pipes: '#ef4444',      // Changed to red
-  // ...
+  house: '#ffffff',      // Changed from #f5f5f5 (white)
+  tank: '#3b82f6',       // Changed from #06b6d4 (blue)
+  pipes: '#ef4444',      // Changed from #f97316 (red)
+  // ... rest unchanged
 }
 ```
 
-**Test:** Run dev server and check diagram.
+**Test your changes:**
+```bash
+npm run dev
+# Visit http://localhost:3000/calculators/fosa-septica
+# Fill form and check diagram colors
+```
 
-### Task 5: Add a New Calculator
+### Task 5: Update CTE Validation Rules
+
+**File:** `src/lib/validation/cteValidator.ts`
+
+This file checks tank + field against CTE DB-HS 5 and RD 1620/2007.
+
+**To add a new rule:**
+
+```typescript
+export function validateAgainstCte(input: ValidateInput): ValidationResult {
+  const errors = [];
+  const warnings = [];
+  
+  // Existing rules...
+  
+  // Add your rule:
+  if (input.volumeM3 < 2.0) {
+    errors.push({
+      field: 'volumeM3',
+      message: 'Mínimo 2 m³ por CTE DB-HS 5',
+      severity: 'error',
+      article: 'CTE DB-HS 5, 4.2.1'
+    });
+  }
+  
+  return { errors, warnings, compliant: errors.length === 0 };
+}
+```
+
+**Test it:**
+```bash
+npm test -- cteValidator.test.ts
+```
+
+### Task 6: Add a New Calculator Page
+
+**This is less common (usually users call agent instead), but here's the pattern:**
 
 **Step 1:** Create calculation module
 
@@ -181,36 +350,31 @@ File: `src/lib/calculations/imhoff-tank.ts`
 export interface ImhoffInput {
   users: number
   dotacion: number
-  temperatura: number
   // ... other params
 }
 
 export interface ImhoffResult {
   volumeArriba: number
   volumeAbajo: number
-  altoTotal: number
   // ... other results
 }
 
 export function calculateImhoff(input: ImhoffInput): ImhoffResult {
-  // Implementation here
-  return {
-    volumeArriba: users * dotacion * 6 / 1000,
-    // ...
-  }
+  // Implement calculation logic
+  return { volumeArriba: ..., ... }
 }
 ```
 
-**Step 2:** Create component
+**Step 2:** Create React component
 
-File: `src/components/Calculators/ImhoffTankCalculator.tsx`
+File: `src/components/ImhoffTankCalculator.jsx`
 
-```typescript
-import { calculateImhoff, ImhoffInput, ImhoffResult } from '@/lib/calculations/imhoff-tank'
+```javascript
+import { calculateImhoff } from '@/src/lib/calculations/imhoff-tank'
 
 export default function ImhoffTankCalculator() {
-  const [input, setInput] = useState<ImhoffInput>(defaults)
-  const [results, setResults] = useState<ImhoffResult | null>(null)
+  const [input, setInput] = useState({ users: 4, dotacion: 150 })
+  const [results, setResults] = useState(null)
 
   const handleCalculate = () => {
     const r = calculateImhoff(input)
@@ -218,16 +382,10 @@ export default function ImhoffTankCalculator() {
   }
 
   return (
-    <div>
-      {/* Form */}
-      <input
-        value={input.users}
-        onChange={(e) => setInput({...input, users: parseInt(e.target.value)})}
-      />
+    <div style={styles.container}>
+      <input ... onChange={e => setInput({...input, users: parseInt(e.target.value)})} />
       <button onClick={handleCalculate}>Calculate</button>
-      
-      {/* Results */}
-      {results && <div>{/* Display results */}</div>}
+      {results && <div>{results.volumeArriba}</div>}
     </div>
   )
 }
@@ -238,102 +396,144 @@ export default function ImhoffTankCalculator() {
 File: `app/calculators/imhoff-tank/page.tsx`
 
 ```typescript
-import ImhoffTankCalculator from '@/src/components/Calculators/ImhoffTankCalculator'
+import ImhoffTankCalculator from '@/src/components/ImhoffTankCalculator'
 
-export const metadata = {
-  title: 'Imhoff Tank Calculator'
-}
+export const metadata = { title: 'Imhoff Tank Calculator' }
 
 export default function ImhoffTankPage() {
   return <ImhoffTankCalculator />
 }
 ```
 
-**Step 4:** Register in module list
+**Step 4:** Add to home page
 
-File: `app/page.tsx`
-
+Edit `app/page.tsx` and add to the CALCULATORS list:
 ```typescript
-const CALCULATORS = [
-  // ... existing
-  {
-    slug: 'imhoff-tank',
-    name: 'Tanque Imhoff',
-    description: '...',
-    icon: '🏗️',
-    ready: true
-  }
-]
+{
+  slug: 'imhoff-tank',
+  name: 'Tanque Imhoff',
+  description: 'Design an Imhoff tank',
+  icon: '🏗️',
+  ready: true
+}
 ```
-
-**Step 5:** Test and document
-
-- Run: `npm run dev`
-- Visit: `http://localhost:3000/calculators/imhoff-tank`
-- Create: `docs/calculators/imhoff-tank.md`
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing (Vitest)
 
 ### Running Tests
 
 ```bash
-npm run test              # Run all tests
-npm run test:watch       # Watch mode
-npm run test:ui          # Visual UI
-npm run test:coverage    # Coverage report
+npm run test              # Run all tests once
+npm run test:watch       # Watch mode (re-run on changes)
 ```
 
-### Writing Tests
+**Note:** Tests use Vitest, not Jest. Same API, faster execution.
 
-**Calculation Test:**
+### Current Test Coverage
 
-File: `src/__tests__/calculations/imhoff.test.ts`
+```
+src/__tests__/
+├── agent/
+│   └── toolComposition.test.ts      # Tool chaining tests
+├── calculations/
+│   ├── septicTank.test.ts           # Tank calculation tests
+│   └── drainageField.test.ts        # Field calculation tests
+└── validation/
+    └── cteValidator.test.ts         # CTE validation tests
+```
+
+Run specific test file:
+```bash
+npm run test -- septicTank.test.ts
+npm run test -- agent/toolComposition.test.ts
+```
+
+### Writing Calculation Tests
+
+**File:** `src/__tests__/calculations/septicTank.test.ts`
 
 ```typescript
-import { calculateImhoff } from '@/lib/calculations/imhoff-tank'
+import { calculateSepticTank } from '@/src/lib/calculations/septicTank'
+import { describe, it, expect } from 'vitest'
 
-describe('Imhoff tank calculations', () => {
+describe('Septic tank calculations', () => {
   it('calculates volume correctly', () => {
-    const input = {
-      users: 5,
+    const result = calculateSepticTank({
+      users: 4,
       dotacion: 150,
-      temperatura: 20
-    }
-    const result = calculateImhoff(input)
-    expect(result.volumeArriba).toBeGreaterThan(0)
+      temperatura: 20,
+      norm: 'CTE',
+      profundidad: 1.2
+    })
+    
+    // Assert expected volume
+    expect(result.volumeM3).toBeGreaterThan(0)
+    expect(result.volumeM3).toBeLessThan(10) // Sanity check
   })
 
-  it('handles edge cases', () => {
-    const input = { users: 1, dotacion: 50, temperatura: 5 }
-    const result = calculateImhoff(input)
-    expect(result.volumeArriba).toBeLessThan(0.1)
+  it('handles edge case: single user', () => {
+    const result = calculateSepticTank({
+      users: 1,
+      dotacion: 100,
+      temperatura: 15,
+      norm: 'CTE',
+      profundidad: 1.2
+    })
+    
+    expect(result.volumeM3).toBeGreaterThan(0.5)
+    expect(result.volumeM3).toBeLessThan(1.5)
+  })
+
+  it('respects minimum volume per norm', () => {
+    const result = calculateSepticTank({
+      users: 1,
+      dotacion: 50,
+      temperatura: 25,
+      norm: 'CTE',
+      profundidad: 1.0
+    })
+    
+    // CTE requires minimum volume
+    expect(result.volumeM3).toBeGreaterThanOrEqual(2.0)
   })
 })
 ```
 
-**Component Test:**
+### Writing Tool Tests
 
-File: `src/__tests__/components/ImhoffCalculator.test.tsx`
+**File:** `src/__tests__/agent/myNewTool.test.ts`
 
 ```typescript
-import { render, screen, fireEvent } from '@testing-library/react'
-import ImhoffTankCalculator from '@/src/components/Calculators/ImhoffTankCalculator'
+import { executeMyNewTool } from '@/src/lib/agent/tools/myNewTool'
+import { describe, it, expect } from 'vitest'
 
-describe('ImhoffTankCalculator', () => {
-  it('renders form inputs', () => {
-    render(<ImhoffTankCalculator />)
-    expect(screen.getByLabelText(/Usuarios/)).toBeInTheDocument()
+describe('myNewTool', () => {
+  it('executes successfully with valid input', async () => {
+    const result = await executeMyNewTool({
+      param1: 'test',
+      param2: 42
+    })
+    
+    expect(result).toHaveProperty('result', 'success')
+    expect(result.data).toBeDefined()
   })
 
-  it('calculates on button click', () => {
-    render(<ImhoffTankCalculator />)
-    fireEvent.click(screen.getByText('Calculate'))
-    expect(screen.getByText(/Volumen/)).toBeInTheDocument()
+  it('handles missing optional params', async () => {
+    const result = await executeMyNewTool({ param1: 'test' })
+    expect(result.result).toBe('success')
   })
 })
 ```
+
+### Best Practices
+
+- **Arrange-Act-Assert:** Setup → Execute → Verify
+- **Descriptive names:** `it('calculates tank volume when users > 4', ...)`
+- **Test edge cases:** Single user, max users, boundary values
+- **Avoid mocking:** Test real calculation functions, not stubs
+- **Use `toBeCloseTo()`** for floating-point comparisons: `expect(2.001).toBeCloseTo(2.0, 2)`
 
 ---
 
@@ -341,68 +541,87 @@ describe('ImhoffTankCalculator', () => {
 
 ### How It Works
 
-File: `src/lib/i18n.tsx`
+File: `src/lib/i18n.js`
 
-```typescript
+Simple key-value object for Spanish (ES) and English (EN):
+
+```javascript
 export const translations = {
   es: {
-    'calculator.title': 'Calculadora de Fosa Séptica',
+    'home.title': 'HydroStack',
     'calculator.users': 'Usuarios',
     'calculator.dotacion': 'Dotación (L/hab/día)',
     // ... many more
   },
   en: {
-    'calculator.title': 'Septic Tank Calculator',
+    'home.title': 'HydroStack',
     'calculator.users': 'Users',
     'calculator.dotacion': 'Dotation (L/person/day)',
     // ... many more
   }
 }
-```
 
-### Using Translations
-
-```typescript
-import { t } from '@/lib/i18n'
-import { useLanguage } from '@/lib/i18n'
-
-export default function MyComponent() {
-  const { lang } = useLanguage()
-  
-  return <h1>{t(lang, 'calculator.title')}</h1>
+// Helper function
+export function t(lang, key) {
+  return translations[lang]?.[key] || key // Fallback to key if missing
 }
 ```
 
+### Using in Components
+
+```javascript
+import { t } from '@/src/lib/i18n'
+
+export default function MyComponent({ lang }) {
+  return (
+    <div>
+      <h1>{t(lang, 'home.title')}</h1>
+      <label>{t(lang, 'calculator.users')}</label>
+    </div>
+  )
+}
+```
+
+### Language Detection
+
+**In agent (`app/api/agent/route.ts`):**
+- Detects language from first message
+- Maintains language throughout conversation
+- System prompt changes role instructions per language
+
+**In calculator (SepticTankCalculator.jsx):**
+- Uses `owner-state.js` for persistent language
+- User can toggle via Navbar language switcher
+
 ### Adding New Translations
 
-1. **Add to translations object:**
-```typescript
+1. **Add to BOTH languages:**
+
+```javascript
 export const translations = {
   es: {
-    'my-key': 'Valor en español',
-    // ...
+    'my.new.key': 'Texto en español',
   },
   en: {
-    'my-key': 'English value',
-    // ...
+    'my.new.key': 'English text',
   }
 }
 ```
 
 2. **Use in component:**
-```typescript
-<label>{t(lang, 'my-key')}</label>
+```javascript
+<p>{t(lang, 'my.new.key')}</p>
 ```
 
 **Rules:**
-- Always add both ES and EN
-- Use dot notation for keys: `calculator.errors.invalidInput`
-- Keep Spanish and English in sync
-- Document new keys
+- **Always add ES and EN together** — Don't forget either one
+- **Dot notation for hierarchy:** `calculator.errors.invalidInput`
+- **Keep them in sync** — Delete from both if removing
+- **Test both languages:** npm run dev → toggle language in UI
 
 ---
 
-## 🔐 Type Safety
+## 🔐 Type Safety (TypeScript)
 
 ### TypeScript Setup
 
@@ -415,57 +634,72 @@ File: `tsconfig.json`
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "strict": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/src/*": ["src/*"]
+    }
   }
 }
 ```
 
 **Key settings:**
-- `strict: true` — Enables all strict checks
-- `jsx: react-jsx` — React 18 new JSX transform
+- `strict: true` — All strict type checking enabled
+- `jsx: "react-jsx"` — React 18 JSX transform
 
-### Common Types
+### Types Defined Inline
 
-File: `src/types/index.ts`
+**Note:** There's no separate `src/types/index.ts`. Types are defined in each module:
 
+`src/lib/calculations/septicTank.ts`:
 ```typescript
-export interface CalculationInput {
+export interface TankInput {
   users: number
   dotacion: number
   temperatura: number
-  profundidad: number
   norm: string
+  profundidad: number
   // ...
 }
 
-export interface CalculationResult {
+export interface TankResult {
   volumeM3: number
-  fieldAreaM2: number
+  dimensiones: { alto: number; ancho: number; largo: number }
   trh: number
-  cargaSuperficial: number
   // ...
 }
 
-export interface ValidationError {
-  field: string
-  message: string
-  value: any
+export function calculateSepticTank(input: TankInput): TankResult { ... }
+```
+
+`src/lib/agent/tools/index.ts`:
+```typescript
+export interface ToolInput {
+  [key: string]: unknown;
+}
+
+export interface ToolExecutor {
+  (input: ToolInput): Promise<unknown>;
 }
 ```
 
-**Best practices:**
-- Define types in `src/types/index.ts`
-- Avoid `any` type
-- Use interfaces for objects
-- Use unions for multiple options: `'es' | 'en'`
+### Best Practices
+
+- **Define types near usage** — Keep them in the same file as functions
+- **Avoid `any`** — Use `unknown` and narrow types
+- **Use unions** for options: `type Language = 'es' | 'en'`
+- **Run type check:** `npm run build` includes TypeScript check
+- **No test runs before build** — Build fails if types are wrong
 
 ---
 
 ## 🎨 Styling Guidelines
 
-### CSS-in-JS Pattern
+### CSS-in-JS Pattern (Inline Styles Only)
 
-```typescript
+All styling uses inline style objects. No external CSS files:
+
+```javascript
 const styles = {
   container: {
     display: 'flex',
@@ -480,57 +714,80 @@ const styles = {
     border: '1px solid #ddd',
     borderRadius: '4px',
     fontSize: '14px',
-    fontFamily: 'inherit',
-    '&:focus': {  // Won't work! Use onFocus handler instead
-      outline: 'none',
-      borderColor: '#2563eb'
-    }
+    fontFamily: 'inherit'
+  },
+  inputFocus: {
+    borderColor: '#2563eb',
+    outline: 'none'
   }
 }
 
-// For dynamic styling:
-const buttonStyle = {
-  ...styles.button,
-  backgroundColor: isLoading ? '#ccc' : '#2563eb',
-  cursor: isLoading ? 'not-allowed' : 'pointer'
-}
+// In JSX, use onFocus/onBlur for interactive states:
+<input
+  style={focusedField === 'users' ? {...styles.input, ...styles.inputFocus} : styles.input}
+  onFocus={() => setFocusedField('users')}
+  onBlur={() => setFocusedField(null)}
+/>
 ```
 
 ### Color Palette
 
-```typescript
+```javascript
 const colors = {
   primary: '#2563eb',      // Blue
   success: '#10b981',      // Green
   error: '#ef4444',        // Red
   warning: '#f59e0b',      // Orange
   gray: '#6b7280',         // Neutral gray
-  lightGray: '#f3f4f6',    // Light gray
-  darkGray: '#1f2937'      // Dark gray
+  lightGray: '#f3f4f6',    // Very light
+  darkGray: '#1f2937'      // Very dark
+}
+```
+
+**Example: Dynamic colors**
+```javascript
+const buttonStyle = {
+  ...styles.button,
+  backgroundColor: isLoading ? colors.gray : colors.primary,
+  cursor: isLoading ? 'not-allowed' : 'pointer'
 }
 ```
 
 ### Responsive Design
 
-```typescript
+**Inline styles don't support media queries.** Use JavaScript instead:
+
+```javascript
+const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
+
+useEffect(() => {
+  const handleResize = () => setWindowWidth(window.innerWidth)
+  window.addEventListener('resize', handleResize)
+  return () => window.removeEventListener('resize', handleResize)
+}, [])
+
+const isTablet = windowWidth >= 768
+const isMobile = windowWidth < 640
+
 const styles = {
   container: {
     display: 'flex',
-    flexDirection: 'column',
-    padding: '20px',
-    '@media (min-width: 768px)': {  // Won't work inline!
-      flexDirection: 'row'
-    }
+    flexDirection: isMobile ? 'column' : 'row',
+    padding: isMobile ? '10px' : '20px'
   }
 }
+```
 
-// Instead, use JavaScript:
-const isTablet = typeof window !== 'undefined' && window.innerWidth >= 768
-
+**Or simpler — just use CSS percentages and flexbox:**
+```javascript
 const styles = {
   container: {
     display: 'flex',
-    flexDirection: isTablet ? 'row' : 'column'
+    flexWrap: 'wrap',
+    gap: '20px'
+  },
+  item: {
+    flex: '1 1 300px'  // Grows/shrinks, min 300px
   }
 }
 ```
@@ -539,59 +796,102 @@ const styles = {
 
 ## 🚀 Building & Deployment
 
-### Development Build
+### Development Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Create .env.local with API key
+echo "GROQ_API_KEY=your-key-here" > .env.local
+
+# Start dev server
 npm run dev
-# Hot reload enabled
-# Source maps available
-# Slower performance (by design)
+# → http://localhost:3000
+# → Hot reload enabled
+# → Full source maps
 ```
 
-### Production Build
+### Type Check & Build
 
 ```bash
+# Check for TypeScript errors
 npm run build
-# Optimizes code
-# Minifies output
-# Creates .next/ folder
-# ~2-3 minutes
+# This includes: type checking + Next.js build + optimization
+# Output: .next/ folder
+# Time: 2-3 minutes
+
+# If build fails: check error messages (usually missing types)
 ```
 
-### Testing the Prod Build Locally
+### Testing Before Deploy
 
 ```bash
+# Run all tests
+npm run test
+
+# Test production build locally
 npm run build
 npm run start
-# Server runs on http://localhost:3000
-# Serves optimized build
-# Closest to production behavior
+# → Serves optimized code
+# → Closest to production
+# → Use this to verify everything works
 ```
 
-### Deploy to Vercel
+### Deploy to Vercel (Recommended)
 
 ```bash
+# Install Vercel CLI (once)
 npm install -g vercel
+
+# Deploy from project root
+cd /path/to/hydrostack-2
 vercel
-# Follow prompts
-# Takes ~1 minute
+
+# First deploy: follow prompts
+# - Link to GitHub repo
+# - Set environment: GROQ_API_KEY
+# - Auto-deploys on git push after that
 ```
 
-### Deploy to Other Hosts
+### Deploy to Other Hosts (Self-Hosted)
 
 **Requirements:**
 - Node.js 18+
 - npm or yarn
-- 512 MB RAM minimum
+- GROQ_API_KEY environment variable
 
 **Steps:**
 ```bash
-# Build
+# On your server:
+cd /app/hydrostack-2
+
+# Install & build
+npm install
 npm run build
 
 # Start server
 npm run start
-# Or use a process manager (PM2, systemd, etc.)
+# Listens on http://localhost:3000
+
+# Reverse proxy with nginx/caddy
+# Or use process manager (PM2, systemd, Docker)
+```
+
+**Docker example:**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install && npm run build
+ENV GROQ_API_KEY=your-key
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+```bash
+docker build -t hydrostack .
+docker run -e GROQ_API_KEY=xxx -p 3000:3000 hydrostack
 ```
 
 ---
@@ -600,256 +900,448 @@ npm run start
 
 ### Browser DevTools
 
-**Console:**
+**Console in calculator:**
 ```javascript
-// In calculator component
-window.lastInput
+// Check what's being calculated
 window.lastResult
+// or log from component: console.log(results)
 
-// In diagram
-window.diagramDebug
+// Check calculation errors
+// Try different inputs and watch calculation output
 ```
 
-**Network tab:**
-- Monitor `/api/agent` requests
-- Check response times
-- Debug image generation
+**Network tab for agent:**
+- Click `/api/agent` request
+- Watch **Response** tab as it streams
+- Should see `data: {...}` lines (SSE format)
+- Check for errors or malformed JSON
 
-**React DevTools:**
-- Install React DevTools extension
-- Inspect component hierarchy
-- Check props and state
-- Profile performance
+**React DevTools (Browser Extension):**
+- Install: https://react-devtools-extension.com/
+- Inspect HydroAgent component state
+- Check messages array
+- Profile rendering (Profiler tab)
 
-### Server Debugging
+### Server Logs
 
 ```bash
-# Enable verbose logging
-DEBUG=* npm run dev
+npm run dev
 
-# Check specific module
-DEBUG=app:* npm run dev
+# Terminal output shows:
+# - Next.js build process
+# - API route logs (if you add console.log)
+# - Groq API errors
+# - Tool execution results
+
+# Example: Add logging to a tool:
+console.log('Tool input:', input)
+const result = executeCalculation(input)
+console.log('Tool result:', result)
 ```
 
-### Common Issues
+### Common Issues & Solutions
 
-| Error | Solution |
-|-------|----------|
-| "Module not found" | Run `npm install` |
-| "Port 3000 in use" | `lsof -i :3000` + kill process |
-| "API key not set" | Add to `.env.local` |
-| "Build fails" | Check `npm run lint` |
-| "Tests fail" | Check test file naming |
+| Problem | Check | Solution |
+|---------|-------|----------|
+| "Groq API key not set" | `.env.local` file | `echo "GROQ_API_KEY=xxx" > .env.local` |
+| Chat doesn't respond | Network tab: POST /api/agent | Check response for errors |
+| PDF tool fails | Server logs | Check pdfkit installed: `npm ls pdfkit` |
+| Calculator won't compute | Browser console | Check for JS errors in calculation |
+| Build fails | Run `npm run build` | TypeScript error? Check error message |
+| Tests fail | Run `npm test -- -t "test name"` | Debug specific test |
+| Port 3000 in use | `lsof -i :3000` | Kill: `kill -9 <PID>` |
+
+### Debugging a Specific Tool
+
+**Example: Debug `calculateSepticTank` tool**
+
+1. Add logging to the tool:
+```typescript
+// src/lib/agent/tools/calculateSepticTank.ts
+export async function executeCalculateSepticTank(input: ExecuteToolInput) {
+  console.log('🔧 calculateSepticTank input:', input)
+  
+  const result = calculateSepticTank({...})
+  
+  console.log('🔧 calculateSepticTank output:', result)
+  return result
+}
+```
+
+2. Start dev server and watch logs:
+```bash
+npm run dev 2>&1 | grep "calculateSepticTank"
+```
+
+3. Call agent with a test message that triggers the tool
+4. Check server logs for input/output
 
 ---
 
 ## 📊 Performance Optimization
 
-### Code Splitting
+### Bundle Size
 
-Next.js automatically code-splits, but you can optimize:
+Check what's in the build:
 
-```typescript
+```bash
+npm run build
+# Look for: "pages" and "size" output
+# Should be < 500 KB for /api/agent route
+
+# Tools like `next/bundle-analyzer` can help (optional)
+npm install -D @next/bundle-analyzer
+# Add to next.config.js and re-run build
+```
+
+### React Component Memoization
+
+Use when a component is expensive to render:
+
+```javascript
+import { memo } from 'react'
+
+const IsometricDiagram = memo(function Diagram(props) {
+  // Only re-renders if props change
+  return <svg>{...}</svg>
+})
+
+export default IsometricDiagram
+```
+
+### Lazy Load Heavy Components
+
+```javascript
 import dynamic from 'next/dynamic'
 
-// Lazy load heavy components
-const IsometricDiagram = dynamic(
-  () => import('@/components/IsometricDiagram'),
-  { loading: () => <p>Loading...</p> }
+// Load 3D viewer only when user clicks it
+const IsometricDiagram3D = dynamic(
+  () => import('@/src/components/IsometricDiagram3D'),
+  { loading: () => <p>Loading 3D view...</p> }
 )
 ```
 
-### Memoization
+### Minimize Tool Chain Rounds
 
-```typescript
-import { memo } from 'react'
-
-// Prevent unnecessary re-renders
-const MyComponent = memo(function MyComponent(props) {
-  return <div>{props.value}</div>
-})
-
-export default MyComponent
-```
-
-### Profiling
-
-```bash
-# Build profiling data
-npm run build -- --profile
-
-# Analyze with browser DevTools
-```
+Each tool round = new Groq API call. Reduce if possible:
+- Combine multiple checks into one tool
+- Cache intermediate results (future feature)
+- Limit context size (already done: `MAX_NORMATIVA_CHARS`)
 
 ---
 
 ## 🔒 Security Best Practices
 
-### Input Validation
-
-Always validate user input:
-
-```typescript
-import { validateCalculatorInput } from '@/lib/validation'
-
-const handleCalculate = (input) => {
-  const validation = validateCalculatorInput(input)
-  if (!validation.valid) {
-    // Show errors
-    setErrors(validation.errors)
-    return
-  }
-  // Proceed with calculation
-}
-```
-
 ### Environment Variables
 
-Never commit API keys:
+**Never commit secrets to git:**
 
 ```bash
 # .gitignore
 .env.local
 .env.*.local
+
+# Example .env.local (NEVER commit this):
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxx
+ANTHROPIC_API_KEY=sk_xxx (optional)
 ```
 
-```typescript
-// API routes can access .env.local
-const apiKey = process.env.ANTHROPIC_API_KEY
+**In production:**
+- Set via Vercel dashboard (recommended)
+- OR environment variables on server
+- Never hardcode keys
+
+### Input Validation
+
+Calculator and validation always run on real input:
+
+```javascript
+// src/lib/validation/cteValidator.ts
+export function validateAgainstCte(input) {
+  const errors = []
+  
+  if (input.volumeM3 < 2.0) {
+    errors.push({ field: 'volumeM3', message: 'Min 2 m³' })
+  }
+  
+  return { valid: errors.length === 0, errors }
+}
 ```
+
+**Use in component:**
+```javascript
+const validation = validateAgainstCte(results)
+if (!validation.valid) {
+  setErrors(validation.errors)
+}
+```
+
+### API Security
+
+**Groq API:**
+- API key only stored in environment (server-side)
+- Never sent to browser
+- HTTPS by default on Groq endpoints
+- Rate limiting protects against abuse
+
+**Message inputs:**
+- No SQL/shell injection risk (no database, no system calls)
+- Tool outputs sanitized before re-injection to LLM
+- Message length limits prevent token exhaustion
 
 ### HTTPS Only
 
-Always use HTTPS in production:
+```bash
+# Development: http://localhost:3000 OK for testing
+npm run dev
 
-```typescript
-// Vercel handles this automatically
-// For custom servers, use nginx/caddy
+# Production: Always HTTPS
+# Vercel: automatic HTTPS
+# Self-hosted: use nginx/Caddy with Let's Encrypt cert
 ```
 
 ---
 
 ## 📚 Additional Resources
 
-### Documentation
-- [../README.md](../README.md) — Project overview
-- [../GETTING_STARTED.md](../GETTING_STARTED.md) — Quick start
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — System design
-- [FEATURES.md](./FEATURES.md) — Feature list
+### HydroStack Documentation
+- [../README.md](../README.md) — Project overview & features
+- [../GETTING_STARTED.md](../GETTING_STARTED.md) — Quick setup guide
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — System design & data flow
+- [CLAUDE.md](../CLAUDE.md) — Agent rules & instructions
 
 ### Code Examples
-- Check `src/__tests__/` for test examples
-- Check components for React patterns
-- Check `src/lib/` for utility patterns
+- Tests: `src/__tests__/` — Vitest examples for calculations
+- Components: `src/components/` — React patterns (JSX/CSS-in-JS)
+- Tools: `src/lib/agent/tools/` — How to write tools
+- Calculations: `src/lib/calculations/` — Pure math logic
 
-### External Resources
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-- [Vitest Documentation](https://vitest.dev)
+### External Documentation
+- [Next.js 14 Docs](https://nextjs.org/docs) — App Router, API routes
+- [React 18 Docs](https://react.dev) — Hooks, components
+- [TypeScript Docs](https://www.typescriptlang.org/docs) — Type system
+- [Vitest Docs](https://vitest.dev) — Testing framework
+- [Groq API](https://console.groq.com/docs) — LLM models & tool calling
 
 ---
 
 ## 💡 Tips & Tricks
 
-### Hot Reload
-Changes save automatically when you edit files
+### Hot Module Reload (HMR)
 
-### TypeScript Compilation
-Check for errors: `npm run build`
-
-### Test in Watch Mode
-```bash
-npm run test:watch
-# Re-runs tests on file changes
-```
-
-### Browser Sync
 ```bash
 npm run dev
-# Opens browser automatically
+# Changes to JS/JSX/CSS auto-refresh in browser
+# State might reset on component changes
+# Full page reload: Cmd+R / Ctrl+R if needed
 ```
 
-### Kill Stuck Process
+### Type Checking Without Building
+
 ```bash
-npm run dev &  # Start in background
-jobs            # List jobs
-kill %1         # Kill job 1
+# Check types only (faster than full build):
+npm run build  # Includes type check at start
+
+# Run tests to catch logic errors:
+npm run test
+```
+
+### Test in Watch Mode (TDD)
+
+```bash
+npm run test
+# Re-runs tests on file changes
+# Great for TDD workflow
+# Type `q` to quit, `w` to show file filters
+```
+
+### Quick Restart Server
+
+```bash
+# If server gets stuck:
+Ctrl+C  # Stop npm run dev
+npm run dev  # Restart
+
+# Or in another terminal:
+lsof -i :3000  # Find process
+kill -9 <PID>
+npm run dev
+```
+
+### Inspect Network Requests
+
+```bash
+npm run dev
+# Open DevTools → Network tab
+# Watch POST /api/agent requests
+# Response should be `text/event-stream` (SSE)
+# See individual `data:` chunks streaming in
 ```
 
 ---
 
-## 🤝 Contributing Code
+## 🤝 Contributing & Committing
 
 ### Before Committing
 
-1. **Format code:**
-```bash
-# No formatter configured (use IDE)
-# or `npm run lint` if available
-```
-
-2. **Run tests:**
+1. **Run tests locally:**
 ```bash
 npm run test
+# Should show: "✓ 29 tests passed"
 ```
 
-3. **Build check:**
+2. **Build check:**
 ```bash
 npm run build
+# Should complete with no errors
 ```
 
-4. **Manual testing:**
-- Try your changes in browser
-- Test on mobile
-- Try different scenarios
+3. **Manual testing:**
+- Try your feature in browser
+- Test both calculator and chat
+- Test both Spanish and English
 
-### Commit Message Format
+### Commit Guidelines
 
+**Format:**
 ```
-type(scope): subject
+type(scope): short summary
 
-body explaining changes
+Optional longer explanation of why
 
-Fixes #123
-```
-
-Examples:
-```
-feat(calculator): add new input field
-fix(validation): handle negative values
-docs(README): update build instructions
-test(calculations): add edge case tests
+Fixes #123 (if closing an issue)
 ```
 
-### Pull Request Process
+**Types:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `test:` Add/update tests
+- `docs:` Documentation only
+- `refactor:` Code cleanup (no behavior change)
 
-1. Create feature branch
-2. Make changes + commit
-3. Push to GitHub
-4. Create Pull Request
-5. Link to issue (if exists)
-6. Wait for review
+**Examples:**
+```
+feat(agent): add new validate_against_cte tool
+fix(calculator): prevent division by zero
+test(calculations): add septic tank edge cases
+docs(DEVELOPERS): update instructions for new tool
+```
+
+### Making a Change
+
+1. Create branch (optional):
+```bash
+git checkout -b my-feature-name
+```
+
+2. Edit files and test locally
+
+3. Commit your work:
+```bash
+git add src/lib/calculations/myfile.ts
+git commit -m "feat(calc): improve tank volume formula"
+```
+
+4. Push and create PR on GitHub
 
 ---
 
 ## 📞 Getting Help
 
-### Search
-1. Check [ARCHITECTURE.md](./ARCHITECTURE.md)
-2. Check [../README.md](../README.md)
-3. Check source code comments
-4. Search GitHub issues
+### Self-Service Debugging
 
-### Ask Questions
-- Create GitHub issue
-- Include error messages
-- Include reproduction steps
-- Include your environment info
+1. **Check existing docs:**
+   - [ARCHITECTURE.md](./ARCHITECTURE.md) — System design
+   - [../GETTING_STARTED.md](../GETTING_STARTED.md) — Setup issues
+   - [../README.md](../README.md) — Feature overview
+   - [CLAUDE.md](../CLAUDE.md) — Agent rules
+
+2. **Check the code:**
+   - `src/__tests__/` — Examples of how things work
+   - `src/lib/calculations/septicTank.ts` — Calculation logic
+   - `app/api/agent/route.ts` — Full agent flow
+
+3. **Check error messages:**
+   - Read full error stack in terminal
+   - Search for error message in docs
+   - Check GitHub Issues (closed issues often have solutions)
+
+### Debugging Checklist
+
+**If something doesn't work:**
+- [ ] `.env.local` has `GROQ_API_KEY` set
+- [ ] `npm run build` passes (no TypeScript errors)
+- [ ] `npm test` shows all tests passing
+- [ ] Browser console has no errors (DevTools)
+- [ ] Network tab shows `/api/agent` response is SSE stream
+- [ ] Port 3000 not already in use: `lsof -i :3000`
+
+### Report a Bug
+
+Create a GitHub issue with:
+- **What you tried:** "I clicked the calculator button"
+- **What happened:** Error message from browser console or terminal
+- **What you expected:** Should show results
+- **Your environment:** `node --version`, OS, browser
+
+Example:
+```
+Title: "Calculator won't compute with 4 users"
+
+Error:
+TypeError: Cannot read property 'volumeM3' of undefined
+  at SepticTankCalculator.jsx:42
+
+Steps:
+1. Go to /calculators/fosa-septica
+2. Enter 4 users, 150 L/person/day
+3. Click "Calculate"
+4. Error appears in console
+
+Environment: Node 18.17.0, macOS 14, Chrome 120
+```
+
+### Request a Feature
+
+Create an issue titled: `[Feature] Description of what you want`
+
+Include:
+- **Why you need it:** Use case or problem it solves
+- **Suggested approach:** How you might implement it
+- **Linked issue:** Is it related to an existing issue?
+
+---
+
+## 🎓 Learning Path
+
+**New to the project?**
+
+1. Read [../README.md](../README.md) (2 min)
+2. Run `npm run dev` and explore (5 min)
+3. Read [ARCHITECTURE.md](./ARCHITECTURE.md) → System Overview section (10 min)
+4. Read this file's **Quick Start** section (5 min)
+5. Try a simple task: modify a color in IsometricDiagram.jsx (15 min)
+
+**Want to add a tool?**
+
+1. Read [ARCHITECTURE.md](./ARCHITECTURE.md) → API Layer section
+2. Read **Task 3: Add a New Agent Tool** in this file
+3. Copy `src/lib/agent/tools/calculateSepticTank.ts` as template
+4. Follow the step-by-step in Task 3
+
+**Want to fix a calculation?**
+
+1. Run `npm test` to see what's failing
+2. Look at test in `src/__tests__/calculations/septicTank.test.ts`
+3. Find calculation in `src/lib/calculations/septicTank.ts`
+4. Update formula and re-run `npm test`
 
 ---
 
 **Last Updated:** May 2026
 
-For system design details, see [ARCHITECTURE.md](./ARCHITECTURE.md)  
-For user guide, see [../README.md](../README.md)
+**Quick Links:**
+- Architecture: [ARCHITECTURE.md](./ARCHITECTURE.md)
+- Getting Started: [../GETTING_STARTED.md](../GETTING_STARTED.md)
+- Agent Rules: [../CLAUDE.md](../CLAUDE.md)
+- Project Home: [../README.md](../README.md)

@@ -15,6 +15,7 @@
     "@babylonjs/core": "^9.4.1",
     "@google/generative-ai": "^0.24.1",
     "babylonjs": "^9.4.1",
+    "leaflet": "^1.9.4",
     "next": "14.2.3",
     "pdfkit": "^0.18.0",
     "react": "^18",

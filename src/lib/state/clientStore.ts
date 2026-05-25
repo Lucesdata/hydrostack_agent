@@ -118,6 +118,10 @@ export function setProfile(profile: UserProfile): void {
   }
 }
 
+export function clearProfile(): void {
+  remove(KEYS.profile);
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Owner state
 // ─────────────────────────────────────────────────────────────────────────

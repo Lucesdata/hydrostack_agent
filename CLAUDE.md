@@ -187,9 +187,222 @@ La auto-detección de sub-escenarios se implementa con:
 
 ---
 
+## 7. Roadmap de Desarrollo — Fases de Mejora Técnica
+
+Estas fases aplican al módulo de cálculo SITARD (fosa séptica + campo de infiltración), no al comportamiento conversacional del agente.
+
+### Estado
+
+| Fase | Descripción | Estado | Fecha |
+|------|-------------|--------|-------|
+| 0 | Corrección normativa crítica | ✅ Completada | 2026-05-23 |
+| 1 | Completar el cálculo básico | ✅ Completada | 2026-05-24 |
+| 2 | UI geoespacial — formulario de campo | ✅ Completada | 2026-05-25 |
+| 3 | Campo de drenaje mejorado | ✅ Completada | 2026-05-25 |
+| 4 | Informe PDF profesional | ✅ Completada | 2026-05-25 |
+| 5 | Calculadora de mantenimiento | ✅ Completada | 2026-05-25 |
+| 6 | Geolocalización real (Leaflet + Open-Meteo) | ✅ Completada | 2026-05-25 |
+
+---
+
+### Fase 0 — Corrección normativa crítica ✅
+
+**Qué se corrigió:**
+- Norma principal: RAS 2000 Título E → **Resolución 0330/2017** (Art. 134–145)
+- Añadida Resolución 0631/2015 como criterio de efluentes
+- Añadido Decreto 1076/2015 como marco de permiso ambiental
+- Corregido error en "Próximos pasos": "concepto favorable PSMV" → "permiso de vertimientos ante SDA/CAR" (el PSMV es instrumento municipal, NO del usuario)
+- Añadida nota POT Bogotá (Decreto 555/2021): SITARD solo aplica en suelo rural/suburbano
+
+**Archivos creados/modificados:**
+- `src/lib/config/regulatory_framework.ts` — jerarquía normativa completa con trazabilidad por artículo
+- `src/lib/config/normativeRegistry.ts` — mínimos CTE/RAS actualizados
+- `app/api/agent/route.ts` — system prompt corregido
+
+---
+
+### Fase 1 — Completar el cálculo básico ✅
+
+**Qué se corrigió/añadió:**
+- **V_N (natas)**: `0.7 × V_S` en vez del erróneo `0.25 × V_L` → +525 L para caso ejemplo
+- **Intervalo limpieza**: default 3 años (era 1 año hardcodeado — bug crítico) → triplica V_S
+- **Coeficiente retorno**: Cr = 0.85 (era 1.00 — sobreestimaba caudal)
+- **Suite de caudales**: Q_med, Q_max_diario (K1=1.3), Q_max_horario (K1×K2), Q_min (0.30×Q_med)
+- **TRH verificado a Q_max_horario**
+- **Corrección por temperatura (Van't Hoff)**: θ = 1.07^(T–25); Bogotá T≈14–16°C → TRH mín. 2.0 días
+- **Verificaciones geoespaciales**: pozos ≥30 m, cuerpos de agua ≥30 m, edificaciones ≥5 m, árboles ≥3 m, N.F. clearance ≥1.20 m
+
+**Archivos creados/modificados:**
+- `src/lib/calculations/septicTank.ts` — reescritura completa
+- `src/lib/validation/geospatialValidator.ts` — nuevo: OK/ALERTA/BLOQUEANTE + alternativas tecnológicas
+- `src/lib/validation/cteValidator.ts` — integra verificaciones geoespaciales
+- `src/lib/agent/tools/calculateSepticTank.ts` — nuevos parámetros: Cr, T_agua, intervalo_limpieza
+- `src/lib/agent/tools/validateAgainstCte.ts` — nuevo bloque `geoespacial` en el schema del tool
+- `src/lib/reports/generatePdfReport.ts` — sección de caudales, desglose de volúmenes, sección geoespacial
+
+**Impacto en caso ejemplo** (5 pers., Bogotá, Cr=0.85, T=15°C, 3 años limpieza):
+- V_diseño: 1,500 L → 2,975 L (+98 %)
+- Q_med: 1,000 → 850 L/día; Q_max_h: 2,210 L/día
+
+---
+
+### Fase 2 — UI Geoespacial (Formulario de campo)
+
+**Objetivo:** Conectar el backend `validateGeospatialConstraints()` con el formulario de la calculadora para que el usuario pueda ingresar datos de campo y ver los resultados en pantalla.
+
+**Qué se debe implementar:**
+
+1. **Campos nuevos en el formulario** (`src/app/calculators/fosa-septica/` o el componente de formulario activo):
+   - Distancia a pozos de abastecimiento (m)
+   - Distancia a cuerpos de agua / ronda hídrica (m)
+   - Distancia a edificaciones y linderos (m)
+   - Distancia a árboles de raíz profunda (m)
+   - Posición respecto a captaciones (checkbox: "aguas abajo de todas las captaciones")
+   - Nivel freático medido (m desde la superficie)
+   - Profundidad de instalación de zanjas (m, default 0.75)
+
+2. **Sección de resultados geoespaciales** en el UI:
+   - Tarjeta por cada parámetro con badge OK (verde) / ALERTA (amarillo) / BLOQUEANTE (rojo)
+   - Descripción del problema y sugerencia si no es OK
+   - Bloque "Alternativas tecnológicas" si N.F. alto (<1.5 m)
+
+3. **Integración con el agente**: los campos geoespaciales deben incluirse en el context que el agente recibe al llamar `validate_against_cte`
+
+**Archivos a modificar:**
+- Formulario principal de la calculadora (identificar ruta exacta antes de empezar)
+- `app/api/agent/route.ts` si se necesita pasar el contexto geoespacial
+
+---
+
+### Fase 3 — Campo de drenaje mejorado
+
+**Objetivo:** Hacer el dimensionamiento del campo de infiltración más preciso y profesional.
+
+**Qué se debe implementar:**
+
+1. **Prueba de percolación (perc test)**:
+   - Input: tiempo de descenso de 25 mm (minutos)
+   - Cálculo: tasa de percolación T_perc (min/cm) y conversión a Ka (L/m²·día) con la tabla de Crites & Tchobanoglous
+   - Si no hay perc test, mantener tabla de Ka por tipo de suelo como fallback
+
+2. **Corrección por evapotranspiración** (climas fríos de altura):
+   - Para Bogotá y altiplanos: reducción de Ka efectiva del 10–15 % en temporada seca
+   - Parámetro opcional: ETP_media_mm_dia
+
+3. **Tipos alternativos de campo**:
+   - Zanja filtrante (actual)
+   - Montículo filtrante (mound) — para N.F. alto o suelo poco permeable
+   - Cámara de infiltración (chamber system)
+   - Campo de aspersión (solo en zonas permitidas)
+
+4. **Factor de seguridad configurable**:
+   - Default: FS = 1.20
+   - Rango: 1.10–1.50 con justificación normativa
+
+**Archivos a modificar:**
+- `src/lib/calculations/drainageField.ts`
+- `src/lib/agent/tools/calculateDrainageField.ts`
+- Formulario del campo de drenaje en el UI
+
+---
+
+### Fase 4 — Informe PDF profesional
+
+**Objetivo:** Elevar el informe a nivel de memoria técnica firmable por ingeniero.
+
+**Qué se debe implementar:**
+
+1. **Portada**:
+   - Logo HydroStack + datos del proyecto (nombre, dirección, propietario, profesional responsable)
+   - Número de memoria y fecha
+   - Disclaimer de carácter orientativo vs. definitivo
+
+2. **Sección normativa** (ya parcialmente en PDF):
+   - Jerarquía normativa aplicada con artículos citados
+   - Tabla de criterios de diseño usados con fuente normativa
+
+3. **Sección de verificación de cumplimiento**:
+   - Checklist visual CTE/RES-0330 con ✓/✗ por cada requisito
+   - Bloque de verificaciones geoespaciales (añadido en Fase 1, mejorar presentación)
+
+4. **Sección de próximos pasos** (personalizada por país/ciudad):
+   - Colombia: permiso de vertimientos (SDA/CAR), estudio de suelo, ingeniero matriculado
+   - España: CTE DB-HS 5, licencia de obra, confederación hidrográfica
+
+5. **Área de firma** al final:
+   - Nombre, matrícula profesional, firma, fecha
+
+6. **Mejoras visuales**:
+   - Headers/footers consistentes en todas las páginas
+   - Tabla de contenido
+   - Numeración de secciones alineada con PDFKit `doc.page`
+
+**Archivos a modificar:**
+- `src/lib/reports/generatePdfReport.ts` — secciones nuevas
+- `app/api/generate-pdf/route.ts` o similar — verificar que acepta datos del profesional
+
+---
+
+### Fase 5 — Calculadora de mantenimiento
+
+**Objetivo:** Ayudar al propietario/operador a planificar el mantenimiento del sistema una vez instalado.
+
+**Qué se debe implementar:**
+
+1. **Cronograma de limpieza de lodos**:
+   - Input: fecha de instalación, intervalo de limpieza (años), número de personas
+   - Output: próximas fechas de vaciado con alarma visual
+
+2. **Checklist de inspección**:
+   - Verificación de tapas, ventilación, efluente, olores, nivel de lodos
+   - Exportable a PDF
+
+3. **Registro de eventos**:
+   - Fecha de limpieza, contratista, observaciones
+   - Historial de la vida del sistema
+
+4. **Alerta de colmatación**:
+   - Basada en años de operación y tipo de suelo
+   - Señal visual cuando el campo puede estar próximo a saturarse (típico: 15–25 años)
+
+**Archivos nuevos:**
+- `src/lib/calculations/maintenance.ts`
+- `src/app/calculators/mantenimiento/page.jsx` (nueva ruta)
+- Componente de cronograma y checklist
+
+---
+
 ## Notas Finales
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del agente. Cualquier cambio debe documentarse aquí y actualizarse en memoria.
 
-Última actualización: 2026-05-18
-**Auto-detección de sub-escenarios**: Agregada en fase 1 de mejoras de propietarios (2026-05-18)
+Última actualización: 2026-05-25
+- **Auto-detección de sub-escenarios**: Agregada en fase 1 de mejoras de propietarios (2026-05-18)
+- **Fase 0 — Corrección normativa**: Completada (2026-05-23)
+- **Fase 1 — Cálculo básico**: Completada (2026-05-25)
+- **Fase 3 — Campo de drenaje mejorado**: Completada (2026-05-25)
+- **Fase 4 — Informe PDF profesional**: Completada (2026-05-25)
+  - Header/footer en cada página (pageAdded event)
+  - Portada expandida: propietario, matrícula, N° memoria, disclaimer
+  - Tabla de contenido en portada
+  - Sección 1: Marco normativo con jerarquía y tabla de criterios
+  - Sección 4: Checklist visual ✓/✗ por requisito (Res. 0330/2017)
+  - Numeración de secciones corregida y consistente (1–8)
+  - Sección 8: Área de firma con nombre, matrícula, propietario, fecha
+  - Tool: nuevos campos proyecto.propietario, .matricula, .numero_memoria
+  - Perc test ASTM D6391 (25 mm descent) → Ka vía Crites & Tchobanoglous
+- **Fase 2 — UI Geoespacial**: Completada (2026-05-25)
+  - Los inputs ya estaban en el formulario; `runGeoCalc()` y tab "Site Checks" ya implementados
+  - Integración con agente: `FormState` extendido con 9 campos geoespaciales
+  - `saveFormState()` guarda distancias, N.F., posición vs. captaciones y resultado del geo-check
+  - `app/api/agent/route.ts` inyecta sección "Site conditions" en el contexto del agente al chatear
+- **Fase 5 — Calculadora de mantenimiento**: Completada (2026-05-25)
+  - `src/lib/calculations/maintenance.ts`: funciones puras de cálculo (pumping schedule, clogging risk, inspection checklist)
+  - `src/components/MaintenanceCalculator.jsx`: UI 4 tabs (Cronograma, Checklist, Registro, Colmatación)
+  - `app/calculators/mantenimiento/page.jsx`: nueva ruta `/calculators/mantenimiento`
+  - Card añadida en `/calculators` (grid), i18n ES+EN añadido
+  - Persistencia de eventos en localStorage clave `hs_maint_events`
+  - Corrección ETP para altiplanos fríos (hasta −20% Ka)
+  - Factor de seguridad FS configurable (1.10–1.50, default 1.20)
+  - 6 tipos de sistema: zanjas, lecho, pozo, montículo, cámara, aspersión
+  - UI: toggle min/cm vs 25mm, sección Drainage Field Design, resultados detallados

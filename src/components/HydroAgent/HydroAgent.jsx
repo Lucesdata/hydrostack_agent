@@ -10,17 +10,58 @@ import { EmptyState, Bubble, PhaseResume } from "./HydroAgentParts";
 const SCRIPTED_CHIPS = {
   "Necesito construir un sistema séptico para mi casa": "build_system",
   "I need to build a septic system for my house": "build_system",
+  // Owner profile option — installation path connects directly to the calculator
+  "Voy a instalar un sistema nuevo en terreno sin alcantarillado": "build_system",
+  "I'm installing a new system on land without a sewer connection": "build_system",
+};
+
+// Scripted welcome message injected immediately when a profile is selected (no API call).
+// Sets the advisory tone before the user types their first message.
+const PROFILE_WELCOMES = {
+  owner: {
+    es: "Hola, soy tu asesor de ingeniería sanitaria en HydroStack.\n\n¿Cuál de estas describe mejor tu situación?",
+    en: "Hi, I'm your sanitary engineering advisor at HydroStack.\n\nWhich of these best describes your situation?",
+  },
+  professional: {
+    es: "Listo. Dime los datos del proyecto y empezamos el dimensionamiento.\n\n¿Cuántos habitantes equivalentes tiene el sistema, bajo qué norma diseñamos y en qué municipio o región se ubica la obra?",
+    en: "Ready. Give me the project data and let's start sizing.\n\nHow many equivalent inhabitants, which design standard, and where is the project located?",
+  },
+  contractor: {
+    es: "Hola. ¿Qué diseño necesitas verificar o qué duda técnica tienes?\n\nDame las dimensiones del tanque, el tipo de campo de infiltración y la norma aplicable.",
+    en: "Hi. What design do you need to verify, or what technical question do you have?\n\nGive me the tank dimensions, drainage field type, and applicable standard.",
+  },
+  exploring: {
+    es: "Bienvenido a HydroStack. Te puedo ayudar a entender cómo funcionan los sistemas de tratamiento individual, dimensionar un sistema o explorar alternativas.\n\n¿Qué te trae por aquí?",
+    en: "Welcome to HydroStack. I can help you understand how individual treatment systems work, size a system, or explore alternatives.\n\nWhat brings you here?",
+  },
+};
+
+// Clickable option chips shown with the owner welcome message.
+const OWNER_OPTIONS = {
+  es: [
+    "Voy a instalar un sistema nuevo en terreno sin alcantarillado",
+    "Mi sistema actual está fallando (olores, aguas en superficie, atascos)",
+    "Quiero hacer mantenimiento preventivo a un sistema existente",
+    "Tengo una propiedad que estuvo cerrada o abandonada",
+  ],
+  en: [
+    "I'm installing a new system on land without a sewer connection",
+    "My current system is failing (odors, surface water, backups)",
+    "I want preventive maintenance on an existing system",
+    "I have a property that's been closed or abandoned",
+  ],
 };
 
 const SCRIPTED_RESPONSES = {
   build_system: {
-    es: "Perfecto. Para diseñar tu sistema séptico necesito algunos datos básicos:",
-    en: "Perfect. To design your septic system I need a few basic details:",
+    es: "Entendido. Para dimensionar tu sistema de tratamiento necesito tres datos: cuántas personas lo van a usar, dónde está ubicado el terreno y qué tipo de suelo tiene. Con eso calculo el volumen del tanque séptico y el campo de infiltración según la norma de tu país.",
+    en: "Got it. To size your treatment system I need three things: how many people will use it, where the land is located, and the soil type. With that I'll calculate the septic tank volume and drainage field according to your country's standard.",
   },
 };
 import {
   getProfile,
   setProfile,
+  clearProfile,
   getOwnerState,
   saveOwnerState,
   clearOwnerState,
@@ -87,6 +128,24 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
   function handleProfileSelect(profileId) {
     setUserProfile(profileId);
     setProfile(profileId);
+
+    // Inject a scripted opening message from the "engineer" immediately,
+    // so the user enters a live consultation rather than a blank chat.
+    const welcome = PROFILE_WELCOMES[profileId];
+    if (welcome) {
+      const text = welcome[lang] ?? welcome.es;
+      const initialMsg = { role: "assistant", content: text };
+
+      // Owner profile: attach clickable options so the user never has to type
+      // their situation — one click advances the consultation.
+      if (profileId === "owner") {
+        const opts = OWNER_OPTIONS[lang] ?? OWNER_OPTIONS.es;
+        initialMsg.suggestions = opts.map((opt) => ({ text: opt }));
+      }
+
+      setMessages([initialMsg]);
+    }
+
     inputRef.current?.focus();
   }
 
@@ -126,11 +185,13 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     try {
       const formState = getFormState() ?? undefined;
       const currentOwnerState = ownerState;
+      let geoData = null;
+      try { const raw = localStorage.getItem("hs_geo_data"); if (raw) geoData = JSON.parse(raw); } catch {}
 
       const res = await fetch("/api/agent", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ messages: next, formState, userProfile, ownerState: currentOwnerState, ...apiOptions }),
+        body:    JSON.stringify({ messages: next, formState, geoData, userProfile, ownerState: currentOwnerState, ...apiOptions }),
         signal:  abortRef.current.signal,
       });
 
@@ -280,7 +341,12 @@ export default function HydroAgent({ variant = "page", showOpenFull = false }) {
     setMessages([]);
     setErrored(false);
     setShowPhaseResume(false);
-    // Keep ownerstate but reset phase resume
+    // Reset profile so the user goes through profile selection again
+    // and gets the proper engineering welcome for their role.
+    setUserProfile(null);
+    clearProfile();
+    clearOwnerState();
+    setOwnerState(null);
     inputRef.current?.focus();
   }
 

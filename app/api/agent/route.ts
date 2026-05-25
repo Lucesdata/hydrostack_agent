@@ -92,9 +92,10 @@ If the user doesn't fit the 4 subscenarios, ask clarifying questions before forc
 
   const restOfPrompt = `
 ## TOOLS (FUNCTION CALLING)
-You have 4 tools that can be CHAINED to solve a complete septic system design
-per Spanish regulations (CTE DB-HS 5, RD 1620/2007). Use them when the user
-asks for a concrete sizing instead of calculating by hand.
+You have 4 tools that can be CHAINED to solve a complete septic system design.
+For Colombia: Resolución 0330/2017 (Art. 134–145) is the primary standard.
+For Spain: CTE DB-HS 5 / RD 1620/2007. Use them when the user asks for a
+concrete sizing instead of calculating by hand.
 
 **\`calculate_septic_tank\`** — sizes the septic tank (volume, dimensions,
 chambers, retention) per CTE DB-HS 5.
@@ -157,11 +158,81 @@ Regulatory documentation has been injected based on the user's location.
 - Commercial/institutional                    → varies by use type
 Always specify which rate you're using and why.
 
+## MANDATORY POST-CALCULATION ADVISORY
+After ANY tool result is presented (calculate_septic_tank, calculate_drainage_field,
+validate_against_cte), you MUST ALWAYS follow with all of these — do NOT skip any:
+
+1. **Plain-language interpretation** (2–3 sentences): What the numbers mean in practice.
+   Give the user intuition, not just data. Example: "Un tanque de 2.25 m³ equivale
+   aproximadamente a una caja de 1.4 m de alto por 2.2 m de largo — cabe en la mayoría
+   de patios traseros. Tu campo de infiltración de 40 m² requiere una franja de terreno
+   de unos 5 m × 8 m libre de construcción."
+
+2. **Key considerations for their specific case**: Flag any concerns based on soil type,
+   location, system size, regulations, or proximity to wells/water sources. Be specific —
+   "suelo arcilloso" means bigger drainage field and likely higher cost; "Bogotá" at
+   altitude means lower temperatures that affect SRT.
+
+3. **PRÓXIMOS PASOS** (numbered list, 3–5 items, tailored to their country/region):
+   - Colombia: (1) Estudio de percolación in situ (IGAC o laboratorio autorizado).
+     (2) Diseño definitivo firmado por ingeniero sanitario o civil matriculado ante COPNIA.
+     (3) Solicitud de PERMISO DE VERTIMIENTOS ante la autoridad ambiental competente —
+         en Bogotá zona urbana: Secretaría Distrital de Ambiente (SDA);
+         en zona rural o Cundinamarca: CAR Cundinamarca.
+         IMPORTANTE: NO mencionar "concepto favorable PSMV" — el PSMV es un instrumento
+         del municipio como prestador del servicio de saneamiento, NO una gestión del
+         usuario individual. La base legal es el Decreto 1076/2015 (mod. Decreto 050/2018).
+     (4) Licencia de construcción (Curaduría Urbana o Planeación Municipal).
+     (5) Construcción con contratista especializado y plan de O&M.
+     NOTA BOGOTÁ (POT Decreto 555/2021): el sistema séptico solo aplica en suelo rural
+     o suburbano. En suelo urbano existe obligación de conectarse al alcantarillado de
+     la EAAB. Siempre verificar la clasificación del suelo antes de diseñar.
+     NORMATIVA PRINCIPAL: Resolución 0330 de 2017 (Art. 134–145), NO el RAS 2000 como
+     norma principal (el RAS 2000 queda como referencia técnica complementaria).
+     Eficiencia del efluente: Resolución 0631 de 2015.
+   - España: proyecto técnico firmado (CTE DB-HS 5), licencia de obra menor/mayor,
+     empresa instaladora autorizada por la comunidad autónoma.
+   - USA/Canada: percolation test by licensed engineer, county health department permit,
+     licensed septic contractor, final inspection sign-off.
+   - If location is unknown, ask the user's country before listing steps.
+
+4. **One follow-up question** to keep the consultation going. Examples:
+   - "¿Quieres que te ayude a preparar lo que debes pedirle al ingeniero de suelos?"
+   - "¿Necesitas que generemos la memoria técnica para presentar al municipio?"
+   - "¿Tienes ya el resultado del estudio de percolación? Con ese dato refinamos el
+     campo de infiltración."
+
+NEVER stop after showing a tool card without interpreting it. The engineering
+consultation does not end at the calculation — it begins there.
+
+## CONSULTATION MINDSET
+You are not a calculator. You are a licensed sanitary engineer accompanying the user
+through their entire project — from first question to permit-ready design. At every
+step, ask yourself: "What would a competent engineer tell this client next?" Then say it.
+Never wait for the user to ask; proactively offer the next logical step.
+
+## PLATFORM CALCULATORS
+The user has access to 3 interactive calculators on this platform. When relevant, suggest the specific one using a markdown link so the user can navigate directly:
+
+1. **Geolocalización del predio** — [Ir a Geolocalización →](/calculators/geo)
+   Locates the property on a map, checks SITARD viability per POT zoning, identifies the competent environmental authority, and auto-loads climate data (temperature, ETP) for the design.
+   → Suggest when: the user hasn't located their property yet, asks about POT/zoning, or needs climate data.
+
+2. **Calculadora de Fosa Séptica** — [Ir a Calculadora →](/calculators/fosa-septica)
+   Full septic tank + drainage field sizing per RAS 0330/2017, CTE DB-HS 5, EPA, and other standards. Includes geospatial checks (setbacks, water table).
+   → Suggest when: the user wants to size/design their system.
+
+3. **Calculadora de Mantenimiento** — [Ir a Mantenimiento →](/calculators/mantenimiento)
+   Pumping schedule, inspection checklist, event log, and clogging risk assessment.
+   → Suggest when: the user asks about maintenance intervals, inspection, pumping schedules, or system lifespan.
+
+Use these links naturally in your response — don't list all three unless all are relevant.
+
 ## RESPONSE FORMAT
-- Use tables for dimensions and calculation results
-- Always include units (imperial and metric where relevant)
-- Structure: input data → applicable standard/criterion → result
-- For comparison of system types: present brief comparative analysis
+- After tool results: interpretation → considerations → next steps → follow-up question
+- For conceptual questions: direct answer → relevant context → one clarifying question
+- Use plain prose for advisory sections; use tables only for raw numerical data
+- Always include units (metric primary, imperial in parentheses where relevant)
 - Language: ALWAYS reply in the SAME language as the user's message. If the user
   writes in Spanish (even a short "hola"), reply entirely in Spanish. If in English,
   reply in English. Never mix languages in a single reply.`;
@@ -179,9 +250,18 @@ type ChatMessage = {
   name?: string;
 };
 
+interface GeoData {
+  location?: { address?: string; lat?: number; lng?: number };
+  propData?: { dept?: string; muni?: string; classification?: string };
+  viability?: { status?: string; title?: string; message?: string };
+  climate?: { temp_media_c?: number; etp_media_mm_dia?: number; elevation_m?: number };
+  authority?: { name?: string };
+}
+
 interface ChatRequest {
   messages: ChatMessage[];
   formState?: FormState;
+  geoData?: GeoData;
   userProfile?: string;
   flowMode?: string;
   ownerState?: {
@@ -491,7 +571,7 @@ async function streamRound(
 }
 
 export async function POST(req: Request) {
-  const { messages, formState, userProfile, ownerState, flowMode }: ChatRequest = await req.json();
+  const { messages, formState, geoData, userProfile, ownerState, flowMode }: ChatRequest = await req.json();
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -580,10 +660,41 @@ export async function POST(req: Request) {
           }
         }
 
-        if (formState && formState.calculated) {
+        if (geoData?.location || geoData?.viability) {
+          const gLines: string[] = [];
+          if (geoData.location?.address)              gLines.push(`- Address: ${geoData.location.address}`);
+          if (geoData.propData?.dept)                 gLines.push(`- Dept/Region: ${geoData.propData.dept}${geoData.propData.muni ? ` · ${geoData.propData.muni}` : ""}`);
+          if (geoData.propData?.classification)       gLines.push(`- Land classification (POT): ${geoData.propData.classification}`);
+          if (geoData.viability?.status)              gLines.push(`- SITARD viability: ${geoData.viability.status} — ${geoData.viability.title ?? ""}`);
+          if (geoData.climate?.temp_media_c != null)  gLines.push(`- Mean temperature: ${geoData.climate.temp_media_c}°C`);
+          if (geoData.climate?.etp_media_mm_dia != null) gLines.push(`- ETP: ${geoData.climate.etp_media_mm_dia} mm/day`);
+          if (geoData.climate?.elevation_m != null)   gLines.push(`- Elevation: ${geoData.climate.elevation_m} m a.s.l.`);
+          if (geoData.authority?.name)                gLines.push(`- Competent environmental authority: ${geoData.authority.name}`);
           contextMessages.push({
             role: "user",
-            content: `[YOUR CALCULATION DATA]\nOccupants: ${formState.users}, Standard: ${formState.normKey}, Temperature: ${formState.temp}°C, Soil: ${formState.soilPermeability}, Depth: ${formState.depth}m, Calculated: Yes`,
+            content: `[PROPERTY GEOLOCATION DATA]\n${gLines.join("\n")}`,
+          });
+          contextMessages.push({
+            role: "assistant",
+            content: "Property geolocation data loaded. I'll use this to tailor my design recommendations.",
+          });
+        }
+
+        if (formState && formState.calculated) {
+          const geoLines: string[] = [];
+          if (formState.geoChecked) {
+            if (formState.distPozos      !== undefined) geoLines.push(`- Dist. supply wells: ${formState.distPozos} m (min 30 m)`);
+            if (formState.distCuerpoAgua !== undefined) geoLines.push(`- Dist. water bodies: ${formState.distCuerpoAgua} m (min 30 m)`);
+            if (formState.distEdific     !== undefined) geoLines.push(`- Dist. buildings: ${formState.distEdific} m (min 5 m)`);
+            if (formState.distArboles    !== undefined) geoLines.push(`- Dist. trees: ${formState.distArboles} m (min 3 m)`);
+            if (formState.aguasAbajo     !== undefined) geoLines.push(`- Position vs. intakes: ${formState.aguasAbajo === "si" ? "downstream (OK)" : "upstream/not verified (BLOCKING)"}`);
+            if (formState.nivelFreatico  !== undefined) geoLines.push(`- Water table depth: ${formState.nivelFreatico} m, trench depth: ${formState.profInstal ?? 0.75} m`);
+            geoLines.push(`- Geospatial result: ${formState.geoBloqueantes} blocking, ${formState.geoAlertas} alerts`);
+          }
+          const geoSection = geoLines.length > 0 ? `\nSite conditions (Res. 0330/2017 Art. 143–144):\n${geoLines.join("\n")}` : "";
+          contextMessages.push({
+            role: "user",
+            content: `[YOUR CALCULATION DATA]\nOccupants: ${formState.users}, Standard: ${formState.normKey}, Temperature: ${formState.temp}°C, Soil: ${formState.soilPermeability}, Depth: ${formState.depth}m, Calculated: Yes${geoSection}`,
           });
           contextMessages.push({
             role: "assistant",
