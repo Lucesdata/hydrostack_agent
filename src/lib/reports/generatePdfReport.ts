@@ -166,36 +166,56 @@ function registerHeaderFooter(
   reportId: string,
   getPageNum: () => number
 ): void {
+  // Re-entry guard: prevents infinite recursion if any text inside the handler
+  // overflows the page bounds and triggers pdfkit's auto-pagination.
+  let drawing = false;
+
   doc.on('pageAdded', () => {
+    if (drawing) return;
     const pg = getPageNum();
     if (pg <= 1) return; // Skip cover page
 
-    // ── Header bar ─────────────────────────────────────────────────────
-    doc.rect(0, 0, PAGE_W, HEADER_H).fill('#f0f6fa');
-    doc.rect(0, HEADER_H, PAGE_W, 0.5).fill(C.divider);
+    drawing = true;
+    try {
+      // ── Header bar ───────────────────────────────────────────────────
+      doc.rect(0, 0, PAGE_W, HEADER_H).fill('#f0f6fa');
+      doc.rect(0, HEADER_H, PAGE_W, 0.5).fill(C.divider);
 
-    doc.fillColor(C.primary).font('Helvetica-Bold').fontSize(8)
-      .text('HYDROSTACK', MARGIN_L, 10);
-    doc.fillColor(C.textLight).font('Helvetica').fontSize(7.5)
-      .text(`Memoria Técnica · ${proyecto.nombre}`, MARGIN_L + 80, 11);
+      // NOTE: every text call here uses { lineBreak: false } and no `width`
+      // so pdfkit takes the no-wrap path in `_text` and never calls
+      // `nextSection()`/`addPage()` from inside this handler.
+      doc.fillColor(C.primary).font('Helvetica-Bold').fontSize(8)
+        .text('HYDROSTACK', MARGIN_L, 10, { lineBreak: false });
+      doc.fillColor(C.textLight).font('Helvetica').fontSize(7.5)
+        .text(`Memoria Técnica · ${proyecto.nombre}`, MARGIN_L + 80, 11, { lineBreak: false });
 
-    const pgText = `Pág. ${pg}`;
-    const memText = proyecto.numero_memoria ?? reportId.slice(0, 8).toUpperCase();
-    doc.fillColor(C.textLight).font('Helvetica').fontSize(7.5)
-      .text(`Mem. N° ${memText}`, PAGE_W - MARGIN_R - 120, 11, { width: 60, align: 'right' });
-    doc.fillColor(C.primary).font('Helvetica-Bold').fontSize(8)
-      .text(pgText, PAGE_W - MARGIN_R - 50, 10, { width: 45, align: 'right' });
+      // Right-aligned items: compute x manually with widthOfString
+      const memText = proyecto.numero_memoria ?? reportId.slice(0, 8).toUpperCase();
+      const memLabel = `Mem. N° ${memText}`;
+      doc.fillColor(C.textLight).font('Helvetica').fontSize(7.5);
+      const memW = doc.widthOfString(memLabel);
+      doc.text(memLabel, PAGE_W - MARGIN_R - 60 - memW, 11, { lineBreak: false });
 
-    // Reset cursor below header
-    doc.y = HEADER_H + 10;
+      const pgText = `Pág. ${pg}`;
+      doc.fillColor(C.primary).font('Helvetica-Bold').fontSize(8);
+      const pgW = doc.widthOfString(pgText);
+      doc.text(pgText, PAGE_W - MARGIN_R - pgW, 10, { lineBreak: false });
 
-    // ── Footer ──────────────────────────────────────────────────────────
-    doc.rect(0, FOOTER_Y - 10, PAGE_W, 0.5).fill(C.divider);
-    doc.fillColor(C.textLight).font('Helvetica').fontSize(7)
-      .text(
-        `Generado por HydroStack · Report ID: ${reportId} · ${formatDate()}`,
-        MARGIN_L, FOOTER_Y - 4, { width: CONTENT_W, align: 'center' }
-      );
+      // ── Footer ───────────────────────────────────────────────────────
+      doc.rect(0, FOOTER_Y - 10, PAGE_W, 0.5).fill(C.divider);
+
+      const footerText = `Generado por HydroStack · Report ID: ${reportId} · ${formatDate()}`;
+      doc.fillColor(C.textLight).font('Helvetica').fontSize(7);
+      const footerW = doc.widthOfString(footerText);
+      const footerX = MARGIN_L + (CONTENT_W - footerW) / 2;
+      doc.text(footerText, footerX, FOOTER_Y - 4, { lineBreak: false });
+
+      // Place cursor below header so the caller can start drawing content.
+      doc.x = MARGIN_L;
+      doc.y = HEADER_H + 14;
+    } finally {
+      drawing = false;
+    }
   });
 }
 

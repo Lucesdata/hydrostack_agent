@@ -1,4 +1,5 @@
 import GeoPanel from "@/src/components/geo/GeoPanel";
+import CalculatorContextBanner from "@/src/components/BuildFlow/CalculatorContextBanner";
 
 export const metadata = {
   title: "Geolocalización del Predio — HydroStack",
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function GeoPage() {
-  return <GeoPanel />;
+  return (
+    <>
+      <CalculatorContextBanner step={1} />
+      <GeoPanel />
+    </>
+  );
 }

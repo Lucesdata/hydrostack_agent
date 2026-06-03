@@ -1,4 +1,5 @@
 import MaintenanceCalculator from "@/src/components/MaintenanceCalculator";
+import CalculatorContextBanner from "@/src/components/BuildFlow/CalculatorContextBanner";
 
 export const metadata = {
   title: "Mantenimiento SITARD — HydroStack",
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function MantenimientoPage() {
-  return <MaintenanceCalculator />;
+  return (
+    <>
+      <CalculatorContextBanner step={3} />
+      <MaintenanceCalculator />
+    </>
+  );
 }

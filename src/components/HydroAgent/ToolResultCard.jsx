@@ -1,6 +1,8 @@
 "use client";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useLang } from "@/src/lib/i18n";
+import { saveLastReport } from "@/src/lib/state/clientStore";
 
 /**
  * Renders the inline result of a tool call inside the chat.
@@ -253,6 +255,13 @@ function ValidationCard({ result, tx }) {
 }
 
 function PdfCard({ result, tx }) {
+  // Persist agent-generated PDF so the /build wizard's stepper can surface it too.
+  useEffect(() => {
+    if (result?.download_url && result?.report_id) {
+      saveLastReport(result.download_url, String(result.report_id));
+    }
+  }, [result?.download_url, result?.report_id]);
+
   if (!result || result.error) {
     return <ToolError toolName="generate_pdf_report" message={result?.error} tx={tx} />;
   }

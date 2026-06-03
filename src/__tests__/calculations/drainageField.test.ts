@@ -23,7 +23,7 @@ describe('calculateDrainageField', () => {
 
     expect(result).toBeDefined();
     expect(result.tipo_sistema).toBe('zanjas_filtrantes');
-    expect(result.dimensiones.superficie_infiltracion_m2).toBeGreaterThan(0);
+    expect(result.dimensiones.superficie_diseno_m2).toBeGreaterThan(0);
     expect(result.dimensiones.longitud_total_zanjas_m).not.toBeNull();
     expect(result.dimensiones.num_zanjas).toBeGreaterThanOrEqual(1);
     expect(result.dimensiones.separacion_zanjas_m).toBe(2.0);
@@ -40,7 +40,7 @@ describe('calculateDrainageField', () => {
 
     expect(result).toBeDefined();
     expect(result.tipo_sistema).toBe('lecho_filtrante');
-    expect(result.dimensiones.superficie_infiltracion_m2).toBeGreaterThan(0);
+    expect(result.dimensiones.superficie_diseno_m2).toBeGreaterThan(0);
     expect(result.dimensiones.longitud_total_zanjas_m).toBeNull();
     expect(result.dimensiones.num_zanjas).toBeNull();
     expect(result.dimensiones.profundidad_m).toBe(1.0);
@@ -64,15 +64,17 @@ describe('calculateDrainageField', () => {
     expect(has_perm_bloqueante).toBe(true);
   });
 
-  it('should flag low water table as blocking', () => {
+  it('should auto-select mound system for high water table', () => {
+    // nivel_freatico_m < 1.5 m → auto-selects monticulo_filtrante instead of blocking
     const result = calculateDrainageField({
       caudal_diario_l: 1200,
       permeabilidad_suelo_m_dia: 0.864,
-      nivel_freatico_m: 0.5, // below CTE minimum of 1.0 m
+      nivel_freatico_m: 0.5,
     });
 
-    expect(result.validacion.ok).toBe(false);
-    expect(result.validacion.bloqueantes.some((b) => b.includes('freático'))).toBe(true);
+    expect(result.tipo_sistema).toBe('monticulo_filtrante');
+    expect(result.validacion.ok).toBe(true);
+    expect(result.validacion.bloqueantes.length).toBe(0);
   });
 
   it('should flag distance to water well as blocking', () => {

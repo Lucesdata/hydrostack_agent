@@ -48,6 +48,14 @@ const KEYS = {
   profile: "hydrostack_profile",
   ownerState: "hydrostack_ownerstate",
   formState: "hydrostack_formstate",
+  // Written by GeoPanel when the user saves location/predio data.
+  geoData: "hs_geo_data",
+  // Written by SepticTankCalculator on calculate; minimal summary used by MaintenanceCalculator.
+  calcData: "hs_calc_data",
+  // Written by MaintenanceCalculator when the user adds events.
+  maintEvents: "hs_maint_events",
+  // Wizard: last PDF generated (from either /build or the chat agent).
+  lastReport: "hydrostack_lastreport",
 } as const;
 
 function isBrowser(): boolean {
@@ -228,4 +236,59 @@ export function getFormState<T = unknown>(): T | null {
 
 export function saveFormState(formState: unknown): void {
   writeJSON(KEYS.formState, formState);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Build flow progress — derived from the keys each calculator writes
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface BuildProgress {
+  geo: boolean;
+  septic: boolean;
+  maintenance: boolean;
+  allReady: boolean;
+}
+
+export function getBuildProgress(): BuildProgress {
+  const geo = readRaw(KEYS.geoData) !== null;
+  const septic = readRaw(KEYS.formState) !== null || readRaw(KEYS.calcData) !== null;
+  const maintenance = (() => {
+    const raw = readRaw(KEYS.maintEvents);
+    if (!raw) return false;
+    try {
+      const evs = JSON.parse(raw);
+      return Array.isArray(evs) && evs.length > 0;
+    } catch {
+      return false;
+    }
+  })();
+  // Report only needs septic to be generable. Maintenance is informative.
+  const allReady = septic;
+  return { geo, septic, maintenance, allReady };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Last generated PDF report — shared between /build wizard and chat agent
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface LastReport {
+  url: string;
+  reportId: string;
+  generatedAt: string;
+}
+
+export function getLastReport(): LastReport | null {
+  return readJSON<LastReport>(KEYS.lastReport);
+}
+
+export function saveLastReport(url: string, reportId: string): void {
+  writeJSON(KEYS.lastReport, {
+    url,
+    reportId,
+    generatedAt: new Date().toISOString(),
+  });
+}
+
+export function clearLastReport(): void {
+  remove(KEYS.lastReport);
 }

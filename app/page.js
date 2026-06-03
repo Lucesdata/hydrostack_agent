@@ -22,12 +22,63 @@ const FEATURES = [
 export default function LandingPage() {
   const { t, lang } = useLang();
   const tl = t.landing;
+  const isEs = lang === "es";
 
   return (
     <div style={S.page}>
 
-      {/* ── Hydro_Agent: centerpiece ── */}
-      <HydroAgent variant="landing" showOpenFull />
+      {/* ── HERO: el flujo guiado es la entrada principal ── */}
+      <section style={S.hero}>
+        <div style={S.heroInner}>
+          <div style={S.heroTag}>
+            {isEs ? "construye tu sistema · 4 pasos · informe pdf" : "build your system · 4 steps · pdf report"}
+          </div>
+          <h1 style={S.heroTitle}>
+            {isEs
+              ? "De los datos del predio al informe técnico — en un solo flujo."
+              : "From site data to the technical report — in one flow."}
+          </h1>
+          <p style={S.heroLead}>
+            {isEs
+              ? "Te llevamos paso a paso: ubicación, dimensionamiento de la fosa séptica, plan de mantenimiento y la memoria técnica firmable en PDF."
+              : "We walk you through: location, septic tank sizing, maintenance plan and the signable technical PDF memo."}
+          </p>
+          <div style={S.heroSteps}>
+            <span style={S.heroStep}>① 📍 {isEs ? "Ubicación" : "Location"}</span>
+            <span style={S.heroArrow}>→</span>
+            <span style={S.heroStep}>② 🪣 {isEs ? "Fosa Séptica" : "Septic Tank"}</span>
+            <span style={S.heroArrow}>→</span>
+            <span style={S.heroStep}>③ 🔧 {isEs ? "Mantenimiento" : "Maintenance"}</span>
+            <span style={S.heroArrow}>→</span>
+            <span style={S.heroStepFinal}>④ 📄 {isEs ? "Informe PDF" : "PDF Report"}</span>
+          </div>
+          <Link href="/build" style={S.heroBtn}>
+            {isEs ? "Empezar el flujo guiado" : "Start the guided flow"} →
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Asistente IA: ayuda secundaria, claramente al servicio del flujo ── */}
+      <section style={S.assistantWrap}>
+        <div style={S.assistantInner}>
+          <div style={S.assistantHead}>
+            <div style={S.assistantTag}>
+              {isEs ? "o si prefieres conversar" : "or if you prefer to chat"}
+            </div>
+            <h2 style={S.assistantTitle}>
+              {isEs
+                ? "Asistente IA — resuelve dudas técnicas mientras avanzas"
+                : "AI Assistant — answers technical questions as you go"}
+            </h2>
+            <p style={S.assistantSub}>
+              {isEs
+                ? "El asistente entiende tu progreso, sugiere próximos pasos y puede dimensionar el sistema por ti. Los resultados se guardan y aparecen en el flujo guiado."
+                : "The assistant tracks your progress, suggests next steps and can size the system for you. Results sync into the guided flow."}
+            </p>
+          </div>
+          <HydroAgent variant="landing" showOpenFull />
+        </div>
+      </section>
 
       {/* ── Below-the-fold: secondary content ── */}
       <section style={S.section} id="features">
@@ -103,6 +154,122 @@ const S = {
     fontFamily: "'IBM Plex Mono', monospace",
     position: "relative",
     zIndex: 1,
+  },
+
+  /* HERO — entrada principal al flujo guiado */
+  hero: {
+    padding: "clamp(40px, 7vw, 72px) clamp(16px, 5vw, 28px) clamp(28px, 5vw, 40px)",
+    borderBottom: "1px solid rgba(0,245,255,0.08)",
+  },
+  heroInner: {
+    maxWidth: "920px",
+    margin: "0 auto",
+    textAlign: "center",
+  },
+  heroTag: {
+    fontSize: "10px",
+    letterSpacing: "0.25em",
+    textTransform: "uppercase",
+    color: "#00F5FF",
+    fontFamily: "'IBM Plex Mono', monospace",
+    marginBottom: "16px",
+  },
+  heroTitle: {
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: "clamp(22px, 3.4vw, 34px)",
+    color: "#E8F8FF",
+    margin: "0 0 14px 0",
+    fontWeight: 700,
+    lineHeight: 1.25,
+  },
+  heroLead: {
+    fontSize: "14px",
+    color: "#7ab8c8",
+    fontFamily: "'Inter', system-ui, sans-serif",
+    lineHeight: 1.6,
+    maxWidth: "640px",
+    margin: "0 auto 24px",
+  },
+  heroSteps: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    marginBottom: "26px",
+  },
+  heroStep: {
+    fontSize: "11px",
+    color: "#a0c8d8",
+    fontFamily: "'IBM Plex Mono', monospace",
+    padding: "6px 10px",
+    background: "rgba(0,245,255,0.05)",
+    border: "1px solid rgba(0,245,255,0.15)",
+    borderRadius: "4px",
+    letterSpacing: "0.04em",
+  },
+  heroStepFinal: {
+    fontSize: "11px",
+    color: "#00FF88",
+    fontFamily: "'IBM Plex Mono', monospace",
+    padding: "6px 10px",
+    background: "rgba(0,255,136,0.08)",
+    border: "1px solid rgba(0,255,136,0.3)",
+    borderRadius: "4px",
+    letterSpacing: "0.04em",
+    fontWeight: 700,
+  },
+  heroArrow: { color: "#3a5a70", fontSize: "12px" },
+  heroBtn: {
+    display: "inline-block",
+    background: "rgba(0,245,255,0.18)",
+    border: "1px solid rgba(0,245,255,0.55)",
+    color: "#00F5FF",
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: "14px",
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    padding: "14px 28px",
+    borderRadius: "6px",
+    textDecoration: "none",
+    boxShadow: "0 0 24px rgba(0,245,255,0.18)",
+  },
+
+  /* Asistente — sección secundaria */
+  assistantWrap: {
+    padding: "clamp(32px, 5vw, 56px) clamp(16px, 5vw, 28px) 12px",
+  },
+  assistantInner: {
+    maxWidth: "1100px",
+    margin: "0 auto",
+  },
+  assistantHead: {
+    textAlign: "center",
+    marginBottom: "22px",
+    maxWidth: "640px",
+    marginInline: "auto",
+  },
+  assistantTag: {
+    fontSize: "9px",
+    letterSpacing: "0.22em",
+    textTransform: "uppercase",
+    color: "#4a7a8a",
+    fontFamily: "'IBM Plex Mono', monospace",
+    marginBottom: "8px",
+  },
+  assistantTitle: {
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: "clamp(16px, 2.2vw, 20px)",
+    color: "#E8F8FF",
+    margin: "0 0 8px 0",
+    fontWeight: 700,
+  },
+  assistantSub: {
+    fontSize: "13px",
+    color: "#7ab8c8",
+    fontFamily: "'Inter', system-ui, sans-serif",
+    lineHeight: 1.55,
+    margin: 0,
   },
 
   /* Below-the-fold sections */

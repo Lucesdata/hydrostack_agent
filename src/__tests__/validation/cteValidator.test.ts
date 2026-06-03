@@ -84,13 +84,13 @@ describe('validateAgainstCte', () => {
     expect(result.cumple).toBe(false);
     expect(result.bloqueantes.length).toBeGreaterThan(0);
 
-    // Verify the issue has a code and article
+    // Verify the issue has a code and article — default norm is 'ras' (Colombia)
     const pozo_issue = result.bloqueantes.find((b) =>
       b.descripcion.toLowerCase().includes('pozo')
     );
     expect(pozo_issue).toBeDefined();
     expect(pozo_issue?.codigo).toBeTruthy();
-    expect(pozo_issue?.articulo).toContain('CTE DB-HS 5');
+    expect(pozo_issue?.articulo).toContain('Res. 0330/2017');
   });
 
   it('should produce blocking issue when distance to dwelling < 5 m', () => {
@@ -124,8 +124,9 @@ describe('validateAgainstCte', () => {
     });
 
     expect(result.cumple).toBe(false);
+    // Default norm is 'ras' (Colombia) → Decreto 1076/2015, not RD 1620 (Spain)
     const protected_issue = result.bloqueantes.find((b) =>
-      b.articulo.includes('RD 1620')
+      b.articulo.includes('Dec. 1076')
     );
     expect(protected_issue).toBeDefined();
   });

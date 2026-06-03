@@ -46,7 +46,7 @@ describe('Tool composition (chained execution)', () => {
     });
 
     expect(fieldResult.tipo_sistema).toBe('zanjas_filtrantes');
-    expect(fieldResult.dimensiones.superficie_infiltracion_m2).toBeGreaterThan(0);
+    expect(fieldResult.dimensiones.superficie_diseno_m2).toBeGreaterThan(0);
   });
 
   it('should chain all 4 tools end-to-end (tank → drainage → validate → PDF)', async () => {

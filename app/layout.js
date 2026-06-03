@@ -1,5 +1,6 @@
 import { LangProvider } from "@/src/lib/i18n";
 import Navbar from "@/src/components/Navbar";
+import GlobalProgress from "@/src/components/BuildFlow/GlobalProgress";
 import "./globals.css";
 
 export const metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         <LangProvider>
           <Navbar />
           <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+          <GlobalProgress />
         </LangProvider>
       </body>
     </html>

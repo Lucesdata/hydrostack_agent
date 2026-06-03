@@ -1,4 +1,5 @@
 import SepticTankCalculator from "@/src/components/SepticTankCalculator";
+import CalculatorContextBanner from "@/src/components/BuildFlow/CalculatorContextBanner";
 
 export const metadata = {
   title: "Fosa Séptica — HydroStack",
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function FosaSepticaPage() {
-  return <SepticTankCalculator />;
+  return (
+    <>
+      <CalculatorContextBanner step={2} />
+      <SepticTankCalculator />
+    </>
+  );
 }

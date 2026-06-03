@@ -35,8 +35,9 @@ const MODULES = [
 ];
 
 export default function CalculatorsPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const tc = t.calculators;
+  const isEs = lang === "es";
 
   return (
     <div style={S.page}>
@@ -46,6 +47,23 @@ export default function CalculatorsPage() {
           <h1 style={S.title}>{tc.pageTitle}</h1>
           <p style={S.sub}>{tc.pageSubtitle}</p>
         </div>
+
+        <Link href="/build" style={S.guidedBanner}>
+          <span style={S.guidedBannerIcon}>🧭</span>
+          <span style={S.guidedBannerBody}>
+            <span style={S.guidedBannerTitle}>
+              {isEs ? "¿Primera vez?" : "First time?"}
+            </span>
+            <span style={S.guidedBannerSub}>
+              {isEs
+                ? "Prueba el flujo guiado paso a paso (incluye informe PDF al final)."
+                : "Try the step-by-step guided flow (PDF report included)."}
+            </span>
+          </span>
+          <span style={S.guidedBannerCta}>
+            {isEs ? "Ir al flujo guiado" : "Go to guided flow"} →
+          </span>
+        </Link>
 
         <div style={S.grid}>
           {MODULES.map((m, i) => (
@@ -84,7 +102,48 @@ const S = {
     margin: "0 auto",
   },
   header: {
-    marginBottom: "44px",
+    marginBottom: "22px",
+  },
+  guidedBanner: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    padding: "14px 18px",
+    marginBottom: "26px",
+    background: "linear-gradient(120deg, rgba(0,245,255,0.06), rgba(0,255,136,0.04))",
+    border: "1px solid rgba(0,245,255,0.22)",
+    borderRadius: "8px",
+    textDecoration: "none",
+    flexWrap: "wrap",
+  },
+  guidedBannerIcon: { fontSize: "22px", flexShrink: 0 },
+  guidedBannerBody: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    flex: "1 1 auto",
+    minWidth: 0,
+  },
+  guidedBannerTitle: {
+    fontSize: "12px",
+    color: "#e2f0f7",
+    fontWeight: 700,
+    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: "0.04em",
+  },
+  guidedBannerSub: {
+    fontSize: "11px",
+    color: "#7ab8c8",
+    fontFamily: "'IBM Plex Mono', monospace",
+    lineHeight: 1.5,
+  },
+  guidedBannerCta: {
+    fontSize: "11px",
+    color: "#00F5FF",
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontWeight: 700,
+    letterSpacing: "0.08em",
+    flexShrink: 0,
   },
   tag: {
     fontSize: "9px",

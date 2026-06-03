@@ -28,15 +28,15 @@ describe('calculateSepticTank', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.caudal_diario_litros).toBe(6 * 200); // 1200 L/día
+    // Q_AR = n × q × Cr — default Cr = 0.85 (Res. 0330/2017 / RAS 2000)
+    expect(result.caudal_diario_litros).toBe(Math.round(6 * 200 * 0.85)); // 1020 L/día
     expect(result.volumen_util_litros).toBeGreaterThan(0);
 
-    // For 6 h-e × 200 L/d × 2 days = 2400 L useful volume
-    // Plus safety margins, total should be around 2400–2800 L
+    // Useful volume includes V_L + V_S + V_N — always > V_L alone
     expect(result.volumen_util_litros).toBeGreaterThanOrEqual(2400);
 
-    // Dimensions should respect L:W ≈ 2:1 proportion
-    expect(result.dimensiones.largo_m).toBeCloseTo(2 * result.dimensiones.ancho_m, 0.2);
+    // Dimensions should respect L:W = 3:1 proportion (Res. 0330/2017 Art. 140)
+    expect(result.dimensiones.largo_m).toBeCloseTo(3 * result.dimensiones.ancho_m, 0.2);
 
     // Should have 2 compartments
     expect(result.num_compartimentos).toBe(2);
@@ -64,8 +64,8 @@ describe('calculateSepticTank', () => {
 
     expect(result).toBeDefined();
 
-    // 50 h-e × 200 L/d = 10,000 L/día (high flow)
-    expect(result.caudal_diario_litros).toBe(50 * 200);
+    // Q_AR = 50 × 200 × Cr(0.85) = 8,500 L/día
+    expect(result.caudal_diario_litros).toBe(Math.round(50 * 200 * 0.85));
 
     // Useful volume should be larger
     expect(result.volumen_util_litros).toBeGreaterThanOrEqual(10000);
@@ -113,7 +113,7 @@ describe('calculateSepticTank', () => {
   // Test 4: Volume and dimension consistency
   // ─────────────────────────────────────────────────────────────────────
 
-  it('should maintain geometric consistency (L ≈ 2W proportion)', () => {
+  it('should maintain geometric consistency (L = 3W proportion)', () => {
     const result = calculateSepticTank({
       habitantes_equivalentes: 10,
       tipo_uso: 'vivienda_unifamiliar',
@@ -121,8 +121,8 @@ describe('calculateSepticTank', () => {
 
     const { largo_m, ancho_m, alto_util_m } = result.dimensiones;
 
-    // L ≈ 2W (with tolerance)
-    expect(largo_m).toBeCloseTo(2 * ancho_m, 0.5);
+    // L = 3W (Res. 0330/2017 Art. 140 — range 2:1–4:1, design uses 3:1)
+    expect(largo_m).toBeCloseTo(3 * ancho_m, 0.5);
 
     // Verify volume from dimensions
     const volumen_calculado_m3 = largo_m * ancho_m * alto_util_m;
@@ -143,11 +143,11 @@ describe('calculateSepticTank', () => {
       dotacion_litros_hab_dia: 150,
     });
 
-    // Daily flow = 5 × 150 = 750 L/day
-    expect(result.caudal_diario_litros).toBe(5 * 150);
+    // Q_AR = 5 × 150 × Cr(0.85) = 637.5 → rounded 638 L/día
+    expect(result.caudal_diario_litros).toBe(Math.round(5 * 150 * 0.85));
 
-    // Per-second flow = 750 / 86400 ≈ 0.00868 L/s
-    const caudal_esperado_s = (5 * 150) / 86400;
+    // Per-second flow = Q_AR / 86400
+    const caudal_esperado_s = (5 * 150 * 0.85) / 86400;
     // Allow 2 decimals of tolerance (function uses toFixed(3))
     expect(result.caudal_segundos).toBeCloseTo(caudal_esperado_s, 2);
   });
