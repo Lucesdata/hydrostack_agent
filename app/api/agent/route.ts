@@ -364,6 +364,8 @@ function wantsCalculation(text: string): boolean {
     "dimensiona", "dimension", "calcul", "size", "sizing", "valida", "validate",
     "memoria", "informe", "pdf", "report", "diseña", "diseńa", "disena",
     "design", "genera",
+    // SECOP / licitaciones — para que el modelo pueda invocar search_secop_tenders
+    "licit", "secop", "adjudic", "convocator", "oportunidad", "tender",
   ];
   return actionKw.some(k => t.includes(k));
 }

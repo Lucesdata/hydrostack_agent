@@ -9,6 +9,7 @@ export default function Navbar() {
   const path = usePathname();
   const isCalc = path.startsWith("/calculators");
   const isChat = path.startsWith("/chat");
+  const isLic  = path.startsWith("/licitaciones");
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
@@ -32,6 +33,9 @@ export default function Navbar() {
           </Link>
           <Link href="/chat" style={{ ...S.link, ...(isChat ? S.linkActive : {}) }} className={isChat ? "" : "nav-link"}>
             {t.nav.assistant}
+          </Link>
+          <Link href="/licitaciones" style={{ ...S.link, ...(isLic ? S.linkActive : {}) }} className={isLic ? "" : "nav-link"}>
+            Licitaciones
           </Link>
           <a href="#about" style={S.link} className="nav-link">
             {t.nav.about}
@@ -60,6 +64,9 @@ export default function Navbar() {
         </Link>
         <Link href="/chat" className={`nav-mobile-link${isChat ? " active" : ""}`} onClick={close}>
           {t.nav.assistant}
+        </Link>
+        <Link href="/licitaciones" className={`nav-mobile-link${isLic ? " active" : ""}`} onClick={close}>
+          Licitaciones
         </Link>
         <a href="#about" className="nav-mobile-link" onClick={close}>
           {t.nav.about}

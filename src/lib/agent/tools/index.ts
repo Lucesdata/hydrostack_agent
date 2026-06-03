@@ -30,6 +30,12 @@ import {
   ExecuteGeneratePdfReportInput,
 } from './generatePdfReport';
 
+import {
+  searchSecopTendersTool,
+  executeSearchSecopTenders,
+  ExecuteSearchSecopTendersInput,
+} from './searchSecopTenders';
+
 // ─────────────────────────────────────────────────────────────────────────
 // Tool definitions for Groq (OpenAI format)
 // ─────────────────────────────────────────────────────────────────────────
@@ -39,6 +45,7 @@ export const tools = [
   calculateDrainageFieldTool,
   validateAgainstCteTool,
   generatePdfReportTool,
+  searchSecopTendersTool,
 ];
 
 // Re-export individual tools for direct access
@@ -47,6 +54,7 @@ export {
   calculateDrainageFieldTool,
   validateAgainstCteTool,
   generatePdfReportTool,
+  searchSecopTendersTool,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -73,6 +81,9 @@ export const toolExecutors: Record<string, ToolExecutor> = {
   },
   generate_pdf_report: async (input: ToolInput) => {
     return executeGeneratePdfReport(input as ExecuteGeneratePdfReportInput);
+  },
+  search_secop_tenders: async (input: ToolInput) => {
+    return executeSearchSecopTenders(input as ExecuteSearchSecopTendersInput);
   },
 };
 
