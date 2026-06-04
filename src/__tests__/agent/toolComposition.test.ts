@@ -9,17 +9,18 @@ import { describe, it, expect } from 'vitest';
 import { executeTool, listToolNames, tools } from '@/src/lib/agent/tools';
 
 describe('Tool registry', () => {
-  it('should register exactly 4 tools', () => {
+  it('should register exactly 5 tools', () => {
     const names = listToolNames();
-    expect(names).toHaveLength(4);
+    expect(names).toHaveLength(5);
     expect(names).toContain('calculate_septic_tank');
     expect(names).toContain('calculate_drainage_field');
     expect(names).toContain('validate_against_cte');
     expect(names).toContain('generate_pdf_report');
+    expect(names).toContain('search_secop_tenders');
   });
 
-  it('should expose 4 tool definitions for the LLM', () => {
-    expect(tools).toHaveLength(4);
+  it('should expose 5 tool definitions for the LLM', () => {
+    expect(tools).toHaveLength(5);
     for (const tool of tools) {
       expect((tool as any).type).toBe('function');
       expect((tool as any).function.name).toBeTruthy();
