@@ -1,9 +1,161 @@
 "use client";
 
+import { useLang } from "@/src/lib/i18n";
+
 const F  = (v, d=2) => Number(v).toFixed(d);
 const FI = (v)      => Math.round(v);
 const FONT = "'IBM Plex Mono', monospace";
 const ORBITRON = "'Orbitron', sans-serif";
+
+// ── Bilingual strings ─────────────────────────────────────────────────────────
+const T = {
+  es: {
+    secPlanta: "VISTA EN PLANTA",
+    secCorte: "CORTE A-A  —  LONGITUDINAL",
+    secHidraulica: "PERFIL HIDRÁULICO",
+    secEsquema: "ESQUEMA SITARD — SISTEMA INTEGRAL DE TRATAMIENTO",
+    secCotas: "CUADRO DE COTAS",
+    natas: "NATAS",
+    natasVol: "Vn",
+    zonaLiquida: "ZONA LÍQUIDA",
+    zonaLiquidaVol: "Vl",
+    lodos: "LODOS",
+    lodosVol: "Vs",
+    barInlet: "Entrada",
+    barContrac: "Contrac.",
+    barTank: "Fosa",
+    barTabiques: "Tabiques",
+    barOutlet: "Salida",
+    schemeDwelling: "VIVIENDA",
+    schemeGreaseTrap: "TRAMPA GRASAS",
+    schemeSepticTank: "FOSA SÉPTICA",
+    schemeAnaerobic: "FAFA/FILTRO",
+    schemeInspBox: "CAJA INSP.",
+    schemeLeach: "INFILTRACIÓN",
+    schemeHabs: "hab",
+    schemeRetention: "retención",
+    schemeChambers: (n) => `${n} cámara(s)`,
+    schemeAnaerobicSub: "⑥ anaerobio",
+    schemeBiofilm: "lecho bacteriano",
+    schemeCleanout: "⑦ registro",
+    schemeInspection: "rev. periódica",
+    schemeLeachField: "campo ⑧",
+    schemeNoStudy: "ver estudio",
+    quality: (dboIn, dboOut, ssIn, ssOut, rem) =>
+      `DBO₅: ${dboIn} mg/L  →  ≈${dboOut} mg/L salida  |  SS: ${ssIn} mg/L  →  ≈${ssOut} mg/L  |  Remoción ≈${rem}%`,
+    rowL: "L — Longitud total",
+    rowA: "A — Ancho interior",
+    rowHu: "Hu — Prof. útil",
+    rowBL: "BL — Borde libre",
+    rowH: "H — Prof. total",
+    rowVtot: "Vtot — Vol. diseño",
+    rowVl: "Vl — Vol. líquido",
+    rowVs: "Vs — Vol. lodos",
+    rowVn: "Vn — Vol. natas",
+    rowDPipe: "Ø Tub. E/S",
+    rowDVent: "Ø Tub. ventilación",
+    rowChambers: "Nº de cámaras",
+    rowHf: "Pérdida hidráulica",
+    tableParameter: "PARÁMETRO",
+    tableValue: "VALOR",
+    legend: "LEYENDA",
+    legInlet: "Tubería de entrada (T)",
+    legOutlet: "Tubería de salida (T)",
+    legGreaseTrap: "Trampa de grasas",
+    legSepticTank: "Fosa séptica",
+    legVent: "Tubería ventilación",
+    legFafa: "Filtro / FAFA",
+    legInspBox: "Caja de inspección",
+    legLeach: "Campo infiltración",
+    cajaProject: "PROYECTO",
+    cajaDesigner: "ELABORÓ",
+    cajaStandard: "NORMA",
+    cajaDrawing: "PLANO N°",
+    cajaLocation: "UBICACIÓN",
+    cajaDate: "FECHA",
+    cajaScale: "ESCALA",
+    cajaRev: "REV",
+    brandTagline: "Ingeniería Sanitaria",
+    brandSubtitle: "FOSA SÉPTICA — Plano HID-01",
+    download: "↓ DESCARGAR SVG",
+    sheetInfo: "Plano HID-01 · A3 apaisado · 1587 × 1122 px",
+    dateLocale: "es",
+  },
+  en: {
+    secPlanta: "PLAN VIEW",
+    secCorte: "SECTION A-A  —  LONGITUDINAL",
+    secHidraulica: "HYDRAULIC PROFILE",
+    secEsquema: "SYSTEM SCHEME — ONSITE WASTEWATER TREATMENT",
+    secCotas: "DATA TABLE",
+    natas: "SCUM",
+    natasVol: "Scum Volume",
+    zonaLiquida: "LIQUID ZONE",
+    zonaLiquidaVol: "Liquid Volume",
+    lodos: "SLUDGE",
+    lodosVol: "Sludge Volume",
+    barInlet: "Inlet",
+    barContrac: "Contrac.",
+    barTank: "Tank",
+    barTabiques: "Baffles",
+    barOutlet: "Outlet",
+    schemeDwelling: "DWELLING",
+    schemeGreaseTrap: "GREASE TRAP",
+    schemeSepticTank: "SEPTIC TANK",
+    schemeAnaerobic: "ANAEROBIC FILTER",
+    schemeInspBox: "INSPECTION BOX",
+    schemeLeach: "LEACH FIELD",
+    schemeHabs: "occ",
+    schemeRetention: "retention",
+    schemeChambers: (n) => `${n} chamber(s)`,
+    schemeAnaerobicSub: "⑥ anaerobic",
+    schemeBiofilm: "biofilm media",
+    schemeCleanout: "⑦ cleanout",
+    schemeInspection: "periodic inspection",
+    schemeLeachField: "field ⑧",
+    schemeNoStudy: "see soil study",
+    quality: (dboIn, dboOut, ssIn, ssOut, rem) =>
+      `BOD₅: ${dboIn} mg/L  →  ≈${dboOut} mg/L outlet  |  SS: ${ssIn} mg/L  →  ≈${ssOut} mg/L  |  Removal ≈${rem}%`,
+    rowL: "L — Total Length",
+    rowA: "W — Inner Width",
+    rowHu: "Hu — Useful Depth",
+    rowBL: "FB — Freeboard",
+    rowH: "H — Total Depth",
+    rowVtot: "Vtot — Design Volume",
+    rowVl: "Vl — Liquid Volume",
+    rowVs: "Vs — Sludge Volume",
+    rowVn: "Vn — Scum Volume",
+    rowDPipe: "Ø I/O Pipe",
+    rowDVent: "Ø Vent Pipe",
+    rowChambers: "Number of Chambers",
+    rowHf: "Head Loss",
+    tableParameter: "PARAMETER",
+    tableValue: "VALUE",
+    legend: "LEGEND",
+    legInlet: "Inlet pipe (T-pipe)",
+    legOutlet: "Outlet pipe (T-pipe)",
+    legGreaseTrap: "Grease trap",
+    legSepticTank: "Septic tank",
+    legVent: "Vent pipe",
+    legFafa: "Filter / Anaerobic",
+    legInspBox: "Inspection box",
+    legLeach: "Leach field",
+    cajaProject: "PROJECT",
+    cajaDesigner: "PREPARED BY",
+    cajaStandard: "STANDARD",
+    cajaDrawing: "DRAWING NO.",
+    cajaLocation: "LOCATION",
+    cajaDate: "DATE",
+    cajaScale: "SCALE",
+    cajaRev: "REV",
+    brandTagline: "Sanitary Engineering",
+    brandSubtitle: "SEPTIC TANK — Drawing HID-01",
+    download: "↓ DOWNLOAD SVG",
+    sheetInfo: "Drawing HID-01 · A3 landscape · 1587 × 1122 px",
+    dateLocale: "en",
+  },
+};
+
+const pickT = (lang) => T[lang === "en" ? "en" : "es"];
 
 // ── Design tokens (matches global design system) ──────────────────────────────
 const DS = {
@@ -91,8 +243,8 @@ const SecTitle = ({ x, y, w, num, label }) => (
   </g>
 );
 
-// ── 1. VISTA EN PLANTA ────────────────────────────────────────────────────────
-function PlantView({ r, x, y, w, h }) {
+// ── 1. PLAN VIEW ──────────────────────────────────────────────────────────────
+function PlantView({ r, x, y, w, h, t }) {
   const TH = 17, PAD = 28;
   const aW = w - PAD*2 - 46, aH = h - TH - PAD*2 - 40;
   const scl = Math.min(aW / r.L, aH / r.W, 70);
@@ -113,7 +265,7 @@ function PlantView({ r, x, y, w, h }) {
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="1" label="VISTA EN PLANTA"/>
+      <SecTitle x={x} y={y} w={w} num="1" label={t.secPlanta}/>
       {/* Ground */}
       <rect x={ox-22} y={oy-22} width={tW+44} height={tH+44} fill="url(#la-gnd)" opacity="0.3"/>
       {/* Outer shell */}
@@ -181,8 +333,8 @@ function PlantView({ r, x, y, w, h }) {
   );
 }
 
-// ── 2. CORTE A-A ──────────────────────────────────────────────────────────────
-function CrossSection({ r, freeboard, x, y, w, h }) {
+// ── 2. SECTION A-A ────────────────────────────────────────────────────────────
+function CrossSection({ r, freeboard, x, y, w, h, t }) {
   const TH=17, ML=52, MR=18, MT=38, MB=40;
   const tW=w-ML-MR, tH=h-TH-MT-MB;
   const x0=x+ML, y0=y+TH+MT, wt=9;
@@ -197,7 +349,7 @@ function CrossSection({ r, freeboard, x, y, w, h }) {
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="2" label="CORTE A-A  —  LONGITUDINAL"/>
+      <SecTitle x={x} y={y} w={w} num="2" label={t.secCorte}/>
       {/* Ground */}
       <rect x={x0-28} y={y0-MT} width={tW+56} height={MT} fill="url(#la-gnd)" opacity="0.28"/>
       <line x1={x0-30} y1={y0} x2={x0+tW+30} y2={y0}
@@ -218,12 +370,12 @@ function CrossSection({ r, freeboard, x, y, w, h }) {
       <rect x={x0+wt} y={yLiqB} width={tW-wt*2} height={ySldB-yLiqB} fill={DS.sludge}/>
       {/* Zone labels */}
       <text x={x0+tW/2} y={(yWtr+yNatB)/2+3} fill="#9a8040" fontSize="8.5"
-        textAnchor="middle" fontFamily={FONT}>SCUM — Scum Volume = {F(r.Vn)} m³</text>
+        textAnchor="middle" fontFamily={FONT}>{t.natas} — {t.natasVol} = {F(r.Vn)} m³</text>
       <text x={x0+tW/2} y={(yNatB+yLiqB)/2+3} fill="#3a8090" fontSize="8.5"
-        textAnchor="middle" fontFamily={FONT}>LIQUID ZONE — Liquid Volume = {F(r.Vl)} m³</text>
+        textAnchor="middle" fontFamily={FONT}>{t.zonaLiquida} — {t.zonaLiquidaVol} = {F(r.Vl)} m³</text>
       {ySldB-yLiqB>16&&(
         <text x={x0+tW/2} y={(yLiqB+ySldB)/2+3} fill="#8a5a28" fontSize="8.5"
-          textAnchor="middle" fontFamily={FONT}>SLUDGE — Sludge Volume = {F(r.Vs)} m³</text>
+          textAnchor="middle" fontFamily={FONT}>{t.lodos} — {t.lodosVol} = {F(r.Vs)} m³</text>
       )}
       {/* Dividers */}
       {divs.map((dx,i)=>(
@@ -264,25 +416,25 @@ function CrossSection({ r, freeboard, x, y, w, h }) {
   );
 }
 
-// ── 3. PERFIL HIDRÁULICO ──────────────────────────────────────────────────────
-function HydraulicProfile({ r, x, y, w, h }) {
+// ── 3. HYDRAULIC PROFILE ──────────────────────────────────────────────────────
+function HydraulicProfile({ r, x, y, w, h, t }) {
   const TH=17, ML=20, MR=10, MT=22, MB=52;
   const cW=w-ML-MR, cH=h-TH-MT-MB;
   const x0=x+ML, y0=y+TH+MT;
 
   const bars=[
-    {lbl:"Inlet",  sub:"Ks=0.5", v:r.hf_entrada},
-    {lbl:"Contrac.", sub:"Kc=0.5", v:r.hf_contraccion},
-    {lbl:"Tank",     sub:"H-W",    v:r.hf_fosa},
-    {lbl:"Tabiques", sub:"Kt=0.3", v:r.hf_tabiques},
-    {lbl:"Outlet",   sub:"Ks=1.0", v:r.hf_salida},
+    {lbl:t.barInlet,    sub:"Ks=0.5", v:r.hf_entrada},
+    {lbl:t.barContrac,  sub:"Kc=0.5", v:r.hf_contraccion},
+    {lbl:t.barTank,     sub:"H-W",    v:r.hf_fosa},
+    {lbl:t.barTabiques, sub:"Kt=0.3", v:r.hf_tabiques},
+    {lbl:t.barOutlet,   sub:"Ks=1.0", v:r.hf_salida},
   ];
   const maxV=Math.max(...bars.map(b=>b.v),0.0001);
   const bW=(cW/bars.length)*0.55, bGap=cW/bars.length;
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="3" label="PERFIL HIDRÁULICO"/>
+      <SecTitle x={x} y={y} w={w} num="3" label={t.secHidraulica}/>
       {/* Grid */}
       {[0,0.25,0.5,0.75,1].map(f=>(
         <g key={f}>
@@ -327,25 +479,25 @@ function HydraulicProfile({ r, x, y, w, h }) {
 }
 
 // ── 4. SYSTEM SCHEME ─────────────────────────────────────────────────────────
-function SitardScheme({ r, x, y, w, h }) {
+function SitardScheme({ r, x, y, w, h, t }) {
   const TH=17, padX=22, padY=28;
   const x0=x+padX, y0=y+TH+padY;
   const cW=w-padX*2, cH=h-TH-padY*2;
   const mid=y0+cH*0.40;
 
   const items=[
-    {lbl:"DWELLING",     sub:`${r.users||"—"} hab`,       det:`Q=${F(r.Qd||0)} m³/d`, col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🏠"},
-    {lbl:"GREASE TRAP",sub:"③ L+G",                    det:"retention",             col:"#8ab020", bg:"rgba(130,180,20,0.07)",icon:"🧱"},
-    {lbl:"SEPTIC TANK", sub:`Vtot=${F(r.Vtot)} m³`,     det:`${r.chambers} chamber(s)`,col:DS.cyan,  bg:"rgba(0,245,255,0.07)",icon:"⬛"},
-    {lbl:"ANAEROBIC FILTER",  sub:"⑥ anaerobic",             det:"biofilm media",      col:"#A78BFA", bg:"rgba(167,139,250,0.07)",icon:"🔲"},
-    {lbl:"INSPECTION BOX",   sub:"⑦ cleanout",              det:"periodic inspection",        col:DS.amber,  bg:"rgba(255,176,32,0.07)", icon:"⬜"},
-    {lbl:"LEACH FIELD", sub:r.A_inf?`A≈${F(r.A_inf)}m²`:"see soil study",det:"field ⑧",col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🌱"},
+    {lbl:t.schemeDwelling,    sub:`${r.users||"—"} ${t.schemeHabs}`,       det:`Q=${F(r.Qd||0)} m³/d`, col:DS.green, bg:"rgba(0,255,136,0.07)", icon:"🏠"},
+    {lbl:t.schemeGreaseTrap,  sub:"③ L+G",                                 det:t.schemeRetention,       col:"#8ab020", bg:"rgba(130,180,20,0.07)",icon:"🧱"},
+    {lbl:t.schemeSepticTank,  sub:`Vtot=${F(r.Vtot)} m³`,                  det:t.schemeChambers(r.chambers),col:DS.cyan,  bg:"rgba(0,245,255,0.07)",icon:"⬛"},
+    {lbl:t.schemeAnaerobic,   sub:t.schemeAnaerobicSub,                    det:t.schemeBiofilm,         col:"#A78BFA", bg:"rgba(167,139,250,0.07)",icon:"🔲"},
+    {lbl:t.schemeInspBox,     sub:t.schemeCleanout,                        det:t.schemeInspection,      col:DS.amber,  bg:"rgba(255,176,32,0.07)", icon:"⬜"},
+    {lbl:t.schemeLeach,       sub:r.A_inf?`A≈${F(r.A_inf)}m²`:t.schemeNoStudy, det:t.schemeLeachField,  col:DS.green,  bg:"rgba(0,255,136,0.07)", icon:"🌱"},
   ];
   const segW=cW/items.length, boxW=Math.min(segW*0.72,118), boxH=66;
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="4" label="SYSTEM SCHEME — ONSITE WASTEWATER TREATMENT"/>
+      <SecTitle x={x} y={y} w={w} num="4" label={t.secEsquema}/>
       {/* Ground */}
       <rect x={x0} y={mid-boxH*0.4-10} width={cW} height={10} fill="url(#la-gnd)" opacity="0.3"/>
       <line x1={x0} y1={mid-boxH*0.4} x2={x0+cW} y2={mid-boxH*0.4}
@@ -391,51 +543,51 @@ function SitardScheme({ r, x, y, w, h }) {
         stroke="rgba(0,245,255,0.15)" strokeWidth="0.5"/>
       <text x={x0+cW/2} y={y0+cH-7} fill={DS.muted} fontSize="8.5"
         textAnchor="middle" fontFamily={FONT}>
-        DBO₅: {r.dboIn||250} mg/L  →  ≈{F(r.dboOut||0)} mg/L outlet |  SS: {r.ssIn||280} mg/L  →  ≈{F(r.ssOut||0)} mg/L  |  Remoción ≈{r.chambers===1?"60":"68"}%
+        {t.quality(r.dboIn||250, F(r.dboOut||0), r.ssIn||280, F(r.ssOut||0), r.chambers===1?"60":"68")}
       </text>
     </g>
   );
 }
 
-// ── 5. CUADRO DE COTAS ────────────────────────────────────────────────────────
-function DataTable({ r, x, y, w, h }) {
+// ── 5. DATA TABLE ─────────────────────────────────────────────────────────────
+function DataTable({ r, x, y, w, h, t }) {
   const TH=17, px=x+12, py=y+TH+10;
   const aW=w-24, rH=13.5;
 
   const rows=[
-    {lbl:"L — Longitud total",      val:`${F(r.L)} m`,                 hi:true },
-    {lbl:"A — Ancho interior",       val:`${F(r.W)} m`,                 hi:true },
-    {lbl:"Hu — Useful Depth",          val:`${F(r.depth)} m`,             hi:true },
-    {lbl:"BL — Borde libre",         val:`${F(r.hT-r.depth,2)} m`,     hi:false},
-    {lbl:"H — Prof. total",          val:`${F(r.hT)} m`,               hi:false},
-    {lbl:"Vtot — Design Volume",       val:`${F(r.Vtot)} m³`,             hi:true },
-    {lbl:"Vl — Liquid Volume",        val:`${F(r.Vl)} m³`,              hi:false},
-    {lbl:"Vs — Vol. lodos",          val:`${F(r.Vs)} m³`,              hi:false},
-    {lbl:"Vn — Vol. natas",          val:`${F(r.Vn)} m³`,              hi:false},
-    {lbl:"Ø Tub. E/S",               val:`${FI(r.dPipe*1000)} mm`,     hi:false},
-    {lbl:"Ø Ventilation Pipe",       val:`${FI(r.dVent*1000)} mm`,     hi:false},
-    {lbl:"Number of Chambers",               val:`${r.chambers}`,               hi:false},
-    {lbl:"Hydraulic Head Loss",            val:`${(r.hf_total*100).toFixed(1)} cm`, hi:false},
+    {lbl:t.rowL,        val:`${F(r.L)} m`,                 hi:true },
+    {lbl:t.rowA,        val:`${F(r.W)} m`,                 hi:true },
+    {lbl:t.rowHu,       val:`${F(r.depth)} m`,             hi:true },
+    {lbl:t.rowBL,       val:`${F(r.hT-r.depth,2)} m`,      hi:false},
+    {lbl:t.rowH,        val:`${F(r.hT)} m`,                hi:false},
+    {lbl:t.rowVtot,     val:`${F(r.Vtot)} m³`,             hi:true },
+    {lbl:t.rowVl,       val:`${F(r.Vl)} m³`,               hi:false},
+    {lbl:t.rowVs,       val:`${F(r.Vs)} m³`,               hi:false},
+    {lbl:t.rowVn,       val:`${F(r.Vn)} m³`,               hi:false},
+    {lbl:t.rowDPipe,    val:`${FI(r.dPipe*1000)} mm`,      hi:false},
+    {lbl:t.rowDVent,    val:`${FI(r.dVent*1000)} mm`,      hi:false},
+    {lbl:t.rowChambers, val:`${r.chambers}`,               hi:false},
+    {lbl:t.rowHf,       val:`${(r.hf_total*100).toFixed(1)} cm`, hi:false},
   ];
 
   const legend=[
-    ["①","Inlet pipe (T-pipe)"],["②","Outlet pipe (T-pipe)"],
-    ["③","Grease trap"],        ["④","Septic tank"],
-    ["⑤","Tubería ventilación"],     ["⑥","Filtro / FAFA"],
-    ["⑦","Caja de inspección"],      ["⑧","Campo infiltración"],
+    ["①",t.legInlet],     ["②",t.legOutlet],
+    ["③",t.legGreaseTrap],["④",t.legSepticTank],
+    ["⑤",t.legVent],      ["⑥",t.legFafa],
+    ["⑦",t.legInspBox],   ["⑧",t.legLeach],
   ];
   const tableH=rows.length*rH+18;
 
   return (
     <g>
-      <SecTitle x={x} y={y} w={w} num="5" label="CUADRO DE COTAS"/>
+      <SecTitle x={x} y={y} w={w} num="5" label={t.secCotas}/>
       {/* Table bg */}
       <rect x={px-4} y={py} width={aW} height={tableH} fill="rgba(4,24,32,0.6)" rx="2"/>
       {/* Header */}
       <rect x={px-4} y={py} width={aW} height={14} fill="rgba(0,245,255,0.10)" rx="2"/>
-      <text x={px+2} y={py+10} fill={DS.muted} fontSize="8" fontFamily={FONT}>PARAMETER</text>
+      <text x={px+2} y={py+10} fill={DS.muted} fontSize="8" fontFamily={FONT}>{t.tableParameter}</text>
       <text x={px+aW-6} y={py+10} fill={DS.muted} fontSize="8"
-        textAnchor="end" fontFamily={FONT}>VALOR</text>
+        textAnchor="end" fontFamily={FONT}>{t.tableValue}</text>
       {rows.map((row,i)=>(
         <g key={i}>
           <rect x={px-4} y={py+14+i*rH} width={aW} height={rH}
@@ -451,7 +603,7 @@ function DataTable({ r, x, y, w, h }) {
       <line x1={px-4} y1={py+tableH+8} x2={px+aW} y2={py+tableH+8}
         stroke="rgba(0,245,255,0.1)" strokeWidth="0.5"/>
       <text x={px+2} y={py+tableH+20} fill={DS.muted} fontSize="8"
-        fontFamily={FONT} letterSpacing="1">LEYENDA</text>
+        fontFamily={FONT} letterSpacing="1">{t.legend}</text>
       {legend.map(([id,txt],i)=>(
         <text key={i}
           x={px+(i%2)*(aW/2)}
@@ -465,22 +617,22 @@ function DataTable({ r, x, y, w, h }) {
 }
 
 // ── Cajetín ───────────────────────────────────────────────────────────────────
-function Cajétin({ meta, W, H, cajeH }) {
+function Cajétin({ meta, W, H, cajeH, t }) {
   const y0=H-cajeH;
-  const today=new Date().toLocaleDateString("en",
+  const today=new Date().toLocaleDateString(t.dateLocale,
     {day:"2-digit",month:"2-digit",year:"numeric"});
 
   const row1=[
-    {lbl:"PROJECT",  val:meta.projectName||"—",              x:W*0.28+10, y:y0+16},
-    {lbl:"PREPARED BY",   val:meta.designer||"—",                 x:W*0.56+10, y:y0+16},
-    {lbl:"STANDARD",     val:meta.normRef||"EPA / UK / AU",   x:W*0.73+10, y:y0+16},
-    {lbl:"DRAWING NO.",  val:"HID-01",                            x:W*0.87+10, y:y0+16},
+    {lbl:t.cajaProject,  val:meta.projectName||"—",              x:W*0.28+10, y:y0+16},
+    {lbl:t.cajaDesigner, val:meta.designer||"—",                 x:W*0.56+10, y:y0+16},
+    {lbl:t.cajaStandard, val:meta.normRef||"EPA / UK / AU",      x:W*0.73+10, y:y0+16},
+    {lbl:t.cajaDrawing,  val:"HID-01",                            x:W*0.87+10, y:y0+16},
   ];
   const row2=[
-    {lbl:"LOCATION", val:meta.location||"—",  x:W*0.28+10, y:y0+cajeH/2+16},
-    {lbl:"DATE",     val:today,                x:W*0.56+10, y:y0+cajeH/2+16},
-    {lbl:"SCALE",    val:"S / E",              x:W*0.73+10, y:y0+cajeH/2+16},
-    {lbl:"REV",       val:"A",                  x:W*0.87+10, y:y0+cajeH/2+16},
+    {lbl:t.cajaLocation, val:meta.location||"—",  x:W*0.28+10, y:y0+cajeH/2+16},
+    {lbl:t.cajaDate,     val:today,                x:W*0.56+10, y:y0+cajeH/2+16},
+    {lbl:t.cajaScale,    val:"S / E",              x:W*0.73+10, y:y0+cajeH/2+16},
+    {lbl:t.cajaRev,      val:"A",                  x:W*0.87+10, y:y0+cajeH/2+16},
   ];
 
   return (
@@ -504,9 +656,9 @@ function Cajétin({ meta, W, H, cajeH }) {
         textAnchor="middle" fontFamily={ORBITRON}
         style={{filter:"drop-shadow(0 0 6px rgba(0,245,255,0.4))"}}>HydroStack</text>
       <text x={W*0.14} y={y0+32} fill={DS.muted} fontSize="8.5"
-        textAnchor="middle" fontFamily={FONT}>Ingeniería Sanitaria</text>
+        textAnchor="middle" fontFamily={FONT}>{t.brandTagline}</text>
       <text x={W*0.14} y={y0+44} fill="rgba(74,122,138,0.6)" fontSize="8"
-        textAnchor="middle" fontFamily={FONT}>SEPTIC TANK — Drawing HID-01</text>
+        textAnchor="middle" fontFamily={FONT}>{t.brandSubtitle}</text>
       {/* Fields */}
       {[...row1,...row2].map((f,i)=>(
         <g key={i}>
@@ -521,6 +673,8 @@ function Cajétin({ meta, W, H, cajeH }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function LaminaTecnica({ r, freeboard, meta }) {
+  const { lang } = useLang();
+  const t = pickT(lang);
   const W=1587, H=1122, cajeH=52;
   const drawH=H-cajeH;
   const topH=Math.round(drawH*0.52), botH=drawH-topH;
@@ -560,10 +714,10 @@ export default function LaminaTecnica({ r, freeboard, meta }) {
           cursor:"pointer",letterSpacing:"0.1em",fontWeight:"700",
           transition:"all 0.2s",
         }} className="btn-cta">
-          ↓ DESCARGAR SVG
+          {t.download}
         </button>
         <span style={{fontSize:"9px",color:"#4A7A8A",fontFamily:"'IBM Plex Mono',monospace"}}>
-          Plano HID-01 · A3 apaisado · 1587 × 1122 px
+          {t.sheetInfo}
         </span>
       </div>
       {/* Drawing */}
@@ -583,12 +737,12 @@ export default function LaminaTecnica({ r, freeboard, meta }) {
           <line x1={0}              y1={topH} x2={W}               y2={topH}  stroke="rgba(0,245,255,0.12)" strokeWidth="1"/>
           <line x1={z.tabla.x}      y1={topH} x2={z.tabla.x}       y2={drawH} stroke="rgba(0,245,255,0.12)" strokeWidth="1"/>
           {/* Views */}
-          <PlantView        r={r} {...z.planta}/>
-          <CrossSection     r={r} freeboard={freeboard} {...z.corte}/>
-          <HydraulicProfile r={r} {...z.hidraulica}/>
-          <SitardScheme     r={r} {...z.sitard}/>
-          <DataTable        r={r} {...z.tabla}/>
-          <Cajétin meta={meta} W={W} H={H} cajeH={cajeH}/>
+          <PlantView        r={r} {...z.planta}     t={t}/>
+          <CrossSection     r={r} freeboard={freeboard} {...z.corte} t={t}/>
+          <HydraulicProfile r={r} {...z.hidraulica} t={t}/>
+          <SitardScheme     r={r} {...z.sitard}     t={t}/>
+          <DataTable        r={r} {...z.tabla}      t={t}/>
+          <Cajétin meta={meta} W={W} H={H} cajeH={cajeH} t={t}/>
         </svg>
       </div>
     </div>
