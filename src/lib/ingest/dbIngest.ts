@@ -49,7 +49,7 @@ async function latestHashes(
 }
 
 /** Sink: inserta solo los snapshots que cambiaron; devuelve cuántos entraron. */
-function makeDbSink(source: string): RawSink {
+export function makeDbSink(source: string): RawSink {
   return async (records: RawRecordInsert[]): Promise<number> => {
     if (records.length === 0) return 0;
     const ids = [...new Set(records.map((r) => r.sourceRecordId))];
