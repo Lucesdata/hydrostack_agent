@@ -1,0 +1,2409 @@
+{
+  "generated_at": "2026-06-05T18:11:52.552Z",
+  "procesos": {
+    "total": 500,
+    "columns": {
+      "entidad": {
+        "declared_type": "text",
+        "name_in_metadata": "Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "AGUAS DE SINCE SAS ESP"
+      },
+      "nit_entidad": {
+        "declared_type": "text",
+        "name_in_metadata": "Nit Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "9017647423"
+      },
+      "departamento_entidad": {
+        "declared_type": "text",
+        "name_in_metadata": "Departamento Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 41,
+        "sentinel_rate_pct": 8.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Sucre"
+      },
+      "ciudad_entidad": {
+        "declared_type": "text",
+        "name_in_metadata": "Ciudad Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 95,
+        "sentinel_rate_pct": 19,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Sincé"
+      },
+      "ordenentidad": {
+        "declared_type": "text",
+        "name_in_metadata": "OrdenEntidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Territorial"
+      },
+      "codigo_pci": {
+        "declared_type": "text",
+        "name_in_metadata": "Entidad Centralizada",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Descentralizada"
+      },
+      "id_del_proceso": {
+        "declared_type": "text",
+        "name_in_metadata": "ID del Proceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO1.REQ.10002742"
+      },
+      "referencia_del_proceso": {
+        "declared_type": "text",
+        "name_in_metadata": "Referencia del Proceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 476,
+          "string<number>": 24
+        },
+        "sample_value": "OCUO-001-2026_1"
+      },
+      "ppi": {
+        "declared_type": "text",
+        "name_in_metadata": "PCI",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "724884721"
+      },
+      "id_del_portafolio": {
+        "declared_type": "text",
+        "name_in_metadata": "ID del Portafolio",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO1.BDOS.9819985"
+      },
+      "nombre_del_procedimiento": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre del Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 498,
+          "string<number>": 2
+        },
+        "sample_value": "ADQUISICION DE POLIZA DE SEGURO QUE AMPAREN LOS CARGOS QUE CONFORMAN LA ESTRUCTURA ADMINISTRATIVA ASI COMO LOS DAÑOS MATERIALES DE LA EMPRESA OFICIAL DE SERVICIOS PÚBLICOS DE ACUEDUCTO Y ALCANTARILLAD"
+      },
+      "descripci_n_del_procedimiento": {
+        "declared_type": "text",
+        "name_in_metadata": "Descripción del Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 8,
+        "sentinel_rate_pct": 1.6,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "ADQUISICION DE POLIZA DE SEGURO QUE AMPAREN LOS CARGOS QUE CONFORMAN LA ESTRUCTURA ADMINISTRATIVA ASI COMO LOS DAÑOS MATERIALES DE LA EMPRESA OFICIAL DE SERVICIOS PÚBLICOS DE ACUEDUCTO Y ALCANTARILLADO DEL\nMUNICIPIO DE SINCÉ- SUCRE, AGUAS DE SINCÉ S.A.S. Y E.S.P."
+      },
+      "fase": {
+        "declared_type": "text",
+        "name_in_metadata": "Fase",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 33,
+        "null_rate_pct": 6.6,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 467
+        },
+        "sample_value": "Presentación de oferta"
+      },
+      "fecha_de_publicacion_del": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion del Proceso",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_ultima_publicaci": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Ultima Publicación",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_publicacion_fase": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion (Fase Planeacion Precalificacion)",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_publicacion_fase_1": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion (Fase Seleccion Precalificacion)",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_publicacion": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion (Manifestacion de Interes)",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_publicacion_fase_2": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion (Fase Borrador)",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_publicacion_fase_3": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Publicacion (Fase Seleccion)",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "precio_base": {
+        "declared_type": "number",
+        "name_in_metadata": "Precio Base",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 48,
+        "sentinel_rate_pct": 9.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "9580000"
+      },
+      "modalidad_de_contratacion": {
+        "declared_type": "text",
+        "name_in_metadata": "Modalidad de Contratacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Contratación régimen especial (con ofertas)"
+      },
+      "justificaci_n_modalidad_de": {
+        "declared_type": "text",
+        "name_in_metadata": "Justificación Modalidad de Contratación",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Regla aplicable"
+      },
+      "duracion": {
+        "declared_type": "number",
+        "name_in_metadata": "Duracion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 54,
+        "sentinel_rate_pct": 10.8,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "12"
+      },
+      "unidad_de_duracion": {
+        "declared_type": "text",
+        "name_in_metadata": "Unidad de Duracion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Mes(es)"
+      },
+      "fecha_de_recepcion_de": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Recepcion de Respuestas",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 404,
+        "null_rate_pct": 80.8,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 96
+        },
+        "sample_value": "2026-01-29T00:00:00.000"
+      },
+      "fecha_de_apertura_de_respuesta": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Apertura de Respuesta",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 419,
+        "null_rate_pct": 83.8,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 81
+        },
+        "sample_value": "2026-01-29T00:00:00.000"
+      },
+      "fecha_de_apertura_efectiva": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Apertura Efectiva",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 226,
+        "null_rate_pct": 45.2,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 274
+        },
+        "sample_value": "2026-04-20T00:00:00.000"
+      },
+      "ciudad_de_la_unidad_de": {
+        "declared_type": "text",
+        "name_in_metadata": "Ciudad de la Unidad de Contratación",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 146,
+        "sentinel_rate_pct": 29.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Sincé"
+      },
+      "nombre_de_la_unidad_de": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre de la Unidad de Contratación",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CONTRATOS"
+      },
+      "proveedores_invitados": {
+        "declared_type": "number",
+        "name_in_metadata": "Proveedores Invitados",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 431,
+        "sentinel_rate_pct": 86.2,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "502"
+      },
+      "proveedores_con_invitacion": {
+        "declared_type": "number",
+        "name_in_metadata": "Proveedores con Invitacion Directa",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 477,
+        "sentinel_rate_pct": 95.4,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "10"
+      },
+      "visualizaciones_del": {
+        "declared_type": "number",
+        "name_in_metadata": "Visualizaciones del Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 223,
+        "sentinel_rate_pct": 44.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "4"
+      },
+      "proveedores_que_manifestaron": {
+        "declared_type": "number",
+        "name_in_metadata": "Proveedores que Manifestaron Interes",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "respuestas_al_procedimiento": {
+        "declared_type": "number",
+        "name_in_metadata": "Respuestas al Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 322,
+        "sentinel_rate_pct": 64.4,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "1"
+      },
+      "respuestas_externas": {
+        "declared_type": "number",
+        "name_in_metadata": "Respuestas Externas",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 494,
+        "sentinel_rate_pct": 98.8,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "1"
+      },
+      "conteo_de_respuestas_a_ofertas": {
+        "declared_type": "number",
+        "name_in_metadata": "Conteo de Respuestas a Ofertas",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "proveedores_unicos_con": {
+        "declared_type": "number",
+        "name_in_metadata": "Proveedores Unicos con Respuestas",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 328,
+        "sentinel_rate_pct": 65.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "1"
+      },
+      "numero_de_lotes": {
+        "declared_type": "number",
+        "name_in_metadata": "Numero de Lotes",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 481,
+        "sentinel_rate_pct": 96.2,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "3"
+      },
+      "estado_del_procedimiento": {
+        "declared_type": "text",
+        "name_in_metadata": "Estado del Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cancelado"
+      },
+      "id_estado_del_procedimiento": {
+        "declared_type": "number",
+        "name_in_metadata": "ID Estado del Procedimiento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 33,
+        "sentinel_rate_pct": 6.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "60"
+      },
+      "adjudicado": {
+        "declared_type": "text",
+        "name_in_metadata": "Adjudicado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "id_adjudicacion": {
+        "declared_type": "text",
+        "name_in_metadata": "ID Adjudicacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 364,
+        "sentinel_rate_pct": 72.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO1.AWD.2571470"
+      },
+      "codigoproveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "CodigoProveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 302,
+        "sentinel_rate_pct": 60.4,
+        "apparent_types": {
+          "string": 302,
+          "string<number>": 198
+        },
+        "sample_value": "730385614"
+      },
+      "departamento_proveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "Departamento Proveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 367,
+        "sentinel_rate_pct": 73.4,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Casanare"
+      },
+      "ciudad_proveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "Ciudad Proveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 374,
+        "sentinel_rate_pct": 74.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Yopal"
+      },
+      "fecha_adjudicacion": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha Adjudicacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 368,
+        "null_rate_pct": 73.6,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 132
+        },
+        "sample_value": "2026-05-01T00:00:00.000"
+      },
+      "valor_total_adjudicacion": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Total Adjudicacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 365,
+        "sentinel_rate_pct": 73,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "2383007"
+      },
+      "nombre_del_adjudicador": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre del Adjudicador",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 364,
+        "sentinel_rate_pct": 72.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "WILBER BONILLA MORENO"
+      },
+      "nombre_del_proveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre del Proveedor Adjudicado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 303,
+        "sentinel_rate_pct": 60.6,
+        "apparent_types": {
+          "string": 499,
+          "string<number>": 1
+        },
+        "sample_value": "AQUALIM LABORATORIO Y CONSULTORIAS S.A.S"
+      },
+      "nit_del_proveedor_adjudicado": {
+        "declared_type": "text",
+        "name_in_metadata": "NIT del Proveedor Adjudicado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 416,
+        "sentinel_rate_pct": 83.2,
+        "apparent_types": {
+          "string": 416,
+          "string<number>": 84
+        },
+        "sample_value": "901823957"
+      },
+      "codigo_principal_de_categoria": {
+        "declared_type": "text",
+        "name_in_metadata": "Codigo Principal de Categoria",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "V1.84131600"
+      },
+      "estado_de_apertura_del_proceso": {
+        "declared_type": "text",
+        "name_in_metadata": "Estado de Apertura del Proceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cerrado"
+      },
+      "tipo_de_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 47,
+        "sentinel_rate_pct": 9.4,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Seguros"
+      },
+      "subtipo_de_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Subtipo de Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "categorias_adicionales": {
+        "declared_type": "text",
+        "name_in_metadata": "Categorias Adicionales",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "urlproceso": {
+        "declared_type": "url",
+        "name_in_metadata": "URLProceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "object": 500
+        },
+        "sample_value": {
+          "url": "https://community.secop.gov.co/STS/Users/Login/Index"
+        }
+      },
+      "codigo_entidad": {
+        "declared_type": "number",
+        "name_in_metadata": "Codigo Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "724884721"
+      },
+      "estado_resumen": {
+        "declared_type": "text",
+        "name_in_metadata": "Estado Resumen",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 33,
+        "sentinel_rate_pct": 6.6,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Presentación de oferta"
+      }
+    }
+  },
+  "contratos": {
+    "total": 500,
+    "columns": {
+      "nombre_entidad": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P."
+      },
+      "nit_entidad": {
+        "declared_type": "number",
+        "name_in_metadata": "Nit Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "899999094"
+      },
+      "departamento": {
+        "declared_type": "text",
+        "name_in_metadata": "Departamento",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 359,
+        "sentinel_rate_pct": 71.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cundinamarca"
+      },
+      "ciudad": {
+        "declared_type": "text",
+        "name_in_metadata": "Ciudad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 369,
+        "sentinel_rate_pct": 73.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Paratebueno"
+      },
+      "localizaci_n": {
+        "declared_type": "text",
+        "name_in_metadata": "Localización",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Colombia, No Definido, No Definido"
+      },
+      "orden": {
+        "declared_type": "text",
+        "name_in_metadata": "Orden",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Territorial"
+      },
+      "sector": {
+        "declared_type": "text",
+        "name_in_metadata": "Sector",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Industria"
+      },
+      "rama": {
+        "declared_type": "text",
+        "name_in_metadata": "Rama",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Corporación Autónoma"
+      },
+      "entidad_centralizada": {
+        "declared_type": "text",
+        "name_in_metadata": "Entidad Centralizada",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Centralizada"
+      },
+      "proceso_de_compra": {
+        "declared_type": "text",
+        "name_in_metadata": "Proceso de Compra",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO1.BDOS.28503"
+      },
+      "id_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "ID Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO1.PCCNTR.10001"
+      },
+      "referencia_del_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Referencia del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 493,
+          "string<number>": 7
+        },
+        "sample_value": "2-06-25596-0807-2015"
+      },
+      "estado_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Estado Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Borrador"
+      },
+      "codigo_de_categoria_principal": {
+        "declared_type": "text",
+        "name_in_metadata": "Codigo de Categoria Principal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "V1.83101500"
+      },
+      "descripcion_del_proceso": {
+        "declared_type": "text",
+        "name_in_metadata": "Descripcion del Proceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "SUMINISTRO DE QUIMICOS PARA EL MANTENIMIENTO INDUSTRIAL DE LA PTAR SALITRE"
+      },
+      "tipo_de_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Suministros"
+      },
+      "modalidad_de_contratacion": {
+        "declared_type": "text",
+        "name_in_metadata": "Modalidad de Contratacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Contratación régimen especial"
+      },
+      "justificacion_modalidad_de": {
+        "declared_type": "text",
+        "name_in_metadata": "Justificacion Modalidad de Contratacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Regla aplicable"
+      },
+      "fecha_de_firma": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Firma",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "fecha_de_inicio_del_contrato": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Inicio del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 133,
+        "null_rate_pct": 26.6,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 367
+        },
+        "sample_value": "2015-12-16T00:00:00.000"
+      },
+      "fecha_de_fin_del_contrato": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Fin del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 500
+        },
+        "sample_value": "2016-04-10T00:00:00.000"
+      },
+      "condiciones_de_entrega": {
+        "declared_type": "text",
+        "name_in_metadata": "Condiciones de Entrega",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 385,
+        "sentinel_rate_pct": 77,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Como acordado previamente"
+      },
+      "tipodocproveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "TipoDocProveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 69,
+        "sentinel_rate_pct": 13.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "NIT"
+      },
+      "documento_proveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "Documento Proveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 70,
+        "sentinel_rate_pct": 14,
+        "apparent_types": {
+          "string<number>": 430,
+          "string": 70
+        },
+        "sample_value": "8301464943"
+      },
+      "proveedor_adjudicado": {
+        "declared_type": "text",
+        "name_in_metadata": "Proveedor Adjudicado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 66,
+        "sentinel_rate_pct": 13.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "QSM CHEMICALS AND SERVICES SAS"
+      },
+      "es_grupo": {
+        "declared_type": "text",
+        "name_in_metadata": "Es Grupo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "es_pyme": {
+        "declared_type": "text",
+        "name_in_metadata": "Es Pyme",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "habilita_pago_adelantado": {
+        "declared_type": "text",
+        "name_in_metadata": "Habilita Pago Adelantado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 451,
+        "sentinel_rate_pct": 90.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "liquidaci_n": {
+        "declared_type": "text",
+        "name_in_metadata": "Liquidación",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "obligaci_n_ambiental": {
+        "declared_type": "text",
+        "name_in_metadata": "Obligación Ambiental",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "obligaciones_postconsumo": {
+        "declared_type": "text",
+        "name_in_metadata": "Obligaciones Postconsumo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "reversion": {
+        "declared_type": "text",
+        "name_in_metadata": "Reversion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "origen_de_los_recursos": {
+        "declared_type": "text",
+        "name_in_metadata": "Origen de los Recursos",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Distribuido"
+      },
+      "destino_gasto": {
+        "declared_type": "text",
+        "name_in_metadata": "Destino Gasto",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 19,
+        "sentinel_rate_pct": 3.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Funcionamiento"
+      },
+      "valor_del_contrato": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 35,
+        "sentinel_rate_pct": 7,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "78996000"
+      },
+      "valor_de_pago_adelantado": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor de pago adelantado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "valor_facturado": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Facturado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "valor_pendiente_de_pago": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Pendiente de Pago",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 34,
+        "sentinel_rate_pct": 6.8,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "78996000"
+      },
+      "valor_pagado": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Pagado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "valor_amortizado": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Amortizado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "valor_pendiente_de": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Pendiente de Amortizacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "valor_pendiente_de_ejecucion": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor Pendiente de Ejecucion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 35,
+        "sentinel_rate_pct": 7,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "78996000"
+      },
+      "saldo_cdp": {
+        "declared_type": "number",
+        "name_in_metadata": "Saldo CDP",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 155,
+        "sentinel_rate_pct": 31,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "45779444"
+      },
+      "saldo_vigencia": {
+        "declared_type": "number",
+        "name_in_metadata": "Saldo Vigencia",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "espostconflicto": {
+        "declared_type": "text",
+        "name_in_metadata": "EsPostConflicto",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "dias_adicionados": {
+        "declared_type": "number",
+        "name_in_metadata": "Dias adicionados",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "puntos_del_acuerdo": {
+        "declared_type": "text",
+        "name_in_metadata": "Puntos del Acuerdo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 499,
+        "sentinel_rate_pct": 99.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "FinConflicto"
+      },
+      "pilares_del_acuerdo": {
+        "declared_type": "text",
+        "name_in_metadata": "Pilares del Acuerdo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 499,
+        "sentinel_rate_pct": 99.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CFHBDDA"
+      },
+      "urlproceso": {
+        "declared_type": "url",
+        "name_in_metadata": "URLProceso",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "object": 500
+        },
+        "sample_value": {
+          "url": "https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.26801&isFromPublicArea=True&isModal=true&asPopupView=true"
+        }
+      },
+      "nombre_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 66,
+        "sentinel_rate_pct": 13.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "LUIS FELIPE BURBANO"
+      },
+      "nacionalidad_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Nacionalidad Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 66,
+        "sentinel_rate_pct": 13.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CO"
+      },
+      "domicilio_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Domicilio Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 360,
+        "sentinel_rate_pct": 72,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "CARRERA 56 A # 4 G - 05"
+      },
+      "tipo_de_identificaci_n_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de Identificación Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 360,
+        "sentinel_rate_pct": 72,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cédula de Ciudadanía"
+      },
+      "identificaci_n_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Identificación Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 342,
+        "sentinel_rate_pct": 68.4,
+        "apparent_types": {
+          "string<number>": 145,
+          "string": 355
+        },
+        "sample_value": "79498259"
+      },
+      "g_nero_representante_legal": {
+        "declared_type": "text",
+        "name_in_metadata": "Género Representante Legal",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 394,
+        "sentinel_rate_pct": 78.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Hombre"
+      },
+      "presupuesto_general_de_la_nacion_pgn": {
+        "declared_type": "number",
+        "name_in_metadata": "Presupuesto General de la Nacion – PGN",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 470,
+        "sentinel_rate_pct": 94,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "56784000"
+      },
+      "sistema_general_de_participaciones": {
+        "declared_type": "number",
+        "name_in_metadata": "Sistema General de Participaciones",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 481,
+        "sentinel_rate_pct": 96.2,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "90858778"
+      },
+      "sistema_general_de_regal_as": {
+        "declared_type": "number",
+        "name_in_metadata": "Sistema General de Regalías",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 498,
+        "sentinel_rate_pct": 99.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "7846894"
+      },
+      "recursos_propios_alcald_as_gobernaciones_y_resguardos_ind_genas_": {
+        "declared_type": "number",
+        "name_in_metadata": "Recursos Propios (Alcaldías, Gobernaciones y Resguardos Indígenas)",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 453,
+        "sentinel_rate_pct": 90.6,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "3600000"
+      },
+      "recursos_de_credito": {
+        "declared_type": "number",
+        "name_in_metadata": "Recursos de Credito",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      },
+      "recursos_propios": {
+        "declared_type": "number",
+        "name_in_metadata": "Recursos Propios",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 477,
+        "sentinel_rate_pct": 95.4,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "18400000"
+      },
+      "ultima_actualizacion": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Ultima Actualizacion",
+        "not_in_metadata": false,
+        "not_in_any_row": true,
+        "null_count": 500,
+        "null_rate_pct": 100,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {},
+        "sample_value": null
+      },
+      "codigo_entidad": {
+        "declared_type": "number",
+        "name_in_metadata": "Codigo Entidad",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "700064108"
+      },
+      "codigo_proveedor": {
+        "declared_type": "text",
+        "name_in_metadata": "Codigo Proveedor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 66,
+        "sentinel_rate_pct": 13.2,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "700474067"
+      },
+      "fecha_inicio_liquidacion": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha Inicio Liquidacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 482,
+        "null_rate_pct": 96.4,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 18
+        },
+        "sample_value": "2019-07-17T00:00:00.000"
+      },
+      "fecha_fin_liquidacion": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha Fin Liquidacion",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 482,
+        "null_rate_pct": 96.4,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 18
+        },
+        "sample_value": "2019-07-17T00:00:00.000"
+      },
+      "objeto_del_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Objeto del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "SUMINISTRO DE QUIMICOS PARA EL MANTENIMIENTO INDUSTRIAL DE LA PTAR SALITRE"
+      },
+      "duraci_n_del_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Duración del contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 363,
+        "sentinel_rate_pct": 72.6,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Dia(s)"
+      },
+      "nombre_del_banco": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre del banco",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "tipo_de_cuenta": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de cuenta",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "n_mero_de_cuenta": {
+        "declared_type": "text",
+        "name_in_metadata": "Número de cuenta",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "el_contrato_puede_ser_prorrogado": {
+        "declared_type": "text",
+        "name_in_metadata": "El contrato puede ser prorrogado",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "fecha_de_notificaci_n_de_prorrogaci_n": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de notificación de prorrogación",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 488,
+        "null_rate_pct": 97.6,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 12
+        },
+        "sample_value": "2020-12-30T00:00:00.000"
+      },
+      "nombre_ordenador_del_gasto": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre ordenador del gasto",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 411,
+        "sentinel_rate_pct": 82.2,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "LEONEL GARCIA LOPEZ"
+      },
+      "tipo_de_documento_ordenador_del_gasto": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de documento Ordenador del gasto",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 412,
+        "sentinel_rate_pct": 82.4,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cédula de Ciudadanía"
+      },
+      "n_mero_de_documento_ordenador_del_gasto": {
+        "declared_type": "text",
+        "name_in_metadata": "Número de documento Ordenador del gasto",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 412,
+        "sentinel_rate_pct": 82.4,
+        "apparent_types": {
+          "string": 413,
+          "string<number>": 87
+        },
+        "sample_value": "4145487"
+      },
+      "nombre_supervisor": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre supervisor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 419,
+        "sentinel_rate_pct": 83.8,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "OMAIRA DEL SOCORRO MIRANDA MACIAS"
+      },
+      "tipo_de_documento_supervisor": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de documento supervisor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 420,
+        "sentinel_rate_pct": 84,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Cédula de Ciudadanía"
+      },
+      "n_mero_de_documento_supervisor": {
+        "declared_type": "text",
+        "name_in_metadata": "Número de documento supervisor",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 420,
+        "sentinel_rate_pct": 84,
+        "apparent_types": {
+          "string": 420,
+          "string<number>": 80
+        },
+        "sample_value": "45440132"
+      },
+      "nombre_ordenador_de_pago": {
+        "declared_type": "text",
+        "name_in_metadata": "Nombre Ordenador de Pago",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "tipo_de_documento_ordenador_de_pago": {
+        "declared_type": "text",
+        "name_in_metadata": "Tipo de documento Ordenador de Pago",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "n_mero_de_documento_ordenador_de_pago": {
+        "declared_type": "text",
+        "name_in_metadata": "Número de documento Ordenador de Pago",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      },
+      "documentos_tipo": {
+        "declared_type": "text",
+        "name_in_metadata": "Documentos Tipo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "No"
+      },
+      "descripcion_documentos_tipo": {
+        "declared_type": "text",
+        "name_in_metadata": "Descripcion Documentos Tipo",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": null
+      }
+    }
+  },
+  "join_key": {
+    "procesos_total": 500,
+    "procesos_con_portafolio": 500,
+    "procesos_con_portafolio_pct": 100,
+    "contratos_total": 500,
+    "contratos_con_proceso_de_compra": 500,
+    "contratos_con_pdc_pct": 100,
+    "contratos_que_cruzan_via_portafolio": 0,
+    "cruce_via_portafolio_pct": 0,
+    "contratos_que_cruzan_via_id_proceso": 0,
+    "cruce_via_id_proceso_pct": 0,
+    "samples_proceso_de_compra": [
+      "CO1.BDOS.28503",
+      "CO1.BDOS.100807",
+      "CO1.BDOS.100922",
+      "CO1.BDOS.28804",
+      "CO1.BDOS.28805"
+    ],
+    "nota": "Las muestras son independientes (cap 500 c/u, filtros distintos por dataset), así que la intersección es informativa pero no es la tasa real de match end-to-end del backfill completo."
+  },
+  "nit": {
+    "proveedor_en_contratos": {
+      "field": "documento_proveedor",
+      "total_rows": 500,
+      "present": 430,
+      "present_pct": 86,
+      "centinela": 70,
+      "centinela_pct": 14,
+      "non_numeric": 0,
+      "with_dv": 0,
+      "dv_ok": 0,
+      "dv_bad": 0,
+      "dv_ok_pct_of_with_dv": 0,
+      "length_distribution": {
+        "6": 1,
+        "7": 7,
+        "8": 111,
+        "9": 200,
+        "10": 111
+      },
+      "samples": [
+        "8301464943",
+        "900705626",
+        "811023331",
+        "10277784",
+        "8600688023"
+      ]
+    },
+    "entidad_en_procesos": {
+      "field": "nit_entidad",
+      "total_rows": 500,
+      "present": 500,
+      "present_pct": 100,
+      "centinela": 0,
+      "centinela_pct": 0,
+      "non_numeric": 0,
+      "with_dv": 0,
+      "dv_ok": 0,
+      "dv_bad": 0,
+      "dv_ok_pct_of_with_dv": 0,
+      "length_distribution": {
+        "9": 464,
+        "10": 36
+      },
+      "samples": [
+        "9017647423",
+        "9017647423",
+        "890980040",
+        "800103923",
+        "900586660"
+      ]
+    },
+    "entidad_en_contratos": {
+      "field": "nit_entidad",
+      "total_rows": 500,
+      "present": 500,
+      "present_pct": 100,
+      "centinela": 0,
+      "centinela_pct": 0,
+      "non_numeric": 0,
+      "with_dv": 0,
+      "dv_ok": 0,
+      "dv_bad": 0,
+      "dv_ok_pct_of_with_dv": 0,
+      "length_distribution": {
+        "9": 494,
+        "10": 6
+      },
+      "samples": [
+        "899999094",
+        "899999094",
+        "899999094",
+        "899999094",
+        "899999094"
+      ]
+    }
+  },
+  "geo": {
+    "procesos": {
+      "departamento_entidad": {
+        "present": 500,
+        "present_pct": 100,
+        "distinct_values": 33,
+        "top10": [
+          {
+            "value": "Distrito Capital de Bogotá",
+            "count": 73
+          },
+          {
+            "value": "Antioquia",
+            "count": 54
+          },
+          {
+            "value": "Cundinamarca",
+            "count": 50
+          },
+          {
+            "value": "No Definido",
+            "count": 41
+          },
+          {
+            "value": "Valle del Cauca",
+            "count": 34
+          },
+          {
+            "value": "Boyacá",
+            "count": 33
+          },
+          {
+            "value": "Huila",
+            "count": 23
+          },
+          {
+            "value": "Santander",
+            "count": 19
+          },
+          {
+            "value": "Tolima",
+            "count": 19
+          },
+          {
+            "value": "Caldas",
+            "count": 16
+          }
+        ]
+      },
+      "ciudad_entidad": {
+        "present": 500,
+        "present_pct": 100,
+        "distinct_values": 170,
+        "top10": [
+          {
+            "value": "No Definido",
+            "count": 95
+          },
+          {
+            "value": "Bogotá",
+            "count": 52
+          },
+          {
+            "value": "Medellín",
+            "count": 22
+          },
+          {
+            "value": "Cali",
+            "count": 15
+          },
+          {
+            "value": "Ibagué",
+            "count": 10
+          },
+          {
+            "value": "Manizales",
+            "count": 9
+          },
+          {
+            "value": "Tenjo",
+            "count": 8
+          },
+          {
+            "value": "Barranquilla",
+            "count": 7
+          },
+          {
+            "value": "Pereira",
+            "count": 7
+          },
+          {
+            "value": "Cartagena",
+            "count": 6
+          }
+        ]
+      }
+    },
+    "contratos": {
+      "departamento": {
+        "present": 500,
+        "present_pct": 100,
+        "distinct_values": 25,
+        "top10": [
+          {
+            "value": "No Definido",
+            "count": 359
+          },
+          {
+            "value": "Distrito Capital de Bogotá",
+            "count": 55
+          },
+          {
+            "value": "Magdalena",
+            "count": 13
+          },
+          {
+            "value": "Valle del Cauca",
+            "count": 10
+          },
+          {
+            "value": "Nariño",
+            "count": 10
+          },
+          {
+            "value": "Cundinamarca",
+            "count": 7
+          },
+          {
+            "value": "Antioquia",
+            "count": 6
+          },
+          {
+            "value": "Casanare",
+            "count": 6
+          },
+          {
+            "value": "Bolívar",
+            "count": 5
+          },
+          {
+            "value": "Risaralda",
+            "count": 5
+          }
+        ]
+      },
+      "ciudad": {
+        "present": 500,
+        "present_pct": 100,
+        "distinct_values": 33,
+        "top10": [
+          {
+            "value": "No Definido",
+            "count": 369
+          },
+          {
+            "value": "Bogotá",
+            "count": 50
+          },
+          {
+            "value": "Santa Marta",
+            "count": 13
+          },
+          {
+            "value": "Pasto",
+            "count": 9
+          },
+          {
+            "value": "Cali",
+            "count": 7
+          },
+          {
+            "value": "Yopal",
+            "count": 6
+          },
+          {
+            "value": "Pereira",
+            "count": 5
+          },
+          {
+            "value": "Medellín",
+            "count": 4
+          },
+          {
+            "value": "Cartagena",
+            "count": 3
+          },
+          {
+            "value": "Tausa",
+            "count": 3
+          }
+        ]
+      },
+      "localizaci_n": {
+        "present": 500,
+        "present_pct": 100,
+        "distinct_values": 41,
+        "top10": [
+          {
+            "value": "Colombia, No Definido, No Definido",
+            "count": 359
+          },
+          {
+            "value": "Colombia, Bogotá, Bogotá",
+            "count": 36
+          },
+          {
+            "value": "Colombia, Bogotá,  Bogotá",
+            "count": 14
+          },
+          {
+            "value": "Colombia,  Magdalena ,  Santa Marta",
+            "count": 13
+          },
+          {
+            "value": "Colombia,  Nariño ,  Pasto",
+            "count": 9
+          },
+          {
+            "value": "Colombia,  Valle del Cauca ,  Cali",
+            "count": 7
+          },
+          {
+            "value": "Colombia, Bogotá, No Definido",
+            "count": 5
+          },
+          {
+            "value": "Colombia,  Risaralda ,  Pereira",
+            "count": 5
+          },
+          {
+            "value": "Colombia, Casanare, Yopal",
+            "count": 5
+          },
+          {
+            "value": "Colombia,  Antioquia ,  Medellín",
+            "count": 4
+          }
+        ]
+      }
+    }
+  },
+  "event_fields": {
+    "contratos": {
+      "valor_del_contrato": {
+        "declared_type": "number",
+        "name_in_metadata": "Valor del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 35,
+        "sentinel_rate_pct": 7,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": "78996000"
+      },
+      "fecha_de_fin_del_contrato": {
+        "declared_type": "calendar_date",
+        "name_in_metadata": "Fecha de Fin del Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string<date>": 500
+        },
+        "sample_value": "2016-04-10T00:00:00.000"
+      },
+      "estado_contrato": {
+        "declared_type": "text",
+        "name_in_metadata": "Estado Contrato",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 0,
+        "sentinel_rate_pct": 0,
+        "apparent_types": {
+          "string": 500
+        },
+        "sample_value": "Borrador"
+      },
+      "dias_adicionados": {
+        "declared_type": "number",
+        "name_in_metadata": "Dias adicionados",
+        "not_in_metadata": false,
+        "not_in_any_row": false,
+        "null_count": 0,
+        "null_rate_pct": 0,
+        "sentinel_count": 500,
+        "sentinel_rate_pct": 100,
+        "apparent_types": {
+          "string<number>": 500
+        },
+        "sample_value": null
+      }
+    }
+  }
+}
