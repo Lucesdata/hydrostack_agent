@@ -1,0 +1,25 @@
+
+> hydrostack@1.0.0 db:audit-proveedores
+> tsx scripts/audit-proveedores.ts
+
+
+=== R1.1 — NITs con razones sociales múltiples ===
+  total NITs con >1 razón social: 2
+  top 10:
+    899999004 (2 razones): IGAC Sede Central * | INSTITUTO GEOGRÁFICO AGUSTÍN CODAZZI
+    900320612 (2 razones): SAP COLOMBIA S.A.S. | SAP Colombia SAS
+
+=== R1.2 — Patrones de NIT basura no contemplados ===
+  patrones que terminaron en proveedor_raw:
+    [1] CONSORCIO INTER-TAPIAS-2019
+    [1] CONSORCIO PLAN MAESTRO 03-2019
+    [1] UNION TEMPORAL CENACCUC -MANTENIMIENTO 2020
+    [1] UNION TEMPORAL CONSTRUIMOS
+  → si hay patrones que NO son centinela legítimo, ampliar normalize.ts SENTINELS
+
+=== R1.3 — tipo_documento sospechoso ===
+  proveedores con tipo_documento='NIT' y length(nit_canonico)<=7: 0
+  proveedores con tipo_documento != NIT y length(nit_canonico)>=9:
+    OTRO: 2
+    CC: 126
+  → si los conteos son significativos, revisar normalizeTipoDoc en nit.ts
