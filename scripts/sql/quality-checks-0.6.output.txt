@@ -1,0 +1,92 @@
+=====================================================================
+C1 — Huérfanos
+=====================================================================
+-- C1.1 contratos sin proceso (EXENTO masivo: artefacto BDOS, 0.2 §5.1)
+ contratos_sin_proceso_total | contratos_total 
+-----------------------------+-----------------
+                         698 |             699
+(1 fila)
+
+-- C1.2 procesos sin entidad (NO debería pasar — entidad es FK obligatoria)
+ procesos_sin_entidad 
+----------------------
+                    0
+(1 fila)
+
+-- C1.3 contratos sin entidad (NO debería pasar)
+ contratos_sin_entidad 
+-----------------------
+                     0
+(1 fila)
+
+-- C1.4 raw que NO mapeó a canónica (latest snapshot por source_record_id)
+ procesos_raw_sin_canonica | contratos_raw_sin_canonica 
+---------------------------+----------------------------
+                         0 |                          0
+(1 fila)
+
+=====================================================================
+C2 — Nulos críticos
+=====================================================================
+-- C2.1 proveedor: nit_canonico nunca debería ser NULL (es la UNIQUE)
+ proveedor_sin_nit 
+-------------------
+                 0
+(1 fila)
+
+-- C2.2 contrato: campos obligatorios
+ sin_secop_id | sin_valor_inicial | sin_estado_actual | sin_fecha_inicio | total 
+--------------+-------------------+-------------------+------------------+-------
+            0 |                 0 |                 0 |              150 |   699
+(1 fila)
+
+-- C2.3 proceso: campos obligatorios
+ sin_secop_id | sin_objeto | sin_estado_actual | total 
+--------------+------------+-------------------+-------
+            0 |          0 |                 0 |   698
+(1 fila)
+
+=====================================================================
+C3 — Rangos
+=====================================================================
+-- C3.1 valor_inicial <= 0 (sospechoso; 0 puede ser válido pero raro)
+ valor_inicial_cero | valor_inicial_negativo 
+--------------------+------------------------
+                 39 |                      0
+(1 fila)
+
+-- C3.2 valor_actual < valor_inicial (no debería pasar: adiciones suben)
+ valor_actual_menor_que_inicial 
+--------------------------------
+                              0
+(1 fila)
+
+-- C3.3 fecha_fin_actual < fecha_inicio
+ fecha_fin_antes_que_inicio 
+----------------------------
+                          0
+(1 fila)
+
+-- C3.4 ingested_at futuro (reloj mal)
+ ingested_futuro 
+-----------------
+               0
+(1 fila)
+
+=====================================================================
+Cobertura geográfica (informativo, alimenta T3)
+=====================================================================
+-- Cobertura por tabla
+  tabla   | con_geo | total | pct  
+----------+---------+-------+------
+ proceso  |     446 |   698 | 63.9
+ contrato |     333 |   699 | 47.6
+(2 filas)
+
+-- Top 30 textos crudos NO resueltos (contratos): entrada para extender DANE en T3
+                        localizacion_raw                         |  n  
+-----------------------------------------------------------------+-----
+ Colombia, No Definido, No Definido                              | 365
+ Colombia, San Andrés, Providencia y Santa Catalina, No Definido |   1
+(2 filas)
+
