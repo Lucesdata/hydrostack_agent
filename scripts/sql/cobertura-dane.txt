@@ -1,0 +1,6 @@
+  tabla   | con_geo | total | pct  | sin_geo_centinela 
+----------+---------+-------+------+-------------------
+ proceso  |     446 |   698 | 63.9 |               252
+ contrato |     333 |   699 | 47.6 |               366
+(2 filas)
+
