@@ -16,7 +16,8 @@
     "db:load-sample": "tsx scripts/load-sample-raw.ts",
     "db:seed-geografia": "tsx scripts/seed-geografia.ts",
     "db:transform": "tsx scripts/run-transform.ts",
-    "db:ingest": "tsx scripts/run-ingest.ts"
+    "db:ingest": "tsx scripts/run-ingest.ts",
+    "db:audit-proveedores": "tsx scripts/audit-proveedores.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
