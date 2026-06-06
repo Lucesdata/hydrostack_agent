@@ -1,0 +1,70 @@
+=====================================================================
+(a) Top 5 proveedores por valor adjudicado
+=====================================================================
+ nit_canonico |              razon_social               | nro_contratos |   valor_total   
+--------------+-----------------------------------------+---------------+-----------------
+ 890399003    | EMCALI EICE ESP                         |             7 | 122933194562.00
+ 901038832    | CONSORCIO REDES CHICO MV                |             1 |  53611546233.00
+ 830128286    | AGUAS DE BOGOTA S.A. E.S.P.             |             7 |  51310213402.00
+ 9010340843   | CONSORCIO ALCANTARILLADOS DEL OCCIDENTE |             1 |  49553663890.00
+ 901041711    | Unión Temporal Alianza 905              |             1 |  35619088416.00
+(5 filas)
+
+=====================================================================
+(b) Contratos activos por municipio
+=====================================================================
+      municipio      |  departamento   | contratos_activos 
+---------------------+-----------------+-------------------
+ Bogotá D.C.         | Bogotá D.C.     |               100
+ (sin geografía)     | (sin geografía) |                 4
+ Medellín            | Antioquia       |                 3
+ Cartagena de Indias | Bolívar         |                 3
+ Tunja               | Boyacá          |                 3
+ (sin geografía)     | Valle del Cauca |                 2
+ (sin geografía)     | Risaralda       |                 2
+ (sin geografía)     | Tolima          |                 2
+ Villavicencio       | Meta            |                 1
+ Manizales           | Caldas          |                 1
+ (sin geografía)     | Bolívar         |                 1
+ Caldas              | Antioquia       |                 1
+ Arauca              | Arauca          |                 1
+ (sin geografía)     | Cundinamarca    |                 1
+ Cali                | Valle del Cauca |                 1
+ Girón               | Santander       |                 1
+ Neiva               | Huila           |                 1
+ (sin geografía)     | Chocó           |                 1
+(18 filas)
+
+-- contratos Aprobado/Modificado SIN geografía (informativo)
+ activos_sin_geo 
+-----------------
+               4
+(1 fila)
+
+=====================================================================
+(c) Entidades que adjudicaron >=2 contratos al mismo proveedor
+=====================================================================
+                                          entidad                                          |                                                                   proveedor                                                                   | nro_contratos |   valor_total   
+-------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------
+ SANTIAGO DE CALI DISTRITO ESPECIAL - UNIDAD ADMINISTRATIVA ESPECIAL DE SERVICIOS PUBLICOS | EMCALI EICE ESP                                                                                                                               |             7 | 122933194562.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | AGUAS DE BOGOTA S.A. E.S.P.                                                                                                                   |             7 |  51310213402.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | FF SOLUCIONES S.A                                                                                                                             |             3 |   6456494520.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | MAQUINAS AMARILLAS S.A.S                                                                                                                      |             3 |    251219999.00
+ ALCALDIA MUNICIPAL TAUSA                                                                  | ASOCIACION DE USUARIOS DEL ACUEDUCTO REGIONAL DE LAS VEREDAS RASGATA Y DE OTRAS DE LOS MUNICIPIOS DE TAUSA NEMOCON CUCUNUBA SUTATAUSA Y COGUA |             3 |     90858778.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | Ingeniería y Consultoria Global S.A.S                                                                                                         |             3 |     73695078.00
+ INSTITUTO PARA LA ECONOMIA SOCIAL- IPES                                                   | Janett Rocio Escobar Angulo                                                                                                                   |             3 |      8402000.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | SAP Colombia SAS                                                                                                                              |             2 |  12254676971.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | CONSULTORIA TECNICA LATINOAMERICANA Y DEL CARIBE SAS - CONTELAC SAS                                                                           |             2 |   9047774921.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | CONSORCIO REDES DE ALCANTARILLADO 2016                                                                                                        |             2 |   8739221343.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | CONSORCIO ESPERANZA 2017                                                                                                                      |             2 |   6521594183.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | ACI PROYECTOS S.A.S.                                                                                                                          |             2 |   4661695519.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | Ingenieria & Consultoria Espelizada Rojas Ramirez S.A.S                                                                                       |             2 |   1847179146.00
+ CORPORACION AUTONOMA REGIONAL DE RISARALDA                                                | EMPRESA DE DESARROLLO TERRITORIAL URBANO Y RURAL DE RISARALDA - EDUR                                                                          |             2 |   1331548542.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | GREELEY AND HANSEN COLOMBIA SAS                                                                                                               |             2 |    787314884.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | COMPAÑIA COLOMBIANA DE SERVICIO AUTOMOTIRZ S A                                                                                                |             2 |    689500000.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | GOCP                                                                                                                                          |             2 |    686619962.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | TECNODUCTOS SOCIEDAD POR ACCIONES SIMPLIFICADA SAS                                                                                            |             2 |    666638334.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | montemar                                                                                                                                      |             2 |    625724999.00
+ EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE BOGOTÁ - E.S.P.                                  | INGENIERIA GEOLOGIA Y MATERIALES DE COLOMBIA SAS                                                                                              |             2 |    419843440.00
+(20 filas)
+

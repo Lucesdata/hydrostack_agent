@@ -18,21 +18,23 @@ LIMIT 5;
 \echo '====================================================================='
 \echo '(b) Contratos activos por municipio'
 \echo '====================================================================='
--- AJUSTAR los valores tras el Paso 1 (e.g. 'En ejecución', 'Activo', ...)
+-- Estados en la muestra: 'Aprobado' y 'Modificado' son los más cercanos
+-- a contrato activo en ejecución. La muestra refleja el flujo de firma
+-- SECOP II, no el ciclo de ejecución — hallazgo documentado en cierre.
 SELECT
-  g.municipio_nombre,
-  g.departamento_nombre,
+  COALESCE(g.municipio_nombre, '(sin geografía)') AS municipio,
+  COALESCE(g.departamento_nombre, '(sin geografía)') AS departamento,
   COUNT(*) AS contratos_activos
 FROM contrato c
 LEFT JOIN geografia g ON g.codigo_divipola = c.geografia_id
-WHERE c.estado_actual IN ('En ejecución', 'Activo')  -- AJUSTAR
+WHERE c.estado_actual IN ('Aprobado', 'Modificado')
 GROUP BY g.municipio_nombre, g.departamento_nombre
 ORDER BY contratos_activos DESC;
 
-\echo '-- contratos activos SIN geografía (informativo, no falla la pregunta)'
+\echo '-- contratos Aprobado/Modificado SIN geografía (informativo)'
 SELECT COUNT(*) AS activos_sin_geo
 FROM contrato
-WHERE estado_actual IN ('En ejecución', 'Activo')  -- AJUSTAR
+WHERE estado_actual IN ('Aprobado', 'Modificado')
   AND geografia_id IS NULL;
 
 \echo '====================================================================='
