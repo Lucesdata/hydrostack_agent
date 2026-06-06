@@ -8,6 +8,13 @@
       "when": 1780600782469,
       "tag": "0000_clumsy_silver_sable",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780786800000,
+      "tag": "0001_align_d22_d26",
+      "breakpoints": true
     }
   ]
 }

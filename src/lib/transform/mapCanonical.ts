@@ -14,25 +14,32 @@
 
 import { cleanText, parseBool, parseDate, parseMoney } from './normalize';
 import { canonicalizeNit, normalizeTipoDoc } from './nit';
-import { normalizeGeoText, municipioFromLocalizacion } from './geo';
+import { normalizeGeoText } from './geo';
 
 type SodaRow = Record<string, unknown>;
 
-/** Entidad estatal compradora resuelta desde la fila. `null` si no hay NIT usable. */
+/**
+ * Entidad estatal compradora resuelta desde la fila. `null` si no hay NIT usable.
+ * D23: `sectorAdministrativo` es el sector PGN crudo (Industria, defensa, etc.),
+ * NO el sector agua/saneamiento. `rama` se guarda en `rawAttrs.rama`.
+ */
 export interface EntidadProjection {
   nitCanonico: string;
   nitDv: string | null;
   nombre: string | null;
   nivelGobierno: string | null;
-  rama: string | null;
-  sector: string | null;
+  sectorAdministrativo: string | null;
+  rawAttrs: Record<string, unknown> | null;
 }
 
-/** Proveedor adjudicado. `null` si el documento es basura/centinela (D3). */
+/**
+ * Proveedor adjudicado. `null` si el documento es basura/centinela (D3).
+ * D22: `nitValidDv` se eliminó del modelo persistente (no hay DV declarado
+ * contra el cual validar). El DV calculado (DIAN) viaja en `nitDv`.
+ */
 export interface ProveedorProjection {
   nitCanonico: string;
   nitDv: string | null;
-  nitValidDv: boolean | null;
   tipoDocumento: string | null;
   razonSocial: string | null;
   esEstructuraPlural: boolean;
@@ -92,13 +99,14 @@ function buildEntidad(
 ): EntidadProjection | null {
   const { nitCanonico, nitDv } = canonicalizeNit(rawNit, 'NIT');
   if (nitCanonico === null) return null;
+  const ramaClean = cleanText(rama);
   return {
     nitCanonico,
     nitDv,
     nombre: cleanText(nombre),
     nivelGobierno: cleanText(nivel),
-    rama: cleanText(rama),
-    sector: cleanText(sector),
+    sectorAdministrativo: cleanText(sector), // D23: sector PGN, no agua/saneamiento
+    rawAttrs: ramaClean !== null ? { rama: ramaClean } : null, // D23: rama vive aquí
   };
 }
 
@@ -127,17 +135,17 @@ export function mapProcesoRow(row: SodaRow): ProcesoProjection {
 export function mapContratoRow(row: SodaRow): ContratoProjection {
   const doc = canonicalizeNit(row['documento_proveedor'], row['tipodocproveedor']);
   const razonSocial = cleanText(row['proveedor_adjudicado']);
+  const representante = cleanText(row['nombre_representante_legal']);
   const proveedor: ProveedorProjection | null =
     doc.nitCanonico === null
       ? null
       : {
           nitCanonico: doc.nitCanonico,
           nitDv: doc.nitDv,
-          nitValidDv: doc.nitValidDv,
           tipoDocumento: normalizeTipoDoc(row['tipodocproveedor']),
           razonSocial,
           esEstructuraPlural: parseBool(row['es_grupo']) ?? false,
-          rawAttrs: null,
+          rawAttrs: representante !== null ? { representante_legal: representante } : null,
         };
 
   return {
@@ -166,9 +174,46 @@ export function mapContratoRow(row: SodaRow): ContratoProjection {
     // proveedor null pero hay razón social → guardamos el texto para no perder la pista (D3)
     proveedor,
     proveedorRaw: proveedor === null ? razonSocial : null,
-    geo: {
-      departamento: normalizeGeoText(row['departamento']),
-      municipio: normalizeGeoText(row['ciudad']) ?? municipioFromLocalizacion(row['localizaci_n']),
-    },
+    // D25: `localizaci_n` PRIMARIA ("Colombia, <dep>, <mun>" viene 0% nula);
+    // `departamento`/`ciudad` son fallback (72-74% centinela en contratos).
+    geo: geoFromContrato(row),
   };
+}
+
+/**
+ * Resuelve geografía de contrato según D25: localización primaria, depto/ciudad
+ * como respaldo cuando localizaci_n trae "No Definido" o no parsea.
+ *
+ * Formato esperado: "Colombia, <dep>, <mun>". El parser ya normaliza centinelas
+ * via cleanText, así que un segmento "no definido" sale como null y cae al
+ * fallback. Si tampoco hay fallback, queda null (lo recoge 0.6).
+ */
+function geoFromContrato(row: SodaRow): GeoHints {
+  const parsed = parseLocalizacion(row['localizaci_n']);
+  return {
+    departamento: parsed.departamento ?? normalizeGeoText(row['departamento']),
+    municipio: parsed.municipio ?? normalizeGeoText(row['ciudad']),
+  };
+}
+
+function parseLocalizacion(value: unknown): GeoHints {
+  const s = cleanText(value);
+  if (s === null) return { departamento: null, municipio: null };
+  // "Colombia, <dep>, <mun>" — el primer segmento es el país, lo descartamos.
+  const segments = s
+    .split(',')
+    .map((p) => normalizeGeoText(p))
+    .filter((p) => p !== 'colombia');
+  // Tomamos los dos últimos como (dep, mun). Si solo hay uno, va a municipio
+  // (es la pista más específica observada en muestra).
+  if (segments.length >= 2) {
+    return {
+      departamento: segments[segments.length - 2],
+      municipio: segments[segments.length - 1],
+    };
+  }
+  if (segments.length === 1) {
+    return { departamento: null, municipio: segments[0] };
+  }
+  return { departamento: null, municipio: null };
 }

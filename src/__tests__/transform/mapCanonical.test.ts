@@ -53,7 +53,8 @@ describe('mapContratoRow', () => {
     nit_entidad: '899999063',
     nombre_entidad: 'Acueducto de Bogotá',
     orden: 'Territorial',
-    sector: 'Servicios Públicos',
+    rama: 'Ejecutivo',
+    sector: 'Industria',
     tipodocproveedor: 'NIT',
     documento_proveedor: '900123456-7',
     proveedor_adjudicado: 'Constructora XYZ',
@@ -62,6 +63,7 @@ describe('mapContratoRow', () => {
     fecha_de_firma: '2024-06-10T00:00:00.000',
     el_contrato_puede_ser_prorrogado: 'Si',
     valor_pagado: '50000000',
+    localizaci_n: 'Colombia, Cundinamarca, Soacha',
     departamento: 'Distrito Capital de Bogotá',
     ciudad: 'Bogotá',
   };
@@ -91,9 +93,35 @@ describe('mapContratoRow', () => {
     expect(c.proveedorRaw).toBe('Constructora XYZ');
   });
 
-  it('falls back to localizacion for municipio when ciudad is absent', () => {
-    const { ciudad, ...noCiudad } = row;
-    const c = mapContratoRow({ ...noCiudad, localizaci_n: 'Colombia, Cundinamarca, Soacha' });
+  it('D25: takes geography from localizacion as primary, not from depto/ciudad', () => {
+    // localizaci_n gana sobre departamento/ciudad cuando ambos están presentes
+    const c = mapContratoRow(row);
+    expect(c.geo.departamento).toBe('cundinamarca');
     expect(c.geo.municipio).toBe('soacha');
+  });
+
+  it('D25: falls back to depto/ciudad when localizacion has "No Definido"', () => {
+    const c = mapContratoRow({ ...row, localizaci_n: 'Colombia, No Definido, No Definido' });
+    expect(c.geo.departamento).toBe('distrito capital de bogota');
+    expect(c.geo.municipio).toBe('bogota');
+  });
+
+  it('D25: falls back when localizacion is missing entirely', () => {
+    const { localizaci_n, ...noLoc } = row;
+    const c = mapContratoRow(noLoc);
+    expect(c.geo.departamento).toBe('distrito capital de bogota');
+    expect(c.geo.municipio).toBe('bogota');
+  });
+
+  it('D23: entidad stores sector_administrativo (PGN, not water) and rama in raw_attrs', () => {
+    const c = mapContratoRow(row);
+    expect(c.entidad?.sectorAdministrativo).toBe('Industria');
+    expect(c.entidad?.rawAttrs).toEqual({ rama: 'Ejecutivo' });
+  });
+
+  it('D22: proveedor has no nitValidDv, but nitDv (DIAN-calculated) is present', () => {
+    const c = mapContratoRow(row);
+    expect(c.proveedor?.nitDv).toBe('7'); // 900123456 DIAN DV
+    expect((c.proveedor as unknown as Record<string, unknown> | null)?.nitValidDv).toBeUndefined();
   });
 });
