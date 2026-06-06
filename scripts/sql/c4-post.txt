@@ -1,0 +1,9 @@
+          t           |  n  
+----------------------+-----
+ proveedor            | 556
+ entidad              | 416
+ proceso              | 698
+ contrato             | 699
+ transform_quarantine |   0
+(5 filas)
+
