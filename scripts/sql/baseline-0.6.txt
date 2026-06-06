@@ -1,0 +1,15 @@
+        tabla         | total 
+----------------------+-------
+ raw procesos         |   748
+ raw contratos        |   699
+ proveedor            |   556
+ entidad              |   416
+ geografia            |   131
+ geografia_alias      |   136
+ proceso              |   698
+ contrato             |   699
+ contrato_evento      |     0
+ transform_quarantine |     0
+ sync_log             |     3
+(11 filas)
+
