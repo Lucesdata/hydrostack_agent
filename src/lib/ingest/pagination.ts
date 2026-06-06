@@ -72,3 +72,34 @@ export function cursorFromRow(
   if (id == null || String(id) === '') return null;
   return { watermark, id: String(id) };
 }
+
+/**
+ * Página del sweep D21a (0.5): barre registros SIN watermark, paginando por id
+ * nativo. Socrata no soporta keyset sobre NULL, así que el cursor solo lleva el
+ * id; el orden por id da estabilidad determinista entre páginas.
+ *
+ *   $order = idField ASC
+ *   $where = watermarkField IS NULL
+ *            AND idField > '{cursor.id}'    (en páginas siguientes)
+ *
+ * El watermark NO se mueve por el sweep (estos registros no tienen timestamp);
+ * la dedup la hace el payload_hash en el sink.
+ */
+export function buildSweepPage(opts: {
+  idField: string;
+  watermarkField: string;
+  /** Id de la última fila de la página anterior (cursor del sweep). */
+  sinceIdExclusive?: string | null;
+  limit: number;
+}): SodaPageParams {
+  const { idField, watermarkField, sinceIdExclusive, limit } = opts;
+  const conditions = [`${watermarkField} IS NULL`];
+  if (sinceIdExclusive) {
+    conditions.push(`${idField} > '${soqlEscape(sinceIdExclusive)}'`);
+  }
+  return {
+    $order: `${idField} ASC`,
+    $limit: limit,
+    $where: conditions.join(' AND '),
+  };
+}

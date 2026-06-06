@@ -16,7 +16,13 @@ import { randomUUID } from 'crypto';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '@/src/lib/db/client';
 import { rawRecord, syncLog } from '@/src/lib/db/schema';
-import { runIngest, type IngestSummary, type RawSink } from './runIngest';
+import {
+  runIngest,
+  runSweep,
+  type IngestSummary,
+  type RawSink,
+  type SweepSummary,
+} from './runIngest';
 import { sodaFetchPage } from './sodaFetch';
 import { windowStart } from './watermark';
 import type { IngestSource } from './sources';
@@ -60,6 +66,27 @@ export function makeDbSink(source: string): RawSink {
     return toInsert.length;
   };
 }
+
+/**
+ * Pasada 2 del incremental (D21a / 0.5 §3): cabléa el bucle puro `runSweep`
+ * contra el fetch SODA real y el sink que escribe en `raw_record`. La dedup la
+ * hace el `payload_hash` (`makeDbSink`); el watermark NO avanza porque estos
+ * registros vienen sin `ultima_actualizacion`.
+ *
+ * Aplicable a `secop_ii_contratos` (≈43% sin timestamp en muestra). Procesos
+ * no lo necesita: `fecha_de_ultima_publicaci` viene casi 100% poblado.
+ */
+export async function sweepWithoutWatermark(
+  source: IngestSource,
+  opts: { pageSize?: number; maxPages?: number; batchId?: string } = {},
+): Promise<SweepSummary> {
+  return runSweep(
+    { fetchPage: sodaFetchPage, sink: makeDbSink(source.source) },
+    { source, ...opts },
+  );
+}
+
+export type { IngestSummary, SweepSummary };
 
 /** Corre la ingesta incremental de una fuente y registra la corrida. */
 export async function ingestSource(

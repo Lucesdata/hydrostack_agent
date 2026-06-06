@@ -15,7 +15,8 @@
     "db:studio": "drizzle-kit studio",
     "db:load-sample": "tsx scripts/load-sample-raw.ts",
     "db:seed-geografia": "tsx scripts/seed-geografia.ts",
-    "db:transform": "tsx scripts/run-transform.ts"
+    "db:transform": "tsx scripts/run-transform.ts",
+    "db:ingest": "tsx scripts/run-ingest.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",

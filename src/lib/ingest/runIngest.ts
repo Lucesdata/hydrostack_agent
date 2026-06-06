@@ -15,7 +15,12 @@
 import { randomUUID } from 'crypto';
 import type { IngestSource } from './sources';
 import { windowStart, maxWatermark } from './watermark';
-import { buildKeysetPage, cursorFromRow, type SodaPageParams } from './pagination';
+import {
+  buildKeysetPage,
+  buildSweepPage,
+  cursorFromRow,
+  type SodaPageParams,
+} from './pagination';
 import { toRawRecord, type RawRecordInsert } from './mapRecord';
 
 export type SodaFetcher = (
@@ -107,6 +112,91 @@ export async function runIngest(
     watermarkTo: maxWatermark([lastWatermark, maxSeen]),
     recordsIngested,
     pages,
+    reachedMaxPages,
+  };
+}
+
+// ============================================================================
+// Pasada 2: Sweep D21a — barre registros que la fuente trae SIN watermark.
+// ============================================================================
+
+export interface SweepOptions {
+  source: IngestSource;
+  batchId?: string;
+  pageSize?: number;
+  maxPages?: number;
+}
+
+export interface SweepSummary {
+  source: string;
+  batchId: string;
+  pages: number;
+  /** Cuántos snapshots aceptó el sink (descontando los descartados por hash). */
+  recordsIngested: number;
+  /** Cuántos registros vio el sweep (denominador del dedup). */
+  totalScanned: number;
+  reachedMaxPages: boolean;
+}
+
+const DEFAULT_SWEEP_PAGE_SIZE = 1000;
+const DEFAULT_SWEEP_MAX_PAGES = 10_000;
+
+/**
+ * Bucle puro del sweep D21a (0.5 §3). Pagina por id nativo con `WHERE
+ * watermark IS NULL` (Socrata no soporta keyset sobre NULL, así que el cursor
+ * solo lleva el id). NO mueve el watermark — los registros sin timestamp no son
+ * "nuevos", solo son "nunca-vistos-por-watermark"; la dedup la hace el hash en
+ * el sink. IO inyectado (mismo patrón que `runIngest`) para que sea testeable
+ * sin red ni base.
+ */
+export async function runSweep(
+  deps: { fetchPage: SodaFetcher; sink: RawSink },
+  opts: SweepOptions,
+): Promise<SweepSummary> {
+  const { source } = opts;
+  const batchId = opts.batchId ?? randomUUID();
+  const pageSize = opts.pageSize ?? DEFAULT_SWEEP_PAGE_SIZE;
+  const maxPages = opts.maxPages ?? DEFAULT_SWEEP_MAX_PAGES;
+
+  let pages = 0;
+  let recordsIngested = 0;
+  let totalScanned = 0;
+  let cursor: string | null = null;
+  let reachedMaxPages = false;
+
+  while (pages < maxPages) {
+    const params = buildSweepPage({
+      idField: source.idField,
+      watermarkField: source.watermarkField,
+      sinceIdExclusive: cursor,
+      limit: pageSize,
+    });
+
+    const rows = await deps.fetchPage(source.dataset, params);
+    if (rows.length === 0) break;
+
+    const records = rows.map((row) => toRawRecord(row, source, batchId));
+    recordsIngested += await deps.sink(records);
+    totalScanned += rows.length;
+    pages += 1;
+
+    const lastId = rows[rows.length - 1][source.idField];
+    cursor = typeof lastId === 'string' && lastId ? lastId : null;
+    if (cursor === null) break;
+    if (rows.length < pageSize) break;
+
+    if (pages >= maxPages) {
+      reachedMaxPages = true;
+      break;
+    }
+  }
+
+  return {
+    source: source.source,
+    batchId,
+    pages,
+    recordsIngested,
+    totalScanned,
     reachedMaxPages,
   };
 }
