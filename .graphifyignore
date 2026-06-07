@@ -1,0 +1,5 @@
+*.md
+*.pdf
+*.txt
+*.rst
+docs/
