@@ -2,44 +2,150 @@
 import Link from "next/link";
 import { useLang } from "@/src/lib/i18n";
 
+/* --- Glifos SVG inline (referencia 1:1 con option-b-water.html) --- */
+
+function GlyphCalc() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={S.glyph}>
+      <rect x="3" y="10" width="34" height="22" rx="2" />
+      <line x1="20" y1="10" x2="20" y2="32" />
+      <line x1="3" y1="18" x2="20" y2="18" strokeDasharray="2 2" opacity="0.5" />
+      <line x1="20" y1="22" x2="37" y2="22" strokeDasharray="2 2" opacity="0.5" />
+      <path d="M3 6 L8 6 L8 10" />
+      <path d="M37 6 L32 6 L32 10" />
+      <circle cx="14" cy="14" r="0.8" fill="currentColor" />
+      <circle cx="28" cy="14" r="0.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function GlyphBuild() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={S.glyph}>
+      <path d="M20 6 L34 14 L34 28 L20 36 L6 28 L6 14 Z" />
+      <path d="M20 6 L20 20 M6 14 L20 20 L34 14" />
+      <line x1="11" y1="22" x2="11" y2="30" opacity="0.5" />
+      <line x1="15" y1="24" x2="15" y2="32" opacity="0.5" />
+      <line x1="19" y1="22" x2="19" y2="34" opacity="0.5" />
+    </svg>
+  );
+}
+
+function GlyphAgent() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={S.glyph}>
+      <path d="M6 10 L24 10 L24 24 L14 24 L9 28 L9 24 L6 24 Z" />
+      <line x1="10" y1="14" x2="20" y2="14" opacity="0.6" />
+      <line x1="10" y1="18" x2="18" y2="18" opacity="0.6" />
+      <rect x="22" y="18" width="12" height="14" rx="1" />
+      <line x1="25" y1="22" x2="31" y2="22" opacity="0.6" />
+      <line x1="25" y1="25" x2="31" y2="25" opacity="0.6" />
+      <line x1="25" y1="28" x2="29" y2="28" opacity="0.6" />
+    </svg>
+  );
+}
+
+function GlyphTender() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={S.glyph}>
+      <path d="M4 28 L10 22 L16 26 L24 14 L36 14" />
+      <circle cx="10" cy="22" r="1.6" fill="currentColor" />
+      <circle cx="16" cy="26" r="1.6" fill="currentColor" />
+      <circle cx="24" cy="14" r="1.6" fill="currentColor" />
+      <path d="M4 32 L36 32" opacity="0.4" />
+      <path d="M30 30 L30 14" opacity="0.4" strokeDasharray="2 2" />
+    </svg>
+  );
+}
+
+const GLYPHS = { calc: GlyphCalc, build: GlyphBuild, agent: GlyphAgent, tender: GlyphTender };
+
 const MODULES = [
-  { n: "01", glyph: "⬡", key: "mod1", href: "/calculators" },
-  { n: "02", glyph: "◈", key: "mod2", href: "/build" },
-  { n: "03", glyph: "◉", key: "mod3", href: "/chat" },
-  { n: "04", glyph: "⊞", key: "mod4", href: "/licitaciones" },
+  {
+    n: "01",
+    label: "CALCULADORAS",
+    href: "/calculators",
+    glyph: "calc",
+    chipsKey: "m1",
+    titleKey: "mod1Title",
+    descKey: "mod1Desc",
+    ctaKey: "mod1Cta",
+    subRoutes: [
+      { labelKey: "submod1a", href: "/calculators/geo" },
+      { labelKey: "submod1b", href: "/calculators/fosa-septica" },
+      { labelKey: "submod1c", href: "/calculators/mantenimiento" },
+    ],
+  },
+  { n: "02", label: "BUILD",        href: "/build",        glyph: "build",  chipsKey: "m2", titleKey: "mod2Title", descKey: "mod2Desc", ctaKey: "mod2Cta", subRoutes: [] },
+  { n: "03", label: "AGENTE",       href: "/chat",         glyph: "agent",  chipsKey: "m3", titleKey: "mod3Title", descKey: "mod3Desc", ctaKey: "mod3Cta", subRoutes: [] },
+  { n: "04", label: "LICITACIONES", href: "/licitaciones", glyph: "tender", chipsKey: "m4", titleKey: "mod4Title", descKey: "mod4Desc", ctaKey: "mod4Cta", subRoutes: [] },
 ];
 
-const HUB_CSS = `
-.hub-card{
-  background: linear-gradient(160deg, #041820, #061218);
-  border: 1px solid rgba(0,245,255,0.12);
-  border-radius: 8px;
-  padding: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  min-height: 190px;
-  text-decoration: none;
-  color: inherit;
-  transition: transform .18s, border-color .18s, box-shadow .18s;
+const LANDING_CSS = `
+.ls-page { background: #FAFAF7; color: #0A1F1C; font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+.ls-hero { position: relative; overflow: hidden; padding: clamp(96px, 12vw, 140px) 0 clamp(72px, 10vw, 100px); }
+.ls-hero::before {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(15,118,110,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,118,110,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse at top right, rgba(0,0,0,0.6), transparent 65%);
+  mask-image: radial-gradient(ellipse at top right, rgba(0,0,0,0.6), transparent 65%);
+  pointer-events: none;
 }
-.hub-card::before{
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: #00F5FF;
-  opacity: .55;
+.ls-tag-dot { position: relative; width: 6px; height: 6px; border-radius: 50%; background: #0F766E; display: inline-block; }
+.ls-tag-dot::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1px solid #0F766E; opacity: .5;
+  animation: ls-pulse 2.4s ease-out infinite;
 }
-.hub-card:hover{
+@keyframes ls-pulse { 0% { transform: scale(.8); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
+.ls-title em {
+  font-style: normal; color: #0F766E; position: relative;
+}
+.ls-title em::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 6' preserveAspectRatio='none'><path d='M0,3 Q15,0 30,3 T60,3' stroke='%230F766E' stroke-width='1.2' fill='none' opacity='0.55'/></svg>");
+  background-repeat: repeat-x; background-size: 60px 6px;
+}
+.ls-card {
+  background: #FFFFFF; border: 1px solid #E5E5E0; border-radius: 12px;
+  padding: 24px; display: flex; flex-direction: column; gap: 14px;
+  min-height: 260px; position: relative; overflow: hidden;
+  transition: border-color .18s, transform .18s, box-shadow .18s;
+}
+.ls-card::after {
+  content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(to right, #0F766E, transparent);
+  opacity: 0; transition: opacity .18s;
+  pointer-events: none;
+}
+.ls-card:hover {
+  border-color: rgba(15,118,110,0.33);
   transform: translateY(-3px);
-  border-color: #00F5FF;
-  box-shadow: 0 6px 24px rgba(0,245,255,0.08);
+  box-shadow: 0 18px 32px -20px rgba(15,118,110,0.3);
 }
-.hub-card:hover .hub-card-cta{
-  color: #E8F8FF;
+.ls-card:hover::after { opacity: 1; }
+.ls-card:hover .ls-cta-arrow { transform: translateX(4px); }
+.ls-cta-arrow { display: inline-block; transition: transform .18s; }
+/* Stretched title link covers the whole card via ::before overlay.
+   Sub-links / chips sit on top (z-index 2) to remain clickable. */
+.ls-card-link {
+  text-decoration: none; color: inherit;
+  position: relative; z-index: 0;
+}
+.ls-card-link::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+}
+.ls-card-link:focus-visible { outline: 2px solid #0F766E; outline-offset: 2px; }
+.ls-sub, .ls-card-chips, .ls-card-cta { position: relative; z-index: 1; }
+.ls-sub a { color: #525B5A; text-decoration: none; }
+.ls-sub a:hover { color: #0F766E; }
+.ls-footer-wave {
+  position: absolute; top: -1px; left: 0; right: 0; height: 2px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 2' preserveAspectRatio='none'><path d='M0,1 Q30,0 60,1 T120,1' stroke='%230F766E' stroke-width='0.8' fill='none' opacity='0.4'/></svg>");
+  background-repeat: repeat-x; background-size: 120px 2px;
 }
 `;
 
@@ -48,44 +154,103 @@ export default function LandingPage() {
   const tl = t.landing;
 
   return (
-    <div style={S.page}>
-      <style dangerouslySetInnerHTML={{ __html: HUB_CSS }} />
+    <div style={S.page} className="ls-page">
+      <style dangerouslySetInnerHTML={{ __html: LANDING_CSS }} />
 
-      <section style={S.hero}>
-        <div style={S.heroInner}>
-          <div style={S.heroTag}>{tl.hubTag}</div>
-          <h1 style={S.heroTitle}>{tl.hubTitle}</h1>
-          <p style={S.heroLead}>{tl.hubLead}</p>
+      <header className="ls-hero">
+        <div style={S.container}>
+          <div style={S.mark}>
+            <div style={S.markLogo}>H</div>
+            <div style={S.markName}>HydroStack</div>
+            <div style={S.markBar} />
+            <div style={S.markLang}>ES · EN</div>
+          </div>
+
+          <span style={S.tag}>
+            <span className="ls-tag-dot" />
+            <span style={{ marginLeft: 8 }}>{tl.heroTag}</span>
+          </span>
+
+          <h1 className="ls-title" style={S.title}>
+            {tl.heroTitleA}<em>{tl.heroTitleEm}</em>{tl.heroTitleB}
+          </h1>
+
+          <p style={S.lead}>{tl.heroLead}</p>
+
+          <div style={S.meta}>
+            {tl.meta.map((m, i) => (
+              <div key={i} style={{ ...S.metaItem, ...(i === tl.meta.length - 1 ? S.metaItemLast : null) }}>
+                <strong style={S.metaStrong}>{m.value}</strong> · {m.scope}
+              </div>
+            ))}
+          </div>
         </div>
-      </section>
+      </header>
 
-      <section style={S.gridWrap}>
-        <div style={S.grid}>
-          {MODULES.map((m) => {
-            const mod = tl[m.key];
-            return (
-              <Link key={m.n} href={m.href} className="hub-card">
-                <div style={S.cardTop}>
-                  <span style={S.cardNumber}>{m.n}</span>
-                  <span style={S.cardGlyph}>{m.glyph}</span>
-                </div>
-                <div style={S.cardName}>{mod.title}</div>
-                <div style={S.cardDesc}>{mod.desc}</div>
-                <div className="hub-card-cta" style={S.cardCta}>
-                  → {tl.cardCta}
-                </div>
-              </Link>
-            );
-          })}
+      <section style={S.pillars}>
+        <div style={S.container}>
+          <div style={S.pillarsHead}>
+            <div>
+              <div style={S.pillarsLabel}>{tl.pillarsLabel}</div>
+              <h2 style={S.pillarsH}>{tl.pillarsH}</h2>
+            </div>
+            <div style={S.pillarsSide}>{tl.pillarsFlow}</div>
+          </div>
+
+          <div style={S.grid}>
+            {MODULES.map((m) => {
+              const Glyph = GLYPHS[m.glyph];
+              const chips = tl.chips[m.chipsKey];
+              return (
+                <article key={m.n} className="ls-card">
+                  <div style={S.cardTop}>
+                    <span style={S.cardNum}>{m.n} · {m.label}</span>
+                    <Glyph />
+                  </div>
+                  <Link href={m.href} className="ls-card-link" style={S.cardTitle}>
+                    {tl[m.titleKey]}
+                  </Link>
+                  <p style={S.cardDesc}>{tl[m.descKey]}</p>
+
+                  {m.subRoutes.length > 0 && (
+                    <div className="ls-sub" style={S.cardSub}>
+                      {m.subRoutes.map((s, i) => (
+                        <span key={s.href}>
+                          {i > 0 && <span style={S.subSep}> · </span>}
+                          <Link href={s.href}>{tl[s.labelKey]}</Link>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="ls-card-chips" style={S.chips}>
+                    {chips.map((c, i) => <span key={i} style={S.chip}>{c}</span>)}
+                  </div>
+
+                  <span className="ls-card-cta" style={S.cardCta}>
+                    {tl[m.ctaKey]} <span className="ls-cta-arrow">→</span>
+                  </span>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       <footer style={S.footer}>
-        <div style={S.footerInner}>
-          <span style={S.footerLogo}>HydroStack</span>
-          <span style={S.footerSep}>·</span>
-          <span style={S.footerDesc}>{tl.footerDesc}</span>
-          <span style={S.footerRight}>hydrostack.io</span>
+        <div className="ls-footer-wave" />
+        <div style={{ ...S.container, ...S.footerInner }}>
+          <div style={S.footerLeft}>
+            <span style={{ fontWeight: 600, color: "#0A1F1C" }}>HydroStack</span>
+            <span>·</span>
+            <span>{tl.footerTagline}</span>
+          </div>
+          <div style={S.footerRight}>
+            <span style={S.footerDot} />
+            <span>{tl.footerPhase}</span>
+            <span>·</span>
+            <span>hydrostack.io</span>
+          </div>
         </div>
       </footer>
     </div>
@@ -93,132 +258,114 @@ export default function LandingPage() {
 }
 
 const S = {
-  page: {
-    minHeight: "100vh",
-    fontFamily: "'IBM Plex Mono', monospace",
-    position: "relative",
-    zIndex: 1,
+  page: { minHeight: "100vh", position: "relative", zIndex: 1 },
+  container: { maxWidth: 1100, margin: "0 auto", padding: "0 28px", position: "relative", zIndex: 1 },
+
+  /* HERO */
+  mark: { display: "flex", alignItems: "center", gap: 10, marginBottom: 28 },
+  markLogo: {
+    width: 28, height: 28, borderRadius: 7, background: "#0F766E", color: "white",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: 700, fontSize: 13, boxShadow: "0 6px 20px -8px rgba(15,118,110,0.5)",
+  },
+  markName: { fontWeight: 700, fontSize: 15, letterSpacing: "-0.01em" },
+  markBar: { flex: 1, height: 1, background: "linear-gradient(to right, rgba(15,118,110,0.13), transparent)", maxWidth: 120 },
+  markLang: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#525B5A", letterSpacing: ".08em" },
+
+  tag: {
+    display: "inline-flex", alignItems: "center",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#0F766E",
+    letterSpacing: "0.18em", textTransform: "uppercase",
+    marginBottom: 28, padding: "4px 12px 4px 8px",
+    border: "1px solid rgba(15,118,110,0.13)", borderRadius: 999,
+    background: "rgba(15,118,110,0.03)",
   },
 
-  hero: {
-    padding: "clamp(48px, 8vw, 80px) clamp(16px, 5vw, 28px) clamp(28px, 4vw, 40px)",
+  title: {
+    fontSize: "clamp(38px, 5.5vw, 60px)", fontWeight: 700,
+    letterSpacing: "-0.028em", lineHeight: 1.04,
+    color: "#0A1F1C", marginBottom: 24, maxWidth: 760,
   },
-  heroInner: {
-    maxWidth: "720px",
-    margin: "0 auto",
-    textAlign: "center",
+  lead: { fontSize: 18, color: "#525B5A", maxWidth: 600, lineHeight: 1.55, margin: 0 },
+
+  meta: {
+    marginTop: 36, display: "flex", gap: 0, flexWrap: "wrap",
+    borderTop: "1px dashed rgba(15,118,110,0.2)",
+    paddingTop: 20, maxWidth: 760,
   },
-  heroTag: {
-    fontSize: "10px",
-    letterSpacing: "0.25em",
-    textTransform: "uppercase",
-    color: "#00F5FF",
-    fontFamily: "'IBM Plex Mono', monospace",
-    marginBottom: "16px",
+  metaItem: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
+    padding: "4px 18px 4px 0", marginRight: 18,
+    borderRight: "1px solid #E5E5E0",
   },
-  heroTitle: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: "clamp(24px, 3.6vw, 38px)",
-    color: "#E8F8FF",
-    margin: "0 0 12px 0",
-    fontWeight: 700,
-    lineHeight: 1.2,
-    letterSpacing: "0.02em",
+  metaItemLast: { borderRight: "none", marginRight: 0 },
+  metaStrong: { color: "#0A1F1C", fontWeight: 600 },
+
+  /* PILLARS */
+  pillars: { paddingBottom: "clamp(96px, 12vw, 140px)", position: "relative" },
+  pillarsHead: {
+    display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+    gap: 24, flexWrap: "wrap", marginBottom: 32,
   },
-  heroLead: {
-    fontSize: "14px",
-    color: "#7ab8c8",
-    fontFamily: "'IBM Plex Mono', monospace",
-    lineHeight: 1.55,
-    maxWidth: "640px",
-    margin: "0 auto",
+  pillarsLabel: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#0F766E", letterSpacing: ".15em", textTransform: "uppercase",
+  },
+  pillarsH: {
+    fontSize: 24, fontWeight: 600, letterSpacing: "-0.015em",
+    marginTop: 8, color: "#0A1F1C", maxWidth: 520,
+  },
+  pillarsSide: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
   },
 
-  gridWrap: {
-    padding: "clamp(8px, 2vw, 16px) clamp(16px, 5vw, 28px) clamp(48px, 8vw, 72px)",
-  },
   grid: {
-    maxWidth: "900px",
-    margin: "0 auto",
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(380px, 100%), 1fr))",
-    gap: "1.25rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(400px, 100%), 1fr))",
+    gap: 14,
   },
 
-  cardTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "0.25rem",
+  /* CARD */
+  cardTop: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+  cardNum: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#0F766E", letterSpacing: ".12em", fontWeight: 500,
   },
-  cardNumber: {
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: "28px",
-    fontWeight: 700,
-    color: "rgba(0,245,255,0.35)",
-    lineHeight: 1,
-    letterSpacing: "0.02em",
+  glyph: { width: 36, height: 36, color: "#0F766E", flexShrink: 0 },
+  cardTitle: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.012em", color: "#0A1F1C" },
+  cardDesc: { fontSize: 13.5, color: "#525B5A", lineHeight: 1.55, flexGrow: 1, margin: 0 },
+  cardSub: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#525B5A", display: "flex", flexWrap: "wrap", alignItems: "center",
   },
-  cardGlyph: {
-    fontSize: "22px",
-    color: "#00F5FF",
-    opacity: 0.7,
-    lineHeight: 1,
-  },
-  cardName: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: "1.05rem",
-    fontWeight: 700,
-    color: "#E8F8FF",
-    letterSpacing: "0.02em",
-    marginTop: "0.5rem",
-  },
-  cardDesc: {
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: "12px",
-    color: "#4A7A8A",
-    lineHeight: 1.5,
+  subSep: { color: "#E5E5E0", margin: "0 4px" },
+  chips: { display: "flex", gap: 6, flexWrap: "wrap" },
+  chip: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 10, padding: "3px 8px",
+    background: "#F4F4EE", border: "1px solid #E5E5E0", borderRadius: 4,
+    color: "#525B5A", letterSpacing: ".03em",
   },
   cardCta: {
-    marginTop: "auto",
-    paddingTop: "0.75rem",
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: "12px",
-    color: "#00F5FF",
-    letterSpacing: "0.08em",
-    transition: "color .18s",
+    marginTop: 4, fontSize: 13, fontWeight: 500, color: "#0F766E",
+    display: "flex", alignItems: "center", gap: 6,
   },
 
-  footer: {
-    borderTop: "1px solid rgba(0,245,255,0.08)",
-    padding: "20px clamp(16px, 5vw, 28px)",
-    background: "rgba(2,12,16,0.8)",
-  },
+  /* FOOTER */
+  footer: { borderTop: "1px solid #E8E8E2", padding: "28px 0", background: "#fff", position: "relative" },
   footerInner: {
-    maxWidth: "1100px",
-    margin: "0 auto",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    flexWrap: "wrap", gap: 12,
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
   },
-  footerLogo: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: "12px",
-    fontWeight: 700,
-    color: "#00F5FF",
-  },
-  footerSep: { color: "#1a3a4a", fontSize: "12px" },
-  footerDesc: {
-    fontSize: "10px",
-    color: "#2a5070",
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  footerRight: {
-    marginLeft: "auto",
-    fontSize: "9px",
-    color: "#1e3050",
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: "0.1em",
+  footerLeft: { display: "flex", gap: 12, alignItems: "center" },
+  footerRight: { display: "flex", gap: 14, alignItems: "center" },
+  footerDot: {
+    width: 6, height: 6, borderRadius: "50%", background: "#16A34A",
+    boxShadow: "0 0 0 3px rgba(22,163,74,0.13)",
   },
 };
