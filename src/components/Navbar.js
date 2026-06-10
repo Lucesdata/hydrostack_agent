@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useLang } from "@/src/lib/i18n";
 
 export default function Navbar() {
-  const { t, toggle, lang } = useLang();
+  const { t, toggle } = useLang();
   const path = usePathname();
   const isCalc = path.startsWith("/calculators");
   const isChat = path.startsWith("/chat");
@@ -14,64 +14,62 @@ export default function Navbar() {
 
   const close = () => setOpen(false);
 
+  const navAria = (active) => (active ? { "aria-current": "page" } : {});
+
   return (
-    <nav style={S.nav}>
-      <div style={S.inner}>
-        {/* Logo */}
-        <Link href="/" style={S.logo} onClick={close}>
+    <nav className="clr-nav" aria-label="Menú principal">
+      <div className="clr-nav-inner">
+        <Link href="/" style={S.logo} onClick={close} aria-label="HydroStack inicio">
           <span style={S.logoMark}>H</span>
           <span style={S.logoText}>ydroStack</span>
         </Link>
 
-        {/* Online status dot */}
-        <span style={S.statusDot} className="blink" title="Sistema activo"/>
+        <span className="clr-status-dot" title="Sistema activo" aria-hidden="true" />
 
-        {/* Desktop links */}
         <div style={S.links} className="hide-mobile">
-          <Link href="/calculators" style={{ ...S.link, ...(isCalc ? S.linkActive : {}) }} className={isCalc ? "" : "nav-link"}>
+          <Link href="/calculators" className="clr-nav-link" {...navAria(isCalc)}>
             {t.nav.calculators}
           </Link>
-          <Link href="/chat" style={{ ...S.link, ...(isChat ? S.linkActive : {}) }} className={isChat ? "" : "nav-link"}>
+          <Link href="/chat" className="clr-nav-link" {...navAria(isChat)}>
             {t.nav.assistant}
           </Link>
-          <Link href="/licitaciones" style={{ ...S.link, ...(isLic ? S.linkActive : {}) }} className={isLic ? "" : "nav-link"}>
+          <Link href="/licitaciones" className="clr-nav-link" {...navAria(isLic)}>
             Licitaciones
           </Link>
-          <a href="#about" style={S.link} className="nav-link">
+          <a href="#about" className="clr-nav-link">
             {t.nav.about}
           </a>
         </div>
 
-        {/* Lang toggle — desktop */}
-        <button style={S.langBtn} className="btn-ghost hide-mobile" onClick={toggle}>
+        <button className="clr-lang-btn hide-mobile" onClick={toggle}>
           {t.nav.lang}
         </button>
 
-        {/* Hamburger — mobile only */}
         <button
-          className="nav-hamburger hide-desktop"
+          className="clr-hamburger hide-desktop"
           onClick={() => setOpen(o => !o)}
-          aria-label="Menú"
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={open}
+          aria-controls="clr-mobile-menu"
         >
           {open ? "✕" : "☰"}
         </button>
       </div>
 
-      {/* Mobile dropdown */}
-      <div className={`nav-mobile-menu${open ? " open" : ""}`}>
-        <Link href="/calculators" className={`nav-mobile-link${isCalc ? " active" : ""}`} onClick={close}>
+      <div id="clr-mobile-menu" className={`clr-mobile-menu${open ? " open" : ""}`}>
+        <Link href="/calculators" className="clr-mobile-link" {...navAria(isCalc)} onClick={close}>
           {t.nav.calculators}
         </Link>
-        <Link href="/chat" className={`nav-mobile-link${isChat ? " active" : ""}`} onClick={close}>
+        <Link href="/chat" className="clr-mobile-link" {...navAria(isChat)} onClick={close}>
           {t.nav.assistant}
         </Link>
-        <Link href="/licitaciones" className={`nav-mobile-link${isLic ? " active" : ""}`} onClick={close}>
+        <Link href="/licitaciones" className="clr-mobile-link" {...navAria(isLic)} onClick={close}>
           Licitaciones
         </Link>
-        <a href="#about" className="nav-mobile-link" onClick={close}>
+        <a href="#about" className="clr-mobile-link" onClick={close}>
           {t.nav.about}
         </a>
-        <button className="nav-mobile-lang" onClick={() => { toggle(); close(); }}>
+        <button className="clr-mobile-lang" onClick={() => { toggle(); close(); }}>
           {t.nav.lang}
         </button>
       </div>
@@ -80,84 +78,37 @@ export default function Navbar() {
 }
 
 const S = {
-  nav: {
-    position: "sticky",
-    top: 0,
-    zIndex: 100,
-    background: "rgba(2,12,16,0.92)",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
-    borderBottom: "1px solid rgba(0,245,255,0.10)",
-    padding: "0 28px",
-    height: "52px",
-    display: "flex",
-    alignItems: "center",
-    boxShadow: "0 1px 32px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(0,245,255,0.05)",
-  },
-  inner: {
-    maxWidth: "1100px",
-    width: "100%",
-    margin: "0 auto",
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
   logo: {
     display: "flex",
     alignItems: "center",
-    cursor: "pointer",
+    gap: 8,
     textDecoration: "none",
+    color: "var(--ink-900)",
   },
   logoMark: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: "18px",
-    fontWeight: "900",
-    color: "#00F5FF",
-    textShadow: "0 0 16px rgba(0,245,255,0.5)",
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    background: "var(--accent)",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 700,
+    fontSize: 13,
+    fontFamily: "var(--font-sans)",
+    boxShadow: "var(--shadow-logo)",
   },
   logoText: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#E8F8FF",
-  },
-  statusDot: {
-    width: "5px",
-    height: "5px",
-    borderRadius: "50%",
-    background: "#00FF88",
-    boxShadow: "0 0 6px #00FF88",
-    flexShrink: 0,
+    fontFamily: "var(--font-sans)",
+    fontSize: 15,
+    fontWeight: 700,
+    letterSpacing: "-0.01em",
+    color: "var(--ink-900)",
   },
   links: {
     display: "flex",
-    gap: "28px",
+    gap: 28,
     marginLeft: "auto",
-  },
-  link: {
-    fontSize: "10px",
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: "#4A7A8A",
-    fontFamily: "'IBM Plex Mono', monospace",
-    transition: "color 0.2s",
-    textDecoration: "none",
-  },
-  linkActive: {
-    color: "#00F5FF",
-    textShadow: "0 0 10px rgba(0,245,255,0.4)",
-  },
-  langBtn: {
-    background: "transparent",
-    border: "1px solid rgba(0,245,255,0.18)",
-    borderRadius: "3px",
-    padding: "4px 12px",
-    color: "#4A7A8A",
-    fontSize: "9px",
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    cursor: "pointer",
-    transition: "all 0.2s",
   },
 };
