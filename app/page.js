@@ -82,7 +82,7 @@ const MODULES = [
 ];
 
 const LANDING_CSS = `
-.ls-page { background: #FAFAF7; color: #0A1F1C; font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+.ls-page { background: var(--bg); color: var(--ink-900); font-family: var(--font-sans); }
 .ls-hero { position: relative; overflow: hidden; padding: clamp(96px, 12vw, 140px) 0 clamp(72px, 10vw, 100px); }
 .ls-hero::before {
   content: ""; position: absolute; inset: 0;
@@ -94,15 +94,15 @@ const LANDING_CSS = `
   mask-image: radial-gradient(ellipse at top right, rgba(0,0,0,0.6), transparent 65%);
   pointer-events: none;
 }
-.ls-tag-dot { position: relative; width: 6px; height: 6px; border-radius: 50%; background: #0F766E; display: inline-block; }
+.ls-tag-dot { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
 .ls-tag-dot::after {
   content: ""; position: absolute; inset: -3px; border-radius: 50%;
-  border: 1px solid #0F766E; opacity: .5;
+  border: 1px solid var(--accent); opacity: .5;
   animation: ls-pulse 2.4s ease-out infinite;
 }
 @keyframes ls-pulse { 0% { transform: scale(.8); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
 .ls-title em {
-  font-style: normal; color: #0F766E; position: relative;
+  font-style: normal; color: var(--accent); position: relative;
 }
 .ls-title em::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px;
@@ -110,21 +110,21 @@ const LANDING_CSS = `
   background-repeat: repeat-x; background-size: 60px 6px;
 }
 .ls-card {
-  background: #FFFFFF; border: 1px solid #E5E5E0; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   padding: 24px; display: flex; flex-direction: column; gap: 14px;
   min-height: 260px; position: relative; overflow: hidden;
   transition: border-color .18s, transform .18s, box-shadow .18s;
 }
 .ls-card::after {
   content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
-  background: linear-gradient(to right, #0F766E, transparent);
+  background: linear-gradient(to right, var(--accent), transparent);
   opacity: 0; transition: opacity .18s;
   pointer-events: none;
 }
 .ls-card:hover {
   border-color: rgba(15,118,110,0.33);
   transform: translateY(-3px);
-  box-shadow: 0 18px 32px -20px rgba(15,118,110,0.3);
+  box-shadow: var(--shadow-card-hover);
 }
 .ls-card:hover::after { opacity: 1; }
 .ls-card:hover .ls-cta-arrow { transform: translateX(4px); }
@@ -138,10 +138,10 @@ const LANDING_CSS = `
 .ls-card-link::before {
   content: ""; position: absolute; inset: 0; z-index: 0;
 }
-.ls-card-link:focus-visible { outline: 2px solid #0F766E; outline-offset: 2px; }
+.ls-card-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ls-sub, .ls-card-chips, .ls-card-cta { position: relative; z-index: 1; }
-.ls-sub a { color: #525B5A; text-decoration: none; }
-.ls-sub a:hover { color: #0F766E; }
+.ls-sub a { color: var(--ink-600); text-decoration: none; }
+.ls-sub a:hover { color: var(--accent); }
 .ls-footer-wave {
   position: absolute; top: -1px; left: 0; right: 0; height: 2px;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 2' preserveAspectRatio='none'><path d='M0,1 Q30,0 60,1 T120,1' stroke='%230F766E' stroke-width='0.8' fill='none' opacity='0.4'/></svg>");
@@ -241,7 +241,7 @@ export default function LandingPage() {
         <div className="ls-footer-wave" />
         <div style={{ ...S.container, ...S.footerInner }}>
           <div style={S.footerLeft}>
-            <span style={{ fontWeight: 600, color: "#0A1F1C" }}>HydroStack</span>
+            <span style={{ fontWeight: 600, color: "var(--ink-900)" }}>HydroStack</span>
             <span>·</span>
             <span>{tl.footerTagline}</span>
           </div>
@@ -264,30 +264,30 @@ const S = {
   /* HERO */
   mark: { display: "flex", alignItems: "center", gap: 10, marginBottom: 28 },
   markLogo: {
-    width: 28, height: 28, borderRadius: 7, background: "#0F766E", color: "white",
+    width: 28, height: 28, borderRadius: 7, background: "var(--accent)", color: "white",
     display: "flex", alignItems: "center", justifyContent: "center",
-    fontWeight: 700, fontSize: 13, boxShadow: "0 6px 20px -8px rgba(15,118,110,0.5)",
+    fontWeight: 700, fontSize: 13, boxShadow: "var(--shadow-logo)",
   },
   markName: { fontWeight: 700, fontSize: 15, letterSpacing: "-0.01em" },
-  markBar: { flex: 1, height: 1, background: "linear-gradient(to right, rgba(15,118,110,0.13), transparent)", maxWidth: 120 },
-  markLang: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#525B5A", letterSpacing: ".08em" },
+  markBar: { flex: 1, height: 1, background: "linear-gradient(to right, var(--accent-soft), transparent)", maxWidth: 120 },
+  markLang: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-600)", letterSpacing: ".08em" },
 
   tag: {
     display: "inline-flex", alignItems: "center",
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#0F766E",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--accent)",
     letterSpacing: "0.18em", textTransform: "uppercase",
     marginBottom: 28, padding: "4px 12px 4px 8px",
-    border: "1px solid rgba(15,118,110,0.13)", borderRadius: 999,
-    background: "rgba(15,118,110,0.03)",
+    border: "1px solid var(--accent-soft)", borderRadius: 999,
+    background: "var(--accent-faint)",
   },
 
   title: {
-    fontSize: "clamp(38px, 5.5vw, 60px)", fontWeight: 700,
+    fontSize: "var(--fs-hero)", fontWeight: 700,
     letterSpacing: "-0.028em", lineHeight: 1.04,
-    color: "#0A1F1C", marginBottom: 24, maxWidth: 760,
+    color: "var(--ink-900)", marginBottom: 24, maxWidth: 760,
   },
-  lead: { fontSize: 18, color: "#525B5A", maxWidth: 600, lineHeight: 1.55, margin: 0 },
+  lead: { fontSize: 18, color: "var(--ink-600)", maxWidth: 600, lineHeight: 1.55, margin: 0 },
 
   meta: {
     marginTop: 36, display: "flex", gap: 0, flexWrap: "wrap",
@@ -295,13 +295,13 @@ const S = {
     paddingTop: 20, maxWidth: 760,
   },
   metaItem: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
     padding: "4px 18px 4px 0", marginRight: 18,
-    borderRight: "1px solid #E5E5E0",
+    borderRight: "1px solid var(--line)",
   },
   metaItemLast: { borderRight: "none", marginRight: 0 },
-  metaStrong: { color: "#0A1F1C", fontWeight: 600 },
+  metaStrong: { color: "var(--ink-900)", fontWeight: 600 },
 
   /* PILLARS */
   pillars: { paddingBottom: "clamp(96px, 12vw, 140px)", position: "relative" },
@@ -310,16 +310,16 @@ const S = {
     gap: 24, flexWrap: "wrap", marginBottom: 32,
   },
   pillarsLabel: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#0F766E", letterSpacing: ".15em", textTransform: "uppercase",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--accent)", letterSpacing: ".15em", textTransform: "uppercase",
   },
   pillarsH: {
     fontSize: 24, fontWeight: 600, letterSpacing: "-0.015em",
-    marginTop: 8, color: "#0A1F1C", maxWidth: 520,
+    marginTop: 8, color: "var(--ink-900)", maxWidth: 520,
   },
   pillarsSide: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
   },
 
   grid: {
@@ -331,41 +331,41 @@ const S = {
   /* CARD */
   cardTop: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
   cardNum: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#0F766E", letterSpacing: ".12em", fontWeight: 500,
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--accent)", letterSpacing: ".12em", fontWeight: 500,
   },
-  glyph: { width: 36, height: 36, color: "#0F766E", flexShrink: 0 },
-  cardTitle: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.012em", color: "#0A1F1C" },
-  cardDesc: { fontSize: 13.5, color: "#525B5A", lineHeight: 1.55, flexGrow: 1, margin: 0 },
+  glyph: { width: 36, height: 36, color: "var(--accent)", flexShrink: 0 },
+  cardTitle: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.012em", color: "var(--ink-900)" },
+  cardDesc: { fontSize: 13.5, color: "var(--ink-600)", lineHeight: 1.55, flexGrow: 1, margin: 0 },
   cardSub: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#525B5A", display: "flex", flexWrap: "wrap", alignItems: "center",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--ink-600)", display: "flex", flexWrap: "wrap", alignItems: "center",
   },
-  subSep: { color: "#E5E5E0", margin: "0 4px" },
+  subSep: { color: "var(--line)", margin: "0 4px" },
   chips: { display: "flex", gap: 6, flexWrap: "wrap" },
   chip: {
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "var(--font-mono)",
     fontSize: 10, padding: "3px 8px",
-    background: "#F4F4EE", border: "1px solid #E5E5E0", borderRadius: 4,
-    color: "#525B5A", letterSpacing: ".03em",
+    background: "var(--surface-alt)", border: "1px solid var(--line)", borderRadius: 4,
+    color: "var(--ink-600)", letterSpacing: ".03em",
   },
   cardCta: {
-    marginTop: 4, fontSize: 13, fontWeight: 500, color: "#0F766E",
+    marginTop: 4, fontSize: 13, fontWeight: 500, color: "var(--accent)",
     display: "flex", alignItems: "center", gap: 6,
   },
 
   /* FOOTER */
-  footer: { borderTop: "1px solid #E8E8E2", padding: "28px 0", background: "#fff", position: "relative" },
+  footer: { borderTop: "1px solid var(--line-soft)", padding: "28px 0", background: "var(--surface)", position: "relative" },
   footerInner: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
     flexWrap: "wrap", gap: 12,
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11, color: "#525B5A", letterSpacing: ".04em",
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
   },
   footerLeft: { display: "flex", gap: 12, alignItems: "center" },
   footerRight: { display: "flex", gap: 14, alignItems: "center" },
   footerDot: {
-    width: 6, height: 6, borderRadius: "50%", background: "#16A34A",
+    width: 6, height: 6, borderRadius: "50%", background: "var(--success)",
     boxShadow: "0 0 0 3px rgba(22,163,74,0.13)",
   },
 };
