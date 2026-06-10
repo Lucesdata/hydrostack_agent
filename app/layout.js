@@ -21,10 +21,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        {/* Fixed background grid */}
-        <div className="bg-grid" aria-hidden="true"/>
-        {/* CRT scanline */}
-        <div className="scanline" aria-hidden="true"/>
         <LangProvider>
           <Navbar />
           <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
