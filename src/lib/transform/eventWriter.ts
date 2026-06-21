@@ -40,7 +40,9 @@ export interface BuiltEventRow {
   fechaNueva: string | null;
   estadoAnterior: string | null;
   estadoNuevo: string | null;
-  docProveedorAnterior: string | null; // NIT crudo; el IO resuelve la FK
+  // NIT canónico (sin DV) tal como lo produce canonicalizeNit; el IO lo resuelve
+  // contra proveedor.nit_canonico (ambos lados canónicos).
+  docProveedorAnterior: string | null;
   docProveedorNuevo: string | null;
 }
 

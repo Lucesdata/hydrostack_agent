@@ -109,6 +109,14 @@ describe('buildContratoEventos', () => {
     expect(out[0].docProveedorNuevo).toBe('800111222');
   });
 
+  it('no emite cesión cuando el documento del proveedor no cambia', () => {
+    const groups = [[
+      snap('r1', D('2024-01-01T00:00:00Z'), D('2024-01-01T00:00:00Z'), { doc: '900123456', tipoDoc: 'NIT' }),
+      snap('r2', D('2024-02-01T00:00:00Z'), D('2024-02-01T00:00:00Z'), { doc: '900123456', tipoDoc: 'NIT' }),
+    ]];
+    expect(buildContratoEventos(groups, counter())).toEqual([]);
+  });
+
   it('suspensión y terminación en transiciones distintas usan correlation_id distintos', () => {
     const groups = [[
       snap('r1', D('2024-01-01T00:00:00Z'), D('2024-01-01T00:00:00Z'), { estado: 'En ejecución' }),
