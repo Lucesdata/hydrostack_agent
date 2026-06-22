@@ -168,6 +168,11 @@ function fmtTransform(t: TransformSummary): string {
       `geo ${t.contratos.geografiaResuelta}/${t.contratos.geografiaResuelta + t.contratos.geografiaNoResuelta} · ` +
       `centinela ${t.contratos.proveedorCentinela} · sin-proc ${t.contratos.procesoNoEncontrado} · ` +
       `cuarentena ${t.contratos.cuarentena}`,
+    `  eventos:   ${t.eventos.eventosInsertados} insertados · ` +
+      `${t.eventos.gruposMultiSnapshot} grupos multi-snapshot · ` +
+      `adic ${t.eventos.porTipo.adicion} · pror ${t.eventos.porTipo.prorroga} · ` +
+      `susp ${t.eventos.porTipo.suspension} · term ${t.eventos.porTipo.terminacion} · ` +
+      `ces ${t.eventos.porTipo.cesion}`,
   ].join('\n');
 }
 

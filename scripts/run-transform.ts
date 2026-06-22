@@ -16,6 +16,7 @@
 import './_env';
 import { pool } from '@/src/lib/db/client';
 import { runTransform, type SourceMetrics } from '@/src/lib/transform/orchestrator';
+import type { EventMetrics } from '@/src/lib/transform/eventWriter';
 
 function fmt(label: string, m: SourceMetrics): string {
   return [
@@ -43,6 +44,23 @@ function fmt(label: string, m: SourceMetrics): string {
     .join('\n');
 }
 
+function fmtEventos(m: EventMetrics): string {
+  return [
+    'eventos (contrato_evento):',
+    `  grupos total:               ${m.gruposTotal}`,
+    `  grupos multi-snapshot:      ${m.gruposMultiSnapshot}`,
+    `  eventos insertados:         ${m.eventosInsertados}`,
+    `    adicion:                  ${m.porTipo.adicion}`,
+    `    prorroga:                 ${m.porTipo.prorroga}`,
+    `    suspension:               ${m.porTipo.suspension}`,
+    `    terminacion:              ${m.porTipo.terminacion}`,
+    `    cesion:                   ${m.porTipo.cesion}`,
+    `  cesiones sin proveedor FK:  ${m.cesionesSinProveedorFk}`,
+    `  grupos sin contrato:        ${m.gruposSinContrato}`,
+    `  grupos con error:           ${m.gruposConError}`,
+  ].join('\n');
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL no definida. Provisiona la Neon branch y ponla en .env.local.');
@@ -54,6 +72,7 @@ async function main() {
   process.stdout.write(`\nbatchId: ${summary.batchId}\n`);
   process.stdout.write(`${fmt('procesos (secop_ii_procesos)', summary.procesos)}\n\n`);
   process.stdout.write(`${fmt('contratos (secop_ii_contratos)', summary.contratos)}\n\n`);
+  process.stdout.write(`${fmtEventos(summary.eventos)}\n\n`);
   process.stdout.write(`transform terminado en ${ms}ms\n`);
 
   await pool.end();
