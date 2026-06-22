@@ -5,4 +5,5 @@ export * from './geo';
 export * from './events';
 export * from './mapCanonical';
 export * from './writers';
+export * from './eventWriter';
 export * from './orchestrator';

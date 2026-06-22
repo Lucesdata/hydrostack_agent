@@ -35,6 +35,7 @@ import {
   upsertProceso,
   upsertProveedor,
 } from './writers';
+import { rebuildContratoEventos, type EventMetrics } from './eventWriter';
 
 export interface SourceMetrics {
   totalSnapshots: number; // filas en raw_record para la source
@@ -54,6 +55,7 @@ export interface TransformSummary {
   batchId: string;
   procesos: SourceMetrics;
   contratos: SourceMetrics;
+  eventos: EventMetrics;
 }
 
 function emptyMetrics(): SourceMetrics {
@@ -226,5 +228,6 @@ export async function runTransform(): Promise<TransformSummary> {
   // (resolveProcesoIdByPortafolio) en contratos encuentre algo.
   const procesos = await transformProcesos(geo, batchId);
   const contratos = await transformContratos(geo, batchId);
-  return { batchId, procesos, contratos };
+  const eventos = await rebuildContratoEventos(db);
+  return { batchId, procesos, contratos, eventos };
 }
