@@ -1,5 +1,5 @@
 /**
- * Ingesta incremental E2E (0.5).
+ * Ingesta incremental E2E (0.5) — CLI.
  *
  *   npm run db:ingest                          # keyset + sweep + transform
  *   npm run db:ingest -- --skip-transform      # solo aterrizar a raw_record
@@ -14,31 +14,20 @@
  *   2. Migración 0001 aplicada (`npm run db:migrate`).
  *   3. Geografía sembrada (`npm run db:seed-geografia`).
  *
- * Flujo:
- *   - Pasada 1 (keyset, D14): `ingestSource()` mueve `sync_log.watermark_to`.
- *   - Pasada 2 (sweep, D21a): `sweepWithoutWatermark()` para contratos sin
- *     `ultima_actualizacion`; NO mueve watermark.
- *   - Transform: `runTransform()` reconstruye la canónica desde raw_record
- *     (idempotente; reconstruye TODO, no solo el batch nuevo — D28).
- *
- * Las dos fuentes son independientes (sus watermarks no se cruzan). El sweep
- * solo aplica a contratos (procesos trae `fecha_de_ultima_publicaci` ≈ 100%).
+ * Este archivo es solo la cáscara CLI: parsea flags, formatea la salida y cierra
+ * el pool. Toda la orquestación vive en `runIngestPipeline` (src/lib/ingest/
+ * pipeline.ts), compartida con el cron HTTP `app/api/cron/ingest`.
  */
 
 import './_env';
 import { pool } from '@/src/lib/db/client';
 import {
-  ingestSource,
-  sweepWithoutWatermark,
-  type IngestSummary,
-  type SweepSummary,
-} from '@/src/lib/ingest/dbIngest';
-import {
-  SOURCE_PROCESOS,
-  SOURCE_CONTRATOS,
-  type IngestSource,
-} from '@/src/lib/ingest/sources';
-import { runTransform, type TransformSummary } from '@/src/lib/transform/orchestrator';
+  runIngestPipeline,
+  type RunOutput,
+  type SourceRun,
+} from '@/src/lib/ingest/pipeline';
+import type { IngestSummary, SweepSummary } from '@/src/lib/ingest/dbIngest';
+import type { TransformSummary } from '@/src/lib/transform/orchestrator';
 
 // ============================================================================
 // CLI args (parser mínimo — sin deps externas)
@@ -115,25 +104,8 @@ function printHelp(): void {
 }
 
 // ============================================================================
-// Output estructurado
+// Output legible
 // ============================================================================
-
-interface SourceRun {
-  keyset: IngestSummary | null;
-  sweep: SweepSummary | null;
-}
-
-interface RunOutput {
-  startedAt: string;
-  durationMs: number;
-  procesos: SourceRun | null;
-  contratos: SourceRun | null;
-  transform: TransformSummary | null;
-}
-
-function emptyRun(): SourceRun {
-  return { keyset: null, sweep: null };
-}
 
 function fmtIngest(s: IngestSummary): string {
   return (
@@ -176,79 +148,34 @@ function fmtTransform(t: TransformSummary): string {
   ].join('\n');
 }
 
+function printHuman(out: RunOutput): void {
+  process.stdout.write(`\ningesta iniciada: ${out.startedAt}\n\n`);
+  if (out.procesos) process.stdout.write(fmtSource('procesos (secop_ii_procesos)', out.procesos) + '\n\n');
+  if (out.contratos) process.stdout.write(fmtSource('contratos (secop_ii_contratos)', out.contratos) + '\n\n');
+  if (out.transform) process.stdout.write(fmtTransform(out.transform) + '\n\n');
+  process.stdout.write(`terminado en ${out.durationMs}ms\n`);
+}
+
 // ============================================================================
 // Main
 // ============================================================================
 
-const SOURCES: Record<'procesos' | 'contratos', IngestSource> = {
-  procesos: SOURCE_PROCESOS,
-  contratos: SOURCE_CONTRATOS,
-};
-
-async function runSource(
-  key: 'procesos' | 'contratos',
-  opts: CliOptions,
-): Promise<SourceRun> {
-  const source = SOURCES[key];
-  const run = emptyRun();
-
-  if (!opts.sweepOnly) {
-    run.keyset = await ingestSource(source, {
-      pageSize: opts.pageSize,
-      marginDays: opts.marginDays,
-      maxPages: opts.maxPages,
-    });
-  }
-
-  // Sweep D21a aplica a contratos (procesos trae watermark ≈100%).
-  if (key === 'contratos') {
-    run.sweep = await sweepWithoutWatermark(source, {
-      pageSize: opts.pageSize,
-      maxPages: opts.maxPages,
-    });
-  }
-
-  return run;
-}
-
 async function main(): Promise<void> {
   const opts = parseArgs(process.argv.slice(2));
 
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL no definida. Configúrala en .env.local.');
-  }
-
-  const t0 = Date.now();
-  const startedAt = new Date().toISOString();
-  const out: RunOutput = {
-    startedAt,
-    durationMs: 0,
-    procesos: null,
-    contratos: null,
-    transform: null,
-  };
-
-  const toRun: ('procesos' | 'contratos')[] =
-    opts.source === 'both' ? ['procesos', 'contratos'] : [opts.source];
-
-  for (const key of toRun) {
-    out[key] = await runSource(key, opts);
-  }
-
-  if (!opts.skipTransform) {
-    out.transform = await runTransform();
-  }
-
-  out.durationMs = Date.now() - t0;
+  const out = await runIngestPipeline({
+    source: opts.source,
+    skipTransform: opts.skipTransform,
+    sweepOnly: opts.sweepOnly,
+    pageSize: opts.pageSize,
+    marginDays: opts.marginDays,
+    maxPages: opts.maxPages,
+  });
 
   if (opts.json) {
     process.stdout.write(JSON.stringify(out, null, 2) + '\n');
   } else {
-    process.stdout.write(`\ningesta iniciada: ${startedAt}\n\n`);
-    if (out.procesos) process.stdout.write(fmtSource('procesos (secop_ii_procesos)', out.procesos) + '\n\n');
-    if (out.contratos) process.stdout.write(fmtSource('contratos (secop_ii_contratos)', out.contratos) + '\n\n');
-    if (out.transform) process.stdout.write(fmtTransform(out.transform) + '\n\n');
-    process.stdout.write(`terminado en ${out.durationMs}ms\n`);
+    printHuman(out);
   }
 
   await pool.end();

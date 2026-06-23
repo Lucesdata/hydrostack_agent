@@ -6,3 +6,4 @@ export * from './mapRecord';
 export * from './runIngest';
 export * from './sodaFetch';
 export * from './dbIngest';
+export * from './pipeline';
