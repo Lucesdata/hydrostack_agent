@@ -14,10 +14,13 @@
  * al cruzar con el endpoint de columnas antes de cerrar 0.3 (0.2 §5).
  */
 
-import { DATASETS } from '@/src/lib/secop/config';
+import { DATASETS, type DatasetKey } from '@/src/lib/secop/config';
 
 export interface IngestSource {
   readonly source: string;
+  /** Clave para resolver el id 4x4 vigente vía catálogo (datasetResolver). */
+  readonly datasetKey: DatasetKey;
+  /** Id 4x4 de fallback; el id real lo resuelve la capa IO en runtime. */
   readonly dataset: string;
   readonly idField: string;
   readonly watermarkField: string;
@@ -26,6 +29,7 @@ export interface IngestSource {
 
 export const SOURCE_PROCESOS: IngestSource = {
   source: 'secop_ii_procesos',
+  datasetKey: 'procesos',
   dataset: DATASETS.procesos,
   idField: 'id_del_proceso',
   watermarkField: 'fecha_de_ultima_publicaci',
@@ -41,6 +45,7 @@ export const SOURCE_PROCESOS: IngestSource = {
 
 export const SOURCE_CONTRATOS: IngestSource = {
   source: 'secop_ii_contratos',
+  datasetKey: 'contratos',
   dataset: DATASETS.contratos,
   idField: 'id_contrato',
   watermarkField: 'ultima_actualizacion',

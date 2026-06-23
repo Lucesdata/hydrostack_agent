@@ -33,6 +33,21 @@ export const DATASETS = {
 export type DatasetKey = keyof typeof DATASETS;
 
 /**
+ * Nombres canónicos de cada dataset en el catálogo Socrata. El id 4x4 puede
+ * rotar por vigencia fiscal (PLAN §4), pero el nombre es estable, así que el
+ * `datasetResolver` lo usa para resolver el id vigente en runtime. Los IDs de
+ * `DATASETS` quedan como fallback de emergencia. Verificados en vivo contra el
+ * catálogo el 2026-06-23.
+ */
+export const DATASET_NAMES: Record<DatasetKey, string> = {
+  procesos: "SECOP II - Procesos de Contratación",
+  contratos: "SECOP II - Contratos Electrónicos",
+};
+
+/** Dominio (sin protocolo) para la Discovery API del catálogo Socrata. */
+export const SOCRATA_CATALOG_DOMAIN = "datos.gov.co";
+
+/**
  * Mapeo de campos del dataset PROCESOS (p6dx-8zbt).
  * Verificado contra el esquema real (Fase 0).
  */

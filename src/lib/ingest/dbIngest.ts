@@ -27,6 +27,7 @@ import { sodaFetchPage } from './sodaFetch';
 import { windowStart } from './watermark';
 import type { IngestSource } from './sources';
 import type { RawRecordInsert } from './mapRecord';
+import { resolveDatasetId } from '@/src/lib/secop/datasetResolver';
 
 /** Watermark anterior = MAX(watermark_to) de las corridas exitosas (0.1 §4.5). */
 export async function readLastWatermark(source: string): Promise<string | null> {
@@ -80,9 +81,10 @@ export async function sweepWithoutWatermark(
   source: IngestSource,
   opts: { pageSize?: number; maxPages?: number; batchId?: string } = {},
 ): Promise<SweepSummary> {
+  const dataset = await resolveDatasetId(source.datasetKey);
   return runSweep(
     { fetchPage: sodaFetchPage, sink: makeDbSink(source.source) },
-    { source, ...opts },
+    { source: { ...source, dataset }, ...opts },
   );
 }
 
@@ -93,6 +95,7 @@ export async function ingestSource(
   source: IngestSource,
   opts: { pageSize?: number; marginDays?: number; maxPages?: number } = {},
 ): Promise<IngestSummary> {
+  const dataset = await resolveDatasetId(source.datasetKey);
   const lastWatermark = await readLastWatermark(source.source);
   const batchId = randomUUID();
   const from = windowStart(lastWatermark, opts.marginDays ?? 1);
@@ -105,7 +108,7 @@ export async function ingestSource(
   try {
     const summary = await runIngest(
       { fetchPage: sodaFetchPage, sink: makeDbSink(source.source) },
-      { source, lastWatermark, batchId, ...opts },
+      { source: { ...source, dataset }, lastWatermark, batchId, ...opts },
     );
     await db
       .update(syncLog)

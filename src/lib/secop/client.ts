@@ -12,13 +12,13 @@
 
 import {
   SOCRATA_DOMAIN,
-  DATASETS,
   FIELDS_PROCESOS,
   FIELDS_CONTRATOS,
   KEYWORDS_AGUA,
   PAGE_SIZE_DEFAULT,
   PAGE_SIZE_MAX,
 } from "./config";
+import { resolveDatasetId } from "./datasetResolver";
 import type {
   SecopProceso,
   SecopContrato,
@@ -145,7 +145,7 @@ export async function searchProcesos(
     query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
   );
 
-  const rows = await sodaFetch<Record<string, unknown>>(DATASETS.procesos, {
+  const rows = await sodaFetch<Record<string, unknown>>(await resolveDatasetId("procesos"), {
     $where: where || undefined,
     $q: query.q ? soqlEscape(query.q) : undefined,
     $order: `${F.fechaPublicacion} DESC`,
@@ -198,7 +198,7 @@ export async function searchContratos(
     query.valorMin != null ? `${C.valor} >= ${query.valorMin}` : null,
   );
 
-  const rows = await sodaFetch<Record<string, unknown>>(DATASETS.contratos, {
+  const rows = await sodaFetch<Record<string, unknown>>(await resolveDatasetId("contratos"), {
     $where: where || undefined,
     $q: query.q ? soqlEscape(query.q) : undefined,
     $limit: pageSize,
