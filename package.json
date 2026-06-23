@@ -17,7 +17,8 @@
     "db:seed-geografia": "tsx scripts/seed-geografia.ts",
     "db:transform": "tsx scripts/run-transform.ts",
     "db:ingest": "tsx scripts/run-ingest.ts",
-    "db:audit-proveedores": "tsx scripts/audit-proveedores.ts"
+    "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
+    "analyze-pliego": "tsx scripts/analyze-pliego.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
