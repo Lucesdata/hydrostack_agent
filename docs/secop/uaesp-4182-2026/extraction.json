@@ -1,0 +1,193 @@
+{
+  "proceso": "4182.010.32.1.305-2026",
+  "entidad": "Distrito de Santiago de Cali – Unidad Administrativa Especial de Servicios Públicos (UAESP)",
+  "modalidad": "Concurso de méritos abierto",
+  "plazo": "4 meses contados a partir del cumplimiento de los requisitos de perfeccionamiento y ejecución",
+  "presupuesto_oficial_cop": 412698192,
+  "presupuesto_oficial_letras": "CUATROCIENTOS DOCE MILLONES SEISCIENTOS NOVENTA Y OCHO MIL CIENTO NOVENTA Y DOS PESOS M/CTE",
+  "presupuesto_incluye": "impuestos, tributos, contribuciones, costos directos e indirectos nacionales y municipales",
+  "moneda": "COP",
+  "reajuste_precios_durante_ejecucion": false,
+  "reajuste_precios_nota": "Pliego Cap. V (p.81): 'Los precios contenidos en la propuesta NO ESTÁN SUJETOS A REAJUSTE ALGUNO'.",
+
+  "formato_exigido": {
+    "nombre_canonico_pliego": "COMPLEMENTO DE OFERTA ECONOMICA",
+    "referencia_pliego": "Capítulo V, página 80-81",
+    "archivo_descargado_secop": "FORMATO OFERTA ECONOMICA EST MITIGACION DE RIESGOS PTAPS.xlsx",
+    "hoja": "Estudios MyR",
+    "columnas": ["ITEM", "DESCRIPCION", "UND", "CANT.", "VR. UNIT", "VR. PARCIAL", "IVA (19%)", "VALOR TOTAL"],
+    "iva_fijado": 0.19,
+    "estructura": "Tabla plana con encabezados de bloque por PTAP (8 bloques) + 3 sub-actividades cada bloque + fila VALOR TOTAL + fila TOTAL por PTAP + VALOR TOTAL general al final (R55).",
+    "diligenciamiento": "El proponente llena solo VR. UNIT por sub-actividad. VR. PARCIAL = VR.UNIT × CANT (CANT = 1 en todos los items). VALOR TOTAL = VR.PARCIAL × (1+IVA). Firmado por el representante legal.",
+    "desglose_exigido": "Los precios deben ser desglosados por actividad y de ser necesario por gastos en moneda nacional (Cap. V, p.81).",
+    "exige_apu_desglosado": false,
+    "nota_apu": "El formato NO pide APU. Las unidades son globales (GLB) y solo se entrega un VR. UNIT por sub-actividad. No hay columnas para mano de obra, equipo, materiales, factor multiplicador ni componentes desglosados. Consistente con concurso de méritos donde el precio no es factor de selección."
+  },
+
+  "evaluacion_economica": {
+    "precio_punta": false,
+    "precio_punta_nota": "Concurso de méritos: el precio NO es factor de escogencia (Ley 1150/2007 art. 5° num. 4, citado en pliego Cap. IV, p.59). El precio solo opera como techo de rechazo.",
+    "apertura_sobre_economico": "La oferta económica se abre SOLO del proponente que quede primero en calificación técnica (Cap. V, p.81).",
+    "correcciones_aritmeticas": {
+      "permitidas_solo_por_entidad": true,
+      "alcance": "operaciones aritméticas erróneamente realizadas y ajuste al peso del VR. UNIT y el IVA",
+      "redondeo_al_peso": "≥0.5 sube al entero siguiente, <0.5 baja al entero anterior",
+      "valor_evaluado": "el valor total corregido por la entidad"
+    },
+    "precio_artificialmente_bajo": {
+      "aplica": true,
+      "norma": "Decreto 1082/2015 art. 2.2.1.1.2.2.4, complementado por la Guía de Colombia Compra Eficiente para ofertas artificialmente bajas",
+      "referencia_pliego": "Capítulo 5.2, p.82"
+    }
+  },
+
+  "reglas_presupuesto": [
+    "El presupuesto oficial total 2026 no podrá sobrepasarse — propuesta RECHAZADA (NOTA 1, sección 1.3, p.4).",
+    "El valor individual 2026 por actividad no podrá sobrepasarse — propuesta RECHAZADA (NOTA 2, sección 1.3, p.4).",
+    "El precio NO es factor de escogencia: concurso de méritos, Ley 1150/2007 art. 5° num. 4 (Cap. IV).",
+    "Los precios NO están sujetos a reajuste alguno durante la ejecución (Cap. V, p.81).",
+    "Causal de rechazo #15: no presentar la propuesta económica.",
+    "Causal de rechazo #16: superar los precios promedios con su margen de variación por ítem del análisis del sector.",
+    "Causal de rechazo #17: modificar, alterar o incluir apartes, descripciones, cantidades o unidades de medida que impidan la evaluación del formato.",
+    "Causal de rechazo #18: no ofertar todos los ítems del formato.",
+    "Causal de rechazo #19: inconsistencia entre el valor del formato y el cuestionario de SECOP II.",
+    "Causal de rechazo #28: la oferta económica no se presenta conforme a lo establecido por la entidad.",
+    "Causal de rechazo #29: superar el presupuesto oficial o los valores techo del análisis del sector.",
+    "No se admiten propuestas parciales (sección 2.7).",
+    "Valor en letras y números obligatorio.",
+    "Una sola oferta por proponente; presentar dos = rechazo de ambas (causales #12, #26)."
+  ],
+
+  "partidas": [
+    {
+      "codigo_raiz": "1.1.73",
+      "descripcion": "Realizar estudio con alcance de diseño para la mitigación del riesgo y manejo de la estabilidad del terreno sistema de acueducto en la zona rural de Santiago de Cali",
+      "subpartidas": [
+        {
+          "codigo": "1.1.73.1",
+          "descripcion": "PTAP Veredas Diamante, Soledad y Cedral, Corregimiento Felidia",
+          "valor_techo_2026_cop": 51587274,
+          "items": [
+            {"codigo": "1.1.73.1.1", "descripcion": "Diseño estructural de unidades que garanticen la estabilidad de la infraestructura existente y mitiguen el riesgo (diseños definitivos, especificaciones de materiales, cantidades de obra y presupuesto)", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 15621320},
+            {"codigo": "1.1.73.1.2", "descripcion": "Estudio de suelos con recomendaciones del estudio geológico o morfológico, análisis de estabilidad de taludes en la zona donde está construida la PTAP", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 15438168},
+            {"codigo": "1.1.73.1.3", "descripcion": "Estudios sobre la mitigación del riesgo", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 20527786}
+          ]
+        },
+        {"codigo": "1.1.73.2", "descripcion": "PTAP El Banqueo, corregimiento de Pance", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1 (mismas 3 actividades, mismos valores techo)"},
+        {"codigo": "1.1.73.3", "descripcion": "PTAP Las Palmas Fase II – corregimiento La Castilla", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
+        {"codigo": "1.1.73.4", "descripcion": "PTAP Vereda Alto Aguacatal, Corregimiento La Elvira", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
+        {"codigo": "1.1.73.5", "descripcion": "PTAP La Leonera cabecera, Corregimiento La Leonera", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
+        {"codigo": "1.1.73.6", "descripcion": "PTAP La Elvira, corregimiento La Elvira", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
+        {"codigo": "1.1.73.7", "descripcion": "PTAP Piamonte, corregimiento Montebello", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
+        {"codigo": "1.1.73.8", "descripcion": "PTAP El Saladito, corregimiento El Saladito", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"}
+      ]
+    }
+  ],
+
+  "metadatos_calculo_techo": {
+    "fuente": "Pliego sección 1.3, tabla 'El valor del presupuesto oficial se encuentra distribuido de la siguiente manera' (págs. 5-8).",
+    "metodologia_entidad": "La entidad calculó precios promedio 2025 a partir de tres cotizaciones de mercado (CITY GYR, COORDENADA EXACTA, PROQ UING) y aplicó IPC 5.1% para llevarlos a 2026. Los valores techo 2026 incluyen IVA 19%.",
+    "promedio_2025_antes_iva_por_actividad": {
+      "diseño_estructural": 12490162,
+      "estudio_suelos": 12343720,
+      "mitigacion_riesgo": 16413168
+    },
+    "ipc_aplicado": 0.051
+  },
+
+  "requisitos_habilitantes": {
+    "capacidad_financiera": {
+      "indice_liquidez_minimo": 2.64,
+      "indice_endeudamiento_maximo": 0.51,
+      "razon_cobertura_intereses_minima": 4.38,
+      "capital_de_trabajo_minimo": "100% del Presupuesto Oficial"
+    },
+    "capacidad_organizacional": {
+      "rentabilidad_patrimonio_minima": 0.15,
+      "rentabilidad_activo_minima": 0.07
+    },
+    "equipo_humano_minimo": [
+      {"cantidad": 1, "cargo": "Director", "perfil": "Ingeniero Civil y/o Ingeniero Sanitario con Maestría en ingeniería", "experiencia_general_anos": 10, "experiencia_especifica": "Mínimo 5 contratos como director de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 0.5},
+      {"cantidad": 3, "cargo": "Geotecnista", "perfil": "Ingeniero Civil especialista en Geotecnia y/o Ingeniero Geólogo y/o Geólogo", "experiencia_general_anos": 5, "experiencia_especifica": "Mínimo 5 contratos como geotecnista de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 1.0},
+      {"cantidad": 3, "cargo": "Especialista Estructural", "perfil": "Ingeniero Civil especialista en Estructuras", "experiencia_general_anos": 5, "experiencia_especifica": "Mínimo 5 contratos como especialista estructural de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 1.0}
+    ]
+  },
+
+  "criterios_calificacion": {
+    "total_puntos": 100,
+    "items": [
+      {"criterio": "Experiencia adicional del proponente", "puntos": 40.5},
+      {"criterio": "Experiencia adicional del equipo mínimo de trabajo", "puntos": 29},
+      {"criterio": "Formación adicional del equipo mínimo de trabajo", "puntos": 18},
+      {"criterio": "Apoyo a la industria nacional", "puntos": 10},
+      {"criterio": "MiPymes", "puntos": 0.25},
+      {"criterio": "Emprendimientos y empresas de mujeres", "puntos": 0.25},
+      {"criterio": "Vinculación de personas con discapacidad", "puntos": 1, "nota": "La tabla resumen de p.59 dice 2 puntos pero el detalle en p.69, p.70 y p.79 dice 1 punto. La tabla de p.59 está mal."}
+    ],
+    "reduccion_por_incumplimientos": "2% sobre el total si hay multas/cláusulas penales en el último año (sección 4.8)."
+  },
+
+  "garantias": {
+    "seriedad_oferta": {"valor": "10% del valor de la oferta", "vigencia_dias": 90},
+    "cumplimiento_contrato": {"valor": "20% del valor del contrato", "vigencia": "duración del contrato + 6 meses"},
+    "pago_salarios_prestaciones": {"valor": "8% del valor del contrato", "vigencia": "plazo del contrato + 3 años"},
+    "calidad_servicio": {"valor": "20% del valor del contrato", "vigencia": "plazo del contrato + 3 años"},
+    "responsabilidad_civil_extracontractual": {"valor": "200 SMMLV", "vigencia": "igual al período de ejecución"},
+    "clausula_penal_pecuniaria_minima": "20% del valor total del contrato",
+    "multa_por_mora": "1/1000 (0.1%) del valor del contrato por día de atraso"
+  },
+
+  "acuerdos_comerciales_aplicables": ["Estados Unidos", "Canadá", "Corea", "Costa Rica", "Estados AELC (EFTA)", "Unión Europea", "Israel", "Reino Unido e Irlanda del Norte", "Comunidad Andina", "Alianza Pacífico (Chile, Perú)"],
+
+  "lagunas_pendientes": [
+    {
+      "id": 1,
+      "descripcion": "Tres numeraciones distintas para los mismos items del presupuesto: sección 1.2 'Alcance' usa 1.1.70.x, sección 1.3 'Valor estimado' usa 1.1.72.x, y el Excel exige diligenciar 1.1.73.x. No se identificó adenda que aclare cuál numeración es oficial para evaluación.",
+      "severidad": "alta",
+      "tipo": "inconsistencia interna del pliego"
+    },
+    {
+      "id": 2,
+      "descripcion": "La sección 1.1 'Ubicación' lista 7 sitios sin Felidia; la sección 1.2 'Alcance' lista 8 con Felidia. Total efectivo = 8 PTAPs por el Excel y por la sección 1.3.",
+      "severidad": "media",
+      "tipo": "omisión en sección 1.1 del pliego"
+    },
+    {
+      "id": 3,
+      "descripcion": "Tabla de criterios de calificación (p.59) asigna 2 puntos a vinculación de discapacidad, pero el resto del pliego (p.69, p.70, p.79) dice 1 punto. La suma con 2 es 100 y con 1 es 99 — la tabla de p.59 está mal.",
+      "severidad": "media",
+      "tipo": "inconsistencia interna del pliego"
+    },
+    {
+      "id": 4,
+      "descripcion": "Texto residual de plantilla de obra civil: sección de equipo humano (p.57-58) menciona 'costos por metro cúbico', 'dotación de pantalón, camisa, casco y botas de seguridad'. Frases impropias de un contrato de consultoría de diseño.",
+      "severidad": "baja",
+      "tipo": "residuo de template no depurado"
+    },
+    {
+      "id": 5,
+      "descripcion": "Anexo 3 – Minuta del Contrato NO está entre los archivos analizados. En él vive la forma de pago, anticipo, pago anticipado y obligaciones específicas (referido en Cap. IX, p.89). Sin ese anexo no se conoce el esquema de desembolsos.",
+      "severidad": "alta",
+      "tipo": "archivo externo no analizado"
+    },
+    {
+      "id": 6,
+      "descripcion": "Matriz de Riesgos referida en Cap. VI (p.82) tampoco está entre los archivos analizados. Vive como anexo separado.",
+      "severidad": "media",
+      "tipo": "archivo externo no analizado"
+    }
+  ],
+
+  "lagunas_cerradas_post_lectura_completa": [
+    "Nombre canónico del formato → 'COMPLEMENTO DE OFERTA ECONOMICA' (Cap. V, p.80-81).",
+    "Reglas de reajuste durante ejecución → no hay reajuste (Cap. V, p.81).",
+    "PROQ UING es una de las tres consultoras de referencia de mercado citadas por la entidad para construir el techo. Razón social completa no se especifica.",
+    "APU explícitamente NO requerido — confirmado por ausencia de columnas en el formato y por la no ponderación del precio."
+  ],
+
+  "metadatos_extraccion": {
+    "fecha": "2026-06-12",
+    "paginas_pliego_leidas": "1-90 (100%)",
+    "fuentes_originales": "ver sources.md"
+  }
+}
