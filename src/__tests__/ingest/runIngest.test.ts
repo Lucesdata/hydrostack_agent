@@ -43,9 +43,12 @@ describe('runIngest', () => {
     expect(summary.reachedMaxPages).toBe(false);
     expect(summary.batchId).toBe(BATCH);
 
-    // Página 1 sin cota (backfill); páginas siguientes con cursor del último row.
-    expect(calls[0].$where).toBeUndefined();
+    // Página 1 backfill: ahora SIEMPRE lleva el filtro sectorial (ADR-0001 B1),
+    // ya no es undefined. Páginas siguientes: filtro AND cursor del último row.
+    expect(calls[0].$where).toContain("like '%ACUEDUCTO%'");
+    expect(calls[0].$where).toContain('AND NOT');
     expect(calls[1].$where).toContain("ultima_actualizacion > '2024-01-02T00:00:00.000'");
+    expect(calls[1].$where).toContain('AND NOT'); // filtro sectorial sigue presente
     expect(calls[2].$where).toContain("ultima_actualizacion > '2024-01-04T00:00:00.000'");
   });
 
@@ -68,7 +71,8 @@ describe('runIngest', () => {
       { fetchPage, sink: countingSink },
       { source: SOURCE_CONTRATOS, lastWatermark: '2024-06-04T00:00:00.000', batchId: BATCH, marginDays: 1 },
     );
-    expect(calls[0].$where).toBe("ultima_actualizacion > '2024-06-03T00:00:00.000'");
+    // La ventana D14 sigue aplicando; ahora ANDeada con el filtro sectorial.
+    expect(calls[0].$where).toContain("ultima_actualizacion > '2024-06-03T00:00:00.000'");
   });
 
   it('never lets the watermark go backwards below the previous one', async () => {

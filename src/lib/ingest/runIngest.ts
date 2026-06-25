@@ -82,6 +82,7 @@ export async function runIngest(
       idField: source.idField,
       sinceExclusive: start,
       cursor,
+      sectorWhere: source.sectorWhere,
       limit: pageSize,
     });
 
@@ -169,6 +170,7 @@ export async function runSweep(
       idField: source.idField,
       watermarkField: source.watermarkField,
       sinceIdExclusive: cursor,
+      sectorWhere: source.sectorWhere,
       limit: pageSize,
     });
 

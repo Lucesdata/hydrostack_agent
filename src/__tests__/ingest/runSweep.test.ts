@@ -42,13 +42,12 @@ describe('runSweep (D21a)', () => {
     expect(summary.batchId).toBe(BATCH);
 
     // Página 1 sin cursor; siguientes con cursor por id (no por watermark).
-    expect(calls[0].$where).toBe('ultima_actualizacion IS NULL');
-    expect(calls[1].$where).toBe(
-      "ultima_actualizacion IS NULL AND id_contrato > 'B'",
-    );
-    expect(calls[2].$where).toBe(
-      "ultima_actualizacion IS NULL AND id_contrato > 'D'",
-    );
+    // Ahora el sweep también lleva el filtro sectorial ANDeado (ADR-0001 B1).
+    expect(calls[0].$where).toContain('ultima_actualizacion IS NULL');
+    expect(calls[0].$where).toContain('AND NOT'); // filtro sectorial presente
+    expect(calls[1].$where).toContain('ultima_actualizacion IS NULL');
+    expect(calls[1].$where).toContain("id_contrato > 'B'");
+    expect(calls[2].$where).toContain("id_contrato > 'D'");
     expect(calls[0].$order).toBe('id_contrato ASC');
   });
 

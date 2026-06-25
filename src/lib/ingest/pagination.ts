@@ -38,9 +38,11 @@ export function buildKeysetPage(opts: {
   sinceExclusive?: string | null;
   /** Cursor de la última fila de la página anterior. */
   cursor?: KeysetCursor | null;
+  /** Filtro sectorial de ingesta (ADR-0001): se ANDea con la condición de cursor. */
+  sectorWhere?: string | null;
   limit: number;
 }): SodaPageParams {
-  const { watermarkField, idField, sinceExclusive, cursor, limit } = opts;
+  const { watermarkField, idField, sinceExclusive, cursor, sectorWhere, limit } = opts;
 
   let where: string | undefined;
   if (cursor) {
@@ -53,11 +55,24 @@ export function buildKeysetPage(opts: {
     where = `${watermarkField} > '${soqlEscape(sinceExclusive)}'`;
   }
 
+  // La cláusula de cursor tiene un OR de nivel superior; para ANDearla con el
+  // filtro sectorial hay que parentizarla. Sin `sectorWhere` la salida queda
+  // IDÉNTICA (compat hacia atrás): backfill sin cota → sin $where.
+  const combined = combineWhere(where, sectorWhere);
+
   return {
     $order: `${watermarkField} ASC, ${idField} ASC`,
     $limit: limit,
-    ...(where ? { $where: where } : {}),
+    ...(combined ? { $where: combined } : {}),
   };
+}
+
+/** AND de la cláusula de cursor/ventana con el filtro sectorial, parentizando. */
+function combineWhere(cursorWhere?: string, sectorWhere?: string | null): string | undefined {
+  const sector = sectorWhere ? `(${sectorWhere})` : null;
+  if (cursorWhere && sector) return `(${cursorWhere}) AND ${sector}`;
+  if (cursorWhere) return cursorWhere;
+  return sector ?? undefined;
 }
 
 /** Extrae el cursor de la última fila de una página. */
@@ -90,12 +105,19 @@ export function buildSweepPage(opts: {
   watermarkField: string;
   /** Id de la última fila de la página anterior (cursor del sweep). */
   sinceIdExclusive?: string | null;
+  /** Filtro sectorial de ingesta (ADR-0001): se ANDea como condición extra. */
+  sectorWhere?: string | null;
   limit: number;
 }): SodaPageParams {
-  const { idField, watermarkField, sinceIdExclusive, limit } = opts;
+  const { idField, watermarkField, sinceIdExclusive, sectorWhere, limit } = opts;
   const conditions = [`${watermarkField} IS NULL`];
   if (sinceIdExclusive) {
     conditions.push(`${idField} > '${soqlEscape(sinceIdExclusive)}'`);
+  }
+  // Todas las condiciones del sweep son AND, así que el filtro sectorial entra
+  // como una condición más (sin riesgo de precedencia). Sin él, salida idéntica.
+  if (sectorWhere) {
+    conditions.push(`(${sectorWhere})`);
   }
   return {
     $order: `${idField} ASC`,

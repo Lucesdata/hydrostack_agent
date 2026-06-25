@@ -15,6 +15,11 @@
  */
 
 import { DATASETS, type DatasetKey } from '@/src/lib/secop/config';
+import {
+  buildSectorWhere,
+  SECTOR_NET_PROCESOS,
+  SECTOR_NET_CONTRATOS,
+} from '@/src/lib/secop/ingest-net';
 
 export interface IngestSource {
   readonly source: string;
@@ -25,6 +30,12 @@ export interface IngestSource {
   readonly idField: string;
   readonly watermarkField: string;
   readonly volatileFields: readonly string[];
+  /**
+   * Filtro sectorial de ingesta (ADR-0001, Opción C): SoQL `$where` que el
+   * keyset/sweep ANDea con su cursor para aterrizar SOLO el sector agua. Fuente
+   * de verdad: `secop/ingest-net.ts`.
+   */
+  readonly sectorWhere: string;
 }
 
 export const SOURCE_PROCESOS: IngestSource = {
@@ -41,6 +52,7 @@ export const SOURCE_PROCESOS: IngestSource = {
     'respuestas_al_procedimiento',
     'respuestas_externas',
   ],
+  sectorWhere: buildSectorWhere(SECTOR_NET_PROCESOS),
 };
 
 export const SOURCE_CONTRATOS: IngestSource = {
@@ -59,6 +71,7 @@ export const SOURCE_CONTRATOS: IngestSource = {
     'saldo_cdp',
     'saldo_vigencia',
   ],
+  sectorWhere: buildSectorWhere(SECTOR_NET_CONTRATOS),
 };
 
 export const INGEST_SOURCES = {
