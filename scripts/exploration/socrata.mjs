@@ -70,6 +70,7 @@ async function fetchWithRetry(url, { timeoutMs, maxRetries }) {
       const status = err.status;
       const retriable =
         status === 429 ||
+        status === 500 || // Socrata "internal-error" suele ser transitorio
         status === 503 ||
         status === 502 ||
         status === 504 ||
