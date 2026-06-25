@@ -132,3 +132,138 @@ export function accessMessage(state: DocumentAccess): string {
       return 'Acceso a documentos por confirmar.';
   }
 }
+
+// ===========================================================================
+//  Fase C — probe on-demand + gate del extractor
+// ===========================================================================
+
+/**
+ * HALLAZGO VERIFICADO (2026-06-25): la URL pública de SECOP II
+ * (`community.secop.gov.co/Public/Tendering/OpportunityDetail`) **redirige a un
+ * muro de Google ReCaptcha** (`/Public/Common/GoogleReCaptcha/Index?previousUrl=…`)
+ * para clientes no-navegador. Probado en 3 procesos: todos redirigen al captcha.
+ *
+ * Implicación: un probe server-side NUNCA obtiene el contenido del detalle →
+ * cae en el muro → `RESTRICTED`. Eso ES el valor del gate: detectar que el
+ * documento no es accesible por máquina y mantenerlo FUERA del extractor (un
+ * HTML de captcha alimentado a Hydro_Agent = presupuesto alucinado). `PUBLIC`
+ * solo es plausible para una URL de documento descargable directo (PDF), no para
+ * la página de detalle. Coherente con `gate-verdict.md` (descarga manual).
+ */
+const WALL_URL_PATTERNS = [
+  '/googlerecaptcha/',
+  '/account/login',
+  '/common/login',
+  '/account/signin',
+  'previousurl=', // SECOP II adjunta la url original al redirigir al captcha
+];
+
+/** Metadata de la respuesta HTTP del probe (desacoplada del fetch real). */
+export interface ProbeResponseInput {
+  /** Hubo respuesta (no error de red/timeout). */
+  ok: boolean;
+  status: number;
+  /** URL efectiva tras seguir redirects (clave para detectar el muro). */
+  finalUrl: string;
+  contentType: string | null;
+  /** Muestra del cuerpo (solo si es HTML), para marcadores de captcha/login. */
+  bodySample?: string | null;
+  error?: string;
+}
+
+/**
+ * Clasifica la respuesta del probe → estado (PURO, testeable). Centrado en el
+ * muro ReCaptcha (ver nota arriba): prioriza la URL final tras redirects.
+ */
+export function classifyProbeResponse(input: ProbeResponseInput): DocumentAccessResult {
+  if (!input.ok) {
+    return { state: 'UNKNOWN', reason: `probe sin respuesta${input.error ? `: ${input.error}` : ''}`, method: 'probe' };
+  }
+  const finalUrl = (input.finalUrl ?? '').toLowerCase();
+  const ctype = (input.contentType ?? '').toLowerCase();
+  const body = (input.bodySample ?? '').toLowerCase();
+
+  // Muro de captcha/login: la señal más fiable es la URL final tras redirects.
+  if (WALL_URL_PATTERNS.some((p) => finalUrl.includes(p)) || body.includes('recaptcha')) {
+    return { state: 'RESTRICTED', reason: 'muro ReCaptcha/login: documento no accesible por máquina', method: 'probe' };
+  }
+  if (input.status === 404 || input.status === 410) {
+    return { state: 'NOT_PUBLISHED', reason: `documento no encontrado (HTTP ${input.status})`, method: 'probe' };
+  }
+  if (input.status === 401 || input.status === 403) {
+    return { state: 'RESTRICTED', reason: `acceso denegado (HTTP ${input.status})`, method: 'probe' };
+  }
+  if (input.status >= 500) {
+    return { state: 'UNKNOWN', reason: `error de servidor (HTTP ${input.status})`, method: 'probe' };
+  }
+  // Documento descargable directo (PDF/binario) sin muro → accesible por máquina.
+  if (input.status === 200 && (ctype.includes('application/pdf') || ctype.includes('octet-stream'))) {
+    return { state: 'PUBLIC', reason: `documento descargable (${input.contentType})`, method: 'probe' };
+  }
+  if (input.status === 200) {
+    return { state: 'UNKNOWN', reason: 'respuesta 200 sin marcador claro de documento ni de muro', method: 'probe' };
+  }
+  return { state: 'UNKNOWN', reason: `respuesta inesperada (HTTP ${input.status})`, method: 'probe' };
+}
+
+export interface ProbeDeps {
+  /** fetch inyectable (tests sin red). Default: fetch global. */
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+  bodySampleBytes?: number;
+}
+
+/**
+ * C1 — probe ON-DEMAND (jamás en batch nacional): un GET ligero que sigue
+ * redirects y clasifica el resultado. Solo lee el cuerpo si es HTML (para
+ * marcadores de muro); un PDF no se descarga entero.
+ */
+export async function probeDocument(url: string | null, deps: ProbeDeps = {}): Promise<DocumentAccessResult> {
+  if (!url) {
+    return { state: 'NOT_PUBLISHED', reason: 'sin url para probar', method: 'probe' };
+  }
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), deps.timeoutMs ?? 15_000);
+  try {
+    const res = await fetchImpl(url, {
+      redirect: 'follow',
+      signal: ctl.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (HydroStack probe)' },
+    });
+    const contentType = res.headers.get('content-type');
+    let bodySample: string | null = null;
+    if (contentType && contentType.toLowerCase().includes('text/html')) {
+      bodySample = (await res.text()).slice(0, deps.bodySampleBytes ?? 4000);
+    }
+    return classifyProbeResponse({ ok: true, status: res.status, finalUrl: res.url, contentType, bodySample });
+  } catch (e) {
+    return classifyProbeResponse({
+      ok: false,
+      status: 0,
+      finalUrl: url,
+      contentType: null,
+      error: e instanceof Error ? e.name : 'error',
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * C2 — gate del extractor: SOLO `PUBLIC` puede llegar a Hydro_Agent. Garantiza
+ * que el extractor jamás reciba un HTML de captcha/login → cero líneas de
+ * presupuesto alucinadas (parte del pass/fail de Fase 0).
+ */
+export function canExtract(state: DocumentAccess): boolean {
+  return state === 'PUBLIC';
+}
+
+/** Lanza si el estado no permite extracción. Usar antes de alimentar el extractor. */
+export function assertExtractable(state: DocumentAccess): void {
+  if (!canExtract(state)) {
+    throw new Error(
+      `Gate de acceso documental: estado "${state}" — el extractor solo procesa documentos PUBLIC. ${accessMessage(state)}`,
+    );
+  }
+}

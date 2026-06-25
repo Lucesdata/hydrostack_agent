@@ -4,6 +4,10 @@ import {
   accessMessage,
   secopPortal,
   extractUrl,
+  classifyProbeResponse,
+  probeDocument,
+  canExtract,
+  assertExtractable,
   type DocumentAccess,
 } from '@/src/lib/secop/document-access';
 import { FIELDS_PROCESOS } from '@/src/lib/secop/config';
@@ -88,5 +92,93 @@ describe('accessMessage', () => {
     const msgs = (['PUBLIC', 'RESTRICTED', 'NOT_PUBLISHED', 'UNKNOWN'] as DocumentAccess[]).map(accessMessage);
     msgs.forEach((m) => expect(m.length).toBeGreaterThan(0));
     expect(new Set(msgs).size).toBe(4); // los cuatro mensajes son distintos
+  });
+});
+
+describe('classifyProbeResponse (C1)', () => {
+  it('muro ReCaptcha por URL final tras redirect → RESTRICTED (caso real SECOP II)', () => {
+    const r = classifyProbeResponse({
+      ok: true,
+      status: 200,
+      finalUrl: 'https://community.secop.gov.co/Public/Common/GoogleReCaptcha/Index?previousUrl=...',
+      contentType: 'text/html; charset=utf-8',
+      bodySample: '<title>ReCaptcha</title>',
+    });
+    expect(r.state).toBe('RESTRICTED');
+    expect(r.method).toBe('probe');
+  });
+
+  it('marcador recaptcha en el cuerpo → RESTRICTED', () => {
+    expect(
+      classifyProbeResponse({ ok: true, status: 200, finalUrl: 'https://x/y', contentType: 'text/html', bodySample: 'grecaptcha.execute()' }).state,
+    ).toBe('RESTRICTED');
+  });
+
+  it('404 → NOT_PUBLISHED; 403 → RESTRICTED; 5xx → UNKNOWN', () => {
+    const base = { ok: true, finalUrl: 'https://x/y', contentType: 'text/html', bodySample: '' };
+    expect(classifyProbeResponse({ ...base, status: 404 }).state).toBe('NOT_PUBLISHED');
+    expect(classifyProbeResponse({ ...base, status: 403 }).state).toBe('RESTRICTED');
+    expect(classifyProbeResponse({ ...base, status: 502 }).state).toBe('UNKNOWN');
+  });
+
+  it('PDF descargable directo (200) → PUBLIC', () => {
+    const r = classifyProbeResponse({ ok: true, status: 200, finalUrl: 'https://x/pliego.pdf', contentType: 'application/pdf', bodySample: null });
+    expect(r.state).toBe('PUBLIC');
+  });
+
+  it('sin respuesta (error de red) → UNKNOWN', () => {
+    expect(classifyProbeResponse({ ok: false, status: 0, finalUrl: 'https://x', contentType: null, error: 'AbortError' }).state).toBe('UNKNOWN');
+  });
+});
+
+describe('probeDocument (C1, fetch inyectado)', () => {
+  /** Construye un Response-like mínimo con lo que probeDocument lee. */
+  function fakeRes(over: { status: number; url: string; contentType: string | null; body?: string }) {
+    return {
+      status: over.status,
+      url: over.url,
+      headers: { get: (k: string) => (k.toLowerCase() === 'content-type' ? over.contentType : null) },
+      text: async () => over.body ?? '',
+    } as unknown as Response;
+  }
+
+  it('reproduce el redirect a ReCaptcha de SECOP II → RESTRICTED', async () => {
+    const fetchImpl = (async () =>
+      fakeRes({
+        status: 200,
+        url: 'https://community.secop.gov.co/Public/Common/GoogleReCaptcha/Index?previousUrl=x',
+        contentType: 'text/html',
+        body: '<title>ReCaptcha</title>',
+      })) as unknown as typeof fetch;
+    const r = await probeDocument('https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.1', { fetchImpl });
+    expect(r.state).toBe('RESTRICTED');
+  });
+
+  it('PDF directo → PUBLIC', async () => {
+    const fetchImpl = (async () => fakeRes({ status: 200, url: 'https://x/d.pdf', contentType: 'application/pdf' })) as unknown as typeof fetch;
+    expect((await probeDocument('https://x/d.pdf', { fetchImpl })).state).toBe('PUBLIC');
+  });
+
+  it('error de red → UNKNOWN', async () => {
+    const fetchImpl = (async () => {
+      throw new Error('boom');
+    }) as unknown as typeof fetch;
+    expect((await probeDocument('https://x', { fetchImpl })).state).toBe('UNKNOWN');
+  });
+
+  it('url nula → NOT_PUBLISHED (no hace red)', async () => {
+    expect((await probeDocument(null)).state).toBe('NOT_PUBLISHED');
+  });
+});
+
+describe('gate de extracción (C2)', () => {
+  it('canExtract: solo PUBLIC pasa', () => {
+    expect(canExtract('PUBLIC')).toBe(true);
+    (['RESTRICTED', 'NOT_PUBLISHED', 'UNKNOWN'] as DocumentAccess[]).forEach((s) => expect(canExtract(s)).toBe(false));
+  });
+
+  it('assertExtractable: lanza para no-PUBLIC, no lanza para PUBLIC', () => {
+    expect(() => assertExtractable('PUBLIC')).not.toThrow();
+    expect(() => assertExtractable('RESTRICTED')).toThrow(/solo procesa documentos PUBLIC/);
   });
 });
