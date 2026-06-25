@@ -15,6 +15,13 @@
       "when": 1780786800000,
       "tag": "0001_align_d22_d26",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782361614752,
+      "tag": "0002_sudden_vengeance",
+      "breakpoints": true
     }
   ]
 }

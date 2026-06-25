@@ -32,6 +32,13 @@ export const proceso = pgTable(
     fechaPublicacion: date('fecha_publicacion'),
     estadoActual: text('estado_actual'),
     estadoCodigo: text('estado_codigo'),
+    // Gate de acceso documental (B2/C). text (no enum) para añadir estados sin
+    // migración: PUBLIC | RESTRICTED | NOT_PUBLISHED | UNKNOWN. Solo PUBLIC llega
+    // al extractor de pliegos. `evaluated_at` marca la última (pre)clasificación.
+    documentAccess: text('document_access'),
+    documentAccessReason: text('document_access_reason'),
+    documentAccessMethod: text('document_access_method'), // metadata | probe
+    documentAccessEvaluatedAt: timestamp('document_access_evaluated_at', { withTimezone: true }),
     rawRecordIdActual: uuid('raw_record_id_actual').references(() => rawRecord.id),
     deletedAt: timestamp('deleted_at', { withTimezone: true }), // soft delete (D6)
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -40,6 +47,7 @@ export const proceso = pgTable(
   (t) => [
     uniqueIndex('proceso_secop_id_uq').on(t.secopProcesoId),
     index('proceso_portafolio_idx').on(t.portafolioId),
+    index('proceso_doc_access_idx').on(t.documentAccess),
   ],
 );
 

@@ -32,6 +32,7 @@ import type {
   ProcesoProjection,
   ProveedorProjection,
 } from './mapCanonical';
+import type { DocumentAccessResult } from '@/src/lib/secop/document-access';
 
 type Db = NeonDatabase<typeof schema>;
 
@@ -141,7 +142,17 @@ export async function upsertProceso(
   entidadId: string | null,
   geografiaId: string | null,
   rawRecordId: string,
+  docAccess: DocumentAccessResult,
 ): Promise<string> {
+  // El gate (B2/B3) se reescribe SIEMPRE: NOT_PUBLISHED/UNKNOWN se re-evalúan en
+  // cada corrida porque el estado cambia con la fase. Un probe (Fase C) que ya
+  // confirmó PUBLIC/RESTRICTED lo persiste con method='probe' por otra vía.
+  const docAccessSet = {
+    documentAccess: docAccess.state,
+    documentAccessReason: docAccess.reason,
+    documentAccessMethod: docAccess.method,
+    documentAccessEvaluatedAt: sql`now()`,
+  };
   const [row] = await db
     .insert(proceso)
     .values({
@@ -158,6 +169,7 @@ export async function upsertProceso(
       estadoActual: p.estadoActual,
       estadoCodigo: p.estadoCodigo,
       rawRecordIdActual: rawRecordId,
+      ...docAccessSet,
     })
     .onConflictDoUpdate({
       target: proceso.secopProcesoId,
@@ -174,6 +186,7 @@ export async function upsertProceso(
         estadoActual: p.estadoActual,
         estadoCodigo: p.estadoCodigo,
         rawRecordIdActual: rawRecordId,
+        ...docAccessSet,
         updatedAt: sql`now()`,
       },
     })

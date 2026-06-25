@@ -36,6 +36,7 @@ import {
   upsertProveedor,
 } from './writers';
 import { rebuildContratoEventos, type EventMetrics } from './eventWriter';
+import { preclassify } from '@/src/lib/secop/document-access';
 
 export interface SourceMetrics {
   totalSnapshots: number; // filas en raw_record para la source
@@ -142,7 +143,10 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
     if (entidadGeo) m.geografiaResuelta++;
     else m.geografiaNoResuelta++;
 
-    await upsertProceso(db, projection, entidadId, entidadGeo, snap.id);
+    // Gate de acceso documental (B2): preclasificación barata sobre la metadata
+    // cruda (sin HTTP). Se re-evalúa en cada corrida (B3).
+    const docAccess = preclassify(snap.payload);
+    await upsertProceso(db, projection, entidadId, entidadGeo, snap.id, docAccess);
     m.procesosUpsert++;
   }
 
