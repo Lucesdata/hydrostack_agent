@@ -19,6 +19,7 @@ import {
   PAGE_SIZE_MAX,
 } from "./config";
 import { resolveDatasetId } from "./datasetResolver";
+import { preclassify, accessMessage } from "./document-access";
 import type {
   SecopProceso,
   SecopContrato,
@@ -103,6 +104,9 @@ async function sodaFetch<T>(
 
 /** Normaliza una fila cruda de PROCESOS al tipo limpio. */
 function normalizeProceso(row: Record<string, unknown>): SecopProceso {
+  // Gate de acceso documental preliminar (B2): preclassify sobre la fila cruda,
+  // sin HTTP ni DB. El probe on-demand (C) lo refina luego desde la UI.
+  const access = preclassify(row);
   return {
     id: String(row[F.id] ?? ""),
     referencia: String(row[F.referencia] ?? ""),
@@ -122,6 +126,8 @@ function normalizeProceso(row: Record<string, unknown>): SecopProceso {
     adjudicatario: (row[F.adjudicatario] as string) ?? null,
     unspsc: (row[F.unspsc] as string) ?? null,
     url: extractUrl(row[F.url]),
+    documentAccess: access.state,
+    accessMessage: accessMessage(access.state),
   };
 }
 

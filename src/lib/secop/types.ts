@@ -5,6 +5,8 @@
  * normalizador en client.ts (y config.ts), no el resto del código.
  */
 
+import type { DocumentAccess } from './document-access';
+
 export interface SecopProceso {
   id: string;
   referencia: string;
@@ -24,6 +26,10 @@ export interface SecopProceso {
   adjudicatario: string | null;
   unspsc: string | null;
   url: string | null;
+  /** Gate de acceso documental (Fase B2/C). Preliminar vía preclassify; se
+   *  refina con el probe on-demand. */
+  documentAccess: DocumentAccess;
+  accessMessage: string;
 }
 
 export interface SecopContrato {

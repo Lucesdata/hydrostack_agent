@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SecopProceso, SecopResult } from "@/src/lib/secop/types";
+import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
 
 const DEPARTAMENTOS = [
@@ -25,6 +26,20 @@ const DEPARTAMENTOS = [
 const COP = new Intl.NumberFormat("es-CO", {
   style: "currency", currency: "COP", maximumFractionDigits: 0,
 });
+
+/** Etiqueta + clase CSS por estado de acceso documental (Fase D). */
+const ACCESS_LABEL: Record<DocumentAccess, string> = {
+  PUBLIC: "Público",
+  RESTRICTED: "Restringido",
+  NOT_PUBLISHED: "Sin publicar",
+  UNKNOWN: "Por confirmar",
+};
+const ACCESS_CLASS: Record<DocumentAccess, string> = {
+  PUBLIC: "public",
+  RESTRICTED: "restricted",
+  NOT_PUBLISHED: "notpub",
+  UNKNOWN: "unknown",
+};
 
 interface Filters {
   q: string; departamento: string; estado: string; valorMin: string;
@@ -38,6 +53,9 @@ export default function SecopExplorer() {
   const [data, setData] = useState<SecopResult<SecopProceso> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Resultado del probe on-demand por proceso (refina el chip preliminar).
+  const [probed, setProbed] = useState<Record<string, { state: DocumentAccess; message: string }>>({});
+  const [probing, setProbing] = useState<Record<string, boolean>>({});
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -65,6 +83,27 @@ export default function SecopExplorer() {
 
   const set = (k: keyof Filters) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setPage(1); setFilters((f) => ({ ...f, [k]: e.target.value }));
+  };
+
+  /** Probe on-demand (C1): confirma PUBLIC/RESTRICTED al abrir un proceso. */
+  const probe = async (p: SecopProceso) => {
+    if (!p.url || probing[p.id]) return;
+    setProbing((s) => ({ ...s, [p.id]: true }));
+    try {
+      const res = await fetch("/api/secop/probe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: p.url, secopProcesoId: p.id }),
+      });
+      const payload = await res.json();
+      if (res.ok) {
+        setProbed((s) => ({ ...s, [p.id]: { state: payload.state, message: payload.message } }));
+      }
+    } catch {
+      /* el chip preliminar se mantiene si el probe falla */
+    } finally {
+      setProbing((s) => ({ ...s, [p.id]: false }));
+    }
   };
 
   return (
@@ -101,7 +140,10 @@ export default function SecopExplorer() {
           <div className="hs-secop-empty">Sin resultados para estos filtros.</div>
         )}
 
-        {!loading && data?.items.map((p) => (
+        {!loading && data?.items.map((p) => {
+          // Acceso efectivo: el del probe on-demand si existe, si no el preliminar.
+          const acc = probed[p.id] ?? { state: p.documentAccess, message: p.accessMessage };
+          return (
           <article key={p.id} className="hs-secop-card">
             <div className="hs-secop-card-top">
               <span className={`hs-secop-state hs-secop-state--${p.adjudicado ? "adj" : "open"}`}>
@@ -125,13 +167,27 @@ export default function SecopExplorer() {
             {p.adjudicatario && p.adjudicatario !== "No Adjudicado" && (
               <p className="hs-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
             )}
-            {p.url && (
-              <a className="hs-secop-link" href={p.url} target="_blank" rel="noreferrer">
-                Ver en SECOP ↗
-              </a>
-            )}
+            <div className="hs-secop-access-row">
+              <span className={`hs-secop-access hs-secop-access--${ACCESS_CLASS[acc.state]}`}>
+                {ACCESS_LABEL[acc.state]}
+              </span>
+              <span className="hs-secop-access-msg">{acc.message}</span>
+            </div>
+            <div className="hs-secop-actions">
+              {acc.state !== "PUBLIC" && !probed[p.id] && p.url && (
+                <button className="hs-secop-probe" onClick={() => probe(p)} disabled={probing[p.id]}>
+                  {probing[p.id] ? "Verificando…" : "Verificar acceso"}
+                </button>
+              )}
+              {p.url && (
+                <a className="hs-secop-link" href={p.url} target="_blank" rel="noreferrer">
+                  {acc.state === "PUBLIC" ? "Ver en SECOP ↗" : "Abrir en SECOP II ↗"}
+                </a>
+              )}
+            </div>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       <div className="hs-secop-pager">
@@ -296,13 +352,72 @@ const CSS = `
 .hs-secop-adj{ font-size: .8rem; color: var(--white); }
 .hs-secop-adj strong{ color: var(--green); }
 .hs-secop-link{
-  margin-top: auto;
   color: var(--cyan);
   text-decoration: none;
   font-size: .8rem;
   font-family: var(--mono);
 }
 .hs-secop-link:hover{ text-decoration: underline; }
+/* Fase D — chips de acceso documental */
+.hs-secop-access-row{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .45rem .6rem;
+  margin-top: .15rem;
+}
+.hs-secop-access{
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: .22rem .5rem;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.hs-secop-access--public{
+  background: rgba(0,229,212,.14);
+  color: #00E5D4;
+  border: 1px solid rgba(0,229,212,.42);
+}
+.hs-secop-access--restricted, .hs-secop-access--notpub{
+  background: rgba(255,176,32,.1);
+  color: var(--amber);
+  border: 1px solid rgba(255,176,32,.35);
+}
+.hs-secop-access--unknown{
+  background: rgba(232,248,255,.05);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.hs-secop-access-msg{
+  font-size: .68rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  line-height: 1.3;
+}
+.hs-secop-actions{
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  flex-wrap: wrap;
+  padding-top: .35rem;
+}
+.hs-secop-probe{
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: .35rem .7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .06em;
+  transition: border-color .15s, color .15s;
+}
+.hs-secop-probe:hover:not(:disabled){ border-color: var(--cyan); color: var(--cyan); }
+.hs-secop-probe:disabled{ opacity: .5; cursor: not-allowed; }
 .hs-secop-pager{
   display: flex;
   align-items: center;

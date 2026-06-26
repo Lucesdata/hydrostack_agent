@@ -238,13 +238,13 @@ export async function probeDocument(url: string | null, deps: ProbeDeps = {}): P
     }
     return classifyProbeResponse({ ok: true, status: res.status, finalUrl: res.url, contentType, bodySample });
   } catch (e) {
-    return classifyProbeResponse({
-      ok: false,
-      status: 0,
-      finalUrl: url,
-      contentType: null,
-      error: e instanceof Error ? e.name : 'error',
-    });
+    // Surfacing de la causa real: undici envuelve el motivo en `cause`
+    // (p. ej. UNABLE_TO_VERIFY_LEAF_SIGNATURE en sitios .gov.co con cadena TLS
+    // incompleta, o ECONNRESET/ETIMEDOUT). Mucho más útil que "TypeError".
+    const err = e instanceof Error ? e : null;
+    const cause = err && 'cause' in err ? (err.cause as { code?: string } | undefined) : undefined;
+    const detail = cause?.code ?? err?.name ?? 'error';
+    return classifyProbeResponse({ ok: false, status: 0, finalUrl: url, contentType: null, error: detail });
   } finally {
     clearTimeout(timer);
   }
