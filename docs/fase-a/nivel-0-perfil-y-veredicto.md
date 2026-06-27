@@ -281,10 +281,12 @@ Sin veto sectorial duro (la señal sectorial es probabilística en Nivel 0).
    usa el UNSPSC; plazo usa estadoApertura).
 6. ~~UI del semáforo~~ **(hecho 2026-06-27)**: `SecopExplorer` pinta un readout HUD por
    tarjeta (overall + 5 chips de compuerta con `reason` en tooltip), fiel al design system
-   cyberpunk. Verificado en navegador (25 tarjetas, 0 errores). ⚠️ Con el perfil placeholder
-   (`sectoresUnspsc:['83101']` estrecho + cuantía de ejemplo) el `overall` sale FAIL casi
-   siempre — **artefacto del seed, no bug**; los chips muestran los 4 colores. Diversifica al
-   poner el perfil real.
+   cyberpunk. Verificado en navegador (25 tarjetas, 0 errores). **Lecturas del semáforo
+   (no bugs):** (a) en la vista nacional por defecto el `overall` sale FAIL casi siempre
+   porque el perfil cubre solo Valle → Ubicación reprueba lo de fuera (el veredicto descarta
+   correctamente); al filtrar a Valle aparece variedad (medido: WARN 7 / FAIL 33 de 40).
+   (b) **En Nivel 0 el techo es WARN, no PASS**: Plazo solo llega a verde con la fecha exacta
+   de cierre (Nivel 2); con `Abierto` da amarillo. El verde es un resultado de Nivel 2.
 
 ---
 
