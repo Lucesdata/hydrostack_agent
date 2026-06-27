@@ -290,11 +290,10 @@ Sin veto sectorial duro (la señal sectorial es probabilística en Nivel 0).
 
 ## 8. Diferido a Nivel 2 / fases siguientes
 
-- **Hallazgos de revisión anotados (2026-06-27) — cerrar en el upgrade:**
-  - `#1` `plazoGate` (verdict.ts): `fechaCierre` inválida → `NaN` → cae a PASS "NaN días".
-    Guardar con `Number.isNaN(dias)` antes de activar la rama de fecha (fuente L2). `TODO` en código.
-  - `#2` `ubicacionGate` (verdict.ts): solo cruza departamento; `cobertura.municipios` no se
-    lee (footgun si `departamentos:[]`). Resolver con el cruce municipio (tabla geografia). `TODO` en código.
+- **Hallazgos de revisión (2026-06-27) — RESUELTOS:**
+  - ~~`#1` `plazoGate` `fechaCierre` inválida → NaN → PASS~~ ✅ guarda `Number.isNaN` → UNKNOWN (+ test).
+  - ~~`#2` `ubicacionGate` ignora `cobertura.municipios`~~ ✅ cruza depto **O** municipio vía
+    crosswalk DANE (`MUNICIPIOS`), depto desambigua (+ tests). Cierra el footgun `departamentos:[]`.
 - **Plazo con días exactos:** requiere el cronograma del pliego (no está en metadata).
 - **Habilitación financiera/jurídica real:** comparar perfil vs umbrales del pliego.
 - **Cuantía vs capacidad K residual:** banda relativa a capacidad (Decreto 1082, AIU).

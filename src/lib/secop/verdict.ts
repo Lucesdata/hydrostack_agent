@@ -25,7 +25,7 @@
 
 import type { OferenteProfile } from '@/src/lib/oferente/types';
 import type { SecopProceso } from './types';
-import { DEPARTAMENTOS } from '@/data/dane/divipola';
+import { DEPARTAMENTOS, MUNICIPIOS } from '@/data/dane/divipola';
 import { normalizeGeoText } from '@/src/lib/transform/geo';
 
 // ===========================================================================
@@ -198,6 +198,18 @@ const DEPT_NAME_TO_CODE: Map<string, string> = (() => {
   return m;
 })();
 
+/** Mapa `<deptCode>:<municipio-normalizado>` → DIVIPOLA (5 díg). El depto desambigua
+ *  nombres de municipio repetidos. Crosswalk DANE parcial (best-effort). */
+const MUNI_NAME_TO_CODE: Map<string, string> = (() => {
+  const m = new Map<string, string>();
+  for (const d of MUNICIPIOS) {
+    if (!d.municipioNombre) continue;
+    const n = normalizeGeoText(d.municipioNombre);
+    if (n) m.set(`${d.departamentoCodigo}:${n}`, d.divipola);
+  }
+  return m;
+})();
+
 /**
  * Sectorial: intersección UNSPSC perfil ∩ categoría del proceso. Si el proceso no
  * trae código (null/UNSPECIFIED), delega en `sectorAgua` precomputado (D2): true →
@@ -253,9 +265,11 @@ export const cuantiaGate: CuantiaGate = (p, proc, cfg) => {
  */
 export const plazoGate: PlazoGate = (proc, now) => {
   if (proc.fechaCierre != null) {
-    // TODO(review 2026-06-27, #1): guardar contra fecha inválida — new Date('basura')
-    // → NaN → cae a PASS con "NaN días". Cerrar antes de activar esta rama (fuente L2).
-    const dias = Math.ceil((new Date(proc.fechaCierre).getTime() - now.getTime()) / 86_400_000);
+    const t = new Date(proc.fechaCierre).getTime();
+    if (Number.isNaN(t)) {
+      return { status: 'UNKNOWN', reason: `fechaCierre inválida (${proc.fechaCierre})`, resolvedBy: 'document', requiredLevel: 2 };
+    }
+    const dias = Math.ceil((t - now.getTime()) / 86_400_000);
     if (dias < 0) return { status: 'FAIL', reason: `cierre vencido hace ${-dias} día(s)`, resolvedBy: 'document', requiredLevel: 2 };
     if (dias <= PLAZO_WARN_DIAS) return { status: 'WARN', reason: `cierra en ${dias} día(s)`, resolvedBy: 'document', requiredLevel: 2 };
     return { status: 'PASS', reason: `${dias} días hasta el cierre`, resolvedBy: 'document', requiredLevel: 2 };
@@ -270,22 +284,29 @@ export const plazoGate: PlazoGate = (proc, now) => {
 };
 
 /**
- * Ubicación (L0): departamento del proceso (nombre) ∈ cobertura del perfil
- * (DIVIPOLA). Resuelve nombre→código vía el crosswalk DANE estático. El cruce a
- * nivel municipio requiere la tabla `geografia` (DB) → diferido.
+ * Ubicación (L0): la ubicación del proceso ∈ cobertura del perfil (DIVIPOLA).
+ * Matchea por departamento O por municipio (la cobertura puede declararse a
+ * cualquier granularidad). Resuelve nombre→código vía el crosswalk DANE estático
+ * (parcial, best-effort); el depto desambigua el municipio. UNKNOWN si no resuelve
+ * ni depto ni municipio.
  */
 export const ubicacionGate: UbicacionGate = (p, proc) => {
-  // TODO(review 2026-06-27, #2): solo cruza a nivel departamento; `cobertura.municipios`
-  // no se lee. Footgun: un perfil con solo municipios y departamentos:[] reprobaría todo.
-  // Resolver junto con el cruce municipio (tabla geografia) en el upgrade.
-  const key = normalizeGeoText(proc.departamento);
-  const code = key ? DEPT_NAME_TO_CODE.get(key) : undefined;
-  if (!code) {
-    return { status: 'UNKNOWN', reason: `departamento no reconocido (${proc.departamento || '—'})`, resolvedBy: 'metadata', requiredLevel: 0 };
+  const deptKey = normalizeGeoText(proc.departamento);
+  const deptCode = deptKey ? DEPT_NAME_TO_CODE.get(deptKey) : undefined;
+  const muniKey = deptCode && proc.ciudad ? `${deptCode}:${normalizeGeoText(proc.ciudad)}` : undefined;
+  const muniCode = muniKey ? MUNI_NAME_TO_CODE.get(muniKey) : undefined;
+
+  const deptHit = deptCode != null && p.cobertura.departamentos.includes(deptCode);
+  const muniHit = muniCode != null && p.cobertura.municipios.includes(muniCode);
+  const lugar = proc.ciudad ? `${proc.ciudad}, ${proc.departamento}` : proc.departamento;
+
+  if (deptHit || muniHit) {
+    return { status: 'PASS', reason: `el proceso está en tu cobertura (${lugar})`, resolvedBy: 'metadata', requiredLevel: 0 };
   }
-  return p.cobertura.departamentos.includes(code)
-    ? { status: 'PASS', reason: `el proceso está en tu cobertura (${proc.departamento})`, resolvedBy: 'metadata', requiredLevel: 0 }
-    : { status: 'FAIL', reason: `el proceso está en ${proc.departamento}, fuera de tu cobertura`, resolvedBy: 'metadata', requiredLevel: 0 };
+  if (deptCode == null && muniCode == null) {
+    return { status: 'UNKNOWN', reason: `ubicación no reconocida (${proc.departamento || '—'})`, resolvedBy: 'metadata', requiredLevel: 0 };
+  }
+  return { status: 'FAIL', reason: `el proceso está en ${lugar}, fuera de tu cobertura`, resolvedBy: 'metadata', requiredLevel: 0 };
 };
 
 /**

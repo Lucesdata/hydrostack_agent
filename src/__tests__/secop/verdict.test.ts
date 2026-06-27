@@ -139,6 +139,10 @@ describe('plazoGate (L0 parcial, D1)', () => {
   it('fechaCierre vencida → FAIL', () => {
     expect(plazoGate(proc({ fechaCierre: iso(-1) }), NOW).status).toBe('FAIL');
   });
+
+  it('#1 fechaCierre inválida → UNKNOWN (no PASS con NaN)', () => {
+    expect(plazoGate(proc({ fechaCierre: 'no-es-fecha' }), NOW).status).toBe('UNKNOWN');
+  });
 });
 
 describe('ubicacionGate (L0 — DIVIPOLA depto)', () => {
@@ -152,6 +156,16 @@ describe('ubicacionGate (L0 — DIVIPOLA depto)', () => {
 
   it('departamento no reconocido → UNKNOWN', () => {
     expect(ubicacionGate(profile, proc({ departamento: 'Tierra del Nunca' })).status).toBe('UNKNOWN');
+  });
+
+  it('#2 cobertura solo por municipio (departamentos:[]) → PASS si el municipio coincide', () => {
+    const soloMuni = { ...profile, cobertura: { departamentos: [], municipios: ['76001'] } };
+    expect(ubicacionGate(soloMuni, proc({ departamento: 'Valle del Cauca', ciudad: 'Cali' })).status).toBe('PASS');
+  });
+
+  it('#2 cobertura solo por municipio → FAIL si el municipio no coincide', () => {
+    const soloMuni = { ...profile, cobertura: { departamentos: [], municipios: ['76001'] } };
+    expect(ubicacionGate(soloMuni, proc({ departamento: 'Valle del Cauca', ciudad: 'Palmira' })).status).toBe('FAIL');
   });
 });
 
