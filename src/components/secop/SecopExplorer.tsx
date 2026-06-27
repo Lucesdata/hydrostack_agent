@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SecopProceso, SecopResult } from "@/src/lib/secop/types";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
+import type { Verdict, GateStatus } from "@/src/lib/secop/verdict";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
 
 const DEPARTAMENTOS = [
@@ -41,6 +42,34 @@ const ACCESS_CLASS: Record<DocumentAccess, string> = {
   UNKNOWN: "unknown",
 };
 
+/** Proceso con veredicto Nivel 0 adjunto por /api/secop. */
+type ProcesoVeredicto = SecopProceso & { verdict?: Verdict };
+
+/** Glifo + clase CSS por estado de compuerta/veredicto (semáforo HUD). */
+const STATUS: Record<GateStatus, { cls: string; glyph: string }> = {
+  PASS: { cls: "pass", glyph: "✓" },
+  WARN: { cls: "warn", glyph: "!" },
+  FAIL: { cls: "fail", glyph: "✕" },
+  UNKNOWN: { cls: "unknown", glyph: "?" },
+};
+
+/** Etiqueta del veredicto global. */
+const OVERALL_LABEL: Record<GateStatus, string> = {
+  PASS: "Elegible",
+  WARN: "Con reservas",
+  FAIL: "No elegible",
+  UNKNOWN: "Por confirmar",
+};
+
+/** Orden + etiqueta corta de cada compuerta en el readout. */
+const GATE_LABEL: Array<[keyof Verdict["gates"], string]> = [
+  ["sectorial", "SECTOR"],
+  ["cuantia", "CUANTÍA"],
+  ["plazo", "PLAZO"],
+  ["ubicacion", "ZONA"],
+  ["habilitacion", "HABILIT."],
+];
+
 interface Filters {
   q: string; departamento: string; estado: string; valorMin: string;
 }
@@ -50,7 +79,7 @@ export default function SecopExplorer() {
     q: "", departamento: "", estado: "", valorMin: "",
   });
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<SecopResult<SecopProceso> | null>(null);
+  const [data, setData] = useState<SecopResult<ProcesoVeredicto> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Resultado del probe on-demand por proceso (refina el chip preliminar).
@@ -143,6 +172,7 @@ export default function SecopExplorer() {
         {!loading && data?.items.map((p) => {
           // Acceso efectivo: el del probe on-demand si existe, si no el preliminar.
           const acc = probed[p.id] ?? { state: p.documentAccess, message: p.accessMessage };
+          const v = p.verdict;
           return (
           <article key={p.id} className="hs-secop-card">
             <div className="hs-secop-card-top">
@@ -164,6 +194,30 @@ export default function SecopExplorer() {
                 <span>{new Date(p.fechaPublicacion).toLocaleDateString("es-CO")}</span>
               )}
             </div>
+            {v && (
+              <div className={`hs-verdict hs-verdict--${STATUS[v.overall].cls}`}>
+                <div className="hs-verdict-head">
+                  <span className="hs-verdict-tag">VEREDICTO · NIVEL 0</span>
+                  <span className="hs-verdict-overall">
+                    <span className="hs-verdict-dot" />
+                    {OVERALL_LABEL[v.overall]}
+                  </span>
+                </div>
+                <div className="hs-verdict-gates">
+                  {GATE_LABEL.map(([key, label]) => {
+                    const g = v.gates[key];
+                    const s = STATUS[g.status];
+                    const tip = `${label}: ${g.reason}${g.requiredLevel === 2 ? " · requiere pliego" : ""}`;
+                    return (
+                      <span key={key} className={`hs-verdict-gate hs-verdict-gate--${s.cls}`} title={tip}>
+                        <span className="hs-verdict-glyph">{s.glyph}</span>
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {p.adjudicatario && p.adjudicatario !== "No Adjudicado" && (
               <p className="hs-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
             )}
@@ -418,6 +472,81 @@ const CSS = `
 }
 .hs-secop-probe:hover:not(:disabled){ border-color: var(--cyan); color: var(--cyan); }
 .hs-secop-probe:disabled{ opacity: .5; cursor: not-allowed; }
+/* Veredicto Nivel 0 — readout/semáforo HUD */
+.hs-verdict{
+  margin-top: .2rem;
+  border: 1px solid var(--border);
+  border-left-width: 2px;
+  border-radius: 6px;
+  padding: .55rem .6rem;
+  background: rgba(0,0,0,.22);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.hs-verdict--pass{ border-left-color: #00e5a0; }
+.hs-verdict--warn{ border-left-color: var(--amber); }
+.hs-verdict--fail{ border-left-color: #ff3b5c; }
+.hs-verdict--unknown{ border-left-color: var(--muted); }
+.hs-verdict-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.hs-verdict-tag{
+  font-family: var(--mono);
+  font-size: .54rem;
+  letter-spacing: .22em;
+  color: var(--muted);
+}
+.hs-verdict-overall{
+  font-family: var(--orb);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  text-transform: uppercase;
+}
+.hs-verdict-dot{
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.hs-verdict--pass .hs-verdict-overall{ color: #00e5a0; }
+.hs-verdict--pass .hs-verdict-dot{ background: #00e5a0; box-shadow: 0 0 9px #00e5a0; }
+.hs-verdict--warn .hs-verdict-overall{ color: var(--amber); }
+.hs-verdict--warn .hs-verdict-dot{ background: var(--amber); box-shadow: 0 0 9px var(--amber); }
+.hs-verdict--fail .hs-verdict-overall{ color: #ff3b5c; }
+.hs-verdict--fail .hs-verdict-dot{ background: #ff3b5c; box-shadow: 0 0 9px #ff3b5c; }
+.hs-verdict--unknown .hs-verdict-overall{ color: var(--muted); }
+.hs-verdict--unknown .hs-verdict-dot{ background: var(--muted); }
+.hs-verdict-gates{
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+}
+.hs-verdict-gate{
+  font-family: var(--mono);
+  font-size: .55rem;
+  letter-spacing: .07em;
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .2rem .42rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: default;
+  white-space: nowrap;
+}
+.hs-verdict-glyph{ font-weight: 700; line-height: 1; }
+.hs-verdict-gate--pass{ color: #00e5a0; border-color: rgba(0,229,160,.4); background: rgba(0,229,160,.08); }
+.hs-verdict-gate--warn{ color: var(--amber); border-color: rgba(255,176,32,.4); background: rgba(255,176,32,.08); }
+.hs-verdict-gate--fail{ color: #ff3b5c; border-color: rgba(255,59,92,.42); background: rgba(255,59,92,.08); }
+.hs-verdict-gate--unknown{ color: var(--muted); border-color: var(--border); }
 .hs-secop-pager{
   display: flex;
   align-items: center;

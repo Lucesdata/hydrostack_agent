@@ -7,6 +7,14 @@
 
 import type { DocumentAccess } from './document-access';
 
+/**
+ * Apertura del proceso (campo `estado_de_apertura_del_proceso`). Único insumo
+ * Nivel-0 de la compuerta Plazo del veredicto: el dataset Procesos NO trae fecha
+ * de cierre exacta (spike 2026-06-27). Vive aquí por ser metadata normalizada
+ * general (la UI también podría mostrarla).
+ */
+export type EstadoApertura = 'Abierto' | 'Cerrado';
+
 export interface SecopProceso {
   id: string;
   referencia: string;
@@ -26,6 +34,8 @@ export interface SecopProceso {
   adjudicatario: string | null;
   unspsc: string | null;
   url: string | null;
+  /** Apertura del proceso (Abierto/Cerrado). null si la fuente no lo trae. */
+  estadoApertura: EstadoApertura | null;
   /** Gate de acceso documental (Fase B2/C). Preliminar vía preclassify; se
    *  refina con el probe on-demand. */
   documentAccess: DocumentAccess;

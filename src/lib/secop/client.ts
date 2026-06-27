@@ -107,6 +107,7 @@ function normalizeProceso(row: Record<string, unknown>): SecopProceso {
   // Gate de acceso documental preliminar (B2): preclassify sobre la fila cruda,
   // sin HTTP ni DB. El probe on-demand (C) lo refina luego desde la UI.
   const access = preclassify(row);
+  const apertura = row[F.estadoApertura];
   return {
     id: String(row[F.id] ?? ""),
     referencia: String(row[F.referencia] ?? ""),
@@ -126,6 +127,7 @@ function normalizeProceso(row: Record<string, unknown>): SecopProceso {
     adjudicatario: (row[F.adjudicatario] as string) ?? null,
     unspsc: (row[F.unspsc] as string) ?? null,
     url: extractUrl(row[F.url]),
+    estadoApertura: apertura === "Abierto" || apertura === "Cerrado" ? apertura : null,
     documentAccess: access.state,
     accessMessage: accessMessage(access.state),
   };

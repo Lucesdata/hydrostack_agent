@@ -71,6 +71,7 @@ export const FIELDS_PROCESOS = {
   adjudicatario: "nombre_del_adjudicador",
   unspsc: "codigo_principal_de_categoria",
   url: "urlproceso", // objeto { url: "..." }
+  estadoApertura: "estado_de_apertura_del_proceso", // Abierto | Cerrado — señal Nivel-0 de Plazo (no hay fecha de cierre en este dataset)
 } as const;
 
 /**
