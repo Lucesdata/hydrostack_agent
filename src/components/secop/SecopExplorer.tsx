@@ -196,22 +196,20 @@ export default function SecopExplorer() {
               )}
             </div>
             {v && (
-              <div className={`hs-verdict hs-verdict--${STATUS[v.overall].cls}`}>
-                <div className="hs-verdict-head">
-                  <span className="hs-verdict-tag">VEREDICTO · NIVEL 0</span>
-                  <span className="hs-verdict-overall">
-                    <span className="hs-verdict-dot" />
-                    {OVERALL_LABEL[v.overall]}
-                  </span>
-                </div>
-                <div className="hs-verdict-gates">
+              <div className="clr-verdict">
+                <span className={`clr-verdict-overall clr-verdict-overall--${STATUS[v.overall].cls}`}>
+                  <span className="clr-verdict-dot" />
+                  {OVERALL_LABEL[v.overall]}
+                  <span style={{ opacity: 0.7, fontWeight: 400 }}>· Nivel 0</span>
+                </span>
+                <div className="clr-verdict-gates">
                   {GATE_LABEL.map(([key, label]) => {
                     const g = v.gates[key];
                     const s = STATUS[g.status];
                     const tip = `${label}: ${g.reason}${g.requiredLevel === 2 ? " · requiere pliego" : ""}`;
                     return (
-                      <span key={key} className={`hs-verdict-gate hs-verdict-gate--${s.cls}`} title={tip}>
-                        <span className="hs-verdict-glyph">{s.glyph}</span>
+                      <span key={key} className={`clr-verdict-gate clr-verdict-gate--${s.cls}`} title={tip}>
+                        <span className="clr-verdict-glyph">{s.glyph}</span>
                         {label}
                       </span>
                     );
