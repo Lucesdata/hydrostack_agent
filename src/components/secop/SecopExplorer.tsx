@@ -136,29 +136,30 @@ export default function SecopExplorer() {
   };
 
   return (
-    <div className="hs-secop">
+    <div className="clr-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <header className="hs-secop-head">
-        <span className="hs-secop-tag">SECOP II · DATOS ABIERTOS</span>
-        <h1>Licitaciones · Agua y Saneamiento</h1>
-        <p>Procesos de contratación pública del sector agua potable y saneamiento básico en Colombia — adjudicados y por adjudicar.</p>
-      </header>
+      <div className="clr-container">
+        <header style={{ marginBottom: 22 }}>
+          <span className="clr-tag">SECOP II · Datos abiertos</span>
+          <h1 className="clr-h1">Licitaciones · Agua y Saneamiento</h1>
+          <p className="clr-sub">Procesos de contratación pública del sector agua potable y saneamiento básico en Colombia — adjudicados y por adjudicar.</p>
+        </header>
 
-      <div className="hs-secop-filters">
-        <input className="hs-secop-input" placeholder="Buscar (municipio, objeto, entidad…)"
-          value={filters.q} onChange={set("q")} />
-        <select className="hs-secop-input" value={filters.departamento} onChange={set("departamento")}>
-          <option value="">Todos los departamentos</option>
-          {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select className="hs-secop-input" value={filters.estado} onChange={set("estado")}>
-          <option value="">Todos los estados</option>
-          {ESTADOS_PROCESO.map((e) => <option key={e} value={e}>{e}</option>)}
-        </select>
-        <input className="hs-secop-input" type="number" placeholder="Valor mín. (COP)"
-          value={filters.valorMin} onChange={set("valorMin")} />
-      </div>
+        <div className="clr-secop-filters">
+          <input className="clr-input" placeholder="Buscar (municipio, objeto, entidad…)"
+            value={filters.q} onChange={set("q")} />
+          <select className="clr-select" value={filters.departamento} onChange={set("departamento")}>
+            <option value="">Todos los departamentos</option>
+            {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select className="clr-select" value={filters.estado} onChange={set("estado")}>
+            <option value="">Todos los estados</option>
+            {ESTADOS_PROCESO.map((e) => <option key={e} value={e}>{e}</option>)}
+          </select>
+          <input className="clr-input" type="number" placeholder="Valor mín. (COP)"
+            value={filters.valorMin} onChange={set("valorMin")} />
+        </div>
 
       {error && <div className="hs-secop-error">⚠ {error}</div>}
 
