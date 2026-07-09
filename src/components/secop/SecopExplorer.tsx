@@ -36,10 +36,10 @@ const ACCESS_LABEL: Record<DocumentAccess, string> = {
   UNKNOWN: "Por confirmar",
 };
 const ACCESS_CLASS: Record<DocumentAccess, string> = {
-  PUBLIC: "public",
-  RESTRICTED: "restricted",
-  NOT_PUBLISHED: "notpub",
-  UNKNOWN: "unknown",
+  PUBLIC: "success",
+  RESTRICTED: "warning",
+  NOT_PUBLISHED: "warning",
+  UNKNOWN: "neutral",
 };
 
 /** Proceso con veredicto Nivel 0 adjunto por /api/secop. */
