@@ -161,13 +161,13 @@ export default function SecopExplorer() {
             value={filters.valorMin} onChange={set("valorMin")} />
         </div>
 
-      {error && <div className="hs-secop-error">⚠ {error}</div>}
+      {error && <div className="clr-secop-error">⚠ {error}</div>}
 
-      <div className="hs-secop-results">
-        {loading && <div className="hs-secop-skeleton">Consultando SECOP…</div>}
+      <div className="clr-grid">
+        {loading && <div className="clr-secop-empty">Consultando SECOP…</div>}
 
         {!loading && data?.items.length === 0 && (
-          <div className="hs-secop-empty">Sin resultados para estos filtros.</div>
+          <div className="clr-secop-empty">Sin resultados para estos filtros.</div>
         )}
 
         {!loading && data?.items.map((p) => {
@@ -175,20 +175,20 @@ export default function SecopExplorer() {
           const acc = probed[p.id] ?? { state: p.documentAccess, message: p.accessMessage };
           const v = p.verdict;
           return (
-          <article key={p.id} className="hs-secop-card">
-            <div className="hs-secop-card-top">
-              <span className={`hs-secop-state hs-secop-state--${p.adjudicado ? "adj" : "open"}`}>
+          <article key={p.id} className="clr-card is-active">
+            <div className="clr-secop-card-top">
+              <span className={`clr-badge clr-badge--${p.adjudicado ? "accent" : "neutral"}`}>
                 {p.estado || (p.adjudicado ? "Adjudicado" : "Abierto")}
               </span>
-              <span className="hs-secop-val">
+              <span className="clr-secop-val">
                 {p.valorAdjudicacion ?? p.precioBase
                   ? COP.format((p.valorAdjudicacion ?? p.precioBase)!)
                   : "—"}
               </span>
             </div>
-            <h3 className="hs-secop-card-title">{p.nombre || p.referencia}</h3>
-            <p className="hs-secop-card-entity">{p.entidad}</p>
-            <div className="hs-secop-meta">
+            <h3 className="clr-card-title">{p.nombre || p.referencia}</h3>
+            <p className="clr-secop-entity">{p.entidad}</p>
+            <div className="clr-secop-meta">
               <span>{p.departamento}{p.ciudad ? ` · ${p.ciudad}` : ""}</span>
               <span>{p.modalidad}</span>
               {p.fechaPublicacion && (
