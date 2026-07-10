@@ -218,22 +218,22 @@ export default function SecopExplorer() {
               </div>
             )}
             {p.adjudicatario && p.adjudicatario !== "No Adjudicado" && (
-              <p className="hs-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
+              <p className="clr-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
             )}
-            <div className="hs-secop-access-row">
-              <span className={`hs-secop-access hs-secop-access--${ACCESS_CLASS[acc.state]}`}>
+            <div className="clr-secop-access-row">
+              <span className={`clr-badge clr-badge--${ACCESS_CLASS[acc.state]}`}>
                 {ACCESS_LABEL[acc.state]}
               </span>
-              <span className="hs-secop-access-msg">{acc.message}</span>
+              <span className="clr-secop-access-msg">{acc.message}</span>
             </div>
-            <div className="hs-secop-actions">
+            <div className="clr-secop-actions">
               {acc.state !== "PUBLIC" && !probed[p.id] && p.url && (
-                <button className="hs-secop-probe" onClick={() => probe(p)} disabled={probing[p.id]}>
+                <button className="clr-secop-probe" onClick={() => probe(p)} disabled={probing[p.id]}>
                   {probing[p.id] ? "Verificando…" : "Verificar acceso"}
                 </button>
               )}
               {p.url && (
-                <a className="hs-secop-link" href={p.url} target="_blank" rel="noreferrer">
+                <a className="clr-secop-link" href={p.url} target="_blank" rel="noreferrer">
                   {acc.state === "PUBLIC" ? "Ver en SECOP ↗" : "Abrir en SECOP II ↗"}
                 </a>
               )}
@@ -243,10 +243,11 @@ export default function SecopExplorer() {
         })}
       </div>
 
-      <div className="hs-secop-pager">
+      <div className="clr-secop-pager">
         <button disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)}>← Anterior</button>
         <span>Página {page}</span>
         <button disabled={loading || (data?.items.length ?? 0) === 0} onClick={() => setPage((p) => p + 1)}>Siguiente →</button>
+      </div>
       </div>
     </div>
   );
