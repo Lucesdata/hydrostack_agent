@@ -4,8 +4,8 @@
  * SecopExplorer · sección "Licitaciones" de HydroStack
  *
  * Componente cliente. Llama a /api/secop (server-side proxy a SECOP II).
- * Adaptado al design system existente de HydroStack (cyberpunk dark:
- * --deep1/2, --cyan, --white, --muted; fuentes Orbitron / IBM Plex Mono / Inter).
+ * Usa el clear theme compartido de HydroStack (clr-* / app/globals.css) —
+ * mismo sistema visual que la landing y el hub de calculadoras.
  *
  * Uso (App Router):
  *   // app/licitaciones/page.js
@@ -36,10 +36,10 @@ const ACCESS_LABEL: Record<DocumentAccess, string> = {
   UNKNOWN: "Por confirmar",
 };
 const ACCESS_CLASS: Record<DocumentAccess, string> = {
-  PUBLIC: "public",
-  RESTRICTED: "restricted",
-  NOT_PUBLISHED: "notpub",
-  UNKNOWN: "unknown",
+  PUBLIC: "success",
+  RESTRICTED: "warning",
+  NOT_PUBLISHED: "warning",
+  UNKNOWN: "neutral",
 };
 
 /** Proceso con veredicto Nivel 0 adjunto por /api/secop. */
@@ -136,37 +136,38 @@ export default function SecopExplorer() {
   };
 
   return (
-    <div className="hs-secop">
+    <div className="clr-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <header className="hs-secop-head">
-        <span className="hs-secop-tag">SECOP II · DATOS ABIERTOS</span>
-        <h1>Licitaciones · Agua y Saneamiento</h1>
-        <p>Procesos de contratación pública del sector agua potable y saneamiento básico en Colombia — adjudicados y por adjudicar.</p>
-      </header>
+      <div className="clr-container">
+        <header style={{ marginBottom: 22 }}>
+          <span className="clr-tag">SECOP II · Datos abiertos</span>
+          <h1 className="clr-h1">Licitaciones · Agua y Saneamiento</h1>
+          <p className="clr-sub">Procesos de contratación pública del sector agua potable y saneamiento básico en Colombia — adjudicados y por adjudicar.</p>
+        </header>
 
-      <div className="hs-secop-filters">
-        <input className="hs-secop-input" placeholder="Buscar (municipio, objeto, entidad…)"
-          value={filters.q} onChange={set("q")} />
-        <select className="hs-secop-input" value={filters.departamento} onChange={set("departamento")}>
-          <option value="">Todos los departamentos</option>
-          {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select className="hs-secop-input" value={filters.estado} onChange={set("estado")}>
-          <option value="">Todos los estados</option>
-          {ESTADOS_PROCESO.map((e) => <option key={e} value={e}>{e}</option>)}
-        </select>
-        <input className="hs-secop-input" type="number" placeholder="Valor mín. (COP)"
-          value={filters.valorMin} onChange={set("valorMin")} />
-      </div>
+        <div className="clr-secop-filters">
+          <input className="clr-input" placeholder="Buscar (municipio, objeto, entidad…)"
+            value={filters.q} onChange={set("q")} />
+          <select className="clr-select" value={filters.departamento} onChange={set("departamento")}>
+            <option value="">Todos los departamentos</option>
+            {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select className="clr-select" value={filters.estado} onChange={set("estado")}>
+            <option value="">Todos los estados</option>
+            {ESTADOS_PROCESO.map((e) => <option key={e} value={e}>{e}</option>)}
+          </select>
+          <input className="clr-input" type="number" placeholder="Valor mín. (COP)"
+            value={filters.valorMin} onChange={set("valorMin")} />
+        </div>
 
-      {error && <div className="hs-secop-error">⚠ {error}</div>}
+      {error && <div className="clr-secop-error">⚠ {error}</div>}
 
-      <div className="hs-secop-results">
-        {loading && <div className="hs-secop-skeleton">Consultando SECOP…</div>}
+      <div className="clr-grid">
+        {loading && <div className="clr-secop-empty">Consultando SECOP…</div>}
 
         {!loading && data?.items.length === 0 && (
-          <div className="hs-secop-empty">Sin resultados para estos filtros.</div>
+          <div className="clr-secop-empty">Sin resultados para estos filtros.</div>
         )}
 
         {!loading && data?.items.map((p) => {
@@ -174,20 +175,20 @@ export default function SecopExplorer() {
           const acc = probed[p.id] ?? { state: p.documentAccess, message: p.accessMessage };
           const v = p.verdict;
           return (
-          <article key={p.id} className="hs-secop-card">
-            <div className="hs-secop-card-top">
-              <span className={`hs-secop-state hs-secop-state--${p.adjudicado ? "adj" : "open"}`}>
+          <article key={p.id} className="clr-card is-active">
+            <div className="clr-secop-card-top">
+              <span className={`clr-badge clr-badge--${p.adjudicado ? "accent" : "neutral"}`}>
                 {p.estado || (p.adjudicado ? "Adjudicado" : "Abierto")}
               </span>
-              <span className="hs-secop-val">
+              <span className="clr-secop-val">
                 {p.valorAdjudicacion ?? p.precioBase
                   ? COP.format((p.valorAdjudicacion ?? p.precioBase)!)
                   : "—"}
               </span>
             </div>
-            <h3 className="hs-secop-card-title">{p.nombre || p.referencia}</h3>
-            <p className="hs-secop-card-entity">{p.entidad}</p>
-            <div className="hs-secop-meta">
+            <h3 className="clr-card-title">{p.nombre || p.referencia}</h3>
+            <p className="clr-secop-entity">{p.entidad}</p>
+            <div className="clr-secop-meta">
               <span>{p.departamento}{p.ciudad ? ` · ${p.ciudad}` : ""}</span>
               <span>{p.modalidad}</span>
               {p.fechaPublicacion && (
@@ -195,22 +196,20 @@ export default function SecopExplorer() {
               )}
             </div>
             {v && (
-              <div className={`hs-verdict hs-verdict--${STATUS[v.overall].cls}`}>
-                <div className="hs-verdict-head">
-                  <span className="hs-verdict-tag">VEREDICTO · NIVEL 0</span>
-                  <span className="hs-verdict-overall">
-                    <span className="hs-verdict-dot" />
-                    {OVERALL_LABEL[v.overall]}
-                  </span>
-                </div>
-                <div className="hs-verdict-gates">
+              <div className="clr-verdict">
+                <span className={`clr-verdict-overall clr-verdict-overall--${STATUS[v.overall].cls}`}>
+                  <span className="clr-verdict-dot" />
+                  {OVERALL_LABEL[v.overall]}
+                  <span style={{ opacity: 0.7, fontWeight: 400 }}>· Nivel 0</span>
+                </span>
+                <div className="clr-verdict-gates">
                   {GATE_LABEL.map(([key, label]) => {
                     const g = v.gates[key];
                     const s = STATUS[g.status];
                     const tip = `${label}: ${g.reason}${g.requiredLevel === 2 ? " · requiere pliego" : ""}`;
                     return (
-                      <span key={key} className={`hs-verdict-gate hs-verdict-gate--${s.cls}`} title={tip}>
-                        <span className="hs-verdict-glyph">{s.glyph}</span>
+                      <span key={key} className={`clr-verdict-gate clr-verdict-gate--${s.cls}`} title={tip}>
+                        <span className="clr-verdict-glyph">{s.glyph}</span>
                         {label}
                       </span>
                     );
@@ -219,22 +218,22 @@ export default function SecopExplorer() {
               </div>
             )}
             {p.adjudicatario && p.adjudicatario !== "No Adjudicado" && (
-              <p className="hs-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
+              <p className="clr-secop-adj">Adjudicatario: <strong>{p.adjudicatario}</strong></p>
             )}
-            <div className="hs-secop-access-row">
-              <span className={`hs-secop-access hs-secop-access--${ACCESS_CLASS[acc.state]}`}>
+            <div className="clr-secop-access-row">
+              <span className={`clr-badge clr-badge--${ACCESS_CLASS[acc.state]}`}>
                 {ACCESS_LABEL[acc.state]}
               </span>
-              <span className="hs-secop-access-msg">{acc.message}</span>
+              <span className="clr-secop-access-msg">{acc.message}</span>
             </div>
-            <div className="hs-secop-actions">
+            <div className="clr-secop-actions">
               {acc.state !== "PUBLIC" && !probed[p.id] && p.url && (
-                <button className="hs-secop-probe" onClick={() => probe(p)} disabled={probing[p.id]}>
+                <button className="clr-secop-probe" onClick={() => probe(p)} disabled={probing[p.id]}>
                   {probing[p.id] ? "Verificando…" : "Verificar acceso"}
                 </button>
               )}
               {p.url && (
-                <a className="hs-secop-link" href={p.url} target="_blank" rel="noreferrer">
+                <a className="clr-secop-link" href={p.url} target="_blank" rel="noreferrer">
                   {acc.state === "PUBLIC" ? "Ver en SECOP ↗" : "Abrir en SECOP II ↗"}
                 </a>
               )}
@@ -244,336 +243,129 @@ export default function SecopExplorer() {
         })}
       </div>
 
-      <div className="hs-secop-pager">
+      <div className="clr-secop-pager">
         <button disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)}>← Anterior</button>
         <span>Página {page}</span>
         <button disabled={loading || (data?.items.length ?? 0) === 0} onClick={() => setPage((p) => p + 1)}>Siguiente →</button>
+      </div>
       </div>
     </div>
   );
 }
 
 const CSS = `
-.hs-secop{
-  color: var(--white);
-  padding: 2.5rem clamp(1rem, 4vw, 3rem);
-  min-height: calc(100vh - 52px);
-  font-family: var(--sans);
-  position: relative;
-  z-index: 1;
-}
-.hs-secop-head{ max-width: 60ch; margin-bottom: 2rem; }
-.hs-secop-tag{
-  font-family: var(--mono);
-  font-size: .7rem;
-  letter-spacing: .25em;
-  color: var(--cyan);
-  text-shadow: 0 0 12px rgba(0,245,255,0.35);
-}
-.hs-secop-head h1{
-  font-family: var(--orb);
-  font-size: clamp(1.7rem, 4.2vw, 2.6rem);
-  font-weight: 700;
-  margin: .4rem 0 .6rem;
-  color: var(--white);
-  letter-spacing: -0.01em;
-}
-.hs-secop-head p{ color: var(--muted); line-height: 1.55; font-size: .95rem; }
-.hs-secop-filters{
+.clr-secop-filters{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: .75rem;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 24px;
 }
-.hs-secop-input{
-  background: var(--deep2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--white);
-  padding: .7rem .9rem;
-  font-size: .9rem;
-  font-family: var(--mono);
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
+.clr-secop-error{
+  border: 1px solid rgba(217,119,6,0.3);
+  background: rgba(217,119,6,0.06);
+  color: var(--warning);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  font-size: var(--fs-sm);
 }
-.hs-secop-input::placeholder{ color: var(--muted); }
-.hs-secop-input:focus{
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(0,245,255,.12);
-}
-.hs-secop-error{
-  border: 1px solid rgba(255,176,32,.35);
-  background: rgba(255,176,32,.07);
-  color: var(--amber);
-  padding: .8rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: .9rem;
-  font-family: var(--mono);
-}
-.hs-secop-results{
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
-}
-.hs-secop-skeleton, .hs-secop-empty{
+.clr-secop-empty{
   grid-column: 1 / -1;
-  padding: 3rem;
+  padding: 48px;
   text-align: center;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: .85rem;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
+  color: var(--ink-600);
+  font-size: var(--fs-sm);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
 }
-.hs-secop-card{
-  background: linear-gradient(160deg, var(--deep2), #061218);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  position: relative;
-  overflow: hidden;
-  transition: transform .18s, border-color .18s, box-shadow .18s;
-}
-.hs-secop-card:hover{
-  transform: translateY(-3px);
-  border-color: var(--cyan);
-  box-shadow: 0 6px 24px rgba(0,245,255,0.08);
-}
-.hs-secop-card::before{
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: var(--cyan);
-  opacity: .55;
-}
-.hs-secop-card-top{
+.clr-secop-card-top{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: .5rem;
+  gap: 8px;
 }
-.hs-secop-state{
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .14em;
-  padding: .25rem .55rem;
-  border-radius: 99px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.hs-secop-state--adj{
-  background: rgba(0,245,255,.12);
-  color: var(--cyan);
-  border: 1px solid rgba(0,245,255,.25);
-}
-.hs-secop-state--open{
-  background: rgba(232,248,255,.06);
-  color: var(--white);
-  border: 1px solid var(--border);
-}
-.hs-secop-val{
-  font-family: var(--mono);
-  font-size: .82rem;
-  color: var(--white);
+.clr-secop-val{
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--ink-900);
   text-align: right;
 }
-.hs-secop-card-title{
-  font-family: var(--sans);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--white);
-  line-height: 1.25;
-  margin: .15rem 0;
+.clr-secop-entity{
+  color: var(--accent);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  margin: 0;
 }
-.hs-secop-card-entity{
-  color: var(--cyan);
-  font-size: .8rem;
-  font-family: var(--mono);
-}
-.hs-secop-meta{
+.clr-secop-meta{
   display: flex;
   flex-wrap: wrap;
-  gap: .4rem .9rem;
-  color: var(--muted);
-  font-size: .72rem;
-  font-family: var(--mono);
+  gap: 4px 14px;
+  color: var(--ink-600);
+  font-size: 11px;
+  font-family: var(--font-mono);
 }
-.hs-secop-adj{ font-size: .8rem; color: var(--white); }
-.hs-secop-adj strong{ color: var(--green); }
-.hs-secop-link{
-  color: var(--cyan);
-  text-decoration: none;
-  font-size: .8rem;
-  font-family: var(--mono);
-}
-.hs-secop-link:hover{ text-decoration: underline; }
-/* Fase D — chips de acceso documental */
-.hs-secop-access-row{
+.clr-secop-adj{ font-size: 12px; color: var(--ink-600); margin: 0; }
+.clr-secop-adj strong{ color: var(--ink-900); }
+.clr-secop-access-row{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .45rem .6rem;
-  margin-top: .15rem;
+  gap: 6px 10px;
+  margin-top: 2px;
 }
-.hs-secop-access{
-  font-family: var(--mono);
-  font-size: .6rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: .22rem .5rem;
-  border-radius: 99px;
-  white-space: nowrap;
-}
-.hs-secop-access--public{
-  background: rgba(0,229,212,.14);
-  color: #00E5D4;
-  border: 1px solid rgba(0,229,212,.42);
-}
-.hs-secop-access--restricted, .hs-secop-access--notpub{
-  background: rgba(255,176,32,.1);
-  color: var(--amber);
-  border: 1px solid rgba(255,176,32,.35);
-}
-.hs-secop-access--unknown{
-  background: rgba(232,248,255,.05);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-.hs-secop-access-msg{
-  font-size: .68rem;
-  color: var(--muted);
-  font-family: var(--mono);
+.clr-secop-access-msg{
+  font-size: 11px;
+  color: var(--ink-600);
   line-height: 1.3;
 }
-.hs-secop-actions{
+.clr-secop-actions{
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: .9rem;
+  gap: 14px;
   flex-wrap: wrap;
-  padding-top: .35rem;
+  padding-top: 6px;
 }
-.hs-secop-probe{
+.clr-secop-probe{
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--white);
-  padding: .35rem .7rem;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--ink-600);
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-family: var(--mono);
-  font-size: .68rem;
-  letter-spacing: .06em;
-  transition: border-color .15s, color .15s;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  transition: border-color 0.18s, color 0.18s;
 }
-.hs-secop-probe:hover:not(:disabled){ border-color: var(--cyan); color: var(--cyan); }
-.hs-secop-probe:disabled{ opacity: .5; cursor: not-allowed; }
-/* Veredicto Nivel 0 — readout/semáforo HUD */
-.hs-verdict{
-  margin-top: .2rem;
-  border: 1px solid var(--border);
-  border-left-width: 2px;
-  border-radius: 6px;
-  padding: .55rem .6rem;
-  background: rgba(0,0,0,.22);
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
+.clr-secop-probe:hover:not(:disabled){ border-color: var(--accent); color: var(--accent); }
+.clr-secop-probe:disabled{ opacity: 0.5; cursor: not-allowed; }
+.clr-secop-link{
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
 }
-.hs-verdict--pass{ border-left-color: #00e5a0; }
-.hs-verdict--warn{ border-left-color: var(--amber); }
-.hs-verdict--fail{ border-left-color: #ff3b5c; }
-.hs-verdict--unknown{ border-left-color: var(--muted); }
-.hs-verdict-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-}
-.hs-verdict-tag{
-  font-family: var(--mono);
-  font-size: .54rem;
-  letter-spacing: .22em;
-  color: var(--muted);
-}
-.hs-verdict-overall{
-  font-family: var(--orb);
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .06em;
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  text-transform: uppercase;
-}
-.hs-verdict-dot{
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.hs-verdict--pass .hs-verdict-overall{ color: #00e5a0; }
-.hs-verdict--pass .hs-verdict-dot{ background: #00e5a0; box-shadow: 0 0 9px #00e5a0; }
-.hs-verdict--warn .hs-verdict-overall{ color: var(--amber); }
-.hs-verdict--warn .hs-verdict-dot{ background: var(--amber); box-shadow: 0 0 9px var(--amber); }
-.hs-verdict--fail .hs-verdict-overall{ color: #ff3b5c; }
-.hs-verdict--fail .hs-verdict-dot{ background: #ff3b5c; box-shadow: 0 0 9px #ff3b5c; }
-.hs-verdict--unknown .hs-verdict-overall{ color: var(--muted); }
-.hs-verdict--unknown .hs-verdict-dot{ background: var(--muted); }
-.hs-verdict-gates{
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem;
-}
-.hs-verdict-gate{
-  font-family: var(--mono);
-  font-size: .55rem;
-  letter-spacing: .07em;
-  display: flex;
-  align-items: center;
-  gap: .25rem;
-  padding: .2rem .42rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  cursor: default;
-  white-space: nowrap;
-}
-.hs-verdict-glyph{ font-weight: 700; line-height: 1; }
-.hs-verdict-gate--pass{ color: #00e5a0; border-color: rgba(0,229,160,.4); background: rgba(0,229,160,.08); }
-.hs-verdict-gate--warn{ color: var(--amber); border-color: rgba(255,176,32,.4); background: rgba(255,176,32,.08); }
-.hs-verdict-gate--fail{ color: #ff3b5c; border-color: rgba(255,59,92,.42); background: rgba(255,59,92,.08); }
-.hs-verdict-gate--unknown{ color: var(--muted); border-color: var(--border); }
-.hs-secop-pager{
+.clr-secop-link:hover{ text-decoration: underline; }
+.clr-secop-pager{
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  font-family: var(--mono);
-  font-size: .8rem;
-  color: var(--muted);
+  gap: 20px;
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--ink-600);
 }
-.hs-secop-pager button{
+.clr-secop-pager button{
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--white);
-  padding: .5rem 1rem;
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--ink-900);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-family: var(--mono);
-  font-size: .75rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  transition: all .18s;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  transition: border-color 0.18s, color 0.18s;
 }
-.hs-secop-pager button:hover:not(:disabled){
-  border-color: var(--cyan);
-  color: var(--cyan);
-  box-shadow: 0 0 12px rgba(0,245,255,0.15);
-}
-.hs-secop-pager button:disabled{ opacity: .35; cursor: not-allowed; }
+.clr-secop-pager button:hover:not(:disabled){ border-color: var(--accent); color: var(--accent); }
+.clr-secop-pager button:disabled{ opacity: 0.35; cursor: not-allowed; }
 `;

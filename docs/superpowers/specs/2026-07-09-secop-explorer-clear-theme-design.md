@@ -1,5 +1,7 @@
 # Re-skin de Licitaciones (SecopExplorer) al clear theme — Design
 
+> **Estado:** implementado 2026-07-10. Verificado manualmente en `/licitaciones`: los 4 estados del semáforo (PASS/WARN/FAIL/UNKNOWN), badges de acceso documental, paginador, estado vacío y foco de inputs. Suite completa (`npm test`, 231/231) y `npm run build` en verde.
+
 ## Contexto
 
 HydroStack tiene actualmente tres lenguajes visuales coexistiendo:
