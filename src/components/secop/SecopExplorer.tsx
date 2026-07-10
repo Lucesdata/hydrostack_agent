@@ -4,8 +4,8 @@
  * SecopExplorer · sección "Licitaciones" de HydroStack
  *
  * Componente cliente. Llama a /api/secop (server-side proxy a SECOP II).
- * Adaptado al design system existente de HydroStack (cyberpunk dark:
- * --deep1/2, --cyan, --white, --muted; fuentes Orbitron / IBM Plex Mono / Inter).
+ * Usa el clear theme compartido de HydroStack (clr-* / app/globals.css) —
+ * mismo sistema visual que la landing y el hub de calculadoras.
  *
  * Uso (App Router):
  *   // app/licitaciones/page.js
