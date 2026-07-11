@@ -40,6 +40,12 @@ describe('sentenceCaseTitle', () => {
     );
   });
 
+  it('preserva siglas también al inicio del título', () => {
+    expect(sentenceCaseTitle('PTAP MUNICIPAL DE LA CUMBRE')).toBe(
+      'PTAP municipal de la cumbre',
+    );
+  });
+
   it('no toca títulos que ya vienen en caso mixto', () => {
     expect(sentenceCaseTitle('Interventoría acueducto La Cumbre')).toBe(
       'Interventoría acueducto La Cumbre',

@@ -18,12 +18,11 @@ export function sentenceCaseTitle(raw: string): string {
   const letters = s.replace(/[^A-Za-zÁÉÍÓÚÑÜáéíóúñü]/g, '');
   const isShouting = letters.length > 0 && letters === letters.toUpperCase();
   if (!isShouting) return s;
-  const lower = s.toLowerCase();
-  let out = lower.charAt(0).toUpperCase() + lower.slice(1);
+  let out = s.toLowerCase();
   for (const a of ACRONYMS) {
     out = out.replace(new RegExp(`\\b${a.toLowerCase()}\\b`, 'g'), a);
   }
-  return out;
+  return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
 const COP_FULL = new Intl.NumberFormat('es-CO', {
