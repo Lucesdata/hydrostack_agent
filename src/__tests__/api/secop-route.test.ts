@@ -36,6 +36,7 @@ describe('GET /api/secop — veredicto Nivel 0 adjunto', () => {
     const res = await GET(req());
     expect(res.status).toBe(200);
     const body = await res.json();
+    expect(body.total).toBe(1);
     expect(body.items).toHaveLength(1);
     expect(body.items[0].id).toBe('CO1.REQ.42');
     expect(body.items[0].verdict.procesoId).toBe('CO1.REQ.42');

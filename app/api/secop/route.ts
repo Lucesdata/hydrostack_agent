@@ -11,6 +11,8 @@
  *   ?estado=Adjudicado
  *   ?valorMin=100000000
  *   ?desde=2026-01-01
+ *   ?apertura=Abierto|Cerrado
+ *   ?orden=fecha|valor         (default: fecha)
  *   ?soloAgua=false            (default: true)
  *   ?page=1&pageSize=25
  */

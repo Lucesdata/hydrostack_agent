@@ -13,21 +13,19 @@ export function parseQuery(sp: URLSearchParams): SecopQuery {
     const v = sp.get(k);
     return v != null && v !== "" ? Number(v) : undefined;
   };
+  const apertura = sp.get("apertura") as EstadoApertura | null;
+  const orden = sp.get("orden");
   return {
     q: sp.get("q") ?? undefined,
     departamento: sp.get("departamento") ?? undefined,
     estado: sp.get("estado") ?? undefined,
     valorMin: num("valorMin"),
     desde: sp.get("desde") ?? undefined,
-    apertura: (["Abierto", "Cerrado"] as const).includes(
-      sp.get("apertura") as EstadoApertura,
-    )
-      ? (sp.get("apertura") as EstadoApertura)
-      : undefined,
-    orden:
-      sp.get("orden") === "valor" ? "valor"
-      : sp.get("orden") === "fecha" ? "fecha"
-      : undefined,
+    apertura:
+      apertura !== null && (["Abierto", "Cerrado"] as const).includes(apertura)
+        ? apertura
+        : undefined,
+    orden: orden === "valor" || orden === "fecha" ? orden : undefined,
     soloAgua: sp.get("soloAgua") === "false" ? false : true,
     page: num("page"),
     pageSize: num("pageSize"),
