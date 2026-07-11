@@ -262,7 +262,13 @@ git commit -m "feat(secop): countProcesos para contador total de resultados"
 
 ### Task 3: Route handler — params nuevos + `total`
 
+> **Ajuste durante ejecución:** Next.js App Router no permite exports arbitrarios
+> en archivos de ruta (`"parseQuery" is not a valid Route export field`), así que
+> `parseQuery` vive en `src/lib/secop/parse-query.ts` (nuevo módulo) y el test
+> importa de ahí. El route handler solo exporta `GET` y `runtime`.
+
 **Files:**
+- Create: `src/lib/secop/parse-query.ts` (parseQuery movida desde route.ts)
 - Modify: `app/api/secop/route.ts:26-61`
 - Test: `src/__tests__/secop/route-parse.test.ts`
 
