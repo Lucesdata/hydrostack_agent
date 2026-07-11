@@ -10,7 +10,7 @@
 import { useState } from "react";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { Verdict, GateStatus } from "@/src/lib/secop/verdict";
-import { formatCopFull, sentenceCaseTitle } from "./format";
+import { formatCopFull, sentenceCaseTitle, verdictScore } from "./format";
 import type { ProcesoVeredicto } from "./ProcessList";
 
 const ACCESS_LABEL: Record<DocumentAccess, string> = {
@@ -52,9 +52,9 @@ interface Props {
 export default function ProcessDetail({ proceso: p, access, probing, onBack }: Props) {
   const [expanded, setExpanded] = useState(false);
   const v = p.verdict;
-  const passCount = v
-    ? Object.values(v.gates).filter((g) => g.status === "PASS").length
-    : 0;
+  const { pass: passCount, total: gateTotal } = v
+    ? verdictScore(v)
+    : { pass: 0, total: GATE_LABEL.length };
 
   return (
     <article className="clr-pdetail-card">
@@ -109,7 +109,7 @@ export default function ProcessDetail({ proceso: p, access, probing, onBack }: P
         <section className="clr-elig" aria-label="Elegibilidad">
           <header className="clr-elig-head">
             <span>Elegibilidad · nivel 0</span>
-            <span className="clr-elig-count">{passCount} de {GATE_LABEL.length} compuertas</span>
+            <span className="clr-elig-count">{passCount} de {gateTotal} compuertas</span>
           </header>
           <div className="clr-elig-bar">
             {GATE_LABEL.map(([key]) => (
