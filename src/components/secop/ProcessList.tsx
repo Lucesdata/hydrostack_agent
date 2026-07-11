@@ -26,7 +26,7 @@ interface Props {
 export default function ProcessList({ items, selectedId, onSelect, loading }: Props) {
   if (loading) {
     return (
-      <div className="clr-plist" aria-busy="true">
+      <div className="clr-plist" aria-busy="true" aria-hidden="true">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="clr-prow clr-prow--skel" />
         ))}
@@ -39,7 +39,7 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
   }
 
   return (
-    <div className="clr-plist" role="listbox" aria-label="Procesos de contratación">
+    <div className="clr-plist" role="list" aria-label="Procesos de contratación">
       {items.map((p) => {
         const closed =
           p.estadoApertura === "Cerrado" || ESTADOS_CERRADOS.includes(p.estado);
@@ -49,8 +49,7 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
           <button
             key={p.id}
             type="button"
-            role="option"
-            aria-selected={p.id === selectedId}
+            aria-current={p.id === selectedId ? "true" : undefined}
             className={`clr-prow${p.id === selectedId ? " is-selected" : ""}${closed ? " is-closed" : ""}`}
             onClick={() => onSelect(p)}
           >
