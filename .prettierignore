@@ -1,0 +1,9 @@
+.next
+out
+dist
+build
+coverage
+node_modules
+.env
+.env.local
+*.md
