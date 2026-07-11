@@ -70,6 +70,16 @@ describe('formatShortDate', () => {
   it('formatea ISO a día + mes corto', () => {
     expect(formatShortDate('2026-07-02T00:00:00.000')).toBe('2 jul');
   });
+  it('canario: la salida ICU cruda de es-CO sigue siendo la esperada', () => {
+    // La normalización de formatShortDate (quitar " de " y puntos) se escribió
+    // contra esta forma exacta. Si un upgrade de Node/ICU cambia el formato,
+    // este test lo hace visible en vez de pasar en silencio.
+    const raw = new Date('2026-07-02T00:00:00.000').toLocaleDateString('es-CO', {
+      day: 'numeric',
+      month: 'short',
+    });
+    expect(raw).toBe('2 de jul');
+  });
   it('null o inválida → cadena vacía', () => {
     expect(formatShortDate(null)).toBe('');
     expect(formatShortDate('no-es-fecha')).toBe('');

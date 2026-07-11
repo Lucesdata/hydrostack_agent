@@ -44,7 +44,15 @@ export function formatCopCompact(value: number | null): string {
   return `$${millones.toLocaleString('es-CO')} M`;
 }
 
-/** Fecha corta para la fila de lista ("2 jul"). Vacía si null/inválida. */
+/**
+ * Fecha corta para la fila de lista ("2 jul"). Vacía si null/inválida.
+ *
+ * La normalización asume la salida ICU/CLDR de es-CO vigente al escribirla
+ * (Node 22, ICU 76): `toLocaleDateString` produce "2 de jul" — con "de" y sin
+ * punto tras el mes. Si un upgrade de ICU cambia esa forma cruda, el test
+ * canario en format.test.ts ("salida ICU cruda") fallará y hay que revisar
+ * estos replace().
+ */
 export function formatShortDate(iso: string | null): string {
   if (!iso) return '';
   const d = new Date(iso);
