@@ -133,6 +133,29 @@ function normalizeProceso(row: Record<string, unknown>): SecopProceso {
   };
 }
 
+/** Orden SoQL soportado, mapeado desde SecopQuery.orden. */
+export const ORDER_SOQL = {
+  fecha: `${F.fechaPublicacion} DESC`,
+  valor: `${F.precioBase} DESC`,
+} as const;
+
+/**
+ * Construye el $where de PROCESOS a partir del query normalizado.
+ * Pura (sin red) para poder testearla; searchProcesos y countProcesos la comparten.
+ */
+export function buildProcesosWhere(query: SecopQuery): string {
+  return andWhere(
+    query.soloAgua !== false ? buildAguaWhere() : null, // por defecto, solo agua
+    query.departamento
+      ? `upper(${F.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
+      : null,
+    query.estado ? `${F.estado} = '${soqlEscape(query.estado)}'` : null,
+    query.valorMin != null ? `${F.precioBase} >= ${query.valorMin}` : null,
+    query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
+    query.apertura ? `${F.estadoApertura} = '${soqlEscape(query.apertura)}'` : null,
+  );
+}
+
 /**
  * Busca PROCESOS de contratación (licitaciones).
  * Punto de entrada principal de la feature.
@@ -143,20 +166,12 @@ export async function searchProcesos(
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
 
-  const where = andWhere(
-    query.soloAgua !== false ? buildAguaWhere() : null, // por defecto, solo agua
-    query.departamento
-      ? `upper(${F.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
-      : null,
-    query.estado ? `${F.estado} = '${soqlEscape(query.estado)}'` : null,
-    query.valorMin != null ? `${F.precioBase} >= ${query.valorMin}` : null,
-    query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
-  );
+  const where = buildProcesosWhere(query);
 
   const rows = await sodaFetch<Record<string, unknown>>(await resolveDatasetId("procesos"), {
     $where: where || undefined,
     $q: query.q ? soqlEscape(query.q) : undefined,
-    $order: `${F.fechaPublicacion} DESC`,
+    $order: ORDER_SOQL[query.orden ?? 'fecha'],
     $limit: pageSize,
     $offset: (page - 1) * pageSize,
   });

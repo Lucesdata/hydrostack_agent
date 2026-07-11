@@ -66,6 +66,10 @@ export interface SecopQuery {
   valorMin?: number;
   /** Solo procesos publicados desde esta fecha ISO (YYYY-MM-DD). */
   desde?: string;
+  /** Filtra por apertura del proceso (Abierto = aún recibe ofertas). */
+  apertura?: EstadoApertura;
+  /** Orden: fecha de publicación desc (default) o precio base desc. */
+  orden?: 'fecha' | 'valor';
   /** Si true, aplica el filtro de palabras clave del sector agua. */
   soloAgua?: boolean;
   page?: number;
