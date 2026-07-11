@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { buildProcesosWhere, ORDER_SOQL } from '@/src/lib/secop/client';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { buildProcesosWhere, ORDER_SOQL, countProcesos } from '@/src/lib/secop/client';
 import { FIELDS_PROCESOS } from '@/src/lib/secop/config';
 
 const F = FIELDS_PROCESOS;
+
+vi.mock('@/src/lib/secop/datasetResolver', () => ({
+  resolveDatasetId: vi.fn().mockResolvedValue('p6dx-8zbt'),
+}));
 
 describe('buildProcesosWhere', () => {
   it('sin filtros (y sin agua) devuelve cadena vacía', () => {
@@ -40,5 +44,36 @@ describe('ORDER_SOQL', () => {
   it('mapea fecha y valor a las columnas SoQL correctas', () => {
     expect(ORDER_SOQL.fecha).toBe(`${F.fechaPublicacion} DESC`);
     expect(ORDER_SOQL.valor).toBe(`${F.precioBase} DESC`);
+  });
+});
+
+describe('countProcesos', () => {
+  const okResponse = (body: unknown) =>
+    ({ ok: true, json: async () => body }) as Response;
+
+  beforeEach(() => vi.stubGlobal('fetch', vi.fn()));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('devuelve el count numérico de la respuesta SODA', async () => {
+    vi.mocked(fetch).mockResolvedValue(okResponse([{ count: '2208' }]));
+    expect(await countProcesos({ soloAgua: false })).toBe(2208);
+  });
+
+  it('pide $select=count(*) con el mismo $where', async () => {
+    vi.mocked(fetch).mockResolvedValue(okResponse([{ count: '1' }]));
+    await countProcesos({ soloAgua: false, apertura: 'Abierto' });
+    const url = new URL(vi.mocked(fetch).mock.calls[0][0] as string);
+    expect(url.searchParams.get('$select')).toBe('count(*) as count');
+    expect(url.searchParams.get('$where')).toContain("= 'Abierto'");
+  });
+
+  it('devuelve undefined si la consulta falla (nunca bloquea resultados)', async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error('boom'));
+    expect(await countProcesos({ soloAgua: false })).toBeUndefined();
+  });
+
+  it('devuelve undefined si el count no es numérico', async () => {
+    vi.mocked(fetch).mockResolvedValue(okResponse([{ count: 'NaN?' }]));
+    expect(await countProcesos({ soloAgua: false })).toBeUndefined();
   });
 });

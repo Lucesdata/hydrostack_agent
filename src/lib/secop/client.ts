@@ -66,6 +66,7 @@ function andWhere(...parts: (string | null | undefined)[]): string {
 }
 
 interface SodaParams {
+  $select?: string;
   $where?: string;
   $q?: string;
   $order?: string;
@@ -154,6 +155,27 @@ export function buildProcesosWhere(query: SecopQuery): string {
     query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
     query.apertura ? `${F.estadoApertura} = '${soqlEscape(query.apertura)}'` : null,
   );
+}
+
+/**
+ * Total de PROCESOS que matchean el query (para "Página X de Y" y el contador).
+ * Best-effort: si SODA falla, devuelve undefined y la UI degrada sin total.
+ */
+export async function countProcesos(query: SecopQuery = {}): Promise<number | undefined> {
+  try {
+    const where = buildProcesosWhere(query);
+    const rows = await sodaFetch<{ count?: string }>(await resolveDatasetId("procesos"), {
+      $select: "count(*) as count",
+      $where: where || undefined,
+      $q: query.q ? soqlEscape(query.q) : undefined,
+      $limit: 1,
+      $offset: 0,
+    });
+    const n = Number(rows[0]?.count);
+    return Number.isFinite(n) ? n : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
