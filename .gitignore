@@ -16,3 +16,4 @@ graphify-out/
 
 # Superpowers brainstorm artifacts (mockups del visual companion)
 .superpowers/
+.env*

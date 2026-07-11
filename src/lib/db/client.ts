@@ -35,13 +35,16 @@ function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
     const { Pool: PgPool } = require('pg');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { drizzle: drizzleNode } = require('drizzle-orm/node-postgres');
-    const pool: MinimalPool = new PgPool({ connectionString: process.env.DATABASE_URL });
+    const pool: MinimalPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      keepAlive: true,
+    });
     const db = drizzleNode(pool, { schema }) as unknown as NeonDatabase<typeof schema>;
     return { db, pool };
   }
 
   neonConfig.webSocketConstructor = ws;
-  const pool = new NeonPool({ connectionString: process.env.DATABASE_URL });
+  const pool = new NeonPool({ connectionString: process.env.DATABASE_URL, keepAlive: true });
   const db = drizzleNeon(pool, { schema });
   return { db, pool };
 }
