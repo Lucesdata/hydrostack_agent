@@ -76,4 +76,9 @@ describe('countProcesos', () => {
     vi.mocked(fetch).mockResolvedValue(okResponse([{ count: 'NaN?' }]));
     expect(await countProcesos({ soloAgua: false })).toBeUndefined();
   });
+
+  it('devuelve undefined si la respuesta SODA viene vacía', async () => {
+    vi.mocked(fetch).mockResolvedValue(okResponse([]));
+    expect(await countProcesos({ soloAgua: false })).toBeUndefined();
+  });
 });

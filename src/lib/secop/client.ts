@@ -172,8 +172,19 @@ export async function countProcesos(query: SecopQuery = {}): Promise<number | un
       $offset: 0,
     });
     const n = Number(rows[0]?.count);
-    return Number.isFinite(n) ? n : undefined;
-  } catch {
+    if (!Number.isFinite(n)) {
+      console.warn(
+        `[countProcesos] count no numérico en la respuesta SODA (${String(rows[0]?.count)}), se omite el total`,
+      );
+      return undefined;
+    }
+    return n;
+  } catch (err) {
+    console.warn(
+      `[countProcesos] falló la consulta count (${
+        err instanceof Error ? err.message : String(err)
+      }), se omite el total`,
+    );
     return undefined;
   }
 }
