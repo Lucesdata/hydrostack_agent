@@ -376,6 +376,7 @@ import {
   sentenceCaseTitle,
   formatCopCompact,
   formatCopFull,
+  formatShortDate,
   verdictScore,
 } from '@/src/components/secop/format';
 import type { Verdict, GateResult, GateStatus } from '@/src/lib/secop/verdict';
@@ -429,6 +430,16 @@ describe('formatCopCompact', () => {
   it('null → guion', () => {
     expect(formatCopCompact(null)).toBe('—');
     expect(formatCopFull(null)).toBe('—');
+  });
+});
+
+describe('formatShortDate', () => {
+  it('formatea ISO a día + mes corto', () => {
+    expect(formatShortDate('2026-07-02T00:00:00.000')).toBe('2 jul');
+  });
+  it('null o inválida → cadena vacía', () => {
+    expect(formatShortDate(null)).toBe('');
+    expect(formatShortDate('no-es-fecha')).toBe('');
   });
 });
 
@@ -509,6 +520,16 @@ export function formatCopCompact(value: number | null): string {
   return `$${millones.toLocaleString('es-CO')} M`;
 }
 
+/** Fecha corta para la fila de lista ("2 jul"). Vacía si null/ inválida. */
+export function formatShortDate(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d
+    .toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })
+    .replace(/\./g, '');
+}
+
 export type ScoreTone = 'success' | 'warn' | 'fail' | 'neutral';
 
 export interface VerdictScore {
@@ -561,7 +582,7 @@ Sin test unitario de componente (el proyecto no tiene testing-library); se verif
 
 import type { SecopProceso } from "@/src/lib/secop/types";
 import type { Verdict } from "@/src/lib/secop/verdict";
-import { sentenceCaseTitle, formatCopCompact, verdictScore } from "./format";
+import { sentenceCaseTitle, formatCopCompact, formatShortDate, verdictScore } from "./format";
 
 /** Proceso con veredicto Nivel 0 adjunto por /api/secop. */
 export type ProcesoVeredicto = SecopProceso & { verdict?: Verdict };
@@ -615,6 +636,9 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
             <span className="clr-prow-meta">
               {p.entidad}
               {p.departamento ? ` · ${p.departamento}` : ""}
+              {formatShortDate(p.fechaPublicacion)
+                ? ` · ${formatShortDate(p.fechaPublicacion)}`
+                : ""}
             </span>
             <span className="clr-prow-foot">
               <span className="clr-prow-val">
