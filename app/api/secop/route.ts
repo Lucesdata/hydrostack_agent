@@ -16,29 +16,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { searchProcesos, searchContratos } from "@/src/lib/secop/client";
-import type { SecopQuery } from "@/src/lib/secop/types";
+import { searchProcesos, searchContratos, countProcesos } from "@/src/lib/secop/client";
+import { parseQuery } from "@/src/lib/secop/parse-query";
 import { buildVerdict, toVerdictInput } from "@/src/lib/secop/verdict";
 import { OFERENTE_PILOTO } from "@/src/lib/oferente/pilot";
 
 export const runtime = "nodejs";
-
-function parseQuery(sp: URLSearchParams): SecopQuery {
-  const num = (k: string) => {
-    const v = sp.get(k);
-    return v != null && v !== "" ? Number(v) : undefined;
-  };
-  return {
-    q: sp.get("q") ?? undefined,
-    departamento: sp.get("departamento") ?? undefined,
-    estado: sp.get("estado") ?? undefined,
-    valorMin: num("valorMin"),
-    desde: sp.get("desde") ?? undefined,
-    soloAgua: sp.get("soloAgua") === "false" ? false : true,
-    page: num("page"),
-    pageSize: num("pageSize"),
-  };
-}
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
@@ -53,12 +36,17 @@ export async function GET(req: NextRequest) {
     // adjunta documentAccess. Perfil = OFERENTE_PILOTO (seed; valores reales TODO).
     // sectorAgua/fechaCierre no están en la foto live → null (sectorial usa el UNSPSC;
     // plazo usa estadoApertura). El veredicto es recomputable, no se persiste.
-    const result = await searchProcesos(query);
+    // total: count SODA en paralelo, best-effort — si falla, total queda
+    // undefined y la UI degrada sin él (ver countProcesos en client.ts).
+    const [result, total] = await Promise.all([
+      searchProcesos(query),
+      countProcesos(query),
+    ]);
     const items = result.items.map((p) => ({
       ...p,
       verdict: buildVerdict(OFERENTE_PILOTO, toVerdictInput(p)),
     }));
-    return NextResponse.json({ ...result, items });
+    return NextResponse.json({ ...result, total, items });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error desconocido";
     return NextResponse.json(

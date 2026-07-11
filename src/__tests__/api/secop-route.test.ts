@@ -7,12 +7,14 @@ import type { SecopProceso } from '@/src/lib/secop/types';
 vi.mock('@/src/lib/secop/client', () => ({
   searchProcesos: vi.fn(),
   searchContratos: vi.fn(),
+  countProcesos: vi.fn(),
 }));
 
 import { GET } from '@/app/api/secop/route';
-import { searchProcesos } from '@/src/lib/secop/client';
+import { searchProcesos, countProcesos } from '@/src/lib/secop/client';
 
 const mockedSearch = vi.mocked(searchProcesos);
+const mockedCount = vi.mocked(countProcesos);
 
 const sampleProceso: SecopProceso = {
   id: 'CO1.REQ.42', referencia: 'R42', nombre: 'Optimización acueducto', descripcion: '',
@@ -30,6 +32,7 @@ beforeEach(() => vi.clearAllMocks());
 describe('GET /api/secop — veredicto Nivel 0 adjunto', () => {
   it('adjunta un verdict a cada proceso', async () => {
     mockedSearch.mockResolvedValue({ items: [sampleProceso], page: 1, pageSize: 25 });
+    mockedCount.mockResolvedValue(1);
     const res = await GET(req());
     expect(res.status).toBe(200);
     const body = await res.json();
