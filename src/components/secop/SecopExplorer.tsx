@@ -86,7 +86,7 @@ export default function SecopExplorer() {
   const [probed, setProbed] = useState<Record<string, { state: DocumentAccess; message: string }>>({});
   const [probing, setProbing] = useState<Record<string, boolean>>({});
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (signal: AbortSignal) => {
     setLoading(true); setError(null);
     try {
       const params = new URLSearchParams({ tipo: "procesos", page: String(page) });
@@ -94,21 +94,26 @@ export default function SecopExplorer() {
       if (filters.departamento) params.set("departamento", filters.departamento);
       if (filters.estado) params.set("estado", filters.estado);
       if (filters.valorMin) params.set("valorMin", filters.valorMin);
-      const res = await fetch(`/api/secop?${params}`);
+      const res = await fetch(`/api/secop?${params}`, { signal });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
         throw new Error(payload.detail ?? "Error de consulta");
       }
       setData(await res.json());
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setError(e instanceof Error ? e.message : "Error desconocido");
       setData(null);
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
   }, [filters, page]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
+  }, [fetchData]);
 
   const set = (k: keyof Filters) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setPage(1); setFilters((f) => ({ ...f, [k]: e.target.value }));
