@@ -54,7 +54,7 @@ export default function SecopExplorer() {
   // Solo-abiertos aplica si el usuario no pidió cerrados ni un estado concreto.
   const soloAbiertos = !incluirCerrados && !filters.estado;
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
     setError(null);
     try {
@@ -69,21 +69,26 @@ export default function SecopExplorer() {
       if (filters.departamento) params.set("departamento", filters.departamento);
       if (filters.estado) params.set("estado", filters.estado);
       if (filters.valorMin) params.set("valorMin", filters.valorMin);
-      const res = await fetch(`/api/secop?${params}`);
+      const res = await fetch(`/api/secop?${params}`, { signal });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
         throw new Error(payload.detail ?? "Error de consulta");
       }
       setData(await res.json());
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setError(e instanceof Error ? e.message : "Error desconocido");
       setData(null);
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
   }, [filters, page, pageSize, orden, soloAbiertos]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
+  }, [fetchData]);
 
   // Auto-selección: primer resultado de la página (sin abrir overlay móvil).
   useEffect(() => {
