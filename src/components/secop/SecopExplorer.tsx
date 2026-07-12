@@ -473,7 +473,10 @@ const CSS = `
   .clr-wb-detailcol.is-open{
     display: block;
     position: fixed;
-    inset: 0;
+    top: var(--nav-h);
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 50;
     background: var(--bg);
     overflow-y: auto;
