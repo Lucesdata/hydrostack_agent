@@ -17,6 +17,8 @@ import {
   KEYWORDS_AGUA,
   PAGE_SIZE_DEFAULT,
   PAGE_SIZE_MAX,
+  REVALIDATE_SEARCH,
+  REVALIDATE_COUNT,
 } from "./config";
 import { resolveDatasetId } from "./datasetResolver";
 import { preclassify, accessMessage } from "./document-access";
@@ -77,6 +79,7 @@ interface SodaParams {
 async function sodaFetch<T>(
   dataset: string,
   params: SodaParams,
+  opts: { signal?: AbortSignal; revalidate?: number } = {},
 ): Promise<T[]> {
   const url = new URL(`${SOCRATA_DOMAIN}/resource/${dataset}.json`);
   Object.entries(params).forEach(([k, v]) => {
@@ -92,8 +95,9 @@ async function sodaFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers,
-    // Cache de Next: revalida cada 30 min. Ajusta a gusto.
-    next: { revalidate: 1800 },
+    signal: opts.signal,
+    // Cache de Next: revalida según el llamador (ver REVALIDATE_* en config.ts).
+    next: { revalidate: opts.revalidate ?? REVALIDATE_SEARCH },
   });
 
   if (!res.ok) {
@@ -161,16 +165,23 @@ export function buildProcesosWhere(query: SecopQuery): string {
  * Total de PROCESOS que matchean el query (para "Página X de Y" y el contador).
  * Best-effort: si SODA falla, devuelve undefined y la UI degrada sin total.
  */
-export async function countProcesos(query: SecopQuery = {}): Promise<number | undefined> {
+export async function countProcesos(
+  query: SecopQuery = {},
+  signal?: AbortSignal,
+): Promise<number | undefined> {
   try {
     const where = buildProcesosWhere(query);
-    const rows = await sodaFetch<{ count?: string }>(await resolveDatasetId("procesos"), {
-      $select: "count(*) as count",
-      $where: where || undefined,
-      $q: query.q ? soqlEscape(query.q) : undefined,
-      $limit: 1,
-      $offset: 0,
-    });
+    const rows = await sodaFetch<{ count?: string }>(
+      await resolveDatasetId("procesos"),
+      {
+        $select: "count(*) as count",
+        $where: where || undefined,
+        $q: query.q ? soqlEscape(query.q) : undefined,
+        $limit: 1,
+        $offset: 0,
+      },
+      { signal, revalidate: REVALIDATE_COUNT },
+    );
     const n = Number(rows[0]?.count);
     if (!Number.isFinite(n)) {
       console.warn(
@@ -180,6 +191,7 @@ export async function countProcesos(query: SecopQuery = {}): Promise<number | un
     }
     return n;
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") return undefined;
     console.warn(
       `[countProcesos] falló la consulta count (${
         err instanceof Error ? err.message : String(err)
@@ -195,19 +207,24 @@ export async function countProcesos(query: SecopQuery = {}): Promise<number | un
  */
 export async function searchProcesos(
   query: SecopQuery = {},
+  signal?: AbortSignal,
 ): Promise<SecopResult<SecopProceso>> {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
 
   const where = buildProcesosWhere(query);
 
-  const rows = await sodaFetch<Record<string, unknown>>(await resolveDatasetId("procesos"), {
-    $where: where || undefined,
-    $q: query.q ? soqlEscape(query.q) : undefined,
-    $order: ORDER_SOQL[query.orden ?? 'fecha'],
-    $limit: pageSize,
-    $offset: (page - 1) * pageSize,
-  });
+  const rows = await sodaFetch<Record<string, unknown>>(
+    await resolveDatasetId("procesos"),
+    {
+      $where: where || undefined,
+      $q: query.q ? soqlEscape(query.q) : undefined,
+      $order: ORDER_SOQL[query.orden ?? 'fecha'],
+      $limit: pageSize,
+      $offset: (page - 1) * pageSize,
+    },
+    { signal },
+  );
 
   return { items: rows.map(normalizeProceso), page, pageSize };
 }
@@ -234,6 +251,7 @@ function normalizeContrato(row: Record<string, unknown>): SecopContrato {
 /** Busca CONTRATOS ya formalizados del sector agua. */
 export async function searchContratos(
   query: SecopQuery = {},
+  signal?: AbortSignal,
 ): Promise<SecopResult<SecopContrato>> {
   const C = FIELDS_CONTRATOS;
   const page = Math.max(1, query.page ?? 1);
@@ -254,12 +272,16 @@ export async function searchContratos(
     query.valorMin != null ? `${C.valor} >= ${query.valorMin}` : null,
   );
 
-  const rows = await sodaFetch<Record<string, unknown>>(await resolveDatasetId("contratos"), {
-    $where: where || undefined,
-    $q: query.q ? soqlEscape(query.q) : undefined,
-    $limit: pageSize,
-    $offset: (page - 1) * pageSize,
-  });
+  const rows = await sodaFetch<Record<string, unknown>>(
+    await resolveDatasetId("contratos"),
+    {
+      $where: where || undefined,
+      $q: query.q ? soqlEscape(query.q) : undefined,
+      $limit: pageSize,
+      $offset: (page - 1) * pageSize,
+    },
+    { signal },
+  );
 
   return { items: rows.map(normalizeContrato), page, pageSize };
 }

@@ -7,10 +7,10 @@
  *   1) Procesos (catálogos: entidad + geografia)
  *   2) Contratos (catálogos: entidad + proveedor; FK a proceso via portafolio)
  *
- * Procesos van ANTES que contratos para que `resolveProcesoIdByPortafolio`
- * encuentre el proceso correspondiente (D11). Si la muestra trae contratos sin
- * proceso (ventanas BDOS disjuntas, 0.2 §5.1), proceso_id queda NULL — el
- * contrato NO se descarta.
+ * Procesos van ANTES que contratos para que el índice de portafolio
+ * (`loadPortafolioIndex`, D11) encuentre el proceso correspondiente. Si la
+ * muestra trae contratos sin proceso (ventanas BDOS disjuntas, 0.2 §5.1),
+ * proceso_id queda NULL — el contrato NO se descarta.
  *
  * Idempotente: corre dos veces sobre el mismo raw_record y deja el mismo
  * estado canónico (UPSERTs por clave natural; reescribe todas las columnas
@@ -25,15 +25,25 @@ import { randomUUID } from 'node:crypto';
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/src/lib/db/client';
 import { rawRecord } from '@/src/lib/db/schema';
-import { mapContratoRow, mapProcesoRow } from './mapCanonical';
+import {
+  mapContratoRow,
+  mapProcesoRow,
+  type ContratoProjection,
+  type ProcesoProjection,
+  type ProveedorProjection,
+} from './mapCanonical';
 import {
   GeoResolver,
-  quarantine,
-  resolveProcesoIdByPortafolio,
-  upsertContrato,
-  upsertEntidad,
-  upsertProceso,
-  upsertProveedor,
+  batchQuarantine,
+  batchUpsertContratos,
+  batchUpsertEntidades,
+  batchUpsertProcesos,
+  batchUpsertProveedores,
+  loadPortafolioIndex,
+  type ContratoItem,
+  type EntidadItem,
+  type ProcesoItem,
+  type QuarantineEntry,
 } from './writers';
 import { rebuildContratoEventos, type EventMetrics } from './eventWriter';
 import { preclassify } from '@/src/lib/secop/document-access';
@@ -108,17 +118,29 @@ async function totalSnapshots(source: string): Promise<number> {
   return row?.total ?? 0;
 }
 
+/**
+ * Transforma una fuente en dos pasadas sobre los snapshots (evita el
+ * round-trip por fila que hacía el rebuild secuencial):
+ *   1) proyecta cada fila (puro) y arma los ítems de escritura en memoria.
+ *   2) resuelve/escribe por lotes (catálogos primero, hechos después — los
+ *      hechos necesitan los ids de catálogo ya resueltos).
+ */
 async function transformProcesos(geo: GeoResolver, batchId: string): Promise<SourceMetrics> {
   const m = emptyMetrics();
   const snapshots = await latestSnapshots('secop_ii_procesos');
   m.totalSnapshots = await totalSnapshots('secop_ii_procesos');
   m.uniqueRecords = snapshots.length;
 
+  const quarantineEntries: QuarantineEntry[] = [];
+  const entidadItems: EntidadItem[] = [];
+  const pending: { snap: LatestSnapshot; projection: ProcesoProjection; entidadGeo: string | null }[] =
+    [];
+
   for (const snap of snapshots) {
     const projection = mapProcesoRow(snap.payload);
 
     if (!projection.secopProcesoId) {
-      await quarantine(db, {
+      quarantineEntries.push({
         rawRecordId: snap.id,
         source: 'secop_ii_procesos',
         sourceRecordId: null,
@@ -132,23 +154,31 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
 
     // Resolver geografía de la entidad (procesos: departamento_entidad/ciudad_entidad)
     const entidadGeo = geo.resolve(projection.geo);
-    let entidadId: string | null = null;
     if (projection.entidad) {
-      entidadId = await upsertEntidad(db, projection.entidad, entidadGeo);
+      entidadItems.push({ proj: projection.entidad, geografiaId: entidadGeo });
       m.entidadesUpsert++;
     }
-
     // La geografía del PROCESO es la misma del entidad (0.2 §3.1 — procesos no
     // traen una localización propia distinta del entidad).
     if (entidadGeo) m.geografiaResuelta++;
     else m.geografiaNoResuelta++;
 
-    // Gate de acceso documental (B2): preclasificación barata sobre la metadata
-    // cruda (sin HTTP). Se re-evalúa en cada corrida (B3).
-    const docAccess = preclassify(snap.payload);
-    await upsertProceso(db, projection, entidadId, entidadGeo, snap.id, docAccess);
-    m.procesosUpsert++;
+    pending.push({ snap, projection, entidadGeo });
   }
+
+  await batchQuarantine(db, quarantineEntries);
+  const entidadIdByNit = await batchUpsertEntidades(db, entidadItems);
+
+  const procesoItems: ProcesoItem[] = pending.map(({ snap, projection, entidadGeo }) => ({
+    proj: projection,
+    entidadId: projection.entidad ? entidadIdByNit.get(projection.entidad.nitCanonico) ?? null : null,
+    geografiaId: entidadGeo,
+    rawRecordId: snap.id,
+    // Gate de acceso documental (B2): preclasificación barata sobre la
+    // metadata cruda (sin HTTP). Se re-evalúa en cada corrida (B3).
+    docAccess: preclassify(snap.payload),
+  }));
+  m.procesosUpsert = await batchUpsertProcesos(db, procesoItems);
 
   return m;
 }
@@ -159,11 +189,17 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
   m.totalSnapshots = await totalSnapshots('secop_ii_contratos');
   m.uniqueRecords = snapshots.length;
 
+  const quarantineEntries: QuarantineEntry[] = [];
+  const entidadItems: EntidadItem[] = [];
+  const proveedorProjs: ProveedorProjection[] = [];
+  const pending: { snap: LatestSnapshot; projection: ContratoProjection; contratoGeo: string | null }[] =
+    [];
+
   for (const snap of snapshots) {
     const projection = mapContratoRow(snap.payload);
 
     if (!projection.secopContratoId) {
-      await quarantine(db, {
+      quarantineEntries.push({
         rawRecordId: snap.id,
         source: 'secop_ii_contratos',
         sourceRecordId: null,
@@ -175,42 +211,56 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
       continue;
     }
 
-    // Geografía de la entidad — solo para el upsert de entidad, no para contrato.
-    // Hint de entidad es departamento_entidad/ciudad_entidad del contrato; en
-    // muestra observada coincide casi siempre con la geografía del contrato.
-    let entidadId: string | null = null;
+    // Geografía de la entidad y del contrato es el mismo hint (D25: localizaci_n
+    // primaria, depto/ciudad fallback). Hint de entidad es departamento_entidad/
+    // ciudad_entidad del contrato; en muestra observada coincide casi siempre.
+    const contratoGeo = geo.resolve(projection.geo);
     if (projection.entidad) {
-      entidadId = await upsertEntidad(db, projection.entidad, geo.resolve(projection.geo));
+      entidadItems.push({ proj: projection.entidad, geografiaId: contratoGeo });
       m.entidadesUpsert++;
     }
 
     // Proveedor: null si centinela (D3). proveedor_raw guarda la pista textual.
-    let proveedorId: string | null = null;
     if (projection.proveedor) {
-      proveedorId = await upsertProveedor(db, projection.proveedor);
+      proveedorProjs.push(projection.proveedor);
       m.proveedoresUpsert++;
     } else if (projection.proveedorRaw) {
       m.proveedorCentinela++;
     }
 
-    // Geografía del CONTRATO (D25: localizaci_n primaria, depto/ciudad fallback).
-    const contratoGeo = geo.resolve(projection.geo);
     if (contratoGeo) m.geografiaResuelta++;
     else m.geografiaNoResuelta++;
 
-    // Proceso por portafolio (D11). Si no existe en la muestra, NULL.
-    const procesoId = await resolveProcesoIdByPortafolio(db, projection.procesoDeCompra);
+    pending.push({ snap, projection, contratoGeo });
+  }
+
+  await batchQuarantine(db, quarantineEntries);
+  const [entidadIdByNit, proveedorIdByNit, portafolioIndex] = await Promise.all([
+    batchUpsertEntidades(db, entidadItems),
+    batchUpsertProveedores(db, proveedorProjs),
+    loadPortafolioIndex(db),
+  ]);
+
+  const contratoItems: ContratoItem[] = pending.map(({ snap, projection, contratoGeo }) => {
+    // Proceso por portafolio (D11). Si no existe en la muestra, NULL (no se
+    // descarta el contrato — 0.2.2 §9.4).
+    const procesoId = projection.procesoDeCompra
+      ? portafolioIndex.get(projection.procesoDeCompra) ?? null
+      : null;
     if (procesoId === null) m.procesoNoEncontrado++;
 
-    await upsertContrato(db, projection, {
-      entidadId,
-      proveedorId,
+    return {
+      proj: projection,
+      entidadId: projection.entidad ? entidadIdByNit.get(projection.entidad.nitCanonico) ?? null : null,
+      proveedorId: projection.proveedor
+        ? proveedorIdByNit.get(projection.proveedor.nitCanonico) ?? null
+        : null,
       procesoId,
       geografiaId: contratoGeo,
       rawRecordId: snap.id,
-    });
-    m.contratosUpsert++;
-  }
+    };
+  });
+  m.contratosUpsert = await batchUpsertContratos(db, contratoItems);
 
   return m;
 }
@@ -228,8 +278,8 @@ export async function runTransform(): Promise<TransformSummary> {
     );
   }
 
-  // ORDEN IMPORTANTE: procesos primero para que el lookup por portafolio
-  // (resolveProcesoIdByPortafolio) en contratos encuentre algo.
+  // ORDEN IMPORTANTE: procesos primero para que el índice de portafolio
+  // (loadPortafolioIndex) en contratos encuentre algo.
   const procesos = await transformProcesos(geo, batchId);
   const contratos = await transformContratos(geo, batchId);
   const eventos = await rebuildContratoEventos(db);

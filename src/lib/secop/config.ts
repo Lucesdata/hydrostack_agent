@@ -146,3 +146,11 @@ export const ESTADOS_PROCESO = [
 /** Límites de paginación. SODA admite hasta 50.000 por página. */
 export const PAGE_SIZE_DEFAULT = 25;
 export const PAGE_SIZE_MAX = 100;
+
+/**
+ * Ventanas de caché (Next fetch) para las consultas a Socrata, en segundos.
+ * El conteo total es más caro (no tiene $limit útil) y menos sensible a
+ * quedar unos minutos desactualizado que la página de resultados.
+ */
+export const REVALIDATE_SEARCH = 1800;
+export const REVALIDATE_COUNT = 3600;
