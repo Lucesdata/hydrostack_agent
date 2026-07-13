@@ -2,10 +2,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useLang } from "@/src/lib/i18n";
+// import { useLang } from "@/src/lib/i18n"; // selector ES/EN retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
 
 export default function Navbar() {
-  const { t, toggle } = useLang();
+  // const { t, toggle } = useLang(); // reactivar junto con los botones de idioma más abajo
   const path = usePathname();
   const isCalc = path.startsWith("/calculators");
   const isChat = path.startsWith("/chat");
@@ -28,22 +28,24 @@ export default function Navbar() {
 
         <div style={S.links} className="hide-mobile">
           <Link href="/calculators" className="clr-nav-link" {...navAria(isCalc)}>
-            {t.nav.calculators}
+            Calculadoras
           </Link>
           <Link href="/chat" className="clr-nav-link" {...navAria(isChat)}>
-            {t.nav.assistant}
+            Asistente
           </Link>
           <Link href="/licitaciones" className="clr-nav-link" {...navAria(isLic)}>
             Licitaciones
           </Link>
           <a href="#about" className="clr-nav-link">
-            {t.nav.about}
+            Nosotros
           </a>
         </div>
 
+        {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
         <button className="clr-lang-btn hide-mobile" onClick={toggle}>
           {t.nav.lang}
         </button>
+        */}
 
         <button
           className="clr-hamburger hide-desktop"
@@ -58,20 +60,22 @@ export default function Navbar() {
 
       <div id="clr-mobile-menu" className={`clr-mobile-menu${open ? " open" : ""}`}>
         <Link href="/calculators" className="clr-mobile-link" {...navAria(isCalc)} onClick={close}>
-          {t.nav.calculators}
+          Calculadoras
         </Link>
         <Link href="/chat" className="clr-mobile-link" {...navAria(isChat)} onClick={close}>
-          {t.nav.assistant}
+          Asistente
         </Link>
         <Link href="/licitaciones" className="clr-mobile-link" {...navAria(isLic)} onClick={close}>
           Licitaciones
         </Link>
         <a href="#about" className="clr-mobile-link" onClick={close}>
-          {t.nav.about}
+          Nosotros
         </a>
+        {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
         <button className="clr-mobile-lang" onClick={() => { toggle(); close(); }}>
           {t.nav.lang}
         </button>
+        */}
       </div>
     </nav>
   );
