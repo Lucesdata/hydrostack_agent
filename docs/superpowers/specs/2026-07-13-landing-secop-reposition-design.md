@@ -13,6 +13,7 @@ HydroStack va en producción (hydrostacks.vercel.app). El hero actual presenta 4
 - **i18n: español directo en JSX.** El copy nuevo del home se escribe como strings en español dentro de los componentes de landing, sin pasar por `src/lib/i18n.js`. El diccionario existente no se toca (sigue sirviendo al resto del sitio). Cuando se reactive el selector ES/EN, se migra este copy a i18n en un trabajo aparte.
 - **No reutilizar `.btn-cta` de `globals.css`.** Su `:hover` referencia `var(--cyan)`/`var(--deep1)`, tokens de un tema oscuro anterior no usado en la landing actual (tema claro `--accent` teal). El botón CTA nuevo se estila con los tokens vigentes.
 - **Formato de valores COP en el ticker:** `"$450 M"` (espacio antes de la M), igual a `formatCopCompact()` en `src/components/secop/format.ts` — consistencia visual con `/licitaciones`, aunque el ticker use datos fijos, no la función real.
+- **Mini-bloque de marca dentro del hero** (`S.mark`: logo "H" + "HydroStack" + texto "ES · EN", líneas 162-167 de `app/page.js` original): se elimina completo (comentado, no borrado). Es redundante con el logo del `Navbar` (que vive en `layout.js`, fuera de este archivo) y el texto "ES · EN" quedaría inconsistente una vez retirado el selector real.
 
 ## Tokens de diseño existentes (no se introduce paleta nueva)
 
