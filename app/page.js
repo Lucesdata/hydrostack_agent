@@ -188,6 +188,7 @@ export default function LandingPage() {
 
       <section style={S.problem}>
         <div style={S.container}>
+          <h2 style={S.srOnly}>El problema</h2>
           <div style={S.problemGrid}>
             {PROBLEM_POINTS.map((p, i) => (
               <div key={i} style={S.problemItem}>
@@ -201,7 +202,7 @@ export default function LandingPage() {
 
       <section style={S.how}>
         <div style={S.container}>
-          <div style={S.howLabel}>▸ Cómo funciona</div>
+          <h2 style={S.howLabel}>▸ Cómo funciona</h2>
           <ol style={S.howList}>
             {HOW_STEPS.map((s, i) => (
               <li key={i} style={S.howItem}>
@@ -264,6 +265,10 @@ export default function LandingPage() {
 const S = {
   page: { minHeight: "100vh", position: "relative", zIndex: 1 },
   container: { maxWidth: 1100, margin: "0 auto", padding: "0 28px", position: "relative", zIndex: 1 },
+  srOnly: {
+    position: "absolute", width: 1, height: 1, padding: 0, margin: -1,
+    overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0,
+  },
 
   /* HERO */
   tag: {
