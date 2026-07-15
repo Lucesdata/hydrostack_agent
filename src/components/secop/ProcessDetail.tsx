@@ -47,11 +47,25 @@ interface Props {
   probing: boolean;
   /** Solo móvil: cierra el overlay. */
   onBack: () => void;
+  /** Veredicto Nivel 0, calculado on-demand (Fase 2) vía POST /api/secop/verdict. */
+  verdict?: Verdict;
+  verdictLoading?: boolean;
+  /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
+  hasPerfil: boolean;
+  onRequestPerfil: () => void;
 }
 
-export default function ProcessDetail({ proceso: p, access, probing, onBack }: Props) {
+export default function ProcessDetail({
+  proceso: p,
+  access,
+  probing,
+  onBack,
+  verdict: v,
+  verdictLoading,
+  hasPerfil,
+  onRequestPerfil,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
-  const v = p.verdict;
   const { pass: passCount, total: gateTotal } = v
     ? verdictScore(v)
     : { pass: 0, total: GATE_LABEL.length };
@@ -105,7 +119,22 @@ export default function ProcessDetail({ proceso: p, access, probing, onBack }: P
         </div>
       </div>
 
-      {v && (
+      {!hasPerfil && (
+        <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
+          <p>¿Puedo participar? Cuéntanos de ti y te decimos si este proceso te conviene.</p>
+          <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
+            Cuéntanos de ti →
+          </button>
+        </section>
+      )}
+
+      {hasPerfil && verdictLoading && !v && (
+        <section className="clr-elig" aria-label="Elegibilidad">
+          <p className="clr-elig-loading">Calculando elegibilidad…</p>
+        </section>
+      )}
+
+      {hasPerfil && v && (
         <section className="clr-elig" aria-label="Elegibilidad">
           <header className="clr-elig-head">
             <span>Elegibilidad · nivel 0</span>

@@ -14,9 +14,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SecopResult } from "@/src/lib/secop/types";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
+import type { Verdict } from "@/src/lib/secop/verdict";
+import type { OferenteProfile } from "@/src/lib/oferente/types";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
+import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientStore";
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
+import OferenteWizard from "./OferenteWizard";
 
 const DEPARTAMENTOS = [
   "VALLE DEL CAUCA", "ANTIOQUIA", "CUNDINAMARCA", "BOGOTÁ", "ATLÁNTICO",
@@ -50,6 +54,18 @@ export default function SecopExplorer() {
   const [probed, setProbed] = useState<Record<string, ProbeState>>({});
   const [probing, setProbing] = useState<Record<string, boolean>>({});
   const probeAttempted = useRef<Set<string>>(new Set());
+
+  // Fase 2 — elegibilidad diferida: perfil de oferente (localStorage) y
+  // veredictos calculados on-demand, cacheados por procesoId en memoria.
+  const [perfil, setPerfil] = useState<OferenteProfile | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({});
+  const [verdictLoading, setVerdictLoading] = useState<Record<string, boolean>>({});
+  const verdictAttempted = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    setPerfil(getOferentePerfil());
+  }, []);
 
   // Solo-abiertos aplica si el usuario no pidió cerrados ni un estado concreto.
   const soloAbiertos = !incluirCerrados && !filters.estado;
@@ -127,6 +143,43 @@ export default function SecopExplorer() {
     probeAttempted.current.add(selected.id);
     probe(selected);
   }, [selected, probe]);
+
+  /** Veredicto Nivel 0 on-demand (Fase 2): solo al abrir detalle con perfil guardado. */
+  const fetchVerdict = useCallback(async (p: ProcesoVeredicto, prof: OferenteProfile) => {
+    setVerdictLoading((s) => ({ ...s, [p.id]: true }));
+    try {
+      const res = await fetch("/api/secop/verdict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proceso: p, perfil: prof }),
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        setVerdicts((s) => ({ ...s, [p.id]: payload.verdict }));
+      }
+    } catch {
+      /* sin veredicto si falla; el usuario puede reabrir el detalle */
+    } finally {
+      setVerdictLoading((s) => ({ ...s, [p.id]: false }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!selected || !perfil) return;
+    if (verdictAttempted.current.has(selected.id)) return;
+    verdictAttempted.current.add(selected.id);
+    fetchVerdict(selected, perfil);
+  }, [selected, perfil, fetchVerdict]);
+
+  function handlePerfilCompleto(nuevoPerfil: OferenteProfile) {
+    saveOferentePerfil(nuevoPerfil);
+    setPerfil(nuevoPerfil);
+    setWizardOpen(false);
+    if (selected) {
+      verdictAttempted.current.add(selected.id);
+      fetchVerdict(selected, nuevoPerfil);
+    }
+  }
 
   const set =
     (k: keyof Filters) =>
@@ -252,13 +305,19 @@ export default function SecopExplorer() {
           </div>
 
           <div className={`clr-wb-detailcol${detailOpen ? " is-open" : ""}`}>
-            {selected && access ? (
+            {wizardOpen ? (
+              <OferenteWizard onComplete={handlePerfilCompleto} onCancel={() => setWizardOpen(false)} />
+            ) : selected && access ? (
               <ProcessDetail
                 key={selected.id}
                 proceso={selected}
                 access={access}
                 probing={!!probing[selected.id]}
                 onBack={() => setDetailOpen(false)}
+                verdict={verdicts[selected.id]}
+                verdictLoading={!!verdictLoading[selected.id]}
+                hasPerfil={!!perfil}
+                onRequestPerfil={() => setWizardOpen(true)}
               />
             ) : (
               !loading && (
@@ -406,6 +465,20 @@ const CSS = `
 .clr-elig-glyph--unknown{ color: var(--ink-600); }
 .clr-elig-name{ color: var(--ink-900); }
 .clr-elig-reason{ color: var(--ink-600); line-height: 1.4; }
+.clr-elig-cta{
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+  background: var(--accent-faint, rgba(0,0,0,0.02));
+}
+.clr-elig-cta p{ margin: 0; font-size: 12.5px; color: var(--ink-600); line-height: 1.5; }
+.clr-elig-cta-btn{
+  background: var(--accent); color: #fff; border: none;
+  font-size: 12.5px; font-weight: 500; white-space: nowrap;
+  padding: 8px 16px; border-radius: var(--radius-md); cursor: pointer;
+  transition: opacity 0.15s;
+}
+.clr-elig-cta-btn:hover{ opacity: 0.88; }
+.clr-elig-loading{ margin: 0; font-size: 12.5px; color: var(--ink-600); }
 
 .clr-pdetail-desc p{
   font-size: 12px; color: var(--ink-600); line-height: 1.55; margin: 0;

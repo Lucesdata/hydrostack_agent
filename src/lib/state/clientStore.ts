@@ -15,6 +15,7 @@
 
 import type { Country } from "../config/normativeRegistry";
 import { detectCountryFromText } from "../config/normativeRegistry";
+import type { OferenteProfile } from "../oferente/types";
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
@@ -56,6 +57,9 @@ const KEYS = {
   maintEvents: "hs_maint_events",
   // Wizard: last PDF generated (from either /build or the chat agent).
   lastReport: "hydrostack_lastreport",
+  // Licitaciones: perfil de oferente del mini-wizard (Fase 2, un solo perfil
+  // por navegador, sin cuenta). Reemplaza a OFERENTE_PILOTO hardcodeado.
+  oferentePerfil: "hydrostack_oferente_perfil",
 } as const;
 
 function isBrowser(): boolean {
@@ -291,4 +295,20 @@ export function saveLastReport(url: string, reportId: string): void {
 
 export function clearLastReport(): void {
   remove(KEYS.lastReport);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Licitaciones — perfil de oferente (Fase 2: elegibilidad diferida)
+// ─────────────────────────────────────────────────────────────────────────
+
+export function getOferentePerfil(): OferenteProfile | null {
+  return readJSON<OferenteProfile>(KEYS.oferentePerfil);
+}
+
+export function saveOferentePerfil(perfil: OferenteProfile): void {
+  writeJSON(KEYS.oferentePerfil, perfil);
+}
+
+export function clearOferentePerfil(): void {
+  remove(KEYS.oferentePerfil);
 }

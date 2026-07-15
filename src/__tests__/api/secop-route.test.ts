@@ -29,8 +29,8 @@ const req = (qs = 'tipo=procesos') => new NextRequest(`http://localhost/api/seco
 
 beforeEach(() => vi.clearAllMocks());
 
-describe('GET /api/secop — veredicto Nivel 0 adjunto', () => {
-  it('adjunta un verdict a cada proceso', async () => {
+describe('GET /api/secop — lista sin veredicto (Fase 2: veredicto es on-demand)', () => {
+  it('no adjunta verdict a los items; el semáforo se computa aparte en POST /api/secop/verdict', async () => {
     mockedSearch.mockResolvedValue({ items: [sampleProceso], page: 1, pageSize: 25 });
     mockedCount.mockResolvedValue(1);
     const res = await GET(req());
@@ -39,10 +39,6 @@ describe('GET /api/secop — veredicto Nivel 0 adjunto', () => {
     expect(body.total).toBe(1);
     expect(body.items).toHaveLength(1);
     expect(body.items[0].id).toBe('CO1.REQ.42');
-    expect(body.items[0].verdict.procesoId).toBe('CO1.REQ.42');
-    expect(body.items[0].verdict.level).toBe(0);
-    // habilitación siempre requiere pliego en Nivel 0
-    expect(body.items[0].verdict.gates.habilitacion.status).toBe('UNKNOWN');
-    expect(['PASS', 'WARN', 'FAIL', 'UNKNOWN']).toContain(body.items[0].verdict.overall);
+    expect(body.items[0].verdict).toBeUndefined();
   });
 });
