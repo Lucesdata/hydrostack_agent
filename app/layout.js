@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LangProvider } from "@/src/lib/i18n";
 import Navbar from "@/src/components/Navbar";
 import GlobalProgress from "@/src/components/BuildFlow/GlobalProgress";
@@ -26,6 +28,8 @@ export default function RootLayout({ children }) {
           <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
           <GlobalProgress />
         </LangProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

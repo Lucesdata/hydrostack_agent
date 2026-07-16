@@ -1,8 +1,10 @@
 /**
  * Route handler:  GET /api/secop
  *
- * Proxy server-side hacia Socrata. El frontend llama aquí, nunca a Socrata
- * directo (CORS + token + cache).
+ * Procesos: Postgres primero (ingesta cron, milisegundos); si la base falla
+ * (sin DATABASE_URL, error de conexión/consulta) cae a Socrata live — nunca
+ * mezcla fuentes entre `items` y `total` (Fase 3). Contratos siguen en vivo.
+ * El frontend llama aquí, nunca a Socrata directo (CORS + token + cache).
  *
  * Query params:
  *   ?tipo=procesos|contratos   (default: procesos)
@@ -23,9 +25,32 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { searchProcesos, searchContratos, countProcesos } from "@/src/lib/secop/client";
+import { searchProcesosDbCached, countProcesosDbCached } from "@/src/lib/secop/cached-db-search";
 import { parseQuery } from "@/src/lib/secop/parse-query";
+import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
 
 export const runtime = "nodejs";
+
+/**
+ * Postgres primero (memoizado por filtros, ver cached-db-search.ts); si
+ * CUALQUIERA de las dos consultas falla (throw), cae a Socrata live para
+ * AMBAS — nunca mezcla `items` de una fuente con `total` de otra. Un
+ * resultado vacío por filtros angostos no es una falla: no cae a live.
+ */
+async function searchProcesosConFallback(
+  query: SecopQuery,
+): Promise<{ result: SecopResult<SecopProceso>; total: number | undefined }> {
+  try {
+    const [result, total] = await Promise.all([
+      searchProcesosDbCached(query),
+      countProcesosDbCached(query),
+    ]);
+    return { result, total };
+  } catch {
+    const [result, total] = await Promise.all([searchProcesos(query), countProcesos(query)]);
+    return { result, total };
+  }
+}
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
@@ -36,12 +61,7 @@ export async function GET(req: NextRequest) {
     if (tipo === "contratos") {
       return NextResponse.json(await searchContratos(query));
     }
-    // total: count SODA en paralelo, best-effort — si falla, total queda
-    // undefined y la UI degrada sin él (ver countProcesos en client.ts).
-    const [result, total] = await Promise.all([
-      searchProcesos(query),
-      countProcesos(query),
-    ]);
+    const { result, total } = await searchProcesosConFallback(query);
     return NextResponse.json({ ...result, total });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error desconocido";

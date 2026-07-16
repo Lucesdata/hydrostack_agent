@@ -1,6 +1,6 @@
 # Separación de momentos: vista simple de procesos + elegibilidad diferida
 
-**Fecha:** 2026-07-15 · **Estado:** Fase 1 y Fase 2 implementadas
+**Fecha:** 2026-07-15 · **Estado:** Fase 1, Fase 2 y Fase 3 implementadas
 
 ## Problema
 
@@ -56,12 +56,41 @@ Dos momentos separados:
 - Nota de alcance: el CTA del wizard vive en el workbench (`/licitaciones/explorar`),
   no en la vista simple de Fase 1 (`/licitaciones`), que sigue intacta.
 
-### Fase 3 — Pulido
+### Fase 3 — Pulido ✅ implementada
 
-- Página educativa "Cómo participar en una licitación" (prosa, tono del agente).
-- Migrar el workbench a leer de Postgres también (hoy Socrata live) y dejar
-  Socrata solo como fallback/probe.
-- Métricas: tiempo a primer render de /licitaciones, tasa de clic en el CTA.
+- Página educativa `/licitaciones/como-participar` (`ComoParticipar.tsx`):
+  prosa, tono del agente (directo, "paso concreto", avisos de error común),
+  5 pasos desde habilitarse (RUP) hasta la firma del contrato. El CTA al pie
+  de la vista simple (`ProcesosRecientes.tsx`) ahora enlaza aquí; la página
+  cierra con un CTA hacia `/licitaciones/explorar`.
+- Workbench migrado a Postgres (`GET /api/secop`): `searchProcesosDb`/
+  `countProcesosDb` (`src/lib/secop/db-search.ts`) primero; Socrata live
+  (`searchProcesos`/`countProcesos`) queda como fallback si la base falla
+  (throw), nunca por resultado vacío. `proceso` solo normaliza un subconjunto
+  de columnas — `unspsc`, `estado_apertura`, `valor_adjudicacion`,
+  `adjudicatario`, `fase`, `descripción` no tienen columna propia y se
+  extraen de `raw_record.payload` (jsonb) con las mismas llaves de
+  `FIELDS_PROCESOS`. `clasificacion_sectorial` está vacía (0 filas, el
+  clasificador UNSPSC nunca corrió) — el filtro "solo sector agua" reproduce
+  el mismo OR de keywords que Socrata live, pero contra el JSON crudo.
+  **Costo real medido:** el ILIKE sobre jsonb sin índice tarda 9–24s en frío
+  contra 87k filas (mejor que los 84s de Socrata live sin caché, pero lejos de
+  "milisegundos"). Mitigado con memoización en memoria por combinación de
+  filtros (`src/lib/secop/cached-db-search.ts`, TTL = `REVALIDATE_SEARCH`/
+  `REVALIDATE_COUNT`, singleton en `globalThis` para sobrevivir HMR en dev y
+  reusarse entre invocaciones calientes en prod): el primer visitante por
+  combinación de filtros paga el costo, todos los siguientes (dentro del TTL)
+  reciben cache hit en ~10ms. Un índice GIN sobre el texto extraído (o correr
+  el clasificador sectorial) resolvería el caso frío; queda pendiente como
+  mejora futura, no bloqueante.
+- Métricas: `@vercel/analytics` + `@vercel/speed-insights` montados en
+  `app/layout.js`. Tiempo a primer render por ruta lo captura Speed Insights
+  automáticamente (Core Web Vitals, sin código adicional). Tasa de clic en el
+  CTA vía `TrackedCtaLink` (`src/components/secop/TrackedCtaLink.tsx`, único
+  client component de la página — el resto sigue siendo server component):
+  eventos `licitaciones_cta_como_participar` y `como_participar_cta_buscar`.
+  Requiere activar Analytics/Speed Insights en el dashboard de Vercel para
+  ver los datos.
 
 ## Decisiones
 
@@ -69,3 +98,6 @@ Dos momentos separados:
 - **Workbench:** se mantiene como modo avanzado en `/licitaciones/explorar`.
 - **Veredicto:** recomputable, nunca persistido (invariante existente en
   `verdict.ts`); solo cambia *cuándo* se computa.
+- **Filtro sector agua en Postgres:** keywords sobre JSON crudo (mismo criterio
+  que Socrata live), no `clasificacion_sectorial` — esa tabla está vacía hoy.
+  Revisar cuando el clasificador UNSPSC corra contra los 87k procesos.

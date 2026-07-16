@@ -25,6 +25,8 @@
     "@babylonjs/core": "^9.4.1",
     "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "babylonjs": "^9.4.1",
     "drizzle-orm": "^0.45.2",
     "leaflet": "^1.9.4",

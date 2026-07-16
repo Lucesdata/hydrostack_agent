@@ -14,6 +14,7 @@
 import Link from "next/link";
 import type { ProcesoResumen } from "@/src/lib/secop/recientes";
 import { sentenceCaseTitle, formatCopCompact, formatShortDate } from "./format";
+import TrackedCtaLink from "./TrackedCtaLink";
 
 export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }) {
   return (
@@ -86,9 +87,13 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
             te ayudamos a ver si tu empresa —o tú como persona natural— cumple los
             requisitos de un proceso. Sin compromiso: primero mira los procesos.
           </p>
-          <Link href="/licitaciones/explorar" className="clr-rc-cta-link">
+          <TrackedCtaLink
+            href="/licitaciones/como-participar"
+            event="licitaciones_cta_como_participar"
+            className="clr-rc-cta-link"
+          >
             Ver cómo participar →
-          </Link>
+          </TrackedCtaLink>
         </aside>
       </div>
     </div>
