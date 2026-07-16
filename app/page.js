@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 
@@ -84,6 +85,98 @@ const PROBLEM_POINTS = [
   "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
 ];
 
+/* ── Demo viva del hero: evaluaciones de ejemplo que rotan ──────────────── */
+// Datos ficticios pero verosímiles. Reusa el sistema .clr-verdict-* de
+// globals.css. El ciclo se detiene si el usuario prefiere reducir movimiento.
+const DEMO_EVALS = [
+  {
+    entidad: "Aguas de Cartagena", valor: "$2.310 M", meta: "PTAR · Cartagena, Bolívar",
+    overall: { tone: "warn", label: "Casi calificas — te falta 1 requisito" },
+    gates: [
+      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
+      { tone: "pass", glyph: "✓", label: "Capacidad financiera" },
+      { tone: "warn", glyph: "!", label: "Clasificación UNSPSC parcial" },
+    ],
+  },
+  {
+    entidad: "ESP Pasto", valor: "$1.450 M", meta: "Alcantarillado · Pasto, Nariño",
+    overall: { tone: "pass", label: "Calificas — puedes ofertar" },
+    gates: [
+      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
+      { tone: "pass", glyph: "✓", label: "Capacidad financiera" },
+      { tone: "pass", glyph: "✓", label: "Clasificación UNSPSC" },
+    ],
+  },
+  {
+    entidad: "EPM", valor: "$7.120 M", meta: "Acueducto rural · Medellín, Antioquia",
+    overall: { tone: "fail", label: "No calificas para este proceso" },
+    gates: [
+      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
+      { tone: "fail", glyph: "✕", label: "Capacidad financiera insuficiente" },
+      { tone: "pass", glyph: "✓", label: "Clasificación UNSPSC" },
+    ],
+  },
+];
+
+function HeroDemoCard() {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % DEMO_EVALS.length), 7000);
+    return () => clearInterval(t);
+  }, []);
+
+  const ev = DEMO_EVALS[idx];
+  const nGates = ev.gates.length;
+
+  return (
+    <div className="ls-demo-card ls-demo-enter" aria-label="Ejemplo de evaluación de elegibilidad">
+      <div className="ls-demo-head">
+        <span className="ls-tag-dot" />
+        <span style={{ marginLeft: 8 }}>Evaluación · RUP vs pliego</span>
+      </div>
+
+      {/* key={idx} re-monta el bloque en cada ciclo y re-dispara la animación */}
+      <div key={idx} className="ls-demo-body">
+        <div className="ls-demo-proc">
+          <div className="ls-demo-proc-top">
+            <strong>{ev.entidad}</strong>
+            <span className="ls-demo-valor">{ev.valor}</span>
+          </div>
+          <span className="ls-demo-meta">{ev.meta}</span>
+        </div>
+
+        <div className="clr-verdict">
+          <div className="clr-verdict-gates" style={{ flexDirection: "column", gap: 6 }}>
+            {ev.gates.map((g, i) => (
+              <span
+                key={i}
+                className={`clr-verdict-gate clr-verdict-gate--${g.tone} ls-demo-gate`}
+                style={{ animationDelay: `${0.3 + i * 0.55}s` }}
+              >
+                <span className="clr-verdict-glyph">{g.glyph}</span>
+                {g.label}
+              </span>
+            ))}
+          </div>
+          <span
+            className={`clr-verdict-overall clr-verdict-overall--${ev.overall.tone} ls-demo-gate`}
+            style={{ animationDelay: `${0.3 + nGates * 0.55 + 0.25}s` }}
+          >
+            <span className="clr-verdict-dot" />
+            {ev.overall.label}
+          </span>
+        </div>
+      </div>
+
+      <Link href="/licitaciones" className="ls-demo-link">
+        Evalúa un proceso real <span aria-hidden="true">→</span>
+      </Link>
+    </div>
+  );
+}
+
 const HOW_STEPS = [
   "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP.",
   "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas.",
@@ -92,7 +185,7 @@ const HOW_STEPS = [
 ];
 
 const LANDING_CSS = `
-.ls-page { background: var(--bg); color: var(--ink-900); font-family: var(--font-sans); }
+.ls-page { background: var(--bg); color: var(--ink-900); font-family: var(--font-sans); cursor: auto; }
 .ls-hero { position: relative; overflow: hidden; padding: clamp(96px, 12vw, 140px) 0 clamp(72px, 10vw, 100px); }
 .ls-hero::before {
   content: ""; position: absolute; inset: 0;
@@ -123,6 +216,85 @@ const LANDING_CSS = `
 .ls-tool-link { text-decoration: none; color: inherit; transition: opacity .18s; }
 .ls-tool-link:hover { opacity: .8; }
 .ls-tool-link:hover .ls-tool-title { color: var(--accent); }
+.ls-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 56px;
+  align-items: center;
+}
+@media (min-width: 960px) {
+  .ls-hero-grid { grid-template-columns: 1.12fr 0.88fr; }
+  /* !important: el font-size llega inline desde S.title y hay que ganarle
+     solo cuando el hero es de dos columnas. */
+  .ls-title { font-size: clamp(34px, 3.8vw, 48px) !important; }
+}
+.ls-demo-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 24px 48px -32px rgba(15,118,110,0.25);
+  max-width: 440px;
+  overflow: hidden;
+}
+.ls-demo-card::before {
+  content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(to right, var(--accent), transparent);
+}
+.ls-demo-head {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--accent);
+  letter-spacing: 0.16em; text-transform: uppercase;
+}
+.ls-demo-body { display: flex; flex-direction: column; gap: 16px; min-height: 176px; }
+.ls-demo-proc { display: flex; flex-direction: column; gap: 3px; }
+.ls-demo-proc-top {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  font-size: 15.5px; color: var(--ink-900);
+}
+.ls-demo-valor {
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  white-space: nowrap;
+}
+.ls-demo-meta {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--ink-600); letter-spacing: 0.03em;
+}
+.ls-demo-gate { animation: ls-demo-in .45s ease both; }
+@keyframes ls-demo-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ls-demo-link {
+  font-size: 13.5px; font-weight: 500; color: var(--accent);
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 14px;
+}
+.ls-demo-link:hover { text-decoration: underline; }
+.ls-demo-enter { animation: fadeUp .6s .35s ease both; }
+
+/* Reveals al scroll (IntersectionObserver añade .is-visible) */
+.ls-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.ls-reveal.is-visible { opacity: 1; transform: none; }
+/* El CTA del cierre lleva .ls-reveal: sin esta regla, transform:none de
+   .is-visible (posterior en el archivo) pisaría el lift del hover. */
+.ls-cta-btn.ls-reveal.is-visible:hover { transform: translateY(-2px); }
+
+/* Micro-interacción de glifos */
+.ls-tool-link svg { transition: transform .25s ease; }
+.ls-tool-link:hover svg { transform: translateY(-3px) scale(1.05); }
 .ls-footer-wave {
   position: absolute; top: -1px; left: 0; right: 0; height: 2px;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 2' preserveAspectRatio='none'><path d='M0,1 Q30,0 60,1 T120,1' stroke='%230F766E' stroke-width='0.8' fill='none' opacity='0.4'/></svg>");
@@ -131,6 +303,32 @@ const LANDING_CSS = `
 `;
 
 export default function LandingPage() {
+  // Reveals al scroll. Si no hay IntersectionObserver o el usuario prefiere
+  // reducir movimiento, todo se muestra de inmediato.
+  useEffect(() => {
+    const els = document.querySelectorAll(".ls-reveal");
+    if (
+      !("IntersectionObserver" in window) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      els.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            obs.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <div style={S.page} className="ls-page">
       <style dangerouslySetInnerHTML={{ __html: LANDING_CSS }} />
@@ -139,6 +337,8 @@ export default function LandingPage() {
 
       <header className="ls-hero">
         <div style={S.container}>
+          <div className="ls-hero-grid">
+          <div>
           {/* Mini-bloque de marca (logo H + HydroStack + "ES · EN") retirado:
               es redundante con el logo del Navbar (app/layout.js) y el texto
               "ES · EN" quedaría inconsistente sin selector real.
@@ -151,38 +351,44 @@ export default function LandingPage() {
           </div>
           */}
 
-          <span style={S.tag}>
+          <span className="fade-up" style={S.tag}>
             <span className="ls-tag-dot" />
             <span style={{ marginLeft: 8 }}>SECOP · Agua y saneamiento</span>
           </span>
 
-          <h1 className="ls-title" style={S.title}>
-            <span style={S.titleLine}>Evalúa si puedes competir.</span>
-            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Qué te hace falta para competir.</span>
-            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Cómo empezar a competir.</span>
+          <h1 className="ls-title fade-up-1" style={S.title}>
+            <span style={S.titleLine}>Plataforma de tratamiento de aguas.</span>
+            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Contratos con el Estado.</span>
+            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Compite, evalúate.</span>
           </h1>
 
-          {/* Badges normativos (Res. 0330/2017, CTE DB-HS 5, ASTM D6391, SECOP II).
-              Reservados para reubicar en la sección de calculadoras — no se
-              implementa la reubicación acá, esa página no se toca en este trabajo.
-              Ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md.
-          <div style={S.meta}>
+          <p className="fade-up-2" style={S.subhead}>
+            HydroStack cruza tu RUP (Registro Único de Proponentes) con los pliegos
+            de SECOP y te dice si calificas — antes de invertir una hora en la propuesta.
+          </p>
+
+          <Link href="/licitaciones" className="ls-cta-btn fade-up-3">
+            Prueba un proceso
+          </Link>
+
+          {/* Badges normativos restaurados en versión compacta como señal de
+              confianza (critique 2026-07-16). */}
+          <div className="fade-up-4" style={S.meta}>
             {[
               { value: "Res. 0330/2017", scope: "CO" },
               { value: "CTE DB-HS 5",    scope: "ES" },
               { value: "ASTM D6391",     scope: "US" },
               { value: "SECOP II",       scope: "datos.gov.co" },
-            ].map((m, i, arr) => (
-              <div key={i} style={{ ...S.metaItem, ...(i === arr.length - 1 ? S.metaItemLast : null) }}>
+            ].map((m, i) => (
+              <div key={i} style={S.metaItem}>
                 <strong style={S.metaStrong}>{m.value}</strong> · {m.scope}
               </div>
             ))}
           </div>
-          */}
+          </div>
 
-          <Link href="/licitaciones" className="ls-cta-btn">
-            Prueba un proceso
-          </Link>
+          <HeroDemoCard />
+          </div>
         </div>
       </header>
 
@@ -191,7 +397,7 @@ export default function LandingPage() {
           <h2 style={S.srOnly}>El problema</h2>
           <div style={S.problemGrid}>
             {PROBLEM_POINTS.map((p, i) => (
-              <div key={i} style={S.problemItem}>
+              <div key={i} className="ls-reveal" style={{ ...S.problemItem, transitionDelay: `${i * 0.09}s` }}>
                 <span style={S.problemNum}>{String(i + 1).padStart(2, "0")}</span>
                 <p style={S.problemText}>{p}</p>
               </div>
@@ -202,10 +408,10 @@ export default function LandingPage() {
 
       <section style={S.how}>
         <div style={S.container}>
-          <h2 style={S.howLabel}>▸ Cómo funciona</h2>
+          <h2 className="ls-reveal" style={S.howLabel}>▸ Cómo funciona</h2>
           <ol style={S.howList}>
             {HOW_STEPS.map((s, i) => (
-              <li key={i} style={S.howItem}>
+              <li key={i} className="ls-reveal" style={{ ...S.howItem, transitionDelay: `${i * 0.09}s` }}>
                 <span style={S.howNum}>{String(i + 1).padStart(2, "0")}</span>
                 <p style={S.howText}>{s}</p>
               </li>
@@ -216,14 +422,14 @@ export default function LandingPage() {
 
       <section style={S.pillars}>
         <div style={S.container}>
-          <h2 style={S.pillarsH}>Una vez identificas el proceso, HydroStack te acompaña con:</h2>
+          <h2 className="ls-reveal" style={S.pillarsH}>Una vez identificas el proceso, HydroStack te acompaña con:</h2>
 
           <div style={S.toolsRow}>
-            {TOOLS_LITE.map((m) => {
+            {TOOLS_LITE.map((m, i) => {
               const Glyph = GLYPHS[m.glyph];
               const copy = TOOL_COPY[m.glyph];
               return (
-                <Link key={m.n} href={m.href} className="ls-tool-link" style={S.toolItem}>
+                <Link key={m.n} href={m.href} className="ls-tool-link ls-reveal" style={{ ...S.toolItem, transitionDelay: `${i * 0.09}s` }}>
                   <Glyph size={28} />
                   <span className="ls-tool-title" style={S.toolTitle}>{copy.title}</span>
                   <p style={S.toolDesc}>{copy.desc}</p>
@@ -236,7 +442,13 @@ export default function LandingPage() {
 
       <section style={S.closing}>
         <div style={{ ...S.container, ...S.closingInner }}>
-          <Link href="/licitaciones" className="ls-cta-btn">
+          <h2 className="ls-reveal" style={S.closingH}>
+            Deja de descubrir tarde que no calificabas.
+          </h2>
+          <p className="ls-reveal" style={{ ...S.closingSub, transitionDelay: "0.09s" }}>
+            Procesos activos de agua y saneamiento, evaluados contra tu RUP.
+          </p>
+          <Link href="/licitaciones" className="ls-cta-btn ls-reveal" style={{ transitionDelay: "0.18s" }}>
             Prueba un proceso
           </Link>
         </div>
@@ -252,7 +464,7 @@ export default function LandingPage() {
           </div>
           <div style={S.footerRight}>
             <span style={S.footerDot} />
-            <span>Fase 0.6 · ingesta operativa</span>
+            <span>Datos SECOP II · actualización diaria</span>
             <span>·</span>
             <span>hydrostack.io</span>
           </div>
@@ -288,6 +500,20 @@ const S = {
   },
   titleLine: { display: "block" },
   titleLineDim: { color: "var(--ink-600)" },
+
+  subhead: {
+    fontSize: 17, color: "var(--ink-600)", lineHeight: 1.6,
+    maxWidth: 560, margin: "0 0 28px",
+  },
+
+  meta: {
+    display: "flex", flexWrap: "wrap", gap: "6px 22px",
+    marginTop: 32,
+    fontFamily: "var(--font-mono)",
+    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
+  },
+  metaItem: { whiteSpace: "nowrap" },
+  metaStrong: { color: "var(--ink-900)", fontWeight: 600 },
 
   /* PROBLEMA */
   problem: { padding: "56px 0", borderTop: "1px solid var(--line-soft)" },
@@ -334,8 +560,18 @@ const S = {
   glyph: { color: "var(--accent)", flexShrink: 0 },
 
   /* CIERRE */
-  closing: { padding: "48px 0", borderTop: "1px solid var(--line-soft)" },
-  closingInner: { display: "flex", justifyContent: "center" },
+  closing: { padding: "clamp(56px, 8vw, 80px) 0", borderTop: "1px solid var(--line-soft)" },
+  closingInner: {
+    display: "flex", flexDirection: "column", alignItems: "center",
+    textAlign: "center", gap: 10,
+  },
+  closingH: {
+    fontSize: "var(--fs-lg)", fontWeight: 700, letterSpacing: "-0.02em",
+    color: "var(--ink-900)", margin: 0,
+  },
+  closingSub: {
+    fontSize: 15, color: "var(--ink-600)", margin: "0 0 14px", lineHeight: 1.55,
+  },
 
   /* FOOTER */
   footer: { borderTop: "1px solid var(--line-soft)", padding: "28px 0", background: "var(--surface)", position: "relative" },
