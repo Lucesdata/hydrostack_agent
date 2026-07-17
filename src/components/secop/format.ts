@@ -13,7 +13,10 @@ const ACRONYMS = ['PTAP', 'PTAR', 'PTAT', 'ESP', 'SENA', 'INVIAS', 'PDA', 'SGP']
  * siglas conocidas. Los títulos que ya vienen en caso mixto no se tocan.
  */
 export function sentenceCaseTitle(raw: string): string {
-  const s = raw.trim();
+  // SECOP a veces trunca el nombre de la entidad con ".." sobrante (artefacto
+  // de exportación, no una abreviatura real como "E.S.P."). Se recorta antes
+  // de decidir el casing.
+  const s = raw.trim().replace(/\s*\.{2,}$/, '');
   if (!s) return s;
   const letters = s.replace(/[^A-Za-zÁÉÍÓÚÑÜáéíóúñü]/g, '');
   const isShouting = letters.length > 0 && letters === letters.toUpperCase();

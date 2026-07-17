@@ -51,6 +51,14 @@ describe('sentenceCaseTitle', () => {
       'Interventoría acueducto La Cumbre',
     );
   });
+
+  it('recorta ".." sobrante al final del nombre de entidad', () => {
+    expect(sentenceCaseTitle('MUNICIPIO DE SOACHA..')).toBe('Municipio de soacha');
+  });
+
+  it('conserva un solo punto final (no lo confunde con el artefacto de "..")', () => {
+    expect(sentenceCaseTitle('MUNICIPIO DE SOACHA.')).toBe('Municipio de soacha.');
+  });
 });
 
 describe('formatCopCompact', () => {
