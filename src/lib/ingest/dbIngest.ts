@@ -28,6 +28,47 @@ import { windowStart } from './watermark';
 import type { IngestSource } from './sources';
 import type { RawRecordInsert } from './mapRecord';
 import { resolveDatasetId } from '@/src/lib/secop/datasetResolver';
+import { findStaleRunningIds } from './staleRuns';
+import { summarizeIngestError } from './errorSummary';
+
+/**
+ * Umbral del watchdog: generoso por encima de `maxDuration = 300` del cron
+ * (app/api/cron/ingest/route.ts) para no pisar una corrida legítima en curso.
+ */
+const STALE_RUNNING_MS = 15 * 60 * 1000;
+
+/**
+ * Marca como `failed` cualquier corrida `running` de esta fuente más vieja
+ * que el umbral — el proceso que la abrió murió sin pasar por el catch de
+ * `ingestSource` (timeout duro, crash), así que nunca va a cerrarla. Corre
+ * antes de abrir una fila nueva para no acumular basura en `sync_log`.
+ */
+export async function failStaleRuns(
+  source: string,
+  opts: { now?: Date; maxDurationMs?: number } = {},
+): Promise<string[]> {
+  const now = opts.now ?? new Date();
+  const maxDurationMs = opts.maxDurationMs ?? STALE_RUNNING_MS;
+
+  const running = await db
+    .select({ id: syncLog.id, startedAt: syncLog.startedAt })
+    .from(syncLog)
+    .where(and(eq(syncLog.source, source), eq(syncLog.status, 'running')));
+
+  const staleIds = findStaleRunningIds(running, now, maxDurationMs);
+  if (staleIds.length === 0) return [];
+
+  await db
+    .update(syncLog)
+    .set({
+      finishedAt: now,
+      status: 'failed',
+      errorSummary: `watchdog: marcada failed — running > ${maxDurationMs}ms sin cerrar (proceso murió sin actualizar sync_log)`,
+    })
+    .where(inArray(syncLog.id, staleIds));
+
+  return staleIds;
+}
 
 /** Watermark anterior = MAX(watermark_to) de las corridas exitosas (0.1 §4.5). */
 export async function readLastWatermark(source: string): Promise<string | null> {
@@ -95,6 +136,8 @@ export async function ingestSource(
   source: IngestSource,
   opts: { pageSize?: number; marginDays?: number; maxPages?: number } = {},
 ): Promise<IngestSummary> {
+  await failStaleRuns(source.source);
+
   const dataset = await resolveDatasetId(source.datasetKey);
   const lastWatermark = await readLastWatermark(source.source);
   const batchId = randomUUID();
@@ -126,7 +169,7 @@ export async function ingestSource(
       .set({
         finishedAt: new Date(),
         status: 'failed',
-        errorSummary: err instanceof Error ? err.message.slice(0, 500) : String(err),
+        errorSummary: summarizeIngestError(err),
       })
       .where(eq(syncLog.id, log.id));
     throw err;
