@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
+import LandingCards from "@/src/components/landing/LandingCards";
 
 /* --- Glifos SVG inline (referencia 1:1 con option-b-water.html) --- */
 
@@ -391,6 +392,8 @@ export default function LandingPage() {
           </div>
         </div>
       </header>
+
+      <LandingCards />
 
       <section style={S.problem}>
         <div style={S.container}>

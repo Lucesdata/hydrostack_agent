@@ -72,6 +72,10 @@ export const FIELDS_PROCESOS = {
   unspsc: "codigo_principal_de_categoria",
   url: "urlproceso", // objeto { url: "..." }
   estadoApertura: "estado_de_apertura_del_proceso", // Abierto | Cerrado — señal Nivel-0 de Plazo (no hay fecha de cierre en este dataset)
+  /** Fecha de Recepcion de Respuestas. Existe en el schema pero solo ~2.6% de los
+   *  procesos abiertos la traen poblada (verificado en vivo 2026-07-17) — úsese
+   *  solo como dato de display opcional con fallback, nunca como filtro. */
+  fechaRecepcion: "fecha_de_recepcion_de",
 } as const;
 
 /**

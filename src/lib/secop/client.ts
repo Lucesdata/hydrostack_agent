@@ -53,7 +53,7 @@ function extractUrl(v: unknown): string | null {
 }
 
 /** Construye la cláusula $where del sector agua (OR de palabras clave). */
-function buildAguaWhere(): string {
+export function buildAguaWhere(): string {
   // upper(...) like '%PALABRA%' es case-insensitive y portable en SoQL.
   const clauses = KEYWORDS_AGUA.map((kw) => {
     const k = soqlEscape(kw.toUpperCase());
@@ -76,7 +76,7 @@ interface SodaParams {
   $offset: number;
 }
 
-async function sodaFetch<T>(
+export async function sodaFetch<T>(
   dataset: string,
   params: SodaParams,
   opts: { signal?: AbortSignal; revalidate?: number } = {},
