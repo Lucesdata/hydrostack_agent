@@ -12,11 +12,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { SecopResult } from "@/src/lib/secop/types";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { Verdict } from "@/src/lib/secop/verdict";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
+import { SECTOR_KEYS, SECTOR_LABELS, type SectorKey } from "@/src/lib/secop/sectorKeywords";
 import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientStore";
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
@@ -34,14 +36,22 @@ interface Filters {
   departamento: string;
   estado: string;
   valorMin: string;
+  sector: string;
 }
 
 type ProbeState = { state: DocumentAccess; message: string };
 
 export default function SecopExplorer() {
-  const [filters, setFilters] = useState<Filters>({
-    q: "", departamento: "", estado: "", valorMin: "",
-  });
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = useState<Filters>(() => ({
+    q: "",
+    departamento: searchParams.get("departamento") ?? "",
+    estado: "",
+    valorMin: "",
+    sector: (SECTOR_KEYS as string[]).includes(searchParams.get("sector") ?? "")
+      ? (searchParams.get("sector") as string)
+      : "",
+  }));
   const [incluirCerrados, setIncluirCerrados] = useState(false);
   const [orden, setOrden] = useState<"fecha" | "valor">("fecha");
   const [pageSize, setPageSize] = useState(25);
@@ -85,6 +95,7 @@ export default function SecopExplorer() {
       if (filters.departamento) params.set("departamento", filters.departamento);
       if (filters.estado) params.set("estado", filters.estado);
       if (filters.valorMin) params.set("valorMin", filters.valorMin);
+      if (filters.sector) params.set("sector", filters.sector);
       const res = await fetch(`/api/secop?${params}`, { signal });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
@@ -219,6 +230,12 @@ export default function SecopExplorer() {
           <select className="clr-select" value={filters.departamento} onChange={set("departamento")}>
             <option value="">Todos los departamentos</option>
             {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select className="clr-select" value={filters.sector} onChange={set("sector")}>
+            <option value="">Todos los sub-sectores</option>
+            {SECTOR_KEYS.map((s) => (
+              <option key={s} value={s}>{SECTOR_LABELS[s as SectorKey]}</option>
+            ))}
           </select>
           <select className="clr-select" value={filters.estado} onChange={set("estado")}>
             <option value="">Todos los estados</option>

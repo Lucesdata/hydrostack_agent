@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import SecopExplorer from "@/src/components/secop/SecopExplorer";
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function ExplorarLicitacionesPage() {
-  return <SecopExplorer />;
+  return (
+    <Suspense fallback={null}>
+      <SecopExplorer />
+    </Suspense>
+  );
 }
