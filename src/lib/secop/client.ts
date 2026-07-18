@@ -62,6 +62,15 @@ export function buildAguaWhere(): string {
   return `(${clauses.join(" OR ")})`;
 }
 
+/** Construye la cláusula $where del sector agua para CONTRATOS (campo objeto). */
+export function buildAguaWhereContratos(): string {
+  const clauses = KEYWORDS_AGUA.map((kw) => {
+    const k = soqlEscape(kw.toUpperCase());
+    return `upper(${FIELDS_CONTRATOS.objeto}) like '%${k}%'`;
+  });
+  return `(${clauses.join(" OR ")})`;
+}
+
 /** Une condiciones $where con AND, ignorando vacías. */
 function andWhere(...parts: (string | null | undefined)[]): string {
   return parts.filter(Boolean).join(" AND ");
@@ -258,12 +267,7 @@ export async function searchContratos(
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
 
-  const aguaWhere =
-    query.soloAgua !== false
-      ? `(${KEYWORDS_AGUA.map(
-          (kw) => `upper(${C.objeto}) like '%${soqlEscape(kw.toUpperCase())}%'`,
-        ).join(" OR ")})`
-      : null;
+  const aguaWhere = query.soloAgua !== false ? buildAguaWhereContratos() : null;
 
   const where = andWhere(
     aguaWhere,

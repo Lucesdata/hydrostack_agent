@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { buildProcesosWhere, ORDER_SOQL, countProcesos } from '@/src/lib/secop/client';
-import { FIELDS_PROCESOS } from '@/src/lib/secop/config';
+import { buildProcesosWhere, ORDER_SOQL, countProcesos, buildAguaWhereContratos } from '@/src/lib/secop/client';
+import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from '@/src/lib/secop/config';
 
 const F = FIELDS_PROCESOS;
+const C = FIELDS_CONTRATOS;
 
 vi.mock('@/src/lib/secop/datasetResolver', () => ({
   resolveDatasetId: vi.fn().mockResolvedValue('p6dx-8zbt'),
@@ -80,5 +81,14 @@ describe('countProcesos', () => {
   it('devuelve undefined si la respuesta SODA viene vacía', async () => {
     vi.mocked(fetch).mockResolvedValue(okResponse([]));
     expect(await countProcesos({ soloAgua: false })).toBeUndefined();
+  });
+});
+
+describe('buildAguaWhereContratos', () => {
+  it('construye el OR de keywords contra objeto_del_contrato', () => {
+    const w = buildAguaWhereContratos();
+    expect(w).toContain(`upper(${C.objeto}) like '%ACUEDUCTO%'`);
+    expect(w).toContain(`upper(${C.objeto}) like '%PTAR%'`);
+    expect(w).toContain(' OR ');
   });
 });
