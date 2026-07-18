@@ -21,4 +21,10 @@ describe('parseQuery', () => {
     expect(q.valorMin).toBe(1000);
     expect(q.soloAgua).toBe(false);
   });
+
+  it('acepta sector válido y rechaza valores desconocidos', () => {
+    expect(parseQuery(new URLSearchParams('sector=ptar')).sector).toBe('ptar');
+    expect(parseQuery(new URLSearchParams('sector=nope')).sector).toBeUndefined();
+    expect(parseQuery(new URLSearchParams()).sector).toBeUndefined();
+  });
 });

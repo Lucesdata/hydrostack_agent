@@ -21,6 +21,7 @@
 
 import { FIELDS_PROCESOS, KEYWORDS_AGUA, PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX } from './config';
 import { accessMessage, type DocumentAccess } from './document-access';
+import { SECTOR_KEYWORDS } from './sectorKeywords';
 import type { SecopProceso, SecopQuery, SecopResult } from './types';
 
 const F = FIELDS_PROCESOS;
@@ -124,13 +125,18 @@ async function prepare(query: SecopQuery) {
   const aperturaRaw = sql<string | null>`(${payload}->>${F.estadoApertura})`;
 
   const aguaClauses =
-    query.soloAgua !== false
+    query.soloAgua !== false && !query.sector
       ? KEYWORDS_AGUA.flatMap((kw) => [ilike(nombreRaw, `%${kw}%`), ilike(descripcionRaw, `%${kw}%`)])
       : [];
+
+  const sectorClauses = query.sector
+    ? SECTOR_KEYWORDS[query.sector].flatMap((kw) => [ilike(nombreRaw, `%${kw}%`), ilike(descripcionRaw, `%${kw}%`)])
+    : [];
 
   const conditions = [
     isNull(proceso.deletedAt),
     aguaClauses.length > 0 ? or(...aguaClauses) : undefined,
+    sectorClauses.length > 0 ? or(...sectorClauses) : undefined,
     query.departamento ? ilike(geografia.departamentoNombre, `%${query.departamento}%`) : undefined,
     query.estado ? eq(proceso.estadoActual, query.estado) : undefined,
     query.valorMin != null ? gte(proceso.valorEstimado, String(query.valorMin)) : undefined,

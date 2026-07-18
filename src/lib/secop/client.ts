@@ -22,6 +22,7 @@ import {
 } from "./config";
 import { resolveDatasetId } from "./datasetResolver";
 import { preclassify, accessMessage } from "./document-access";
+import { buildSectorWhere } from "./sectorKeywords";
 import type {
   SecopProceso,
   SecopContrato,
@@ -160,7 +161,8 @@ export const ORDER_SOQL = {
  */
 export function buildProcesosWhere(query: SecopQuery): string {
   return andWhere(
-    query.soloAgua !== false ? buildAguaWhere() : null, // por defecto, solo agua
+    query.soloAgua !== false && !query.sector ? buildAguaWhere() : null, // por defecto, solo agua
+    query.sector ? buildSectorWhere(query.sector, [F.nombre, F.descripcion]) : null,
     query.departamento
       ? `upper(${F.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
       : null,

@@ -39,6 +39,21 @@ describe('buildProcesosWhere', () => {
     const w = buildProcesosWhere({});
     expect(w).toContain('like');
   });
+
+  it('agrega el filtro de sub-sector cuando se pide', () => {
+    const w = buildProcesosWhere({ soloAgua: false, sector: 'ptar' });
+    expect(w).toContain('PTAR');
+  });
+
+  it('con sector, NO agrega también el OR amplio de KEYWORDS_AGUA (evita excluir por AND)', () => {
+    // soloAgua no se pasa (default true): antes del fix esto ANDeaba
+    // buildAguaWhere() con el filtro de sector, excluyendo procesos que solo
+    // matchean un término exclusivo de KEYWORDS_AGUA (p. ej. "PSMV", que no
+    // está en SECTOR_KEYWORDS.acueducto).
+    const w = buildProcesosWhere({ sector: 'acueducto' });
+    expect(w).not.toContain('PSMV');
+    expect(w).toContain('CAPTACIÓN');
+  });
 });
 
 describe('ORDER_SOQL', () => {
