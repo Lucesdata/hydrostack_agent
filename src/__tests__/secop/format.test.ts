@@ -4,6 +4,7 @@ import {
   formatCopCompact,
   formatCopFull,
   formatShortDate,
+  formatCopMilM,
   verdictScore,
 } from '@/src/components/secop/format';
 import type { Verdict, GateResult, GateStatus } from '@/src/lib/secop/verdict';
@@ -111,5 +112,19 @@ describe('verdictScore', () => {
     expect(
       verdictScore(makeVerdict(['UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN'])).tone,
     ).toBe('neutral');
+  });
+});
+
+describe('formatCopMilM', () => {
+  it('usa formatCopCompact bajo mil millones', () => {
+    expect(formatCopMilM(450_000_000)).toBe(formatCopCompact(450_000_000));
+  });
+
+  it('pasa a "mil M" desde mil millones', () => {
+    expect(formatCopMilM(2_400_000_000)).toBe('$2,4 mil M');
+  });
+
+  it('null → null', () => {
+    expect(formatCopMilM(null)).toBeNull();
   });
 });

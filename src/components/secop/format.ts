@@ -83,3 +83,18 @@ export function verdictScore(v: Verdict): VerdictScore {
   const tone: ScoreTone = pass >= 4 ? 'success' : pass >= 2 ? 'warn' : 'fail';
   return { pass, total, tone };
 }
+
+/**
+ * Sumas grandes del landing (precio_base agregado por mes, proceso de mayor
+ * cuantía) que en millones quedarían con 5+ cifras. Se queda en "$X M" hasta
+ * mil millones, donde pasa a "$X mil M".
+ */
+export function formatCopMilM(value: number | null): string | null {
+  if (value == null) return null;
+  if (value < 1_000_000_000) return formatCopCompact(value);
+  const milMillones = (value / 1_000_000_000).toLocaleString('es-CO', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `$${milMillones} mil M`;
+}
