@@ -71,6 +71,7 @@ interface SodaParams {
   $select?: string;
   $where?: string;
   $q?: string;
+  $group?: string;
   $order?: string;
   $limit: number;
   $offset: number;
