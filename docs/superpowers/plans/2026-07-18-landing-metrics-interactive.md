@@ -736,82 +736,28 @@ git commit -m "feat(secop): módulo puro de estadística para la matriz de métr
 
 ---
 
-### Task 7: Tabla `landing_metrics_cache` + migración
+### ⚠️ Revisión 2026-07-18: Tasks 7–11 reemplazadas (pivote a JSON estático)
 
-**Files:**
-- Create: `src/lib/db/schema/landingMetrics.ts`
-- Modify: `src/lib/db/schema/index.ts`
-
-- [ ] **Step 1: Crear el schema**
-
-```ts
-// src/lib/db/schema/landingMetrics.ts
-import { pgTable, uuid, jsonb, timestamp } from 'drizzle-orm/pg-core';
-import type { LandingMetricsPayload } from '@/src/lib/secop/landingMetrics';
-
-/**
- * Cache de la matriz precalculada de métricas del landing (departamento ×
- * sector). El generador (`src/lib/secop/landingMetricsGenerator.ts`, corrido
- * desde `scripts/generate-landing-metrics.ts` o el cron) hace DELETE+INSERT
- * en cada corrida — una sola fila vigente, sin historial.
- */
-export const landingMetricsCache = pgTable('landing_metrics_cache', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  data: jsonb('data').$type<LandingMetricsPayload>().notNull(),
-  generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),
-});
-```
-
-- [ ] **Step 2: Registrar el export**
-
-En `src/lib/db/schema/index.ts`, agregar:
-
-```ts
-export * from './landingMetrics';
-```
-
-- [ ] **Step 3: Generar la migración**
-
-Run: `npm run db:generate`
-Expected: crea un nuevo archivo `drizzle/000X_<nombre>.sql` con `CREATE TABLE "landing_metrics_cache" (...)`. Confirmar con:
-
-```bash
-git status --short drizzle/
-```
-
-Expected: un nuevo `.sql` sin trackear en `drizzle/`.
-
-- [ ] **Step 4: Aplicar la migración**
-
-Run: `npm run db:migrate`
-Expected: log de drizzle-kit confirmando que la migración se aplicó sin error.
-
-- [ ] **Step 5: Verificar la tabla existe**
-
-Run: `npm run db:studio` (abre Drizzle Studio) o, más rápido:
-
-```bash
-npx tsx -e "
-import './scripts/_env';
-import { pool } from './src/lib/db/client';
-pool.query(\"select to_regclass('public.landing_metrics_cache')\").then(r => { console.log(r.rows); return pool.end(); });
-"
-```
-
-Expected: `[ { to_regclass: 'landing_metrics_cache' } ]` (no `null`)
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add src/lib/db/schema/landingMetrics.ts src/lib/db/schema/index.ts drizzle/
-git commit -m "feat(db): tabla landing_metrics_cache para la matriz precalculada del landing"
-```
+El diseño original de Tasks 7–11 (tabla `landing_metrics_cache` en Postgres/
+Neon + cron HTTP) quedó bloqueado: la base Neon del proyecto está al límite
+de su cuota (490/512 MB), cualquier `CREATE TABLE` falla, y no hay forma de
+liberar espacio suficiente ni de subir el plan disponible ahora mismo (ver
+detalle en `docs/superpowers/specs/2026-07-18-landing-metrics-interactive-
+design.md` §2, nota de revisión). Se pivota a la Opción B ya contemplada en
+el diseño original: `public/landing-metrics.json` commiteado a git, sin
+tabla, sin API route, sin cron. Las 3 tasks de abajo (7, 8, 9 renumeradas)
+reemplazan por completo a las 5 tasks originales (7–11). Los `git status`
+del worktree previos a esta revisión (schema de Postgres, migraciones)
+fueron revertidos — no queda rastro de ese intento en el árbol de trabajo.
 
 ---
 
-### Task 8: Orquestación IO — `landingMetricsGenerator.ts`
+### Task 7: Orquestación IO — `landingMetricsGenerator.ts` (JSON estático, sin DB)
 
-Vive en `src/lib/`, no en `scripts/`, siguiendo el mismo patrón que `runIngestPipeline` (`src/lib/ingest/pipeline.ts`): tanto el CLI (Task 9) como el cron HTTP (Task 11) importan esta función directamente, sin que ninguno de los dos ejecute lógica de "programa principal" del otro. Pega a Socrata real — no se testea con mocks de red (mismo criterio que `landingStats.ts`, que tampoco tiene test file).
+Igual que el diseño original: pega a Socrata en vivo, arma el payload. La
+única diferencia con la versión descartada es la persistencia: en vez de
+`db.delete`/`db.insert`, escribe `public/landing-metrics.json` con
+`fs.writeFileSync` — cero dependencia de Postgres/Neon/`DATABASE_URL`.
 
 **Files:**
 - Create: `src/lib/secop/landingMetricsGenerator.ts`
@@ -822,11 +768,12 @@ Vive en `src/lib/`, no en `scripts/`, siguiendo el mismo patrón que `runIngestP
 // src/lib/secop/landingMetricsGenerator.ts
 /**
  * Orquestación IO de la matriz de métricas del landing: pega a Socrata
- * (Procesos + Contratos) en vivo, arma el payload y lo persiste en
- * `landing_metrics_cache`. Compartido por el CLI (scripts/generate-landing-
- * metrics.ts) y el cron HTTP (app/api/cron/landing-metrics/route.ts) — igual
- * que `runIngestPipeline` es compartido por `run-ingest.ts` y
- * `app/api/cron/ingest`.
+ * (Procesos + Contratos) en vivo, arma el payload y lo escribe en
+ * `public/landing-metrics.json` — sin base de datos (ver spec §2, revisión
+ * 2026-07-18: Neon sin espacio disponible). Compartido por el CLI
+ * (scripts/generate-landing-metrics.ts); no hay cron (el filesystem de
+ * Vercel es de solo lectura en producción, ninguna función puede escribir
+ * en `public/`).
  *
  * Nunca toca la capa canónica del pipeline ELT (Postgres) para los datos en
  * sí — mismo criterio que `landingStats.ts`: Socrata directo, agregación
@@ -834,8 +781,8 @@ Vive en `src/lib/`, no en `scripts/`, siguiendo el mismo patrón que `runIngestP
  * `ciclo_proceso` requiere traer filas crudas (SoQL no la agrega), con tope
  * de `$limit` documentado en cada fetch.
  */
-import { db } from '@/src/lib/db/client';
-import { landingMetricsCache } from '@/src/lib/db/schema';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { sodaFetch, buildAguaWhere, buildAguaWhereContratos } from './client';
 import { resolveDatasetId } from './datasetResolver';
 import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from './config';
@@ -850,6 +797,8 @@ import {
 
 const F = FIELDS_PROCESOS;
 const C = FIELDS_CONTRATOS;
+
+const OUTPUT_PATH = join(process.cwd(), 'public', 'landing-metrics.json');
 
 function soqlEscape(value: string): string {
   return value.replace(/'/g, "''");
@@ -955,7 +904,7 @@ export async function generateLandingMetrics(now: Date = new Date()): Promise<La
           fetchOportunidadActiva(sector, departamento),
           fetchCicloProcesoDias(sector, departamento, now),
         ]);
-        if (oportunidad_activa.n_procesos === 0) continue;
+        if (oportunidad_activa.n_procesos === 0) continue; // se omite del array (spec §5)
         combinaciones.push({
           departamento,
           sector,
@@ -981,10 +930,10 @@ export async function generateLandingMetrics(now: Date = new Date()): Promise<La
   };
 }
 
-/** DELETE + INSERT: una sola fila vigente, sin historial (ver diseño §4). */
-export async function persistLandingMetrics(payload: LandingMetricsPayload): Promise<void> {
-  await db.delete(landingMetricsCache);
-  await db.insert(landingMetricsCache).values({ data: payload });
+/** Escribe `public/landing-metrics.json` — sin base de datos. Indentado a 2
+ *  espacios para que el diff de cada regeneración sea legible en el commit. */
+export function persistLandingMetrics(payload: LandingMetricsPayload): void {
+  writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
 }
 ```
 
@@ -997,12 +946,12 @@ Expected: sin errores nuevos.
 
 ```bash
 git add src/lib/secop/landingMetricsGenerator.ts
-git commit -m "feat(secop): orquestación IO del generador de métricas del landing (Socrata + persistencia)"
+git commit -m "feat(secop): orquestación IO del generador de métricas del landing (Socrata + JSON estático)"
 ```
 
 ---
 
-### Task 9: CLI — `scripts/generate-landing-metrics.ts`
+### Task 8: CLI — `scripts/generate-landing-metrics.ts` (sin DB)
 
 **Files:**
 - Create: `scripts/generate-landing-metrics.ts`
@@ -1014,182 +963,44 @@ git commit -m "feat(secop): orquestación IO del generador de métricas del land
 // scripts/generate-landing-metrics.ts
 /**
  * Genera la matriz precalculada departamento × sector para las métricas
- * interactivas del landing (oportunidad activa + tiempo de ejecución
- * contractual) y la guarda en `landing_metrics_cache`.
+ * interactivas del landing y la escribe en `public/landing-metrics.json`.
  *
- *   npm run db:generate-landing-metrics
+ *   npm run generate-landing-metrics
  *
- * Requiere DATABASE_URL en .env.local (igual que los demás scripts db:*).
- * Cáscara CLI delgada — toda la orquestación vive en
- * src/lib/secop/landingMetricsGenerator.ts, compartida con el cron HTTP
- * (app/api/cron/landing-metrics).
+ * Sin base de datos: pega a Socrata en vivo, escribe el JSON a disco. Commitear
+ * el archivo resultante + push + redeploy es lo que lo publica — no hay cron
+ * (ver docs/superpowers/specs/2026-07-18-landing-metrics-interactive-design.md
+ * §2/§11: el filesystem de Vercel es de solo lectura en producción).
+ *
+ * `./_env` es opcional aquí (solo carga SECOP_APP_TOKEN si existe en
+ * .env.local, para subir el rate limit de Socrata) — a diferencia de los
+ * scripts db:*, este NO requiere DATABASE_URL.
  */
 import './_env';
-import { pool } from '@/src/lib/db/client';
 import { generateLandingMetrics, persistLandingMetrics } from '@/src/lib/secop/landingMetricsGenerator';
 
 async function main() {
   console.log('[generate-landing-metrics] iniciando…');
   const payload = await generateLandingMetrics();
-  await persistLandingMetrics(payload);
+  persistLandingMetrics(payload);
   console.log(
-    `[generate-landing-metrics] listo: ${payload.combinaciones.length} combinaciones, fecha_corte=${payload.fecha_corte}`,
+    `[generate-landing-metrics] listo: ${payload.combinaciones.length} combinaciones, fecha_corte=${payload.fecha_corte} → public/landing-metrics.json`,
   );
 }
 
-main()
-  .catch((err) => {
-    console.error('[generate-landing-metrics] falló:', err);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await pool.end();
-  });
+main().catch((err) => {
+  console.error('[generate-landing-metrics] falló:', err);
+  process.exitCode = 1;
+});
 ```
 
 - [ ] **Step 2: Agregar el script a `package.json`**
 
-En la sección `"scripts"`, junto a los demás `db:*`:
+En la sección `"scripts"` (sin prefijo `db:` — este script no toca ninguna
+base de datos, a diferencia de sus vecinos `db:*`):
 
 ```json
-    "db:generate-landing-metrics": "tsx scripts/generate-landing-metrics.ts"
-```
-
-- [ ] **Step 3: Verificar que compila (no correrlo todavía contra la red real — eso es Task 15)**
-
-Run: `npx tsc --noEmit`
-Expected: sin errores nuevos.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add scripts/generate-landing-metrics.ts package.json
-git commit -m "feat(scripts): CLI para regenerar la matriz de métricas del landing"
-```
-
----
-
-### Task 10: `GET /api/landing-metrics`
-
-**Files:**
-- Create: `app/api/landing-metrics/route.ts`
-
-- [ ] **Step 1: Implementar**
-
-```ts
-// app/api/landing-metrics/route.ts
-/**
- * Sirve la matriz precalculada de métricas del landing (última fila de
- * `landing_metrics_cache`). El front (`LandingMetrics.jsx`) hace un solo
- * fetch aquí al montar; el selector departamento×sector filtra el array ya
- * cargado, sin pegarle a esta ruta de nuevo.
- */
-import { NextResponse } from 'next/server';
-import { desc } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { landingMetricsCache } from '@/src/lib/db/schema';
-
-export const runtime = 'nodejs';
-export const revalidate = 3600;
-
-export async function GET() {
-  const rows = await db
-    .select({ data: landingMetricsCache.data, generatedAt: landingMetricsCache.generatedAt })
-    .from(landingMetricsCache)
-    .orderBy(desc(landingMetricsCache.generatedAt))
-    .limit(1);
-
-  const row = rows[0];
-  if (!row) {
-    return NextResponse.json({ error: 'landing-metrics aún no se ha generado' }, { status: 503 });
-  }
-
-  return NextResponse.json(row.data, {
-    headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
-  });
-}
-```
-
-- [ ] **Step 2: Verificar que compila**
-
-Run: `npx tsc --noEmit`
-Expected: sin errores nuevos.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add app/api/landing-metrics/route.ts
-git commit -m "feat(api): GET /api/landing-metrics sirve la matriz precalculada"
-```
-
----
-
-### Task 11: Cron — `app/api/cron/landing-metrics`
-
-**Files:**
-- Create: `app/api/cron/landing-metrics/route.ts`
-- Modify: `vercel.json`
-
-- [ ] **Step 1: Implementar el route handler, mismo patrón que `app/api/cron/ingest`**
-
-```ts
-// app/api/cron/landing-metrics/route.ts
-/**
- * Route handler:  GET /api/cron/landing-metrics
- *
- * Disparador HTTP de la regeneración periódica de la matriz de métricas del
- * landing. Lo invoca Vercel Cron según `vercel.json`. Mismo patrón que
- * `app/api/cron/ingest`: reusa la orquestación compartida
- * (`src/lib/secop/landingMetricsGenerator.ts`), NO llama `pool.end()` (el
- * pool es un singleton de larga vida del servidor corriendo, a diferencia
- * del CLI que sí lo cierra al terminar).
- *
- * Seguridad: mismo `CRON_SECRET` que `cron/ingest` — si está definido, se
- * exige como Bearer y se rechaza con 401 si no coincide.
- */
-import { NextResponse } from 'next/server';
-import { generateLandingMetrics, persistLandingMetrics } from '@/src/lib/secop/landingMetricsGenerator';
-
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
-
-export async function GET(request: Request): Promise<Response> {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    if (request.headers.get('authorization') !== `Bearer ${secret}`) {
-      return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
-    }
-  } else {
-    console.warn('[cron/landing-metrics] CRON_SECRET no definido — endpoint sin protección');
-  }
-
-  try {
-    console.log('[cron/landing-metrics] start', new Date().toISOString());
-    const payload = await generateLandingMetrics();
-    await persistLandingMetrics(payload);
-    console.log(`[cron/landing-metrics] ok: ${payload.combinaciones.length} combinaciones`);
-    return NextResponse.json({ ok: true, combinaciones: payload.combinaciones.length, fecha_corte: payload.fecha_corte });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error('[cron/landing-metrics] falló:', message);
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
-  }
-}
-```
-
-- [ ] **Step 2: Agregar la entrada de cron a `vercel.json`**
-
-> **Nota:** Vercel Hobby limita el número/frecuencia de cron jobs. Verificar cupo disponible en el dashboard de Vercel junto al cron de `/api/cron/ingest` ya existente antes de asumir que este correrá automáticamente — si no hay cupo, la regeneración queda solo manual (`npm run db:generate-landing-metrics`) sin bloquear el resto del trabajo (ver spec §2).
-
-```json
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    { "path": "/api/cron/ingest", "schedule": "0 11 * * *" },
-    { "path": "/api/cron/landing-metrics", "schedule": "0 12 * * *" }
-  ]
-}
+    "generate-landing-metrics": "tsx scripts/generate-landing-metrics.ts"
 ```
 
 - [ ] **Step 3: Verificar que compila**
@@ -1200,8 +1011,131 @@ Expected: sin errores nuevos.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add app/api/cron/landing-metrics/route.ts vercel.json
-git commit -m "feat(cron): regeneración periódica de la matriz de métricas del landing"
+git add scripts/generate-landing-metrics.ts package.json
+git commit -m "feat(scripts): CLI para regenerar la matriz de métricas del landing (JSON estático)"
+```
+
+---
+
+### Task 9: Actualizar `LandingMetrics.jsx` para leer `/landing-metrics.json`
+
+Task 13 (ya completada) construyó el componente apuntando a
+`/api/landing-metrics`, que ya no existe en el diseño revisado. Este task
+es la única corrección necesaria: cambiar el endpoint fetcheado.
+
+**Files:**
+- Modify: `src/components/landing/LandingMetrics.jsx`
+
+- [ ] **Step 1: Cambiar el fetch**
+
+El archivo actual tiene, dentro de `useLandingMetrics`:
+
+```jsx
+    fetch("/api/landing-metrics")
+```
+
+Cambiar a:
+
+```jsx
+    fetch("/landing-metrics.json")
+```
+
+Esa es la única línea funcional que cambia. También actualizar el comentario
+de cabecera del archivo (las primeras líneas, que dicen "Lee /api/landing-
+metrics (matriz precalculada)") para que diga:
+
+```jsx
+// Métricas interactivas del landing: oportunidad activa + tiempo de
+// ejecución contractual, filtrables por departamento × sector. Lee
+// /landing-metrics.json (archivo estático, generado por
+// scripts/generate-landing-metrics.ts) UNA sola vez al montar — el
+// selector filtra en memoria, cero fetch adicional al interactuar.
+```
+
+Nada más en el archivo cambia — toda la lógica de estados (loading/error/
+zero-data), el selector, el CTA, siguen igual.
+
+- [ ] **Step 2: Verificar que compila**
+
+Run: `npx tsc --noEmit`
+Expected: sin errores nuevos.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/components/landing/LandingMetrics.jsx
+git commit -m "fix(landing): LandingMetrics lee /landing-metrics.json (sin API route, pivote a JSON estático)"
+```
+
+---
+
+**Files:**
+- Create: `src/lib/db/schema/landingMetrics.ts`
+- Modify: `src/lib/db/schema/index.ts`
+
+- [ ] **Step 1: Crear el schema**
+
+```ts
+// src/lib/db/schema/landingMetrics.ts
+import { pgTable, uuid, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import type { LandingMetricsPayload } from '@/src/lib/secop/landingMetrics';
+
+/**
+ * Cache de la matriz precalculada de métricas del landing (departamento ×
+ * sector). El generador (`src/lib/secop/landingMetricsGenerator.ts`, corrido
+ * desde `scripts/generate-landing-metrics.ts` o el cron) hace DELETE+INSERT
+ * en cada corrida — una sola fila vigente, sin historial.
+ */
+export const landingMetricsCache = pgTable('landing_metrics_cache', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  data: jsonb('data').$type<LandingMetricsPayload>().notNull(),
+  generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+```
+
+- [ ] **Step 2: Registrar el export**
+
+En `src/lib/db/schema/index.ts`, agregar:
+
+```ts
+export * from './landingMetrics';
+```
+
+- [ ] **Step 3: Generar la migración**
+
+Run: `npm run db:generate`
+Expected: crea un nuevo archivo `drizzle/000X_<nombre>.sql` con `CREATE TABLE "landing_metrics_cache" (...)`. Confirmar con:
+
+```bash
+git status --short drizzle/
+```
+
+Expected: un nuevo `.sql` sin trackear en `drizzle/`.
+
+- [ ] **Step 4: Aplicar la migración**
+
+Run: `npm run db:migrate`
+Expected: log de drizzle-kit confirmando que la migración se aplicó sin error.
+
+- [ ] **Step 5: Verificar la tabla existe**
+
+Run: `npm run db:studio` (abre Drizzle Studio) o, más rápido:
+
+```bash
+npx tsx -e "
+import './scripts/_env';
+import { pool } from './src/lib/db/client';
+pool.query(\"select to_regclass('public.landing_metrics_cache')\").then(r => { console.log(r.rows); return pool.end(); });
+"
+```
+
+Expected: `[ { to_regclass: 'landing_metrics_cache' } ]` (no `null`)
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/db/schema/landingMetrics.ts src/lib/db/schema/index.ts drizzle/
+git commit -m "feat(db): tabla landing_metrics_cache para la matriz precalculada del landing"
 ```
 
 ---
@@ -1541,11 +1475,15 @@ git commit -m "feat(landing): monta LandingMetrics debajo de las dashboard cards
 
 ---
 
-### Task 15: Generar la matriz real y verificar en navegador
+### Task 15: Generar la matriz real y verificar en navegador (JSON estático)
 
-Este es el único paso que pega a Socrata de verdad y depende de `DATABASE_URL` local. Sin este paso, `/api/landing-metrics` devuelve 503 y `LandingMetrics.jsx` muestra el fallback.
+Este es el único paso que pega a Socrata de verdad. A diferencia del diseño
+original, NO depende de `DATABASE_URL` — el generador solo necesita red
+hacia datos.gov.co. Sin este paso, `public/landing-metrics.json` no existe
+y `LandingMetrics.jsx` muestra el fallback de error.
 
-**Files:** ninguno (solo verificación)
+**Files:**
+- Create (generado, no escrito a mano): `public/landing-metrics.json`
 
 - [ ] **Step 1: Correr todos los tests unitarios (nada roto por los tasks anteriores)**
 
@@ -1554,30 +1492,47 @@ Expected: PASS — todos los archivos, incluidos los nuevos de este plan.
 
 - [ ] **Step 2: Correr el generador contra Socrata real**
 
-Run: `npm run db:generate-landing-metrics`
+Run: `npm run generate-landing-metrics`
 Expected: log final tipo
-`[generate-landing-metrics] listo: N combinaciones, fecha_corte=2026-07-18`
+`[generate-landing-metrics] listo: N combinaciones, fecha_corte=2026-07-18 → public/landing-metrics.json`
 con `N > 0`. Si `N` es sospechosamente bajo (p. ej. 0), revisar el warning de cada combinación fallida en el log — no hay `try/catch` silencioso, cada falla se imprime.
 
-- [ ] **Step 3: Levantar el dev server y pedir el JSON directo**
-
-Run: `npm run dev` (si no está corriendo), luego en otra terminal:
+- [ ] **Step 3: Inspeccionar el JSON generado**
 
 ```bash
-curl -s http://localhost:3000/api/landing-metrics | python3 -m json.tool | head -40
+cat public/landing-metrics.json | python3 -m json.tool | head -40
 ```
 
 Expected: JSON con `fecha_corte`, `combinaciones` (array no vacío) y `nacional.oportunidad_activa.n_procesos > 0`.
 
-- [ ] **Step 4: Verificación visual en el navegador**
+- [ ] **Step 4: Levantar el dev server y confirmar que se sirve como estático**
+
+Run: `npm run dev` (si no está corriendo), luego en otra terminal:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/landing-metrics.json
+```
+
+Expected: `200` (Next.js sirve `public/landing-metrics.json` directo, sin ninguna función serverless de por medio).
+
+- [ ] **Step 5: Verificación visual en el navegador**
 
 Con el Browser tool (o navegador normal), abrir `http://localhost:3000` y:
 1. Confirmar que aparece la sección "Oportunidad en tu región" debajo de las 3 cards existentes, con la fecha de corte visible.
-2. Cambiar el selector de departamento y de sector — confirmar en las DevTools (Network tab) que **no** se dispara ningún fetch nuevo a `/api/landing-metrics` al cambiar el selector (el único fetch debe ser el del montaje inicial).
+2. Cambiar el selector de departamento y de sector — confirmar en las DevTools (Network tab) que **no** se dispara ningún fetch nuevo a `/landing-metrics.json` al cambiar el selector (el único fetch debe ser el del montaje inicial).
 3. Confirmar que las cifras cambian al cambiar el selector, y que una combinación sin datos muestra "0 procesos abiertos" / "Sin contratos firmados..." en vez de un placeholder ambiguo o un crash.
 4. Click en "Ver estos procesos" con un departamento+sector seleccionados — confirmar que navega a `/licitaciones/explorar?departamento=...&sector=...` y que el workbench arranca ya filtrado con esos valores (selectores pre-poblados, lista de resultados acorde).
 
-- [ ] **Step 5: Si todo lo anterior pasa, no hay commit adicional — este task es solo verificación.**
+- [ ] **Step 6: Commit del JSON generado**
+
+```bash
+git add public/landing-metrics.json
+git commit -m "chore(landing): genera public/landing-metrics.json (corrida inicial contra Socrata real)"
+```
+
+Este commit es distinto a los anteriores: es DATO, no código — cada
+regeneración futura produce un commit similar (diff del JSON), a mano, sin
+cron (ver spec §11).
 
 ---
 
@@ -1587,11 +1542,9 @@ Con el Browser tool (o navegador normal), abrir `http://localhost:3000` y:
 - `src/lib/secop/sectorKeywords.ts`
 - `src/lib/secop/landingMetrics.ts`
 - `src/lib/secop/landingMetricsGenerator.ts`
-- `src/lib/db/schema/landingMetrics.ts`
 - `scripts/generate-landing-metrics.ts`
-- `app/api/landing-metrics/route.ts`
-- `app/api/cron/landing-metrics/route.ts`
 - `src/components/landing/LandingMetrics.jsx`
+- `public/landing-metrics.json` (generado, Task 15)
 - Tests: `sectorKeywords.test.ts`, `landingMetrics.test.ts`, adiciones a `client-query.test.ts`, `route-parse.test.ts`, `format.test.ts`
 
 **Modificados:**
@@ -1600,11 +1553,13 @@ Con el Browser tool (o navegador normal), abrir `http://localhost:3000` y:
 - `src/lib/secop/db-search.ts` (`sectorClauses` en `prepare()`)
 - `src/lib/secop/parse-query.ts` (parseo de `sector`)
 - `src/lib/secop/types.ts` (`SecopQuery.sector`)
-- `src/lib/db/schema/index.ts` (export de la tabla nueva)
 - `src/components/secop/format.ts` (`formatCopMilM` compartido)
 - `src/components/landing/LandingCards.jsx` (usa el `formatCopMilM` compartido)
 - `src/components/secop/SecopExplorer.tsx` (URL params + selector de sector)
 - `app/page.js` (monta `LandingMetrics`)
-- `package.json` (script `db:generate-landing-metrics`)
-- `vercel.json` (cron nuevo)
-- `drizzle/` (migración nueva)
+- `package.json` (script `generate-landing-metrics`, sin prefijo `db:`)
+
+**Descartado (pivote 2026-07-18 — Neon sin espacio disponible):** tabla
+`landing_metrics_cache`, `app/api/landing-metrics/route.ts`,
+`app/api/cron/landing-metrics/route.ts`, cambios a `vercel.json`/`drizzle/`.
+Ver nota de revisión en §2 del spec y antes de la Task 7 revisada.
