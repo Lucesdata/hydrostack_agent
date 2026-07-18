@@ -76,6 +76,18 @@ const CARDS_CSS = `
 }
 .lc-loading { color: var(--ink-300); animation: lc-pulse 1.6s ease-in-out infinite; }
 .lc-fallback { color: var(--ink-300); }
+.lc-skeleton {
+  display: inline-block;
+  height: 0.68em;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--line-soft) 25%, var(--line) 50%, var(--line-soft) 75%);
+  background-size: 200% 100%;
+  animation: lc-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes lc-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .lc-card-featured {
   min-height: 100%;
 }
@@ -186,8 +198,10 @@ function useLandingStats() {
   return state;
 }
 
-function StatValue({ status, value }) {
-  if (status === "loading") return <span className="lc-loading">—</span>;
+function StatValue({ status, value, skeletonWidth = 60 }) {
+  if (status === "loading") {
+    return <span className="lc-skeleton" style={{ width: skeletonWidth }} aria-hidden="true" />;
+  }
   if (value == null) return <span className="lc-fallback">—</span>;
   return <>{value}</>;
 }
@@ -211,7 +225,7 @@ export default function LandingCards() {
           >
             <span className="lc-stat-label">Nuevos · últimos 7 días</span>
             <span className="lc-stat-value">
-              <StatValue status={status} value={nuevos7d != null ? nuevos7d.toLocaleString("es-CO") : null} />
+              <StatValue status={status} value={nuevos7d != null ? nuevos7d.toLocaleString("es-CO") : null} skeletonWidth={40} />
             </span>
             <p className="lc-stat-desc">Procesos de agua y saneamiento en presentación de oferta</p>
             <span className="clr-card-cta">
@@ -222,7 +236,7 @@ export default function LandingCards() {
           <Link href="/licitaciones" className="clr-card is-active lc-stat-card lc-card-2">
             <span className="lc-stat-label">$ en juego · este mes</span>
             <span className="lc-stat-value">
-              <StatValue status={status} value={totalCop != null ? formatCopMilM(totalCop) : null} />
+              <StatValue status={status} value={totalCop != null ? formatCopMilM(totalCop) : null} skeletonWidth={92} />
             </span>
             <p className="lc-stat-desc">
               {procesosMes != null ? `${procesosMes.toLocaleString("es-CO")} procesos abiertos del sector` : "Procesos abiertos del sector"}
