@@ -1286,7 +1286,7 @@ Expected: sin errores nuevos.
 - [ ] **Step 6: Verificación manual en navegador**
 
 Con el dev server corriendo (`npm run dev`), navegar a
-`http://localhost:3000/licitaciones?departamento=VALLE%20DEL%20CAUCA&sector=ptar` y confirmar:
+`http://localhost:3000/licitaciones/explorar?departamento=VALLE%20DEL%20CAUCA&sector=ptar` y confirmar:
 - el selector de departamento arranca en "VALLE DEL CAUCA" (no vacío)
 - el selector de sub-sector arranca en "PTAR" (no vacío)
 - la lista de resultados refleja el filtro (menos procesos que sin filtrar)
@@ -1407,7 +1407,7 @@ export default function LandingMetrics() {
     if (departamento) params.set("departamento", departamento);
     if (sector) params.set("sector", sector);
     const qs = params.toString();
-    return qs ? `/licitaciones?${qs}` : "/licitaciones";
+    return qs ? `/licitaciones/explorar?${qs}` : "/licitaciones/explorar";
   }, [departamento, sector]);
 
   if (status === "error") {
@@ -1575,7 +1575,7 @@ Con el Browser tool (o navegador normal), abrir `http://localhost:3000` y:
 1. Confirmar que aparece la sección "Oportunidad en tu región" debajo de las 3 cards existentes, con la fecha de corte visible.
 2. Cambiar el selector de departamento y de sector — confirmar en las DevTools (Network tab) que **no** se dispara ningún fetch nuevo a `/api/landing-metrics` al cambiar el selector (el único fetch debe ser el del montaje inicial).
 3. Confirmar que las cifras cambian al cambiar el selector, y que una combinación sin datos muestra "0 procesos abiertos" / "Sin contratos firmados..." en vez de un placeholder ambiguo o un crash.
-4. Click en "Ver estos procesos" con un departamento+sector seleccionados — confirmar que navega a `/licitaciones?departamento=...&sector=...` y que el workbench arranca ya filtrado con esos valores (selectores pre-poblados, lista de resultados acorde).
+4. Click en "Ver estos procesos" con un departamento+sector seleccionados — confirmar que navega a `/licitaciones/explorar?departamento=...&sector=...` y que el workbench arranca ya filtrado con esos valores (selectores pre-poblados, lista de resultados acorde).
 
 - [ ] **Step 5: Si todo lo anterior pasa, no hay commit adicional — este task es solo verificación.**
 
