@@ -6,6 +6,7 @@
  */
 
 import type { DocumentAccess } from './document-access';
+import type { SectorKey } from './sectorKeywords';
 
 /**
  * Apertura del proceso (campo `estado_de_apertura_del_proceso`). Único insumo
@@ -72,6 +73,8 @@ export interface SecopQuery {
   orden?: 'fecha' | 'valor';
   /** Si true, aplica el filtro de palabras clave del sector agua. */
   soloAgua?: boolean;
+  /** Filtra por sub-sector (taxonomía nueva: acueducto/alcantarillado/ptar/psmv/etap). */
+  sector?: SectorKey;
   page?: number;
   pageSize?: number;
 }

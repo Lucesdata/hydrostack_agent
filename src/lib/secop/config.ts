@@ -94,6 +94,10 @@ export const FIELDS_CONTRATOS = {
   proveedor: "proveedor_adjudicado",
   nitProveedor: "documento_proveedor",
   fechaFirma: "fecha_de_firma",
+  /** Verificado en vivo 2026-07-18: 100% de completitud en contratos del
+   *  sector agua (muestra de 15). Insumo de la métrica "tiempo de ejecución
+   *  contractual" del landing. */
+  fechaFinContrato: "fecha_de_fin_del_contrato",
   valor: "valor_del_contrato",
   unspsc: "codigo_de_categoria_principal",
   url: "urlproceso",

@@ -5,24 +5,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatCopCompact, formatShortDate, sentenceCaseTitle } from "@/src/components/secop/format";
-
-/**
- * Las cards del landing manejan sumas grandes (precio_base agregado por mes,
- * o el proceso de mayor cuantía) que en millones quedarían con 5+ cifras.
- * formatCopCompact (compartido con el explorador) se queda en "$X M" incluso
- * en miles de millones por contrato ya testeado (format.test.ts); esta
- * variante local añade el corte a "mil M" solo para el landing.
- */
-function formatCopMilM(value) {
-  if (value == null) return null;
-  if (value < 1_000_000_000) return formatCopCompact(value);
-  const milMillones = (value / 1_000_000_000).toLocaleString("es-CO", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
-  return `$${milMillones} mil M`;
-}
+import { formatCopCompact, formatCopMilM, formatShortDate, sentenceCaseTitle } from "@/src/components/secop/format";
 
 const CARDS_CSS = `
 .lc-section {

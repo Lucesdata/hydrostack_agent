@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { buildProcesosWhere, ORDER_SOQL, countProcesos } from '@/src/lib/secop/client';
-import { FIELDS_PROCESOS } from '@/src/lib/secop/config';
+import { buildProcesosWhere, ORDER_SOQL, countProcesos, buildAguaWhereContratos } from '@/src/lib/secop/client';
+import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from '@/src/lib/secop/config';
 
 const F = FIELDS_PROCESOS;
+const C = FIELDS_CONTRATOS;
 
 vi.mock('@/src/lib/secop/datasetResolver', () => ({
   resolveDatasetId: vi.fn().mockResolvedValue('p6dx-8zbt'),
@@ -37,6 +38,21 @@ describe('buildProcesosWhere', () => {
   it('con soloAgua default incluye el OR de keywords del sector', () => {
     const w = buildProcesosWhere({});
     expect(w).toContain('like');
+  });
+
+  it('agrega el filtro de sub-sector cuando se pide', () => {
+    const w = buildProcesosWhere({ soloAgua: false, sector: 'ptar' });
+    expect(w).toContain('PTAR');
+  });
+
+  it('con sector, NO agrega también el OR amplio de KEYWORDS_AGUA (evita excluir por AND)', () => {
+    // soloAgua no se pasa (default true): antes del fix esto ANDeaba
+    // buildAguaWhere() con el filtro de sector, excluyendo procesos que solo
+    // matchean un término exclusivo de KEYWORDS_AGUA (p. ej. "PSMV", que no
+    // está en SECTOR_KEYWORDS.acueducto).
+    const w = buildProcesosWhere({ sector: 'acueducto' });
+    expect(w).not.toContain('PSMV');
+    expect(w).toContain('CAPTACIÓN');
   });
 });
 
@@ -80,5 +96,14 @@ describe('countProcesos', () => {
   it('devuelve undefined si la respuesta SODA viene vacía', async () => {
     vi.mocked(fetch).mockResolvedValue(okResponse([]));
     expect(await countProcesos({ soloAgua: false })).toBeUndefined();
+  });
+});
+
+describe('buildAguaWhereContratos', () => {
+  it('construye el OR de keywords contra objeto_del_contrato', () => {
+    const w = buildAguaWhereContratos();
+    expect(w).toContain(`upper(${C.objeto}) like '%ACUEDUCTO%'`);
+    expect(w).toContain(`upper(${C.objeto}) like '%PTAR%'`);
+    expect(w).toContain(' OR ');
   });
 });
