@@ -64,40 +64,57 @@ supuestos del pedido original:
 
 ## 2. Arquitectura
 
+> **Revisión 2026-07-18 (post-implementación parcial):** el diseño original
+> (Opción A del pedido) usaba una tabla `landing_metrics_cache` en
+> Postgres/Neon + un cron HTTP para regenerarla. Al ejecutar Task 7 (crear la
+> tabla) se descubrió que la base Neon del proyecto está al límite de su
+> cuota de almacenamiento (490/512 MB) — cualquier `CREATE TABLE`, incluso
+> vacía, falla (`could not extend file because project size limit (512 MB)
+> has been exceeded`). Se intentó liberar espacio (borrado de 12.252 filas
+> huérfanas de `raw_record`) sin efecto real (`VACUUM` normal no reduce el
+> tamaño físico; `VACUUM FULL` necesitaría más margen del disponible) y un
+> intento de subir el plan de Neon no propagó / no está disponible para el
+> usuario ahora mismo. **Se pivotea a la Opción B** ya contemplada en este
+> mismo documento (§2 original del pedido del usuario): JSON estático
+> commiteado a git, sin tabla ni cron. Las secciones §4, §7 y §8 de abajo
+> reflejan ya el diseño revisado.
+
 ```
 ┌─────────────────────────────┐
-│ scripts/generate-landing-    │  tsx, corre a mano o vía cron
-│ metrics.ts                   │
-│  1. cuenta procesos abiertos │──▶ Socrata p6dx-8zbt (Procesos)
-│     por depto (solo deptos   │
+│ scripts/generate-landing-    │  tsx, corre SOLO a mano (no hay cron —
+│ metrics.ts                   │  el filesystem de Vercel es de solo
+│  1. cuenta procesos abiertos │  lectura en producción, no se puede
+│     por depto (solo deptos   │  escribir ahí desde una función)
 │     con actividad real)      │
 │  2. por depto × 5 sectores:  │──▶ Socrata p6dx-8zbt (Metrica 1)
 │     oportunidad_activa       │──▶ Socrata jbjy-vk9h (Metrica 2)
 │     ciclo_proceso            │
 │  3. agregado nacional        │
-│  4. upsert en Postgres/Neon  │──▶ tabla landing_metrics_cache
+│  4. escribe                  │──▶ public/landing-metrics.json
+│     public/landing-metrics   │
+│     .json (local, en disco)  │
+└─────────────────────────────┘
+              │  commit + push + redeploy (manual)
+              ▼
+┌─────────────────────────────┐
+│ /landing-metrics.json         │  servido como asset estático por Next.js
+│ (public/, en el bundle)       │  (CDN de Vercel) — CERO función serverless
+│                                │  en la ruta de lectura
 └─────────────────────────────┘
               │
               ▼
 ┌─────────────────────────────┐
-│ GET /api/landing-metrics     │  lee la fila más reciente, cache
-│ route.ts                     │  Next revalidate 3600s
-└─────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────┐
-│ LandingMetrics.jsx            │  fetch una vez al montar, selector
-│ (client component)            │  depto+sector filtra EN MEMORIA
-│                                │  (cero fetch adicional al interactuar)
+│ LandingMetrics.jsx            │  fetch("/landing-metrics.json") una vez
+│ (client component)            │  al montar, selector depto+sector filtra
+│                                │  EN MEMORIA (cero fetch adicional)
 └─────────────────────────────┘
 ```
 
-Regeneración: manual (`npm run db:generate-landing-metrics`) o automática vía
-`GET /api/cron/landing-metrics`, mismo patrón que `cron/ingest` (CRON_SECRET,
-runtime nodejs, `dynamic = "force-dynamic"`). Entrada nueva en `vercel.json`
-(`crons` array) — **nota:** Vercel Hobby limita cron jobs (verificar cupo
-disponible junto al cron de ingesta ya existente antes de agregar uno nuevo;
-si no hay cupo, la regeneración queda solo manual/npm sin bloquear el resto).
+Regeneración: **manual únicamente** — `npm run generate-landing-metrics`
+(sin prefijo `db:`, ya no toca ninguna base de datos), commitear el JSON
+resultante, redeploy. No hay cron (§11 documenta por qué no aplica en este
+diseño). Esto es coherente con no depender de más espacio en Neon: el JSON
+vive en git, no en la base.
 
 ## 3. Taxonomía de sectores — `src/lib/secop/sectorKeywords.ts`
 
@@ -132,23 +149,18 @@ export const SECTOR_LABELS: Record<keyof typeof SECTOR_KEYWORDS, string> = {
 Contratos, `nombre_del_procedimiento`/`descripci_n_del_procedimiento` en
 Procesos).
 
-## 4. Esquema de datos — tabla `landing_metrics_cache`
+## 4. Persistencia — `public/landing-metrics.json`
 
-Nueva tabla en `src/lib/db/schema/landingMetrics.ts` (se agrega el
-`export *` a `schema/index.ts`, siguiendo el patrón de las demás):
+Sin tabla, sin base de datos. El archivo `public/landing-metrics.json`
+(exactamente la forma de §5) vive en el repo, versionado por git. Next.js
+sirve todo lo que hay en `public/` como asset estático en la raíz del sitio
+— `public/landing-metrics.json` queda disponible en `/landing-metrics.json`
+sin ninguna función serverless ni route handler de por medio.
 
-```ts
-export const landingMetricsCache = pgTable('landing_metrics_cache', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  data: jsonb('data').notNull(),          // el JSON completo (§5)
-  generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),
-});
-```
-
-Una sola fila vigente (el generador hace `DELETE` + `INSERT`, o
-`ORDER BY generated_at DESC LIMIT 1` al leer — más simple que upsert con
-constraint única). Migración vía `drizzle-kit generate` + `db:push` (patrón
-existente del repo).
+El generador (`scripts/generate-landing-metrics.ts`) escribe el archivo con
+`fs.writeFileSync` — nada de Postgres, nada de Drizzle, nada de
+`DATABASE_URL`. Regenerarlo es: correr el script, revisar el diff del JSON,
+commitear, hacer push, dejar que el deploy normal de Vercel lo recoja.
 
 ## 5. JSON — forma exacta
 
@@ -195,22 +207,27 @@ Reusa `sodaFetch` y `resolveDatasetId` de `src/lib/secop/client.ts`/
    SoQL) — trae solo `fecha_de_firma, fecha_de_fin_del_contrato` de las filas
    matcheadas (con tope de `$limit`, ver §8 rendimiento), no filas completas.
 4. Agregado nacional con `buildAguaWhere()` (sin desglose por sector).
-5. Upsert en `landing_metrics_cache`.
+5. Escribe `public/landing-metrics.json` con `fs.writeFileSync` (JSON
+   formateado con indentación, para que el diff en cada regeneración sea
+   legible en el PR/commit).
 
 Best-effort por combinación (como `landingStats.ts`): si una query individual
 falla, esa combinación se omite del array (no tumba la corrida completa);
 error se loguea con detalle de qué combinación falló.
 
-## 7. `GET /api/landing-metrics`
+## 7. Sin API route
 
-Lee la fila más reciente de `landing_metrics_cache`, `revalidate: 3600`. Si no
-hay fila (primera corrida no se ha ejecutado aún), devuelve `503` con mensaje
-claro — el front cae al estado de fallback (§8), nunca inventa datos.
+No hay `GET /api/landing-metrics` en este diseño — el archivo en `public/`
+ya es servible directo por Next.js como estático. Si `public/landing-
+metrics.json` no existe (antes de la primera corrida del generador), el
+`fetch` del front devuelve 404 y el componente cae al estado de fallback
+(§8), nunca inventa datos.
 
 ## 8. `LandingMetrics.jsx`
 
-- Un solo `fetch("/api/landing-metrics")` al montar (patrón `useLandingStats`
-  ya existente en `LandingCards.jsx`, mismo manejo loading/error/skeleton).
+- Un solo `fetch("/landing-metrics.json")` al montar (mismo patrón
+  loading/error/skeleton que `useLandingStats` en `LandingCards.jsx`, pero
+  apuntando al archivo estático en vez de a una API route).
 - Selector depto + sector (`<select>`, estilo `clr-select` ya usado en
   `SecopExplorer`), estado inicial = sin filtro → muestra `nacional`.
 - Cambiar el selector solo lee del array `combinaciones` ya en memoria (find
@@ -253,8 +270,13 @@ Para que el nuevo CTA no sea otro link muerto, alcance mínimo necesario:
 ## 11. Fuera de alcance
 
 - Backfill histórico más allá de 12 meses para Métrica 2.
-- Automatizar el cron si Vercel Hobby no tiene cupo — queda documentado como
-  paso manual (`npm run db:generate-landing-metrics`) sin bloquear el resto.
+- Regeneración automática (cron): con el diseño de JSON estático (§2 revisado)
+  no es posible en absoluto — el filesystem de Vercel es de solo lectura en
+  producción, ninguna función puede escribir en `public/`. Queda como paso
+  manual permanente: `npm run generate-landing-metrics` + commit + push. Si
+  en el futuro se resuelve el espacio en Neon, se puede reconsiderar volver
+  al diseño con tabla + cron (Opción A, documentada arriba en la nota de
+  revisión de §2) sin tener que rediseñar el resto de la feature.
 - Tocar `clasificacion_sectorial` (tabla derivada del pipeline ELT) — este
   trabajo vive enteramente en la capa Socrata-directa, igual que
   `landingStats.ts`, sin dependencia del pipeline canónico.
