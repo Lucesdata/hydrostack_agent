@@ -32,10 +32,12 @@
   --line:         #E5E5E0;
   --line-soft:    #E8E8E2;
 
-  /* Acento */
-  --accent:       #0F766E;
-  --accent-soft:  rgba(15,118,110,0.13);
-  --accent-faint: rgba(15,118,110,0.04);
+  /* Acento — azul agua: río cristalino → océano profundo */
+  --accent:       #0369A1;
+  --accent-soft:  rgba(3,105,161,0.13);
+  --accent-faint: rgba(3,105,161,0.04);
+  --accent-river: #7DD3FC;
+  --accent-ocean: #0C4A6E;
 
   /* Semánticos */
   --success:      #16A34A;
@@ -43,7 +45,7 @@
   --danger:       #DC2626;
 
   /* Foco */
-  --focus-ring:   #0F766E;
+  --focus-ring:   #0369A1;
 
   /* Tipografía */
   --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
@@ -81,8 +83,8 @@
   --radius-pill: 999px;
 
   /* Sombras */
-  --shadow-card-hover: 0 18px 32px -20px rgba(15,118,110,0.3);
-  --shadow-logo:       0 6px 20px -8px rgba(15,118,110,0.5);
+  --shadow-card-hover: 0 18px 32px -20px rgba(3,105,161,0.3);
+  --shadow-logo:       0 6px 20px -8px rgba(3,105,161,0.5);
 
   /* Layout */
   --container:        1100px;
@@ -462,7 +464,7 @@ input, select { font-family: var(--mono); }
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: linear-gradient(155deg, var(--accent) 0%, #0B5A54 100%);
+  background: linear-gradient(155deg, var(--accent-river) 0%, var(--accent-ocean) 100%);
   color: #fff;
   display: flex;
   align-items: center;
