@@ -186,14 +186,7 @@ const HOW_STEPS = [
 ];
 
 const LANDING_CSS = `
-.ls-page {
-  background: #07111F;
-  color: #EAF6FB;
-  --ls-ink-900: #EAF6FB;
-  --ls-ink-600: #9FC3D6;
-  font-family: var(--font-sans);
-  cursor: auto;
-}
+.ls-page { background: var(--bg); color: var(--ink-900); font-family: var(--font-sans); cursor: auto; }
 .ls-hero { position: relative; overflow: hidden; padding: clamp(96px, 12vw, 140px) 0 clamp(72px, 10vw, 100px); }
 .ls-hero::before {
   content: ""; position: absolute; inset: 0;
@@ -506,13 +499,13 @@ const S = {
   title: {
     fontSize: "var(--fs-hero)", fontWeight: 700,
     letterSpacing: "-0.028em", lineHeight: 1.18,
-    color: "var(--ls-ink-900)", marginBottom: 28, maxWidth: 760,
+    color: "var(--ink-900)", marginBottom: 28, maxWidth: 760,
   },
   titleLine: { display: "block" },
-  titleLineDim: { color: "var(--ls-ink-600)" },
+  titleLineDim: { color: "var(--ink-600)" },
 
   subhead: {
-    fontSize: 17, color: "var(--ls-ink-600)", lineHeight: 1.6,
+    fontSize: 17, color: "var(--ink-600)", lineHeight: 1.6,
     maxWidth: 560, margin: "0 0 28px",
   },
 
@@ -520,10 +513,10 @@ const S = {
     display: "flex", flexWrap: "wrap", gap: "6px 22px",
     marginTop: 32,
     fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--ls-ink-600)", letterSpacing: ".04em",
+    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
   },
   metaItem: { whiteSpace: "nowrap" },
-  metaStrong: { color: "var(--ls-ink-900)", fontWeight: 600 },
+  metaStrong: { color: "var(--ink-900)", fontWeight: 600 },
 
   /* PROBLEMA */
   problem: { padding: "56px 0", borderTop: "1px solid var(--line-soft)" },
@@ -537,7 +530,7 @@ const S = {
     fontFamily: "var(--font-mono)",
     fontSize: 11, color: "var(--accent)", letterSpacing: ".12em", fontWeight: 600,
   },
-  problemText: { fontSize: 15.5, color: "var(--ls-ink-900)", lineHeight: 1.55, margin: 0, maxWidth: 320 },
+  problemText: { fontSize: 15.5, color: "var(--ink-900)", lineHeight: 1.55, margin: 0, maxWidth: 320 },
 
   /* CÓMO FUNCIONA */
   how: { padding: "56px 0", borderTop: "1px solid var(--line-soft)", background: "var(--surface-alt)" },
@@ -561,12 +554,12 @@ const S = {
   pillars: { padding: "clamp(72px, 10vw, 110px) 0", position: "relative" },
   pillarsH: {
     fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em",
-    color: "var(--ls-ink-900)", maxWidth: 560, marginBottom: 36,
+    color: "var(--ink-900)", maxWidth: 560, marginBottom: 36,
   },
   toolsRow: { display: "flex", flexWrap: "wrap", gap: 40 },
   toolItem: { display: "flex", flexDirection: "column", gap: 8, minWidth: 200, flex: "1 1 200px" },
-  toolTitle: { fontSize: 15, fontWeight: 600, color: "var(--ls-ink-900)" },
-  toolDesc: { fontSize: 13, color: "var(--ls-ink-600)", lineHeight: 1.5, margin: 0 },
+  toolTitle: { fontSize: 15, fontWeight: 600, color: "var(--ink-900)" },
+  toolDesc: { fontSize: 13, color: "var(--ink-600)", lineHeight: 1.5, margin: 0 },
   glyph: { color: "var(--accent)", flexShrink: 0 },
 
   /* CIERRE */
@@ -577,10 +570,10 @@ const S = {
   },
   closingH: {
     fontSize: "var(--fs-lg)", fontWeight: 700, letterSpacing: "-0.02em",
-    color: "var(--ls-ink-900)", margin: 0,
+    color: "var(--ink-900)", margin: 0,
   },
   closingSub: {
-    fontSize: 15, color: "var(--ls-ink-600)", margin: "0 0 14px", lineHeight: 1.55,
+    fontSize: 15, color: "var(--ink-600)", margin: "0 0 14px", lineHeight: 1.55,
   },
 
   /* FOOTER */
