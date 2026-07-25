@@ -27,6 +27,7 @@ import {
 import SmartCollections from "./SmartCollections";
 import FacetedSearchBar from "./FacetedSearchBar";
 import ResultCard from "./ResultCard";
+import LicitacionesTabs from "../LicitacionesTabs";
 
 function dedupePills(pills: FilterPill[]): FilterPill[] {
   const seen = new Map<string, FilterPill>();
@@ -72,6 +73,7 @@ export default function LicitacionesDiscovery() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="clr-container">
+        <LicitacionesTabs />
         <header className="clr-disc-header">
           <div>
             <span className="clr-tag">SECOP II · Agua y saneamiento</span>

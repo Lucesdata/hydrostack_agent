@@ -11,12 +11,14 @@
 
 import Link from "next/link";
 import TrackedCtaLink from "./TrackedCtaLink";
+import LicitacionesTabs from "./LicitacionesTabs";
 
 export default function ComoParticipar() {
   return (
     <div className="clr-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="clr-container clr-cp-container">
+        <LicitacionesTabs />
         <header className="clr-cp-header">
           <span className="clr-tag">Guía · Contratación pública</span>
           <h1 className="clr-h1">Cómo participar en una licitación pública</h1>

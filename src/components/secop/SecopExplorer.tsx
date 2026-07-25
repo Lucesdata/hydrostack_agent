@@ -21,6 +21,7 @@ import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientSto
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
 import OferenteWizard from "./OferenteWizard";
+import LicitacionesTabs from "./LicitacionesTabs";
 
 const DEPARTAMENTOS = [
   "VALLE DEL CAUCA", "ANTIOQUIA", "CUNDINAMARCA", "BOGOTÁ", "ATLÁNTICO",
@@ -200,6 +201,7 @@ export default function SecopExplorer() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="clr-container">
+        <LicitacionesTabs />
         <header className="clr-wb-header">
           <span className="clr-tag">SECOP II · Datos abiertos</span>
           <h1 className="clr-h1">Licitaciones · Agua y saneamiento</h1>

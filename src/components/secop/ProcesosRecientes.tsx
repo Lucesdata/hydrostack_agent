@@ -15,6 +15,7 @@ import Link from "next/link";
 import type { ProcesoResumen } from "@/src/lib/secop/recientes";
 import { sentenceCaseTitle, formatCopCompact, formatShortDate } from "./format";
 import TrackedCtaLink from "./TrackedCtaLink";
+import LicitacionesTabs from "./LicitacionesTabs";
 
 export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }) {
   return (
@@ -22,6 +23,7 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="clr-container">
+        <LicitacionesTabs />
         <header className="clr-rc-header">
           <div>
             <span className="clr-tag">SECOP II · Datos abiertos</span>
