@@ -60,25 +60,39 @@ function GlyphTender({ size = 36 }) {
   );
 }
 
-const GLYPHS = { calc: GlyphCalc, build: GlyphBuild, agent: GlyphAgent, tender: GlyphTender };
+function GlyphAbout({ size = 36 }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
+      <circle cx="20" cy="13" r="6" />
+      <path d="M8 34 C8 24 14 20 20 20 C26 20 32 24 32 34" />
+    </svg>
+  );
+}
 
-const MODULES = [
-  { n: "01", label: "CALCULADORAS", href: "/calculators", glyph: "calc" },
-  { n: "02", label: "BUILD",        href: "/build",        glyph: "build" },
-  { n: "03", label: "AGENTE",       href: "/chat",         glyph: "agent" },
-  { n: "04", label: "LICITACIONES", href: "/licitaciones", glyph: "tender" },
+const GLYPHS = { calc: GlyphCalc, build: GlyphBuild, agent: GlyphAgent, tender: GlyphTender, about: GlyphAbout };
+
+const TEASERS = [
+  {
+    id: "proyectos", n: "02", glyph: "build", href: "/build",
+    title: "Planes directores de alcantarillado ejecutados en Cali",
+    desc: "3 corregimientos, modelado hidráulico y gemelo digital como herramienta de entrega.",
+  },
+  {
+    id: "calculadoras", n: "03", glyph: "calc", href: "/calculators",
+    title: "Fosas sépticas, PTAR y redes — dimensionadas según RAS",
+    desc: "Calculadoras que aplican la normativa colombiana automáticamente, sin fórmulas sueltas en una hoja de cálculo.",
+  },
+  {
+    id: "asistente", n: "04", glyph: "agent", href: "/chat",
+    title: "Lee un pliego de 100 páginas en minutos",
+    desc: "El asistente extrae los requisitos legales y técnicos del pliego, para que sepas qué te falta antes de invertir tiempo armando la oferta.",
+  },
+  {
+    id: "nosotros", n: "05", glyph: "about", href: "/nosotros",
+    title: "Un ingeniero especialista, no una startup genérica",
+    desc: "11 años en agua y saneamiento, planes directores ejecutados y licencia profesional vigente — el método detrás de cada indicador.",
+  },
 ];
-
-// Franja de herramientas de soporte del cierre: Licitaciones ya es el mensaje
-// central de la landing, así que no vuelve a aparecer acá. `GlyphTender`
-// queda definido arriba sin uso — no se borra (ver spec 2026-07-13).
-const TOOLS_LITE = MODULES.filter((m) => m.glyph !== "tender");
-
-const TOOL_COPY = {
-  calc:  { title: "Calculadoras", desc: "Dimensiona fosa séptica, campo de drenaje y mantenimiento." },
-  build: { title: "Build",        desc: "Diseño 3D guiado con geolocalización real." },
-  agent: { title: "Agente",       desc: "Resuelve dudas técnicas y normativas en lenguaje natural." },
-};
 
 const PROBLEM_POINTS = [
   "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
@@ -301,6 +315,8 @@ const LANDING_CSS = `
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 2' preserveAspectRatio='none'><path d='M0,1 Q30,0 60,1 T120,1' stroke='%230369A1' stroke-width='0.8' fill='none' opacity='0.4'/></svg>");
   background-repeat: repeat-x; background-size: 120px 2px;
 }
+
+.ls-teaser-card { scroll-margin-top: calc(var(--nav-h) + 24px); }
 `;
 
 export default function LandingPage() {
@@ -427,15 +443,27 @@ export default function LandingPage() {
         <div style={S.container}>
           <h2 className="ls-reveal" style={S.pillarsH}>Una vez identificas el proceso, HydroStack te acompaña con:</h2>
 
-          <div style={S.toolsRow}>
-            {TOOLS_LITE.map((m, i) => {
-              const Glyph = GLYPHS[m.glyph];
-              const copy = TOOL_COPY[m.glyph];
+          <div className="clr-grid">
+            {TEASERS.map((t, i) => {
+              const Glyph = GLYPHS[t.glyph];
               return (
-                <Link key={m.n} href={m.href} className="ls-tool-link ls-reveal" style={{ ...S.toolItem, transitionDelay: `${i * 0.09}s` }}>
-                  <Glyph size={28} />
-                  <span className="ls-tool-title" style={S.toolTitle}>{copy.title}</span>
-                  <p style={S.toolDesc}>{copy.desc}</p>
+                <Link
+                  key={t.id}
+                  id={t.id}
+                  href={t.href}
+                  className="clr-card is-active ls-teaser-card ls-reveal"
+                  style={{ transitionDelay: `${i * 0.09}s` }}
+                >
+                  <div className="clr-card-top">
+                    <span className="clr-card-num">{t.n}</span>
+                    <Glyph size={36} />
+                  </div>
+                  <div className="clr-card-title">{t.title}</div>
+                  <p className="clr-card-desc">{t.desc}</p>
+                  <span className="clr-card-cta">
+                    Ver más
+                    <span className="clr-cta-arrow">→</span>
+                  </span>
                 </Link>
               );
             })}
@@ -556,10 +584,6 @@ const S = {
     fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em",
     color: "var(--ink-900)", maxWidth: 560, marginBottom: 36,
   },
-  toolsRow: { display: "flex", flexWrap: "wrap", gap: 40 },
-  toolItem: { display: "flex", flexDirection: "column", gap: 8, minWidth: 200, flex: "1 1 200px" },
-  toolTitle: { fontSize: 15, fontWeight: 600, color: "var(--ink-900)" },
-  toolDesc: { fontSize: 13, color: "var(--ink-600)", lineHeight: 1.5, margin: 0 },
   glyph: { color: "var(--accent)", flexShrink: 0 },
 
   /* CIERRE */
