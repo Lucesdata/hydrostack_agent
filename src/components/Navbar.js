@@ -1,24 +1,47 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { useLang } from "@/src/lib/i18n"; // selector ES/EN retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
 
 const NAV_ITEMS = [
-  { href: "/licitaciones", index: "01", label: "Licitaciones" },
-  { href: "/build", index: "02", label: "Proyectos" },
-  { href: "/calculators", index: "03", label: "Calculadoras" },
-  { href: "/chat", index: "04", label: "Asistente" },
+  { href: "/licitaciones", route: "/licitaciones", index: "01", label: "Licitaciones" },
+  { href: "/#proyectos", route: "/build", anchor: "proyectos", index: "02", label: "Proyectos" },
+  { href: "/#calculadoras", route: "/calculators", anchor: "calculadoras", index: "03", label: "Calculadoras" },
+  { href: "/#asistente", route: "/chat", anchor: "asistente", index: "04", label: "Asistente" },
+  { href: "/#nosotros", route: "/nosotros", anchor: "nosotros", index: "05", label: "Nosotros" },
 ];
 
 export default function Navbar() {
   // const { t, toggle } = useLang(); // reactivar junto con los botones de idioma más abajo
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const [activeAnchor, setActiveAnchor] = useState(null);
 
   const close = () => setOpen(false);
 
-  const isActive = (href) => path.startsWith(href);
+  useEffect(() => {
+    if (path !== "/") return;
+    const anchors = NAV_ITEMS.filter((item) => item.anchor);
+    const els = anchors
+      .map((item) => document.getElementById(item.anchor))
+      .filter(Boolean);
+    if (!("IntersectionObserver" in window) || els.length === 0) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveAnchor(entry.target.id);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px", threshold: 0 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [path]);
+
+  const isActive = (item) =>
+    path === "/" && item.anchor ? activeAnchor === item.anchor : path.startsWith(item.route);
   const navAria = (active) => (active ? { "aria-current": "page" } : {});
 
   return (
@@ -42,16 +65,12 @@ export default function Navbar() {
               key={item.href}
               href={item.href}
               className="clr-nav-link"
-              {...navAria(isActive(item.href))}
+              {...navAria(isActive(item))}
             >
               <span className="clr-nav-index" aria-hidden="true">{item.index}</span>
               {item.label}
             </Link>
           ))}
-          <a href="#about" className="clr-nav-link">
-            <span className="clr-nav-index" aria-hidden="true">05</span>
-            Nosotros
-          </a>
         </div>
 
         {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
@@ -80,17 +99,13 @@ export default function Navbar() {
             key={item.href}
             href={item.href}
             className="clr-mobile-link"
-            {...navAria(isActive(item.href))}
+            {...navAria(isActive(item))}
             onClick={close}
           >
             <span className="clr-nav-index" aria-hidden="true">{item.index}</span>
             {item.label}
           </Link>
         ))}
-        <a href="#about" className="clr-mobile-link" onClick={close}>
-          <span className="clr-nav-index" aria-hidden="true">05</span>
-          Nosotros
-        </a>
         {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
         <button className="clr-mobile-lang" onClick={() => { toggle(); close(); }}>
           {t.nav.lang}
