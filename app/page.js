@@ -1,628 +1,301 @@
 "use client";
-import { useEffect, useState } from "react";
+// Reemplaza app/page.js completo con este archivo.
+// Requiere: src/components/landing/ProcesosTicker.jsx y LandingCards.jsx (sin cambios).
+// Elimina el uso de ScrollFilmBackground/FILM_CLIPS — el fondo cinemático se
+// sustituye por el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
-import ScrollFilmBackground from "@/src/components/experiencia/ScrollFilmBackground";
-
-/* Fondo cinemático: la historia (planos → planta → interior) avanza con el
-   scroll de la landing, velada tras el contenido. Ver ScrollFilmBackground. */
-const FILM_CLIPS = [
-  { src: "/experiencia/01-planos.mp4", start: 0, end: 0.38 },
-  { src: "/experiencia/02-planta.mp4", start: 0.38, end: 0.66 },
-  { src: "/experiencia/03-interior.mp4", start: 0.66, end: 1 },
-];
-
-/* --- Glifos SVG inline (referencia 1:1 con option-b-water.html) --- */
-
-function GlyphCalc({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
-      <rect x="3" y="10" width="34" height="22" rx="2" />
-      <line x1="20" y1="10" x2="20" y2="32" />
-      <line x1="3" y1="18" x2="20" y2="18" strokeDasharray="2 2" opacity="0.5" />
-      <line x1="20" y1="22" x2="37" y2="22" strokeDasharray="2 2" opacity="0.5" />
-      <path d="M3 6 L8 6 L8 10" />
-      <path d="M37 6 L32 6 L32 10" />
-      <circle cx="14" cy="14" r="0.8" fill="currentColor" />
-      <circle cx="28" cy="14" r="0.8" fill="currentColor" />
-    </svg>
-  );
-}
-
-function GlyphBuild({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
-      <path d="M20 6 L34 14 L34 28 L20 36 L6 28 L6 14 Z" />
-      <path d="M20 6 L20 20 M6 14 L20 20 L34 14" />
-      <line x1="11" y1="22" x2="11" y2="30" opacity="0.5" />
-      <line x1="15" y1="24" x2="15" y2="32" opacity="0.5" />
-      <line x1="19" y1="22" x2="19" y2="34" opacity="0.5" />
-    </svg>
-  );
-}
-
-function GlyphAgent({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
-      <path d="M6 10 L24 10 L24 24 L14 24 L9 28 L9 24 L6 24 Z" />
-      <line x1="10" y1="14" x2="20" y2="14" opacity="0.6" />
-      <line x1="10" y1="18" x2="18" y2="18" opacity="0.6" />
-      <rect x="22" y="18" width="12" height="14" rx="1" />
-      <line x1="25" y1="22" x2="31" y2="22" opacity="0.6" />
-      <line x1="25" y1="25" x2="31" y2="25" opacity="0.6" />
-      <line x1="25" y1="28" x2="29" y2="28" opacity="0.6" />
-    </svg>
-  );
-}
-
-function GlyphTender({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
-      <path d="M4 28 L10 22 L16 26 L24 14 L36 14" />
-      <circle cx="10" cy="22" r="1.6" fill="currentColor" />
-      <circle cx="16" cy="26" r="1.6" fill="currentColor" />
-      <circle cx="24" cy="14" r="1.6" fill="currentColor" />
-      <path d="M4 32 L36 32" opacity="0.4" />
-      <path d="M30 30 L30 14" opacity="0.4" strokeDasharray="2 2" />
-    </svg>
-  );
-}
-
-function GlyphAbout({ size = 36 }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ ...S.glyph, width: size, height: size }}>
-      <circle cx="20" cy="13" r="6" />
-      <path d="M8 34 C8 24 14 20 20 20 C26 20 32 24 32 34" />
-    </svg>
-  );
-}
-
-const GLYPHS = { calc: GlyphCalc, build: GlyphBuild, agent: GlyphAgent, tender: GlyphTender, about: GlyphAbout };
-
-const TEASERS = [
-  {
-    id: "proyectos", n: "02", glyph: "build", href: "/build",
-    title: "Planes directores de alcantarillado ejecutados en Cali",
-    desc: "3 corregimientos, modelado hidráulico y gemelo digital como herramienta de entrega.",
-  },
-  {
-    id: "calculadoras", n: "03", glyph: "calc", href: "/calculators",
-    title: "Fosas sépticas, PTAR y redes — dimensionadas según RAS",
-    desc: "Calculadoras que aplican la normativa colombiana automáticamente, sin fórmulas sueltas en una hoja de cálculo.",
-  },
-  {
-    id: "asistente", n: "04", glyph: "agent", href: "/chat",
-    title: "Lee un pliego de 100 páginas en minutos",
-    desc: "El asistente extrae los requisitos legales y técnicos del pliego, para que sepas qué te falta antes de invertir tiempo armando la oferta.",
-  },
-  {
-    id: "nosotros", n: "05", glyph: "about", href: "/nosotros",
-    title: "Un ingeniero especialista, no una startup genérica",
-    desc: "11 años en agua y saneamiento, planes directores ejecutados y licencia profesional vigente — el método detrás de cada indicador.",
-  },
-];
 
 const PROBLEM_POINTS = [
-  "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
-  "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
-  "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
+  { n: "01", text: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta." },
+  { n: "02", text: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas." },
+  { n: "03", text: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto." },
 ];
-
-/* ── Demo viva del hero: evaluaciones de ejemplo que rotan ──────────────── */
-// Datos ficticios pero verosímiles. Reusa el sistema .clr-verdict-* de
-// globals.css. El ciclo se detiene si el usuario prefiere reducir movimiento.
-const DEMO_EVALS = [
-  {
-    entidad: "Aguas de Cartagena", valor: "$2.310 M", meta: "PTAR · Cartagena, Bolívar",
-    overall: { tone: "warn", label: "Casi calificas — te falta 1 requisito" },
-    gates: [
-      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
-      { tone: "pass", glyph: "✓", label: "Capacidad financiera" },
-      { tone: "warn", glyph: "!", label: "Clasificación UNSPSC parcial" },
-    ],
-  },
-  {
-    entidad: "ESP Pasto", valor: "$1.450 M", meta: "Alcantarillado · Pasto, Nariño",
-    overall: { tone: "pass", label: "Calificas — puedes ofertar" },
-    gates: [
-      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
-      { tone: "pass", glyph: "✓", label: "Capacidad financiera" },
-      { tone: "pass", glyph: "✓", label: "Clasificación UNSPSC" },
-    ],
-  },
-  {
-    entidad: "EPM", valor: "$7.120 M", meta: "Acueducto rural · Medellín, Antioquia",
-    overall: { tone: "fail", label: "No calificas para este proceso" },
-    gates: [
-      { tone: "pass", glyph: "✓", label: "Experiencia acreditada" },
-      { tone: "fail", glyph: "✕", label: "Capacidad financiera insuficiente" },
-      { tone: "pass", glyph: "✓", label: "Clasificación UNSPSC" },
-    ],
-  },
-];
-
-function HeroDemoCard() {
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % DEMO_EVALS.length), 7000);
-    return () => clearInterval(t);
-  }, []);
-
-  const ev = DEMO_EVALS[idx];
-  const nGates = ev.gates.length;
-
-  return (
-    <div className="ls-demo-card ls-demo-enter" aria-label="Ejemplo de evaluación de elegibilidad">
-      <div className="ls-demo-head">
-        <span className="ls-tag-dot" />
-        <span style={{ marginLeft: 8 }}>Evaluación · RUP vs pliego</span>
-      </div>
-
-      {/* key={idx} re-monta el bloque en cada ciclo y re-dispara la animación */}
-      <div key={idx} className="ls-demo-body">
-        <div className="ls-demo-proc">
-          <div className="ls-demo-proc-top">
-            <strong>{ev.entidad}</strong>
-            <span className="ls-demo-valor">{ev.valor}</span>
-          </div>
-          <span className="ls-demo-meta">{ev.meta}</span>
-        </div>
-
-        <div className="clr-verdict">
-          <div className="clr-verdict-gates" style={{ flexDirection: "column", gap: 6 }}>
-            {ev.gates.map((g, i) => (
-              <span
-                key={i}
-                className={`clr-verdict-gate clr-verdict-gate--${g.tone} ls-demo-gate`}
-                style={{ animationDelay: `${0.3 + i * 0.55}s` }}
-              >
-                <span className="clr-verdict-glyph">{g.glyph}</span>
-                {g.label}
-              </span>
-            ))}
-          </div>
-          <span
-            className={`clr-verdict-overall clr-verdict-overall--${ev.overall.tone} ls-demo-gate`}
-            style={{ animationDelay: `${0.3 + nGates * 0.55 + 0.25}s` }}
-          >
-            <span className="clr-verdict-dot" />
-            {ev.overall.label}
-          </span>
-        </div>
-      </div>
-
-      <Link href="/licitaciones" className="ls-demo-link">
-        Evalúa un proceso real <span aria-hidden="true">→</span>
-      </Link>
-    </div>
-  );
-}
 
 const HOW_STEPS = [
-  "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP.",
-  "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas.",
-  "Si te falta algo, ves exactamente qué es: experiencia, capacidad financiera, clasificación.",
-  "HydroStack decodifica el pliego y te ayuda a estructurar el presupuesto.",
+  { n: "01", text: "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP." },
+  { n: "02", text: "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas." },
+  { n: "03", text: "Si te falta algo, ves exactamente qué es: experiencia, capacidad financiera, clasificación." },
+  { n: "04", text: "HydroStack decodifica el pliego y te ayuda a estructurar el presupuesto." },
 ];
 
-const LANDING_CSS = `
-.ls-page { background: var(--bg); color: var(--ink-900); font-family: var(--font-sans); cursor: auto; }
-.ls-hero { position: relative; overflow: hidden; padding: clamp(96px, 12vw, 140px) 0 clamp(72px, 10vw, 100px); }
-.ls-hero::before {
-  content: ""; position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(125,211,252,0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125,211,252,0.07) 1px, transparent 1px);
-  background-size: 48px 48px;
-  -webkit-mask-image: radial-gradient(ellipse at top right, rgba(0,0,0,0.6), transparent 65%);
-  mask-image: radial-gradient(ellipse at top right, rgba(0,0,0,0.6), transparent 65%);
-  pointer-events: none;
-}
-.ls-tag-dot { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
-.ls-tag-dot::after {
-  content: ""; position: absolute; inset: -3px; border-radius: 50%;
-  border: 1px solid var(--accent); opacity: .5;
-  animation: ls-pulse 2.4s ease-out infinite;
-}
-@keyframes ls-pulse { 0% { transform: scale(.8); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
-.ls-cta-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 8px; padding: 13px 24px;
-  background: var(--accent); color: #fff;
-  font-weight: 600; font-size: 14px;
-  border-radius: 10px; text-decoration: none;
-  transition: transform .18s, box-shadow .18s;
-}
-.ls-cta-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
-.ls-tool-link { text-decoration: none; color: inherit; transition: opacity .18s; }
-.ls-tool-link:hover { opacity: .8; }
-.ls-tool-link:hover .ls-tool-title { color: var(--accent); }
-.ls-hero-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 56px;
-  align-items: center;
-}
-@media (min-width: 960px) {
-  .ls-hero-grid { grid-template-columns: 1.12fr 0.88fr; }
-  /* !important: el font-size llega inline desde S.title y hay que ganarle
-     solo cuando el hero es de dos columnas. */
-  .ls-title { font-size: clamp(34px, 3.8vw, 48px) !important; }
-}
-.ls-demo-card {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 22px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  box-shadow: 0 24px 48px -32px rgba(3,105,161,0.25);
-  max-width: 440px;
-  overflow: hidden;
-}
-.ls-demo-card::before {
-  content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
-  background: linear-gradient(to right, var(--accent), transparent);
-}
-.ls-demo-head {
-  display: inline-flex; align-items: center;
-  font-family: var(--font-mono);
-  font-size: 10px; color: var(--accent);
-  letter-spacing: 0.16em; text-transform: uppercase;
-}
-.ls-demo-body { display: flex; flex-direction: column; gap: 16px; min-height: 176px; }
-.ls-demo-proc { display: flex; flex-direction: column; gap: 3px; }
-.ls-demo-proc-top {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-  font-size: 15.5px; color: var(--ink-900);
-}
-.ls-demo-valor {
-  font-family: var(--font-mono);
-  font-size: 13px; font-weight: 600; color: var(--accent);
-  white-space: nowrap;
-}
-.ls-demo-meta {
-  font-family: var(--font-mono);
-  font-size: 11px; color: var(--ink-600); letter-spacing: 0.03em;
-}
-.ls-demo-gate { animation: ls-demo-in .45s ease both; }
-@keyframes ls-demo-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.ls-demo-link {
-  font-size: 13.5px; font-weight: 500; color: var(--accent);
-  text-decoration: none;
-  display: inline-flex; align-items: center; gap: 6px;
-  border-top: 1px solid var(--line-soft);
-  padding-top: 14px;
-}
-.ls-demo-link:hover { text-decoration: underline; }
-.ls-demo-enter { animation: fadeUp .6s .35s ease both; }
+const PILLARS = [
+  { n: "02", title: "Planes directores de alcantarillado en Cali", desc: "3 corregimientos, modelado hidráulico y gemelo digital.", href: "/build" },
+  { n: "03", title: "Fosas sépticas y PTAR — según RAS", desc: "Calculadoras que aplican la normativa colombiana automáticamente.", href: "/calculators" },
+  { n: "04", title: "Lee un pliego de 100 páginas en minutos", desc: "El asistente extrae los requisitos legales y técnicos automáticamente.", href: "/chat" },
+  { n: "05", title: "Un ingeniero especialista, no una startup", desc: "11 años en agua y saneamiento, licencia profesional vigente.", href: "/nosotros", dark: true },
+];
 
-/* Reveals al scroll (IntersectionObserver añade .is-visible) */
-.ls-reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .6s ease, transform .6s ease;
-}
-.ls-reveal.is-visible { opacity: 1; transform: none; }
-/* El CTA del cierre lleva .ls-reveal: sin esta regla, transform:none de
-   .is-visible (posterior en el archivo) pisaría el lift del hover. */
-.ls-cta-btn.ls-reveal.is-visible:hover { transform: translateY(-2px); }
-
-/* Micro-interacción de glifos */
-.ls-tool-link svg { transition: transform .25s ease; }
-.ls-tool-link:hover svg { transform: translateY(-3px) scale(1.05); }
-.ls-footer-wave {
-  position: absolute; top: -1px; left: 0; right: 0; height: 2px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 2' preserveAspectRatio='none'><path d='M0,1 Q30,0 60,1 T120,1' stroke='%230369A1' stroke-width='0.8' fill='none' opacity='0.4'/></svg>");
-  background-repeat: repeat-x; background-size: 120px 2px;
-}
-
-.ls-teaser-card { scroll-margin-top: calc(var(--nav-h) + 24px); }
+/* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
+const BLUEPRINT_CSS = `
+@keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes bp-ripple { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:.55} 100%{transform:translate(-50%,-50%) scale(2.6);opacity:0} }
+@keyframes bp-flash { 0%{opacity:1;filter:brightness(1.9)} 60%{opacity:.5} 100%{opacity:0} }
+.bp-page a { text-decoration: none; }
+.bp-card { transition: border-color .2s, background .2s; }
+.bp-card:hover { border-color: #0369A1; }
+.bp-cta { transition: background .2s; }
+.bp-cta:hover { background: #0369A1 !important; }
+.bp-cta-dark:hover { background: #0A1F1C !important; }
 `;
 
-export default function LandingPage() {
-  // Reveals al scroll. Si no hay IntersectionObserver o el usuario prefiere
-  // reducir movimiento, todo se muestra de inmediato.
+/* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
+function useBlueprintFX() {
+  const heroRef = useRef(null);
+  const statsRef = useRef(null);
+  const problemRef = useRef(null);
+  const howRef = useRef(null);
+  const pillarsRef = useRef(null);
+
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [parallax, setParallax] = useState(0);
+  const [visible, setVisible] = useState({ hero: false, stats: false, problem: false, how: false, pillars: false });
+
   useEffect(() => {
-    const els = document.querySelectorAll(".ls-reveal");
-    if (
-      !("IntersectionObserver" in window) ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      els.forEach((el) => el.classList.add("is-visible"));
-      return;
+    const handleScroll = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setScrollProgress(Math.min(1, Math.max(0, window.scrollY / max)));
+      setParallax(window.scrollY * -0.06);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    handleScroll();
+
+    const targets = [
+      [heroRef, "hero"], [statsRef, "stats"], [problemRef, "problem"], [howRef, "how"], [pillarsRef, "pillars"],
+    ];
+    let io;
+    if ("IntersectionObserver" in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            const hit = targets.find(([ref]) => ref.current === e.target);
+            if (hit) setVisible((v) => ({ ...v, [hit[1]]: true }));
+            io.unobserve(e.target);
+          });
+        },
+        { threshold: 0.3 }
+      );
+      targets.forEach(([ref]) => ref.current && io.observe(ref.current));
+    } else {
+      setVisible({ hero: true, stats: true, problem: true, how: true, pillars: true });
     }
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-visible");
-            obs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (io) io.disconnect();
+    };
   }, []);
 
+  const p = scrollProgress;
+  return {
+    refs: { heroRef, statsRef, problemRef, howRef, pillarsRef },
+    gridTransform: `translate3d(0, ${parallax.toFixed(1)}px, 0)`,
+    scanTopPct: (p * 100).toFixed(1),
+    lineADashoffset: visible.hero ? 0 : 560,
+    lineBScale: visible.stats ? 1 : 0,
+    lineCDashoffset: visible.problem ? 0 : 500,
+    lineDDashoffset: visible.how ? 0 : 500,
+    inletOpacity: visible.hero ? 0.16 : 0.045,
+    tankOpacity: visible.stats ? 0.16 : 0.045,
+    drainOpacity: visible.problem || visible.how ? 0.16 : 0.045,
+    outletOpacity: visible.pillars ? 0.16 : 0.045,
+    waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
+    depthLabel: (p * 6).toFixed(1) + "m",
+    inletFlashStyle: visible.hero ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
+    tankFlashStyle: visible.stats ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
+    drainFlashStyle: visible.problem || visible.how ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
+    outletFlashStyle: visible.pillars ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
+  };
+}
+
+function BlueprintBackground({ fx }) {
   return (
-    <div style={S.page} className="ls-page">
-      <style dangerouslySetInnerHTML={{ __html: LANDING_CSS }} />
+    <>
+      <div style={{ position: "fixed", top: -160, left: 0, right: 0, bottom: -160, backgroundImage: "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none", zIndex: 0, transform: fx.gridTransform, willChange: "transform" }} />
 
-      <ScrollFilmBackground clips={FILM_CLIPS} strength={0.8} />
+      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{ position: "fixed", inset: 0, width: "100%", height: "100vh", pointerEvents: "none", zIndex: 0 }} fill="none" stroke="#0369A1" strokeWidth="1.4">
+        <g style={{ opacity: fx.inletOpacity, transition: "opacity 1s ease" }}>
+          <line x1="0" y1="120" x2="220" y2="120" />
+          <line x1="0" y1="150" x2="180" y2="150" />
+          <path d="M180,150 L220,150 L220,120" />
+          <circle cx="60" cy="120" r="3" fill="#0369A1" stroke="none" />
+          <circle cx="140" cy="150" r="3" fill="#0369A1" stroke="none" />
+          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="4.5s" repeatCount="indefinite" path="M0,120 L220,120 L220,140" /></circle>
+          <circle r="2.2" fill="#0369A1" stroke="none"><animateMotion dur="4.5s" begin="2.2s" repeatCount="indefinite" path="M0,150 L180,150 L220,150 L220,140" /></circle>
+          <text x="20" y="105" fontFamily="'JetBrains Mono',monospace" fontSize="12" fill="#0369A1" stroke="none">Ø160mm</text>
+          <path d="M0,120 L220,120 L220,140" stroke="#7DD3FC" strokeWidth="2.4" style={fx.inletFlashStyle} />
+        </g>
+        <g style={{ opacity: fx.tankOpacity, transition: "opacity 1s ease" }}>
+          <rect x="220" y="140" width="360" height="260" rx="6" />
+          <line x1="220" y1="200" x2="580" y2="200" strokeDasharray="4 6" />
+          <line x1="220" y1="280" x2="580" y2="280" strokeDasharray="4 6" />
+          <line x1="400" y1="140" x2="400" y2="400" strokeDasharray="2 8" strokeWidth="1" />
+          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="5s" repeatCount="indefinite" path="M230,200 L570,200" /></circle>
+          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="M570,280 L230,280" /></circle>
+          <text x="232" y="130" fontFamily="'JetBrains Mono',monospace" fontSize="12" fill="#0369A1" stroke="none">H:2.4m</text>
+          <text x="232" y="418" fontFamily="'JetBrains Mono',monospace" fontSize="12" fill="#0369A1" stroke="none">V:12m³</text>
+          <rect x="220" y="140" width="360" height="260" rx="6" stroke="#7DD3FC" strokeWidth="2" style={fx.tankFlashStyle} />
+        </g>
+        <g style={{ opacity: fx.drainOpacity, transition: "opacity 1s ease" }}>
+          <line x1="640" y1="430" x2="1080" y2="430" />
+          <line x1="640" y1="470" x2="1080" y2="470" />
+          <line x1="640" y1="510" x2="1080" y2="510" />
+          <line x1="700" y1="410" x2="700" y2="530" strokeWidth="1" strokeDasharray="2 6" />
+          <line x1="800" y1="410" x2="800" y2="530" strokeWidth="1" strokeDasharray="2 6" />
+          <line x1="900" y1="410" x2="900" y2="530" strokeWidth="1" strokeDasharray="2 6" />
+          <line x1="1000" y1="410" x2="1000" y2="530" strokeWidth="1" strokeDasharray="2 6" />
+          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" repeatCount="indefinite" path="M650,430 L1070,430" /></circle>
+          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" begin="1.3s" repeatCount="indefinite" path="M650,470 L1070,470" /></circle>
+          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" begin="2.6s" repeatCount="indefinite" path="M650,510 L1070,510" /></circle>
+          <text x="650" y="398" fontFamily="'JetBrains Mono',monospace" fontSize="12" fill="#0369A1" stroke="none">L:440mm</text>
+          <path d="M640,430 L1080,430 M640,470 L1080,470 M640,510 L1080,510" stroke="#7DD3FC" strokeWidth="2.2" style={fx.drainFlashStyle} />
+        </g>
+        <g style={{ opacity: fx.outletOpacity, transition: "opacity 1s ease" }}>
+          <line x1="1140" y1="600" x2="1140" y2="760" />
+          <path d="M1122,742 L1140,764 L1158,742" />
+          <circle cx="1140" cy="620" r="3" fill="#0369A1" stroke="none" />
+          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="3.5s" repeatCount="indefinite" path="M1140,600 L1140,758" /></circle>
+          <text x="1090" y="600" fontFamily="'JetBrains Mono',monospace" fontSize="12" fill="#0369A1" stroke="none">Ø200mm</text>
+          <path d="M1140,600 L1140,760" stroke="#7DD3FC" strokeWidth="2.4" style={fx.outletFlashStyle} />
+        </g>
+      </svg>
 
-      <ProcesosTicker />
+      <div style={{ position: "fixed", left: 0, right: 0, top: `${fx.scanTopPct}vh`, bottom: 0, pointerEvents: "none", zIndex: 0, backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>\")", backgroundRepeat: "repeat", backgroundSize: "120px 14px", opacity: fx.waterFillOpacity, animation: "bp-scroll 22s linear infinite", transition: "top .08s linear" }} />
+      <div style={{ position: "fixed", left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent)", pointerEvents: "none", zIndex: 0, top: `${fx.scanTopPct}vh`, transition: "top .08s linear" }} />
+      {[14, 50, 84].map((leftPct, i) => (
+        <div key={leftPct} style={{ position: "fixed", left: `${leftPct}%`, top: `${fx.scanTopPct}vh`, width: 16, height: 16, borderRadius: "50%", border: "1px solid rgba(3,105,161,0.5)", pointerEvents: "none", zIndex: 0, transition: "top .08s linear", animation: `bp-ripple 2.6s ease-out ${i * 0.9}s infinite` }} />
+      ))}
 
-      <header className="ls-hero">
-        <div style={S.container}>
-          <div className="ls-hero-grid">
-          <div>
-          {/* Mini-bloque de marca (logo H + HydroStack + "ES · EN") retirado:
-              es redundante con el logo del Navbar (app/layout.js) y el texto
-              "ES · EN" quedaría inconsistente sin selector real.
-              Ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md.
-          <div style={S.mark}>
-            <div style={S.markLogo}>H</div>
-            <div style={S.markName}>HydroStack</div>
-            <div style={S.markBar} />
-            <div style={S.markLang}>ES · EN</div>
-          </div>
-          */}
-
-          <span className="fade-up" style={S.tag}>
-            <span className="ls-tag-dot" />
-            <span style={{ marginLeft: 8 }}>SECOP · Agua y saneamiento</span>
-          </span>
-
-          <h1 className="ls-title fade-up-1" style={S.title}>
-            <span style={S.titleLine}>Plataforma de tratamiento de aguas.</span>
-            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Contratos con el Estado.</span>
-            <span style={{ ...S.titleLine, ...S.titleLineDim }}>Compite, evalúate.</span>
-          </h1>
-
-          <p className="fade-up-2" style={S.subhead}>
-            HydroStack cruza tu RUP (Registro Único de Proponentes) con los pliegos
-            de SECOP y te dice si calificas — antes de invertir una hora en la propuesta.
-          </p>
-
-          <Link href="/licitaciones" className="ls-cta-btn fade-up-3">
-            Prueba un proceso
-          </Link>
-
-          {/* Badges normativos restaurados en versión compacta como señal de
-              confianza (critique 2026-07-16). */}
-          <div className="fade-up-4" style={S.meta}>
-            {[
-              { value: "Res. 0330/2017", scope: "CO" },
-              { value: "CTE DB-HS 5",    scope: "ES" },
-              { value: "ASTM D6391",     scope: "US" },
-              { value: "SECOP II",       scope: "datos.gov.co" },
-            ].map((m, i) => (
-              <div key={i} style={S.metaItem}>
-                <strong style={S.metaStrong}>{m.value}</strong> · {m.scope}
-              </div>
-            ))}
-          </div>
-          </div>
-
-          <HeroDemoCard />
-          </div>
-        </div>
-      </header>
-
-      <LandingCards />
-
-      <section style={S.problem}>
-        <div style={S.container}>
-          <h2 style={S.srOnly}>El problema</h2>
-          <div style={S.problemGrid}>
-            {PROBLEM_POINTS.map((p, i) => (
-              <div key={i} className="ls-reveal" style={{ ...S.problemItem, transitionDelay: `${i * 0.09}s` }}>
-                <span style={S.problemNum}>{String(i + 1).padStart(2, "0")}</span>
-                <p style={S.problemText}>{p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={S.how}>
-        <div style={S.container}>
-          <h2 className="ls-reveal" style={S.howLabel}>▸ Cómo funciona</h2>
-          <ol style={S.howList}>
-            {HOW_STEPS.map((s, i) => (
-              <li key={i} className="ls-reveal" style={{ ...S.howItem, transitionDelay: `${i * 0.09}s` }}>
-                <span style={S.howNum}>{String(i + 1).padStart(2, "0")}</span>
-                <p style={S.howText}>{s}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section style={S.pillars}>
-        <div style={S.container}>
-          <h2 className="ls-reveal" style={S.pillarsH}>Una vez identificas el proceso, HydroStack te acompaña con:</h2>
-
-          <div className="clr-grid">
-            {TEASERS.map((t, i) => {
-              const Glyph = GLYPHS[t.glyph];
-              return (
-                <Link
-                  key={t.id}
-                  id={t.id}
-                  href={t.href}
-                  className="clr-card is-active ls-teaser-card ls-reveal"
-                  style={{ transitionDelay: `${i * 0.09}s` }}
-                >
-                  <div className="clr-card-top">
-                    <span className="clr-card-num">{t.n}</span>
-                    <Glyph size={36} />
-                  </div>
-                  <div className="clr-card-title">{t.title}</div>
-                  <p className="clr-card-desc">{t.desc}</p>
-                  <span className="clr-card-cta">
-                    Ver más
-                    <span className="clr-cta-arrow">→</span>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section style={S.closing}>
-        <div style={{ ...S.container, ...S.closingInner }}>
-          <h2 className="ls-reveal" style={S.closingH}>
-            Deja de descubrir tarde que no calificabas.
-          </h2>
-          <p className="ls-reveal" style={{ ...S.closingSub, transitionDelay: "0.09s" }}>
-            Procesos activos de agua y saneamiento, evaluados contra tu RUP.
-          </p>
-          <Link href="/licitaciones" className="ls-cta-btn ls-reveal" style={{ transitionDelay: "0.18s" }}>
-            Prueba un proceso
-          </Link>
-        </div>
-      </section>
-
-      <footer style={S.footer}>
-        <div className="ls-footer-wave" />
-        <div style={{ ...S.container, ...S.footerInner }}>
-          <div style={S.footerLeft}>
-            <span style={{ fontWeight: 600, color: "var(--ink-900)" }}>HydroStack</span>
-            <span>·</span>
-            <span>Plataforma de contratación pública · Agua y saneamiento</span>
-          </div>
-          <div style={S.footerRight}>
-            <span style={S.footerDot} />
-            <span>Datos SECOP II · actualización diaria</span>
-            <span>·</span>
-            <span>hydrostack.io</span>
-          </div>
-        </div>
-      </footer>
-    </div>
+      <div style={{ position: "fixed", left: 10, top: 72, bottom: 16, width: 1, background: "repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", left: 6, top: `${fx.scanTopPct}vh`, pointerEvents: "none", zIndex: 0, transition: "top .08s linear", display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ width: 0, height: 0, borderTop: "4px solid transparent", borderBottom: "4px solid transparent", borderLeft: "6px solid #0369A1" }} />
+        <span style={{ font: "10px 'JetBrains Mono',monospace", color: "#0369A1", background: "rgba(252,252,249,0.85)", padding: "1px 4px", borderRadius: 2 }}>{fx.depthLabel}</span>
+      </div>
+    </>
   );
 }
 
-const S = {
-  page: { minHeight: "100vh", position: "relative", zIndex: 1 },
-  container: { maxWidth: 1100, margin: "0 auto", padding: "0 28px", position: "relative", zIndex: 1 },
-  srOnly: {
-    position: "absolute", width: 1, height: 1, padding: 0, margin: -1,
-    overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0,
-  },
+export default function LandingPage() {
+  const fx = useBlueprintFX();
+  const { heroRef, statsRef, problemRef, howRef, pillarsRef } = fx.refs;
 
-  /* HERO */
-  tag: {
-    display: "inline-flex", alignItems: "center",
-    fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--accent)",
-    letterSpacing: "0.18em", textTransform: "uppercase",
-    marginBottom: 28, padding: "4px 12px 4px 8px",
-    border: "1px solid var(--accent-soft)", borderRadius: 999,
-    background: "var(--accent-faint)",
-  },
+  return (
+    <div className="bp-page" style={{ position: "relative", background: "#FCFCF9", fontFamily: "Inter, sans-serif" }}>
+      <style dangerouslySetInnerHTML={{ __html: BLUEPRINT_CSS }} />
+      <BlueprintBackground fx={fx} />
 
-  title: {
-    fontSize: "var(--fs-hero)", fontWeight: 700,
-    letterSpacing: "-0.028em", lineHeight: 1.18,
-    color: "var(--ink-900)", marginBottom: 28, maxWidth: 760,
-  },
-  titleLine: { display: "block" },
-  titleLineDim: { color: "var(--ink-600)" },
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
+        <ProcesosTicker />
 
-  subhead: {
-    fontSize: 17, color: "var(--ink-600)", lineHeight: 1.6,
-    maxWidth: 560, margin: "0 0 28px",
-  },
+        <div ref={heroRef} style={{ position: "relative", padding: "88px 48px 64px" }}>
+          <span style={{ position: "absolute", top: 88, right: 48, font: "10px 'JetBrains Mono',monospace", color: "#8A938F" }}>x:1440 y:0</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 48, alignItems: "start" }}>
+            <div style={{ position: "relative" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+                <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+                <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 01 — Elegibilidad SECOP</span>
+              </div>
+              <h1 style={{ font: "700 46px/1.15 Inter", letterSpacing: "-0.02em", color: "#0A1F1C", margin: "0 0 20px", maxWidth: 520 }}>Precisión de ingeniería, aplicada a tu oferta.</h1>
+              <p style={{ font: "15px/1.6 Inter", color: "#525B5A", maxWidth: 460, margin: "0 0 28px" }}>HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento — cada requisito habilitante, verificado como una cota en un plano.</p>
+              <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 24px", background: "#0A1F1C", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em", borderRadius: 2 }}>[ Prueba un proceso ]</Link>
+              <svg viewBox="0 0 520 16" width="520" height="16" style={{ display: "block", marginTop: 36, overflow: "visible", maxWidth: "100%" }}>
+                <line x1="0" y1="8" x2="520" y2="8" stroke="#0369A1" strokeWidth="1" strokeDasharray="560" strokeDashoffset={fx.lineADashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
+                <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
+                <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
+              </svg>
+            </div>
 
-  meta: {
-    display: "flex", flexWrap: "wrap", gap: "6px 22px",
-    marginTop: 32,
-    fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
-  },
-  metaItem: { whiteSpace: "nowrap" },
-  metaStrong: { color: "var(--ink-900)", fontWeight: 600 },
+            <div style={{ position: "relative", border: "1px solid #0369A1", padding: 22, background: "#fff" }}>
+              <span style={{ position: "absolute", top: -1, left: -1, width: 12, height: 12, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+              <span style={{ position: "absolute", top: -1, right: -1, width: 12, height: 12, borderTop: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+              <span style={{ position: "absolute", bottom: -1, left: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+              <span style={{ position: "absolute", bottom: -1, right: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+              <div style={{ font: "10px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 14 }}>Evaluación — muestra 001</div>
+              <div style={{ display: "flex", justifyContent: "space-between", font: "14px Inter", color: "#0A1F1C", marginBottom: 16, borderBottom: "1px dashed #DADAD2", paddingBottom: 14 }}><strong>EPS Nariño</strong><span style={{ fontFamily: "'JetBrains Mono',monospace", color: "#0369A1" }}>$3.850M</span></div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, font: "12px 'JetBrains Mono',monospace", color: "#525B5A" }}>
+                <span>[✓] EXPERIENCIA ................ OK</span>
+                <span>[✓] CAPACIDAD_FINANCIERA ........ OK</span>
+                <span>[!] UNSPSC ...................... PARCIAL</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  /* PROBLEMA */
-  problem: { padding: "56px 0", borderTop: "1px solid var(--line-soft)" },
-  problemGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
-    gap: 28,
-  },
-  problemItem: { display: "flex", flexDirection: "column", gap: 10 },
-  problemNum: {
-    fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--accent)", letterSpacing: ".12em", fontWeight: 600,
-  },
-  problemText: { fontSize: 15.5, color: "var(--ink-900)", lineHeight: 1.55, margin: 0, maxWidth: 320 },
+        <div ref={statsRef}>
+          <LandingCards />
+        </div>
 
-  /* CÓMO FUNCIONA */
-  how: { padding: "56px 0", borderTop: "1px solid var(--line-soft)", background: "var(--surface-alt)" },
-  howLabel: {
-    fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--accent)", letterSpacing: ".15em", textTransform: "uppercase",
-    marginBottom: 24,
-  },
-  howList: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 0 },
-  howItem: {
-    display: "flex", gap: 18, alignItems: "flex-start",
-    padding: "16px 0", borderLeft: "1px dashed var(--line)", paddingLeft: 20,
-  },
-  howNum: {
-    fontFamily: "var(--font-mono)",
-    fontSize: 12, color: "var(--accent)", fontWeight: 600, flexShrink: 0, width: 22,
-  },
-  howText: { fontSize: 15, color: "var(--ink-900)", lineHeight: 1.55, margin: 0, maxWidth: 560 },
+        <div style={{ padding: "64px 48px", borderTop: "1px dashed #DADAD2", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56 }}>
+          <div ref={problemRef}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 02 — El problema</span>
+            </div>
+            <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
+              <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineCDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
+            </svg>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {PROBLEM_POINTS.map((p) => (
+                <div key={p.n} style={{ display: "flex", gap: 14 }}>
+                  <span style={{ font: "600 11px 'JetBrains Mono',monospace", color: "#0369A1", flexShrink: 0 }}>[{p.n}]</span>
+                  <p style={{ font: "14.5px/1.55 Inter", color: "#0A1F1C", margin: 0, maxWidth: 360 }}>{p.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div ref={howRef}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 03 — Cómo funciona</span>
+            </div>
+            <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
+              <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineDDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }} />
+            </svg>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {HOW_STEPS.map((s) => (
+                <div key={s.n} style={{ display: "flex", gap: 14, padding: "12px 0", borderLeft: "1px dashed #DADAD2", paddingLeft: 16 }}>
+                  <span style={{ font: "600 11px 'JetBrains Mono',monospace", color: "#0369A1", flexShrink: 0 }}>[{s.n}]</span>
+                  <p style={{ font: "13.5px/1.55 Inter", color: "#0A1F1C", margin: 0 }}>{s.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-  /* HERRAMIENTAS DE SOPORTE */
-  pillars: { padding: "clamp(72px, 10vw, 110px) 0", position: "relative" },
-  pillarsH: {
-    fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em",
-    color: "var(--ink-900)", maxWidth: 560, marginBottom: 36,
-  },
-  glyph: { color: "var(--accent)", flexShrink: 0 },
+        <div ref={pillarsRef} style={{ padding: "64px 48px", borderTop: "1px dashed #DADAD2" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+            <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 04 — Herramientas de soporte</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+            {PILLARS.map((c) => (
+              <Link key={c.n} href={c.href} className="bp-card" style={{ position: "relative", border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`, padding: 22, background: c.dark ? "#0A1F1C" : "#fff", color: c.dark ? "#fff" : "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 200 }}>
+                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
+                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
+                <span style={{ font: "10px 'JetBrains Mono',monospace", color: c.dark ? "rgba(255,255,255,0.5)" : "#8A938F" }}>[ {c.n} ]</span>
+                <div style={{ font: "600 16px/1.3 Inter" }}>{c.title}</div>
+                <p style={{ font: "13px/1.5 Inter", color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A", flexGrow: 1, margin: 0 }}>{c.desc}</p>
+                <span style={{ font: "600 12px 'JetBrains Mono',monospace", color: c.dark ? "#7DD3FC" : "#0369A1" }}>[ VER MÁS → ]</span>
+              </Link>
+            ))}
+          </div>
+        </div>
 
-  /* CIERRE */
-  closing: { padding: "clamp(56px, 8vw, 80px) 0", borderTop: "1px solid var(--line-soft)" },
-  closingInner: {
-    display: "flex", flexDirection: "column", alignItems: "center",
-    textAlign: "center", gap: 10,
-  },
-  closingH: {
-    fontSize: "var(--fs-lg)", fontWeight: 700, letterSpacing: "-0.02em",
-    color: "var(--ink-900)", margin: 0,
-  },
-  closingSub: {
-    fontSize: 15, color: "var(--ink-600)", margin: "0 0 14px", lineHeight: 1.55,
-  },
+        <div style={{ padding: "56px 48px", borderTop: "1px dashed #DADAD2", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+          <span style={{ font: "14px 'JetBrains Mono',monospace", color: "#0A1F1C" }}>▸ Deja de descubrir tarde que no calificabas.</span>
+          <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", padding: "13px 24px", background: "#0369A1", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em" }}>[ PRUEBA UN PROCESO ]</Link>
+        </div>
 
-  /* FOOTER */
-  footer: { borderTop: "1px solid var(--line-soft)", padding: "28px 0", background: "var(--surface)", position: "relative" },
-  footerInner: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    flexWrap: "wrap", gap: 12,
-    fontFamily: "var(--font-mono)",
-    fontSize: 11, color: "var(--ink-600)", letterSpacing: ".04em",
-  },
-  footerLeft: { display: "flex", gap: 12, alignItems: "center" },
-  footerRight: { display: "flex", gap: 14, alignItems: "center" },
-  footerDot: {
-    width: 6, height: 6, borderRadius: "50%", background: "var(--success)",
-    boxShadow: "0 0 0 3px rgba(22,163,74,0.13)",
-  },
-};
+        <div style={{ padding: "20px 48px", borderTop: "1px solid #DADAD2", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, font: "11px 'JetBrains Mono',monospace", color: "#525B5A" }}>
+          <div style={{ display: "flex", gap: 12 }}><strong style={{ color: "#0A1F1C" }}>HydroStack</strong><span>·</span><span>Plataforma de contratación pública</span></div>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} /><span>Datos SECOP II · actualización diaria</span></div>
+        </div>
+      </div>
+    </div>
+  );
+}

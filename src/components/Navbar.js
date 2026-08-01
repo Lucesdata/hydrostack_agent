@@ -12,6 +12,18 @@ const NAV_ITEMS = [
   { href: "/#nosotros", route: "/nosotros", anchor: "nosotros", index: "05", label: "Nosotros" },
 ];
 
+function ValveGlyph() {
+  return (
+    <svg viewBox="0 0 26 26" width="15" height="15" fill="none" stroke="#fff" strokeWidth="1.6" aria-hidden="true">
+      <line x1="2" y1="13" x2="8.2" y2="13" />
+      <line x1="17.8" y1="13" x2="24" y2="13" />
+      <circle cx="13" cy="13" r="4.6" />
+      <line x1="13" y1="8" x2="13" y2="4" />
+      <line x1="13" y1="18" x2="13" y2="22" />
+    </svg>
+  );
+}
+
 export default function Navbar() {
   // const { t, toggle } = useLang(); // reactivar junto con los botones de idioma más abajo
   const path = usePathname();
@@ -48,7 +60,7 @@ export default function Navbar() {
     <nav className="clr-nav" aria-label="Menú principal">
       <div className="clr-nav-inner">
         <Link href="/" className="clr-logo" onClick={close} aria-label="HydroStack inicio">
-          <span className="clr-logo-mark">H</span>
+          <span className="clr-logo-mark"><ValveGlyph /></span>
           <span className="clr-logo-text">ydroStack</span>
         </Link>
 
@@ -67,7 +79,7 @@ export default function Navbar() {
               className="clr-nav-link"
               {...navAria(isActive(item))}
             >
-              <span className="clr-nav-index" aria-hidden="true">{item.index}</span>
+              <span className="clr-nav-index" aria-hidden="true">{item.index}/</span>
               {item.label}
             </Link>
           ))}
@@ -102,7 +114,7 @@ export default function Navbar() {
             {...navAria(isActive(item))}
             onClick={close}
           >
-            <span className="clr-nav-index" aria-hidden="true">{item.index}</span>
+            <span className="clr-nav-index" aria-hidden="true">{item.index}/</span>
             {item.label}
           </Link>
         ))}

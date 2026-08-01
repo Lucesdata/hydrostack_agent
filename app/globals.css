@@ -585,15 +585,27 @@ input, select { font-family: var(--mono); }
   left: 11px;
   right: 11px;
   bottom: 2px;
-  height: 1.5px;
-  background: var(--accent);
+  height: 2px;
+  background-image: repeating-linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 6px);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.22s ease;
 }
-.clr-nav-link:hover::after {
+.clr-nav-link::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  bottom: 0px;
+  width: 3px;
+  height: 6px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.clr-nav-link:hover::after,
+.clr-nav-link:hover::before {
   transform: scaleX(1);
-  transform-origin: left;
+  opacity: 0.5;
 }
 .clr-nav-link[aria-current="page"] {
   color: var(--accent);
@@ -604,6 +616,9 @@ input, select { font-family: var(--mono); }
 }
 .clr-nav-link[aria-current="page"]::after {
   transform: scaleX(1);
+}
+.clr-nav-link[aria-current="page"]::before {
+  opacity: 1;
 }
 
 .clr-lang-btn {
