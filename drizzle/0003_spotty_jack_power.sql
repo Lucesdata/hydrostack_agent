@@ -1,0 +1,1 @@
+DROP INDEX "raw_record_payload_gin_idx";

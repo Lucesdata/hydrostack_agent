@@ -1,4 +1,6 @@
 import { pgTable, uuid, text, jsonb, timestamp, index } from 'drizzle-orm/pg-core';
+// raw_record_payload_gin_idx (índice GIN sobre payload) fue retirado: idx_scan=0 desde
+// siempre, consumía ~101MB (20% de la DB de 512MB) sin que ninguna query lo usara.
 
 /**
  * Capa cruda (ELT landing). Append-only, inmutable: nunca UPDATE/DELETE.
@@ -25,6 +27,5 @@ export const rawRecord = pgTable(
     index('raw_record_source_recid_updated_idx').on(t.source, t.sourceRecordId, t.sourceUpdatedAt),
     index('raw_record_source_hash_idx').on(t.source, t.payloadHash),
     index('raw_record_batch_idx').on(t.batchId),
-    index('raw_record_payload_gin_idx').using('gin', t.payload),
   ],
 );
