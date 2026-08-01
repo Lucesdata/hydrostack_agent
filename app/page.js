@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
+import ScrollFilmBackground from "@/src/components/experiencia/ScrollFilmBackground";
+
+/* Fondo cinemático: la historia (planos → planta → interior) avanza con el
+   scroll de la landing, velada tras el contenido. Ver ScrollFilmBackground. */
+const FILM_CLIPS = [
+  { src: "/experiencia/01-planos.mp4", start: 0, end: 0.38 },
+  { src: "/experiencia/02-planta.mp4", start: 0.38, end: 0.66 },
+  { src: "/experiencia/03-interior.mp4", start: 0.66, end: 1 },
+];
 
 /* --- Glifos SVG inline (referencia 1:1 con option-b-water.html) --- */
 
@@ -349,6 +358,8 @@ export default function LandingPage() {
   return (
     <div style={S.page} className="ls-page">
       <style dangerouslySetInnerHTML={{ __html: LANDING_CSS }} />
+
+      <ScrollFilmBackground clips={FILM_CLIPS} strength={0.8} />
 
       <ProcesosTicker />
 
