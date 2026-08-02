@@ -24,10 +24,12 @@ Acción: versionar el fixture en el repo (o storage accesible al CI) y agregar t
 
 ## Alto
 
-### 3. `ProcesosTicker`: fallback deshonesto
+### 3. `ProcesosTicker`: fallback deshonesto — ✅ resuelto 2026-08-02
 `ProcesosTicker.jsx:216` inicializa con `MOCK_ITEMS` (entidades reales con montos ficticios) y si `/api/procesos/recientes` falla, el `.catch` no hace nada — el mock queda visible indefinidamente sin aviso.
 
 Acción: replicar el patrón de degradación honesta que ya usa `app/api/landing-stats/route.ts` (null/"—").
+
+**Nota:** se eliminó `MOCK_ITEMS` y el archivo `mockProcesos.js` (sin otros consumidores). El componente ahora tiene tres estados explícitos — `loading` / `live` / `empty` — y degrada a "— sin datos disponibles en este momento —" si la API falla o no trae ítems.
 
 ### 4. Destino de `app/experiencia/`
 Página con `ScrollFilm.jsx` y videos en `/public/experiencia/` de un rediseño anterior — nadie la enlaza hoy. Decidir: integrarla como sección "Proyectos" real o eliminarla (código + assets).

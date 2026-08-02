@@ -1,10 +1,11 @@
 // src/components/landing/ProcesosTicker.jsx
 // Ticker de procesos en vivo. Lee /api/procesos/recientes (Postgres →
-// fallback Socrata); si la API falla, degrada a mockProcesos sin romper.
+// fallback Socrata); si la API falla o no trae datos, degrada honestamente
+// a un estado vacío ("—"), igual que app/api/landing-stats/route.ts — nunca
+// muestra datos ficticios sin aviso.
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import mockProcesos from "./mockProcesos";
 
 const TICKER_CSS = `
 .ptr-bar {
@@ -113,6 +114,16 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
 .ptr-lugar {
   max-width: 220px; overflow: hidden; text-overflow: ellipsis;
 }
+.ptr-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-600);
+}
 @media (max-width: 640px) {
   .ptr-bar { height: 48px; }
   .ptr-cap { padding: 0 10px; font-size: 9px; }
@@ -170,8 +181,6 @@ function mapApiItem(p) {
   };
 }
 
-const MOCK_ITEMS = mockProcesos.map((p) => ({ ...p, estado: "Activo" }));
-
 /* ── Componentes ─────────────────────────────────────────────────────────── */
 
 function ProcesoItem({ p }) {
@@ -213,19 +222,26 @@ function ProcesoItem({ p }) {
 }
 
 export default function ProcesosTicker() {
-  const [items, setItems] = useState(MOCK_ITEMS);
-  const [enVivo, setEnVivo] = useState(false);
+  const [items, setItems] = useState([]);
+  // "loading" | "live" | "empty" — nunca hay un cuarto estado con datos ficticios.
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     let cancel = false;
     fetch("/api/procesos/recientes")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((data) => {
-        if (cancel || !Array.isArray(data?.items) || data.items.length === 0) return;
+        if (cancel) return;
+        if (!Array.isArray(data?.items) || data.items.length === 0) {
+          setStatus("empty");
+          return;
+        }
         setItems(data.items.map(mapApiItem));
-        setEnVivo(true);
+        setStatus("live");
       })
-      .catch(() => { /* mock silencioso: la landing nunca se rompe por el ticker */ });
+      .catch(() => {
+        if (!cancel) setStatus("empty");
+      });
     return () => { cancel = true; };
   }, []);
 
@@ -237,23 +253,29 @@ export default function ProcesosTicker() {
       <style dangerouslySetInnerHTML={{ __html: TICKER_CSS }} />
       <div className="ptr-cap">
         <span className="ptr-cap-dot" />
-        {enVivo ? "SECOP · en vivo" : "Procesos"}
+        {status === "live" ? "SECOP · en vivo" : "Procesos"}
       </div>
-      <div className="ptr-clip">
-        {/* La segunda copia lleva aria-hidden: es puramente visual para el
-            loop de translateX(-50%); los lectores de pantalla no deben
-            anunciarla dos veces. */}
-        <div className="ptr-track" style={{ animationDuration: `${duration}s` }}>
-          {items.map((p, i) => (
-            <ProcesoItem key={`${p.id}-${i}`} p={p} />
-          ))}
-          <div aria-hidden="true" style={{ display: "flex", alignItems: "center", height: "100%" }}>
+      {status === "live" ? (
+        <div className="ptr-clip">
+          {/* La segunda copia lleva aria-hidden: es puramente visual para el
+              loop de translateX(-50%); los lectores de pantalla no deben
+              anunciarla dos veces. */}
+          <div className="ptr-track" style={{ animationDuration: `${duration}s` }}>
             {items.map((p, i) => (
-              <ProcesoItem key={`dup-${p.id}-${i}`} p={p} />
+              <ProcesoItem key={`${p.id}-${i}`} p={p} />
             ))}
+            <div aria-hidden="true" style={{ display: "flex", alignItems: "center", height: "100%" }}>
+              {items.map((p, i) => (
+                <ProcesoItem key={`dup-${p.id}-${i}`} p={p} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="ptr-empty">
+          {status === "loading" ? "Cargando procesos…" : "— sin datos disponibles en este momento —"}
+        </div>
+      )}
     </div>
   );
 }
