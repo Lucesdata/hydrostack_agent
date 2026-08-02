@@ -1,7 +1,25 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Design tokens ──────────────────────────────────────────────────────────── */
+/* ── Design tokens ────────────────────────────────────────────────────────────
+   Dos sistemas de tokens conviven en este `:root` con convenciones de nombres
+   distintas por origen histórico — no son duplicados, son temas diferentes:
+     · Tema oscuro "cyberpunk" (prefijo simple: --mono, --sans, --orb, --cyan…)
+       — el tema original del producto, usado por las calculadoras y
+       Hydro_Agent. La mayoría de esos componentes hardcodea fontFamily en JS
+       en vez de leer estos tokens; aquí en globals.css solo --mono se
+       consume (`body`, inputs, `.badge`). --sans y --orb no tienen
+       consumidores fuera de este bloque — se conservan por si se retoma el
+       tema oscuro, no se eliminan en esta pasada.
+     · Tema claro "clear" (prefijo --font-*: --font-mono, --font-sans…) — el
+       sistema de diseño vigente para landing, navbar y hubs (clases `clr-*`).
+   Se fusionaron en un único bloque `:root` (antes eran dos `:root {}`
+   separados, que ya compartían el mismo scope global sin colisión de
+   nombres) para dejar explícita la relación entre ambos. No se renombra ni
+   elimina ninguna variable — cambiar nombres tocaría cada sitio que las
+   consume y arriesgaría la apariencia visual actual.
+──────────────────────────────────────────────────────────────────────────── */
 :root {
+  /* Tema oscuro "cyberpunk" — calculadoras / Hydro_Agent */
   --cyan:   #00F5FF;
   --green:  #00FF88;
   --amber:  #FFB020;
@@ -14,10 +32,8 @@
   --mono:   'IBM Plex Mono', 'Courier New', monospace;
   --sans:   'Inter', system-ui, sans-serif;
   --orb:    'Orbitron', sans-serif;
-}
 
-/* ── Design tokens — clear theme (landing, navbar, hubs) ──────────────────── */
-:root {
+  /* Tema claro "clear" — landing, navbar, hubs */
   /* Superficie */
   --bg:           #FAFAF7;
   --surface:      #FFFFFF;

@@ -44,8 +44,10 @@ La `cita_textual` la autoreporta el modelo; no hay capa de texto extraído del P
 ### 6. Suma total vs presupuesto oficial es solo nota, no gate
 `validate.ts:78-91` valida aritmética por ítem, pero el chequeo de suma total contra presupuesto oficial solo genera `nota`, nunca `ok=false`. Decidir si debe bloquear.
 
-### 7. `globals.css`: dos bloques `:root` inconexos
+### 7. `globals.css`: dos bloques `:root` inconexos — ✅ resuelto 2026-08-02
 Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con convenciones distintas (`--mono` vs `--font-mono`). Unificar o documentar la separación.
+
+**Nota:** se fusionaron los dos `:root` en uno solo con comentarios explicando el origen de cada convención de nombres (no se renombró ni eliminó ninguna variable, incl. `--sans`/`--orb` sin consumidores — cero cambio visual, verificado en landing y calculadoras).
 
 ### 8. Tipografía: 4 familias vía `<link>` en vez de `next/font`
 `layout.js:21` carga Orbitron, IBM Plex Mono, Inter y JetBrains Mono por Google Fonts `<link>` (warning de lint). Migrar a `next/font` y documentar la combinación real.
