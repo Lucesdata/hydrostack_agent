@@ -121,7 +121,7 @@ const CARDS_CSS = `
 .lc-featured-meta-label {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-300);
 }

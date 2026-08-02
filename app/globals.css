@@ -26,7 +26,7 @@
   /* Tinta */
   --ink-900:      #0A1F1C;
   --ink-600:      #525B5A;
-  --ink-300:      #8A938F;
+  --ink-300:      #6B746F; /* was #8A938F — ~4.6:1 on white, passes AA */
 
   /* Línea */
   --line:         #E5E5E0;
@@ -52,7 +52,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'Menlo', monospace;
 
   --fs-xs:   11px;
-  --fs-sm:   13.5px;
+  --fs-sm:   13px;
   --fs-base: 16px;
   --fs-md:   18px;
   --fs-lg:   24px;
@@ -107,7 +107,6 @@ body {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  cursor: crosshair;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -561,12 +560,13 @@ input, select { font-family: var(--mono); }
   align-items: center;
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-600);
   text-decoration: none;
   padding: 7px 11px;
   border-radius: var(--radius-sm);
+  cursor: pointer;
   transition: color 0.18s, background 0.18s;
 }
 .clr-nav-index {
@@ -579,33 +579,24 @@ input, select { font-family: var(--mono); }
   color: var(--ink-900);
   background: var(--surface-alt);
 }
-.clr-nav-link::after {
-  content: "";
+/* Cote (dimension-line) glyph: baseline + two end-cap ticks, scales in on hover/active */
+.clr-nav-cote {
   position: absolute;
   left: 11px;
   right: 11px;
   bottom: 2px;
-  height: 2px;
-  background-image: repeating-linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 6px);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.22s ease;
-}
-.clr-nav-link::before {
-  content: "";
-  position: absolute;
-  left: 11px;
-  bottom: 0px;
-  width: 3px;
   height: 6px;
-  background: var(--accent);
+  overflow: visible;
   opacity: 0;
-  transition: opacity 0.18s ease;
+  transform: scaleX(0.4);
+  transform-origin: left;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
-.clr-nav-link:hover::after,
-.clr-nav-link:hover::before {
+.clr-nav-link:hover .clr-nav-cote,
+.clr-nav-link[aria-current="page"] .clr-nav-cote {
+  opacity: 1;
   transform: scaleX(1);
-  opacity: 0.5;
 }
 .clr-nav-link[aria-current="page"] {
   color: var(--accent);
@@ -613,12 +604,6 @@ input, select { font-family: var(--mono); }
 }
 .clr-nav-link[aria-current="page"] .clr-nav-index {
   color: var(--accent);
-}
-.clr-nav-link[aria-current="page"]::after {
-  transform: scaleX(1);
-}
-.clr-nav-link[aria-current="page"]::before {
-  opacity: 1;
 }
 
 .clr-lang-btn {
@@ -969,7 +954,7 @@ input, select { font-family: var(--mono); }
   align-items: center;
   gap: 5px;
   font-size: var(--fs-xs);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 3px 10px;
   border-radius: var(--radius-pill);

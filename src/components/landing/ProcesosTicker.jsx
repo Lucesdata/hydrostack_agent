@@ -25,7 +25,7 @@ const TICKER_CSS = `
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--accent);
   text-transform: uppercase;
   white-space: nowrap;
@@ -35,12 +35,14 @@ const TICKER_CSS = `
 }
 .ptr-cap-dot {
   position: relative;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--success);
+  width: 8px; height: 8px; border-radius: 0;
+  border: 1.5px solid var(--success);
+  background: none;
+  transform: rotate(45deg);
   flex-shrink: 0;
 }
 .ptr-cap-dot::after {
-  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  content: ""; position: absolute; inset: -4px; border-radius: 0;
   border: 1px solid var(--success); opacity: .5;
   animation: ptr-pulse 2.4s ease-out infinite;
 }
@@ -97,16 +99,16 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
   font-size: 10px; color: var(--ink-600); letter-spacing: 0.04em;
 }
 .ptr-dot {
-  width: 5px; height: 5px; border-radius: 50%;
+  width: 8px; height: 1.5px; border-radius: 0;
   background: var(--ink-300); flex-shrink: 0;
+  margin-left: 3px;
   position: relative;
 }
-.ptr-dot--live { background: var(--success); }
-.ptr-dot--live::after {
-  content: ""; position: absolute; inset: -2px; border-radius: 50%;
-  border: 1px solid var(--success); opacity: .45;
-  animation: ptr-pulse 2.4s ease-out infinite;
+.ptr-dot::after {
+  content: ""; position: absolute; left: 0; top: -3px;
+  width: 1.5px; height: 8px; background: inherit;
 }
+.ptr-dot--live { background: var(--success); }
 .ptr-dot--warn { background: var(--warning); }
 .ptr-lugar {
   max-width: 220px; overflow: hidden; text-overflow: ellipsis;

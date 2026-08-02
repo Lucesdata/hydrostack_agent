@@ -24,6 +24,16 @@ function ValveGlyph() {
   );
 }
 
+function CoteGlyph() {
+  return (
+    <svg className="clr-nav-cote" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" y1="1" x2="100" y2="1" stroke="var(--accent)" strokeWidth="1" />
+      <line x1="0" y1="0" x2="0" y2="3" stroke="var(--accent)" strokeWidth="1" />
+      <line x1="100" y1="0" x2="100" y2="3" stroke="var(--accent)" strokeWidth="1" />
+    </svg>
+  );
+}
+
 export default function Navbar() {
   // const { t, toggle } = useLang(); // reactivar junto con los botones de idioma más abajo
   const path = usePathname();
@@ -81,6 +91,7 @@ export default function Navbar() {
             >
               <span className="clr-nav-index" aria-hidden="true">{item.index}/</span>
               {item.label}
+              <CoteGlyph />
             </Link>
           ))}
         </div>

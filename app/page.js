@@ -34,12 +34,71 @@ const BLUEPRINT_CSS = `
 @keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 @keyframes bp-ripple { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:.55} 100%{transform:translate(-50%,-50%) scale(2.6);opacity:0} }
 @keyframes bp-flash { 0%{opacity:1;filter:brightness(1.9)} 60%{opacity:.5} 100%{opacity:0} }
-.bp-page a { text-decoration: none; }
-.bp-card { transition: border-color .2s, background .2s; }
+.bp-page { cursor: crosshair; }
+.bp-page a { text-decoration: none; cursor: pointer; }
+
+.bp-h1 {
+  font-family: Inter, sans-serif;
+  font-size: 46px;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0A1F1C;
+  margin: 0 0 20px;
+  max-width: 520px;
+  transition: font-variation-settings 1.1s cubic-bezier(.16,1,.3,1);
+}
+
+.bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s, background .2s; }
 .bp-card:hover { border-color: #0369A1; }
-.bp-cta { transition: background .2s; }
+.bp-card-seal {
+  position: absolute; top: -10px; right: 14px; width: 46px; height: 46px; border-radius: 50%;
+  border: 1.5px dashed #0369A1; display: flex; align-items: center; justify-content: center;
+  background: rgba(252,252,249,0.95); font: 600 7px/1.15 'JetBrains Mono',monospace; letter-spacing: .05em;
+  color: #0369A1; text-align: center; transform: scale(0.5) rotate(-10deg); opacity: 0;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; pointer-events: none;
+}
+.bp-card-dark .bp-card-seal { border-color: #7DD3FC; color: #7DD3FC; }
+.bp-card:hover .bp-card-seal { transform: scale(1) rotate(-10deg); opacity: 1; }
+.bp-card-arrow { display: inline-block; transition: transform .25s cubic-bezier(.22,1,.36,1); }
+.bp-card:hover .bp-card-arrow { transform: translateX(4px); }
+
+.bp-cta {
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  padding: 13px 26px 13px 24px;
+  transition: background .2s;
+}
 .bp-cta:hover { background: #0369A1 !important; }
 .bp-cta-dark:hover { background: #0A1F1C !important; }
+.bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
+.bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
+
+.bp-hero-wrap { position: relative; padding: 88px 48px 64px; }
+.bp-hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; }
+.bp-coord-label { position: absolute; top: 88px; right: 48px; font: 10px 'JetBrains Mono',monospace; color: #6B746F; }
+.bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.bp-pillars-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
+.bp-pillars-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.bp-closing-wrap { padding: 56px 48px; border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.bp-footer-wrap { padding: 20px 48px; border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px 'JetBrains Mono',monospace; color: #525B5A; }
+
+@media (max-width: 1100px) {
+  .bp-pillars-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 900px) {
+  .bp-hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .bp-probhow-wrap { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .bp-hero-wrap { padding: 48px 20px 40px; }
+  .bp-probhow-wrap { padding: 48px 20px; }
+  .bp-pillars-wrap { padding: 48px 20px; }
+  .bp-pillars-grid { grid-template-columns: 1fr; }
+  .bp-closing-wrap { padding: 40px 20px; }
+  .bp-footer-wrap { padding: 20px; }
+  .bp-coord-label { display: none; }
+}
 `;
 
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
@@ -94,6 +153,7 @@ function useBlueprintFX() {
   const p = scrollProgress;
   return {
     refs: { heroRef, statsRef, problemRef, howRef, pillarsRef },
+    h1Weight: visible.hero ? 700 : 500,
     gridTransform: `translate3d(0, ${parallax.toFixed(1)}px, 0)`,
     scanTopPct: (p * 100).toFixed(1),
     lineADashoffset: visible.hero ? 0 : 560,
@@ -116,9 +176,9 @@ function useBlueprintFX() {
 function BlueprintBackground({ fx }) {
   return (
     <>
-      <div style={{ position: "fixed", top: -160, left: 0, right: 0, bottom: -160, backgroundImage: "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none", zIndex: 0, transform: fx.gridTransform, willChange: "transform" }} />
+      <div aria-hidden="true" style={{ position: "fixed", top: -160, left: 0, right: 0, bottom: -160, backgroundImage: "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none", zIndex: 0, transform: fx.gridTransform, willChange: "transform" }} />
 
-      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{ position: "fixed", inset: 0, width: "100%", height: "100vh", pointerEvents: "none", zIndex: 0 }} fill="none" stroke="#0369A1" strokeWidth="1.4">
+      <svg aria-hidden="true" role="presentation" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{ position: "fixed", inset: 0, width: "100%", height: "100vh", pointerEvents: "none", zIndex: 0 }} fill="none" stroke="#0369A1" strokeWidth="1.4">
         <g style={{ opacity: fx.inletOpacity, transition: "opacity 1s ease" }}>
           <line x1="0" y1="120" x2="220" y2="120" />
           <line x1="0" y1="150" x2="180" y2="150" />
@@ -192,17 +252,17 @@ export default function LandingPage() {
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
         <ProcesosTicker />
 
-        <div ref={heroRef} style={{ position: "relative", padding: "88px 48px 64px" }}>
-          <span style={{ position: "absolute", top: 88, right: 48, font: "10px 'JetBrains Mono',monospace", color: "#8A938F" }}>x:1440 y:0</span>
-          <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 48, alignItems: "start" }}>
+        <div ref={heroRef} className="bp-hero-wrap">
+          <span className="bp-coord-label">x:1440 y:0</span>
+          <div className="bp-hero-grid">
             <div style={{ position: "relative" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-                <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 01 — Elegibilidad SECOP</span>
+                <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 01 — Elegibilidad SECOP</span>
               </div>
-              <h1 style={{ font: "700 46px/1.15 Inter", letterSpacing: "-0.02em", color: "#0A1F1C", margin: "0 0 20px", maxWidth: 520 }}>Precisión de ingeniería, aplicada a tu oferta.</h1>
+              <h1 className="bp-h1" style={{ fontVariationSettings: `'wght' ${fx.h1Weight}` }}>Precisión de ingeniería, aplicada a tu oferta.</h1>
               <p style={{ font: "15px/1.6 Inter", color: "#525B5A", maxWidth: 460, margin: "0 0 28px" }}>HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento — cada requisito habilitante, verificado como una cota en un plano.</p>
-              <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 24px", background: "#0A1F1C", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em", borderRadius: 2 }}>[ Prueba un proceso ]</Link>
+              <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#0A1F1C", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em" }}>[ Prueba un proceso ]</Link>
               <svg viewBox="0 0 520 16" width="520" height="16" style={{ display: "block", marginTop: 36, overflow: "visible", maxWidth: "100%" }}>
                 <line x1="0" y1="8" x2="520" y2="8" stroke="#0369A1" strokeWidth="1" strokeDasharray="560" strokeDashoffset={fx.lineADashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
                 <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
@@ -215,7 +275,7 @@ export default function LandingPage() {
               <span style={{ position: "absolute", top: -1, right: -1, width: 12, height: 12, borderTop: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
               <span style={{ position: "absolute", bottom: -1, left: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
               <span style={{ position: "absolute", bottom: -1, right: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-              <div style={{ font: "10px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 14 }}>Evaluación — muestra 001</div>
+              <div style={{ font: "10px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 14 }}>Evaluación — muestra 001</div>
               <div style={{ display: "flex", justifyContent: "space-between", font: "14px Inter", color: "#0A1F1C", marginBottom: 16, borderBottom: "1px dashed #DADAD2", paddingBottom: 14 }}><strong>EPS Nariño</strong><span style={{ fontFamily: "'JetBrains Mono',monospace", color: "#0369A1" }}>$3.850M</span></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, font: "12px 'JetBrains Mono',monospace", color: "#525B5A" }}>
                 <span>[✓] EXPERIENCIA ................ OK</span>
@@ -230,11 +290,11 @@ export default function LandingPage() {
           <LandingCards />
         </div>
 
-        <div style={{ padding: "64px 48px", borderTop: "1px dashed #DADAD2", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56 }}>
+        <div className="bp-probhow-wrap">
           <div ref={problemRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 02 — El problema</span>
+              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 02 — El problema</span>
             </div>
             <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
               <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineCDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
@@ -251,7 +311,7 @@ export default function LandingPage() {
           <div ref={howRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 03 — Cómo funciona</span>
+              <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 03 — Cómo funciona</span>
             </div>
             <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
               <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineDDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }} />
@@ -267,31 +327,32 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div ref={pillarsRef} style={{ padding: "64px 48px", borderTop: "1px dashed #DADAD2" }}>
+        <div ref={pillarsRef} className="bp-pillars-wrap">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".14em", textTransform: "uppercase" }}>Fig. 04 — Herramientas de soporte</span>
+            <span style={{ font: "11px 'JetBrains Mono',monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 04 — Herramientas de soporte</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+          <div className="bp-pillars-grid">
             {PILLARS.map((c) => (
-              <Link key={c.n} href={c.href} className="bp-card" style={{ position: "relative", border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`, padding: 22, background: c.dark ? "#0A1F1C" : "#fff", color: c.dark ? "#fff" : "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 200 }}>
+              <Link key={c.n} href={c.href} className={`bp-card${c.dark ? " bp-card-dark" : ""}`} style={{ border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`, padding: 22, background: c.dark ? "#0A1F1C" : "#fff", color: c.dark ? "#fff" : "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 200 }}>
+                <span className="bp-card-seal">{c.dark ? <>11 AÑOS<br />LIC. VIG.</> : <>APROB.<br />RAS-2000</>}</span>
                 <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
                 <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
-                <span style={{ font: "10px 'JetBrains Mono',monospace", color: c.dark ? "rgba(255,255,255,0.5)" : "#8A938F" }}>[ {c.n} ]</span>
+                <span style={{ font: "10px 'JetBrains Mono',monospace", color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F" }}>[ {c.n} ]</span>
                 <div style={{ font: "600 16px/1.3 Inter" }}>{c.title}</div>
                 <p style={{ font: "13px/1.5 Inter", color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A", flexGrow: 1, margin: 0 }}>{c.desc}</p>
-                <span style={{ font: "600 12px 'JetBrains Mono',monospace", color: c.dark ? "#7DD3FC" : "#0369A1" }}>[ VER MÁS → ]</span>
+                <span style={{ font: "600 12px 'JetBrains Mono',monospace", color: c.dark ? "#7DD3FC" : "#0369A1" }}>[ VER MÁS <span className="bp-card-arrow">→</span> ]</span>
               </Link>
             ))}
           </div>
         </div>
 
-        <div style={{ padding: "56px 48px", borderTop: "1px dashed #DADAD2", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+        <div className="bp-closing-wrap">
           <span style={{ font: "14px 'JetBrains Mono',monospace", color: "#0A1F1C" }}>▸ Deja de descubrir tarde que no calificabas.</span>
-          <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", padding: "13px 24px", background: "#0369A1", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em" }}>[ PRUEBA UN PROCESO ]</Link>
+          <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", background: "#0369A1", color: "#fff", font: "600 13px 'JetBrains Mono',monospace", letterSpacing: ".04em" }}>[ PRUEBA UN PROCESO ]</Link>
         </div>
 
-        <div style={{ padding: "20px 48px", borderTop: "1px solid #DADAD2", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, font: "11px 'JetBrains Mono',monospace", color: "#525B5A" }}>
+        <div className="bp-footer-wrap">
           <div style={{ display: "flex", gap: 12 }}><strong style={{ color: "#0A1F1C" }}>HydroStack</strong><span>·</span><span>Plataforma de contratación pública</span></div>
           <div style={{ display: "flex", gap: 14, alignItems: "center" }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} /><span>Datos SECOP II · actualización diaria</span></div>
         </div>
