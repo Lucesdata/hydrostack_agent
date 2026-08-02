@@ -4,12 +4,23 @@ import { parsePliegoExtraction, type PliegoExtraction } from '@/src/lib/pliego/s
 
 function item(o: Partial<PliegoExtraction['capitulos'][number]['items'][number]> = {}) {
   return {
+    codigo: '1.1.73.1.1',
     descripcion: 'x',
     unidad: 'GLB',
     cantidad: 1,
     valor_unitario: 1000,
     valor_total: 1000,
     cita_textual: 'ítem x — 1000 GLB',
+    ...o,
+  };
+}
+
+function laguna(o: Partial<PliegoExtraction['lagunas_pendientes'][number]> = {}) {
+  return {
+    id: 1,
+    descripcion: 'numeración distinta para el mismo ítem entre secciones',
+    severidad: 'alta' as const,
+    tipo: 'inconsistencia interna del pliego',
     ...o,
   };
 }
@@ -37,6 +48,7 @@ function extraction(o: Partial<PliegoExtraction> = {}): PliegoExtraction {
       confianza_general: 'alta',
       justificacion_confianza: 'documento legible y completo',
     },
+    lagunas_pendientes: [],
     ...o,
   };
 }
@@ -101,6 +113,28 @@ describe('validatePliego', () => {
     expect(r.notas).toHaveLength(1);
     expect(r.notas[0]).toContain('1190');
   });
+
+  it('usa el codigo del ítem en la ubicación cuando está presente', () => {
+    const r = validatePliego(
+      extraction({
+        capitulos: [
+          { nombre: 'A', items: [item({ codigo: '1.1.73.1.1', cantidad: 2, valor_unitario: 1000, valor_total: 1500 })] },
+        ],
+      }),
+    );
+    expect(r.inconsistencias[0].ubicacion).toContain('1.1.73.1.1');
+  });
+
+  it('cae en "ítem N" cuando el codigo es NO_ENCONTRADO', () => {
+    const r = validatePliego(
+      extraction({
+        capitulos: [
+          { nombre: 'A', items: [item({ codigo: 'NO_ENCONTRADO', cantidad: 2, valor_unitario: 1000, valor_total: 1500 })] },
+        ],
+      }),
+    );
+    expect(r.inconsistencias[0].ubicacion).toContain('ítem 1');
+  });
 });
 
 // --- parsePliegoExtraction --------------------------------------------------
@@ -119,5 +153,25 @@ describe('parsePliegoExtraction', () => {
 
   it('lanza si capitulos no es array', () => {
     expect(() => parsePliegoExtraction({ ...extraction(), capitulos: {} })).toThrow(/capitulos/);
+  });
+
+  it('lanza si un ítem no tiene codigo', () => {
+    const bad = extraction({ capitulos: [{ nombre: 'A', items: [{ ...item(), codigo: undefined }] }] });
+    expect(() => parsePliegoExtraction(bad)).toThrow(/codigo/);
+  });
+
+  it('parsea lagunas_pendientes con datos válidos', () => {
+    const parsed = parsePliegoExtraction(extraction({ lagunas_pendientes: [laguna(), laguna({ id: 2, severidad: 'media' })] }));
+    expect(parsed.lagunas_pendientes).toHaveLength(2);
+    expect(parsed.lagunas_pendientes[1].severidad).toBe('media');
+  });
+
+  it('lanza si lagunas_pendientes no es array', () => {
+    expect(() => parsePliegoExtraction({ ...extraction(), lagunas_pendientes: {} })).toThrow(/lagunas_pendientes/);
+  });
+
+  it('lanza si una laguna tiene severidad inválida', () => {
+    const bad = extraction({ lagunas_pendientes: [laguna({ severidad: 'critica' as never })] });
+    expect(() => parsePliegoExtraction(bad)).toThrow(/severidad/);
   });
 });

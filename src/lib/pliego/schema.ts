@@ -25,6 +25,8 @@
 export const NO_ENCONTRADO = 'NO_ENCONTRADO';
 
 export interface PliegoItem {
+  /** Código o numeración del ítem tal como aparece en el pliego/formato (p. ej. "1.1.73.1.1"). */
+  codigo: string;
   descripcion: string;
   unidad: string;
   cantidad: number;
@@ -62,6 +64,18 @@ export interface VerificacionExtraccion {
   justificacion_confianza: string;
 }
 
+export type SeveridadLaguna = 'alta' | 'media' | 'baja';
+
+/** Inconsistencia, ambigüedad o vacío del propio pliego (no un error de extracción). */
+export interface LagunaPendiente {
+  /** Entero secuencial desde 1, en orden de aparición en el documento. */
+  id: number;
+  descripcion: string;
+  severidad: SeveridadLaguna;
+  /** Categoría breve, p. ej. "inconsistencia interna del pliego", "archivo externo no analizado". */
+  tipo: string;
+}
+
 export interface PliegoExtraction {
   proceso: string;
   entidad: string;
@@ -78,6 +92,8 @@ export interface PliegoExtraction {
   requisitos_habilitantes: RequisitosHabilitantes;
   cronograma: CronogramaHito[];
   verificacion: VerificacionExtraccion;
+  /** Inconsistencias/ambigüedades del propio pliego detectadas durante la lectura. */
+  lagunas_pendientes: LagunaPendiente[];
 }
 
 /**
@@ -110,6 +126,7 @@ export const PLIEGO_JSON_SCHEMA = {
               type: 'object',
               additionalProperties: false,
               properties: {
+                codigo: { type: 'string' },
                 descripcion: { type: 'string' },
                 unidad: { type: 'string' },
                 cantidad: { type: 'number' },
@@ -118,6 +135,7 @@ export const PLIEGO_JSON_SCHEMA = {
                 cita_textual: { type: 'string' },
               },
               required: [
+                'codigo',
                 'descripcion',
                 'unidad',
                 'cantidad',
@@ -165,6 +183,20 @@ export const PLIEGO_JSON_SCHEMA = {
       },
       required: ['campos_no_encontrados', 'confianza_general', 'justificacion_confianza'],
     },
+    lagunas_pendientes: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          id: { type: 'number' },
+          descripcion: { type: 'string' },
+          severidad: { type: 'string', enum: ['alta', 'media', 'baja'] },
+          tipo: { type: 'string' },
+        },
+        required: ['id', 'descripcion', 'severidad', 'tipo'],
+      },
+    },
   },
   required: [
     'proceso',
@@ -180,6 +212,7 @@ export const PLIEGO_JSON_SCHEMA = {
     'requisitos_habilitantes',
     'cronograma',
     'verificacion',
+    'lagunas_pendientes',
   ],
 } as const;
 
@@ -210,6 +243,7 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
         const ii = it as Record<string, unknown>;
         const loc = `capitulos[${i}].items[${j}]`;
         return {
+          codigo: asString(ii.codigo, `${loc}.codigo`),
           descripcion: asString(ii.descripcion, `${loc}.descripcion`),
           unidad: asString(ii.unidad, `${loc}.unidad`),
           cantidad: asNumber(ii.cantidad, `${loc}.cantidad`),
@@ -265,6 +299,23 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
     justificacion_confianza: asString(v.justificacion_confianza, 'verificacion.justificacion_confianza'),
   };
 
+  if (!Array.isArray(o.lagunas_pendientes)) throw new Error('lagunas_pendientes debe ser un array');
+  const lagunas_pendientes: LagunaPendiente[] = o.lagunas_pendientes.map((l, i) => {
+    if (typeof l !== 'object' || l === null) throw new Error(`lagunas_pendientes[${i}] inválido`);
+    const ll = l as Record<string, unknown>;
+    const loc = `lagunas_pendientes[${i}]`;
+    const severidad = asString(ll.severidad, `${loc}.severidad`);
+    if (severidad !== 'alta' && severidad !== 'media' && severidad !== 'baja') {
+      throw new Error(`${loc}.severidad debe ser alta | media | baja`);
+    }
+    return {
+      id: asNumber(ll.id, `${loc}.id`),
+      descripcion: asString(ll.descripcion, `${loc}.descripcion`),
+      severidad,
+      tipo: asString(ll.tipo, `${loc}.tipo`),
+    };
+  });
+
   return {
     proceso: asString(o.proceso, 'proceso'),
     entidad: asString(o.entidad, 'entidad'),
@@ -279,5 +330,6 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
     requisitos_habilitantes,
     cronograma,
     verificacion,
+    lagunas_pendientes,
   };
 }

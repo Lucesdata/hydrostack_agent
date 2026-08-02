@@ -16,7 +16,7 @@
  *     que un humano lo juzgue, no como fallo de extracción.
  */
 
-import type { PliegoExtraction } from './schema';
+import { NO_ENCONTRADO, type PliegoExtraction } from './schema';
 
 export interface Inconsistencia {
   tipo: 'aritmetica_item' | 'capitulo_duplicado' | 'cita_faltante';
@@ -40,7 +40,8 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
   // 1. Aritmética por ítem + cita faltante (grounding).
   for (const cap of p.capitulos) {
     cap.items.forEach((item, j) => {
-      const ubicacion = `${cap.nombre} › ítem ${j + 1}: ${item.descripcion}`;
+      const etiquetaItem = item.codigo !== NO_ENCONTRADO ? item.codigo : `ítem ${j + 1}`;
+      const ubicacion = `${cap.nombre} › ${etiquetaItem}: ${item.descripcion}`;
       const esperado = item.cantidad * item.valor_unitario;
       if (Math.abs(esperado - item.valor_total) > TOLERANCIA_ITEM) {
         inconsistencias.push({
