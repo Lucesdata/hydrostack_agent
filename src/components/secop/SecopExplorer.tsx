@@ -64,8 +64,43 @@ export default function SecopExplorer() {
   const [verdictLoading, setVerdictLoading] = useState<Record<string, boolean>>({});
   const verdictAttempted = useRef<Set<string>>(new Set());
 
+  // Fase 1.1 — cuentas: el perfil vive en clientStore para anónimos y en
+  // oferente_perfil (DB) para cuentas con sesión. `hasSession` distingue ambos
+  // casos (lo determina la respuesta de GET /api/perfil, sin next-auth/react ni
+  // SessionProvider — el resto del árbol sigue igual).
+  const [hasSession, setHasSession] = useState(false);
+
   useEffect(() => {
-    setPerfil(getOferentePerfil());
+    const local = getOferentePerfil();
+    setPerfil(local);
+
+    (async () => {
+      let res: Response;
+      try {
+        res = await fetch("/api/perfil");
+      } catch {
+        return; // sin red o sin sesión configurada — el perfil local sigue siendo la fuente
+      }
+      if (!res.ok) return; // 401: sin sesión, el flujo anónimo actual no cambia
+      setHasSession(true);
+      const { perfil: remoto } = (await res.json()) as { perfil: OferenteProfile | null };
+      if (remoto) {
+        // La cuenta ya tiene perfil — es la fuente de verdad, sincroniza el caché local.
+        setPerfil(remoto);
+        saveOferentePerfil(remoto);
+      } else if (local) {
+        // Cuenta nueva con perfil local previo (anónimo que inició sesión): migra una vez.
+        try {
+          await fetch("/api/perfil", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(local),
+          });
+        } catch {
+          /* la próxima vez que complete el wizard se reintenta el PUT */
+        }
+      }
+    })();
   }, []);
 
   // Solo-abiertos aplica si el usuario no pidió cerrados ni un estado concreto.
@@ -176,6 +211,15 @@ export default function SecopExplorer() {
     saveOferentePerfil(nuevoPerfil);
     setPerfil(nuevoPerfil);
     setWizardOpen(false);
+    if (hasSession) {
+      fetch("/api/perfil", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoPerfil),
+      }).catch(() => {
+        /* el caché local (clientStore) ya quedó actualizado; no bloquea la UI */
+      });
+    }
     if (selected) {
       verdictAttempted.current.add(selected.id);
       fetchVerdict(selected, nuevoPerfil);

@@ -4,3 +4,4 @@ export * from './hechos';
 export * from './control';
 export * from './clasificacion';
 export * from './quarantine';
+export * from './cuentas';

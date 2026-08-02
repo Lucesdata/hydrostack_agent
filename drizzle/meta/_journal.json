@@ -29,6 +29,20 @@
       "when": 1785574934778,
       "tag": "0003_spotty_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785618799519,
+      "tag": "0004_purple_thunderbolts",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785639513381,
+      "tag": "0005_heavy_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

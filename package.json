@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
+    "@auth/drizzle-adapter": "^1.11.3",
     "@babylonjs/core": "^9.4.1",
     "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.1.0",
@@ -31,9 +32,11 @@
     "drizzle-orm": "^0.45.2",
     "leaflet": "^1.9.4",
     "next": "14.2.3",
+    "next-auth": "^5.0.0-beta.32",
     "pdfkit": "^0.18.0",
     "react": "^18",
     "react-dom": "^18",
+    "resend": "^6.18.1",
     "ws": "^8.21.0"
   },
   "devDependencies": {
