@@ -9,6 +9,7 @@ function item(o: Partial<PliegoExtraction['capitulos'][number]['items'][number]>
     cantidad: 1,
     valor_unitario: 1000,
     valor_total: 1000,
+    cita_textual: 'ítem x — 1000 GLB',
     ...o,
   };
 }
@@ -17,10 +18,25 @@ function extraction(o: Partial<PliegoExtraction> = {}): PliegoExtraction {
   return {
     proceso: 'P-1',
     entidad: 'E',
+    objeto_contrato: 'NO_ENCONTRADO',
+    modalidad_contratacion: 'NO_ENCONTRADO',
+    fecha_publicacion: 'NO_ENCONTRADO',
+    fecha_cierre: 'NO_ENCONTRADO',
     presupuesto_oficial_cop: 1000,
     moneda: 'COP',
     capitulos: [{ nombre: 'Cap A', items: [item()] }],
     reglas_presupuesto: [],
+    requisitos_habilitantes: {
+      experiencia_especifica: 'NO_ENCONTRADO',
+      capacidad_financiera: 'NO_ENCONTRADO',
+      capacidad_organizacional: 'NO_ENCONTRADO',
+    },
+    cronograma: [],
+    verificacion: {
+      campos_no_encontrados: [],
+      confianza_general: 'alta',
+      justificacion_confianza: 'documento legible y completo',
+    },
     ...o,
   };
 }
@@ -53,6 +69,16 @@ describe('validatePliego', () => {
     expect(r.ok).toBe(false);
     expect(r.inconsistencias).toHaveLength(1);
     expect(r.inconsistencias[0].tipo).toBe('aritmetica_item');
+  });
+
+  it('detecta cita_textual faltante en un ítem (grounding roto)', () => {
+    const r = validatePliego(
+      extraction({
+        capitulos: [{ nombre: 'A', items: [item({ cita_textual: '  ' })] }],
+      }),
+    );
+    expect(r.ok).toBe(false);
+    expect(r.inconsistencias.some((i) => i.tipo === 'cita_faltante')).toBe(true);
   });
 
   it('detecta capítulos duplicados (nombre normalizado)', () => {

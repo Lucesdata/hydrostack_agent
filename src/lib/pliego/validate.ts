@@ -7,6 +7,8 @@
  *     el redondeo al peso que exigen los pliegos).
  *   · capítulos duplicados (mismo nombre normalizado) → señal de "mezcla de
  *     capítulos" o doble conteo.
+ *   · cita faltante: un ítem con valor pero sin `cita_textual` → posible
+ *     alucinación (grounding roto), lo que exige el gate de Fase 0.
  *
  * NOTAS informativas (no afectan `ok`):
  *   · suma de los valor_total vs presupuesto_oficial_cop. Puede diferir
@@ -17,7 +19,7 @@
 import type { PliegoExtraction } from './schema';
 
 export interface Inconsistencia {
-  tipo: 'aritmetica_item' | 'capitulo_duplicado';
+  tipo: 'aritmetica_item' | 'capitulo_duplicado' | 'cita_faltante';
   ubicacion: string;
   detalle: string;
 }
@@ -35,15 +37,23 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
   const inconsistencias: Inconsistencia[] = [];
   const notas: string[] = [];
 
-  // 1. Aritmética por ítem.
+  // 1. Aritmética por ítem + cita faltante (grounding).
   for (const cap of p.capitulos) {
     cap.items.forEach((item, j) => {
+      const ubicacion = `${cap.nombre} › ítem ${j + 1}: ${item.descripcion}`;
       const esperado = item.cantidad * item.valor_unitario;
       if (Math.abs(esperado - item.valor_total) > TOLERANCIA_ITEM) {
         inconsistencias.push({
           tipo: 'aritmetica_item',
-          ubicacion: `${cap.nombre} › ítem ${j + 1}: ${item.descripcion}`,
+          ubicacion,
           detalle: `cantidad×valor_unitario=${esperado} ≠ valor_total=${item.valor_total}`,
+        });
+      }
+      if (!item.cita_textual.trim()) {
+        inconsistencias.push({
+          tipo: 'cita_faltante',
+          ubicacion,
+          detalle: 'el ítem no trae cita_textual — no verificable contra el documento',
         });
       }
     });
