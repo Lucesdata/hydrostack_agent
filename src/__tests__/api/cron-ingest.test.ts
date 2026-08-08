@@ -61,10 +61,10 @@ describe('GET /api/cron/ingest', () => {
     expect(body.error).toBe('boom');
   });
 
-  it('sin CRON_SECRET definido, permite la corrida (con warning)', async () => {
+  it('sin CRON_SECRET definido, rechaza con 401 (fail-closed)', async () => {
     delete process.env.CRON_SECRET;
     const res = await GET(req());
-    expect(res.status).toBe(200);
-    expect(mockedPipeline).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(401);
+    expect(mockedPipeline).not.toHaveBeenCalled();
   });
 });

@@ -8,9 +8,9 @@
  * un tope conservador de páginas como válvula anti-timeout: si una corrida se
  * trunca, el watermark idempotente continúa en la corrida del día siguiente.
  *
- * Seguridad: si `CRON_SECRET` está definido (lo manda Vercel como `Bearer` al
- * invocar el cron), se exige y se rechaza con 401 si no coincide. Configúralo en
- * el dashboard de Vercel para que el endpoint no quede abierto en producción.
+ * Seguridad: `CRON_SECRET` es obligatorio. Se exige como `Bearer` en cada
+ * invocación; si la env var no está definida en el entorno, o no coincide,
+ * el endpoint responde 401 (fail-closed) en vez de ejecutar la ingesta.
  *
  * Observabilidad: cada fuente ya registra su corrida en `sync_log`
  * (running → ok | partial | failed). Aquí solo se añaden logs de función y el
@@ -37,12 +37,12 @@ const CRON_MAX_PAGES = 200;
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    if (request.headers.get("authorization") !== `Bearer ${secret}`) {
-      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-    }
-  } else {
-    console.warn("[cron/ingest] CRON_SECRET no definido — endpoint sin protección");
+  if (!secret) {
+    console.error("[cron/ingest] CRON_SECRET no definido — rechazando (fail-closed)");
+    return NextResponse.json({ ok: false, error: "server misconfigured" }, { status: 401 });
+  }
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
   try {

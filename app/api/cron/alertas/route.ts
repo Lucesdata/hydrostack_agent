@@ -7,8 +7,8 @@
  * el matching corre igual sobre los datos del día anterior — degradación
  * aceptable, ver docs/plan-arquitectura-roadmap.md §3.4).
  *
- * Mismo patrón de seguridad que `cron/ingest`: si `CRON_SECRET` está
- * definido, se exige como `Bearer` y se rechaza con 401 si no coincide.
+ * Mismo patrón de seguridad que `cron/ingest`: `CRON_SECRET` es obligatorio;
+ * si no está definido o no coincide como `Bearer`, responde 401 (fail-closed).
  *
  * La idempotencia (no duplicar correos en un reintento del cron) vive en
  * `runDailyAlertas` (envio_log, insert-first), no aquí.
@@ -23,12 +23,12 @@ export const maxDuration = 300;
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    if (request.headers.get("authorization") !== `Bearer ${secret}`) {
-      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-    }
-  } else {
-    console.warn("[cron/alertas] CRON_SECRET no definido — endpoint sin protección");
+  if (!secret) {
+    console.error("[cron/alertas] CRON_SECRET no definido — rechazando (fail-closed)");
+    return NextResponse.json({ ok: false, error: "server misconfigured" }, { status: 401 });
+  }
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
   try {
