@@ -1,9 +1,7 @@
 import { Orbitron, IBM_Plex_Mono, Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { LangProvider } from "@/src/lib/i18n";
 import Navbar from "@/src/components/Navbar";
-import GlobalProgress from "@/src/components/BuildFlow/GlobalProgress";
 import "./globals.css";
 
 // Las 4 familias reales de la landing + calculadoras + Hydro_Agent, self-hosted
@@ -41,9 +39,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "HydroStack — Water & Sanitation Engineering",
-  description: "Technical calculation tools for water and sanitation engineering. Septic tanks, Imhoff tanks, activated sludge, UASB reactors and more.",
-  keywords: "septic tank calculator, fosa septica, water treatment, wastewater design, RAS Colombia, EN 12566",
+  title: "HydroStack — Inteligencia para contratación pública en agua y saneamiento",
+  description: "HydroStack cruza tu perfil de oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.",
+  keywords: "SECOP II, licitaciones agua y saneamiento, contratación pública Colombia, RUP, pliegos de condiciones",
 };
 
 export default function RootLayout({ children }) {
@@ -53,11 +51,8 @@ export default function RootLayout({ children }) {
       className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        <LangProvider>
-          <Navbar />
-          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
-          <GlobalProgress />
-        </LangProvider>
+        <Navbar />
+        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         <Analytics />
         <SpeedInsights />
       </body>

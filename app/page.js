@@ -23,10 +23,9 @@ const HOW_STEPS = [
 ];
 
 const PILLARS = [
-  { n: "02", title: "Planes directores de alcantarillado en Cali", desc: "3 corregimientos, modelado hidráulico y gemelo digital.", href: "/build" },
-  { n: "03", title: "Fosas sépticas y PTAR — según RAS", desc: "Calculadoras que aplican la normativa colombiana automáticamente.", href: "/calculators" },
-  { n: "04", title: "Lee un pliego de 100 páginas en minutos", desc: "El asistente extrae los requisitos legales y técnicos automáticamente.", href: "/chat" },
-  { n: "05", title: "Un ingeniero especialista, no una startup", desc: "11 años en agua y saneamiento, licencia profesional vigente.", href: "/nosotros", dark: true },
+  { n: "02", title: "Planes directores de alcantarillado en Cali", desc: "3 corregimientos, modelado hidráulico y gemelo digital.", href: "/nosotros" },
+  { n: "03", title: "Lee un pliego de 100 páginas en minutos", desc: "El asistente extrae los requisitos legales y técnicos automáticamente.", href: "/pliego" },
+  { n: "04", title: "Un ingeniero especialista, no una startup", desc: "11 años en agua y saneamiento, licencia profesional vigente.", href: "/nosotros", dark: true },
 ];
 
 /* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
@@ -79,7 +78,7 @@ const BLUEPRINT_CSS = `
 .bp-coord-label { position: absolute; top: 88px; right: 48px; font: 10px var(--font-jetbrains-mono),monospace; color: #6B746F; }
 .bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
 .bp-pillars-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
-.bp-pillars-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 .bp-closing-wrap { padding: 56px 48px; border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px 48px; border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 

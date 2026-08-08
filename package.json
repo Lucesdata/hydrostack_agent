@@ -24,20 +24,15 @@
     "analyze-pliego-hybrid": "tsx scripts/analyze-pliego-hybrid.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.91.1",
     "@auth/drizzle-adapter": "^1.11.3",
-    "@babylonjs/core": "^9.4.1",
     "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "babylonjs": "^9.4.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
-    "leaflet": "^1.9.4",
     "next": "14.2.3",
     "next-auth": "^5.0.0-beta.32",
-    "pdfkit": "^0.18.0",
     "react": "^18",
     "react-dom": "^18",
     "resend": "^6.18.1",
@@ -45,7 +40,6 @@
   },
   "devDependencies": {
     "@types/node": "25.6.0",
-    "@types/pdfkit": "^0.17.6",
     "@types/pg": "^8.20.0",
     "@types/react": "19.2.14",
     "@types/ws": "^8.18.1",

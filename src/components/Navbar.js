@@ -2,14 +2,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-// import { useLang } from "@/src/lib/i18n"; // selector ES/EN retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
 
 const NAV_ITEMS = [
   { href: "/licitaciones", route: "/licitaciones", index: "01", label: "Licitaciones" },
-  { href: "/build", route: "/build", index: "02", label: "Proyectos" },
-  { href: "/calculators", route: "/calculators", index: "03", label: "Calculadoras" },
-  { href: "/chat", route: "/chat", index: "04", label: "Asistente" },
-  { href: "/nosotros", route: "/nosotros", index: "05", label: "Nosotros" },
+  { href: "/pliego", route: "/pliego", index: "02", label: "Pliegos" },
+  { href: "/nosotros", route: "/nosotros", index: "03", label: "Nosotros" },
 ];
 
 function ValveGlyph() {
@@ -35,7 +32,6 @@ function CoteGlyph() {
 }
 
 export default function Navbar() {
-  // const { t, toggle } = useLang(); // reactivar junto con los botones de idioma más abajo
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -74,12 +70,6 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
-        <button className="clr-lang-btn hide-mobile" onClick={toggle}>
-          {t.nav.lang}
-        </button>
-        */}
-
         <button
           className="clr-hamburger"
           onClick={() => setOpen((o) => !o)}
@@ -107,11 +97,6 @@ export default function Navbar() {
             {item.label}
           </Link>
         ))}
-        {/* Selector de idioma retirado temporalmente — ver docs/superpowers/specs/2026-07-13-landing-secop-reposition-design.md
-        <button className="clr-mobile-lang" onClick={() => { toggle(); close(); }}>
-          {t.nav.lang}
-        </button>
-        */}
       </div>
     </nav>
   );
