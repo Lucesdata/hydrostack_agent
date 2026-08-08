@@ -65,9 +65,10 @@ Guarda el perfil detectado en memoria para toda la sesión.
 ## 6. Configuración Técnica
 
 - **Modelo**: Groq `llama-3.3-70b-versatile`
-- **Framework**: Next.js 15 + React
+- **Framework**: Next.js 14.2.3 + React
 - **API Key**: variable de entorno `GROQ_API_KEY`
 - **Respuestas**: breves y concretas; explicaciones solo si se solicitan
+- **Diseño**: tokens reales en `app/globals.css` — tema claro (landing/navbar/hubs) `--bg:#FAFAF7`, `--accent:#0369A1`; tema oscuro "cyberpunk" (calculadoras/Hydro_Agent) en el mismo `:root`, documentado ahí
 
 ---
 

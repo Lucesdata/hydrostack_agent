@@ -58,12 +58,14 @@ Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con conve
 
 ## Bajo / Documentación
 
-### 9. Sincronizar docs con la realidad
+### 9. Sincronizar docs con la realidad — ✅ resuelto parcialmente 2026-08-08
 - `CLAUDE.md`: dice "Next.js 15" (real: 14.2.3); colores documentados `#F7F5EF`/`#1D6FA5` no existen en el repo (reales: `--bg:#FAFAF7`, `--accent:#0369A1`). Además `page.js:248` usa `#FCFCF9` inline sin token.
 - `README.md`: describe `app/layout.tsx`/`page.tsx` y `src/components/Calculators/` — reales son `.js` y `src/components/calculator/`.
 - `docs/fase-0/0.1-modelo-datos.md:204`: aún lista el índice GIN eliminado en `drizzle/0003`.
 - `docs/agent/STEP-1-tool-use.md`: describe loop con Anthropic SDK, pero el agente conversacional real usa Groq — marcar como legado.
 - Ningún doc registra que el schema total ya tiene 18 tablas (11 canónicas + 7 de cuentas Fase 1).
+
+**Nota:** resueltos los 4 puntos explícitos del pendiente (versión de Next, tokens de color en `CLAUDE.md`; extensiones/rutas reales en `README.md`; nota del índice GIN retirado en `docs/fase-0/0.1-modelo-datos.md`; aviso de legado en `docs/agent/STEP-1-tool-use.md`). El punto de las "18 tablas" no estaba en el alcance que se me dio para este ítem — queda para una futura pasada de documentación. `page.js:248` con `#FCFCF9` inline tampoco se tocó (es apariencia visual existente, no un dato de doc desactualizado).
 
 ### 10. 12 errores de lint conocidos desde 2026-07-18
 `react/no-unescaped-entities` en varios `.jsx`/`.tsx` y regla ESLint inexistente en `src/lib/db/client.ts:34,36`. Ver `AUDITORIA_TECH_DEBT.md`.

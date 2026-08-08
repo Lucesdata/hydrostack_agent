@@ -1,5 +1,13 @@
 # Hydro_Agent — Paso 1: Implementación del primer Tool (`calculate_septic_tank`)
 
+> **⚠️ LEGADO (2026-08-08):** este documento describe un loop de agente con el
+> Anthropic SDK / `ANTHROPIC_API_KEY`. El agente conversacional propietario en
+> producción (`app/api/agent/route.ts`) usa exclusivamente Groq
+> (`llama-3.3-70b-versatile`, ver `CLAUDE.md` §6) — Anthropic solo se usa hoy
+> en el extractor de pliegos (`src/lib/pliego/extractPliego.ts`), un dominio
+> distinto. Se conserva como referencia histórica del diseño original, no como
+> guía vigente de la arquitectura del agente.
+
 ## Qué hace este paso
 
 Implementa end-to-end el primer **tool** del agente IA de HydroStack:

@@ -110,8 +110,8 @@ hydrostack-2/
 │   └── api/                            # API documentation
 │
 ├── app/                                # Next.js App Router
-│   ├── layout.tsx                      # Global layout
-│   ├── page.tsx                        # Home page
+│   ├── layout.js                       # Global layout
+│   ├── page.js                         # Home page
 │   ├── chat/                           # Chat interface
 │   ├── calculators/                    # Calculator pages
 │   │   └── fosa-septica/              # Septic tank calculator
@@ -123,13 +123,13 @@ hydrostack-2/
 ├── src/                                # Source code
 │   ├── components/                     # React components
 │   │   ├── HydroAgent/                # AI agent UI
-│   │   ├── Calculators/               # Calculator components
+│   │   ├── calculator/                # Calculator components
 │   │   └── Common/                    # Shared components
 │   ├── lib/                           # Utilities & logic
 │   │   ├── agent/                     # Agent logic
 │   │   ├── calculations/              # Engineering calculations
 │   │   ├── validation/                # Input validation
-│   │   └── i18n.tsx                   # Translations (ES/EN)
+│   │   └── i18n.js                    # Translations (ES/EN)
 │   └── __tests__/                     # Test files
 │
 ├── public/                             # Static assets
@@ -184,7 +184,7 @@ hydrostack-2/
 - **Lib**: Pure functions for calculations and utilities
 - **Tests**: Unit tests in `__tests__/` parallel structure
 - **Types**: TypeScript interfaces in `src/types/`
-- **i18n**: Translation strings in `src/lib/i18n.tsx`
+- **i18n**: Translation strings in `src/lib/i18n.js`
 
 ### Running Tests
 
@@ -204,10 +204,10 @@ npm run test:ui       # Interactive UI
 
 ### Adding a New Calculator
 
-1. Create calculator page: `app/calculators/[slug]/page.tsx`
-2. Create calculator component: `src/components/Calculators/[Name].tsx`
+1. Create calculator page: `app/calculators/[slug]/page.js`
+2. Create calculator component: `src/components/calculator/[Name].jsx`
 3. Add calculation logic to `src/lib/calculations/`
-4. Register in module list (see `app/page.tsx`)
+4. Register in module list (see `app/page.js`)
 5. Add documentation to `docs/`
 
 ---
@@ -260,7 +260,7 @@ ANTHROPIC_API_KEY=sk-your-anthropic-key
 ### Customization
 
 **3D Diagram Colors & Scale:**
-Edit `src/components/IsometricDiagram.tsx` (lines 10–30)
+Edit `src/components/IsometricDiagram.jsx` (lines 10–30)
 
 **Calculations Precision:**
 Edit `src/lib/calculations/*.ts`
