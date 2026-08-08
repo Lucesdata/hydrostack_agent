@@ -37,7 +37,7 @@ const S = {
     background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.25)",
     color: "#00d4ff", fontSize: "10px", fontWeight: "700", borderRadius: "4px",
     padding: "0 12px", cursor: "pointer", whiteSpace: "nowrap",
-    fontFamily: "'IBM Plex Mono',monospace",
+    fontFamily: "var(--font-ibm-plex-mono),monospace",
   },
   results: {
     background: "#041820", border: "1px solid #1a4060", borderRadius: "4px",
@@ -55,7 +55,7 @@ const S = {
   },
   coordPill: {
     fontSize: "10px", color: "#4a7fa5",
-    fontFamily: "'IBM Plex Mono',monospace",
+    fontFamily: "var(--font-ibm-plex-mono),monospace",
   },
   coordVal: { color: "#00d4ff", fontWeight: "700" },
   hint: { fontSize: "9px", color: "#1e4060", marginTop: "2px" },

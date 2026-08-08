@@ -114,7 +114,7 @@ const S = {
     border: "1px solid rgba(0,245,255,0.12)",
     borderRadius: "10px",
     padding: "20px 18px",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
   tag: {
     fontSize: "9px",

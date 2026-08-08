@@ -120,7 +120,7 @@ function Bubble({ role, content, tools, suggestions, onSuggestionPick, flow, onF
                 padding: "10px 14px",
                 fontSize: "13px",
                 color: "#c8e8f0",
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 cursor: "pointer",
                 textAlign: "left",
                 lineHeight: "1.45",
@@ -132,7 +132,7 @@ function Bubble({ role, content, tools, suggestions, onSuggestionPick, flow, onF
             >
               <span style={{
                 fontSize: "9px",
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "var(--font-ibm-plex-mono), monospace",
                 color: "#00F5FF",
                 fontWeight: 700,
                 flexShrink: 0,

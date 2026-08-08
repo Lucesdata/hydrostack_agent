@@ -241,14 +241,14 @@ const S = {
     letterSpacing: "0.2em",
     textTransform: "uppercase",
     color: "#4a7a8a",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     marginBottom: "8px",
   },
   h2: {
     fontSize: "22px",
     color: "#e8f8ff",
     margin: "0 0 8px 0",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontWeight: 700,
   },
   lead: {
@@ -272,7 +272,7 @@ const S = {
   summaryLabel: {
     fontSize: "11px",
     color: "#e8f8ff",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     letterSpacing: "0.04em",
     marginBottom: "4px",
     fontWeight: 700,
@@ -280,7 +280,7 @@ const S = {
   summaryStatus: (done) => ({
     fontSize: "10px",
     color: done ? "#00FF88" : "#7ab8c8",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     letterSpacing: "0.04em",
   }),
   warnBox: {
@@ -291,7 +291,7 @@ const S = {
     color: "#FFB020",
     fontSize: "12px",
     lineHeight: 1.55,
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
   formCard: {
     background: "rgba(4,24,32,0.55)",
@@ -302,7 +302,7 @@ const S = {
   formTitle: {
     fontSize: "12px",
     color: "#e8f8ff",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontWeight: 700,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
@@ -319,7 +319,7 @@ const S = {
     fontSize: "10px",
     letterSpacing: "0.08em",
     color: "#7ab8c8",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     textTransform: "uppercase",
   },
   fieldInput: {
@@ -329,14 +329,14 @@ const S = {
     padding: "9px 11px",
     fontSize: "13px",
     color: "#e8f8ff",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     outline: "none",
   },
   cta: (enabled) => ({
     background: enabled ? "rgba(0,245,255,0.14)" : "rgba(0,245,255,0.04)",
     border: `1px solid ${enabled ? "rgba(0,245,255,0.4)" : "rgba(0,245,255,0.08)"}`,
     color: enabled ? "#00F5FF" : "#2a5070",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.08em",
@@ -352,7 +352,7 @@ const S = {
     borderRadius: "5px",
     color: "#FF7878",
     fontSize: "12px",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
   successBox: {
     marginTop: "18px",
@@ -365,7 +365,7 @@ const S = {
     fontSize: "11px",
     color: "#00FF88",
     letterSpacing: "0.1em",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontWeight: 700,
     marginBottom: "10px",
   },
@@ -380,7 +380,7 @@ const S = {
     color: "#00FF88",
     fontSize: "12px",
     fontWeight: 700,
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     letterSpacing: "0.04em",
     textDecoration: "none",
   },
@@ -388,6 +388,6 @@ const S = {
     marginTop: "8px",
     fontSize: "10px",
     color: "#4a7a8a",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
 };

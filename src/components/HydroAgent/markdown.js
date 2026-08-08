@@ -11,7 +11,7 @@ const inlineStyles = {
     border: "1px solid rgba(0,245,255,0.15)",
     borderRadius: "3px",
     padding: "1px 5px",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontSize: "0.92em",
     color: "#7ce8f5",
   },
@@ -70,7 +70,7 @@ function renderInline(text, baseKey) {
           background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.2)",
           borderRadius: "4px", padding: "3px 10px", margin: "2px 1px",
           color: "#00F5FF", textDecoration: "none",
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px",
+          fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "11px",
           fontWeight: "700", letterSpacing: "0.04em",
         } : { color: "#00d4ff", textDecoration: "underline" }}>
           {inner}
@@ -111,7 +111,7 @@ export function renderMarkdown(text) {
           padding: "10px 14px",
           margin: "8px 0",
           overflowX: "auto",
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "var(--font-ibm-plex-mono), monospace",
           fontSize: "12px",
           color: "#7ce8f5",
           lineHeight: "1.6",
@@ -132,7 +132,7 @@ export function renderMarkdown(text) {
           fontSize: size, fontWeight: 700,
           color: "#00F5FF",
           margin: level === 1 ? "12px 0 8px" : "10px 0 4px",
-          fontFamily: "'Orbitron', sans-serif",
+          fontFamily: "var(--font-orbitron), sans-serif",
           letterSpacing: "0.04em",
         }}>
           {renderInline(h[2], `h${key}`)}

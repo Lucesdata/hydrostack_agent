@@ -35,12 +35,12 @@ const S = {
   },
   inner: { maxWidth: "1100px", margin: "0 auto" },
   hdr: { marginBottom: "28px" },
-  tag: { fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#4a7fa5", fontFamily: "'IBM Plex Mono',monospace", marginBottom: "8px" },
-  title: { fontFamily: "'IBM Plex Mono',monospace", fontSize: "26px", fontWeight: "700", color: "#e2f0f7", marginBottom: "6px" },
+  tag: { fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#4a7fa5", fontFamily: "var(--font-ibm-plex-mono),monospace", marginBottom: "8px" },
+  title: { fontFamily: "var(--font-ibm-plex-mono),monospace", fontSize: "26px", fontWeight: "700", color: "#e2f0f7", marginBottom: "6px" },
   sub: { fontSize: "12px", color: "#4a7fa5" },
   layout: { display: "grid", gridTemplateColumns: "1fr 380px", gap: "20px", alignItems: "start" },
   panel: { background: "rgba(255,255,255,0.02)", border: "1px solid #1a4060", borderRadius: "10px", padding: "20px" },
-  panelTitle: { fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#4a7fa5", fontFamily: "'IBM Plex Mono',monospace", marginBottom: "14px" },
+  panelTitle: { fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase", color: "#4a7fa5", fontFamily: "var(--font-ibm-plex-mono),monospace", marginBottom: "14px" },
   resultCard: (status) => ({
     background: `rgba(${STATUS_COLORS[status].rgb},0.06)`,
     border: `1px solid rgba(${STATUS_COLORS[status].rgb},0.2)`,
@@ -49,22 +49,22 @@ const S = {
   }),
   badge: (status) => ({
     display: "inline-block", fontSize: "9px", fontWeight: "700", letterSpacing: "0.08em",
-    color: STATUS_COLORS[status].c, fontFamily: "'Orbitron',sans-serif",
+    color: STATUS_COLORS[status].c, fontFamily: "var(--font-orbitron),sans-serif",
     marginBottom: "5px",
   }),
   cardTitle: { fontSize: "12px", color: "#e2f0f7", fontWeight: "600", marginBottom: "5px" },
   cardText:  { fontSize: "10px", color: "#7ab0d0", lineHeight: "1.6" },
-  cardNorm:  { fontSize: "9px",  color: "#2a6080", marginTop: "5px", fontFamily: "'IBM Plex Mono',monospace" },
+  cardNorm:  { fontSize: "9px",  color: "#2a6080", marginTop: "5px", fontFamily: "var(--font-ibm-plex-mono),monospace" },
   kpiGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "8px", marginBottom: "12px" },
   kpi: { background: "#041820", border: "1px solid #0d2035", borderRadius: "6px", padding: "10px", textAlign: "center" },
-  kpiv: (c) => ({ fontSize: "18px", fontWeight: "700", color: c, fontFamily: "'Orbitron',sans-serif", lineHeight: 1 }),
+  kpiv: (c) => ({ fontSize: "18px", fontWeight: "700", color: c, fontFamily: "var(--font-orbitron),sans-serif", lineHeight: 1 }),
   kpiu: { fontSize: "8px", color: "#4a7fa5", marginTop: "2px" },
   kpil: { fontSize: "9px", color: "#2a6080", marginTop: "4px" },
   saveBtn: {
     width: "100%", background: "transparent", border: "1px solid #00F5FF",
     color: "#00F5FF", fontSize: "10px", fontWeight: "700", letterSpacing: "0.14em",
     textTransform: "uppercase", cursor: "pointer", padding: "11px", borderRadius: "4px",
-    fontFamily: "'Orbitron',sans-serif", marginTop: "12px",
+    fontFamily: "var(--font-orbitron),sans-serif", marginTop: "12px",
   },
   savedBanner: {
     marginTop: "10px", padding: "8px 12px", background: "rgba(0,255,136,0.06)",
@@ -72,7 +72,7 @@ const S = {
     fontSize: "10px", color: "#00FF88", textAlign: "center",
   },
   sec: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", marginTop: "4px" },
-  secLabel: { fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "#2a5070", fontFamily: "'IBM Plex Mono',monospace", whiteSpace: "nowrap" },
+  secLabel: { fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "#2a5070", fontFamily: "var(--font-ibm-plex-mono),monospace", whiteSpace: "nowrap" },
   secLine: { flex: 1, height: "1px", background: "#0d2035" },
   climSpinner: { fontSize: "10px", color: "#2a6080", padding: "8px 0" },
 };
@@ -169,12 +169,12 @@ export default function GeoPanel() {
                     <div style={S.secLine} />
                   </div>
                   <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.12)", borderRadius: "6px", padding: "12px 14px", marginBottom: "12px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: "700", color: "#00d4ff", fontFamily: "'Orbitron',sans-serif", marginBottom: "4px" }}>
+                    <div style={{ fontSize: "13px", fontWeight: "700", color: "#00d4ff", fontFamily: "var(--font-orbitron),sans-serif", marginBottom: "4px" }}>
                       {authority.authority}
                     </div>
                     <div style={{ fontSize: "10px", color: "#7ab0d0", marginBottom: "6px" }}>{authority.authorityFull}</div>
                     <div style={{ fontSize: "9px", color: "#4a7fa5", marginBottom: "4px" }}>📋 {authority.tramite}</div>
-                    <div style={{ fontSize: "9px", color: "#2a6080", fontFamily: "'IBM Plex Mono',monospace" }}>🌐 {authority.contactHint}</div>
+                    <div style={{ fontSize: "9px", color: "#2a6080", fontFamily: "var(--font-ibm-plex-mono),monospace" }}>🌐 {authority.contactHint}</div>
                   </div>
                 </>
               )}
@@ -255,7 +255,7 @@ export default function GeoPanel() {
                 ].map(([k, v], i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginBottom: "5px", gap: "8px" }}>
                     <span style={{ color: "#4a7fa5" }}>{k}</span>
-                    <span style={{ color: "#a0c8d8", fontFamily: "'IBM Plex Mono',monospace", textAlign: "right", wordBreak: "break-all" }}>{v}</span>
+                    <span style={{ color: "#a0c8d8", fontFamily: "var(--font-ibm-plex-mono),monospace", textAlign: "right", wordBreak: "break-all" }}>{v}</span>
                   </div>
                 ))}
               </div>

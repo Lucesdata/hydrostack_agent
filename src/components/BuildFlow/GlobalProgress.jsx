@@ -171,7 +171,7 @@ const S = {
     }`,
     borderRadius: "10px",
     padding: "12px 14px",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
   }),
   head: {
@@ -296,7 +296,7 @@ const S = {
     borderRadius: "999px",
     color: "#e2f0f7",
     cursor: "pointer",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     boxShadow: "0 8px 18px rgba(0,0,0,0.45)",
   }),
   pillDots: { display: "inline-flex", gap: "3px" },

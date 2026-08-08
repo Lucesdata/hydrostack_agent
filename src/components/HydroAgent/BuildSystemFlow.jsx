@@ -22,7 +22,7 @@ const sty = {
   wrap: { marginTop: "4px", display: "flex", flexDirection: "column", gap: "14px" },
   label: {
     fontSize: "10px", color: "#4A7A8A", letterSpacing: "0.1em",
-    textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
+    textTransform: "uppercase", fontFamily: "var(--font-ibm-plex-mono), monospace",
     marginBottom: "5px", display: "block",
   },
   soilList: {
@@ -34,7 +34,7 @@ const sty = {
     padding: "7px 10px", cursor: "pointer",
     background: selected ? "rgba(0,245,255,0.1)" : "transparent",
     borderBottom: "1px solid rgba(0,245,255,0.05)",
-    fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px",
+    fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "12px",
     color: selected ? "#00F5FF" : "#7ab8c8", userSelect: "none",
   }),
   num: {
@@ -46,7 +46,7 @@ const sty = {
     padding: "5px 10px", background: "rgba(0,245,255,0.07)",
     border: "1px solid rgba(0,245,255,0.2)", borderRadius: "3px",
     fontSize: "11px", color: "#00F5FF",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
 };
 
@@ -144,7 +144,7 @@ export default function BuildSystemFlow({ onSubmit, lang = "es" }) {
           border: `1px solid ${canSubmit ? "rgba(0,245,255,0.35)" : "rgba(0,245,255,0.08)"}`,
           borderRadius: "4px", padding: "9px 16px",
           color: canSubmit ? "#00F5FF" : "#2a5070",
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px",
+          fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "11px",
           letterSpacing: "0.08em", cursor: canSubmit ? "pointer" : "not-allowed",
           fontWeight: 700, alignSelf: "flex-start",
         }}

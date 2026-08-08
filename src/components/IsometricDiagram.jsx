@@ -151,7 +151,7 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
 
           {/* Label */}
           <text x="0" y="-15" fontSize="11" fontWeight="bold" fill={DS.cyanBright}
-            textAnchor="middle" fontFamily="'Orbitron',sans-serif">VIVIENDA</text>
+            textAnchor="middle" fontFamily="var(--font-orbitron),sans-serif">VIVIENDA</text>
         </g>
       </g>
 
@@ -269,7 +269,7 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
 
         {/* Panel title */}
         <text x={SVG_W - 130} y="45" fontSize="12" fontWeight="bold" fill={DS.cyanBright}
-          textAnchor="middle" fontFamily="'Orbitron',sans-serif">PARÁMETROS TÉCNICOS</text>
+          textAnchor="middle" fontFamily="var(--font-orbitron),sans-serif">PARÁMETROS TÉCNICOS</text>
 
         {/* Data rows */}
         <text x={SVG_W - 250} y="70" fontSize="9" fill={DS.textMuted} fontFamily="monospace">Usuarios:</text>
@@ -433,7 +433,7 @@ Style: Professional CAD-style technical illustration, detailed, clear labeling, 
           padding: "12px 24px",
           fontSize: "14px",
           fontWeight: "bold",
-          fontFamily: "'Orbitron', sans-serif",
+          fontFamily: "var(--font-orbitron), sans-serif",
           cursor: loading ? "not-allowed" : "pointer",
           borderRadius: "4px",
           transition: "all 0.2s",
@@ -555,7 +555,7 @@ export default function IsometricDiagram({ r, projectName = "Proyecto", location
             border: `1px solid ${mode === "svg" ? DS.cyanBright : DS.border}`,
             padding: "8px 16px",
             fontSize: "12px",
-            fontFamily: "'Orbitron', sans-serif",
+            fontFamily: "var(--font-orbitron), sans-serif",
             fontWeight: "bold",
             cursor: "pointer",
             borderRadius: "3px",
@@ -574,7 +574,7 @@ export default function IsometricDiagram({ r, projectName = "Proyecto", location
             border: `1px solid ${mode === "image" ? DS.amberBright : DS.border}`,
             padding: "8px 16px",
             fontSize: "12px",
-            fontFamily: "'Orbitron', sans-serif",
+            fontFamily: "var(--font-orbitron), sans-serif",
             fontWeight: "bold",
             cursor: "pointer",
             borderRadius: "3px",
@@ -595,7 +595,7 @@ export default function IsometricDiagram({ r, projectName = "Proyecto", location
               border: `1px solid ${DS.greenBright}`,
               padding: "8px 16px",
               fontSize: "12px",
-              fontFamily: "'Orbitron', sans-serif",
+              fontFamily: "var(--font-orbitron), sans-serif",
               fontWeight: "bold",
               cursor: "pointer",
               borderRadius: "3px",

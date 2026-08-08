@@ -4,8 +4,8 @@ import { useLang } from "@/src/lib/i18n";
 
 const F  = (v, d=2) => Number(v).toFixed(d);
 const FI = (v)      => Math.round(v);
-const FONT = "'IBM Plex Mono', monospace";
-const ORBITRON = "'Orbitron', sans-serif";
+const FONT = "var(--font-ibm-plex-mono), monospace";
+const ORBITRON = "var(--font-orbitron), sans-serif";
 
 // ── Bilingual strings ─────────────────────────────────────────────────────────
 const T = {
@@ -710,13 +710,13 @@ export default function LaminaTecnica({ r, freeboard, meta }) {
           border:"1px solid rgba(0,245,255,0.35)",
           borderRadius:"3px",
           color:"#00F5FF",
-          fontSize:"10px",fontFamily:"'Orbitron',sans-serif",
+          fontSize:"10px",fontFamily:"var(--font-orbitron),sans-serif",
           cursor:"pointer",letterSpacing:"0.1em",fontWeight:"700",
           transition:"all 0.2s",
         }} className="btn-cta">
           {t.download}
         </button>
-        <span style={{fontSize:"9px",color:"#4A7A8A",fontFamily:"'IBM Plex Mono',monospace"}}>
+        <span style={{fontSize:"9px",color:"#4A7A8A",fontFamily:"var(--font-ibm-plex-mono),monospace"}}>
           {t.sheetInfo}
         </span>
       </div>

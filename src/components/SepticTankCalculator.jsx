@@ -349,7 +349,7 @@ export default function HydroStack() {
         </span>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:"11px", color:"#E8F8FF", fontWeight:"600", marginBottom:"3px" }}>{check.param}</div>
-          <div style={{ fontSize:"10px", color:"#4A7A8A", marginBottom:"4px", fontFamily:"'IBM Plex Mono',monospace" }}>
+          <div style={{ fontSize:"10px", color:"#4A7A8A", marginBottom:"4px", fontFamily:"var(--font-ibm-plex-mono),monospace" }}>
             {check.v} · Mín: {check.min}
           </div>
           <div style={{ fontSize:"10px", color:"#a0c8d8", lineHeight:"1.55" }}>{check.msg}</div>
@@ -389,16 +389,16 @@ export default function HydroStack() {
         <div style={C.badge}>Fosa Séptica · v6.0</div>
         {/* Geo badge */}
         {geoData ? (
-          <a href="/calculators/geo" style={{fontSize:"9px",color:"#00FF88",border:"1px solid rgba(0,255,136,0.25)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}}>
+          <a href="/calculators/geo" style={{fontSize:"9px",color:"#00FF88",border:"1px solid rgba(0,255,136,0.25)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"var(--font-ibm-plex-mono),monospace",letterSpacing:"0.06em"}}>
             📍 {geoData.propData?.dept ? `${geoData.propData.dept} · ${geoData.climate?.temp_media_c ?? "?"}°C` : "Predio ubicado"} ✓
           </a>
         ) : (
-          <a href="/calculators/geo" style={{fontSize:"9px",color:"#2a5070",border:"1px solid rgba(0,245,255,0.08)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}} className="no-print">
+          <a href="/calculators/geo" style={{fontSize:"9px",color:"#2a5070",border:"1px solid rgba(0,245,255,0.08)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"var(--font-ibm-plex-mono),monospace",letterSpacing:"0.06em"}} className="no-print">
             📍 Ubicar predio
           </a>
         )}
         {res && (
-          <a href="/calculators/mantenimiento" style={{fontSize:"9px",color:"#00F5FF",border:"1px solid rgba(0,245,255,0.2)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}} className="no-print">
+          <a href="/calculators/mantenimiento" style={{fontSize:"9px",color:"#00F5FF",border:"1px solid rgba(0,245,255,0.2)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"var(--font-ibm-plex-mono),monospace",letterSpacing:"0.06em"}} className="no-print">
             🔧 Mantenimiento →
           </a>
         )}
@@ -474,7 +474,7 @@ export default function HydroStack() {
                       style={{fontSize:"9px",padding:"3px 8px",border:"1px solid",borderRadius:"3px",cursor:"pointer",
                         background:percMode===m.k?"rgba(0,245,255,0.12)":"transparent",
                         borderColor:percMode===m.k?"#00F5FF":"#1a4060",color:percMode===m.k?"#00F5FF":"#2a6080",
-                        fontFamily:"'IBM Plex Mono',monospace"}}>
+                        fontFamily:"var(--font-ibm-plex-mono),monospace"}}>
                       {m.l}
                     </button>
                   ))}
@@ -592,7 +592,7 @@ export default function HydroStack() {
           {/* Calculate button fixed at bottom of sidebar */}
           <div style={C.calcWrap} className="no-print">
             <button
-              style={{background:"transparent",border:"1px solid #00F5FF",color:"#00F5FF",fontSize:"10px",fontWeight:"700",letterSpacing:"0.14em",textTransform:"uppercase",cursor:"pointer",padding:"11px",borderRadius:"4px",width:"100%",fontFamily:"'Orbitron',sans-serif",transition:"all 0.2s"}}
+              style={{background:"transparent",border:"1px solid #00F5FF",color:"#00F5FF",fontSize:"10px",fontWeight:"700",letterSpacing:"0.14em",textTransform:"uppercase",cursor:"pointer",padding:"11px",borderRadius:"4px",width:"100%",fontFamily:"var(--font-orbitron),sans-serif",transition:"all 0.2s"}}
               className="hs-calc"
               onClick={calculate}
             >▶ Calculate Design</button>
@@ -637,7 +637,7 @@ export default function HydroStack() {
                     </div>
                   )}
                   {geoData?.climate && (
-                    <div style={{marginBottom:"10px",padding:"7px 11px",background:"rgba(0,255,136,0.04)",border:"1px solid rgba(0,255,136,0.12)",borderRadius:"6px",fontSize:"9px",color:"#00FF88",fontFamily:"'IBM Plex Mono',monospace"}}>
+                    <div style={{marginBottom:"10px",padding:"7px 11px",background:"rgba(0,255,136,0.04)",border:"1px solid rgba(0,255,136,0.12)",borderRadius:"6px",fontSize:"9px",color:"#00FF88",fontFamily:"var(--font-ibm-plex-mono),monospace"}}>
                       📍 {geoData.climate.elevation_m} m.s.n.m. · T={geoData.climate.temp_media_c}°C · ETP={geoData.climate.etp_media_mm_dia} mm/día — aplicado automáticamente desde geolocalización
                     </div>
                   )}
@@ -802,7 +802,7 @@ export default function HydroStack() {
                         {r.soilOk&&r.A_inf?(
                           <>
                             {/* System type badge */}
-                            <div style={{fontSize:"9px",color:"#00F5FF",letterSpacing:"0.08em",fontWeight:"700",marginBottom:"10px",fontFamily:"'Orbitron',sans-serif"}}>
+                            <div style={{fontSize:"9px",color:"#00F5FF",letterSpacing:"0.08em",fontWeight:"700",marginBottom:"10px",fontFamily:"var(--font-orbitron),sans-serif"}}>
                               {r.drainSysKey==="zanjas_filtrantes"?"ZANJAS FILTRANTES"
                                :r.drainSysKey==="monticulo_filtrante"?"MONTÍCULO FILTRANTE"
                                :r.drainSysKey==="camara_infiltracion"?"CÁMARA INFILTRACIÓN"
@@ -850,7 +850,7 @@ export default function HydroStack() {
                             </div>
                             {/* Trench summary */}
                             {r.L_zanjas&&(
-                              <div style={{fontSize:"10px",color:"#4A7A8A",fontFamily:"'IBM Plex Mono',monospace",lineHeight:"1.7",marginBottom:"8px"}}>
+                              <div style={{fontSize:"10px",color:"#4A7A8A",fontFamily:"var(--font-ibm-plex-mono),monospace",lineHeight:"1.7",marginBottom:"8px"}}>
                                 {r.n_zanjas} × {fmt(r.L_por_zanja,1)} m · w={fmt(r.ancho_z,1)} m · sep=2.0 m · L_tot={fmt(r.L_zanjas,1)} m
                                 {r.drainSysKey==="monticulo_filtrante"&&" · elev=+0.6 m"}
                               </div>
@@ -898,7 +898,7 @@ export default function HydroStack() {
                           {lbl:"Status",       val:geoRes.cumple?"PASS":"FAIL", c:geoRes.cumple?"#00FF88":"#FF5050"},
                         ].map((s,i)=>(
                           <div key={i} style={{background:"#041820",border:"1px solid rgba(0,245,255,0.12)",borderRadius:"8px",padding:"10px 16px",textAlign:"center",minWidth:"80px"}}>
-                            <div style={{fontSize:"20px",fontWeight:"700",color:s.c,fontFamily:"'Orbitron',sans-serif"}}>{s.val}</div>
+                            <div style={{fontSize:"20px",fontWeight:"700",color:s.c,fontFamily:"var(--font-orbitron),sans-serif"}}>{s.val}</div>
                             <div style={{fontSize:"9px",color:"#4A7A8A",marginTop:"4px",letterSpacing:"0.06em"}}>{s.lbl}</div>
                           </div>
                         ))}

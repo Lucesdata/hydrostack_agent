@@ -58,7 +58,7 @@ const S = {
     color: "#00FF88",
     letterSpacing: "0.16em",
     textTransform: "uppercase",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
   titleLanding: {
     fontSize: "clamp(20px, 3.4vw, 30px)",
@@ -66,7 +66,7 @@ const S = {
     color: "#E8F8FF",
     lineHeight: 1.35,
     marginBottom: "26px",
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "var(--font-inter), sans-serif",
     letterSpacing: "-0.01em",
   },
   titlePage: {
@@ -75,7 +75,7 @@ const S = {
     color: "#E8F8FF",
     lineHeight: 1.5,
     marginBottom: "20px",
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "var(--font-inter), sans-serif",
   },
   optionsWrap: {
     display: "flex",
@@ -89,7 +89,7 @@ const S = {
     padding: "14px 16px",
     color: "#7ab8c8",
     fontSize: "13px",
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "var(--font-inter), sans-serif",
     cursor: "pointer",
     transition: "all 0.18s",
     textAlign: "left",

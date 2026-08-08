@@ -153,7 +153,7 @@ const MUNICIPALITIES = {
 const sty = {
   sectionLabel: {
     fontSize: "10px", color: "#4A7A8A", letterSpacing: "0.1em",
-    textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
+    textTransform: "uppercase", fontFamily: "var(--font-ibm-plex-mono), monospace",
     marginBottom: "5px", display: "block",
   },
   list: {
@@ -165,7 +165,7 @@ const sty = {
     display: "flex", alignItems: "center", gap: "10px",
     padding: "7px 10px", cursor: "pointer",
     borderBottom: "1px solid rgba(0,245,255,0.05)",
-    fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px",
+    fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "12px",
     color: "#7ab8c8", userSelect: "none",
   },
   num: {
@@ -178,7 +178,7 @@ const sty = {
     background: "rgba(0,245,255,0.07)",
     border: "1px solid rgba(0,245,255,0.18)",
     borderRadius: "3px", fontSize: "11px", color: "#00F5FF",
-    fontFamily: "'IBM Plex Mono', monospace", marginBottom: "2px",
+    fontFamily: "var(--font-ibm-plex-mono), monospace", marginBottom: "2px",
   },
   change: {
     fontSize: "9px", color: "#2a5070", cursor: "pointer",

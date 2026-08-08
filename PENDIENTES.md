@@ -49,8 +49,10 @@ Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con conve
 
 **Nota:** se fusionaron los dos `:root` en uno solo con comentarios explicando el origen de cada convención de nombres (no se renombró ni eliminó ninguna variable, incl. `--sans`/`--orb` sin consumidores — cero cambio visual, verificado en landing y calculadoras).
 
-### 8. Tipografía: 4 familias vía `<link>` en vez de `next/font`
+### 8. Tipografía: 4 familias vía `<link>` en vez de `next/font` — ✅ resuelto 2026-08-08
 `layout.js:21` carga Orbitron, IBM Plex Mono, Inter y JetBrains Mono por Google Fonts `<link>` (warning de lint). Migrar a `next/font` y documentar la combinación real.
+
+**Nota:** el alcance real era mayor al de un solo archivo — verificado en navegador que `next/font` genera nombres de familia internos ofuscados (no el literal `"Orbitron"`), así que los ~30 archivos que hardcodeaban `fontFamily: "'Orbitron', sans-serif"` etc. se migraron también a `var(--font-orbitron)`/`var(--font-ibm-plex-mono)`/`var(--font-jetbrains-mono)`/`var(--font-inter)` (definidas por `next/font` en `layout.js` y re-expuestas como `--mono`/`--sans`/`--orb`/`--font-mono`/`--font-sans` en `globals.css`). Cero cambio visual — verificado con medición de ancho de texto renderizado y screenshots en landing, calculadoras y Hydro_Agent.
 
 ---
 

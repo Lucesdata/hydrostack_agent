@@ -63,7 +63,7 @@ const S = {
     background: "linear-gradient(120deg, rgba(0,245,255,0.06), rgba(0,255,136,0.03))",
     borderBottom: "1px solid rgba(0,245,255,0.18)",
     padding: "10px clamp(14px, 4vw, 24px)",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
   },
   inner: {
     maxWidth: "1200px",

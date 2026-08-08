@@ -145,7 +145,7 @@ const T = {
 const sty = {
   wrap: {
     marginTop: "12px",
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "var(--font-ibm-plex-mono), monospace",
     fontSize: "11px",
   },
   header: {
@@ -269,7 +269,7 @@ const sty = {
     color: "#7ab8c8",
     fontSize: "11px",
     lineHeight: 1.55,
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "var(--font-inter), sans-serif",
   },
 };
 

@@ -52,7 +52,7 @@ const USE_TYPES = {
 const sty = {
   sectionLabel: {
     fontSize: "10px", color: "#4A7A8A", letterSpacing: "0.1em",
-    textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
+    textTransform: "uppercase", fontFamily: "var(--font-ibm-plex-mono), monospace",
     marginBottom: "5px", display: "block",
   },
   list: {
@@ -65,7 +65,7 @@ const sty = {
     padding: "7px 10px", cursor: "pointer",
     background: selected ? "rgba(0,245,255,0.1)" : "transparent",
     borderBottom: "1px solid rgba(0,245,255,0.05)",
-    fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px",
+    fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "12px",
     color: selected ? "#00F5FF" : "#7ab8c8", userSelect: "none",
     transition: "background 0.12s",
   }),
@@ -78,14 +78,14 @@ const sty = {
     padding: "4px 10px", background: "rgba(0,245,255,0.07)",
     border: "1px solid rgba(0,245,255,0.18)", borderRadius: "3px",
     fontSize: "11px", color: "#00F5FF",
-    fontFamily: "'IBM Plex Mono', monospace", marginBottom: "2px",
+    fontFamily: "var(--font-ibm-plex-mono), monospace", marginBottom: "2px",
   },
   change: {
     fontSize: "9px", color: "#2a5070", cursor: "pointer",
     letterSpacing: "0.05em", marginLeft: "2px",
   },
   note: {
-    fontSize: "10px", color: "#4A7A8A", fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: "10px", color: "#4A7A8A", fontFamily: "var(--font-ibm-plex-mono), monospace",
     padding: "6px 8px", background: "rgba(0,245,255,0.03)",
     border: "1px solid rgba(0,245,255,0.08)", borderRadius: "3px",
     lineHeight: 1.5,

@@ -26,7 +26,7 @@ const S = {
   },
   sectionTitle: {
     fontSize: "9px", letterSpacing: "3px", textTransform: "uppercase",
-    color: "#4a7fa5", fontFamily: "'IBM Plex Mono',monospace", marginBottom: "12px",
+    color: "#4a7fa5", fontFamily: "var(--font-ibm-plex-mono),monospace", marginBottom: "12px",
   },
   grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" },
   grid1: { display: "grid", gridTemplateColumns: "1fr", gap: "8px" },

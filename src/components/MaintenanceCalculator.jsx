@@ -86,7 +86,7 @@ function AlertBadge({ level, label }) {
       display: "inline-block", padding: "2px 10px", borderRadius: "20px",
       background: `rgba(${ac.rgb},0.12)`, border: `1px solid rgba(${ac.rgb},0.3)`,
       color: ac.c, fontSize: "9px", fontWeight: "700", letterSpacing: "0.08em",
-      fontFamily: "'Orbitron',sans-serif",
+      fontFamily: "var(--font-orbitron),sans-serif",
     }}>
       {label || ac.label}
     </span>
@@ -175,7 +175,7 @@ function TabSchedule({ schedule, fs }) {
                 border: `2px solid ${dotColor}`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: "11px", fontWeight: "700", color: dotColor,
-                fontFamily: "'Orbitron',sans-serif", zIndex: 1,
+                fontFamily: "var(--font-orbitron),sans-serif", zIndex: 1,
               }}>
                 {isDone ? "✓" : ev.numero}
               </div>
@@ -192,7 +192,7 @@ function TabSchedule({ schedule, fs }) {
                   </span>
                   {isNext && <AlertBadge level={alerta} label="PRÓXIMO" />}
                   {isDone && (
-                    <span style={{ fontSize: "9px", color: "#2a5070", fontFamily: "'IBM Plex Mono',monospace" }}>
+                    <span style={{ fontSize: "9px", color: "#2a5070", fontFamily: "var(--font-ibm-plex-mono),monospace" }}>
                       completado
                     </span>
                   )}
@@ -210,7 +210,7 @@ function TabSchedule({ schedule, fs }) {
         })}
       </div>
 
-      <div style={{ marginTop: "14px", fontSize: "9px", color: "#2a5070", fontFamily: "'IBM Plex Mono',monospace" }}>
+      <div style={{ marginTop: "14px", fontSize: "9px", color: "#2a5070", fontFamily: "var(--font-ibm-plex-mono),monospace" }}>
         Instalación: {fecha_instalacion_display} · Intervalo: {fs} años · Norma: Res. 0330/2017 Art. 139
       </div>
     </div>
@@ -329,7 +329,7 @@ function TabChecklist({ onSaveInspection }) {
             border: `1px solid ${saved ? "#00FF88" : "#00F5FF"}`,
             color: saved ? "#00FF88" : "#00F5FF",
             padding: "9px 20px", borderRadius: "4px", cursor: "pointer",
-            fontSize: "10px", fontWeight: "700", fontFamily: "'Orbitron',sans-serif",
+            fontSize: "10px", fontWeight: "700", fontFamily: "var(--font-orbitron),sans-serif",
             letterSpacing: "0.1em", textTransform: "uppercase",
           }}
         >
@@ -379,7 +379,7 @@ function TabRegistry() {
             background: "transparent", border: "1px dashed rgba(0,245,255,0.3)",
             color: "#00F5FF", padding: "10px 20px", borderRadius: "6px",
             cursor: "pointer", fontSize: "10px", fontWeight: "700",
-            fontFamily: "'Orbitron',sans-serif", letterSpacing: "0.1em",
+            fontFamily: "var(--font-orbitron),sans-serif", letterSpacing: "0.1em",
             textTransform: "uppercase", marginBottom: "20px", width: "100%",
           }}
         >
@@ -423,7 +423,7 @@ function TabRegistry() {
             <button onClick={addEvent} style={{
               background: "rgba(0,245,255,0.1)", border: "1px solid #00F5FF",
               color: "#00F5FF", padding: "7px 18px", borderRadius: "4px", cursor: "pointer",
-              fontSize: "10px", fontWeight: "700", fontFamily: "'Orbitron',sans-serif",
+              fontSize: "10px", fontWeight: "700", fontFamily: "var(--font-orbitron),sans-serif",
             }}>
               Guardar
             </button>
@@ -459,7 +459,7 @@ function TabRegistry() {
                   <span style={{ fontSize: "11px", color: "#E8F8FF", fontWeight: "600" }}>
                     {t.label}
                   </span>
-                  <span style={{ fontSize: "10px", color: "#4A7A8A", fontFamily: "'IBM Plex Mono',monospace" }}>
+                  <span style={{ fontSize: "10px", color: "#4A7A8A", fontFamily: "var(--font-ibm-plex-mono),monospace" }}>
                     {new Date(ev.fecha).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"numeric" })}
                   </span>
                 </div>
@@ -515,7 +515,7 @@ function TabClogging({ risk }) {
             background: `rgba(${rc.rgb},0.12)`, border: `1px solid rgba(${rc.rgb},0.3)`,
             color: rc.c, padding: "2px 10px", borderRadius: "20px",
             fontSize: "9px", fontWeight: "700", letterSpacing: "0.08em",
-            fontFamily: "'Orbitron',sans-serif",
+            fontFamily: "var(--font-orbitron),sans-serif",
           }}>
             RIESGO {risk.riesgo.toUpperCase()}
           </span>
@@ -536,7 +536,7 @@ function TabClogging({ risk }) {
         <div style={{
           display: "flex", justifyContent: "space-between",
           fontSize: "9px", color: "#4A7A8A", marginBottom: "6px",
-          fontFamily: "'IBM Plex Mono',monospace",
+          fontFamily: "var(--font-ibm-plex-mono),monospace",
         }}>
           <span>Vida útil consumida: {risk.porcentaje_vida_util}%</span>
           <span>{risk.vida_util_min_anos}–{risk.vida_util_max_anos} años estimados</span>
@@ -555,7 +555,7 @@ function TabClogging({ risk }) {
         <div style={{
           display: "flex", justifyContent: "space-between",
           fontSize: "9px", color: "#2a5070", marginTop: "4px",
-          fontFamily: "'IBM Plex Mono',monospace",
+          fontFamily: "var(--font-ibm-plex-mono),monospace",
         }}>
           <span>Instalación</span>
           <span>Sustitución estimada: ~{Math.round(risk.anos_operacion + risk.anos_restantes_estimados)} años</span>
@@ -683,7 +683,7 @@ export default function MaintenanceCalculator() {
           <div style={C.lsub}>Cronograma · Checklist · Registro · Colmatación</div>
         </div>
         {fromCalc && (
-          <a href="/calculators/fosa-septica" style={{fontSize:"9px",color:"#4A7A8A",border:"1px solid rgba(0,245,255,0.08)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}} className="no-print">
+          <a href="/calculators/fosa-septica" style={{fontSize:"9px",color:"#4A7A8A",border:"1px solid rgba(0,245,255,0.08)",padding:"4px 9px",borderRadius:"4px",textDecoration:"none",fontFamily:"var(--font-ibm-plex-mono),monospace",letterSpacing:"0.06em"}} className="no-print">
             ← Diseño
           </a>
         )}
