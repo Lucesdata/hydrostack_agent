@@ -9,6 +9,43 @@ const NAV_ITEMS = [
   { href: "/nosotros", route: "/nosotros", index: "03", label: "Nosotros" },
 ];
 
+const AUTH_CSS = `
+.clr-nav-auth{ display: flex; align-items: center; gap: 10px; margin-left: 8px; }
+.clr-nav-auth-link{
+  font: 500 12.5px var(--font-sans, sans-serif); color: var(--ink-600, #525B5A);
+  text-decoration: none; padding: 6px 10px; white-space: nowrap;
+}
+.clr-nav-auth-link:hover{ color: var(--ink-900, #0A1F1C); }
+.clr-nav-auth-cta{
+  font: 600 12.5px var(--font-mono, monospace); color: #fff;
+  background: var(--ink-900, #0A1F1C); text-decoration: none;
+  padding: 7px 12px; white-space: nowrap;
+}
+.clr-nav-auth-cta:hover{ opacity: .9; }
+.clr-nav-user{ position: relative; }
+.clr-nav-user-btn{
+  display: flex; align-items: center; gap: 6px; background: none; border: none;
+  font: 500 12.5px var(--font-sans, sans-serif); color: var(--ink-900, #0A1F1C);
+  cursor: pointer; padding: 6px 4px;
+}
+.clr-nav-user-menu{
+  position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px;
+  background: var(--surface, #fff); border: 1px solid var(--line, #E5E5E0);
+  display: flex; flex-direction: column; z-index: 20;
+}
+.clr-nav-user-email{
+  font: 11px var(--font-mono, monospace); color: var(--ink-600, #525B5A);
+  padding: 8px 12px; border-bottom: 1px solid var(--line, #E5E5E0);
+  overflow: hidden; text-overflow: ellipsis;
+}
+.clr-nav-user-menu button{
+  background: none; border: none; text-align: left; font-size: 12.5px;
+  color: var(--ink-900, #0A1F1C); padding: 9px 12px; cursor: pointer;
+}
+.clr-nav-user-menu button:hover{ background: var(--bg, #FAFAF7); }
+.clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 6px; }
+`;
+
 function ValveGlyph() {
   return (
     <svg viewBox="0 0 26 26" width="15" height="15" fill="none" stroke="#fff" strokeWidth="1.6" aria-hidden="true">
@@ -31,7 +68,40 @@ function CoteGlyph() {
   );
 }
 
-export default function Navbar() {
+function UserMenu({ user, onNavigate }) {
+  const [open, setOpen] = useState(false);
+  const label = user.fullName || user.email;
+
+  return (
+    <div className="clr-nav-user">
+      <button
+        type="button"
+        className="clr-nav-user-btn"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        {label}
+      </button>
+      {open && (
+        <div className="clr-nav-user-menu">
+          <span className="clr-nav-user-email">{user.email}</span>
+          <form
+            action="/logout"
+            method="POST"
+            onSubmit={() => {
+              setOpen(false);
+              onNavigate?.();
+            }}
+          >
+            <button type="submit">Cerrar sesión</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Navbar({ user }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -42,6 +112,7 @@ export default function Navbar() {
 
   return (
     <nav className="clr-nav" aria-label="Menú principal">
+      <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-nav-inner">
         <Link href="/" className="clr-logo" onClick={close} aria-label="HydroStack inicio">
           <span className="clr-logo-mark"><ValveGlyph /></span>
@@ -68,6 +139,17 @@ export default function Navbar() {
               <CoteGlyph />
             </Link>
           ))}
+        </div>
+
+        <div className="clr-nav-auth">
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <>
+              <Link href="/login" className="clr-nav-auth-link">Ingresar</Link>
+              <Link href="/registro" className="clr-nav-auth-cta">Crear cuenta</Link>
+            </>
+          )}
         </div>
 
         <button
@@ -97,6 +179,23 @@ export default function Navbar() {
             {item.label}
           </Link>
         ))}
+        <div className="clr-mobile-auth">
+          {user ? (
+            <>
+              <span className="clr-nav-user-email">{user.email}</span>
+              <form action="/logout" method="POST" onSubmit={close}>
+                <button type="submit" className="clr-mobile-link" style={{ width: "100%" }}>
+                  Cerrar sesión
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="clr-mobile-link" onClick={close}>Ingresar</Link>
+              <Link href="/registro" className="clr-mobile-link" onClick={close}>Crear cuenta</Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

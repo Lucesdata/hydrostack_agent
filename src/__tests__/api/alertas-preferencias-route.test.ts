@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const mockAuth = vi.fn();
-vi.mock('@/src/lib/auth/config', () => ({ auth: () => mockAuth() }));
+vi.mock('@/src/lib/supabase/get-session-user', () => ({ getSessionUser: () => mockAuth() }));
 
 const mockGet = vi.fn();
 const mockSave = vi.fn();
@@ -30,7 +30,7 @@ describe('GET /api/alertas/preferencias', () => {
   });
 
   it('200 con las preferencias de la cuenta', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     mockGet.mockResolvedValue({ activo: true, horaEnvio: 7 });
     const res = await GET();
     expect(res.status).toBe(200);
@@ -49,20 +49,20 @@ describe('PUT /api/alertas/preferencias', () => {
   });
 
   it('400 si horaEnvio está fuera de rango', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     const res = await PUT(putReq({ activo: true, horaEnvio: 24 }));
     expect(res.status).toBe(400);
     expect(mockSave).not.toHaveBeenCalled();
   });
 
   it('400 si falta un campo', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     const res = await PUT(putReq({ activo: true }));
     expect(res.status).toBe(400);
   });
 
   it('200 y guarda con datos válidos', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     mockSave.mockResolvedValue({ activo: false, horaEnvio: 20 });
     const res = await PUT(putReq({ activo: false, horaEnvio: 20 }));
     expect(res.status).toBe(200);

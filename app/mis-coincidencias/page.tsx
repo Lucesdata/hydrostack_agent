@@ -16,7 +16,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/src/lib/auth/config";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ahora";
@@ -91,8 +91,8 @@ interface Props {
 }
 
 export default async function MisCoincidenciasPage({ searchParams }: Props) {
-  const session = await auth();
-  const usuarioId = session?.user?.id;
+  const user = await getSessionUser();
+  const usuarioId = user?.id;
   const banner = BANNER[searchParams.resultado as EnvioEstado] ?? null;
 
   if (!usuarioId) {
@@ -101,7 +101,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <h1 className="clr-mc-title">Mis coincidencias</h1>
         <div className="clr-mc-empty">
           Necesitas una cuenta para ver tus coincidencias.{" "}
-          <Link href="/cuenta">Entra con tu correo →</Link>
+          <Link href="/login?next=/mis-coincidencias">Ingresar →</Link>
         </div>
       </Shell>
     );
@@ -124,9 +124,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
 
   async function handleEnviarAhora() {
     "use server";
-    const s = await auth();
-    if (!s?.user?.id) return;
-    const resultado = await enviarDigestAhora(s.user.id);
+    const s = await getSessionUser();
+    if (!s?.id) return;
+    const resultado = await enviarDigestAhora(s.id);
     redirect(`/mis-coincidencias?resultado=${resultado.estado}`);
   }
 

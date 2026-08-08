@@ -6,8 +6,8 @@ import type { OferenteProfile } from '@/src/lib/oferente/types';
 // route: el gate de sesión, la validación del body y el mapeo select/upsert →
 // respuesta. Mismo patrón que src/__tests__/api/cron-ingest.test.ts.
 const mockAuth = vi.fn();
-vi.mock('@/src/lib/auth/config', () => ({
-  auth: () => mockAuth(),
+vi.mock('@/src/lib/supabase/get-session-user', () => ({
+  getSessionUser: () => mockAuth(),
 }));
 
 const mockLimit = vi.fn();
@@ -59,7 +59,7 @@ describe('GET/PUT /api/perfil', () => {
   });
 
   it('GET devuelve null si la cuenta no tiene perfil aún', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     mockLimit.mockResolvedValue([]);
     const res = await GET();
     expect(res.status).toBe(200);
@@ -67,7 +67,7 @@ describe('GET/PUT /api/perfil', () => {
   });
 
   it('GET devuelve el perfil guardado', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     mockLimit.mockResolvedValue([{ perfil }]);
     const res = await GET();
     const body = await res.json();
@@ -81,19 +81,19 @@ describe('GET/PUT /api/perfil', () => {
   });
 
   it('PUT 400 con JSON inválido', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     const res = await PUT(putReq('no-es-json'));
     expect(res.status).toBe(400);
   });
 
   it('PUT 400 con perfil inválido', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     const res = await PUT(putReq({ id: 'x' }));
     expect(res.status).toBe(400);
   });
 
   it('PUT hace upsert y devuelve el perfil guardado', async () => {
-    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
     mockReturning.mockResolvedValue([{ perfil }]);
     const res = await PUT(putReq(perfil));
     expect(res.status).toBe(200);

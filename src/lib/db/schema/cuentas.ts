@@ -1,17 +1,15 @@
 /**
- * Cuentas (Fase 1.1) — usuario · cuenta · sesión · token_verificacion ·
- * oferente_perfil.
+ * Cuentas (Fase 1.1, migrado a Supabase Auth) — usuario · oferente_perfil.
  *
- * Las 4 primeras tablas son el contrato que `@auth/drizzle-adapter` espera
- * (ver `node_modules/@auth/drizzle-adapter/lib/pg.js` → `defineTables`).
- * Se copian columna por columna del default del adapter (mismos nombres de
- * columna SQL y mismas claves JS que el adapter accede por propiedad:
- * `usersTable.email`, `accountsTable.providerAccountId`, etc.) — deliberado,
- * para no divergir del contrato en futuras versiones del paquete. Es la
- * única excepción al snake_case/español del resto del repo: es infra
- * vendorizada, no un modelo de dominio propio.
+ * `usuario` es un espejo local (Neon) del usuario de Supabase Auth —
+ * ver `src/lib/supabase/sync-usuario.ts`. `id` es el UUID que emite
+ * Supabase (`auth.users.id`), no uno generado localmente; Supabase gestiona
+ * su propia sesión y tokens (viven en el Postgres del proyecto Supabase),
+ * así que ya no hacen falta tablas de sesión/cuenta-OAuth/token de
+ * verificación en Neon — esas eran el contrato específico que esperaba
+ * `@auth/drizzle-adapter` (retirado).
  *
- * `oferentePerfil` sí sigue la convención del repo: PK uuid, perfil en jsonb
+ * `oferentePerfil` sigue la convención del repo: PK uuid, perfil en jsonb
  * (contrato TS estable `OferenteProfile`, sin normalizar — decisión ya fijada
  * en docs/plan-arquitectura-roadmap.md §3.1).
  */
@@ -24,59 +22,18 @@ import {
   smallint,
   boolean,
   date,
-  primaryKey,
   uuid,
   jsonb,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const usuario = pgTable('usuario', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text('id').primaryKey(),
   name: text('name'),
   email: text('email').notNull().unique(),
   emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image'),
 });
-
-export const cuenta = pgTable(
-  'cuenta',
-  {
-    userId: text('userId')
-      .notNull()
-      .references(() => usuario.id, { onDelete: 'cascade' }),
-    type: text('type').notNull(),
-    provider: text('provider').notNull(),
-    providerAccountId: text('providerAccountId').notNull(),
-    refresh_token: text('refresh_token'),
-    access_token: text('access_token'),
-    expires_at: integer('expires_at'),
-    token_type: text('token_type'),
-    scope: text('scope'),
-    id_token: text('id_token'),
-    session_state: text('session_state'),
-  },
-  (t) => [primaryKey({ columns: [t.provider, t.providerAccountId] })],
-);
-
-export const sesion = pgTable('sesion', {
-  sessionToken: text('sessionToken').primaryKey(),
-  userId: text('userId')
-    .notNull()
-    .references(() => usuario.id, { onDelete: 'cascade' }),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
-});
-
-export const tokenVerificacion = pgTable(
-  'token_verificacion',
-  {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
-);
 
 /**
  * Perfil del oferente por cuenta (Fase 1.1). Reemplaza gradualmente al único

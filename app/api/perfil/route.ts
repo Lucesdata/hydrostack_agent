@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/src/lib/auth/config';
+import { getSessionUser } from '@/src/lib/supabase/get-session-user';
 import { db } from '@/src/lib/db/client';
 import { oferentePerfil } from '@/src/lib/db/schema/cuentas';
 import { getPerfilDb } from '@/src/lib/oferente/perfil-store';
@@ -29,8 +29,8 @@ function isValidPerfil(p: unknown): p is OferenteProfile {
 }
 
 export async function GET() {
-  const session = await auth();
-  const usuarioId = session?.user?.id;
+  const user = await getSessionUser();
+  const usuarioId = user?.id;
   if (!usuarioId) {
     return NextResponse.json({ error: 'No hay sesión activa' }, { status: 401 });
   }
@@ -40,8 +40,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await auth();
-  const usuarioId = session?.user?.id;
+  const user = await getSessionUser();
+  const usuarioId = user?.id;
   if (!usuarioId) {
     return NextResponse.json({ error: 'No hay sesión activa' }, { status: 401 });
   }

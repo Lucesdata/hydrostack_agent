@@ -43,6 +43,13 @@
       "when": 1785639513381,
       "tag": "0005_heavy_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786222668413,
+      "tag": "0006_loose_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

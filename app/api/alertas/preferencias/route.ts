@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/src/lib/auth/config";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPreferencias, savePreferencias, type AlertaPreferencias } from "@/src/lib/alertas/preferencias-store";
 
 export const runtime = "nodejs";
@@ -26,8 +26,8 @@ function isValidPrefs(p: unknown): p is AlertaPreferencias {
 }
 
 export async function GET() {
-  const session = await auth();
-  const usuarioId = session?.user?.id;
+  const user = await getSessionUser();
+  const usuarioId = user?.id;
   if (!usuarioId) {
     return NextResponse.json({ error: "No hay sesión activa" }, { status: 401 });
   }
@@ -37,8 +37,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await auth();
-  const usuarioId = session?.user?.id;
+  const user = await getSessionUser();
+  const usuarioId = user?.id;
   if (!usuarioId) {
     return NextResponse.json({ error: "No hay sesión activa" }, { status: 401 });
   }

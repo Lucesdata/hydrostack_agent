@@ -12,6 +12,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SecopResult } from "@/src/lib/secop/types";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { Verdict } from "@/src/lib/secop/verdict";
@@ -40,6 +41,7 @@ interface Filters {
 type ProbeState = { state: DocumentAccess; message: string };
 
 export default function SecopExplorer() {
+  const router = useRouter();
   const [filters, setFilters] = useState<Filters>({
     q: "", departamento: "", estado: "", valorMin: "",
   });
@@ -363,7 +365,13 @@ export default function SecopExplorer() {
                 verdict={verdicts[selected.id]}
                 verdictLoading={!!verdictLoading[selected.id]}
                 hasPerfil={!!perfil}
-                onRequestPerfil={() => setWizardOpen(true)}
+                onRequestPerfil={() => {
+                  if (!hasSession) {
+                    router.push("/login?next=/licitaciones");
+                    return;
+                  }
+                  setWizardOpen(true);
+                }}
               />
             ) : (
               !loading && (

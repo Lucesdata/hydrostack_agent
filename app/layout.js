@@ -2,6 +2,7 @@ import { Orbitron, IBM_Plex_Mono, Inter, JetBrains_Mono } from "next/font/google
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
+import { getSessionDisplayUser } from "@/src/lib/supabase/get-session-user";
 import "./globals.css";
 
 // Las 4 familias reales de la landing + calculadoras + Hydro_Agent, self-hosted
@@ -44,14 +45,16 @@ export const metadata = {
   keywords: "SECOP II, licitaciones agua y saneamiento, contratación pública Colombia, RUP, pliegos de condiciones",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const user = await getSessionDisplayUser();
+
   return (
     <html
       lang="es"
       className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        <Navbar />
+        <Navbar user={user} />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         <Analytics />
         <SpeedInsights />

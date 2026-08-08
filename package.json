@@ -23,15 +23,15 @@
     "analyze-pliego-hybrid": "tsx scripts/analyze-pliego-hybrid.ts"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "^1.11.3",
     "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "next": "14.2.3",
-    "next-auth": "^5.0.0-beta.32",
     "react": "^18",
     "react-dom": "^18",
     "resend": "^6.18.1",
