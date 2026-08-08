@@ -8,6 +8,9 @@
  *
  * Requiere `ANTHROPIC_API_KEY`. Es la única pieza con IO de red; el núcleo
  * (schema, validate, prompt) es puro y testeable sin red.
+ *
+ * Acepta una ruta (CLI, scripts/analyze-pliego.ts) o un Buffer ya en memoria
+ * (ruta API: el archivo llega como bytes del upload, no como path en disco).
  */
 
 import { readFile } from 'node:fs/promises';
@@ -25,11 +28,12 @@ export interface ExtractOptions {
 }
 
 export async function extractPliego(
-  pdfPath: string,
+  pdf: string | Buffer,
   opts: ExtractOptions = {},
 ): Promise<PliegoExtraction> {
   const client = opts.client ?? new Anthropic();
-  const pdfBase64 = (await readFile(pdfPath)).toString('base64');
+  const pdfBuffer = Buffer.isBuffer(pdf) ? pdf : await readFile(pdf);
+  const pdfBase64 = pdfBuffer.toString('base64');
 
   const response = await client.messages.create({
     model: MODEL,
