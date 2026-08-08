@@ -4,26 +4,25 @@
 /**
  * Licitaciones · Descubrir — Colecciones inteligentes + Búsqueda facetada.
  *
- * MOCK: toda la data viene de src/lib/secop/mock-licitaciones.ts, sin
- * conexión a SECOP/Neon. Página nueva y aislada — no reemplaza ni modifica
- * `/licitaciones` (vista simple) ni `/licitaciones/explorar` (workbench real
- * con búsqueda/filtros conectados a datos reales).
+ * Conectada a datos reales (GET /api/secop, mismo backend que Explorar).
+ * Antes corría 100% sobre src/lib/secop/mock-licitaciones.ts; ver
+ * src/lib/secop/discovery.ts para por qué las 3 colecciones cambiaron de
+ * definición al pasar a datos reales (sin fecha de cierre exacta, sin señal
+ * de competencia).
  *
  * Principio de producto: el usuario nunca se perfila. Todos los filtros
  * (colección o búsqueda) son atributos objetivos del proceso/pliego.
- *
- * Spec del pedido: colecciones (3 tarjetas con filtro pre-armado) +
- * búsqueda libre que se traduce en pills removibles, combinables entre sí.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  MOCK_DATA_NOTICE,
-  MOCK_LICITACIONES,
   SMART_COLLECTIONS,
-  filterMockLicitaciones,
+  buildDiscoveryQuery,
+  filterByResidualPills,
+  secopQueryToSearchParams,
   type FilterPill,
-} from "@/src/lib/secop/mock-licitaciones";
+} from "@/src/lib/secop/discovery";
+import type { SecopProceso } from "@/src/lib/secop/types";
 import SmartCollections from "./SmartCollections";
 import FacetedSearchBar from "./FacetedSearchBar";
 import ResultCard from "./ResultCard";
@@ -35,8 +34,13 @@ function dedupePills(pills: FilterPill[]): FilterPill[] {
   return Array.from(seen.values());
 }
 
+type FetchState = "loading" | "ready" | "error";
+
 export default function LicitacionesDiscovery() {
   const [pills, setPills] = useState<FilterPill[]>([]);
+  const [items, setItems] = useState<SecopProceso[]>([]);
+  const [state, setState] = useState<FetchState>("loading");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const activeCollectionIds = useMemo(() => {
     const active = new Set<string>();
@@ -45,6 +49,32 @@ export default function LicitacionesDiscovery() {
     }
     return active;
   }, [pills]);
+
+  const { query, residualPills } = useMemo(() => buildDiscoveryQuery(pills), [pills]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setState("loading");
+    setErrorMsg(null);
+
+    fetch(`/api/secop?${secopQueryToSearchParams(query).toString()}`, { signal: controller.signal })
+      .then(async (res) => {
+        const body = await res.json();
+        if (!res.ok) throw new Error(body?.detail || body?.error || `Error ${res.status}`);
+        setItems(body.items ?? []);
+        setState("ready");
+      })
+      .catch((e) => {
+        if (controller.signal.aborted) return;
+        setErrorMsg(e instanceof Error ? e.message : String(e));
+        setState("error");
+      });
+
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
+
+  const results = useMemo(() => filterByResidualPills(items, residualPills), [items, residualPills]);
 
   function handleToggleCollection(collectionId: string) {
     const collection = SMART_COLLECTIONS.find((c) => c.id === collectionId);
@@ -66,8 +96,6 @@ export default function LicitacionesDiscovery() {
     setPills((prev) => prev.filter((p) => p.id !== pillId));
   }
 
-  const results = useMemo(() => filterMockLicitaciones(MOCK_LICITACIONES, pills), [pills]);
-
   return (
     <div className="clr-page">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
@@ -83,9 +111,6 @@ export default function LicitacionesDiscovery() {
               Ningún filtro pide datos tuyos, solo atributos del proceso.
             </p>
           </div>
-          <span className="clr-badge clr-badge--neutral clr-disc-mock-badge">
-            MOCK · {MOCK_DATA_NOTICE}
-          </span>
         </header>
 
         <SmartCollections
@@ -97,8 +122,14 @@ export default function LicitacionesDiscovery() {
 
         <div className="clr-disc-context">
           <span className="clr-disc-count">
-            <strong>{results.length}</strong> proceso{results.length === 1 ? "" : "s"}
-            {pills.length > 0 ? " con estos filtros" : ""}
+            {state === "loading" ? (
+              "Cargando…"
+            ) : (
+              <>
+                <strong>{results.length}</strong> proceso{results.length === 1 ? "" : "s"}
+                {pills.length > 0 ? " con estos filtros" : ""}
+              </>
+            )}
           </span>
           {pills.length > 0 && (
             <button type="button" className="clr-disc-clear" onClick={() => setPills([])}>
@@ -107,11 +138,19 @@ export default function LicitacionesDiscovery() {
           )}
         </div>
 
-        {results.length === 0 ? (
-          <div className="clr-disc-empty">
-            Ningún proceso mock cumple esta combinación de filtros. Prueba quitando alguna pill.
+        {state === "error" && (
+          <div className="clr-disc-empty clr-disc-error">
+            No se pudo consultar SECOP: {errorMsg}
           </div>
-        ) : (
+        )}
+
+        {state === "ready" && results.length === 0 && (
+          <div className="clr-disc-empty">
+            Ningún proceso cumple esta combinación de filtros. Prueba quitando alguna pill.
+          </div>
+        )}
+
+        {state === "ready" && results.length > 0 && (
           <div className="clr-disc-grid">
             {results.map((item) => (
               <ResultCard key={item.id} item={item} />
@@ -127,10 +166,6 @@ const CSS = `
 .clr-disc-header{
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
-}
-.clr-disc-mock-badge{
-  border-style: dashed;
-  flex-shrink: 0;
 }
 
 .clr-disc-collections{
@@ -214,6 +249,7 @@ const CSS = `
   color: var(--ink-600); font-size: var(--fs-sm);
   border: 1px dashed var(--line); border-radius: var(--radius-lg);
 }
+.clr-disc-error{ color: var(--danger); border-color: var(--danger); }
 
 .clr-disc-grid{
   display: grid;
@@ -247,8 +283,6 @@ const CSS = `
   margin: 0; font-size: 11.5px; color: var(--ink-600);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.clr-disc-tags{ display: flex; flex-wrap: wrap; gap: 5px; }
-
 .clr-disc-gates{
   list-style: none; margin: 0; padding-top: 8px; margin-top: 4px;
   border-top: 1px solid var(--line-soft);

@@ -2,15 +2,16 @@
 "use client";
 
 /**
- * Tarjeta de resultado — Colecciones + Búsqueda facetada (MOCK).
+ * Tarjeta de resultado — Colecciones + Búsqueda facetada, sobre datos reales.
  * Reutiliza el vocabulario visual del semáforo de elegibilidad (glyphs
- * ✓ / ! / ✕ / ? sobre pass/warn/fail/unknown) para un "tanque" de 3
- * indicadores objetivos del proceso: urgencia, competencia y estado del
- * pliego. Ninguno de estos indicadores depende de datos del usuario.
+ * ✓ / ! / ✕ / ? sobre pass/warn/fail/unknown) para 2 indicadores objetivos
+ * del proceso: apertura y acceso al pliego. (El mock original tenía un
+ * tercer indicador "competencia" sin contraparte real — ver discovery.ts.)
  */
 
-import type { MockLicitacion } from "@/src/lib/secop/mock-licitaciones";
-import { formatCopCompact } from "../format";
+import type { SecopProceso } from "@/src/lib/secop/types";
+import { canExtract } from "@/src/lib/secop/document-access";
+import { sentenceCaseTitle, formatCopCompact } from "../format";
 
 type GateTone = "pass" | "warn" | "fail" | "unknown";
 
@@ -23,54 +24,48 @@ interface Gate {
 
 const GLYPH: Record<GateTone, string> = { pass: "✓", warn: "!", fail: "✕", unknown: "?" };
 
-function urgenciaGate(item: MockLicitacion): Gate {
-  if (!item.abierto || item.diasParaCierre == null) {
-    return { label: "Plazo", glyph: GLYPH.unknown, tone: "unknown", detail: "Cerrado" };
+function aperturaGate(item: SecopProceso): Gate {
+  if (item.estadoApertura == null) {
+    return { label: "Apertura", glyph: GLYPH.unknown, tone: "unknown", detail: "Sin dato" };
   }
-  if (item.diasParaCierre <= 3) {
-    return { label: "Plazo", glyph: GLYPH.fail, tone: "fail", detail: `Cierra en ${item.diasParaCierre} d.` };
+  if (item.estadoApertura === "Abierto" && !item.adjudicado) {
+    return { label: "Apertura", glyph: GLYPH.pass, tone: "pass", detail: "Abierto" };
   }
-  if (item.diasParaCierre <= 7) {
-    return { label: "Plazo", glyph: GLYPH.warn, tone: "warn", detail: `Cierra en ${item.diasParaCierre} d.` };
+  if (item.estadoApertura === "Abierto" && item.adjudicado) {
+    return { label: "Apertura", glyph: GLYPH.warn, tone: "warn", detail: "Abierto · adjudicado" };
   }
-  return { label: "Plazo", glyph: GLYPH.pass, tone: "pass", detail: `Cierra en ${item.diasParaCierre} d.` };
+  return { label: "Apertura", glyph: GLYPH.fail, tone: "fail", detail: "Cerrado" };
 }
 
-function competenciaGate(item: MockLicitacion): Gate {
-  if (item.competencia === "baja") return { label: "Competencia", glyph: GLYPH.pass, tone: "pass", detail: "Baja" };
-  if (item.competencia === "media") return { label: "Competencia", glyph: GLYPH.warn, tone: "warn", detail: "Media" };
-  return { label: "Competencia", glyph: GLYPH.fail, tone: "fail", detail: "Alta" };
+function extraccionGate(item: SecopProceso): Gate {
+  if (canExtract(item.documentAccess)) {
+    return { label: "Pliego", glyph: GLYPH.pass, tone: "pass", detail: "Público" };
+  }
+  if (item.documentAccess === "UNKNOWN") {
+    return { label: "Pliego", glyph: GLYPH.unknown, tone: "unknown", detail: "Sin probar" };
+  }
+  return { label: "Pliego", glyph: GLYPH.warn, tone: "warn", detail: "No disponible" };
 }
 
-function extraccionGate(item: MockLicitacion): Gate {
-  return item.pliegoListoParaExtraer
-    ? { label: "Pliego", glyph: GLYPH.pass, tone: "pass", detail: "Listo" }
-    : { label: "Pliego", glyph: GLYPH.warn, tone: "warn", detail: "Pendiente" };
-}
-
-export default function ResultCard({ item }: { item: MockLicitacion }) {
-  const gates = [urgenciaGate(item), competenciaGate(item), extraccionGate(item)];
+export default function ResultCard({ item }: { item: SecopProceso }) {
+  const gates = [aperturaGate(item), extraccionGate(item)];
+  const titulo = sentenceCaseTitle(item.nombre || item.descripcion || item.referencia);
 
   return (
     <a
       className="clr-disc-card"
-      href={item.url}
+      href={item.url ?? undefined}
       target="_blank"
       rel="noopener noreferrer"
     >
       <div className="clr-disc-card-top">
-        <span className="clr-badge clr-badge--neutral clr-disc-mock-badge">MOCK</span>
-        <span className="clr-disc-card-val">{formatCopCompact(item.valorEstimado)}</span>
+        {item.unspsc && <span className="clr-badge clr-badge--neutral">{item.unspsc}</span>}
+        <span className="clr-disc-card-val">{formatCopCompact(item.precioBase)}</span>
       </div>
-      <p className="clr-disc-card-title">{item.objeto}</p>
+      <p className="clr-disc-card-title">{titulo}</p>
       <p className="clr-disc-card-meta">
-        {item.entidad} · {item.municipio}, {item.departamento}
+        {item.entidad} · {item.ciudad}, {item.departamento}
       </p>
-      <div className="clr-disc-tags">
-        {item.sectorTags.map((t) => (
-          <span key={t} className="clr-badge clr-badge--accent">{t}</span>
-        ))}
-      </div>
       <ul className="clr-disc-gates">
         {gates.map((g) => (
           <li key={g.label} className={`clr-disc-gate clr-disc-gate--${g.tone}`}>

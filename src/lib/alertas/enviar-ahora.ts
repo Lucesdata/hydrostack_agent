@@ -1,8 +1,7 @@
 /**
- * Núcleo de "enviar ahora" (Fase 1.3) — sin IO de HTTP. Lo llaman por igual
- * `POST /api/alertas/enviar-ahora` y el server action del botón en
- * `/mis-coincidencias`, así no hay que hacer un fetch a la propia app (que
- * arrastraría la cookie de sesión) para lograr lo mismo dos veces.
+ * Núcleo de "enviar ahora" (Fase 1.3) — sin IO de HTTP. Lo llama el server
+ * action del botón en `/mis-coincidencias` directo, sin pasar por una ruta
+ * API (evita un fetch a la propia app que arrastraría la cookie de sesión).
  */
 
 import { eq } from "drizzle-orm";

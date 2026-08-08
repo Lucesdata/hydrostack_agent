@@ -1,9 +1,9 @@
 import LicitacionesDiscovery from "@/src/components/secop/discovery/LicitacionesDiscovery";
 
 export const metadata = {
-  title: "Descubrir licitaciones (mock) — HydroStack",
+  title: "Descubrir licitaciones — HydroStack",
   description:
-    "Prototipo de colecciones inteligentes y búsqueda facetada para licitaciones de agua y saneamiento. Datos de ejemplo, aún no conectado a SECOP II.",
+    "Colecciones inteligentes y búsqueda facetada para licitaciones de agua y saneamiento en SECOP II.",
 };
 
 export default function LicitacionesDescubrirPage() {

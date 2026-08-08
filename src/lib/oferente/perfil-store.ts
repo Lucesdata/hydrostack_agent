@@ -1,8 +1,7 @@
 /**
  * Lectura del perfil de oferente guardado en DB (Fase 1.1). Extraído porque
- * `GET /api/perfil`, `/mis-coincidencias` y `POST /api/alertas/enviar-ahora`
- * necesitan exactamente la misma consulta — un solo sitio que conoce la forma
- * de la fila `oferente_perfil`.
+ * `GET /api/perfil` y `/mis-coincidencias` necesitan exactamente la misma
+ * consulta — un solo sitio que conoce la forma de la fila `oferente_perfil`.
  */
 
 import { eq } from 'drizzle-orm';

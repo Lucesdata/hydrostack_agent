@@ -8,7 +8,7 @@
  */
 
 import { useState, type FormEvent } from "react";
-import { parseSearchQuery, type FilterPill } from "@/src/lib/secop/mock-licitaciones";
+import { parseSearchQuery, type FilterPill } from "@/src/lib/secop/discovery";
 
 interface Props {
   pills: FilterPill[];

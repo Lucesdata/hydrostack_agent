@@ -7,7 +7,7 @@
  * se aplica solo. Sin onboarding, sin preguntas sobre el usuario.
  */
 
-import { SMART_COLLECTIONS } from "@/src/lib/secop/mock-licitaciones";
+import { SMART_COLLECTIONS } from "@/src/lib/secop/discovery";
 
 interface Props {
   activeCollectionIds: Set<string>;

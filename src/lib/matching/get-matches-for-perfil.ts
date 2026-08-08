@@ -1,9 +1,8 @@
 /**
  * Prefiltro SQL + matching para un perfil ya resuelto — el mismo insumo que
- * `/mis-coincidencias` y `POST /api/alertas/enviar-ahora` necesitan
- * (ver docs/plan-arquitectura-roadmap.md §3.2). Un solo sitio que decide el
- * prefiltro y el orden de presentación (PASS antes que WARN antes que
- * UNKNOWN; `FAIL` se descarta) para que ambos caminos coincidan siempre.
+ * `/mis-coincidencias` necesita (ver docs/plan-arquitectura-roadmap.md §3.2).
+ * Un solo sitio que decide el prefiltro y el orden de presentación (PASS
+ * antes que WARN antes que UNKNOWN; `FAIL` se descarta).
  */
 
 import { searchProcesosDb } from '@/src/lib/secop/db-search';

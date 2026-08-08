@@ -14,7 +14,7 @@ const TABS = [
   { href: "/licitaciones", label: "Recientes" },
   { href: "/licitaciones/explorar", label: "Explorar" },
   { href: "/licitaciones/como-participar", label: "Cómo participar" },
-  { href: "/licitaciones/descubrir", label: "Descubrir", mock: true },
+  { href: "/licitaciones/descubrir", label: "Descubrir" },
 ];
 
 export default function LicitacionesTabs() {
@@ -34,7 +34,6 @@ export default function LicitacionesTabs() {
               aria-current={isActive ? "page" : undefined}
             >
               {tab.label}
-              {tab.mock && <span className="clr-lic-tab-badge">mock</span>}
             </Link>
           );
         })}
@@ -69,13 +68,5 @@ const CSS = `
   content: "";
   position: absolute; left: 8px; right: 8px; bottom: -3px; height: 2px;
   background: var(--accent);
-}
-.clr-lic-tab-badge{
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--ink-600);
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-pill);
-  padding: 1px 6px;
 }
 `;
