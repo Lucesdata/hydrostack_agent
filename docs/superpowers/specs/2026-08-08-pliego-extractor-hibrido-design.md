@@ -1,7 +1,7 @@
 # Extractor de pliegos híbrido (reglas + fallback LLM)
 
 **Fecha**: 2026-08-08
-**Estado**: Aprobado, pendiente de plan de implementación.
+**Estado**: Implementado y en producto (commit `7310aa4`). Integrado como pestaña "Analizar pliego" en `/licitaciones`. Pendiente: calibrar `parseFormulario1.ts` contra un `.xls` real de Formulario 1 (sigue sin haber uno disponible — hasta entonces `capitulos` siempre cae a Gemini).
 
 ## Contexto
 
