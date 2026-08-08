@@ -1,98 +1,78 @@
-# Hydrostack Agent — Instrucciones del Proyecto
+# Hydrostack — Instrucciones del Proyecto
+
+HydroStack es una plataforma de inteligencia para contratación pública en
+agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
+pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto
+activo**. El dominio séptico (calculadoras de fosa séptica, agente
+conversacional Hydro_Agent, diagramas 3D) quedó deprecado el 2026-08-08 —
+ver [ADR-0002](docs/adr/ADR-0002-deprecacion-dominio-septico.md) y el tag
+de git `archive/septic-product-2026-08-08` para su estado previo completo.
 
 ---
 
-## 1. Explicación Contextual — Perfil Propietario
+## 1. Regla Global de Idioma
 
-Ofrece explicación de sistemas sépticos **solo si** detectas: el usuario dijo no saber nada, usó terminología incorrecta, o preguntó directamente qué es algo. **No** la ofrezcas si ya usó términos correctos, pidió algo concreto, o mencionó que alguien le explicó.
-
-Nunca sueltes la explicación sin avisar. Pregunta primero:
-> "Antes de seguir, ¿quieres que te explique en 1 minuto cómo funciona un sistema séptico? Te va a ayudar a entender lo que viene después. Si ya tienes idea, lo saltamos."
-
-Si acepta: máximo 4 párrafos cortos — (1) qué hace, (2) partes principales, (3) por qué fallan, (4) cierre conectado a su caso concreto. Cero jerga sin definir, analogías simples, prosa natural sin bullets. Cierra siempre con: "¿Te queda alguna duda, o seguimos viendo qué pasos tocan en tu caso?"
-
-Si dice que NO quiere: "Vale, vamos al grano." y pasa al siguiente paso.
-
----
-
-## 2. Orientación de Próximos Pasos — Perfil Propietario
-
-El agente transita por cuatro fases: diagnóstico inicial → explicación contextual (opcional) → orientación de próximos pasos → profundización.
-
-**Sub-escenarios** — ubica al usuario en UNO:
-- **Instalación nueva**: terreno virgen, requiere estudio de suelo y diseño previo
-- **Falla activa**: olores, aguas en superficie, retorno de desagüe — urgencia
-- **Sistema viejo sin falla**: prevención, inspección periódica
-- **Casa abandonada**: revisión antes de habitar, bacterias e infiltración comprometidas
-
-**Auto-detección** (umbral >50% confianza) con palabras clave ES+EN implementada en `src/lib/agent/subscenario-detector.ts`. Si se detecta, el agente **no pregunta** el sub-escenario y procede directo a orientación. Si no se detecta, pregunta una sola vez con opciones simples (ver `docs/orientation-guidance.md`).
-
-**Orientación por país**: Latinoamérica (ingeniero civil/sanitario, permisos municipales) · EEUU (Site Evaluator, perc test, Dept. of Health) · España (CTE DB-HS 5, licencia de obra, Confederación Hidrográfica). Detalle completo de sub-escenarios y errores a evitar: `docs/orientation-guidance.md`.
-
-**Reglas de presentación**: prosa conversacional, sin listas. Adapta el país automáticamente si ya se conoce. Cierra con pregunta de control: "¿Quieres detalles de alguno de estos pasos, o prefieres que te ayude a preparar preguntas para el [profesional]?" Sin precios absolutos — ofrece rangos generales solo si los piden. Términos técnicos con traducción la primera vez.
+El idioma lo fija el primer mensaje del usuario y se mantiene toda la
+sesión. Si el usuario cambia de idioma a mitad de conversación, cámbialo
+sin comentarlo. Una respuesta = un idioma; nunca mezclar español e inglés
+salvo términos técnicos oficiales que no tienen equivalente (citar en
+idioma original con traducción entre paréntesis la primera vez). Si el
+usuario pide cambio explícito de idioma ("respóndeme en inglés"), cambia
+de inmediato y mantén hasta nueva indicación.
 
 ---
 
-## 3. Regla Global de Idioma
+## 2. Dominio del producto
 
-El idioma lo fija el primer mensaje y se mantiene toda la sesión. Si el usuario cambia de idioma a mitad de conversación, cámbialo sin comentarlo. Una respuesta = un idioma; nunca mezclar español e inglés salvo términos técnicos oficiales que no tienen equivalente (citar en idioma original con traducción entre paréntesis la primera vez).
+Entidades y flujos principales (ver `AUDITORIA_ARQUITECTONICA_2026-08-08.md`
+sección C/D para el detalle completo):
 
-Términos normativos bilingües: `CTE DB-HS 5` (en inglés: "Spanish Technical Building Code") · `perc test` (en español: "prueba de percolación"). Si el usuario pide cambio explícito de idioma ("respóndeme en inglés"), cambia de inmediato y mantén hasta nueva indicación.
+- **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
+  transform → entidades canónicas (`proceso`, `contrato`,
+  `contrato_evento`, `entidad`, `proveedor`, `geografia`).
+- **Clasificación sectorial**: derivada, versionada por
+  `clasificadorVersion` (`src/lib/classify/classifier.ts`).
+- **Pliegos**: extracción híbrida (reglas + fallback Gemini) —
+  `src/lib/pliego/extractPliegoHybrid.ts`, único extractor cableado a
+  `/api/pliego/extract`.
+- **Oferente / matching**: perfil de oferente (`src/lib/oferente/`) cruzado
+  contra oportunidades (`src/lib/matching/`).
+- **Alertas**: envío diario idempotente (`src/lib/alertas/`,
+  `envio_log` UNIQUE).
 
----
+## 3. Configuración Técnica
 
-## 4. Flujo de Detección de Perfil
+- **Framework**: Next.js 14.2.3 + React 18
+- **Base de datos**: Postgres (Neon) vía Drizzle ORM
+- **Auth**: Auth.js (NextAuth v5) con Resend (magic link)
+- **LLM**: Gemini (extractor de pliegos, `GEMINI_API_KEY`)
+- **Diseño**: tokens en `app/globals.css` — `--bg:#FAFAF7`,
+  `--accent:#0369A1`
 
-Al primer contacto identifica el perfil mediante preguntas naturales:
-- **Propietario**: casa propia, responsable del mantenimiento, busca información práctica
-- **Profesional**: inspector, diseñador, ingeniero, conocimiento técnico
-- **Contratista**: instalador, mantenedor, experiencia en campo
-- **Explorando**: investiga opciones, sin decisión aún
+## 4. Seguridad
 
-Guarda el perfil detectado en memoria para toda la sesión.
+- Los endpoints `/api/cron/*` exigen `CRON_SECRET` como `Bearer` y fallan
+  cerrado (401) si la env var no está definida — ver
+  `app/api/cron/{ingest,alertas}/route.ts`.
+- No hay RLS en Postgres — la única defensa multi-tenant es el `WHERE
+  usuarioId=...` de cada query de aplicación. No asumir que esto está
+  resuelto; ver hallazgo F.2 de la auditoría antes de tocar tablas de
+  cuentas/oferente.
 
----
+## 5. Estado del roadmap
 
-## 5. Implementación Técnica — Auto-detección
-
-- **Archivo**: `src/lib/agent/subscenario-detector.ts`
-- **Función**: `detectSubscenario(userMessage: string)` → `{subscenario, confidence, detectedKeywords}`
-- **Inyección**: `app/api/agent/route.ts` POST — activa cuando `userProfile === "owner"` y no hay sub-escenario previo
-- **Umbral**: confianza > 50% para proceder sin preguntar
-
----
-
-## 6. Configuración Técnica
-
-- **Modelo**: Groq `llama-3.3-70b-versatile`
-- **Framework**: Next.js 14.2.3 + React
-- **API Key**: variable de entorno `GROQ_API_KEY`
-- **Respuestas**: breves y concretas; explicaciones solo si se solicitan
-- **Diseño**: tokens reales en `app/globals.css` — tema claro (landing/navbar/hubs) `--bg:#FAFAF7`, `--accent:#0369A1`; tema oscuro "cyberpunk" (calculadoras/Hydro_Agent) en el mismo `:root`, documentado ahí
-
----
-
-## 7. Roadmap — Estado de Fases
-
-Aplica al módulo de cálculo SITARD (fosa séptica + campo de infiltración), no al comportamiento conversacional.
-
-| Fase | Descripción | Estado | Fecha |
-|------|-------------|--------|-------|
-| 0 | Corrección normativa (Res. 0330/2017, Art. 134–145) | ✅ | 2026-05-23 |
-| 1 | Cálculo básico (V_N, Cr=0.85, Van't Hoff, suite caudales) | ✅ | 2026-05-24 |
-| 2 | UI geoespacial — formulario de campo + tab Site Checks | ✅ | 2026-05-25 |
-| 3 | Campo de drenaje (perc test ASTM D6391, FS configurable, 6 tipos) | ✅ | 2026-05-25 |
-| 4 | Informe PDF profesional (portada, checklist, área de firma) | ✅ | 2026-05-25 |
-| 5 | Calculadora de mantenimiento (cronograma, colmatación, checklist) | ✅ | 2026-05-25 |
-| 6 | Geolocalización real (Leaflet + Open-Meteo) | ✅ | 2026-05-25 |
-
-Todas las fases completadas al 2026-05-25. Ver `git log` para detalle de cambios por fase.
+Ver `PENDIENTES.md` para pendientes activos y `docs/fase-*/` para el
+historial de decisiones de diseño por fase. Para el estado arquitectónico
+completo, `AUDITORIA_ARQUITECTONICA_2026-08-08.md` es la referencia vigente
+más reciente.
 
 ---
 
 ## Notas Finales
 
-Estas instrucciones son **obligatorias** y definen el comportamiento del agente. Cualquier cambio debe documentarse aquí. Última actualización: 2026-05-25.
+Estas instrucciones son **obligatorias** y definen el comportamiento del
+agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
+Última actualización: 2026-08-08.
 
 ## graphify
 

@@ -1,86 +1,55 @@
-# 🌊 HydroStack — Water & Sanitation Engineering Tools
+# 🌊 HydroStack — Inteligencia para contratación pública en agua y saneamiento
 
-**Professional calculation and design tools for wastewater treatment systems. Now with AI-powered guidance and 3D visualization.**
+**Plataforma que cruza el perfil de un oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.**
 
-**Live:** https://hydrostack.io  
-**Status:** ✅ Production Ready  
-**Last Updated:** May 2026
-
----
-
-## 📖 Quick Navigation
-
-- **[Getting Started](#getting-started)** — Installation & first run
-- **[Features](#-features)** — What HydroStack can do
-- **[Project Structure](#-project-structure)** — How the codebase is organized
-- **[Documentation](#-documentation)** — Full guides by topic
-- **[Development](#-development)** — For developers extending the project
-- **[Deployment](#-deployment)** — How to deploy to production
+**Live:** https://hydrostack.io
+**Status:** ✅ En producción
 
 ---
 
-## ✨ Features
+## ✨ Qué hace
 
-### 🧮 **Septic Tank Calculator**
-- Hydraulic design per international standards
-- Automatic tank sizing based on users and regulations
-- Infiltration field dimensioning
-- Real-time parameter validation
-- Support for multiple design norms (EPA, RAS, CTE HS-5, AS/NZS)
+### 🔍 **Exploración de procesos SECOP**
+- Procesos activos y contratos en agua y saneamiento, actualizados diariamente desde SECOP II (Socrata).
+- Filtro por defecto al sector agua; búsqueda por entidad, departamento, estado, valor y fecha.
 
-### 🤖 **AI-Powered Guidance (Agent)**
-- Context-aware explanations of septic systems
-- Scenario detection (new installation, active failure, aging system, abandoned house)
-- Country-specific guidance (procedures, regulations, professionals)
-- Bilingual support (Spanish/English)
-- Auto-detection of user expertise level
+### 📄 **Extracción de pliegos**
+- Extractor híbrido (reglas + fallback con Gemini) que decodifica requisitos legales y técnicos de un pliego en minutos.
+- Contrato de salida validado por schema — no confía directamente en el JSON generado por el LLM.
 
-### 🎨 **3D Isometric Diagrams**
-- Professional technical drawings of complete systems
-- Dual rendering modes:
-  - **SVG Vector** — Instant, clean, professional
-  - **Photorealistic** — Detailed, presentation-ready (via Claude API)
-- One-click PNG export
-- Real-time updates with parameter changes
+### 👤 **Perfil de oferente y elegibilidad**
+- Mini-wizard de perfil de oferente (RUP, capacidad financiera) sin necesidad de cuenta.
+- Cruce contra los requisitos habilitantes de cada proceso.
 
-### 📊 **Technical Data Panels**
-- All design calculations displayed alongside visualizations
-- Professional formatting for reports
-- Normalized values per standard
+### 🔔 **Alertas**
+- Envío diario de coincidencias por correo (Resend), idempotente por diseño (`envio_log`).
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+### Requisitos
+- Node.js 18+
+- npm
 
-### Installation
+### Instalación
 
 ```bash
-# Clone repository
 git clone <repo-url>
 cd hydrostack-2
-
-# Install dependencies
 npm install
-
-# Set up environment variables
 cp .env.example .env.local
-
-# (Optional) For image generation:
-# Add ANTHROPIC_API_KEY to .env.local
+# completa DATABASE_URL, AUTH_SECRET, AUTH_RESEND_KEY, GEMINI_API_KEY (ver .env.example)
 ```
 
-### Development Server
+### Desarrollo
 
 ```bash
 npm run dev
-# → Open http://localhost:3000
+# → http://localhost:3000
 ```
 
-### Build for Production
+### Build de producción
 
 ```bash
 npm run build
@@ -89,318 +58,96 @@ npm run start
 
 ---
 
-## 📁 Project Structure
+## 📁 Estructura del proyecto
 
 ```
-hydrostack-2/
+├── CLAUDE.md                    # Reglas de comportamiento del agente
+├── PENDIENTES.md                # Pendientes activos
+├── AUDITORIA_ARQUITECTONICA_2026-08-08.md   # Estado arquitectónico vigente
 │
-├── 📄 README.md                        # This file
-├── 📄 CLAUDE.md                        # AI Agent behavior rules
-├── 📄 GETTING_STARTED.md               # Quick start guide
+├── docs/
+│   ├── adr/                     # Decisiones arquitectónicas
+│   ├── fase-0/, fase-1/, fase-a/ # Historial de diseño por fase
+│   └── secop/                   # Casos de referencia (gate de calidad del extractor)
 │
-├── docs/                               # Documentation by topic
-│   ├── index.md                        # Documentation index
-│   ├── ARCHITECTURE.md                 # System architecture
-│   ├── AGENT.md                        # AI agent guide
-│   ├── DIAGRAMS_3D.md                  # 3D diagram usage
-│   ├── DEVELOPERS.md                   # Developer reference
-│   ├── FEATURES.md                     # Feature overview
-│   ├── agent/                          # Technical agent docs
-│   ├── normativa/                      # Standards by country
-│   └── api/                            # API documentation
+├── app/                          # Next.js App Router
+│   ├── licitaciones/            # Exploración de procesos SECOP
+│   ├── pliego/                  # Extractor de pliegos
+│   ├── cuenta/                  # Cuenta de usuario (Auth.js)
+│   ├── mis-coincidencias/       # Alertas / matching
+│   └── api/
+│       ├── secop/               # Procesos, contratos, veredicto de elegibilidad
+│       ├── pliego/extract/      # Extracción de pliegos (Gemini)
+│       ├── cron/                # Ingesta diaria + alertas (Vercel Cron)
+│       ├── alertas/              # Preferencias, unsubscribe
+│       ├── perfil/               # Perfil de oferente
+│       └── auth/                # Auth.js
 │
-├── app/                                # Next.js App Router
-│   ├── layout.js                       # Global layout
-│   ├── page.js                         # Home page
-│   ├── chat/                           # Chat interface
-│   ├── calculators/                    # Calculator pages
-│   │   └── fosa-septica/              # Septic tank calculator
-│   └── api/                            # API routes
-│       ├── chat/                       # Agent chat endpoint
-│       ├── agent/                      # Agent utility endpoints
-│       └── generate-isometric/         # 3D diagram generation
+├── src/
+│   ├── components/secop/        # SecopExplorer, OferenteWizard
+│   ├── lib/
+│   │   ├── ingest/, transform/  # Pipeline ELT (SECOP/Socrata → Postgres)
+│   │   ├── classify/            # Clasificación sectorial
+│   │   ├── pliego/              # Extractor híbrido + validación
+│   │   ├── oferente/, matching/ # Perfil de oferente + elegibilidad
+│   │   ├── alertas/, email/     # Envío diario de alertas
+│   │   ├── auth/, db/           # Auth.js, Drizzle + schema
+│   │   └── secop/               # Cliente de datos SECOP
+│   └── __tests__/               # Tests (Vitest)
 │
-├── src/                                # Source code
-│   ├── components/                     # React components
-│   │   ├── HydroAgent/                # AI agent UI
-│   │   ├── calculator/                # Calculator components
-│   │   └── Common/                    # Shared components
-│   ├── lib/                           # Utilities & logic
-│   │   ├── agent/                     # Agent logic
-│   │   ├── calculations/              # Engineering calculations
-│   │   ├── validation/                # Input validation
-│   │   └── i18n.js                    # Translations (ES/EN)
-│   └── __tests__/                     # Test files
-│
-├── public/                             # Static assets
-│   └── reports/                        # Report templates
-│
-├── .env.example                        # Environment template
-├── tsconfig.json                       # TypeScript config
-├── next.config.js                      # Next.js config
-├── package.json                        # Dependencies
-└── vitest.config.ts                    # Test configuration
+├── scripts/                     # Ingesta/transform/análisis de pliegos vía CLI
+└── drizzle/                     # Migraciones
 ```
 
 ---
 
-## 📚 Documentation
+## 💻 Desarrollo
 
-### Getting Started
-- **[GETTING_STARTED.md](./GETTING_STARTED.md)** — First 5 minutes guide
-- **[docs/index.md](./docs/index.md)** — Full documentation index
-
-### For Users
-- **[docs/DIAGRAMS_3D.md](./docs/DIAGRAMS_3D.md)** — How to use 3D diagrams
-- **[docs/FEATURES.md](./docs/FEATURES.md)** — Feature overview
-
-### For Developers
-- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — System design
-- **[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)** — Developer guide
-- **[docs/AGENT.md](./docs/AGENT.md)** — AI agent technical guide
-- **[docs/api/](./docs/api/)** — API endpoints reference
-
-### Standards & Regulations
-- **[docs/normativa/](./docs/normativa/)** — Standards by country
-
----
-
-## 💻 Development
-
-### Technology Stack
-
-| Layer | Technology |
+| Capa | Tecnología |
 |-------|-----------|
 | **Framework** | Next.js 14 (App Router) |
-| **UI** | React 18, CSS-in-JS |
-| **Language** | TypeScript |
-| **Testing** | Vitest + manual coverage |
-| **Deployment** | Vercel, GitHub |
-| **AI Integration** | Anthropic Claude API (optional) |
+| **UI** | React 18 |
+| **Lenguaje** | TypeScript |
+| **Base de datos** | Postgres (Neon) vía Drizzle ORM |
+| **Auth** | Auth.js (NextAuth v5), magic link vía Resend |
+| **LLM** | Gemini (extractor de pliegos) |
+| **Testing** | Vitest |
+| **Deployment** | Vercel |
 
-### Code Organization
-
-- **Components**: React functional components with TypeScript
-- **Lib**: Pure functions for calculations and utilities
-- **Tests**: Unit tests in `__tests__/` parallel structure
-- **Types**: TypeScript interfaces in `src/types/`
-- **i18n**: Translation strings in `src/lib/i18n.js`
-
-### Running Tests
+### Tests
 
 ```bash
-npm run test           # Run all tests
-npm run test:watch    # Watch mode
-npm run test:ui       # Interactive UI
+npm run test           # Correr todos los tests
+npm run test:watch     # Modo watch
 ```
 
-### Code Standards
-
-- **No external UI libraries** — Pure CSS/React styling
-- **TypeScript everywhere** — Type-safe development
-- **Client-side calculations** — Zero database dependency
-- **Bilingual support** — Spanish/English via i18n
-- **Responsive design** — Mobile-first approach
-
-### Adding a New Calculator
-
-1. Create calculator page: `app/calculators/[slug]/page.js`
-2. Create calculator component: `src/components/calculator/[Name].jsx`
-3. Add calculation logic to `src/lib/calculations/`
-4. Register in module list (see `app/page.js`)
-5. Add documentation to `docs/`
-
----
-
-## 🚀 Deployment
-
-### Option 1: Vercel (Recommended)
+### Scripts de datos
 
 ```bash
-npm install -g vercel
-vercel
-# Follow prompts → deployed in ~60 seconds
+npm run db:ingest              # Ingesta manual (SECOP/Socrata → raw_record)
+npm run db:transform           # Transform (raw_record → entidades canónicas)
+npm run db:seed-geografia      # Seed de catálogo de geografía
+npm run analyze-pliego-hybrid  # Prueba el extractor híbrido contra un PDF local
 ```
 
-### Option 2: GitHub + Vercel Dashboard
+---
 
-1. Push repo to GitHub
-2. Go to https://vercel.com/new
-3. Import repository
-4. Click Deploy (no config needed)
+## 🔒 Seguridad
 
-### Option 3: Docker / Custom Server
-
-```bash
-npm run build
-npm run start
-# Server runs on http://localhost:3000
-```
-
-### Environment Variables
-
-**Required for image generation:**
-```
-ANTHROPIC_API_KEY=sk-your-anthropic-key
-```
-
-**Optional:**
-- `GROQ_API_KEY` — For faster agent responses (fallback if using Groq)
+- `/api/cron/*` exige `CRON_SECRET` como `Bearer` y falla cerrado (401) si la variable no está definida.
+- No hay RLS en Postgres — la defensa multi-tenant depende del `WHERE usuarioId=...` de cada query de aplicación. Ver `AUDITORIA_ARQUITECTONICA_2026-08-08.md` hallazgo F.2 antes de tocar tablas de cuentas/oferente.
 
 ---
 
-## 🔧 Configuration
+## 📚 Documentación
 
-### Project Settings
-- **`.claude/settings.local.json`** — Claude Code IDE settings
-- **`.env.local`** — Environment variables (git-ignored)
-- **`tsconfig.json`** — TypeScript compilation options
-- **`next.config.js`** — Next.js build settings
-
-### Customization
-
-**3D Diagram Colors & Scale:**
-Edit `src/components/IsometricDiagram.jsx` (lines 10–30)
-
-**Calculations Precision:**
-Edit `src/lib/calculations/*.ts`
-
-**UI Styling:**
-Edit component inline styles (no CSS files)
+- **[CLAUDE.md](./CLAUDE.md)** — reglas de comportamiento del agente sobre este repo
+- **[AUDITORIA_ARQUITECTONICA_2026-08-08.md](./AUDITORIA_ARQUITECTONICA_2026-08-08.md)** — mapa de arquitectura, hallazgos y roadmap técnico vigente
+- **[docs/adr/](./docs/adr/)** — decisiones arquitectónicas
+- **[PENDIENTES.md](./PENDIENTES.md)** — pendientes activos
 
 ---
 
-## 📊 Performance
+## 📄 Licencia
 
-| Metric | Value |
-|--------|-------|
-| **SVG Render Time** | <50ms |
-| **PNG Export** | 1–2s |
-| **AI Response** | 2–5s |
-| **Image Generation** | 30–60s |
-| **Bundle Size** | ~120 KB (minified) |
-| **Build Time** | <30s |
-
----
-
-## 🌍 Supported Standards
-
-- **USA** — EPA On-Site Wastewater Guidelines
-- **Colombia** — RAS 2000 (Reglamento Técnico del Sector)
-- **Spain** — CTE DB-HS 5 (Código Técnico de Edificación)
-- **Australia/NZ** — AS/NZS 1547 On-site Sewerage
-- **UK** — Building Regulations Approved Document H
-- **International** — EN 12566-1 (European Standard)
-
----
-
-## 🤝 Contributing
-
-### How to Report Issues
-1. Check if issue already exists
-2. Create detailed issue with:
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Screenshots if applicable
-   - Environment info (browser, OS, Node version)
-
-### How to Contribute Code
-1. Fork repository
-2. Create feature branch: `git checkout -b feature/my-feature`
-3. Write tests for new code
-4. Update documentation
-5. Submit pull request with clear description
-
----
-
-## 📞 Support
-
-### Documentation
-- **Quick help:** Check [docs/](./docs/)
-- **Common issues:** See [FAQ](#faq) below
-- **Code examples:** Browse `__tests__/` for usage patterns
-
-### FAQ
-
-**Q: Is HydroStack free?**  
-A: Yes, fully open source.
-
-**Q: Can I use it for commercial projects?**  
-A: Yes, with attribution.
-
-**Q: Do I need an Anthropic API key?**  
-A: No. 3D diagrams work free. AI guidance requires API key for images.
-
-**Q: Does it work offline?**  
-A: Yes! Calculations are client-side. No API calls required except for image generation.
-
-**Q: What browsers are supported?**  
-A: Modern browsers (Chrome, Firefox, Safari, Edge). Mobile responsive.
-
----
-
-## 🗺️ Roadmap
-
-### ✅ Complete (v1.0)
-- Septic tank calculator
-- 3D isometric diagrams (SVG + image)
-- AI agent with scenario detection
-- Multi-language support
-- Multiple standards support
-
-### 🔄 Planned (v1.1)
-- PDF export for diagrams
-- Flow animation
-- Direct DALL-E integration
-- More detailed reporting
-
-### 📅 Future (v2.0)
-- Imhoff tanks
-- UASB reactors
-- Constructed wetlands
-- 3D model export (STL/OBJ)
-- Advanced cost analysis
-
----
-
-## 📄 License
-
-Open Source — See LICENSE file for details
-
----
-
-## 👥 Credits
-
-**HydroStack Team**  
-**Version**: 1.0.0  
-**Last Updated**: May 2026
-
-**Built on:**
-- EN 12566-1 (European septic tank standard)
-- EPA On-Site Wastewater Guidelines
-- RAS 2000 (Colombian regulations)
-- CTE DB-HS 5 (Spanish building code)
-- Open-source community standards
-
----
-
-## 📋 Changelog
-
-### v1.0.0 (May 2026)
-- ✨ Full septic tank calculator
-- 🎨 3D isometric diagrams
-- 🤖 AI agent with auto-detection
-- 🌍 Multi-language support
-- 📊 Professional diagrams export
-
----
-
-**Ready to get started?** → [GETTING_STARTED.md](./GETTING_STARTED.md)
-
-**Need developer docs?** → [docs/DEVELOPERS.md](./docs/DEVELOPERS.md)
-
-**Looking for architecture?** → [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-
----
-
-**Happy engineering! 🌊**
+Privado — todos los derechos reservados.

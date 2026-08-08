@@ -31,8 +31,10 @@ Acción: replicar el patrón de degradación honesta que ya usa `app/api/landing
 
 **Nota:** se eliminó `MOCK_ITEMS` y el archivo `mockProcesos.js` (sin otros consumidores). El componente ahora tiene tres estados explícitos — `loading` / `live` / `empty` — y degrada a "— sin datos disponibles en este momento —" si la API falla o no trae ítems.
 
-### 4. Destino de `app/experiencia/`
-Página con `ScrollFilm.jsx` y videos en `/public/experiencia/` de un rediseño anterior — nadie la enlaza hoy. Decidir: integrarla como sección "Proyectos" real o eliminarla (código + assets).
+### 4. Destino de `app/experiencia/` — ✅ resuelto 2026-08-08
+Página con `ScrollFilm.jsx` y videos en `/public/experiencia/` de un rediseño anterior — nadie la enlazaba.
+
+**Nota:** eliminada como parte de la consolidación de HydroStack como producto SECOP único (ver [ADR-0002](docs/adr/ADR-0002-deprecacion-dominio-septico.md)). Recuperable desde el tag `archive/septic-product-2026-08-08` si se retoma.
 
 ### 5. Grounding del extractor no verificado
 La `cita_textual` la autoreporta el modelo; no hay capa de texto extraído del PDF contra la cual verificar que la cita exista literalmente. Considerar verificador determinístico (page/offset).
