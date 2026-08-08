@@ -9,7 +9,7 @@ export default function ProfileDetector({ profileOptions, onSelect, isLanding })
       </div>
 
       <div style={isLanding ? S.titleLanding : S.titlePage} className="fade-up-1">
-        ¿Cuál es tu perfil? / What's your profile?
+        ¿Cuál es tu perfil? / What&apos;s your profile?
       </div>
 
       <div style={S.optionsWrap} className="fade-up-2">

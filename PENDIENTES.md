@@ -67,8 +67,10 @@ Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con conve
 
 **Nota:** resueltos los 4 puntos explícitos del pendiente (versión de Next, tokens de color en `CLAUDE.md`; extensiones/rutas reales en `README.md`; nota del índice GIN retirado en `docs/fase-0/0.1-modelo-datos.md`; aviso de legado en `docs/agent/STEP-1-tool-use.md`). El punto de las "18 tablas" no estaba en el alcance que se me dio para este ítem — queda para una futura pasada de documentación. `page.js:248` con `#FCFCF9` inline tampoco se tocó (es apariencia visual existente, no un dato de doc desactualizado).
 
-### 10. 12 errores de lint conocidos desde 2026-07-18
+### 10. 12 errores de lint conocidos desde 2026-07-18 — ✅ resuelto 2026-08-08
 `react/no-unescaped-entities` en varios `.jsx`/`.tsx` y regla ESLint inexistente en `src/lib/db/client.ts:34,36`. Ver `AUDITORIA_TECH_DEBT.md`.
+
+**Nota:** `npx next lint` corrió limpio de errores tras el fix (quedan solo 4 warnings preexistentes — react-hooks/exhaustive-deps ×2, no-img-element, aria-pressed — no forman parte de este pendiente). Comillas escapadas con `&quot;`/`&apos;` en `ProfileDetector.jsx`, `IsometricDiagram.jsx` (×2), `CalculatorSchematics.jsx`, `ComoParticipar.tsx` (×2 líneas); en `src/lib/db/client.ts:34,36` se quitaron los comentarios `eslint-disable-next-line @typescript-eslint/no-require-imports` (la regla no existe en esta config, que solo extiende `next/core-web-vitals` sin el plugin de typescript-eslint).
 
 ---
 

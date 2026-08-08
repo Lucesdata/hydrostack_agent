@@ -31,7 +31,7 @@ export default function ComoParticipar() {
 
         <section className="clr-cp-section">
           <p>
-            "Participar" en un proceso de SECOP II significa presentar una
+            &quot;Participar&quot; en un proceso de SECOP II significa presentar una
             oferta formal antes de que cierre el plazo, cumpliendo los
             requisitos que la entidad pidió en el pliego de condiciones. Puedes
             hacerlo como empresa (persona jurídica) o como persona natural —
@@ -75,7 +75,7 @@ export default function ComoParticipar() {
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">3. Lee el pliego de condiciones completo</h2>
           <p>
-            El pliego (o "documento del proceso") vive en SECOP II, en el
+            El pliego (o &quot;documento del proceso&quot;) vive en SECOP II, en el
             detalle del proceso. Ahí están los requisitos habilitantes
             exactos, el cronograma (fecha de cierre, plazo para aclaraciones,
             posibles adendas que modifican las reglas), las garantías que vas

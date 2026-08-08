@@ -179,7 +179,7 @@ function DetailedSchematic({ r, freeboard }) {
       {/* submergence annotation */}
       <line x1={x0+6} y1={pipeY_in} x2={x0+6} y2={pipeY_in+subIn} stroke="#00a0c0" strokeWidth="0.8" strokeDasharray="2,2"
         markerStart="url(#arrowN)" markerEnd="url(#arrowS)"/>
-      <text x={x0+9} y={pipeY_in+subIn/2+3} fill="#3a8090" fontSize="6" fontFamily="monospace">12" (30cm)</text>
+      <text x={x0+9} y={pipeY_in+subIn/2+3} fill="#3a8090" fontSize="6" fontFamily="monospace">12&quot; (30cm)</text>
 
       {/* ── T-pipe OUTLET ── */}
       <line x1={x0+tW} y1={pipeY_out+5} x2={x0+tW+36} y2={pipeY_out+5} stroke="#4ab0c0" strokeWidth="3.5" strokeLinecap="round"/>

@@ -31,9 +31,7 @@ function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
   if (process.env.DB_DRIVER === 'node') {
     // Driver local node-postgres. Import perezoso: solo se carga si se pide,
     // así el bundle de producción (Neon) no arrastra `pg`.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Pool: PgPool } = require('pg');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { drizzle: drizzleNode } = require('drizzle-orm/node-postgres');
     const pool: MinimalPool = new PgPool({
       connectionString: process.env.DATABASE_URL,

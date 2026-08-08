@@ -165,7 +165,7 @@ function SepticSystemIsometric({ r, projectName = "Proyecto", location = "Sitio"
 
         {/* Pipe label */}
         <text x={cx - 80} y={cy - 20} fontSize="9" fill={DS.amberBright} fontFamily="monospace"
-          fontWeight="bold">TUBERÍA PVC Ø 4"</text>
+          fontWeight="bold">TUBERÍA PVC Ø 4&quot;</text>
       </g>
 
       {/* SEPTIC TANK (main component) */}
@@ -498,7 +498,7 @@ Style: Professional CAD-style technical illustration, detailed, clear labeling, 
           fontSize: "13px",
           fontFamily: "monospace",
         }}>
-          Haz clic en "Generar Imagen Fotorrealista" para crear una visualización detallada en alta calidad
+          Haz clic en &quot;Generar Imagen Fotorrealista&quot; para crear una visualización detallada en alta calidad
         </div>
       )}
     </div>
