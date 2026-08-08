@@ -20,7 +20,8 @@
     "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
     "analyze-pliego": "tsx scripts/analyze-pliego.ts",
     "analyze-pliego-groq": "tsx scripts/analyze-pliego-groq.ts",
-    "analyze-pliego-gemini": "tsx scripts/analyze-pliego-gemini.ts"
+    "analyze-pliego-gemini": "tsx scripts/analyze-pliego-gemini.ts",
+    "analyze-pliego-hybrid": "tsx scripts/analyze-pliego-hybrid.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
@@ -32,6 +33,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "babylonjs": "^9.4.1",
     "drizzle-orm": "^0.45.2",
+    "exceljs": "^4.4.0",
     "leaflet": "^1.9.4",
     "next": "14.2.3",
     "next-auth": "^5.0.0-beta.32",

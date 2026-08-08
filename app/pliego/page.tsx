@@ -1,30 +1,36 @@
 "use client";
 
 /**
- * /pliego — primer cableado UI de la extracción de pliegos (Hydro_Agent Capa 3).
- * Antes solo existía como script CLI (scripts/analyze-pliego.ts). Mínimo viable:
- * subir un PDF, llamar a POST /api/pliego/extract, mostrar el JSON resultante.
- * Sin persistencia en DB, sin auth extra — ver docs/architecture para el resto
- * del mapa.
+ * /pliego — cableado UI de la extracción de pliegos (Hydro_Agent Capa 3),
+ * integrado como pestaña de Licitaciones. Sube el Documento Base (+ opcional
+ * Formulario 1 de presupuesto) y llama a POST /api/pliego/extract, que corre
+ * el extractor híbrido: reglas primero, Gemini solo para lo que falte — ver
+ * src/lib/pliego/extractPliegoHybrid.ts. Sin persistencia en DB, sin auth
+ * extra — ver docs/architecture para el resto del mapa.
  */
 
 import { useState } from "react";
+import LicitacionesTabs from "@/src/components/secop/LicitacionesTabs";
 import { formatCopFull } from "@/src/components/secop/format";
 import type { PliegoExtraction } from "@/src/lib/pliego/schema";
 import type { ValidationReport } from "@/src/lib/pliego/validate";
 
 type Status = "idle" | "loading" | "error" | "done";
+type CampoOrigen = "reglas" | "llm";
 
 interface ExtractResponse {
   extraction: PliegoExtraction;
   validation: ValidationReport;
+  origen: Record<"reglas_presupuesto" | "requisitos_habilitantes" | "capitulos", CampoOrigen>;
 }
 
 const CONFIANZA_LABEL: Record<string, string> = { alta: "Alta", media: "Media", baja: "Baja" };
 const SEVERIDAD_LABEL: Record<string, string> = { alta: "Alta", media: "Media", baja: "Baja" };
+const ORIGEN_LABEL: Record<CampoOrigen, string> = { reglas: "Reglas", llm: "LLM" };
 
 export default function PliegoPage() {
   const [file, setFile] = useState<File | null>(null);
+  const [formulario1, setFormulario1] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractResponse | null>(null);
@@ -39,6 +45,7 @@ export default function PliegoPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      if (formulario1) formData.append("formulario1", formulario1);
       const res = await fetch("/api/pliego/extract", { method: "POST", body: formData });
       const body = await res.json();
       if (!res.ok) {
@@ -57,13 +64,15 @@ export default function PliegoPage() {
   return (
     <div className="clr-page">
       <div className="clr-container clr-pl-container">
+        <LicitacionesTabs />
         <header className="clr-pl-header">
           <span className="clr-tag">Hydro_Agent · Capa 3</span>
           <h1 className="clr-h1">Extracción de pliegos</h1>
           <p className="clr-sub">
-            Sube el PDF del pliego de condiciones de un proceso SECOP II y Claude extrae presupuesto,
-            cronograma, requisitos habilitantes y lagunas del documento — con cita textual y validación
-            aritmética de cada ítem.
+            Sube el Documento Base de un proceso SECOP II — y, si lo tienes, el Formulario 1 de
+            presupuesto (Excel) — y el extractor híbrido saca presupuesto, causales de rechazo,
+            requisitos habilitantes y lagunas del documento. Lo que puede resolverse con reglas
+            deterministas (sin modelo) se resuelve así; el resto cae a Gemini.
           </p>
         </header>
 
@@ -76,7 +85,17 @@ export default function PliegoPage() {
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               disabled={status === "loading"}
             />
-            <span>{file ? file.name : "Elegir PDF…"}</span>
+            <span>{file ? file.name : "Elegir Documento Base (PDF)…"}</span>
+          </label>
+          <label className="clr-pl-file" htmlFor="formulario1-file">
+            <input
+              id="formulario1-file"
+              type="file"
+              accept=".xls,.xlsx"
+              onChange={(e) => setFormulario1(e.target.files?.[0] ?? null)}
+              disabled={status === "loading"}
+            />
+            <span>{formulario1 ? formulario1.name : "Formulario 1 (Excel, opcional)…"}</span>
           </label>
           <button type="submit" className="clr-pl-btn" disabled={!file || status === "loading"}>
             {status === "loading" ? "Analizando…" : "Analizar pliego"}
@@ -85,7 +104,7 @@ export default function PliegoPage() {
 
         {status === "loading" && (
           <p className="clr-pl-note">
-            Puede tardar 30–90 segundos (thinking adaptativo + effort alto). No cierres esta pestaña.
+            Puede tardar 10–40 segundos. No cierres esta pestaña.
           </p>
         )}
 
@@ -157,8 +176,14 @@ export default function PliegoPage() {
   );
 }
 
+function OrigenBadge({ origen }: { origen: CampoOrigen }) {
+  return (
+    <span className={`clr-pl-origen clr-pl-origen-${origen}`}>{ORIGEN_LABEL[origen]}</span>
+  );
+}
+
 function PliegoResult({ data }: { data: ExtractResponse }) {
-  const { extraction: x, validation: v } = data;
+  const { extraction: x, validation: v, origen } = data;
   const confianzaColor =
     x.verificacion.confianza_general === "alta"
       ? "#16A34A"
@@ -215,7 +240,18 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
       </section>
 
       <section className="clr-pl-section">
-        <h2 className="clr-pl-h2">Requisitos habilitantes</h2>
+        <h2 className="clr-pl-h2">
+          Causales de rechazo ({x.reglas_presupuesto.length}) <OrigenBadge origen={origen.reglas_presupuesto} />
+        </h2>
+        <ul className="clr-pl-list">
+          {x.reglas_presupuesto.map((r, idx) => <li key={idx}>{r}</li>)}
+        </ul>
+      </section>
+
+      <section className="clr-pl-section">
+        <h2 className="clr-pl-h2">
+          Requisitos habilitantes <OrigenBadge origen={origen.requisitos_habilitantes} />
+        </h2>
         <dl className="clr-pl-dl">
           <div><dt>Experiencia específica</dt><dd>{x.requisitos_habilitantes.experiencia_especifica}</dd></div>
           <div><dt>Capacidad financiera</dt><dd>{x.requisitos_habilitantes.capacidad_financiera}</dd></div>
@@ -235,7 +271,10 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
       )}
 
       <section className="clr-pl-section">
-        <h2 className="clr-pl-h2">Presupuesto por capítulo ({x.capitulos.reduce((n, c) => n + c.items.length, 0)} ítems)</h2>
+        <h2 className="clr-pl-h2">
+          Presupuesto por capítulo ({x.capitulos.reduce((n, c) => n + c.items.length, 0)} ítems){" "}
+          <OrigenBadge origen={origen.capitulos} />
+        </h2>
         {x.capitulos.map((cap, ci) => (
           <div key={ci} className="clr-pl-cap">
             <h3>{cap.nombre}</h3>
@@ -294,6 +333,18 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           align-items: center;
           gap: 10px;
         }
+        .clr-pl-origen {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          padding: 2px 7px;
+          border-radius: 999px;
+          border: 1px solid;
+        }
+        .clr-pl-origen-reglas { color: #16A34A; border-color: #16A34A; background: rgba(22,163,74,0.08); }
+        .clr-pl-origen-llm { color: var(--ink-300); border-color: var(--line); background: var(--surface-alt); }
         .clr-pl-dl { display: grid; gap: 8px; }
         .clr-pl-dl > div { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; }
         .clr-pl-dl dt { flex: 0 0 170px; color: var(--ink-300); font-family: var(--font-mono); font-size: 11.5px; }

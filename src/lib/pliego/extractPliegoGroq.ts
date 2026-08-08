@@ -13,40 +13,27 @@
  * el JSON Schema en la API.
  */
 
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import { PLIEGO_JSON_SCHEMA, parsePliegoExtraction, type PliegoExtraction } from './schema';
 import { buildExtractionPrompt } from './prompt';
-
-const execFileAsync = promisify(execFile);
+import { pdfToText } from './rules/pdfToText';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const DEFAULT_MAX_TOKENS = 32000;
-
-async function pdfToText(pdfPath: string): Promise<string> {
-  const { stdout } = await execFileAsync('pdftotext', ['-layout', pdfPath, '-'], {
-    maxBuffer: 1024 * 1024 * 50,
-  });
-  if (!stdout.trim()) {
-    throw new Error('pdftotext no extrajo texto — ¿el PDF es un escaneo sin OCR?');
-  }
-  return stdout;
-}
 
 export interface ExtractGroqOptions {
   maxTokens?: number;
 }
 
 export async function extractPliegoGroq(
-  pdfPath: string,
+  pdf: string | Buffer,
   opts: ExtractGroqOptions = {},
 ): Promise<PliegoExtraction> {
   if (!process.env.GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY no definida. Configúrala en .env.local.');
   }
 
-  const text = await pdfToText(pdfPath);
+  const text = await pdfToText(pdf);
 
   const systemPrompt = [
     buildExtractionPrompt(),

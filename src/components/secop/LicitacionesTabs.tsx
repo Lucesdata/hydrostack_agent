@@ -15,6 +15,7 @@ const TABS = [
   { href: "/licitaciones/explorar", label: "Explorar" },
   { href: "/licitaciones/como-participar", label: "Cómo participar" },
   { href: "/licitaciones/descubrir", label: "Descubrir" },
+  { href: "/pliego", label: "Analizar pliego" },
 ];
 
 export default function LicitacionesTabs() {
