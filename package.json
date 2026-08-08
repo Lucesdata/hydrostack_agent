@@ -18,7 +18,6 @@
     "db:transform": "tsx scripts/run-transform.ts",
     "db:ingest": "tsx scripts/run-ingest.ts",
     "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
-    "analyze-pliego": "tsx scripts/analyze-pliego.ts",
     "analyze-pliego-groq": "tsx scripts/analyze-pliego-groq.ts",
     "analyze-pliego-gemini": "tsx scripts/analyze-pliego-gemini.ts",
     "analyze-pliego-hybrid": "tsx scripts/analyze-pliego-hybrid.ts"
