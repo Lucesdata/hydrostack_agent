@@ -11,20 +11,20 @@
  * amplia que la de Groq para un documento de este tamaño.
  */
 
-import { readFile } from 'node:fs/promises';
-import { GoogleGenerativeAI, type Schema } from '@google/generative-ai';
-import { PLIEGO_JSON_SCHEMA, parsePliegoExtraction, type PliegoExtraction } from './schema';
-import { buildExtractionPrompt } from './prompt';
+import { readFile } from "node:fs/promises";
+import { GoogleGenerativeAI, type Schema } from "@google/generative-ai";
+import { PLIEGO_JSON_SCHEMA, parsePliegoExtraction, type PliegoExtraction } from "./schema";
+import { buildExtractionPrompt } from "./prompt";
 
-const MODEL = 'gemini-flash-lite-latest';
+const MODEL = "gemini-flash-lite-latest";
 
 /** Gemini no acepta `additionalProperties` — lo despoja recursivamente del JSON Schema. */
 function stripAdditionalProperties(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(stripAdditionalProperties);
-  if (node !== null && typeof node === 'object') {
+  if (node !== null && typeof node === "object") {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(node)) {
-      if (k === 'additionalProperties') continue;
+      if (k === "additionalProperties") continue;
       out[k] = stripAdditionalProperties(v);
     }
     return out;
@@ -41,21 +41,21 @@ export interface ExtractGeminiOptions {
 
 export async function extractPliegoGemini(
   pdf: string | Buffer,
-  opts: ExtractGeminiOptions = {},
+  opts: ExtractGeminiOptions = {}
 ): Promise<PliegoExtraction> {
   const apiKey = opts.apiKey ?? process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY no definida. Configúrala en .env.local.');
+    throw new Error("GEMINI_API_KEY no definida. Configúrala en .env.local.");
   }
 
   const pdfBuffer = Buffer.isBuffer(pdf) ? pdf : await readFile(pdf);
-  const pdfBase64 = pdfBuffer.toString('base64');
+  const pdfBase64 = pdfBuffer.toString("base64");
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: MODEL,
     generationConfig: {
-      responseMimeType: 'application/json',
+      responseMimeType: "application/json",
       responseSchema: GEMINI_SCHEMA,
       maxOutputTokens: opts.maxOutputTokens ?? 16000,
       temperature: 0,
@@ -63,14 +63,14 @@ export async function extractPliegoGemini(
   });
 
   const result = await model.generateContent([
-    { inlineData: { mimeType: 'application/pdf', data: pdfBase64 } },
+    { inlineData: { mimeType: "application/pdf", data: pdfBase64 } },
     { text: buildExtractionPrompt() },
   ]);
 
   const response = result.response;
   const finishReason = response.candidates?.[0]?.finishReason;
-  if (finishReason === 'MAX_TOKENS') {
-    throw new Error('Extracción truncada (maxOutputTokens). Sube el límite o reduce el pliego.');
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error("Extracción truncada (maxOutputTokens). Sube el límite o reduce el pliego.");
   }
 
   const text = response.text();
@@ -78,7 +78,7 @@ export async function extractPliegoGemini(
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error('La salida de Gemini no es JSON válido.');
+    throw new Error("La salida de Gemini no es JSON válido.");
   }
   return parsePliegoExtraction(raw);
 }

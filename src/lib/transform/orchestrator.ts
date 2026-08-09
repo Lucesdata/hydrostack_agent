@@ -21,17 +21,17 @@
  * de "foto actual" de la canónica.
  */
 
-import { randomUUID } from 'node:crypto';
-import { desc, eq, sql } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { rawRecord } from '@/src/lib/db/schema';
+import { randomUUID } from "node:crypto";
+import { desc, eq, sql } from "drizzle-orm";
+import { db } from "@/src/lib/db/client";
+import { rawRecord } from "@/src/lib/db/schema";
 import {
   mapContratoRow,
   mapProcesoRow,
   type ContratoProjection,
   type ProcesoProjection,
   type ProveedorProjection,
-} from './mapCanonical';
+} from "./mapCanonical";
 import {
   GeoResolver,
   batchQuarantine,
@@ -44,9 +44,9 @@ import {
   type EntidadItem,
   type ProcesoItem,
   type QuarantineEntry,
-} from './writers';
-import { rebuildContratoEventos, type EventMetrics } from './eventWriter';
-import { preclassify } from '@/src/lib/secop/document-access';
+} from "./writers";
+import { rebuildContratoEventos, type EventMetrics } from "./eventWriter";
+import { preclassify } from "@/src/lib/secop/document-access";
 
 export interface SourceMetrics {
   totalSnapshots: number; // filas en raw_record para la source
@@ -127,14 +127,17 @@ async function totalSnapshots(source: string): Promise<number> {
  */
 async function transformProcesos(geo: GeoResolver, batchId: string): Promise<SourceMetrics> {
   const m = emptyMetrics();
-  const snapshots = await latestSnapshots('secop_ii_procesos');
-  m.totalSnapshots = await totalSnapshots('secop_ii_procesos');
+  const snapshots = await latestSnapshots("secop_ii_procesos");
+  m.totalSnapshots = await totalSnapshots("secop_ii_procesos");
   m.uniqueRecords = snapshots.length;
 
   const quarantineEntries: QuarantineEntry[] = [];
   const entidadItems: EntidadItem[] = [];
-  const pending: { snap: LatestSnapshot; projection: ProcesoProjection; entidadGeo: string | null }[] =
-    [];
+  const pending: {
+    snap: LatestSnapshot;
+    projection: ProcesoProjection;
+    entidadGeo: string | null;
+  }[] = [];
 
   for (const snap of snapshots) {
     const projection = mapProcesoRow(snap.payload);
@@ -142,9 +145,9 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
     if (!projection.secopProcesoId) {
       quarantineEntries.push({
         rawRecordId: snap.id,
-        source: 'secop_ii_procesos',
+        source: "secop_ii_procesos",
         sourceRecordId: null,
-        reason: 'missing_secop_proceso_id',
+        reason: "missing_secop_proceso_id",
         detail: { keys: Object.keys(snap.payload).slice(0, 20) },
         batchId,
       });
@@ -171,7 +174,9 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
 
   const procesoItems: ProcesoItem[] = pending.map(({ snap, projection, entidadGeo }) => ({
     proj: projection,
-    entidadId: projection.entidad ? entidadIdByNit.get(projection.entidad.nitCanonico) ?? null : null,
+    entidadId: projection.entidad
+      ? (entidadIdByNit.get(projection.entidad.nitCanonico) ?? null)
+      : null,
     geografiaId: entidadGeo,
     rawRecordId: snap.id,
     // Gate de acceso documental (B2): preclasificación barata sobre la
@@ -185,15 +190,18 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
 
 async function transformContratos(geo: GeoResolver, batchId: string): Promise<SourceMetrics> {
   const m = emptyMetrics();
-  const snapshots = await latestSnapshots('secop_ii_contratos');
-  m.totalSnapshots = await totalSnapshots('secop_ii_contratos');
+  const snapshots = await latestSnapshots("secop_ii_contratos");
+  m.totalSnapshots = await totalSnapshots("secop_ii_contratos");
   m.uniqueRecords = snapshots.length;
 
   const quarantineEntries: QuarantineEntry[] = [];
   const entidadItems: EntidadItem[] = [];
   const proveedorProjs: ProveedorProjection[] = [];
-  const pending: { snap: LatestSnapshot; projection: ContratoProjection; contratoGeo: string | null }[] =
-    [];
+  const pending: {
+    snap: LatestSnapshot;
+    projection: ContratoProjection;
+    contratoGeo: string | null;
+  }[] = [];
 
   for (const snap of snapshots) {
     const projection = mapContratoRow(snap.payload);
@@ -201,9 +209,9 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
     if (!projection.secopContratoId) {
       quarantineEntries.push({
         rawRecordId: snap.id,
-        source: 'secop_ii_contratos',
+        source: "secop_ii_contratos",
         sourceRecordId: null,
-        reason: 'missing_secop_contrato_id',
+        reason: "missing_secop_contrato_id",
         detail: { keys: Object.keys(snap.payload).slice(0, 20) },
         batchId,
       });
@@ -245,15 +253,17 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
     // Proceso por portafolio (D11). Si no existe en la muestra, NULL (no se
     // descarta el contrato — 0.2.2 §9.4).
     const procesoId = projection.procesoDeCompra
-      ? portafolioIndex.get(projection.procesoDeCompra) ?? null
+      ? (portafolioIndex.get(projection.procesoDeCompra) ?? null)
       : null;
     if (procesoId === null) m.procesoNoEncontrado++;
 
     return {
       proj: projection,
-      entidadId: projection.entidad ? entidadIdByNit.get(projection.entidad.nitCanonico) ?? null : null,
+      entidadId: projection.entidad
+        ? (entidadIdByNit.get(projection.entidad.nitCanonico) ?? null)
+        : null,
       proveedorId: projection.proveedor
-        ? proveedorIdByNit.get(projection.proveedor.nitCanonico) ?? null
+        ? (proveedorIdByNit.get(projection.proveedor.nitCanonico) ?? null)
         : null,
       procesoId,
       geografiaId: contratoGeo,
@@ -274,7 +284,7 @@ export async function runTransform(): Promise<TransformSummary> {
   const geo = await GeoResolver.load(db);
   if (geo.size() === 0) {
     throw new Error(
-      'geografia_alias vacía. Corre `npm run db:seed-geografia` antes de transformar (0.2.2 §10).',
+      "geografia_alias vacía. Corre `npm run db:seed-geografia` antes de transformar (0.2.2 §10)."
     );
   }
 

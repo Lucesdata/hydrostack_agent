@@ -572,10 +572,7 @@
     "tableColumnId": 88481419,
     "width": 1232,
     "format": {},
-    "subColumnTypes": [
-      "url",
-      "description"
-    ]
+    "subColumnTypes": ["url", "description"]
   },
   {
     "id": 628062200,

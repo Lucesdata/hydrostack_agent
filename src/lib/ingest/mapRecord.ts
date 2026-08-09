@@ -12,9 +12,9 @@
  * descarta (la capa cruda nunca rechaza), solo queda sin timestamp.
  */
 
-import { payloadHash } from './hash';
-import { parseFloatingDate } from './watermark';
-import type { IngestSource } from './sources';
+import { payloadHash } from "./hash";
+import { parseFloatingDate } from "./watermark";
+import type { IngestSource } from "./sources";
 
 export interface RawRecordInsert {
   source: string;
@@ -28,11 +28,11 @@ export interface RawRecordInsert {
 export function toRawRecord(
   row: Record<string, unknown>,
   source: IngestSource,
-  batchId: string,
+  batchId: string
 ): RawRecordInsert {
   return {
     source: source.source,
-    sourceRecordId: String(row[source.idField] ?? ''),
+    sourceRecordId: String(row[source.idField] ?? ""),
     payload: row,
     payloadHash: payloadHash(row, source.volatileFields),
     sourceUpdatedAt: parseFloatingDate(row[source.watermarkField]),

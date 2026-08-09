@@ -75,7 +75,7 @@ export default function OferenteWizard({ onComplete, onCancel }: Props) {
         municipios: [],
         minCop: Number(minCop),
         maxCop: Number(maxCop),
-      }),
+      })
     );
   }
 

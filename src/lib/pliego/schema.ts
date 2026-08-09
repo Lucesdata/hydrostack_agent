@@ -22,7 +22,7 @@
  * cifras es la fuente de no-determinismo entre corridas.
  */
 
-export const NO_ENCONTRADO = 'NO_ENCONTRADO';
+export const NO_ENCONTRADO = "NO_ENCONTRADO";
 
 export interface PliegoItem {
   /** Código o numeración del ítem tal como aparece en el pliego/formato (p. ej. "1.1.73.1.1"). */
@@ -55,7 +55,7 @@ export interface RequisitosHabilitantes {
   capacidad_organizacional: string;
 }
 
-export type ConfianzaGeneral = 'alta' | 'media' | 'baja';
+export type ConfianzaGeneral = "alta" | "media" | "baja";
 
 export interface VerificacionExtraccion {
   /** Nombres de campos (dot-path) que quedaron en NO_ENCONTRADO. */
@@ -64,7 +64,7 @@ export interface VerificacionExtraccion {
   justificacion_confianza: string;
 }
 
-export type SeveridadLaguna = 'alta' | 'media' | 'baja';
+export type SeveridadLaguna = "alta" | "media" | "baja";
 
 /** Inconsistencia, ambigüedad o vacío del propio pliego (no un error de extracción). */
 export interface LagunaPendiente {
@@ -102,144 +102,144 @@ export interface PliegoExtraction {
  * No se usan restricciones numéricas/de longitud (no soportadas por la API).
  */
 export const PLIEGO_JSON_SCHEMA = {
-  type: 'object',
+  type: "object",
   additionalProperties: false,
   properties: {
-    proceso: { type: 'string' },
-    entidad: { type: 'string' },
-    objeto_contrato: { type: 'string' },
-    modalidad_contratacion: { type: 'string' },
-    fecha_publicacion: { type: 'string' },
-    fecha_cierre: { type: 'string' },
-    presupuesto_oficial_cop: { type: 'number' },
-    moneda: { type: 'string' },
+    proceso: { type: "string" },
+    entidad: { type: "string" },
+    objeto_contrato: { type: "string" },
+    modalidad_contratacion: { type: "string" },
+    fecha_publicacion: { type: "string" },
+    fecha_cierre: { type: "string" },
+    presupuesto_oficial_cop: { type: "number" },
+    moneda: { type: "string" },
     capitulos: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         additionalProperties: false,
         properties: {
-          nombre: { type: 'string' },
+          nombre: { type: "string" },
           items: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               additionalProperties: false,
               properties: {
-                codigo: { type: 'string' },
-                descripcion: { type: 'string' },
-                unidad: { type: 'string' },
-                cantidad: { type: 'number' },
-                valor_unitario: { type: 'number' },
-                valor_total: { type: 'number' },
-                cita_textual: { type: 'string' },
+                codigo: { type: "string" },
+                descripcion: { type: "string" },
+                unidad: { type: "string" },
+                cantidad: { type: "number" },
+                valor_unitario: { type: "number" },
+                valor_total: { type: "number" },
+                cita_textual: { type: "string" },
               },
               required: [
-                'codigo',
-                'descripcion',
-                'unidad',
-                'cantidad',
-                'valor_unitario',
-                'valor_total',
-                'cita_textual',
+                "codigo",
+                "descripcion",
+                "unidad",
+                "cantidad",
+                "valor_unitario",
+                "valor_total",
+                "cita_textual",
               ],
             },
           },
         },
-        required: ['nombre', 'items'],
+        required: ["nombre", "items"],
       },
     },
-    reglas_presupuesto: { type: 'array', items: { type: 'string' } },
+    reglas_presupuesto: { type: "array", items: { type: "string" } },
     requisitos_habilitantes: {
-      type: 'object',
+      type: "object",
       additionalProperties: false,
       properties: {
-        experiencia_especifica: { type: 'string' },
-        capacidad_financiera: { type: 'string' },
-        capacidad_organizacional: { type: 'string' },
+        experiencia_especifica: { type: "string" },
+        capacidad_financiera: { type: "string" },
+        capacidad_organizacional: { type: "string" },
       },
-      required: ['experiencia_especifica', 'capacidad_financiera', 'capacidad_organizacional'],
+      required: ["experiencia_especifica", "capacidad_financiera", "capacidad_organizacional"],
     },
     cronograma: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         additionalProperties: false,
         properties: {
-          hito: { type: 'string' },
-          fecha: { type: 'string' },
-          cita_textual: { type: 'string' },
+          hito: { type: "string" },
+          fecha: { type: "string" },
+          cita_textual: { type: "string" },
         },
-        required: ['hito', 'fecha', 'cita_textual'],
+        required: ["hito", "fecha", "cita_textual"],
       },
     },
     verificacion: {
-      type: 'object',
+      type: "object",
       additionalProperties: false,
       properties: {
-        campos_no_encontrados: { type: 'array', items: { type: 'string' } },
-        confianza_general: { type: 'string', enum: ['alta', 'media', 'baja'] },
-        justificacion_confianza: { type: 'string' },
+        campos_no_encontrados: { type: "array", items: { type: "string" } },
+        confianza_general: { type: "string", enum: ["alta", "media", "baja"] },
+        justificacion_confianza: { type: "string" },
       },
-      required: ['campos_no_encontrados', 'confianza_general', 'justificacion_confianza'],
+      required: ["campos_no_encontrados", "confianza_general", "justificacion_confianza"],
     },
     lagunas_pendientes: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         additionalProperties: false,
         properties: {
-          id: { type: 'number' },
-          descripcion: { type: 'string' },
-          severidad: { type: 'string', enum: ['alta', 'media', 'baja'] },
-          tipo: { type: 'string' },
+          id: { type: "number" },
+          descripcion: { type: "string" },
+          severidad: { type: "string", enum: ["alta", "media", "baja"] },
+          tipo: { type: "string" },
         },
-        required: ['id', 'descripcion', 'severidad', 'tipo'],
+        required: ["id", "descripcion", "severidad", "tipo"],
       },
     },
   },
   required: [
-    'proceso',
-    'entidad',
-    'objeto_contrato',
-    'modalidad_contratacion',
-    'fecha_publicacion',
-    'fecha_cierre',
-    'presupuesto_oficial_cop',
-    'moneda',
-    'capitulos',
-    'reglas_presupuesto',
-    'requisitos_habilitantes',
-    'cronograma',
-    'verificacion',
-    'lagunas_pendientes',
+    "proceso",
+    "entidad",
+    "objeto_contrato",
+    "modalidad_contratacion",
+    "fecha_publicacion",
+    "fecha_cierre",
+    "presupuesto_oficial_cop",
+    "moneda",
+    "capitulos",
+    "reglas_presupuesto",
+    "requisitos_habilitantes",
+    "cronograma",
+    "verificacion",
+    "lagunas_pendientes",
   ],
 } as const;
 
 function asString(v: unknown, field: string): string {
-  if (typeof v !== 'string') throw new Error(`campo ${field} debe ser string`);
+  if (typeof v !== "string") throw new Error(`campo ${field} debe ser string`);
   return v;
 }
 
 function asNumber(v: unknown, field: string): number {
-  if (typeof v !== 'number' || Number.isNaN(v)) throw new Error(`campo ${field} debe ser número`);
+  if (typeof v !== "number" || Number.isNaN(v)) throw new Error(`campo ${field} debe ser número`);
   return v;
 }
 
 /** Valida la forma del JSON recibido y devuelve el tipo fuerte; lanza si no calza. */
 export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
-  if (typeof raw !== 'object' || raw === null) throw new Error('la extracción no es un objeto');
+  if (typeof raw !== "object" || raw === null) throw new Error("la extracción no es un objeto");
   const o = raw as Record<string, unknown>;
 
-  if (!Array.isArray(o.capitulos)) throw new Error('capitulos debe ser un array');
+  if (!Array.isArray(o.capitulos)) throw new Error("capitulos debe ser un array");
   const capitulos: PliegoCapitulo[] = o.capitulos.map((c, i) => {
-    if (typeof c !== 'object' || c === null) throw new Error(`capítulo ${i} inválido`);
+    if (typeof c !== "object" || c === null) throw new Error(`capítulo ${i} inválido`);
     const cc = c as Record<string, unknown>;
     if (!Array.isArray(cc.items)) throw new Error(`capitulos[${i}].items debe ser un array`);
     return {
       nombre: asString(cc.nombre, `capitulos[${i}].nombre`),
       items: cc.items.map((it, j) => {
-        if (typeof it !== 'object' || it === null) throw new Error(`ítem ${i}.${j} inválido`);
+        if (typeof it !== "object" || it === null) throw new Error(`ítem ${i}.${j} inválido`);
         const ii = it as Record<string, unknown>;
         const loc = `capitulos[${i}].items[${j}]`;
         return {
@@ -255,10 +255,10 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
     };
   });
 
-  if (!Array.isArray(o.reglas_presupuesto)) throw new Error('reglas_presupuesto debe ser un array');
-  if (!Array.isArray(o.cronograma)) throw new Error('cronograma debe ser un array');
+  if (!Array.isArray(o.reglas_presupuesto)) throw new Error("reglas_presupuesto debe ser un array");
+  if (!Array.isArray(o.cronograma)) throw new Error("cronograma debe ser un array");
   const cronograma: CronogramaHito[] = o.cronograma.map((h, i) => {
-    if (typeof h !== 'object' || h === null) throw new Error(`cronograma[${i}] inválido`);
+    if (typeof h !== "object" || h === null) throw new Error(`cronograma[${i}] inválido`);
     const hh = h as Record<string, unknown>;
     return {
       hito: asString(hh.hito, `cronograma[${i}].hito`),
@@ -267,45 +267,58 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
     };
   });
 
-  if (typeof o.requisitos_habilitantes !== 'object' || o.requisitos_habilitantes === null) {
-    throw new Error('requisitos_habilitantes debe ser un objeto');
+  if (typeof o.requisitos_habilitantes !== "object" || o.requisitos_habilitantes === null) {
+    throw new Error("requisitos_habilitantes debe ser un objeto");
   }
   const rh = o.requisitos_habilitantes as Record<string, unknown>;
   const requisitos_habilitantes: RequisitosHabilitantes = {
-    experiencia_especifica: asString(rh.experiencia_especifica, 'requisitos_habilitantes.experiencia_especifica'),
-    capacidad_financiera: asString(rh.capacidad_financiera, 'requisitos_habilitantes.capacidad_financiera'),
+    experiencia_especifica: asString(
+      rh.experiencia_especifica,
+      "requisitos_habilitantes.experiencia_especifica"
+    ),
+    capacidad_financiera: asString(
+      rh.capacidad_financiera,
+      "requisitos_habilitantes.capacidad_financiera"
+    ),
     capacidad_organizacional: asString(
       rh.capacidad_organizacional,
-      'requisitos_habilitantes.capacidad_organizacional',
+      "requisitos_habilitantes.capacidad_organizacional"
     ),
   };
 
-  if (typeof o.verificacion !== 'object' || o.verificacion === null) {
-    throw new Error('verificacion debe ser un objeto');
+  if (typeof o.verificacion !== "object" || o.verificacion === null) {
+    throw new Error("verificacion debe ser un objeto");
   }
   const v = o.verificacion as Record<string, unknown>;
   if (!Array.isArray(v.campos_no_encontrados)) {
-    throw new Error('verificacion.campos_no_encontrados debe ser un array');
+    throw new Error("verificacion.campos_no_encontrados debe ser un array");
   }
-  const confianza_general = asString(v.confianza_general, 'verificacion.confianza_general');
-  if (confianza_general !== 'alta' && confianza_general !== 'media' && confianza_general !== 'baja') {
-    throw new Error('verificacion.confianza_general debe ser alta | media | baja');
+  const confianza_general = asString(v.confianza_general, "verificacion.confianza_general");
+  if (
+    confianza_general !== "alta" &&
+    confianza_general !== "media" &&
+    confianza_general !== "baja"
+  ) {
+    throw new Error("verificacion.confianza_general debe ser alta | media | baja");
   }
   const verificacion: VerificacionExtraccion = {
     campos_no_encontrados: v.campos_no_encontrados.map((c, i) =>
-      asString(c, `verificacion.campos_no_encontrados[${i}]`),
+      asString(c, `verificacion.campos_no_encontrados[${i}]`)
     ),
     confianza_general,
-    justificacion_confianza: asString(v.justificacion_confianza, 'verificacion.justificacion_confianza'),
+    justificacion_confianza: asString(
+      v.justificacion_confianza,
+      "verificacion.justificacion_confianza"
+    ),
   };
 
-  if (!Array.isArray(o.lagunas_pendientes)) throw new Error('lagunas_pendientes debe ser un array');
+  if (!Array.isArray(o.lagunas_pendientes)) throw new Error("lagunas_pendientes debe ser un array");
   const lagunas_pendientes: LagunaPendiente[] = o.lagunas_pendientes.map((l, i) => {
-    if (typeof l !== 'object' || l === null) throw new Error(`lagunas_pendientes[${i}] inválido`);
+    if (typeof l !== "object" || l === null) throw new Error(`lagunas_pendientes[${i}] inválido`);
     const ll = l as Record<string, unknown>;
     const loc = `lagunas_pendientes[${i}]`;
     const severidad = asString(ll.severidad, `${loc}.severidad`);
-    if (severidad !== 'alta' && severidad !== 'media' && severidad !== 'baja') {
+    if (severidad !== "alta" && severidad !== "media" && severidad !== "baja") {
       throw new Error(`${loc}.severidad debe ser alta | media | baja`);
     }
     return {
@@ -317,14 +330,14 @@ export function parsePliegoExtraction(raw: unknown): PliegoExtraction {
   });
 
   return {
-    proceso: asString(o.proceso, 'proceso'),
-    entidad: asString(o.entidad, 'entidad'),
-    objeto_contrato: asString(o.objeto_contrato, 'objeto_contrato'),
-    modalidad_contratacion: asString(o.modalidad_contratacion, 'modalidad_contratacion'),
-    fecha_publicacion: asString(o.fecha_publicacion, 'fecha_publicacion'),
-    fecha_cierre: asString(o.fecha_cierre, 'fecha_cierre'),
-    presupuesto_oficial_cop: asNumber(o.presupuesto_oficial_cop, 'presupuesto_oficial_cop'),
-    moneda: asString(o.moneda, 'moneda'),
+    proceso: asString(o.proceso, "proceso"),
+    entidad: asString(o.entidad, "entidad"),
+    objeto_contrato: asString(o.objeto_contrato, "objeto_contrato"),
+    modalidad_contratacion: asString(o.modalidad_contratacion, "modalidad_contratacion"),
+    fecha_publicacion: asString(o.fecha_publicacion, "fecha_publicacion"),
+    fecha_cierre: asString(o.fecha_cierre, "fecha_cierre"),
+    presupuesto_oficial_cop: asNumber(o.presupuesto_oficial_cop, "presupuesto_oficial_cop"),
+    moneda: asString(o.moneda, "moneda"),
     capitulos,
     reglas_presupuesto: o.reglas_presupuesto.map((r, i) => asString(r, `reglas_presupuesto[${i}]`)),
     requisitos_habilitantes,

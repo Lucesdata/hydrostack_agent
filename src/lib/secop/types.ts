@@ -5,7 +5,7 @@
  * normalizador en client.ts (y config.ts), no el resto del código.
  */
 
-import type { DocumentAccess } from './document-access';
+import type { DocumentAccess } from "./document-access";
 
 /**
  * Apertura del proceso (campo `estado_de_apertura_del_proceso`). Único insumo
@@ -13,7 +13,7 @@ import type { DocumentAccess } from './document-access';
  * de cierre exacta (spike 2026-06-27). Vive aquí por ser metadata normalizada
  * general (la UI también podría mostrarla).
  */
-export type EstadoApertura = 'Abierto' | 'Cerrado';
+export type EstadoApertura = "Abierto" | "Cerrado";
 
 export interface SecopProceso {
   id: string;
@@ -69,7 +69,7 @@ export interface SecopQuery {
   /** Filtra por apertura del proceso (Abierto = aún recibe ofertas). */
   apertura?: EstadoApertura;
   /** Orden: fecha de publicación desc (default) o precio base desc. */
-  orden?: 'fecha' | 'valor';
+  orden?: "fecha" | "valor";
   /** Si true, aplica el filtro de palabras clave del sector agua. */
   soloAgua?: boolean;
   page?: number;

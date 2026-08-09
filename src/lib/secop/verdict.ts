@@ -23,10 +23,10 @@
  * ──────────────────────────────────────────────────────────────────────────
  */
 
-import type { OferenteProfile } from '@/src/lib/oferente/types';
-import type { SecopProceso } from './types';
-import { DEPARTAMENTOS, MUNICIPIOS } from '@/data/dane/divipola';
-import { normalizeGeoText } from '@/src/lib/transform/geo';
+import type { OferenteProfile } from "@/src/lib/oferente/types";
+import type { SecopProceso } from "./types";
+import { DEPARTAMENTOS, MUNICIPIOS } from "@/data/dane/divipola";
+import { normalizeGeoText } from "@/src/lib/transform/geo";
 
 // ===========================================================================
 //  Insumo: metadata del proceso que leen las compuertas
@@ -34,7 +34,7 @@ import { normalizeGeoText } from '@/src/lib/transform/geo';
 
 /** `EstadoApertura` vive en ./types (metadata normalizada general); se re-exporta
  *  por conveniencia de los consumidores del veredicto. */
-export type { EstadoApertura } from './types';
+export type { EstadoApertura } from "./types";
 
 /**
  * Lo que las compuertas LEEN. Extiende `SecopProceso` (que ya trae id, referencia,
@@ -57,7 +57,7 @@ export interface VerdictProcessInput extends SecopProceso {
    */
   sectorAgua: boolean | null;
   /** Contempla ambas variantes de origen del UNSPSC (Procesos vs Contratos). */
-  categoriaUnspscOrigen?: 'proceso' | 'contrato';
+  categoriaUnspscOrigen?: "proceso" | "contrato";
 }
 
 // ===========================================================================
@@ -65,7 +65,7 @@ export interface VerdictProcessInput extends SecopProceso {
 // ===========================================================================
 
 /** Semáforo + gris. PASS=verde, WARN=amarillo, FAIL=rojo, UNKNOWN=no resoluble aquí. */
-export type GateStatus = 'PASS' | 'WARN' | 'FAIL' | 'UNKNOWN';
+export type GateStatus = "PASS" | "WARN" | "FAIL" | "UNKNOWN";
 
 /** Nivel del embudo que resuelve la compuerta. 0 = solo metadata; 2 = requiere pliego. */
 export type ResolutionLevel = 0 | 2;
@@ -76,7 +76,7 @@ export interface GateResult {
   /** Por qué — auditable, para depurar el veredicto sin adivinar. */
   reason: string;
   /** Cómo se resolvió: `metadata` (Nivel 0) vs `document` (Nivel 2). */
-  resolvedBy: 'metadata' | 'document';
+  resolvedBy: "metadata" | "document";
   /** CRÍTICO: declara si la compuerta necesita el pliego para resolverse de verdad. */
   requiredLevel: ResolutionLevel;
 }
@@ -112,7 +112,7 @@ export type SectorialGate = (p: OferenteProfile, proc: VerdictProcessInput) => G
 export type CuantiaGate = (
   p: OferenteProfile,
   proc: VerdictProcessInput,
-  cfg: CuantiaBandsConfig,
+  cfg: CuantiaBandsConfig
 ) => GateResult; // L0
 
 /**
@@ -162,7 +162,7 @@ export interface Verdict {
  * `WARN`→`WARN`; si todas son `PASS`→`PASS`. Las `UNKNOWN` no fuerzan rojo; se
  * reportan aparte. Sin veto sectorial duro en Nivel 0.
  */
-export type AggregateVerdict = (gates: Verdict['gates']) => GateStatus;
+export type AggregateVerdict = (gates: Verdict["gates"]) => GateStatus;
 
 // ===========================================================================
 //  Implementación de las compuertas (Nivel 0)
@@ -179,7 +179,9 @@ const PLAZO_WARN_DIAS = 7;
  *  ("V1.xxxx") y del perfil ("83101"). */
 function unspscDigits(raw: string | null | undefined): string | null {
   if (raw == null) return null;
-  const d = String(raw).replace(/^v\d+\./i, '').replace(/\D/g, '');
+  const d = String(raw)
+    .replace(/^v\d+\./i, "")
+    .replace(/\D/g, "");
   return d || null;
 }
 
@@ -223,18 +225,34 @@ export const sectorialGate: SectorialGate = (p, proc) => {
       return c != null && (procDigits.startsWith(c) || c.startsWith(procDigits));
     });
     return hit
-      ? { status: 'PASS', reason: `categoría ${proc.unspsc} dentro de tus sectores`, resolvedBy: 'metadata', requiredLevel: 0 }
-      : { status: 'FAIL', reason: `categoría ${proc.unspsc} fuera de tus sectores UNSPSC`, resolvedBy: 'metadata', requiredLevel: 0 };
+      ? {
+          status: "PASS",
+          reason: `categoría ${proc.unspsc} dentro de tus sectores`,
+          resolvedBy: "metadata",
+          requiredLevel: 0,
+        }
+      : {
+          status: "FAIL",
+          reason: `categoría ${proc.unspsc} fuera de tus sectores UNSPSC`,
+          resolvedBy: "metadata",
+          requiredLevel: 0,
+        };
   }
   if (proc.sectorAgua === true) {
     return {
-      status: 'WARN',
-      reason: 'categoría sin código UNSPSC; proceso del sector agua por keyword — intersección por confirmar',
-      resolvedBy: 'metadata',
+      status: "WARN",
+      reason:
+        "categoría sin código UNSPSC; proceso del sector agua por keyword — intersección por confirmar",
+      resolvedBy: "metadata",
       requiredLevel: 0,
     };
   }
-  return { status: 'UNKNOWN', reason: 'categoría sin código UNSPSC y sin clasificación sectorial', resolvedBy: 'metadata', requiredLevel: 0 };
+  return {
+    status: "UNKNOWN",
+    reason: "categoría sin código UNSPSC y sin clasificación sectorial",
+    resolvedBy: "metadata",
+    requiredLevel: 0,
+  };
 };
 
 /**
@@ -244,18 +262,38 @@ export const sectorialGate: SectorialGate = (p, proc) => {
 export const cuantiaGate: CuantiaGate = (p, proc, cfg) => {
   const value = proc.precioBase ?? proc.valorAdjudicacion;
   if (value == null) {
-    return { status: 'UNKNOWN', reason: 'proceso sin valor en metadata', resolvedBy: 'metadata', requiredLevel: 0 };
+    return {
+      status: "UNKNOWN",
+      reason: "proceso sin valor en metadata",
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
   const { minCop, maxCop } = p.cuantiaObjetivo;
   if (value >= minCop && value <= maxCop) {
-    return { status: 'PASS', reason: 'valor dentro de tu rango objetivo', resolvedBy: 'metadata', requiredLevel: 0 };
+    return {
+      status: "PASS",
+      reason: "valor dentro de tu rango objetivo",
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
   const lowerSoft = minCop * (1 - cfg.margenAmarillo);
   const upperSoft = maxCop * (1 + cfg.margenAmarillo);
   if (value >= lowerSoft && value <= upperSoft) {
-    return { status: 'WARN', reason: `valor cerca del borde de tu rango (±${Math.round(cfg.margenAmarillo * 100)}%)`, resolvedBy: 'metadata', requiredLevel: 0 };
+    return {
+      status: "WARN",
+      reason: `valor cerca del borde de tu rango (±${Math.round(cfg.margenAmarillo * 100)}%)`,
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
-  return { status: 'FAIL', reason: 'valor fuera de tu rango objetivo', resolvedBy: 'metadata', requiredLevel: 0 };
+  return {
+    status: "FAIL",
+    reason: "valor fuera de tu rango objetivo",
+    resolvedBy: "metadata",
+    requiredLevel: 0,
+  };
 };
 
 /**
@@ -267,20 +305,57 @@ export const plazoGate: PlazoGate = (proc, now) => {
   if (proc.fechaCierre != null) {
     const t = new Date(proc.fechaCierre).getTime();
     if (Number.isNaN(t)) {
-      return { status: 'UNKNOWN', reason: `fechaCierre inválida (${proc.fechaCierre})`, resolvedBy: 'document', requiredLevel: 2 };
+      return {
+        status: "UNKNOWN",
+        reason: `fechaCierre inválida (${proc.fechaCierre})`,
+        resolvedBy: "document",
+        requiredLevel: 2,
+      };
     }
     const dias = Math.ceil((t - now.getTime()) / 86_400_000);
-    if (dias < 0) return { status: 'FAIL', reason: `cierre vencido hace ${-dias} día(s)`, resolvedBy: 'document', requiredLevel: 2 };
-    if (dias <= PLAZO_WARN_DIAS) return { status: 'WARN', reason: `cierra en ${dias} día(s)`, resolvedBy: 'document', requiredLevel: 2 };
-    return { status: 'PASS', reason: `${dias} días hasta el cierre`, resolvedBy: 'document', requiredLevel: 2 };
+    if (dias < 0)
+      return {
+        status: "FAIL",
+        reason: `cierre vencido hace ${-dias} día(s)`,
+        resolvedBy: "document",
+        requiredLevel: 2,
+      };
+    if (dias <= PLAZO_WARN_DIAS)
+      return {
+        status: "WARN",
+        reason: `cierra en ${dias} día(s)`,
+        resolvedBy: "document",
+        requiredLevel: 2,
+      };
+    return {
+      status: "PASS",
+      reason: `${dias} días hasta el cierre`,
+      resolvedBy: "document",
+      requiredLevel: 2,
+    };
   }
-  if (proc.estadoApertura === 'Cerrado') {
-    return { status: 'FAIL', reason: 'proceso cerrado a ofertas', resolvedBy: 'metadata', requiredLevel: 0 };
+  if (proc.estadoApertura === "Cerrado") {
+    return {
+      status: "FAIL",
+      reason: "proceso cerrado a ofertas",
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
-  if (proc.estadoApertura === 'Abierto') {
-    return { status: 'WARN', reason: 'abierto; fecha exacta de cierre en el cronograma del pliego', resolvedBy: 'metadata', requiredLevel: 0 };
+  if (proc.estadoApertura === "Abierto") {
+    return {
+      status: "WARN",
+      reason: "abierto; fecha exacta de cierre en el cronograma del pliego",
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
-  return { status: 'UNKNOWN', reason: 'sin señal de apertura ni fecha de cierre', resolvedBy: 'metadata', requiredLevel: 0 };
+  return {
+    status: "UNKNOWN",
+    reason: "sin señal de apertura ni fecha de cierre",
+    resolvedBy: "metadata",
+    requiredLevel: 0,
+  };
 };
 
 /**
@@ -293,7 +368,8 @@ export const plazoGate: PlazoGate = (proc, now) => {
 export const ubicacionGate: UbicacionGate = (p, proc) => {
   const deptKey = normalizeGeoText(proc.departamento);
   const deptCode = deptKey ? DEPT_NAME_TO_CODE.get(deptKey) : undefined;
-  const muniKey = deptCode && proc.ciudad ? `${deptCode}:${normalizeGeoText(proc.ciudad)}` : undefined;
+  const muniKey =
+    deptCode && proc.ciudad ? `${deptCode}:${normalizeGeoText(proc.ciudad)}` : undefined;
   const muniCode = muniKey ? MUNI_NAME_TO_CODE.get(muniKey) : undefined;
 
   const deptHit = deptCode != null && p.cobertura.departamentos.includes(deptCode);
@@ -301,12 +377,27 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
   const lugar = proc.ciudad ? `${proc.ciudad}, ${proc.departamento}` : proc.departamento;
 
   if (deptHit || muniHit) {
-    return { status: 'PASS', reason: `el proceso está en tu cobertura (${lugar})`, resolvedBy: 'metadata', requiredLevel: 0 };
+    return {
+      status: "PASS",
+      reason: `el proceso está en tu cobertura (${lugar})`,
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
   if (deptCode == null && muniCode == null) {
-    return { status: 'UNKNOWN', reason: `ubicación no reconocida (${proc.departamento || '—'})`, resolvedBy: 'metadata', requiredLevel: 0 };
+    return {
+      status: "UNKNOWN",
+      reason: `ubicación no reconocida (${proc.departamento || "—"})`,
+      resolvedBy: "metadata",
+      requiredLevel: 0,
+    };
   }
-  return { status: 'FAIL', reason: `el proceso está en ${lugar}, fuera de tu cobertura`, resolvedBy: 'metadata', requiredLevel: 0 };
+  return {
+    status: "FAIL",
+    reason: `el proceso está en ${lugar}, fuera de tu cobertura`,
+    resolvedBy: "metadata",
+    requiredLevel: 0,
+  };
 };
 
 /**
@@ -314,9 +405,10 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
  * Nivel 0 SIEMPRE UNKNOWN + requiredLevel 2 (protege el probing lazy).
  */
 export const habilitacionGate: HabilitacionGate = () => ({
-  status: 'UNKNOWN',
-  reason: 'requiere pliego: los indicadores RUP/jurídicos exigidos están en el pliego de condiciones',
-  resolvedBy: 'document',
+  status: "UNKNOWN",
+  reason:
+    "requiere pliego: los indicadores RUP/jurídicos exigidos están en el pliego de condiciones",
+  resolvedBy: "document",
   requiredLevel: 2,
 });
 
@@ -328,11 +420,11 @@ export const habilitacionGate: HabilitacionGate = () => ({
 export const aggregateVerdict: AggregateVerdict = (gates) => {
   const resolved = Object.values(gates)
     .map((g) => g.status)
-    .filter((s) => s !== 'UNKNOWN');
-  if (resolved.length === 0) return 'UNKNOWN';
-  if (resolved.includes('FAIL')) return 'FAIL';
-  if (resolved.includes('WARN')) return 'WARN';
-  return 'PASS';
+    .filter((s) => s !== "UNKNOWN");
+  if (resolved.length === 0) return "UNKNOWN";
+  if (resolved.includes("FAIL")) return "FAIL";
+  if (resolved.includes("WARN")) return "WARN";
+  return "PASS";
 };
 
 /**
@@ -346,8 +438,8 @@ export function toVerdictInput(
   extra: {
     sectorAgua?: boolean | null;
     fechaCierre?: string | null;
-    categoriaUnspscOrigen?: 'proceso' | 'contrato';
-  } = {},
+    categoriaUnspscOrigen?: "proceso" | "contrato";
+  } = {}
 ): VerdictProcessInput {
   return {
     ...proceso,
@@ -365,7 +457,7 @@ export function buildVerdict(
   profile: OferenteProfile,
   proc: VerdictProcessInput,
   now: Date = new Date(),
-  cfg: CuantiaBandsConfig = DEFAULT_CUANTIA_BANDS,
+  cfg: CuantiaBandsConfig = DEFAULT_CUANTIA_BANDS
 ): Verdict {
   const gates = {
     sectorial: sectorialGate(profile, proc),

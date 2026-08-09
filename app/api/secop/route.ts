@@ -38,7 +38,7 @@ export const runtime = "nodejs";
  * resultado vacío por filtros angostos no es una falla: no cae a live.
  */
 async function searchProcesosConFallback(
-  query: SecopQuery,
+  query: SecopQuery
 ): Promise<{ result: SecopResult<SecopProceso>; total: number | undefined }> {
   try {
     const [result, total] = await Promise.all([
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
     const message = err instanceof Error ? err.message : "Error desconocido";
     return NextResponse.json(
       { error: "No se pudo consultar SECOP", detail: message },
-      { status: 502 },
+      { status: 502 }
     );
   }
 }

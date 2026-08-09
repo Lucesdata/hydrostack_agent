@@ -29,8 +29,8 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
             <span className="clr-tag">SECOP II · Datos abiertos</span>
             <h1 className="clr-h1">Licitaciones recientes · Agua y saneamiento</h1>
             <p className="clr-sub">
-              Los últimos {items.length || 25} procesos de contratación pública del
-              sector agua potable y saneamiento básico en Colombia.
+              Los últimos {items.length || 25} procesos de contratación pública del sector agua
+              potable y saneamiento básico en Colombia.
             </p>
           </div>
           <Link href="/licitaciones/explorar" className="clr-rc-advanced">
@@ -40,8 +40,8 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
 
         {items.length === 0 ? (
           <div className="clr-rc-empty">
-            No pudimos cargar los procesos en este momento. Intenta de nuevo en unos
-            minutos o usa la <Link href="/licitaciones/explorar">búsqueda avanzada</Link>.
+            No pudimos cargar los procesos en este momento. Intenta de nuevo en unos minutos o usa
+            la <Link href="/licitaciones/explorar">búsqueda avanzada</Link>.
           </div>
         ) : (
           <ul className="clr-rc-list">
@@ -54,9 +54,7 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
                     <span className="clr-rc-date">{formatShortDate(p.fechaPublicacion)}</span>
                   </div>
                   <p className="clr-rc-title">{sentenceCaseTitle(p.objeto)}</p>
-                  <p className="clr-rc-meta">
-                    {[p.entidad, lugar].filter(Boolean).join(" · ")}
-                  </p>
+                  <p className="clr-rc-meta">{[p.entidad, lugar].filter(Boolean).join(" · ")}</p>
                   <div className="clr-rc-foot">
                     <span className="clr-rc-val">{formatCopCompact(p.valorEstimado)}</span>
                     {p.url && <span className="clr-rc-open">Ver en SECOP ↗</span>}
@@ -85,9 +83,9 @@ export default function ProcesosRecientes({ items }: { items: ProcesoResumen[] }
 
         <aside className="clr-rc-cta">
           <p>
-            <strong>¿Te interesa participar en una licitación?</strong> Cuando quieras,
-            te ayudamos a ver si tu empresa —o tú como persona natural— cumple los
-            requisitos de un proceso. Sin compromiso: primero mira los procesos.
+            <strong>¿Te interesa participar en una licitación?</strong> Cuando quieras, te ayudamos
+            a ver si tu empresa —o tú como persona natural— cumple los requisitos de un proceso. Sin
+            compromiso: primero mira los procesos.
           </p>
           <TrackedCtaLink
             href="/licitaciones/como-participar"

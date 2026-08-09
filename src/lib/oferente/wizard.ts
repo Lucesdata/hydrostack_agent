@@ -10,10 +10,10 @@
  * perfil por navegador.
  */
 
-import type { OferenteProfile, TipoPersona } from './types';
+import type { OferenteProfile, TipoPersona } from "./types";
 
 /** Un solo perfil por navegador — id fijo, sin necesidad de generar uno. */
-export const OFERENTE_LOCAL_ID = 'oferente-local';
+export const OFERENTE_LOCAL_ID = "oferente-local";
 
 export interface SectorOption {
   codigo: string;
@@ -22,10 +22,10 @@ export interface SectorOption {
 
 /** Familias UNSPSC típicas de agua y saneamiento (mismas que el seed piloto). */
 export const SECTOR_OPTIONS: SectorOption[] = [
-  { codigo: '83101', label: 'Acueducto y alcantarillado' },
-  { codigo: '72141', label: 'Obra civil' },
-  { codigo: '81101', label: 'Ingeniería y consultoría' },
-  { codigo: '77101', label: 'Servicios ambientales' },
+  { codigo: "83101", label: "Acueducto y alcantarillado" },
+  { codigo: "72141", label: "Obra civil" },
+  { codigo: "81101", label: "Ingeniería y consultoría" },
+  { codigo: "77101", label: "Servicios ambientales" },
 ];
 
 export interface WizardAnswers {
@@ -47,7 +47,7 @@ export function buildOferenteProfile(answers: WizardAnswers): OferenteProfile {
       indiceLiquidez: 0,
       indiceEndeudamiento: 0,
       razonCoberturaIntereses: 0,
-      fuente: 'manual',
+      fuente: "manual",
       vigenciaHasta: null,
     },
     kCapacidadResidualCop: null,

@@ -15,7 +15,16 @@
     "referencia_pliego": "Capítulo V, página 80-81",
     "archivo_descargado_secop": "FORMATO OFERTA ECONOMICA EST MITIGACION DE RIESGOS PTAPS.xlsx",
     "hoja": "Estudios MyR",
-    "columnas": ["ITEM", "DESCRIPCION", "UND", "CANT.", "VR. UNIT", "VR. PARCIAL", "IVA (19%)", "VALOR TOTAL"],
+    "columnas": [
+      "ITEM",
+      "DESCRIPCION",
+      "UND",
+      "CANT.",
+      "VR. UNIT",
+      "VR. PARCIAL",
+      "IVA (19%)",
+      "VALOR TOTAL"
+    ],
     "iva_fijado": 0.19,
     "estructura": "Tabla plana con encabezados de bloque por PTAP (8 bloques) + 3 sub-actividades cada bloque + fila VALOR TOTAL + fila TOTAL por PTAP + VALOR TOTAL general al final (R55).",
     "diligenciamiento": "El proponente llena solo VR. UNIT por sub-actividad. VR. PARCIAL = VR.UNIT × CANT (CANT = 1 en todos los items). VALOR TOTAL = VR.PARCIAL × (1+IVA). Firmado por el representante legal.",
@@ -68,18 +77,71 @@
           "descripcion": "PTAP Veredas Diamante, Soledad y Cedral, Corregimiento Felidia",
           "valor_techo_2026_cop": 51587274,
           "items": [
-            {"codigo": "1.1.73.1.1", "descripcion": "Diseño estructural de unidades que garanticen la estabilidad de la infraestructura existente y mitiguen el riesgo (diseños definitivos, especificaciones de materiales, cantidades de obra y presupuesto)", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 15621320},
-            {"codigo": "1.1.73.1.2", "descripcion": "Estudio de suelos con recomendaciones del estudio geológico o morfológico, análisis de estabilidad de taludes en la zona donde está construida la PTAP", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 15438168},
-            {"codigo": "1.1.73.1.3", "descripcion": "Estudios sobre la mitigación del riesgo", "und": "GLB", "cant": 1, "valor_techo_2026_cop": 20527786}
+            {
+              "codigo": "1.1.73.1.1",
+              "descripcion": "Diseño estructural de unidades que garanticen la estabilidad de la infraestructura existente y mitiguen el riesgo (diseños definitivos, especificaciones de materiales, cantidades de obra y presupuesto)",
+              "und": "GLB",
+              "cant": 1,
+              "valor_techo_2026_cop": 15621320
+            },
+            {
+              "codigo": "1.1.73.1.2",
+              "descripcion": "Estudio de suelos con recomendaciones del estudio geológico o morfológico, análisis de estabilidad de taludes en la zona donde está construida la PTAP",
+              "und": "GLB",
+              "cant": 1,
+              "valor_techo_2026_cop": 15438168
+            },
+            {
+              "codigo": "1.1.73.1.3",
+              "descripcion": "Estudios sobre la mitigación del riesgo",
+              "und": "GLB",
+              "cant": 1,
+              "valor_techo_2026_cop": 20527786
+            }
           ]
         },
-        {"codigo": "1.1.73.2", "descripcion": "PTAP El Banqueo, corregimiento de Pance", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1 (mismas 3 actividades, mismos valores techo)"},
-        {"codigo": "1.1.73.3", "descripcion": "PTAP Las Palmas Fase II – corregimiento La Castilla", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
-        {"codigo": "1.1.73.4", "descripcion": "PTAP Vereda Alto Aguacatal, Corregimiento La Elvira", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
-        {"codigo": "1.1.73.5", "descripcion": "PTAP La Leonera cabecera, Corregimiento La Leonera", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
-        {"codigo": "1.1.73.6", "descripcion": "PTAP La Elvira, corregimiento La Elvira", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
-        {"codigo": "1.1.73.7", "descripcion": "PTAP Piamonte, corregimiento Montebello", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"},
-        {"codigo": "1.1.73.8", "descripcion": "PTAP El Saladito, corregimiento El Saladito", "valor_techo_2026_cop": 51587274, "items": "idéntica a 1.1.73.1"}
+        {
+          "codigo": "1.1.73.2",
+          "descripcion": "PTAP El Banqueo, corregimiento de Pance",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1 (mismas 3 actividades, mismos valores techo)"
+        },
+        {
+          "codigo": "1.1.73.3",
+          "descripcion": "PTAP Las Palmas Fase II – corregimiento La Castilla",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        },
+        {
+          "codigo": "1.1.73.4",
+          "descripcion": "PTAP Vereda Alto Aguacatal, Corregimiento La Elvira",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        },
+        {
+          "codigo": "1.1.73.5",
+          "descripcion": "PTAP La Leonera cabecera, Corregimiento La Leonera",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        },
+        {
+          "codigo": "1.1.73.6",
+          "descripcion": "PTAP La Elvira, corregimiento La Elvira",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        },
+        {
+          "codigo": "1.1.73.7",
+          "descripcion": "PTAP Piamonte, corregimiento Montebello",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        },
+        {
+          "codigo": "1.1.73.8",
+          "descripcion": "PTAP El Saladito, corregimiento El Saladito",
+          "valor_techo_2026_cop": 51587274,
+          "items": "idéntica a 1.1.73.1"
+        }
       ]
     }
   ],
@@ -107,37 +169,85 @@
       "rentabilidad_activo_minima": 0.07
     },
     "equipo_humano_minimo": [
-      {"cantidad": 1, "cargo": "Director", "perfil": "Ingeniero Civil y/o Ingeniero Sanitario con Maestría en ingeniería", "experiencia_general_anos": 10, "experiencia_especifica": "Mínimo 5 contratos como director de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 0.5},
-      {"cantidad": 3, "cargo": "Geotecnista", "perfil": "Ingeniero Civil especialista en Geotecnia y/o Ingeniero Geólogo y/o Geólogo", "experiencia_general_anos": 5, "experiencia_especifica": "Mínimo 5 contratos como geotecnista de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 1.0},
-      {"cantidad": 3, "cargo": "Especialista Estructural", "perfil": "Ingeniero Civil especialista en Estructuras", "experiencia_general_anos": 5, "experiencia_especifica": "Mínimo 5 contratos como especialista estructural de diseños de PTAP y/o Redes de Acueducto", "dedicacion": 1.0}
+      {
+        "cantidad": 1,
+        "cargo": "Director",
+        "perfil": "Ingeniero Civil y/o Ingeniero Sanitario con Maestría en ingeniería",
+        "experiencia_general_anos": 10,
+        "experiencia_especifica": "Mínimo 5 contratos como director de diseños de PTAP y/o Redes de Acueducto",
+        "dedicacion": 0.5
+      },
+      {
+        "cantidad": 3,
+        "cargo": "Geotecnista",
+        "perfil": "Ingeniero Civil especialista en Geotecnia y/o Ingeniero Geólogo y/o Geólogo",
+        "experiencia_general_anos": 5,
+        "experiencia_especifica": "Mínimo 5 contratos como geotecnista de diseños de PTAP y/o Redes de Acueducto",
+        "dedicacion": 1.0
+      },
+      {
+        "cantidad": 3,
+        "cargo": "Especialista Estructural",
+        "perfil": "Ingeniero Civil especialista en Estructuras",
+        "experiencia_general_anos": 5,
+        "experiencia_especifica": "Mínimo 5 contratos como especialista estructural de diseños de PTAP y/o Redes de Acueducto",
+        "dedicacion": 1.0
+      }
     ]
   },
 
   "criterios_calificacion": {
     "total_puntos": 100,
     "items": [
-      {"criterio": "Experiencia adicional del proponente", "puntos": 40.5},
-      {"criterio": "Experiencia adicional del equipo mínimo de trabajo", "puntos": 29},
-      {"criterio": "Formación adicional del equipo mínimo de trabajo", "puntos": 18},
-      {"criterio": "Apoyo a la industria nacional", "puntos": 10},
-      {"criterio": "MiPymes", "puntos": 0.25},
-      {"criterio": "Emprendimientos y empresas de mujeres", "puntos": 0.25},
-      {"criterio": "Vinculación de personas con discapacidad", "puntos": 1, "nota": "La tabla resumen de p.59 dice 2 puntos pero el detalle en p.69, p.70 y p.79 dice 1 punto. La tabla de p.59 está mal."}
+      { "criterio": "Experiencia adicional del proponente", "puntos": 40.5 },
+      { "criterio": "Experiencia adicional del equipo mínimo de trabajo", "puntos": 29 },
+      { "criterio": "Formación adicional del equipo mínimo de trabajo", "puntos": 18 },
+      { "criterio": "Apoyo a la industria nacional", "puntos": 10 },
+      { "criterio": "MiPymes", "puntos": 0.25 },
+      { "criterio": "Emprendimientos y empresas de mujeres", "puntos": 0.25 },
+      {
+        "criterio": "Vinculación de personas con discapacidad",
+        "puntos": 1,
+        "nota": "La tabla resumen de p.59 dice 2 puntos pero el detalle en p.69, p.70 y p.79 dice 1 punto. La tabla de p.59 está mal."
+      }
     ],
     "reduccion_por_incumplimientos": "2% sobre el total si hay multas/cláusulas penales en el último año (sección 4.8)."
   },
 
   "garantias": {
-    "seriedad_oferta": {"valor": "10% del valor de la oferta", "vigencia_dias": 90},
-    "cumplimiento_contrato": {"valor": "20% del valor del contrato", "vigencia": "duración del contrato + 6 meses"},
-    "pago_salarios_prestaciones": {"valor": "8% del valor del contrato", "vigencia": "plazo del contrato + 3 años"},
-    "calidad_servicio": {"valor": "20% del valor del contrato", "vigencia": "plazo del contrato + 3 años"},
-    "responsabilidad_civil_extracontractual": {"valor": "200 SMMLV", "vigencia": "igual al período de ejecución"},
+    "seriedad_oferta": { "valor": "10% del valor de la oferta", "vigencia_dias": 90 },
+    "cumplimiento_contrato": {
+      "valor": "20% del valor del contrato",
+      "vigencia": "duración del contrato + 6 meses"
+    },
+    "pago_salarios_prestaciones": {
+      "valor": "8% del valor del contrato",
+      "vigencia": "plazo del contrato + 3 años"
+    },
+    "calidad_servicio": {
+      "valor": "20% del valor del contrato",
+      "vigencia": "plazo del contrato + 3 años"
+    },
+    "responsabilidad_civil_extracontractual": {
+      "valor": "200 SMMLV",
+      "vigencia": "igual al período de ejecución"
+    },
     "clausula_penal_pecuniaria_minima": "20% del valor total del contrato",
     "multa_por_mora": "1/1000 (0.1%) del valor del contrato por día de atraso"
   },
 
-  "acuerdos_comerciales_aplicables": ["Estados Unidos", "Canadá", "Corea", "Costa Rica", "Estados AELC (EFTA)", "Unión Europea", "Israel", "Reino Unido e Irlanda del Norte", "Comunidad Andina", "Alianza Pacífico (Chile, Perú)"],
+  "acuerdos_comerciales_aplicables": [
+    "Estados Unidos",
+    "Canadá",
+    "Corea",
+    "Costa Rica",
+    "Estados AELC (EFTA)",
+    "Unión Europea",
+    "Israel",
+    "Reino Unido e Irlanda del Norte",
+    "Comunidad Andina",
+    "Alianza Pacífico (Chile, Perú)"
+  ],
 
   "lagunas_pendientes": [
     {

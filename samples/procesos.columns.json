@@ -5006,10 +5006,7 @@
     "renderTypeName": "url",
     "tableColumnId": 88482301,
     "format": {},
-    "subColumnTypes": [
-      "url",
-      "description"
-    ]
+    "subColumnTypes": ["url", "description"]
   },
   {
     "id": 589184050,

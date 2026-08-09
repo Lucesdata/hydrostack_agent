@@ -31,7 +31,8 @@ import {
 const BANNER: Record<EnvioEstado, string> = {
   enviado: "Correo enviado — revisa tu bandeja de entrada.",
   sin_coincidencias: "No hay coincidencias hoy — no se envió correo.",
-  error: "No se pudo enviar el correo. Revisa la configuración de Resend (AUTH_RESEND_KEY / EMAIL_FROM).",
+  error:
+    "No se pudo enviar el correo. Revisa la configuración de Resend (AUTH_RESEND_KEY / EMAIL_FROM).",
 };
 
 const STYLE = `
@@ -181,12 +182,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                     {formatCopCompact(proceso.valorAdjudicacion ?? proceso.precioBase)}
                   </span>
                   {proceso.url && (
-                    <a
-                      href={proceso.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="clr-mc-link"
-                    >
+                    <a href={proceso.url} target="_blank" rel="noreferrer" className="clr-mc-link">
                       Ver en SECOP ↗
                     </a>
                   )}

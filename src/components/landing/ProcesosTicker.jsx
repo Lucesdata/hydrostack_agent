@@ -186,7 +186,11 @@ function mapApiItem(p) {
 function ProcesoItem({ p }) {
   const tone = estadoTone(p.estado);
   const dotClass =
-    tone === "live" ? "ptr-dot ptr-dot--live" : tone === "warn" ? "ptr-dot ptr-dot--warn" : "ptr-dot";
+    tone === "live"
+      ? "ptr-dot ptr-dot--live"
+      : tone === "warn"
+        ? "ptr-dot ptr-dot--warn"
+        : "ptr-dot";
   const lugar = [p.ciudad, p.departamento].filter(Boolean).join(", ");
   const content = (
     <>
@@ -242,14 +246,19 @@ export default function ProcesosTicker() {
       .catch(() => {
         if (!cancel) setStatus("empty");
       });
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, []);
 
   // La velocidad se mantiene constante aunque cambie el nº de procesos.
   const duration = Math.max(40, items.length * 9);
 
   return (
-    <div className="ptr-bar" aria-label="Procesos activos de contratación pública en agua y saneamiento">
+    <div
+      className="ptr-bar"
+      aria-label="Procesos activos de contratación pública en agua y saneamiento"
+    >
       <style dangerouslySetInnerHTML={{ __html: TICKER_CSS }} />
       <div className="ptr-cap">
         <span className="ptr-cap-dot" />
@@ -264,7 +273,10 @@ export default function ProcesosTicker() {
             {items.map((p, i) => (
               <ProcesoItem key={`${p.id}-${i}`} p={p} />
             ))}
-            <div aria-hidden="true" style={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <div
+              aria-hidden="true"
+              style={{ display: "flex", alignItems: "center", height: "100%" }}
+            >
               {items.map((p, i) => (
                 <ProcesoItem key={`dup-${p.id}-${i}`} p={p} />
               ))}
@@ -273,7 +285,9 @@ export default function ProcesosTicker() {
         </div>
       ) : (
         <div className="ptr-empty">
-          {status === "loading" ? "Cargando procesos…" : "— sin datos disponibles en este momento —"}
+          {status === "loading"
+            ? "Cargando procesos…"
+            : "— sin datos disponibles en este momento —"}
         </div>
       )}
     </div>

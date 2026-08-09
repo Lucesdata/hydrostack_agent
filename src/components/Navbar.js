@@ -87,7 +87,9 @@ function Avatar({ user, withDot }) {
       {user.avatarUrl ? (
         <img className="clr-avatar-img" src={user.avatarUrl} alt="" referrerPolicy="no-referrer" />
       ) : (
-        <span className="clr-avatar-fallback" aria-hidden="true">{label}</span>
+        <span className="clr-avatar-fallback" aria-hidden="true">
+          {label}
+        </span>
       )}
       {withDot && <span className="clr-avatar-dot" title="Conectado" />}
     </span>
@@ -96,7 +98,15 @@ function Avatar({ user, withDot }) {
 
 function ValveGlyph() {
   return (
-    <svg viewBox="0 0 26 26" width="15" height="15" fill="none" stroke="#fff" strokeWidth="1.6" aria-hidden="true">
+    <svg
+      viewBox="0 0 26 26"
+      width="15"
+      height="15"
+      fill="none"
+      stroke="#fff"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
       <line x1="2" y1="13" x2="8.2" y2="13" />
       <line x1="17.8" y1="13" x2="24" y2="13" />
       <circle cx="13" cy="13" r="4.6" />
@@ -165,7 +175,9 @@ export default function Navbar({ user }) {
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-nav-inner">
         <Link href="/" className="clr-logo" onClick={close} aria-label="HydroStack inicio">
-          <span className="clr-logo-mark"><ValveGlyph /></span>
+          <span className="clr-logo-mark">
+            <ValveGlyph />
+          </span>
           <span className="clr-logo-text">ydroStack</span>
         </Link>
 
@@ -184,7 +196,9 @@ export default function Navbar({ user }) {
               className="clr-nav-link"
               {...navAria(isActive(item))}
             >
-              <span className="clr-nav-index" aria-hidden="true">{item.index}/</span>
+              <span className="clr-nav-index" aria-hidden="true">
+                {item.index}/
+              </span>
               {item.label}
               <CoteGlyph />
             </Link>
@@ -196,8 +210,12 @@ export default function Navbar({ user }) {
             <UserMenu user={user} />
           ) : (
             <>
-              <Link href="/login" className="clr-nav-auth-link">Ingresar</Link>
-              <Link href="/registro" className="clr-nav-auth-cta">Crear cuenta</Link>
+              <Link href="/login" className="clr-nav-auth-link">
+                Ingresar
+              </Link>
+              <Link href="/registro" className="clr-nav-auth-cta">
+                Crear cuenta
+              </Link>
             </>
           )}
         </div>
@@ -225,7 +243,9 @@ export default function Navbar({ user }) {
             {...navAria(isActive(item))}
             onClick={close}
           >
-            <span className="clr-nav-index" aria-hidden="true">{item.index}/</span>
+            <span className="clr-nav-index" aria-hidden="true">
+              {item.index}/
+            </span>
             {item.label}
           </Link>
         ))}
@@ -247,8 +267,12 @@ export default function Navbar({ user }) {
             </>
           ) : (
             <>
-              <Link href="/login" className="clr-mobile-link" onClick={close}>Ingresar</Link>
-              <Link href="/registro" className="clr-mobile-link" onClick={close}>Crear cuenta</Link>
+              <Link href="/login" className="clr-mobile-link" onClick={close}>
+                Ingresar
+              </Link>
+              <Link href="/registro" className="clr-mobile-link" onClick={close}>
+                Crear cuenta
+              </Link>
             </>
           )}
         </div>

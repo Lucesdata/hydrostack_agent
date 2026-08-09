@@ -41,8 +41,7 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
   return (
     <div className="clr-plist" role="list" aria-label="Procesos de contratación">
       {items.map((p) => {
-        const closed =
-          p.estadoApertura === "Cerrado" || ESTADOS_CERRADOS.includes(p.estado);
+        const closed = p.estadoApertura === "Cerrado" || ESTADOS_CERRADOS.includes(p.estado);
         const score = p.verdict ? verdictScore(p.verdict) : null;
         const fecha = formatShortDate(p.fechaPublicacion);
         return (
@@ -53,12 +52,8 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
             className={`clr-prow${p.id === selectedId ? " is-selected" : ""}${closed ? " is-closed" : ""}`}
             onClick={() => onSelect(p)}
           >
-            {closed && p.estado && (
-              <span className="clr-prow-state">{p.estado.toUpperCase()}</span>
-            )}
-            <span className="clr-prow-title">
-              {sentenceCaseTitle(p.nombre || p.referencia)}
-            </span>
+            {closed && p.estado && <span className="clr-prow-state">{p.estado.toUpperCase()}</span>}
+            <span className="clr-prow-title">{sentenceCaseTitle(p.nombre || p.referencia)}</span>
             <span className="clr-prow-meta">
               {p.entidad}
               {p.departamento ? ` · ${p.departamento}` : ""}

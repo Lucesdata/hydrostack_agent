@@ -1,6 +1,6 @@
-import type { User } from '@supabase/supabase-js';
-import { db } from '@/src/lib/db/client';
-import { usuario } from '@/src/lib/db/schema/cuentas';
+import type { User } from "@supabase/supabase-js";
+import { db } from "@/src/lib/db/client";
+import { usuario } from "@/src/lib/db/schema/cuentas";
 
 /**
  * Espejo local (Neon) del usuario de Supabase Auth. `auth.users` vive en el
@@ -14,7 +14,7 @@ export async function syncUsuario(user: User): Promise<void> {
   if (!user.email) return;
 
   const fullName =
-    typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null;
+    typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
 
   await db
     .insert(usuario)

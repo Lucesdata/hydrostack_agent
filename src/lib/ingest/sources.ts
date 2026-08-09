@@ -14,12 +14,12 @@
  * al cruzar con el endpoint de columnas antes de cerrar 0.3 (0.2 §5).
  */
 
-import { DATASETS, type DatasetKey } from '@/src/lib/secop/config';
+import { DATASETS, type DatasetKey } from "@/src/lib/secop/config";
 import {
   buildSectorWhere,
   SECTOR_NET_PROCESOS,
   SECTOR_NET_CONTRATOS,
-} from '@/src/lib/secop/ingest-net';
+} from "@/src/lib/secop/ingest-net";
 
 export interface IngestSource {
   readonly source: string;
@@ -39,37 +39,37 @@ export interface IngestSource {
 }
 
 export const SOURCE_PROCESOS: IngestSource = {
-  source: 'secop_ii_procesos',
-  datasetKey: 'procesos',
+  source: "secop_ii_procesos",
+  datasetKey: "procesos",
   dataset: DATASETS.procesos,
-  idField: 'id_del_proceso',
-  watermarkField: 'fecha_de_ultima_publicaci',
+  idField: "id_del_proceso",
+  watermarkField: "fecha_de_ultima_publicaci",
   volatileFields: [
-    'fecha_de_ultima_publicaci', // watermark
-    'visualizaciones_del',
-    'proveedores_invitados',
-    'proveedores_con_invitacion',
-    'respuestas_al_procedimiento',
-    'respuestas_externas',
+    "fecha_de_ultima_publicaci", // watermark
+    "visualizaciones_del",
+    "proveedores_invitados",
+    "proveedores_con_invitacion",
+    "respuestas_al_procedimiento",
+    "respuestas_externas",
   ],
   sectorWhere: buildSectorWhere(SECTOR_NET_PROCESOS),
 };
 
 export const SOURCE_CONTRATOS: IngestSource = {
-  source: 'secop_ii_contratos',
-  datasetKey: 'contratos',
+  source: "secop_ii_contratos",
+  datasetKey: "contratos",
   dataset: DATASETS.contratos,
-  idField: 'id_contrato',
-  watermarkField: 'ultima_actualizacion',
+  idField: "id_contrato",
+  watermarkField: "ultima_actualizacion",
   volatileFields: [
-    'ultima_actualizacion', // watermark
-    'valor_facturado',
-    'valor_pagado',
-    'valor_pendiente_de_pago',
-    'valor_amortizado',
-    'valor_pendiente_de_ejecucion',
-    'saldo_cdp',
-    'saldo_vigencia',
+    "ultima_actualizacion", // watermark
+    "valor_facturado",
+    "valor_pagado",
+    "valor_pendiente_de_pago",
+    "valor_amortizado",
+    "valor_pendiente_de_ejecucion",
+    "saldo_cdp",
+    "saldo_vigencia",
   ],
   sectorWhere: buildSectorWhere(SECTOR_NET_CONTRATOS),
 };

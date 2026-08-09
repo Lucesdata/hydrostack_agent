@@ -15,20 +15,20 @@
 
 /** Códigos de red de Node + clase 08 (connection exception) + shutdown 57P0x. */
 const TRANSIENT_CODES = new Set([
-  'ECONNRESET',
-  'ECONNREFUSED',
-  'EPIPE',
-  'ETIMEDOUT',
-  'EHOSTUNREACH',
-  'ENETUNREACH',
-  '08000',
-  '08001',
-  '08003',
-  '08006',
-  '08P01',
-  '57P01', // admin_shutdown
-  '57P02', // crash_shutdown
-  '57P03', // cannot_connect_now
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "EPIPE",
+  "ETIMEDOUT",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "08000",
+  "08001",
+  "08003",
+  "08006",
+  "08P01",
+  "57P01", // admin_shutdown
+  "57P02", // crash_shutdown
+  "57P03", // cannot_connect_now
 ]);
 
 /** Mensajes de la capa de transporte (driver Neon / node-postgres / ws). */
@@ -45,10 +45,10 @@ export function isTransientConnectionError(err: unknown): boolean {
   let current: unknown = err;
   for (let depth = 0; depth < MAX_CAUSE_DEPTH && current instanceof Error; depth++) {
     const code = (current as Error & { code?: unknown }).code;
-    if (typeof code === 'string' && TRANSIENT_CODES.has(code)) return true;
+    if (typeof code === "string" && TRANSIENT_CODES.has(code)) return true;
     // Un código presente que NO es transitorio (p. ej. 23505, 57014) manda: es
     // un error SQL real aunque el mensaje contenga palabras de conexión.
-    if (typeof code === 'string' && code.length > 0) return false;
+    if (typeof code === "string" && code.length > 0) return false;
     if (TRANSIENT_MESSAGE.test(current.message)) return true;
     current = current.cause;
   }
@@ -75,7 +75,7 @@ const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
  */
 export async function withTransientRetry<T>(
   fn: () => Promise<T>,
-  opts: RetryOptions = {},
+  opts: RetryOptions = {}
 ): Promise<T> {
   const retries = opts.retries ?? 3;
   const baseDelayMs = opts.baseDelayMs ?? 500;

@@ -9,7 +9,7 @@
  * canónico y dejamos `nitValidDv = null` (nada que validar).
  */
 
-import { cleanText, stripAccents } from './normalize';
+import { cleanText, stripAccents } from "./normalize";
 
 export interface CanonicalNit {
   /** NIT/documento sin DV. `null` si es basura/centinela. */
@@ -24,9 +24,9 @@ const DV_WEIGHTS = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
 
 /** DV oficial colombiano de un NIT (algoritmo DIAN). `null` si no hay dígitos. */
 export function computeNitDv(nit: string): string | null {
-  const digits = nit.replace(/\D/g, '');
+  const digits = nit.replace(/\D/g, "");
   if (!digits) return null;
-  const rev = digits.split('').reverse();
+  const rev = digits.split("").reverse();
   let sum = 0;
   for (let i = 0; i < rev.length; i++) {
     sum += Number(rev[i]) * DV_WEIGHTS[i % DV_WEIGHTS.length];
@@ -40,10 +40,10 @@ export function normalizeTipoDoc(value: unknown): string | null {
   const s = cleanText(value);
   if (s === null) return null;
   const k = stripAccents(s.toLowerCase());
-  if (k.includes('nit')) return 'NIT';
-  if (k.includes('extranjer')) return 'CE'; // cédula de extranjería
-  if (k.includes('ciudadan') || k === 'cc') return 'CC';
-  if (k.includes('pasaporte') || k === 'pa') return 'PASAPORTE';
+  if (k.includes("nit")) return "NIT";
+  if (k.includes("extranjer")) return "CE"; // cédula de extranjería
+  if (k.includes("ciudadan") || k === "cc") return "CC";
+  if (k.includes("pasaporte") || k === "pa") return "PASAPORTE";
   return s.toUpperCase();
 }
 
@@ -51,16 +51,16 @@ export function canonicalizeNit(rawDoc: unknown, tipoDoc?: unknown): CanonicalNi
   const empty: CanonicalNit = { nitCanonico: null, nitDv: null, nitValidDv: null };
   const cleaned = cleanText(rawDoc);
   if (cleaned === null) return empty;
-  const digits = cleaned.replace(/\D/g, '');
+  const digits = cleaned.replace(/\D/g, "");
   if (!digits) return empty;
 
   const tipo = normalizeTipoDoc(tipoDoc);
 
   // Solo el NIT lleva DV. Si viene con guion explícito, separamos y validamos.
-  if (tipo === 'NIT' || tipo === null) {
+  if (tipo === "NIT" || tipo === null) {
     const dash = /(\d[\d.]*\d|\d)\s*-\s*(\d)\s*$/.exec(cleaned);
     if (dash) {
-      const base = dash[1].replace(/\D/g, '');
+      const base = dash[1].replace(/\D/g, "");
       const dv = dash[2];
       return { nitCanonico: base, nitDv: dv, nitValidDv: computeNitDv(base) === dv };
     }

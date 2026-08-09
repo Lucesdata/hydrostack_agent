@@ -5,7 +5,7 @@ const nextConfig = {
   // ws / @neondatabase/serverless: bundling ws breaks its internal frame-masking
   // ("t.mask is not a function") under the Vercel serverless runtime — external avoids it.
   experimental: {
-    serverComponentsExternalPackages: ['pdfkit', 'ws', '@neondatabase/serverless'],
+    serverComponentsExternalPackages: ["pdfkit", "ws", "@neondatabase/serverless"],
   },
   // El repo no tenía .eslintrc.json antes de 2026-07-13; `next build` corría sin
   // linter (no había config que activarlo). Agregar la config para que

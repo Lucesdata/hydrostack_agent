@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
       { error: "GEMINI_API_KEY no configurada en el servidor." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
@@ -44,12 +44,18 @@ export async function POST(req: NextRequest) {
   try {
     formData = await req.formData();
   } catch {
-    return NextResponse.json({ error: "Body inválido: se espera multipart/form-data." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Body inválido: se espera multipart/form-data." },
+      { status: 400 }
+    );
   }
 
   const file = formData.get("file");
   if (!(file instanceof Blob)) {
-    return NextResponse.json({ error: "Falta el archivo `file` (Documento Base, PDF)." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Falta el archivo `file` (Documento Base, PDF)." },
+      { status: 400 }
+    );
   }
   if (file.size === 0) {
     return NextResponse.json({ error: "El archivo está vacío." }, { status: 400 });
@@ -57,17 +63,16 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_BYTES_PDF) {
     return NextResponse.json(
       { error: `El archivo supera el máximo de ${MAX_BYTES_PDF / (1024 * 1024)}MB.` },
-      { status: 413 },
+      { status: 413 }
     );
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const looksLikePdf =
-    buffer.subarray(0, PDF_MAGIC.length).toString("ascii") === PDF_MAGIC;
+  const looksLikePdf = buffer.subarray(0, PDF_MAGIC.length).toString("ascii") === PDF_MAGIC;
   if (!looksLikePdf) {
     return NextResponse.json(
       { error: "El archivo no es un PDF válido (no empieza con %PDF-)." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -77,14 +82,16 @@ export async function POST(req: NextRequest) {
     if (formulario1.size > MAX_BYTES_XLS) {
       return NextResponse.json(
         { error: `El Formulario 1 supera el máximo de ${MAX_BYTES_XLS / (1024 * 1024)}MB.` },
-        { status: 413 },
+        { status: 413 }
       );
     }
     formulario1Buffer = Buffer.from(await formulario1.arrayBuffer());
   }
 
   try {
-    const { extraction, origen } = await extractPliegoHybrid(buffer, { formulario1: formulario1Buffer });
+    const { extraction, origen } = await extractPliegoHybrid(buffer, {
+      formulario1: formulario1Buffer,
+    });
     const validation = validatePliego(extraction);
     const user = await getSessionUser();
     if (user) {

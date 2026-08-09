@@ -11,8 +11,14 @@ import LandingCards from "@/src/components/landing/LandingCards";
 
 const PROBLEM_POINTS = [
   { n: "01", text: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta." },
-  { n: "02", text: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas." },
-  { n: "03", text: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto." },
+  {
+    n: "02",
+    text: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
+  },
+  {
+    n: "03",
+    text: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
+  },
 ];
 
 const INTENT_ROUTES = [
@@ -40,16 +46,38 @@ const INTENT_ROUTES = [
 ];
 
 const HOW_STEPS = [
-  { n: "01", text: "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP." },
+  {
+    n: "01",
+    text: "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP.",
+  },
   { n: "02", text: "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas." },
-  { n: "03", text: "Si te falta algo, ves exactamente qué es: experiencia, capacidad financiera, clasificación." },
+  {
+    n: "03",
+    text: "Si te falta algo, ves exactamente qué es: experiencia, capacidad financiera, clasificación.",
+  },
   { n: "04", text: "HydroStack decodifica el pliego y te ayuda a estructurar el presupuesto." },
 ];
 
 const PILLARS = [
-  { n: "02", title: "Planes directores de alcantarillado en Cali", desc: "3 corregimientos, modelado hidráulico y gemelo digital.", href: "/nosotros" },
-  { n: "03", title: "Lee un pliego de 100 páginas en minutos", desc: "El asistente extrae los requisitos legales y técnicos automáticamente.", href: "/pliego" },
-  { n: "04", title: "Un ingeniero especialista, no una startup", desc: "11 años en agua y saneamiento, licencia profesional vigente.", href: "/nosotros", dark: true },
+  {
+    n: "02",
+    title: "Planes directores de alcantarillado en Cali",
+    desc: "3 corregimientos, modelado hidráulico y gemelo digital.",
+    href: "/nosotros",
+  },
+  {
+    n: "03",
+    title: "Lee un pliego de 100 páginas en minutos",
+    desc: "El asistente extrae los requisitos legales y técnicos automáticamente.",
+    href: "/pliego",
+  },
+  {
+    n: "04",
+    title: "Un ingeniero especialista, no una startup",
+    desc: "11 años en agua y saneamiento, licencia profesional vigente.",
+    href: "/nosotros",
+    dark: true,
+  },
 ];
 
 /* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
@@ -134,7 +162,13 @@ function useBlueprintFX() {
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [parallax, setParallax] = useState(0);
-  const [visible, setVisible] = useState({ hero: false, stats: false, problem: false, how: false, pillars: false });
+  const [visible, setVisible] = useState({
+    hero: false,
+    stats: false,
+    problem: false,
+    how: false,
+    pillars: false,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -147,7 +181,11 @@ function useBlueprintFX() {
     handleScroll();
 
     const targets = [
-      [heroRef, "hero"], [statsRef, "stats"], [problemRef, "problem"], [howRef, "how"], [pillarsRef, "pillars"],
+      [heroRef, "hero"],
+      [statsRef, "stats"],
+      [problemRef, "problem"],
+      [howRef, "how"],
+      [pillarsRef, "pillars"],
     ];
     let io;
     if ("IntersectionObserver" in window) {
@@ -189,40 +227,140 @@ function useBlueprintFX() {
     outletOpacity: visible.pillars ? 0.16 : 0.045,
     waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
     depthLabel: (p * 6).toFixed(1) + "m",
-    inletFlashStyle: visible.hero ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
-    tankFlashStyle: visible.stats ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
-    drainFlashStyle: visible.problem || visible.how ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
-    outletFlashStyle: visible.pillars ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" } : { opacity: 0 },
+    inletFlashStyle: visible.hero
+      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
+      : { opacity: 0 },
+    tankFlashStyle: visible.stats
+      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
+      : { opacity: 0 },
+    drainFlashStyle:
+      visible.problem || visible.how
+        ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
+        : { opacity: 0 },
+    outletFlashStyle: visible.pillars
+      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
+      : { opacity: 0 },
   };
 }
 
 function BlueprintBackground({ fx }) {
   return (
     <>
-      <div aria-hidden="true" style={{ position: "fixed", top: -160, left: 0, right: 0, bottom: -160, backgroundImage: "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none", zIndex: 0, transform: fx.gridTransform, willChange: "transform" }} />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          top: -160,
+          left: 0,
+          right: 0,
+          bottom: -160,
+          backgroundImage:
+            "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)",
+          backgroundSize: "32px 32px",
+          pointerEvents: "none",
+          zIndex: 0,
+          transform: fx.gridTransform,
+          willChange: "transform",
+        }}
+      />
 
-      <svg aria-hidden="true" role="presentation" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{ position: "fixed", inset: 0, width: "100%", height: "100vh", pointerEvents: "none", zIndex: 0 }} fill="none" stroke="#0369A1" strokeWidth="1.4">
+      <svg
+        aria-hidden="true"
+        role="presentation"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid slice"
+        style={{
+          position: "fixed",
+          inset: 0,
+          width: "100%",
+          height: "100vh",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+        fill="none"
+        stroke="#0369A1"
+        strokeWidth="1.4"
+      >
         <g style={{ opacity: fx.inletOpacity, transition: "opacity 1s ease" }}>
           <line x1="0" y1="120" x2="220" y2="120" />
           <line x1="0" y1="150" x2="180" y2="150" />
           <path d="M180,150 L220,150 L220,120" />
           <circle cx="60" cy="120" r="3" fill="#0369A1" stroke="none" />
           <circle cx="140" cy="150" r="3" fill="#0369A1" stroke="none" />
-          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="4.5s" repeatCount="indefinite" path="M0,120 L220,120 L220,140" /></circle>
-          <circle r="2.2" fill="#0369A1" stroke="none"><animateMotion dur="4.5s" begin="2.2s" repeatCount="indefinite" path="M0,150 L180,150 L220,150 L220,140" /></circle>
-          <text x="20" y="105" fontFamily="var(--font-jetbrains-mono),monospace" fontSize="12" fill="#0369A1" stroke="none">Ø160mm</text>
-          <path d="M0,120 L220,120 L220,140" stroke="#7DD3FC" strokeWidth="2.4" style={fx.inletFlashStyle} />
+          <circle r="2.6" fill="#0369A1" stroke="none">
+            <animateMotion dur="4.5s" repeatCount="indefinite" path="M0,120 L220,120 L220,140" />
+          </circle>
+          <circle r="2.2" fill="#0369A1" stroke="none">
+            <animateMotion
+              dur="4.5s"
+              begin="2.2s"
+              repeatCount="indefinite"
+              path="M0,150 L180,150 L220,150 L220,140"
+            />
+          </circle>
+          <text
+            x="20"
+            y="105"
+            fontFamily="var(--font-jetbrains-mono),monospace"
+            fontSize="12"
+            fill="#0369A1"
+            stroke="none"
+          >
+            Ø160mm
+          </text>
+          <path
+            d="M0,120 L220,120 L220,140"
+            stroke="#7DD3FC"
+            strokeWidth="2.4"
+            style={fx.inletFlashStyle}
+          />
         </g>
         <g style={{ opacity: fx.tankOpacity, transition: "opacity 1s ease" }}>
           <rect x="220" y="140" width="360" height="260" rx="6" />
           <line x1="220" y1="200" x2="580" y2="200" strokeDasharray="4 6" />
           <line x1="220" y1="280" x2="580" y2="280" strokeDasharray="4 6" />
           <line x1="400" y1="140" x2="400" y2="400" strokeDasharray="2 8" strokeWidth="1" />
-          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="5s" repeatCount="indefinite" path="M230,200 L570,200" /></circle>
-          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="M570,280 L230,280" /></circle>
-          <text x="232" y="130" fontFamily="var(--font-jetbrains-mono),monospace" fontSize="12" fill="#0369A1" stroke="none">H:2.4m</text>
-          <text x="232" y="418" fontFamily="var(--font-jetbrains-mono),monospace" fontSize="12" fill="#0369A1" stroke="none">V:12m³</text>
-          <rect x="220" y="140" width="360" height="260" rx="6" stroke="#7DD3FC" strokeWidth="2" style={fx.tankFlashStyle} />
+          <circle r="2.6" fill="#0369A1" stroke="none">
+            <animateMotion dur="5s" repeatCount="indefinite" path="M230,200 L570,200" />
+          </circle>
+          <circle r="2.6" fill="#0369A1" stroke="none">
+            <animateMotion
+              dur="5s"
+              begin="2.5s"
+              repeatCount="indefinite"
+              path="M570,280 L230,280"
+            />
+          </circle>
+          <text
+            x="232"
+            y="130"
+            fontFamily="var(--font-jetbrains-mono),monospace"
+            fontSize="12"
+            fill="#0369A1"
+            stroke="none"
+          >
+            H:2.4m
+          </text>
+          <text
+            x="232"
+            y="418"
+            fontFamily="var(--font-jetbrains-mono),monospace"
+            fontSize="12"
+            fill="#0369A1"
+            stroke="none"
+          >
+            V:12m³
+          </text>
+          <rect
+            x="220"
+            y="140"
+            width="360"
+            height="260"
+            rx="6"
+            stroke="#7DD3FC"
+            strokeWidth="2"
+            style={fx.tankFlashStyle}
+          />
         </g>
         <g style={{ opacity: fx.drainOpacity, transition: "opacity 1s ease" }}>
           <line x1="640" y1="430" x2="1080" y2="430" />
@@ -232,32 +370,164 @@ function BlueprintBackground({ fx }) {
           <line x1="800" y1="410" x2="800" y2="530" strokeWidth="1" strokeDasharray="2 6" />
           <line x1="900" y1="410" x2="900" y2="530" strokeWidth="1" strokeDasharray="2 6" />
           <line x1="1000" y1="410" x2="1000" y2="530" strokeWidth="1" strokeDasharray="2 6" />
-          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" repeatCount="indefinite" path="M650,430 L1070,430" /></circle>
-          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" begin="1.3s" repeatCount="indefinite" path="M650,470 L1070,470" /></circle>
-          <circle r="2.4" fill="#0369A1" stroke="none"><animateMotion dur="4s" begin="2.6s" repeatCount="indefinite" path="M650,510 L1070,510" /></circle>
-          <text x="650" y="398" fontFamily="var(--font-jetbrains-mono),monospace" fontSize="12" fill="#0369A1" stroke="none">L:440mm</text>
-          <path d="M640,430 L1080,430 M640,470 L1080,470 M640,510 L1080,510" stroke="#7DD3FC" strokeWidth="2.2" style={fx.drainFlashStyle} />
+          <circle r="2.4" fill="#0369A1" stroke="none">
+            <animateMotion dur="4s" repeatCount="indefinite" path="M650,430 L1070,430" />
+          </circle>
+          <circle r="2.4" fill="#0369A1" stroke="none">
+            <animateMotion
+              dur="4s"
+              begin="1.3s"
+              repeatCount="indefinite"
+              path="M650,470 L1070,470"
+            />
+          </circle>
+          <circle r="2.4" fill="#0369A1" stroke="none">
+            <animateMotion
+              dur="4s"
+              begin="2.6s"
+              repeatCount="indefinite"
+              path="M650,510 L1070,510"
+            />
+          </circle>
+          <text
+            x="650"
+            y="398"
+            fontFamily="var(--font-jetbrains-mono),monospace"
+            fontSize="12"
+            fill="#0369A1"
+            stroke="none"
+          >
+            L:440mm
+          </text>
+          <path
+            d="M640,430 L1080,430 M640,470 L1080,470 M640,510 L1080,510"
+            stroke="#7DD3FC"
+            strokeWidth="2.2"
+            style={fx.drainFlashStyle}
+          />
         </g>
         <g style={{ opacity: fx.outletOpacity, transition: "opacity 1s ease" }}>
           <line x1="1140" y1="600" x2="1140" y2="760" />
           <path d="M1122,742 L1140,764 L1158,742" />
           <circle cx="1140" cy="620" r="3" fill="#0369A1" stroke="none" />
-          <circle r="2.6" fill="#0369A1" stroke="none"><animateMotion dur="3.5s" repeatCount="indefinite" path="M1140,600 L1140,758" /></circle>
-          <text x="1090" y="600" fontFamily="var(--font-jetbrains-mono),monospace" fontSize="12" fill="#0369A1" stroke="none">Ø200mm</text>
-          <path d="M1140,600 L1140,760" stroke="#7DD3FC" strokeWidth="2.4" style={fx.outletFlashStyle} />
+          <circle r="2.6" fill="#0369A1" stroke="none">
+            <animateMotion dur="3.5s" repeatCount="indefinite" path="M1140,600 L1140,758" />
+          </circle>
+          <text
+            x="1090"
+            y="600"
+            fontFamily="var(--font-jetbrains-mono),monospace"
+            fontSize="12"
+            fill="#0369A1"
+            stroke="none"
+          >
+            Ø200mm
+          </text>
+          <path
+            d="M1140,600 L1140,760"
+            stroke="#7DD3FC"
+            strokeWidth="2.4"
+            style={fx.outletFlashStyle}
+          />
         </g>
       </svg>
 
-      <div style={{ position: "fixed", left: 0, right: 0, top: `${fx.scanTopPct}vh`, bottom: 0, pointerEvents: "none", zIndex: 0, backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>\")", backgroundRepeat: "repeat", backgroundSize: "120px 14px", opacity: fx.waterFillOpacity, animation: "bp-scroll 22s linear infinite", transition: "top .08s linear" }} />
-      <div style={{ position: "fixed", left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent)", pointerEvents: "none", zIndex: 0, top: `${fx.scanTopPct}vh`, transition: "top .08s linear" }} />
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          top: `${fx.scanTopPct}vh`,
+          bottom: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>\")",
+          backgroundRepeat: "repeat",
+          backgroundSize: "120px 14px",
+          opacity: fx.waterFillOpacity,
+          animation: "bp-scroll 22s linear infinite",
+          transition: "top .08s linear",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          height: 2,
+          background: "linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent)",
+          pointerEvents: "none",
+          zIndex: 0,
+          top: `${fx.scanTopPct}vh`,
+          transition: "top .08s linear",
+        }}
+      />
       {[14, 50, 84].map((leftPct, i) => (
-        <div key={leftPct} style={{ position: "fixed", left: `${leftPct}%`, top: `${fx.scanTopPct}vh`, width: 16, height: 16, borderRadius: "50%", border: "1px solid rgba(3,105,161,0.5)", pointerEvents: "none", zIndex: 0, transition: "top .08s linear", animation: `bp-ripple 2.6s ease-out ${i * 0.9}s infinite` }} />
+        <div
+          key={leftPct}
+          style={{
+            position: "fixed",
+            left: `${leftPct}%`,
+            top: `${fx.scanTopPct}vh`,
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            border: "1px solid rgba(3,105,161,0.5)",
+            pointerEvents: "none",
+            zIndex: 0,
+            transition: "top .08s linear",
+            animation: `bp-ripple 2.6s ease-out ${i * 0.9}s infinite`,
+          }}
+        />
       ))}
 
-      <div style={{ position: "fixed", left: 10, top: 72, bottom: 16, width: 1, background: "repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", left: 6, top: `${fx.scanTopPct}vh`, pointerEvents: "none", zIndex: 0, transition: "top .08s linear", display: "flex", alignItems: "center", gap: 4 }}>
-        <div style={{ width: 0, height: 0, borderTop: "4px solid transparent", borderBottom: "4px solid transparent", borderLeft: "6px solid #0369A1" }} />
-        <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#0369A1", background: "rgba(252,252,249,0.85)", padding: "1px 4px", borderRadius: 2 }}>{fx.depthLabel}</span>
+      <div
+        style={{
+          position: "fixed",
+          left: 10,
+          top: 72,
+          bottom: 16,
+          width: 1,
+          background:
+            "repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          left: 6,
+          top: `${fx.scanTopPct}vh`,
+          pointerEvents: "none",
+          zIndex: 0,
+          transition: "top .08s linear",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderTop: "4px solid transparent",
+            borderBottom: "4px solid transparent",
+            borderLeft: "6px solid #0369A1",
+          }}
+        />
+        <span
+          style={{
+            font: "10px var(--font-jetbrains-mono),monospace",
+            color: "#0369A1",
+            background: "rgba(252,252,249,0.85)",
+            padding: "1px 4px",
+            borderRadius: 2,
+          }}
+        >
+          {fx.depthLabel}
+        </span>
       </div>
     </>
   );
@@ -268,7 +538,14 @@ export default function LandingPage() {
   const { heroRef, statsRef, problemRef, howRef, pillarsRef } = fx.refs;
 
   return (
-    <div className="bp-page" style={{ position: "relative", background: "#FCFCF9", fontFamily: "var(--font-inter), sans-serif" }}>
+    <div
+      className="bp-page"
+      style={{
+        position: "relative",
+        background: "#FCFCF9",
+        fontFamily: "var(--font-inter), sans-serif",
+      }}
+    >
       <style dangerouslySetInnerHTML={{ __html: BLUEPRINT_CSS }} />
       <BlueprintBackground fx={fx} />
 
@@ -281,26 +558,158 @@ export default function LandingPage() {
             <div style={{ position: "relative" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-                <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 01 — Elegibilidad SECOP</span>
+                <span
+                  style={{
+                    font: "11px var(--font-jetbrains-mono),monospace",
+                    color: "#0369A1",
+                    letterSpacing: ".12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Fig. 01 — Elegibilidad SECOP
+                </span>
               </div>
-              <h1 className="bp-h1" style={{ fontVariationSettings: `'wght' ${fx.h1Weight}` }}>Precisión de ingeniería, aplicada a tu oferta.</h1>
-              <p style={{ font: "15px/1.6 var(--font-inter)", color: "#525B5A", maxWidth: 460, margin: "0 0 28px" }}>HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento — cada requisito habilitante, verificado como una cota en un plano.</p>
-              <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#0A1F1C", color: "#fff", font: "600 13px var(--font-jetbrains-mono),monospace", letterSpacing: ".04em" }}>[ Prueba un proceso ]</Link>
-              <svg viewBox="0 0 520 16" width="520" height="16" style={{ display: "block", marginTop: 36, overflow: "visible", maxWidth: "100%" }}>
-                <line x1="0" y1="8" x2="520" y2="8" stroke="#0369A1" strokeWidth="1" strokeDasharray="560" strokeDashoffset={fx.lineADashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
+              <h1 className="bp-h1" style={{ fontVariationSettings: `'wght' ${fx.h1Weight}` }}>
+                Precisión de ingeniería, aplicada a tu oferta.
+              </h1>
+              <p
+                style={{
+                  font: "15px/1.6 var(--font-inter)",
+                  color: "#525B5A",
+                  maxWidth: 460,
+                  margin: "0 0 28px",
+                }}
+              >
+                HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento —
+                cada requisito habilitante, verificado como una cota en un plano.
+              </p>
+              <Link
+                href="/licitaciones"
+                className="bp-cta"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "#0A1F1C",
+                  color: "#fff",
+                  font: "600 13px var(--font-jetbrains-mono),monospace",
+                  letterSpacing: ".04em",
+                }}
+              >
+                [ Prueba un proceso ]
+              </Link>
+              <svg
+                viewBox="0 0 520 16"
+                width="520"
+                height="16"
+                style={{ display: "block", marginTop: 36, overflow: "visible", maxWidth: "100%" }}
+              >
+                <line
+                  x1="0"
+                  y1="8"
+                  x2="520"
+                  y2="8"
+                  stroke="#0369A1"
+                  strokeWidth="1"
+                  strokeDasharray="560"
+                  strokeDashoffset={fx.lineADashoffset}
+                  style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
+                />
                 <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
                 <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
               </svg>
             </div>
 
-            <div style={{ position: "relative", border: "1px solid #0369A1", padding: 22, background: "#fff" }}>
-              <span style={{ position: "absolute", top: -1, left: -1, width: 12, height: 12, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-              <span style={{ position: "absolute", top: -1, right: -1, width: 12, height: 12, borderTop: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-              <span style={{ position: "absolute", bottom: -1, left: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-              <span style={{ position: "absolute", bottom: -1, right: -1, width: 12, height: 12, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-              <div style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 14 }}>Evaluación — muestra 001</div>
-              <div style={{ display: "flex", justifyContent: "space-between", font: "14px var(--font-inter)", color: "#0A1F1C", marginBottom: 16, borderBottom: "1px dashed #DADAD2", paddingBottom: 14 }}><strong>EPS Nariño</strong><span style={{ fontFamily: "var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>$3.850M</span></div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, font: "12px var(--font-jetbrains-mono),monospace", color: "#525B5A" }}>
+            <div
+              style={{
+                position: "relative",
+                border: "1px solid #0369A1",
+                padding: 22,
+                background: "#fff",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  top: -1,
+                  left: -1,
+                  width: 12,
+                  height: 12,
+                  borderTop: "2px solid #0369A1",
+                  borderLeft: "2px solid #0369A1",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  top: -1,
+                  right: -1,
+                  width: 12,
+                  height: 12,
+                  borderTop: "2px solid #0369A1",
+                  borderRight: "2px solid #0369A1",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: -1,
+                  left: -1,
+                  width: 12,
+                  height: 12,
+                  borderBottom: "2px solid #0369A1",
+                  borderLeft: "2px solid #0369A1",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: -1,
+                  right: -1,
+                  width: 12,
+                  height: 12,
+                  borderBottom: "2px solid #0369A1",
+                  borderRight: "2px solid #0369A1",
+                }}
+              />
+              <div
+                style={{
+                  font: "10px var(--font-jetbrains-mono),monospace",
+                  color: "#0369A1",
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                  marginBottom: 14,
+                }}
+              >
+                Evaluación — muestra 001
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  font: "14px var(--font-inter)",
+                  color: "#0A1F1C",
+                  marginBottom: 16,
+                  borderBottom: "1px dashed #DADAD2",
+                  paddingBottom: 14,
+                }}
+              >
+                <strong>EPS Nariño</strong>
+                <span
+                  style={{ fontFamily: "var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
+                >
+                  $3.850M
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                  font: "12px var(--font-jetbrains-mono),monospace",
+                  color: "#525B5A",
+                }}
+              >
                 <span>[✓] EXPERIENCIA ................ OK</span>
                 <span>[✓] CAPACIDAD_FINANCIERA ........ OK</span>
                 <span>[!] UNSPSC ...................... PARCIAL</span>
@@ -312,17 +721,80 @@ export default function LandingPage() {
         <div className="bp-pillars-wrap">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 02 — ¿Qué necesitas resolver?</span>
+            <span
+              style={{
+                font: "11px var(--font-jetbrains-mono),monospace",
+                color: "#0369A1",
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+              }}
+            >
+              Fig. 02 — ¿Qué necesitas resolver?
+            </span>
           </div>
           <div className="bp-pillars-grid">
             {INTENT_ROUTES.map((c) => (
-              <Link key={c.n} href={c.href} className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
-                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-                <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ {c.n} ]</span>
+              <Link
+                key={c.n}
+                href={c.href}
+                className="bp-card"
+                style={{
+                  border: "1px solid #DADAD2",
+                  padding: 22,
+                  background: "#fff",
+                  color: "#0A1F1C",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  minHeight: 180,
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    left: -1,
+                    width: 10,
+                    height: 10,
+                    borderTop: "2px solid #0369A1",
+                    borderLeft: "2px solid #0369A1",
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: -1,
+                    right: -1,
+                    width: 10,
+                    height: 10,
+                    borderBottom: "2px solid #0369A1",
+                    borderRight: "2px solid #0369A1",
+                  }}
+                />
+                <span
+                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
+                >
+                  [ {c.n} ]
+                </span>
                 <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>{c.desc}</p>
-                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ {c.cta} <span className="bp-card-arrow">→</span> ]</span>
+                <p
+                  style={{
+                    font: "13px/1.5 var(--font-inter)",
+                    color: "#525B5A",
+                    flexGrow: 1,
+                    margin: 0,
+                  }}
+                >
+                  {c.desc}
+                </p>
+                <span
+                  style={{
+                    font: "600 12px var(--font-jetbrains-mono),monospace",
+                    color: "#0369A1",
+                  }}
+                >
+                  [ {c.cta} <span className="bp-card-arrow">→</span> ]
+                </span>
               </Link>
             ))}
           </div>
@@ -336,16 +808,57 @@ export default function LandingPage() {
           <div ref={problemRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 03 — El problema</span>
+              <span
+                style={{
+                  font: "11px var(--font-jetbrains-mono),monospace",
+                  color: "#0369A1",
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Fig. 03 — El problema
+              </span>
             </div>
-            <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
-              <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineCDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
+            <svg
+              viewBox="0 0 460 8"
+              width="460"
+              height="8"
+              style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}
+            >
+              <line
+                x1="0"
+                y1="4"
+                x2="460"
+                y2="4"
+                stroke="#0369A1"
+                strokeWidth="1"
+                strokeDasharray="500"
+                strokeDashoffset={fx.lineCDashoffset}
+                style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
+              />
             </svg>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {PROBLEM_POINTS.map((p) => (
                 <div key={p.n} style={{ display: "flex", gap: 14 }}>
-                  <span style={{ font: "600 11px var(--font-jetbrains-mono),monospace", color: "#0369A1", flexShrink: 0 }}>[{p.n}]</span>
-                  <p style={{ font: "14.5px/1.55 var(--font-inter)", color: "#0A1F1C", margin: 0, maxWidth: 360 }}>{p.text}</p>
+                  <span
+                    style={{
+                      font: "600 11px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      flexShrink: 0,
+                    }}
+                  >
+                    [{p.n}]
+                  </span>
+                  <p
+                    style={{
+                      font: "14.5px/1.55 var(--font-inter)",
+                      color: "#0A1F1C",
+                      margin: 0,
+                      maxWidth: 360,
+                    }}
+                  >
+                    {p.text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -353,16 +866,59 @@ export default function LandingPage() {
           <div ref={howRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 04 — Cómo funciona</span>
+              <span
+                style={{
+                  font: "11px var(--font-jetbrains-mono),monospace",
+                  color: "#0369A1",
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Fig. 04 — Cómo funciona
+              </span>
             </div>
-            <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
-              <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineDDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }} />
+            <svg
+              viewBox="0 0 460 8"
+              width="460"
+              height="8"
+              style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}
+            >
+              <line
+                x1="0"
+                y1="4"
+                x2="460"
+                y2="4"
+                stroke="#0369A1"
+                strokeWidth="1"
+                strokeDasharray="500"
+                strokeDashoffset={fx.lineDDashoffset}
+                style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }}
+              />
             </svg>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {HOW_STEPS.map((s) => (
-                <div key={s.n} style={{ display: "flex", gap: 14, padding: "12px 0", borderLeft: "1px dashed #DADAD2", paddingLeft: 16 }}>
-                  <span style={{ font: "600 11px var(--font-jetbrains-mono),monospace", color: "#0369A1", flexShrink: 0 }}>[{s.n}]</span>
-                  <p style={{ font: "13.5px/1.55 var(--font-inter)", color: "#0A1F1C", margin: 0 }}>{s.text}</p>
+                <div
+                  key={s.n}
+                  style={{
+                    display: "flex",
+                    gap: 14,
+                    padding: "12px 0",
+                    borderLeft: "1px dashed #DADAD2",
+                    paddingLeft: 16,
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "600 11px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      flexShrink: 0,
+                    }}
+                  >
+                    [{s.n}]
+                  </span>
+                  <p style={{ font: "13.5px/1.55 var(--font-inter)", color: "#0A1F1C", margin: 0 }}>
+                    {s.text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -372,31 +928,132 @@ export default function LandingPage() {
         <div ref={pillarsRef} className="bp-pillars-wrap">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 05 — Herramientas de soporte</span>
+            <span
+              style={{
+                font: "11px var(--font-jetbrains-mono),monospace",
+                color: "#0369A1",
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+              }}
+            >
+              Fig. 05 — Herramientas de soporte
+            </span>
           </div>
           <div className="bp-pillars-grid">
             {PILLARS.map((c) => (
-              <Link key={c.n} href={c.href} className={`bp-card${c.dark ? " bp-card-dark" : ""}`} style={{ border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`, padding: 22, background: c.dark ? "#0A1F1C" : "#fff", color: c.dark ? "#fff" : "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 200 }}>
-                <span className="bp-card-seal">{c.dark ? <>11 AÑOS<br />LIC. VIG.</> : <>APROB.<br />RAS-2000</>}</span>
-                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
-                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`, borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}` }} />
-                <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F" }}>[ {c.n} ]</span>
+              <Link
+                key={c.n}
+                href={c.href}
+                className={`bp-card${c.dark ? " bp-card-dark" : ""}`}
+                style={{
+                  border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`,
+                  padding: 22,
+                  background: c.dark ? "#0A1F1C" : "#fff",
+                  color: c.dark ? "#fff" : "#0A1F1C",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  minHeight: 200,
+                }}
+              >
+                <span className="bp-card-seal">
+                  {c.dark ? (
+                    <>
+                      11 AÑOS
+                      <br />
+                      LIC. VIG.
+                    </>
+                  ) : (
+                    <>
+                      APROB.
+                      <br />
+                      RAS-2000
+                    </>
+                  )}
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    left: -1,
+                    width: 10,
+                    height: 10,
+                    borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
+                    borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: -1,
+                    right: -1,
+                    width: 10,
+                    height: 10,
+                    borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
+                    borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
+                  }}
+                />
+                <span
+                  style={{
+                    font: "10px var(--font-jetbrains-mono),monospace",
+                    color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F",
+                  }}
+                >
+                  [ {c.n} ]
+                </span>
                 <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p style={{ font: "13px/1.5 var(--font-inter)", color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A", flexGrow: 1, margin: 0 }}>{c.desc}</p>
-                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: c.dark ? "#7DD3FC" : "#0369A1" }}>[ VER MÁS <span className="bp-card-arrow">→</span> ]</span>
+                <p
+                  style={{
+                    font: "13px/1.5 var(--font-inter)",
+                    color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A",
+                    flexGrow: 1,
+                    margin: 0,
+                  }}
+                >
+                  {c.desc}
+                </p>
+                <span
+                  style={{
+                    font: "600 12px var(--font-jetbrains-mono),monospace",
+                    color: c.dark ? "#7DD3FC" : "#0369A1",
+                  }}
+                >
+                  [ VER MÁS <span className="bp-card-arrow">→</span> ]
+                </span>
               </Link>
             ))}
           </div>
         </div>
 
         <div className="bp-closing-wrap">
-          <span style={{ font: "14px var(--font-jetbrains-mono),monospace", color: "#0A1F1C" }}>▸ Deja de descubrir tarde que no calificabas.</span>
-          <Link href="/licitaciones" className="bp-cta" style={{ display: "inline-flex", background: "#0369A1", color: "#fff", font: "600 13px var(--font-jetbrains-mono),monospace", letterSpacing: ".04em" }}>[ PRUEBA UN PROCESO ]</Link>
+          <span style={{ font: "14px var(--font-jetbrains-mono),monospace", color: "#0A1F1C" }}>
+            ▸ Deja de descubrir tarde que no calificabas.
+          </span>
+          <Link
+            href="/licitaciones"
+            className="bp-cta"
+            style={{
+              display: "inline-flex",
+              background: "#0369A1",
+              color: "#fff",
+              font: "600 13px var(--font-jetbrains-mono),monospace",
+              letterSpacing: ".04em",
+            }}
+          >
+            [ PRUEBA UN PROCESO ]
+          </Link>
         </div>
 
         <div className="bp-footer-wrap">
-          <div style={{ display: "flex", gap: 12 }}><strong style={{ color: "#0A1F1C" }}>HydroStack</strong><span>·</span><span>Plataforma de contratación pública</span></div>
-          <div style={{ display: "flex", gap: 14, alignItems: "center" }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} /><span>Datos SECOP II · actualización diaria</span></div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <strong style={{ color: "#0A1F1C" }}>HydroStack</strong>
+            <span>·</span>
+            <span>Plataforma de contratación pública</span>
+          </div>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} />
+            <span>Datos SECOP II · actualización diaria</span>
+          </div>
         </div>
       </div>
     </div>

@@ -23,103 +23,92 @@ export default function ComoParticipar() {
           <span className="clr-tag">Guía · Contratación pública</span>
           <h1 className="clr-h1">Cómo participar en una licitación pública</h1>
           <p className="clr-sub">
-            Una guía práctica para empresas y personas naturales que quieren
-            ofertar en procesos de contratación del sector agua potable y
-            saneamiento básico en Colombia.
+            Una guía práctica para empresas y personas naturales que quieren ofertar en procesos de
+            contratación del sector agua potable y saneamiento básico en Colombia.
           </p>
         </header>
 
         <section className="clr-cp-section">
           <p>
-            &quot;Participar&quot; en un proceso de SECOP II significa presentar una
-            oferta formal antes de que cierre el plazo, cumpliendo los
-            requisitos que la entidad pidió en el pliego de condiciones. Puedes
-            hacerlo como empresa (persona jurídica) o como persona natural —
-            los requisitos cambian según el tipo de contrato y su cuantía, pero
-            el camino general es el mismo.
+            &quot;Participar&quot; en un proceso de SECOP II significa presentar una oferta formal
+            antes de que cierre el plazo, cumpliendo los requisitos que la entidad pidió en el
+            pliego de condiciones. Puedes hacerlo como empresa (persona jurídica) o como persona
+            natural — los requisitos cambian según el tipo de contrato y su cuantía, pero el camino
+            general es el mismo.
           </p>
         </section>
 
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">1. Revisa si puedes ofertar</h2>
           <p>
-            Para obras, consultoría e interventoría necesitas estar inscrito en
-            el <strong>RUP</strong> (Registro Único de Proponentes) de tu
-            Cámara de Comercio, con la experiencia y capacidad financiera que
-            el pliego exige. Para contratos de prestación de servicios o de
-            mínima cuantía, muchas entidades no exigen RUP — basta con tus
-            documentos de identidad o de constitución de la empresa.
+            Para obras, consultoría e interventoría necesitas estar inscrito en el{" "}
+            <strong>RUP</strong> (Registro Único de Proponentes) de tu Cámara de Comercio, con la
+            experiencia y capacidad financiera que el pliego exige. Para contratos de prestación de
+            servicios o de mínima cuantía, muchas entidades no exigen RUP — basta con tus documentos
+            de identidad o de constitución de la empresa.
           </p>
           <p>
-            <strong>Paso concreto:</strong> si nunca has ofertado, empieza por
-            confirmar tu inscripción en el RUP (o inscribirte si trabajas en
-            obra o consultoría) antes de buscar procesos. Sin eso, no vas a
-            poder presentar oferta cuando encuentres uno que te sirva.
+            <strong>Paso concreto:</strong> si nunca has ofertado, empieza por confirmar tu
+            inscripción en el RUP (o inscribirte si trabajas en obra o consultoría) antes de buscar
+            procesos. Sin eso, no vas a poder presentar oferta cuando encuentres uno que te sirva.
           </p>
         </section>
 
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">2. Encuentra procesos que te sirvan</h2>
           <p>
-            No todos los procesos publicados aplican para ti — importa el
-            sector, la ubicación y el rango de valor del contrato. En{" "}
-            <Link href="/licitaciones/explorar">Búsqueda avanzada</Link> puedes
-            filtrar los procesos de agua y saneamiento por departamento, estado
-            y valor, y cuando cuentas quién eres (sectores en los que trabajas,
-            dónde puedes operar, qué rango de cuantía te interesa) te decimos
-            en cuáles procesos tienes más chance antes de que inviertas tiempo
-            leyendo el pliego completo.
+            No todos los procesos publicados aplican para ti — importa el sector, la ubicación y el
+            rango de valor del contrato. En{" "}
+            <Link href="/licitaciones/explorar">Búsqueda avanzada</Link> puedes filtrar los procesos
+            de agua y saneamiento por departamento, estado y valor, y cuando cuentas quién eres
+            (sectores en los que trabajas, dónde puedes operar, qué rango de cuantía te interesa) te
+            decimos en cuáles procesos tienes más chance antes de que inviertas tiempo leyendo el
+            pliego completo.
           </p>
         </section>
 
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">3. Lee el pliego de condiciones completo</h2>
           <p>
-            El pliego (o &quot;documento del proceso&quot;) vive en SECOP II, en el
-            detalle del proceso. Ahí están los requisitos habilitantes
-            exactos, el cronograma (fecha de cierre, plazo para aclaraciones,
-            posibles adendas que modifican las reglas), las garantías que vas
-            a tener que constituir y los criterios con los que van a evaluar
-            tu oferta frente a las demás.
+            El pliego (o &quot;documento del proceso&quot;) vive en SECOP II, en el detalle del
+            proceso. Ahí están los requisitos habilitantes exactos, el cronograma (fecha de cierre,
+            plazo para aclaraciones, posibles adendas que modifican las reglas), las garantías que
+            vas a tener que constituir y los criterios con los que van a evaluar tu oferta frente a
+            las demás.
           </p>
           <p className="clr-cp-warn">
-            <strong>Error común:</strong> presentar la oferta a última hora sin
-            margen para imprevistos. SECOP II no acepta nada después del cierre
-            exacto, ni por unos minutos — no hay excepción por falla técnica de
-            tu lado.
+            <strong>Error común:</strong> presentar la oferta a última hora sin margen para
+            imprevistos. SECOP II no acepta nada después del cierre exacto, ni por unos minutos — no
+            hay excepción por falla técnica de tu lado.
           </p>
         </section>
 
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">4. Prepara y presenta tu oferta</h2>
           <p>
-            Una oferta completa suele llevar tres bloques de documentos:
-            jurídicos (RUP vigente, certificado de existencia y representación
-            si eres empresa, o cédula si eres persona natural), técnicos
-            (experiencia específica y propuesta técnica) y económicos
-            (propuesta de precio y garantía de seriedad de la oferta). Todo se
-            sube a través de la plataforma SECOP II, dentro del plazo que fijó
-            el cronograma.
+            Una oferta completa suele llevar tres bloques de documentos: jurídicos (RUP vigente,
+            certificado de existencia y representación si eres empresa, o cédula si eres persona
+            natural), técnicos (experiencia específica y propuesta técnica) y económicos (propuesta
+            de precio y garantía de seriedad de la oferta). Todo se sube a través de la plataforma
+            SECOP II, dentro del plazo que fijó el cronograma.
           </p>
         </section>
 
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">5. Qué pasa después de presentar</h2>
           <p>
-            La entidad evalúa las ofertas contra los criterios del pliego. Si
-            te piden subsanar (completar un documento faltante o corregir
-            algo menor), responde dentro del plazo que te den — no hacerlo a
-            tiempo puede sacarte del proceso aunque tu oferta fuera la mejor.
-            Si resultas adjudicado, sigue la firma del contrato y las
-            garantías de cumplimiento.
+            La entidad evalúa las ofertas contra los criterios del pliego. Si te piden subsanar
+            (completar un documento faltante o corregir algo menor), responde dentro del plazo que
+            te den — no hacerlo a tiempo puede sacarte del proceso aunque tu oferta fuera la mejor.
+            Si resultas adjudicado, sigue la firma del contrato y las garantías de cumplimiento.
           </p>
         </section>
 
         <aside className="clr-cp-cta">
           <p>
-            <strong>¿Listo para buscar un proceso?</strong> En la búsqueda
-            avanzada puedes filtrar por sector agua y saneamiento y, cuando
-            quieras, contarnos de ti para ver tu elegibilidad en cada uno.
+            <strong>¿Listo para buscar un proceso?</strong> En la búsqueda avanzada puedes filtrar
+            por sector agua y saneamiento y, cuando quieras, contarnos de ti para ver tu
+            elegibilidad en cada uno.
           </p>
           <TrackedCtaLink
             href="/licitaciones/explorar"

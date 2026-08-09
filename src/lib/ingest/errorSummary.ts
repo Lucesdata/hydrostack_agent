@@ -21,12 +21,12 @@ function asPgLikeError(value: unknown): PgLikeError | null {
 
 export function summarizeIngestError(err: unknown, maxLen = 500): string {
   const top = err instanceof Error ? err : new Error(String(err));
-  const cause = 'cause' in top ? (top as { cause?: unknown }).cause : undefined;
+  const cause = "cause" in top ? (top as { cause?: unknown }).cause : undefined;
   const source = asPgLikeError(cause) ?? (top as unknown as PgLikeError);
 
-  const code = typeof source.code === 'string' ? source.code : null;
-  const detail = typeof source.detail === 'string' ? source.detail : null;
-  const hint = typeof source.hint === 'string' ? source.hint : null;
+  const code = typeof source.code === "string" ? source.code : null;
+  const detail = typeof source.detail === "string" ? source.detail : null;
+  const hint = typeof source.hint === "string" ? source.hint : null;
 
   let summary = code ? `[${code}] ${source.message}` : source.message;
   if (detail) summary += ` — detail: ${detail}`;

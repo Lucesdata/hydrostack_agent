@@ -22,12 +22,7 @@ import {
 } from "./config";
 import { resolveDatasetId } from "./datasetResolver";
 import { preclassify, accessMessage } from "./document-access";
-import type {
-  SecopProceso,
-  SecopContrato,
-  SecopQuery,
-  SecopResult,
-} from "./types";
+import type { SecopProceso, SecopContrato, SecopQuery, SecopResult } from "./types";
 
 const F = FIELDS_PROCESOS;
 
@@ -79,7 +74,7 @@ interface SodaParams {
 export async function sodaFetch<T>(
   dataset: string,
   params: SodaParams,
-  opts: { signal?: AbortSignal; revalidate?: number } = {},
+  opts: { signal?: AbortSignal; revalidate?: number } = {}
 ): Promise<T[]> {
   const url = new URL(`${SOCRATA_DOMAIN}/resource/${dataset}.json`);
   Object.entries(params).forEach(([k, v]) => {
@@ -157,7 +152,7 @@ export function buildProcesosWhere(query: SecopQuery): string {
     query.estado ? `${F.estado} = '${soqlEscape(query.estado)}'` : null,
     query.valorMin != null ? `${F.precioBase} >= ${query.valorMin}` : null,
     query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
-    query.apertura ? `${F.estadoApertura} = '${soqlEscape(query.apertura)}'` : null,
+    query.apertura ? `${F.estadoApertura} = '${soqlEscape(query.apertura)}'` : null
   );
 }
 
@@ -167,7 +162,7 @@ export function buildProcesosWhere(query: SecopQuery): string {
  */
 export async function countProcesos(
   query: SecopQuery = {},
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<number | undefined> {
   try {
     const where = buildProcesosWhere(query);
@@ -180,12 +175,12 @@ export async function countProcesos(
         $limit: 1,
         $offset: 0,
       },
-      { signal, revalidate: REVALIDATE_COUNT },
+      { signal, revalidate: REVALIDATE_COUNT }
     );
     const n = Number(rows[0]?.count);
     if (!Number.isFinite(n)) {
       console.warn(
-        `[countProcesos] count no numérico en la respuesta SODA (${String(rows[0]?.count)}), se omite el total`,
+        `[countProcesos] count no numérico en la respuesta SODA (${String(rows[0]?.count)}), se omite el total`
       );
       return undefined;
     }
@@ -195,7 +190,7 @@ export async function countProcesos(
     console.warn(
       `[countProcesos] falló la consulta count (${
         err instanceof Error ? err.message : String(err)
-      }), se omite el total`,
+      }), se omite el total`
     );
     return undefined;
   }
@@ -207,7 +202,7 @@ export async function countProcesos(
  */
 export async function searchProcesos(
   query: SecopQuery = {},
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<SecopResult<SecopProceso>> {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
@@ -219,11 +214,11 @@ export async function searchProcesos(
     {
       $where: where || undefined,
       $q: query.q ? soqlEscape(query.q) : undefined,
-      $order: ORDER_SOQL[query.orden ?? 'fecha'],
+      $order: ORDER_SOQL[query.orden ?? "fecha"],
       $limit: pageSize,
       $offset: (page - 1) * pageSize,
     },
-    { signal },
+    { signal }
   );
 
   return { items: rows.map(normalizeProceso), page, pageSize };
@@ -251,7 +246,7 @@ function normalizeContrato(row: Record<string, unknown>): SecopContrato {
 /** Busca CONTRATOS ya formalizados del sector agua. */
 export async function searchContratos(
   query: SecopQuery = {},
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<SecopResult<SecopContrato>> {
   const C = FIELDS_CONTRATOS;
   const page = Math.max(1, query.page ?? 1);
@@ -260,7 +255,7 @@ export async function searchContratos(
   const aguaWhere =
     query.soloAgua !== false
       ? `(${KEYWORDS_AGUA.map(
-          (kw) => `upper(${C.objeto}) like '%${soqlEscape(kw.toUpperCase())}%'`,
+          (kw) => `upper(${C.objeto}) like '%${soqlEscape(kw.toUpperCase())}%'`
         ).join(" OR ")})`
       : null;
 
@@ -269,7 +264,7 @@ export async function searchContratos(
     query.departamento
       ? `upper(${C.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
       : null,
-    query.valorMin != null ? `${C.valor} >= ${query.valorMin}` : null,
+    query.valorMin != null ? `${C.valor} >= ${query.valorMin}` : null
   );
 
   const rows = await sodaFetch<Record<string, unknown>>(
@@ -280,7 +275,7 @@ export async function searchContratos(
       $limit: pageSize,
       $offset: (page - 1) * pageSize,
     },
-    { signal },
+    { signal }
   );
 
   return { items: rows.map(normalizeContrato), page, pageSize };

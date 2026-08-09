@@ -4,10 +4,10 @@
  * consulta — un solo sitio que conoce la forma de la fila `oferente_perfil`.
  */
 
-import { eq } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { oferentePerfil } from '@/src/lib/db/schema/cuentas';
-import type { OferenteProfile } from './types';
+import { eq } from "drizzle-orm";
+import { db } from "@/src/lib/db/client";
+import { oferentePerfil } from "@/src/lib/db/schema/cuentas";
+import type { OferenteProfile } from "./types";
 
 export async function getPerfilDb(usuarioId: string): Promise<OferenteProfile | null> {
   const [row] = await db

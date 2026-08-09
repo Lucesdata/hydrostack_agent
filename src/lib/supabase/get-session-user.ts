@@ -1,4 +1,4 @@
-import { createClient } from '@/src/lib/supabase/server';
+import { createClient } from "@/src/lib/supabase/server";
 
 export interface SessionUser {
   id: string;
@@ -42,11 +42,11 @@ export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
 
     if (!user || !user.email) return null;
     const meta = user.user_metadata ?? {};
-    const fullName = typeof meta.full_name === 'string' ? meta.full_name : null;
+    const fullName = typeof meta.full_name === "string" ? meta.full_name : null;
     const avatarUrl =
-      typeof meta.avatar_url === 'string'
+      typeof meta.avatar_url === "string"
         ? meta.avatar_url
-        : typeof meta.picture === 'string'
+        : typeof meta.picture === "string"
           ? meta.picture
           : null;
     return { email: user.email, fullName, avatarUrl };

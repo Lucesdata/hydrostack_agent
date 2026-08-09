@@ -74,7 +74,10 @@ export default function LicitacionesDiscovery() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  const results = useMemo(() => filterByResidualPills(items, residualPills), [items, residualPills]);
+  const results = useMemo(
+    () => filterByResidualPills(items, residualPills),
+    [items, residualPills]
+  );
 
   function handleToggleCollection(collectionId: string) {
     const collection = SMART_COLLECTIONS.find((c) => c.id === collectionId);
@@ -107,8 +110,8 @@ export default function LicitacionesDiscovery() {
             <span className="clr-tag">SECOP II · Agua y saneamiento</span>
             <h1 className="clr-h1">Descubrir licitaciones</h1>
             <p className="clr-sub">
-              Colecciones listas para usar y búsqueda libre — combinables entre sí.
-              Ningún filtro pide datos tuyos, solo atributos del proceso.
+              Colecciones listas para usar y búsqueda libre — combinables entre sí. Ningún filtro
+              pide datos tuyos, solo atributos del proceso.
             </p>
           </div>
         </header>
@@ -118,7 +121,11 @@ export default function LicitacionesDiscovery() {
           onToggle={handleToggleCollection}
         />
 
-        <FacetedSearchBar pills={pills} onAddPills={handleAddPills} onRemovePill={handleRemovePill} />
+        <FacetedSearchBar
+          pills={pills}
+          onAddPills={handleAddPills}
+          onRemovePill={handleRemovePill}
+        />
 
         <div className="clr-disc-context">
           <span className="clr-disc-count">

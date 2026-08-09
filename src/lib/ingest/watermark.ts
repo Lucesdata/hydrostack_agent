@@ -16,7 +16,7 @@
 const DAY_MS = 86_400_000;
 
 function pad(n: number, width = 2): string {
-  return String(n).padStart(width, '0');
+  return String(n).padStart(width, "0");
 }
 
 const FLOATING_RE = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?/;
@@ -32,7 +32,7 @@ function floatingToUtcMs(ts: string): number | null {
   const m = FLOATING_RE.exec(ts);
   if (!m) return null;
   const [, y, mo, d, h, mi, s, ms] = m;
-  return Date.UTC(+y, +mo - 1, +d, +h, +mi, +s, ms ? +ms.padEnd(3, '0') : 0);
+  return Date.UTC(+y, +mo - 1, +d, +h, +mi, +s, ms ? +ms.padEnd(3, "0") : 0);
 }
 
 /** Formatea un Date como timestamp floating de Socrata (sin zona), en UTC. */
@@ -46,7 +46,7 @@ export function formatFloating(d: Date): string {
 
 /** Parsea un floating de Socrata a Date (UTC). `null` si no es parseable. */
 export function parseFloatingDate(ts: unknown): Date | null {
-  if (typeof ts !== 'string' || !ts) return null;
+  if (typeof ts !== "string" || !ts) return null;
   const ms = floatingToUtcMs(ts);
   return ms === null ? null : new Date(ms);
 }
@@ -67,7 +67,7 @@ export function subtractDays(isoTimestamp: string, days: number): string {
  */
 export function windowStart(
   lastWatermark: string | null | undefined,
-  marginDays = 1,
+  marginDays = 1
 ): string | null {
   if (!lastWatermark) return null;
   return subtractDays(lastWatermark, marginDays);

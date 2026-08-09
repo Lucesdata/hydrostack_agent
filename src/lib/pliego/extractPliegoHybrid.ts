@@ -14,16 +14,16 @@
  * Ver docs/superpowers/specs/2026-08-08-pliego-extractor-hibrido-design.md.
  */
 
-import { readFile } from 'node:fs/promises';
-import { parseDocumentoBaseTexto } from './rules/parseDocumentoBase';
-import { parseFormulario1Xls } from './rules/parseFormulario1';
-import { pdfToText } from './rules/pdfToText';
-import { ParseoNoConfiable } from './rules/errors';
-import { extractPliegoGemini } from './extractPliegoGemini';
-import { parsePliegoExtraction, type PliegoExtraction } from './schema';
+import { readFile } from "node:fs/promises";
+import { parseDocumentoBaseTexto } from "./rules/parseDocumentoBase";
+import { parseFormulario1Xls } from "./rules/parseFormulario1";
+import { pdfToText } from "./rules/pdfToText";
+import { ParseoNoConfiable } from "./rules/errors";
+import { extractPliegoGemini } from "./extractPliegoGemini";
+import { parsePliegoExtraction, type PliegoExtraction } from "./schema";
 
-type CampoHibrido = 'reglas_presupuesto' | 'requisitos_habilitantes' | 'capitulos';
-type CampoOrigen = 'reglas' | 'llm';
+type CampoHibrido = "reglas_presupuesto" | "requisitos_habilitantes" | "capitulos";
+type CampoOrigen = "reglas" | "llm";
 
 export interface HybridExtraction {
   extraction: PliegoExtraction;
@@ -39,7 +39,7 @@ export interface ExtractPliegoHybridOptions {
 
 export async function extractPliegoHybrid(
   documentoBasePdf: string | Buffer,
-  opts: ExtractPliegoHybridOptions = {},
+  opts: ExtractPliegoHybridOptions = {}
 ): Promise<HybridExtraction> {
   const documentoBaseBuffer = Buffer.isBuffer(documentoBasePdf)
     ? documentoBasePdf
@@ -47,10 +47,10 @@ export async function extractPliegoHybrid(
 
   const base = await extractPliegoGemini(documentoBaseBuffer, { apiKey: opts.geminiApiKey });
 
-  const origen: HybridExtraction['origen'] = {
-    reglas_presupuesto: 'llm',
-    requisitos_habilitantes: 'llm',
-    capitulos: 'llm',
+  const origen: HybridExtraction["origen"] = {
+    reglas_presupuesto: "llm",
+    requisitos_habilitantes: "llm",
+    capitulos: "llm",
   };
 
   let reglas_presupuesto = base.reglas_presupuesto;
@@ -60,8 +60,8 @@ export async function extractPliegoHybrid(
     const reglas = parseDocumentoBaseTexto(texto);
     reglas_presupuesto = reglas.reglas_presupuesto;
     requisitos_habilitantes = reglas.requisitos_habilitantes;
-    origen.reglas_presupuesto = 'reglas';
-    origen.requisitos_habilitantes = 'reglas';
+    origen.reglas_presupuesto = "reglas";
+    origen.requisitos_habilitantes = "reglas";
   } catch (e) {
     if (!(e instanceof ParseoNoConfiable)) throw e;
     // Documento Base sin la estructura esperada (probablemente escaneado): se
@@ -75,7 +75,7 @@ export async function extractPliegoHybrid(
         ? opts.formulario1
         : await readFile(opts.formulario1);
       capitulos = await parseFormulario1Xls(xlsBuffer);
-      origen.capitulos = 'reglas';
+      origen.capitulos = "reglas";
     } catch (e) {
       if (!(e instanceof ParseoNoConfiable)) throw e;
       // Excel con columnas distintas a las esperadas: se queda con lo que trajo

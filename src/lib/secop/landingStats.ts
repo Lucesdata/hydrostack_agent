@@ -15,10 +15,10 @@
  * ──────────────────────────────────────────────────────────────────────────
  */
 
-import { sodaFetch, buildAguaWhere } from './client';
-import { resolveDatasetId } from './datasetResolver';
-import { FIELDS_PROCESOS, REVALIDATE_SEARCH } from './config';
-import type { EstadoApertura } from './types';
+import { sodaFetch, buildAguaWhere } from "./client";
+import { resolveDatasetId } from "./datasetResolver";
+import { FIELDS_PROCESOS, REVALIDATE_SEARCH } from "./config";
+import type { EstadoApertura } from "./types";
 
 const F = FIELDS_PROCESOS;
 
@@ -28,26 +28,26 @@ const BOGOTA_OFFSET_MS = 5 * 60 * 60 * 1000;
 /** Instante UTC → floating timestamp SoQL en hora Bogotá (mismo formato naive
  *  que usa el dataset, p.ej. "2022-01-18T00:00:00.000"). */
 function toBogotaNaiveIso(date: Date): string {
-  return new Date(date.getTime() - BOGOTA_OFFSET_MS).toISOString().replace('Z', '');
+  return new Date(date.getTime() - BOGOTA_OFFSET_MS).toISOString().replace("Z", "");
 }
 
 /** Año/mes calendario en hora Bogotá para el corte de "mes actual". */
 function bogotaYearMonth(now: Date): { year: number; month: number } {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Bogota',
-    year: 'numeric',
-    month: '2-digit',
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
   }).formatToParts(now);
   return {
-    year: Number(parts.find((p) => p.type === 'year')?.value),
-    month: Number(parts.find((p) => p.type === 'month')?.value),
+    year: Number(parts.find((p) => p.type === "year")?.value),
+    month: Number(parts.find((p) => p.type === "month")?.value),
   };
 }
 
 /** Primer día del mes actual (hora Bogotá), como floating timestamp SoQL. */
 function bogotaMonthStartSoql(now: Date): string {
   const { year, month } = bogotaYearMonth(now);
-  return `${year}-${String(month).padStart(2, '0')}-01T00:00:00.000`;
+  return `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000`;
 }
 
 /**
@@ -67,18 +67,18 @@ export async function getNuevos7d(now: Date = new Date()): Promise<number | null
       `${F.fase} = 'Presentación de oferta'`,
       `${F.estadoApertura} = 'Abierto'`,
       `${F.fechaPublicacion} >= '${cutoff}'`,
-    ].join(' AND ');
+    ].join(" AND ");
 
     const rows = await sodaFetch<{ count?: string }>(
-      await resolveDatasetId('procesos'),
-      { $select: 'count(*) as count', $where: where, $limit: 1, $offset: 0 },
-      { revalidate: REVALIDATE_SEARCH },
+      await resolveDatasetId("procesos"),
+      { $select: "count(*) as count", $where: where, $limit: 1, $offset: 0 },
+      { revalidate: REVALIDATE_SEARCH }
     );
     const n = Number(rows[0]?.count);
     return Number.isFinite(n) ? n : null;
   } catch (err) {
     console.warn(
-      `[landingStats.getNuevos7d] falló (${err instanceof Error ? err.message : String(err)})`,
+      `[landingStats.getNuevos7d] falló (${err instanceof Error ? err.message : String(err)})`
     );
     return null;
   }
@@ -101,17 +101,17 @@ export async function getEnJuegoMes(now: Date = new Date()): Promise<EnJuegoMes>
       buildAguaWhere(),
       `${F.estadoApertura} = 'Abierto'`,
       `${F.fechaPublicacion} >= '${monthStart}'`,
-    ].join(' AND ');
+    ].join(" AND ");
 
     const rows = await sodaFetch<{ total?: string; procesos?: string }>(
-      await resolveDatasetId('procesos'),
+      await resolveDatasetId("procesos"),
       {
         $select: `sum(${F.precioBase}) as total, count(*) as procesos`,
         $where: where,
         $limit: 1,
         $offset: 0,
       },
-      { revalidate: REVALIDATE_SEARCH },
+      { revalidate: REVALIDATE_SEARCH }
     );
     const total = Number(rows[0]?.total);
     const procesos = Number(rows[0]?.procesos);
@@ -121,7 +121,7 @@ export async function getEnJuegoMes(now: Date = new Date()): Promise<EnJuegoMes>
     };
   } catch (err) {
     console.warn(
-      `[landingStats.getEnJuegoMes] falló (${err instanceof Error ? err.message : String(err)})`,
+      `[landingStats.getEnJuegoMes] falló (${err instanceof Error ? err.message : String(err)})`
     );
     return { totalCop: null, procesos: null };
   }
@@ -144,8 +144,8 @@ export interface DestacadoStat {
 
 function extractUrl(v: unknown): string | null {
   if (!v) return null;
-  if (typeof v === 'string') return v;
-  if (typeof v === 'object' && v !== null && 'url' in v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "object" && v !== null && "url" in v) {
     return (v as { url?: string }).url ?? null;
   }
   return null;
@@ -157,10 +157,10 @@ function extractUrl(v: unknown): string | null {
  */
 export async function getDestacado(): Promise<DestacadoStat | null> {
   try {
-    const where = [buildAguaWhere(), `${F.estadoApertura} = 'Abierto'`].join(' AND ');
+    const where = [buildAguaWhere(), `${F.estadoApertura} = 'Abierto'`].join(" AND ");
 
     const rows = await sodaFetch<Record<string, unknown>>(
-      await resolveDatasetId('procesos'),
+      await resolveDatasetId("procesos"),
       {
         $select: [
           F.id,
@@ -174,13 +174,13 @@ export async function getDestacado(): Promise<DestacadoStat | null> {
           F.estadoApertura,
           F.fechaRecepcion,
           F.url,
-        ].join(', '),
+        ].join(", "),
         $where: where,
         $order: `${F.precioBase} DESC`,
         $limit: 1,
         $offset: 0,
       },
-      { revalidate: REVALIDATE_SEARCH },
+      { revalidate: REVALIDATE_SEARCH }
     );
     const row = rows[0];
     if (!row) return null;
@@ -189,21 +189,21 @@ export async function getDestacado(): Promise<DestacadoStat | null> {
     const precio = Number(row[F.precioBase]);
 
     return {
-      id: String(row[F.id] ?? ''),
+      id: String(row[F.id] ?? ""),
       referencia: (row[F.referencia] as string) ?? null,
-      objeto: String(row[F.nombre] ?? ''),
-      entidad: String(row[F.entidad] ?? ''),
-      departamento: String(row[F.departamento] ?? ''),
-      ciudad: String(row[F.ciudad] ?? ''),
+      objeto: String(row[F.nombre] ?? ""),
+      entidad: String(row[F.entidad] ?? ""),
+      departamento: String(row[F.departamento] ?? ""),
+      ciudad: String(row[F.ciudad] ?? ""),
       precioBase: Number.isFinite(precio) ? precio : null,
-      fase: String(row[F.fase] ?? ''),
-      estadoApertura: apertura === 'Abierto' || apertura === 'Cerrado' ? apertura : null,
+      fase: String(row[F.fase] ?? ""),
+      estadoApertura: apertura === "Abierto" || apertura === "Cerrado" ? apertura : null,
       fechaRecepcion: (row[F.fechaRecepcion] as string) ?? null,
       url: extractUrl(row[F.url]),
     };
   } catch (err) {
     console.warn(
-      `[landingStats.getDestacado] falló (${err instanceof Error ? err.message : String(err)})`,
+      `[landingStats.getDestacado] falló (${err instanceof Error ? err.message : String(err)})`
     );
     return null;
   }

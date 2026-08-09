@@ -19,19 +19,20 @@
  * fila propia) — si nunca ocurre, todo cae en un único capítulo.
  */
 
-import ExcelJS from 'exceljs';
-import { ParseoNoConfiable } from './errors';
-import { NO_ENCONTRADO, type PliegoCapitulo, type PliegoItem } from '../schema';
+import ExcelJS from "exceljs";
+import { ParseoNoConfiable } from "./errors";
+import { NO_ENCONTRADO, type PliegoCapitulo, type PliegoItem } from "../schema";
 
-type CampoColumna = 'codigo' | 'descripcion' | 'unidad' | 'cantidad' | 'valor_unitario' | 'valor_total';
+type CampoColumna =
+  "codigo" | "descripcion" | "unidad" | "cantidad" | "valor_unitario" | "valor_total";
 
 const COLUMNAS_ESPERADAS: Record<CampoColumna, string[]> = {
-  codigo: ['item', 'ítem', 'codigo', 'código', 'ref'],
-  descripcion: ['descripcion', 'descripción', 'actividad', 'concepto'],
-  unidad: ['unidad', 'und', 'un'],
-  cantidad: ['cantidad', 'cant'],
-  valor_unitario: ['valor unitario', 'vr unitario', 'v. unitario', 'precio unitario'],
-  valor_total: ['valor total', 'vr total', 'v. total', 'subtotal'],
+  codigo: ["item", "ítem", "codigo", "código", "ref"],
+  descripcion: ["descripcion", "descripción", "actividad", "concepto"],
+  unidad: ["unidad", "und", "un"],
+  cantidad: ["cantidad", "cant"],
+  valor_unitario: ["valor unitario", "vr unitario", "v. unitario", "precio unitario"],
+  valor_total: ["valor total", "vr total", "v. total", "subtotal"],
 };
 
 interface MapaColumnas {
@@ -44,9 +45,9 @@ interface MapaColumnas {
 }
 
 function normalizar(s: unknown): string {
-  return String(s ?? '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  return String(s ?? "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .trim();
 }
@@ -69,14 +70,17 @@ function detectarEncabezados(fila: ExcelJS.Row): MapaColumnas | null {
 }
 
 function aNumero(valor: ExcelJS.CellValue): number | null {
-  if (typeof valor === 'number') return valor;
-  if (typeof valor === 'string') {
-    const limpio = valor.replace(/\./g, '').replace(',', '.').replace(/[^0-9.\-]/g, '');
+  if (typeof valor === "number") return valor;
+  if (typeof valor === "string") {
+    const limpio = valor
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .replace(/[^0-9.\-]/g, "");
     if (!limpio) return null;
     const n = parseFloat(limpio);
     return Number.isNaN(n) ? null : n;
   }
-  if (valor && typeof valor === 'object' && 'result' in valor) {
+  if (valor && typeof valor === "object" && "result" in valor) {
     return aNumero((valor as { result: ExcelJS.CellValue }).result);
   }
   return null;
@@ -92,11 +96,11 @@ export async function parseFormulario1Xls(buffer: Buffer): Promise<PliegoCapitul
     // `Buffer<ArrayBufferLike>` de aquí — mismo objeto en runtime, solo choque de tipos.
     await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
   } catch {
-    throw new ParseoNoConfiable('El archivo no es un .xlsx/.xls legible.');
+    throw new ParseoNoConfiable("El archivo no es un .xlsx/.xls legible.");
   }
 
   const hoja = workbook.worksheets[0];
-  if (!hoja) throw new ParseoNoConfiable('El archivo Excel no tiene hojas.');
+  if (!hoja) throw new ParseoNoConfiable("El archivo Excel no tiene hojas.");
 
   let columnas: MapaColumnas | null = null;
   let filaEncabezado = -1;
@@ -110,27 +114,32 @@ export async function parseFormulario1Xls(buffer: Buffer): Promise<PliegoCapitul
   }
   if (!columnas) {
     throw new ParseoNoConfiable(
-      `No se encontró fila de encabezados (descripción/cantidad/valor unitario/valor total) en las primeras ${MAX_FILAS_BUSQUEDA_ENCABEZADO} filas.`,
+      `No se encontró fila de encabezados (descripción/cantidad/valor unitario/valor total) en las primeras ${MAX_FILAS_BUSQUEDA_ENCABEZADO} filas.`
     );
   }
 
   const capitulos: PliegoCapitulo[] = [];
-  let capituloActual: PliegoCapitulo = { nombre: hoja.name || 'Presupuesto', items: [] };
+  let capituloActual: PliegoCapitulo = { nombre: hoja.name || "Presupuesto", items: [] };
 
   for (let i = filaEncabezado + 1; i <= hoja.rowCount; i++) {
     const fila = hoja.getRow(i);
-    const descripcionCell = fila.getCell(columnas.descripcion).text?.trim() ?? '';
+    const descripcionCell = fila.getCell(columnas.descripcion).text?.trim() ?? "";
     const cantidad = aNumero(fila.getCell(columnas.cantidad).value);
     const valor_unitario = aNumero(fila.getCell(columnas.valor_unitario).value);
     const valor_total = aNumero(fila.getCell(columnas.valor_total).value);
 
-    const esFilaDeItem = descripcionCell && cantidad !== null && valor_unitario !== null && valor_total !== null;
+    const esFilaDeItem =
+      descripcionCell && cantidad !== null && valor_unitario !== null && valor_total !== null;
 
     if (esFilaDeItem) {
       const item: PliegoItem = {
-        codigo: columnas.codigo ? fila.getCell(columnas.codigo).text?.trim() || NO_ENCONTRADO : NO_ENCONTRADO,
+        codigo: columnas.codigo
+          ? fila.getCell(columnas.codigo).text?.trim() || NO_ENCONTRADO
+          : NO_ENCONTRADO,
         descripcion: descripcionCell,
-        unidad: columnas.unidad ? fila.getCell(columnas.unidad).text?.trim() || NO_ENCONTRADO : NO_ENCONTRADO,
+        unidad: columnas.unidad
+          ? fila.getCell(columnas.unidad).text?.trim() || NO_ENCONTRADO
+          : NO_ENCONTRADO,
         cantidad,
         valor_unitario,
         valor_total,
@@ -148,7 +157,7 @@ export async function parseFormulario1Xls(buffer: Buffer): Promise<PliegoCapitul
     // sin números en ninguna columna clave: primera celda con texto en la fila = posible
     // título de sección/capítulo (suele venir en una celda combinada, no necesariamente
     // alineada con la columna de descripción).
-    let textoDivisor = '';
+    let textoDivisor = "";
     fila.eachCell((cell) => {
       if (!textoDivisor) {
         const t = cell.text?.trim();
@@ -164,7 +173,7 @@ export async function parseFormulario1Xls(buffer: Buffer): Promise<PliegoCapitul
   if (capituloActual.items.length > 0) capitulos.push(capituloActual);
 
   if (capitulos.length === 0) {
-    throw new ParseoNoConfiable('Se encontraron encabezados pero ningún ítem válido debajo.');
+    throw new ParseoNoConfiable("Se encontraron encabezados pero ningún ítem válido debajo.");
   }
 
   return capitulos;

@@ -7,11 +7,7 @@
  */
 
 import type { Match } from "@/src/lib/matching/match";
-import {
-  sentenceCaseTitle,
-  formatCopCompact,
-  verdictScore,
-} from "@/src/components/secop/format";
+import { sentenceCaseTitle, formatCopCompact, verdictScore } from "@/src/components/secop/format";
 import { signUnsubscribeToken } from "./unsubscribe-token";
 
 export interface Digest {
@@ -40,19 +36,18 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
 
   const unsubscribeUrl = `${appUrl()}/api/alertas/unsubscribe?token=${signUnsubscribeToken(usuario.id)}`;
 
-  const filas = matches
-    .map(({ proceso, verdict }) => {
-      const score = verdictScore(verdict);
-      const titulo = sentenceCaseTitle(proceso.nombre || proceso.referencia);
-      const valor = formatCopCompact(proceso.valorAdjudicacion ?? proceso.precioBase);
-      const link = proceso.url ? withUtm(proceso.url) : null;
-      return { titulo, entidad: proceso.entidad, valor, score, link };
-    });
+  const filas = matches.map(({ proceso, verdict }) => {
+    const score = verdictScore(verdict);
+    const titulo = sentenceCaseTitle(proceso.nombre || proceso.referencia);
+    const valor = formatCopCompact(proceso.valorAdjudicacion ?? proceso.precioBase);
+    const link = proceso.url ? withUtm(proceso.url) : null;
+    return { titulo, entidad: proceso.entidad, valor, score, link };
+  });
 
   const html = [
     '<div style="font-family:system-ui,sans-serif;color:#0A1F1C;max-width:560px;margin:0 auto;">',
     `<p>Estos procesos abiertos del sector agua calzan con tu perfil en HydroStack:</p>`,
-    '<div>',
+    "<div>",
     ...filas.map(
       (f) => `
       <div style="border:1px solid #E5E5E0;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
@@ -62,7 +57,7 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
           ${f.valor}
           ${f.link ? ` · <a href="${f.link}" style="color:#0369A1;">Ver en SECOP</a>` : ""}
         </p>
-      </div>`,
+      </div>`
     ),
     "</div>",
     `<p style="margin-top:24px;font-size:11px;color:#8A938F;">` +
@@ -77,7 +72,7 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
     ...filas.map(
       (f) =>
         `- ${f.titulo} (${f.entidad}, ${f.score.pass}/${f.score.total}) — ${f.valor}` +
-        (f.link ? ` — ${f.link}` : ""),
+        (f.link ? ` — ${f.link}` : "")
     ),
     "",
     `Darte de baja: ${unsubscribeUrl}`,

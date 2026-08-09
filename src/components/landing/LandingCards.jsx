@@ -5,7 +5,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatCopCompact, formatShortDate, sentenceCaseTitle } from "@/src/components/secop/format";
+import {
+  formatCopCompact,
+  formatShortDate,
+  sentenceCaseTitle,
+} from "@/src/components/secop/format";
 
 /**
  * Las cards del landing manejan sumas grandes (precio_base agregado por mes,
@@ -215,7 +219,10 @@ export default function LandingCards() {
   const destacado = data?.destacado ?? null;
 
   return (
-    <section className="lc-section" aria-label="Estado en vivo de contratación pública en agua y saneamiento">
+    <section
+      className="lc-section"
+      aria-label="Estado en vivo de contratación pública en agua y saneamiento"
+    >
       <style dangerouslySetInnerHTML={{ __html: CARDS_CSS }} />
       <div className="lc-container">
         <div className="lc-grid">
@@ -225,24 +232,40 @@ export default function LandingCards() {
           >
             <span className="lc-stat-label">Nuevos · últimos 7 días</span>
             <span className="lc-stat-value">
-              <StatValue status={status} value={nuevos7d != null ? nuevos7d.toLocaleString("es-CO") : null} skeletonWidth={40} />
+              <StatValue
+                status={status}
+                value={nuevos7d != null ? nuevos7d.toLocaleString("es-CO") : null}
+                skeletonWidth={40}
+              />
             </span>
             <p className="lc-stat-desc">Procesos de agua y saneamiento en presentación de oferta</p>
             <span className="clr-card-cta">
-              Ver procesos <span className="clr-cta-arrow" aria-hidden="true">→</span>
+              Ver procesos{" "}
+              <span className="clr-cta-arrow" aria-hidden="true">
+                →
+              </span>
             </span>
           </Link>
 
           <Link href="/licitaciones" className="clr-card is-active lc-stat-card lc-card-2">
             <span className="lc-stat-label">$ en juego · este mes</span>
             <span className="lc-stat-value">
-              <StatValue status={status} value={totalCop != null ? formatCopMilM(totalCop) : null} skeletonWidth={92} />
+              <StatValue
+                status={status}
+                value={totalCop != null ? formatCopMilM(totalCop) : null}
+                skeletonWidth={92}
+              />
             </span>
             <p className="lc-stat-desc">
-              {procesosMes != null ? `${procesosMes.toLocaleString("es-CO")} procesos abiertos del sector` : "Procesos abiertos del sector"}
+              {procesosMes != null
+                ? `${procesosMes.toLocaleString("es-CO")} procesos abiertos del sector`
+                : "Procesos abiertos del sector"}
             </p>
             <span className="clr-card-cta">
-              Explorar licitaciones <span className="clr-cta-arrow" aria-hidden="true">→</span>
+              Explorar licitaciones{" "}
+              <span className="clr-cta-arrow" aria-hidden="true">
+                →
+              </span>
             </span>
           </Link>
 
@@ -261,7 +284,9 @@ export default function LandingCards() {
                 <div className="lc-featured-meta">
                   <div className="lc-featured-meta-item">
                     <span className="lc-featured-meta-label">Cuantía</span>
-                    <span className="lc-featured-meta-value">{formatCopMilM(destacado.precioBase)}</span>
+                    <span className="lc-featured-meta-value">
+                      {formatCopMilM(destacado.precioBase)}
+                    </span>
                   </div>
                   <div className="lc-featured-meta-item">
                     <span className="lc-featured-meta-label">Cierre</span>
@@ -282,13 +307,22 @@ export default function LandingCards() {
                   <li className="clr-verdict-gate clr-verdict-gate--warn">
                     <span className="clr-verdict-glyph">!</span> Cuantía
                   </li>
-                  <li className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked" aria-hidden="true">
+                  <li
+                    className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked"
+                    aria-hidden="true"
+                  >
                     <span className="clr-verdict-glyph">?</span> Plazo
                   </li>
-                  <li className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked" aria-hidden="true">
+                  <li
+                    className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked"
+                    aria-hidden="true"
+                  >
                     <span className="clr-verdict-glyph">?</span> Zona
                   </li>
-                  <li className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked" aria-hidden="true">
+                  <li
+                    className="clr-verdict-gate clr-verdict-gate--unknown lc-gate-locked"
+                    aria-hidden="true"
+                  >
                     <span className="clr-verdict-glyph">?</span> Habilitación
                   </li>
                 </ul>

@@ -9,6 +9,6 @@
  * Los imports ES se evalúan en orden de aparición, así que dotenv corre antes de
  * que el cliente lea la variable.
  */
-import { config } from 'dotenv';
+import { config } from "dotenv";
 
-config({ path: '.env.local' });
+config({ path: ".env.local" });

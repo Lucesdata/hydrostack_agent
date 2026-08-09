@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { createClient } from '@/src/lib/supabase/server';
-import { syncUsuario } from '@/src/lib/supabase/sync-usuario';
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@/src/lib/supabase/server";
+import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
 
 /**
  * Callback único para OAuth (Google) y verificación de correo — Supabase
@@ -8,9 +8,9 @@ import { syncUsuario } from '@/src/lib/supabase/sync-usuario';
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const rawNext = searchParams.get('next') ?? '/';
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
+  const code = searchParams.get("code");
+  const rawNext = searchParams.get("next") ?? "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   if (code) {
     const supabase = await createClient();

@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import { getNuevos7d, getEnJuegoMes, getDestacado } from '@/src/lib/secop/landingStats';
+import { NextResponse } from "next/server";
+import { getNuevos7d, getEnJuegoMes, getDestacado } from "@/src/lib/secop/landingStats";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export const revalidate = 1800;
 
 export interface LandingStatsResponse {
@@ -24,12 +24,12 @@ export async function GET() {
   ]);
 
   const body: LandingStatsResponse = {
-    nuevos7d: nuevos7d.status === 'fulfilled' ? nuevos7d.value : null,
-    enJuego: enJuego.status === 'fulfilled' ? enJuego.value : { totalCop: null, procesos: null },
-    destacado: destacado.status === 'fulfilled' ? destacado.value : null,
+    nuevos7d: nuevos7d.status === "fulfilled" ? nuevos7d.value : null,
+    enJuego: enJuego.status === "fulfilled" ? enJuego.value : { totalCop: null, procesos: null },
+    destacado: destacado.status === "fulfilled" ? destacado.value : null,
   };
 
   return NextResponse.json(body, {
-    headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
+    headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
   });
 }

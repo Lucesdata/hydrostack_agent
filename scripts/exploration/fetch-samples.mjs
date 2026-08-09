@@ -79,11 +79,7 @@ async function fetchDataset(name, dataset, where, order, { cap, page }) {
   process.stderr.write(`[${name}] $where = ${where.slice(0, 120)}…\n`);
   process.stderr.write(`[${name}] $order = ${order}\n`);
   const t0 = Date.now();
-  const rows = await paginate(
-    dataset,
-    { where, order, pageSize: page, cap },
-    { maxRetries: 4 },
-  );
+  const rows = await paginate(dataset, { where, order, pageSize: page, cap }, { maxRetries: 4 });
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
   process.stderr.write(`[${name}] ${rows.length} filas en ${elapsed}s\n`);
 
@@ -112,7 +108,7 @@ async function main() {
     DATASETS.procesos,
     procesosWhere,
     procesosOrder,
-    args,
+    args
   );
   await persistJson(resolve(SAMPLES_DIR, "procesos.json"), procesos.rows);
   await persistJson(resolve(SAMPLES_DIR, "procesos.columns.json"), procesos.columns);
@@ -122,7 +118,7 @@ async function main() {
     DATASETS.contratos,
     contratosWhere,
     contratosOrder,
-    args,
+    args
   );
   await persistJson(resolve(SAMPLES_DIR, "contratos.json"), contratos.rows);
   await persistJson(resolve(SAMPLES_DIR, "contratos.columns.json"), contratos.columns);

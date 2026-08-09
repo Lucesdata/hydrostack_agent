@@ -7,6 +7,6 @@
 export class ParseoNoConfiable extends Error {
   constructor(motivo: string) {
     super(motivo);
-    this.name = 'ParseoNoConfiable';
+    this.name = "ParseoNoConfiable";
   }
 }

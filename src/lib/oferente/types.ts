@@ -17,7 +17,7 @@
  * Diseño y decisiones: docs/fase-a/nivel-0-perfil-y-veredicto.md (§3).
  */
 
-export type TipoPersona = 'natural' | 'juridica';
+export type TipoPersona = "natural" | "juridica";
 
 /**
  * Código UNSPSC propio del oferente, en formato normalizado (sin el prefijo
@@ -29,7 +29,7 @@ export type TipoPersona = 'natural' | 'juridica';
 export type UnspscCodigo = string;
 
 /** Procedencia de los indicadores RUP (D4). Manual hoy; `rues` cuando se ingeste. */
-export type FuenteRUP = 'manual' | 'rues';
+export type FuenteRUP = "manual" | "rues";
 
 /** Indicadores RUP de capacidad financiera. // traza: indicadores RUP */
 export interface CapacidadFinancieraRUP {

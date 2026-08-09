@@ -27,7 +27,7 @@ function hoyIso(): string {
 async function registrarEnvio(
   usuarioId: string,
   estado: EnvioEstado,
-  matches: number,
+  matches: number
 ): Promise<void> {
   await db
     .insert(envioLog)

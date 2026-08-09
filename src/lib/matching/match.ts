@@ -10,9 +10,9 @@
  * (la página `/mis-coincidencias`).
  */
 
-import { buildVerdict, toVerdictInput, type Verdict } from '@/src/lib/secop/verdict';
-import type { OferenteProfile } from '@/src/lib/oferente/types';
-import type { SecopProceso } from '@/src/lib/secop/types';
+import { buildVerdict, toVerdictInput, type Verdict } from "@/src/lib/secop/verdict";
+import type { OferenteProfile } from "@/src/lib/oferente/types";
+import type { SecopProceso } from "@/src/lib/secop/types";
 
 export interface Match {
   proceso: SecopProceso;
@@ -22,7 +22,7 @@ export interface Match {
 export function matchProcesos(
   perfil: OferenteProfile,
   procesos: SecopProceso[],
-  now: Date = new Date(),
+  now: Date = new Date()
 ): Match[] {
   return procesos.map((proceso) => ({
     proceso,

@@ -35,7 +35,9 @@ export default function FacetedSearchBar({ pills, onAddPills, onRemovePill }: Pr
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="submit" className="clr-disc-search-btn">Buscar</button>
+        <button type="submit" className="clr-disc-search-btn">
+          Buscar
+        </button>
       </form>
 
       {pills.length > 0 && (

@@ -17,7 +17,7 @@ export interface RunningRow {
 export function findStaleRunningIds(
   rows: RunningRow[],
   now: Date,
-  maxDurationMs: number,
+  maxDurationMs: number
 ): string[] {
   const cutoff = now.getTime() - maxDurationMs;
   return rows.filter((r) => r.startedAt.getTime() < cutoff).map((r) => r.id);

@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { AuthCard } from '@/src/components/auth/AuthCard';
-import { GoogleButton } from '@/src/components/auth/GoogleButton';
-import { signUpAction } from '@/src/lib/supabase/actions';
-import { authErrorMessage } from '@/src/lib/supabase/auth-messages';
+import Link from "next/link";
+import { AuthCard } from "@/src/components/auth/AuthCard";
+import { GoogleButton } from "@/src/components/auth/GoogleButton";
+import { signUpAction } from "@/src/lib/supabase/actions";
+import { authErrorMessage } from "@/src/lib/supabase/auth-messages";
 
 export default async function RegistroPage({
   searchParams,
@@ -10,7 +10,7 @@ export default async function RegistroPage({
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const next = params.next && params.next.startsWith('/') ? params.next : '/';
+  const next = params.next && params.next.startsWith("/") ? params.next : "/";
   const error = authErrorMessage(params.error);
 
   return (
@@ -24,7 +24,9 @@ export default async function RegistroPage({
       <form action={signUpAction}>
         <input type="hidden" name="next" value={next} />
         <div className="clr-auth-field">
-          <label className="clr-auth-label" htmlFor="fullName">Nombre completo</label>
+          <label className="clr-auth-label" htmlFor="fullName">
+            Nombre completo
+          </label>
           <input
             id="fullName"
             name="fullName"
@@ -36,7 +38,9 @@ export default async function RegistroPage({
           />
         </div>
         <div className="clr-auth-field">
-          <label className="clr-auth-label" htmlFor="email">Correo</label>
+          <label className="clr-auth-label" htmlFor="email">
+            Correo
+          </label>
           <input
             id="email"
             name="email"
@@ -48,7 +52,9 @@ export default async function RegistroPage({
           />
         </div>
         <div className="clr-auth-field">
-          <label className="clr-auth-label" htmlFor="password">Contraseña</label>
+          <label className="clr-auth-label" htmlFor="password">
+            Contraseña
+          </label>
           <input
             id="password"
             name="password"
@@ -60,7 +66,9 @@ export default async function RegistroPage({
             className="clr-auth-input"
           />
         </div>
-        <button type="submit" className="clr-auth-btn">[ Crear cuenta ]</button>
+        <button type="submit" className="clr-auth-btn">
+          [ Crear cuenta ]
+        </button>
       </form>
 
       <div className="clr-auth-divider">o</div>

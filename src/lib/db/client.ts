@@ -1,10 +1,7 @@
-import {
-  drizzle as drizzleNeon,
-  type NeonDatabase,
-} from 'drizzle-orm/neon-serverless';
-import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-import * as schema from './schema';
+import { drizzle as drizzleNeon, type NeonDatabase } from "drizzle-orm/neon-serverless";
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
+import * as schema from "./schema";
 
 /**
  * Cliente de base. Por defecto usa `@neondatabase/serverless` (WebSocket —
@@ -28,11 +25,11 @@ const globalForDb = globalThis as unknown as {
 };
 
 function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
-  if (process.env.DB_DRIVER === 'node') {
+  if (process.env.DB_DRIVER === "node") {
     // Driver local node-postgres. Import perezoso: solo se carga si se pide,
     // así el bundle de producción (Neon) no arrastra `pg`.
-    const { Pool: PgPool } = require('pg');
-    const { drizzle: drizzleNode } = require('drizzle-orm/node-postgres');
+    const { Pool: PgPool } = require("pg");
+    const { drizzle: drizzleNode } = require("drizzle-orm/node-postgres");
     const pool: MinimalPool = new PgPool({
       connectionString: process.env.DATABASE_URL,
       keepAlive: true,
@@ -52,7 +49,7 @@ const built =
     ? { db: globalForDb._hydrostackDb, pool: globalForDb._hydrostackPool }
     : build();
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForDb._hydrostackPool = built.pool;
   globalForDb._hydrostackDb = built.db;
 }
