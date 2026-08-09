@@ -22,6 +22,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractPliegoHybrid } from "@/src/lib/pliego/extractPliegoHybrid";
 import { validatePliego } from "@/src/lib/pliego/validate";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { recordUserSignal } from "@/src/lib/signals/record-signal";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -84,6 +86,10 @@ export async function POST(req: NextRequest) {
   try {
     const { extraction, origen } = await extractPliegoHybrid(buffer, { formulario1: formulario1Buffer });
     const validation = validatePliego(extraction);
+    const user = await getSessionUser();
+    if (user) {
+      await recordUserSignal(user.id, "estructurador");
+    }
     return NextResponse.json({ extraction, validation, origen });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

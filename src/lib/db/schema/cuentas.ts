@@ -25,6 +25,7 @@ import {
   uuid,
   jsonb,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core';
 
 export const usuario = pgTable('usuario', {
@@ -94,3 +95,25 @@ export const alertaPreferencias = pgTable('alerta_preferencias', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+/**
+ * Señal pasiva de intención (Prompt 02 — rutas sin perfilamiento). Ningún
+ * flujo de UI pregunta el perfil del usuario; en su lugar registramos qué
+ * acción tomó y de ahí se infiere. Sin RLS de Postgres — este DB (Neon) se
+ * consulta siempre con el mismo DATABASE_URL de servidor, nunca como el
+ * usuario final, así que una policy sobre auth.uid() nunca aplicaría (ver
+ * CLAUDE.md §4). El aislamiento es el mismo de siempre en este repo: cada
+ * query se filtra por usuarioId en código de aplicación.
+ */
+export const senalUsuario = pgTable(
+  'senal_usuario',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    usuarioId: text('usuario_id')
+      .notNull()
+      .references(() => usuario.id, { onDelete: 'cascade' }),
+    senal: text('senal').notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index('senal_usuario_usuario_idx').on(t.usuarioId)],
+);

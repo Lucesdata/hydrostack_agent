@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/licitaciones", route: "/licitaciones", index: "01", label: "Licitaciones" },
   { href: "/pliego", route: "/pliego", index: "02", label: "Pliegos" },
   { href: "/nosotros", route: "/nosotros", index: "03", label: "Nosotros" },
+  { href: "/soluciones", route: "/soluciones", index: "04", label: "Soluciones" },
 ];
 
 const AUTH_CSS = `

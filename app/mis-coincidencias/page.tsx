@@ -20,6 +20,7 @@ import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ahora";
+import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import {
   sentenceCaseTitle,
   formatCopCompact,
@@ -106,6 +107,8 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
       </Shell>
     );
   }
+
+  await recordUserSignal(usuarioId, "oferente");
 
   const perfil = await getPerfilDb(usuarioId);
   if (!perfil) {
