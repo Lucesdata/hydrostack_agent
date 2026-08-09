@@ -57,6 +57,13 @@
       "when": 1786277628468,
       "tag": "0007_zippy_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786304637282,
+      "tag": "0008_sharp_cerise",
+      "breakpoints": true
     }
   ]
 }
