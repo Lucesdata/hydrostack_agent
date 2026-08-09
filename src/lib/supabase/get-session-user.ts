@@ -29,9 +29,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 export interface DisplayUser {
   email: string;
   fullName: string | null;
+  avatarUrl: string | null;
 }
 
-/** Para el Navbar: nombre a mostrar (con fallback a correo). */
+/** Para el Navbar: nombre + foto a mostrar (con fallback a correo/iniciales). */
 export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
   try {
     const supabase = await createClient();
@@ -40,9 +41,15 @@ export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
     } = await supabase.auth.getUser();
 
     if (!user || !user.email) return null;
-    const fullName =
-      typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null;
-    return { email: user.email, fullName };
+    const meta = user.user_metadata ?? {};
+    const fullName = typeof meta.full_name === 'string' ? meta.full_name : null;
+    const avatarUrl =
+      typeof meta.avatar_url === 'string'
+        ? meta.avatar_url
+        : typeof meta.picture === 'string'
+          ? meta.picture
+          : null;
+    return { email: user.email, fullName, avatarUrl };
   } catch {
     return null;
   }

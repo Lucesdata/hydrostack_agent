@@ -25,26 +25,73 @@ const AUTH_CSS = `
 .clr-nav-user{ position: relative; }
 .clr-nav-user-btn{
   display: flex; align-items: center; gap: 6px; background: none; border: none;
-  font: 500 12.5px var(--font-sans, sans-serif); color: var(--ink-900, #0A1F1C);
-  cursor: pointer; padding: 6px 4px;
+  cursor: pointer; padding: 4px;
+}
+.clr-avatar{
+  position: relative; width: 30px; height: 30px; flex-shrink: 0;
+}
+.clr-avatar-img{
+  width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+  border: 1.5px solid var(--line, #E5E5E0); display: block;
+}
+.clr-avatar-fallback{
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent, #0369A1), #075985);
+  color: #fff; font: 500 12px var(--font-sans, sans-serif);
+  display: flex; align-items: center; justify-content: center;
+}
+.clr-avatar-dot{
+  position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px;
+  border-radius: 50%; background: #16a34a; border: 1.5px solid #fff;
 }
 .clr-nav-user-menu{
-  position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px;
+  position: absolute; top: calc(100% + 6px); right: 0; min-width: 220px;
   background: var(--surface, #fff); border: 1px solid var(--line, #E5E5E0);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
   display: flex; flex-direction: column; z-index: 20;
+}
+.clr-nav-user-head{
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid var(--line, #E5E5E0);
+}
+.clr-nav-user-name{
+  font-size: 13px; font-weight: 500; color: var(--ink-900, #0A1F1C);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .clr-nav-user-email{
   font: 11px var(--font-mono, monospace); color: var(--ink-600, #525B5A);
-  padding: 8px 12px; border-bottom: 1px solid var(--line, #E5E5E0);
-  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .clr-nav-user-menu button{
   background: none; border: none; text-align: left; font-size: 12.5px;
-  color: var(--ink-900, #0A1F1C); padding: 9px 12px; cursor: pointer;
+  color: var(--ink-900, #0A1F1C); padding: 9px 14px; cursor: pointer;
 }
 .clr-nav-user-menu button:hover{ background: var(--bg, #FAFAF7); }
-.clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 6px; }
+.clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 10px; gap: 8px; }
+.clr-mobile-user{ display: flex; align-items: center; gap: 10px; padding: 0 4px 6px; }
 `;
+
+function initials(fullName, email) {
+  if (fullName) {
+    const parts = fullName.trim().split(/\s+/);
+    return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
+  }
+  return (email?.[0] ?? "?").toUpperCase();
+}
+
+function Avatar({ user, withDot }) {
+  const label = initials(user.fullName, user.email);
+  return (
+    <span className="clr-avatar">
+      {user.avatarUrl ? (
+        <img className="clr-avatar-img" src={user.avatarUrl} alt="" referrerPolicy="no-referrer" />
+      ) : (
+        <span className="clr-avatar-fallback" aria-hidden="true">{label}</span>
+      )}
+      {withDot && <span className="clr-avatar-dot" title="Conectado" />}
+    </span>
+  );
+}
 
 function ValveGlyph() {
   return (
@@ -70,7 +117,6 @@ function CoteGlyph() {
 
 function UserMenu({ user, onNavigate }) {
   const [open, setOpen] = useState(false);
-  const label = user.fullName || user.email;
 
   return (
     <div className="clr-nav-user">
@@ -79,12 +125,19 @@ function UserMenu({ user, onNavigate }) {
         className="clr-nav-user-btn"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
+        aria-label="Menú de cuenta"
       >
-        {label}
+        <Avatar user={user} withDot />
       </button>
       {open && (
         <div className="clr-nav-user-menu">
-          <span className="clr-nav-user-email">{user.email}</span>
+          <div className="clr-nav-user-head">
+            <Avatar user={user} />
+            <div style={{ minWidth: 0 }}>
+              <div className="clr-nav-user-name">{user.fullName || user.email}</div>
+              <div className="clr-nav-user-email">{user.email}</div>
+            </div>
+          </div>
           <form
             action="/logout"
             method="POST"
@@ -182,7 +235,13 @@ export default function Navbar({ user }) {
         <div className="clr-mobile-auth">
           {user ? (
             <>
-              <span className="clr-nav-user-email">{user.email}</span>
+              <div className="clr-mobile-user">
+                <Avatar user={user} withDot />
+                <div style={{ minWidth: 0 }}>
+                  <div className="clr-nav-user-name">{user.fullName || user.email}</div>
+                  <div className="clr-nav-user-email">{user.email}</div>
+                </div>
+              </div>
               <form action="/logout" method="POST" onSubmit={close}>
                 <button type="submit" className="clr-mobile-link" style={{ width: "100%" }}>
                   Cerrar sesión
