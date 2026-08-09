@@ -15,6 +15,30 @@ const PROBLEM_POINTS = [
   { n: "03", text: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto." },
 ];
 
+const INTENT_ROUTES = [
+  {
+    n: "01",
+    title: "Quiero ganar contratos",
+    desc: "Busca procesos activos de agua y saneamiento y verifica si calificas.",
+    href: "/licitaciones",
+    cta: "BUSCAR PROCESOS",
+  },
+  {
+    n: "02",
+    title: "Necesito estructurar o entender un pliego",
+    desc: "Decodifica requisitos habilitantes, técnicos y legales en minutos.",
+    href: "/pliego",
+    cta: "DECODIFICAR PLIEGO",
+  },
+  {
+    n: "03",
+    title: "Tengo un problema de agua o vertimientos",
+    desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
+    href: "/soluciones",
+    cta: "VER EL CAMINO",
+  },
+];
+
 const HOW_STEPS = [
   { n: "01", text: "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP." },
   { n: "02", text: "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas." },
@@ -285,6 +309,25 @@ export default function LandingPage() {
           </div>
         </div>
 
+        <div className="bp-pillars-wrap">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 02 — ¿Qué necesitas resolver?</span>
+          </div>
+          <div className="bp-pillars-grid">
+            {INTENT_ROUTES.map((c) => (
+              <Link key={c.n} href={c.href} className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
+                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+                <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ {c.n} ]</span>
+                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
+                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>{c.desc}</p>
+                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ {c.cta} <span className="bp-card-arrow">→</span> ]</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <div ref={statsRef}>
           <LandingCards />
         </div>
@@ -293,7 +336,7 @@ export default function LandingPage() {
           <div ref={problemRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 02 — El problema</span>
+              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 03 — El problema</span>
             </div>
             <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
               <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineCDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }} />
@@ -310,7 +353,7 @@ export default function LandingPage() {
           <div ref={howRef}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 03 — Cómo funciona</span>
+              <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 04 — Cómo funciona</span>
             </div>
             <svg viewBox="0 0 460 8" width="460" height="8" style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}>
               <line x1="0" y1="4" x2="460" y2="4" stroke="#0369A1" strokeWidth="1" strokeDasharray="500" strokeDashoffset={fx.lineDDashoffset} style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }} />
@@ -329,7 +372,7 @@ export default function LandingPage() {
         <div ref={pillarsRef} className="bp-pillars-wrap">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 04 — Herramientas de soporte</span>
+            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 05 — Herramientas de soporte</span>
           </div>
           <div className="bp-pillars-grid">
             {PILLARS.map((c) => (
