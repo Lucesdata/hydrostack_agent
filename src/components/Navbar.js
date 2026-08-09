@@ -115,7 +115,7 @@ function CoteGlyph() {
   );
 }
 
-function UserMenu({ user, onNavigate }) {
+function UserMenu({ user }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -138,14 +138,10 @@ function UserMenu({ user, onNavigate }) {
               <div className="clr-nav-user-email">{user.email}</div>
             </div>
           </div>
-          <form
-            action="/logout"
-            method="POST"
-            onSubmit={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-          >
+          {/* Sin onSubmit: el submit navega fuera de la página (redirect a /),
+              cerrar el dropdown acá desmontaría el <form> a mitad del envío
+              ("Form submission canceled because the form is not connected"). */}
+          <form action="/logout" method="POST">
             <button type="submit">Cerrar sesión</button>
           </form>
         </div>
