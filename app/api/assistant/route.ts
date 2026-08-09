@@ -59,23 +59,35 @@ export async function POST(req: Request) {
   }
   const clientMessages = body.messages;
 
-  const conversationId = await getOrCreateConversation(user.id, context.slug);
-  const alreadySaved = await loadMessages(conversationId);
+  let conversationId: string;
+  let alreadySavedIds: Set<string>;
+  let systemPrompt: string;
+  let modelMessages: Awaited<ReturnType<typeof convertToModelMessages>>;
+  try {
+    conversationId = await getOrCreateConversation(user.id, context.slug);
+    const alreadySaved = await loadMessages(conversationId);
+    alreadySavedIds = new Set(alreadySaved.map((m) => m.id));
 
-  const document = body.documentId
-    ? await getDocumentById(user.id, body.documentId)
-    : await getLatestDocument(user.id, context.slug);
+    const document = body.documentId
+      ? await getDocumentById(user.id, body.documentId)
+      : await getLatestDocument(user.id, context.slug);
 
-  const systemPrompt = document
-    ? `${context.systemPrompt}\n\n--- Texto del documento subido por el usuario (${document.nombreArchivo}) ---\n${document.textoExtraido}`
-    : context.systemPrompt;
+    systemPrompt = document
+      ? `${context.systemPrompt}\n\n--- Texto del documento subido por el usuario (${document.nombreArchivo}) ---\n${document.textoExtraido}`
+      : context.systemPrompt;
+
+    modelMessages = await convertToModelMessages(clientMessages);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: `No se pudo preparar la conversación: ${message}` }, { status: 502 });
+  }
 
   await recordUserSignal(user.id, context.senal);
 
   const result = streamText({
     model: anthropic('claude-sonnet-4-5'),
     system: systemPrompt,
-    messages: await convertToModelMessages(clientMessages),
+    messages: modelMessages,
   });
 
   result.consumeStream();
@@ -85,7 +97,7 @@ export async function POST(req: Request) {
       stream: result.stream,
       originalMessages: clientMessages,
       onEnd: async ({ messages: finalMessages }) => {
-        const newMessages = finalMessages.slice(alreadySaved.length);
+        const newMessages = finalMessages.filter((m) => !alreadySavedIds.has(m.id));
         await saveMessages(conversationId, newMessages);
       },
     }),

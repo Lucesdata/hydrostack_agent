@@ -11,10 +11,12 @@ vi.mock('@/src/lib/signals/record-signal', () => ({
   recordUserSignal: vi.fn(),
 }));
 
+const mockSaveMessages = vi.fn();
+const mockLoadMessages = vi.fn().mockResolvedValue([]);
 vi.mock('@/src/lib/assistants/conversations', () => ({
   getOrCreateConversation: vi.fn().mockResolvedValue('conv-1'),
-  loadMessages: vi.fn().mockResolvedValue([]),
-  saveMessages: vi.fn(),
+  loadMessages: () => mockLoadMessages(),
+  saveMessages: (...args: unknown[]) => mockSaveMessages(...args),
 }));
 
 vi.mock('@/src/lib/assistants/documents', () => ({
@@ -26,6 +28,7 @@ vi.mock('@ai-sdk/anthropic', () => ({
   anthropic: vi.fn(() => 'mock-model'),
 }));
 
+let capturedOnEnd: ((args: { messages: unknown[] }) => Promise<void>) | undefined;
 vi.mock('ai', async () => {
   const actual = await vi.importActual<typeof import('ai')>('ai');
   return {
@@ -34,6 +37,14 @@ vi.mock('ai', async () => {
       stream: new ReadableStream(),
       consumeStream: vi.fn(),
     })),
+    toUIMessageStream: vi.fn((options: { onEnd?: typeof capturedOnEnd }) => {
+      capturedOnEnd = options.onEnd;
+      return new ReadableStream({
+        start(controller) {
+          controller.close();
+        },
+      });
+    }),
   };
 });
 
@@ -48,6 +59,8 @@ describe('POST /api/assistant', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.ANTHROPIC_API_KEY = 'test-key';
+    mockLoadMessages.mockResolvedValue([]);
+    capturedOnEnd = undefined;
   });
 
   it('500 sin ANTHROPIC_API_KEY', async () => {
@@ -85,5 +98,26 @@ describe('POST /api/assistant', () => {
       postReq({ context: 'ejecucion', messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'hola' }] }] }),
     );
     expect(res.status).toBe(200);
+  });
+
+  it('onEnd persiste solo los mensajes que aún no estaban guardados', async () => {
+    mockAuth.mockResolvedValue({ id: 'user-1', email: 'a@b.com' });
+    mockLoadMessages.mockResolvedValue([{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hola' }] }]);
+    const { POST } = await import('@/app/api/assistant/route');
+
+    const res = await POST(
+      postReq({ context: 'ejecucion', messages: [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hola' }] }] }),
+    );
+    expect(res.status).toBe(200);
+    expect(capturedOnEnd).toBeDefined();
+
+    const finalMessages = [
+      { id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hola' }] },
+      { id: 'm2', role: 'assistant', parts: [{ type: 'text', text: 'respuesta' }] },
+    ];
+    await capturedOnEnd!({ messages: finalMessages });
+
+    expect(mockSaveMessages).toHaveBeenCalledTimes(1);
+    expect(mockSaveMessages).toHaveBeenCalledWith('conv-1', [finalMessages[1]]);
   });
 });
