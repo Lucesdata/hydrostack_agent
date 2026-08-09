@@ -1,972 +1,2757 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HydroStack — Mapa de arquitectura</title>
-<style>
-  :root{
-    --bg:#FAFAF7; --surface:#FFFFFF; --surface-alt:#F4F4EE;
-    --ink-900:#0A1F1C; --ink-600:#525B5A; --ink-300:#6B746F;
-    --line:#E5E5E0; --line-soft:#E8E8E2;
-    --accent:#0369A1; --accent-soft:rgba(3,105,161,.12); --accent-faint:rgba(3,105,161,.05);
-    --accent-river:#7DD3FC; --accent-ocean:#0C4A6E;
-    --success:#16A34A; --success-soft:rgba(22,163,74,.12);
-    --warning:#D97706; --warning-soft:rgba(217,119,6,.12);
-    --danger:#DC2626; --danger-soft:rgba(220,38,38,.09);
-    --font-sans:'Inter',-apple-system,system-ui,sans-serif;
-    --font-mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,Menlo,monospace;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#0E1614; --surface:#151F1C; --surface-alt:#1A2521;
-      --ink-900:#EDF3F1; --ink-600:#AAB8B4; --ink-300:#7C8B87;
-      --line:#26332F; --line-soft:#202B27;
-      --accent:#5EB3E4; --accent-soft:rgba(94,179,228,.16); --accent-faint:rgba(94,179,228,.07);
-      --accent-river:#7DD3FC; --accent-ocean:#8FD3F4;
-      --success:#4ADE80; --success-soft:rgba(74,222,128,.14);
-      --warning:#FBBF24; --warning-soft:rgba(251,191,36,.14);
-      --danger:#F87171; --danger-soft:rgba(248,113,113,.12);
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#0E1614; --surface:#151F1C; --surface-alt:#1A2521;
-    --ink-900:#EDF3F1; --ink-600:#AAB8B4; --ink-300:#7C8B87;
-    --line:#26332F; --line-soft:#202B27;
-    --accent:#5EB3E4; --accent-soft:rgba(94,179,228,.16); --accent-faint:rgba(94,179,228,.07);
-    --accent-river:#7DD3FC; --accent-ocean:#8FD3F4;
-    --success:#4ADE80; --success-soft:rgba(74,222,128,.14);
-    --warning:#FBBF24; --warning-soft:rgba(251,191,36,.14);
-    --danger:#F87171; --danger-soft:rgba(248,113,113,.12);
-  }
-  :root[data-theme="light"]{
-    --bg:#FAFAF7; --surface:#FFFFFF; --surface-alt:#F4F4EE;
-    --ink-900:#0A1F1C; --ink-600:#525B5A; --ink-300:#6B746F;
-    --line:#E5E5E0; --line-soft:#E8E8E2;
-    --accent:#0369A1; --accent-soft:rgba(3,105,161,.12); --accent-faint:rgba(3,105,161,.05);
-    --success:#16A34A; --success-soft:rgba(22,163,74,.12);
-    --warning:#D97706; --warning-soft:rgba(217,119,6,.12);
-    --danger:#DC2626; --danger-soft:rgba(220,38,38,.09);
-  }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HydroStack — Mapa de arquitectura</title>
+    <style>
+      :root {
+        --bg: #fafaf7;
+        --surface: #ffffff;
+        --surface-alt: #f4f4ee;
+        --ink-900: #0a1f1c;
+        --ink-600: #525b5a;
+        --ink-300: #6b746f;
+        --line: #e5e5e0;
+        --line-soft: #e8e8e2;
+        --accent: #0369a1;
+        --accent-soft: rgba(3, 105, 161, 0.12);
+        --accent-faint: rgba(3, 105, 161, 0.05);
+        --accent-river: #7dd3fc;
+        --accent-ocean: #0c4a6e;
+        --success: #16a34a;
+        --success-soft: rgba(22, 163, 74, 0.12);
+        --warning: #d97706;
+        --warning-soft: rgba(217, 119, 6, 0.12);
+        --danger: #dc2626;
+        --danger-soft: rgba(220, 38, 38, 0.09);
+        --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e1614;
+          --surface: #151f1c;
+          --surface-alt: #1a2521;
+          --ink-900: #edf3f1;
+          --ink-600: #aab8b4;
+          --ink-300: #7c8b87;
+          --line: #26332f;
+          --line-soft: #202b27;
+          --accent: #5eb3e4;
+          --accent-soft: rgba(94, 179, 228, 0.16);
+          --accent-faint: rgba(94, 179, 228, 0.07);
+          --accent-river: #7dd3fc;
+          --accent-ocean: #8fd3f4;
+          --success: #4ade80;
+          --success-soft: rgba(74, 222, 128, 0.14);
+          --warning: #fbbf24;
+          --warning-soft: rgba(251, 191, 36, 0.14);
+          --danger: #f87171;
+          --danger-soft: rgba(248, 113, 113, 0.12);
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #0e1614;
+        --surface: #151f1c;
+        --surface-alt: #1a2521;
+        --ink-900: #edf3f1;
+        --ink-600: #aab8b4;
+        --ink-300: #7c8b87;
+        --line: #26332f;
+        --line-soft: #202b27;
+        --accent: #5eb3e4;
+        --accent-soft: rgba(94, 179, 228, 0.16);
+        --accent-faint: rgba(94, 179, 228, 0.07);
+        --accent-river: #7dd3fc;
+        --accent-ocean: #8fd3f4;
+        --success: #4ade80;
+        --success-soft: rgba(74, 222, 128, 0.14);
+        --warning: #fbbf24;
+        --warning-soft: rgba(251, 191, 36, 0.14);
+        --danger: #f87171;
+        --danger-soft: rgba(248, 113, 113, 0.12);
+      }
+      :root[data-theme="light"] {
+        --bg: #fafaf7;
+        --surface: #ffffff;
+        --surface-alt: #f4f4ee;
+        --ink-900: #0a1f1c;
+        --ink-600: #525b5a;
+        --ink-300: #6b746f;
+        --line: #e5e5e0;
+        --line-soft: #e8e8e2;
+        --accent: #0369a1;
+        --accent-soft: rgba(3, 105, 161, 0.12);
+        --accent-faint: rgba(3, 105, 161, 0.05);
+        --success: #16a34a;
+        --success-soft: rgba(22, 163, 74, 0.12);
+        --warning: #d97706;
+        --warning-soft: rgba(217, 119, 6, 0.12);
+        --danger: #dc2626;
+        --danger-soft: rgba(220, 38, 38, 0.09);
+      }
 
-  *,*::before,*::after{box-sizing:border-box;}
-  html,body{margin:0;padding:0;height:100%;}
-  body{
-    background:var(--bg); color:var(--ink-900); font-family:var(--font-sans);
-    display:flex; flex-direction:column; height:100vh; overflow:hidden;
-  }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      body {
+        background: var(--bg);
+        color: var(--ink-900);
+        font-family: var(--font-sans);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
 
-  /* ── Header ─────────────────────────────────────────── */
-  header{
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-    padding:14px 20px; border-bottom:1px solid var(--line); background:var(--surface);
-    flex-shrink:0; z-index:20;
-  }
-  .brand{display:flex; align-items:center; gap:10px; margin-right:6px;}
-  .brand-mark{
-    width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-ocean));
-    display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-weight:700;font-size:13px;
-    flex-shrink:0;
-  }
-  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
-  .brand-text b{font-size:14.5px;letter-spacing:-.01em;}
-  .brand-text span{font-size:11px;color:var(--ink-300);font-family:var(--font-mono);}
+      /* ── Header ─────────────────────────────────────────── */
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+        flex-shrink: 0;
+        z-index: 20;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-right: 6px;
+      }
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-ocean));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+      }
+      .brand-text b {
+        font-size: 14.5px;
+        letter-spacing: -0.01em;
+      }
+      .brand-text span {
+        font-size: 11px;
+        color: var(--ink-300);
+        font-family: var(--font-mono);
+      }
 
-  .search-wrap{position:relative; flex:1 1 260px; max-width:340px;}
-  .search-wrap input{
-    width:100%; padding:8px 12px 8px 32px; border-radius:8px; border:1px solid var(--line);
-    background:var(--surface-alt); color:var(--ink-900); font-family:var(--font-sans); font-size:13px;
-    outline:none; transition:border-color .15s;
-  }
-  .search-wrap input:focus{border-color:var(--accent);}
-  .search-wrap svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--ink-300);}
+      .search-wrap {
+        position: relative;
+        flex: 1 1 260px;
+        max-width: 340px;
+      }
+      .search-wrap input {
+        width: 100%;
+        padding: 8px 12px 8px 32px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--surface-alt);
+        color: var(--ink-900);
+        font-family: var(--font-sans);
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .search-wrap input:focus {
+        border-color: var(--accent);
+      }
+      .search-wrap svg {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        color: var(--ink-300);
+      }
 
-  .chips{display:flex; gap:6px; flex-wrap:wrap;}
-  .chip{
-    font-family:var(--font-mono); font-size:11px; padding:6px 10px; border-radius:999px;
-    border:1px solid var(--line); background:var(--surface-alt); color:var(--ink-600);
-    cursor:pointer; user-select:none; display:flex; align-items:center; gap:6px; transition:all .12s;
-  }
-  .chip:hover{border-color:var(--accent);}
-  .chip.active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:600;}
-  .chip .dot{width:7px;height:7px;border-radius:50%; flex-shrink:0;}
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--surface-alt);
+        color: var(--ink-600);
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.12s;
+      }
+      .chip:hover {
+        border-color: var(--accent);
+      }
+      .chip.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .chip .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
 
-  .header-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
-  .status-legend{display:flex; gap:12px; font-size:11px; color:var(--ink-300); font-family:var(--font-mono);}
-  .status-legend .item{display:flex; align-items:center; gap:5px;}
-  .status-legend .swatch{width:14px; height:2px; background:var(--ink-600);}
-  .status-legend .swatch.dashed{background:none; border-top:2px dashed var(--danger);}
+      .header-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .status-legend {
+        display: flex;
+        gap: 12px;
+        font-size: 11px;
+        color: var(--ink-300);
+        font-family: var(--font-mono);
+      }
+      .status-legend .item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .status-legend .swatch {
+        width: 14px;
+        height: 2px;
+        background: var(--ink-600);
+      }
+      .status-legend .swatch.dashed {
+        background: none;
+        border-top: 2px dashed var(--danger);
+      }
 
-  .btn-reset{
-    font-family:var(--font-mono); font-size:11px; padding:7px 12px; border-radius:8px;
-    border:1px solid var(--line); background:var(--surface-alt); color:var(--ink-600); cursor:pointer;
-  }
-  .btn-reset:hover{border-color:var(--accent); color:var(--accent);}
+      .btn-reset {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--surface-alt);
+        color: var(--ink-600);
+        cursor: pointer;
+      }
+      .btn-reset:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-  /* ── Layout ─────────────────────────────────────────── */
-  .layout{display:flex; flex:1; min-height:0;}
-  .canvas-wrap{position:relative; flex:1; min-width:0; overflow:hidden; background:
-    radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 1px) 0 0/22px 22px, var(--bg);
-    cursor:grab;
-  }
-  .canvas-wrap.grabbing{cursor:grabbing;}
-  svg#graph{width:100%; height:100%; display:block;}
+      /* ── Layout ─────────────────────────────────────────── */
+      .layout {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+      .canvas-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 1px) 0 0/22px 22px,
+          var(--bg);
+        cursor: grab;
+      }
+      .canvas-wrap.grabbing {
+        cursor: grabbing;
+      }
+      svg#graph {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
 
-  .zoom-controls{position:absolute; right:16px; bottom:16px; display:flex; flex-direction:column; gap:6px; z-index:10;}
-  .zoom-controls button{
-    width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
-    color:var(--ink-600); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 1px 3px rgba(0,0,0,.08);
-  }
-  .zoom-controls button:hover{color:var(--accent); border-color:var(--accent);}
+      .zoom-controls {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 10;
+      }
+      .zoom-controls button {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--ink-600);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      .zoom-controls button:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
 
-  .flow-banner{
-    position:absolute; top:14px; left:14px; right:14px; max-width:640px;
-    background:var(--surface); border:1px solid var(--accent); border-radius:10px;
-    padding:10px 14px; font-size:12.5px; color:var(--ink-900); box-shadow:0 4px 16px rgba(0,0,0,.08);
-    display:none; align-items:flex-start; gap:10px; z-index:15;
-  }
-  .flow-banner.visible{display:flex;}
-  .flow-banner .fb-text{flex:1;}
-  .flow-banner b{color:var(--accent);}
-  .flow-banner p{margin:2px 0 0; color:var(--ink-600); line-height:1.45;}
-  .flow-banner button{
-    border:none; background:none; color:var(--ink-300); cursor:pointer; font-size:16px; line-height:1; padding:2px;
-  }
-  .flow-banner button:hover{color:var(--danger);}
+      .flow-banner {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        max-width: 640px;
+        background: var(--surface);
+        border: 1px solid var(--accent);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 12.5px;
+        color: var(--ink-900);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        display: none;
+        align-items: flex-start;
+        gap: 10px;
+        z-index: 15;
+      }
+      .flow-banner.visible {
+        display: flex;
+      }
+      .flow-banner .fb-text {
+        flex: 1;
+      }
+      .flow-banner b {
+        color: var(--accent);
+      }
+      .flow-banner p {
+        margin: 2px 0 0;
+        color: var(--ink-600);
+        line-height: 1.45;
+      }
+      .flow-banner button {
+        border: none;
+        background: none;
+        color: var(--ink-300);
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        padding: 2px;
+      }
+      .flow-banner button:hover {
+        color: var(--danger);
+      }
 
-  .empty-state{
-    position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column;
-    gap:8px; color:var(--ink-300); font-size:13px; pointer-events:none;
-  }
-  .empty-state.visible{display:flex;}
+      .empty-state {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        color: var(--ink-300);
+        font-size: 13px;
+        pointer-events: none;
+      }
+      .empty-state.visible {
+        display: flex;
+      }
 
-  /* ── SVG node/edge styling ──────────────────────────── */
-  .node-box{cursor:pointer; transition:opacity .18s;}
-  .node-box rect{stroke-width:1.6; transition:stroke-width .15s, filter .15s;}
-  .node-box.dimmed{opacity:.16;}
-  .node-box:hover rect{stroke-width:2.6; filter:drop-shadow(0 2px 6px rgba(0,0,0,.15));}
-  .node-box.pinned rect{stroke-width:2.8;}
-  .node-title{font-family:var(--font-sans); font-weight:600; fill:var(--ink-900); pointer-events:none;}
-  .node-meta{font-family:var(--font-mono); fill:var(--ink-300); pointer-events:none;}
-  .node-badge-text{font-family:var(--font-mono); font-weight:700; pointer-events:none;}
-  .node-planned rect{stroke-dasharray:5 4;}
+      /* ── SVG node/edge styling ──────────────────────────── */
+      .node-box {
+        cursor: pointer;
+        transition: opacity 0.18s;
+      }
+      .node-box rect {
+        stroke-width: 1.6;
+        transition:
+          stroke-width 0.15s,
+          filter 0.15s;
+      }
+      .node-box.dimmed {
+        opacity: 0.16;
+      }
+      .node-box:hover rect {
+        stroke-width: 2.6;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+      }
+      .node-box.pinned rect {
+        stroke-width: 2.8;
+      }
+      .node-title {
+        font-family: var(--font-sans);
+        font-weight: 600;
+        fill: var(--ink-900);
+        pointer-events: none;
+      }
+      .node-meta {
+        font-family: var(--font-mono);
+        fill: var(--ink-300);
+        pointer-events: none;
+      }
+      .node-badge-text {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        pointer-events: none;
+      }
+      .node-planned rect {
+        stroke-dasharray: 5 4;
+      }
 
-  .edge-path{fill:none; stroke:var(--line); stroke-width:1.4; transition:opacity .18s, stroke-width .15s;}
-  .edge-path.planned{stroke-dasharray:5 4; stroke:var(--danger); opacity:.55;}
-  .edge-path.dimmed{opacity:.08;}
-  .edge-path.hi{stroke:var(--accent); stroke-width:2.4; opacity:1;}
-  .edge-arrow{fill:var(--line);}
-  .edge-arrow.hi{fill:var(--accent);}
-  .edge-arrow.planned{fill:var(--danger); opacity:.55;}
+      .edge-path {
+        fill: none;
+        stroke: var(--line);
+        stroke-width: 1.4;
+        transition:
+          opacity 0.18s,
+          stroke-width 0.15s;
+      }
+      .edge-path.planned {
+        stroke-dasharray: 5 4;
+        stroke: var(--danger);
+        opacity: 0.55;
+      }
+      .edge-path.dimmed {
+        opacity: 0.08;
+      }
+      .edge-path.hi {
+        stroke: var(--accent);
+        stroke-width: 2.4;
+        opacity: 1;
+      }
+      .edge-arrow {
+        fill: var(--line);
+      }
+      .edge-arrow.hi {
+        fill: var(--accent);
+      }
+      .edge-arrow.planned {
+        fill: var(--danger);
+        opacity: 0.55;
+      }
 
-  .lane-header{font-family:var(--font-mono); font-size:12px; fill:var(--ink-300); letter-spacing:.04em;}
-  .lane-header tspan.count{fill:var(--ink-300);}
-  .lane-rule{stroke:var(--line-soft); stroke-width:1;}
+      .lane-header {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        fill: var(--ink-300);
+        letter-spacing: 0.04em;
+      }
+      .lane-header tspan.count {
+        fill: var(--ink-300);
+      }
+      .lane-rule {
+        stroke: var(--line-soft);
+        stroke-width: 1;
+      }
 
-  .order-badge circle{fill:var(--accent); }
-  .order-badge text{fill:#fff; font-family:var(--font-mono); font-weight:700; font-size:11px;}
+      .order-badge circle {
+        fill: var(--accent);
+      }
+      .order-badge text {
+        fill: #fff;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 11px;
+      }
 
-  /* ── Tooltip ────────────────────────────────────────── */
-  #tooltip{
-    position:fixed; max-width:340px; background:var(--surface); border:1px solid var(--line);
-    border-radius:10px; padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.18); z-index:100;
-    display:none; font-size:12.5px; pointer-events:none;
-  }
-  #tooltip.pinned{pointer-events:auto;}
-  #tooltip .tt-head{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
-  #tooltip .tt-title{font-weight:700; font-size:14px; color:var(--ink-900); flex:1;}
-  #tooltip .tt-status{
-    font-family:var(--font-mono); font-size:10px; padding:3px 7px; border-radius:5px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.03em; flex-shrink:0;
-  }
-  #tooltip .tt-status.implemented{background:var(--success-soft); color:var(--success);}
-  #tooltip .tt-status.planned{background:var(--danger-soft); color:var(--danger);}
-  #tooltip .tt-tech{font-family:var(--font-mono); color:var(--accent); font-size:11px; margin-bottom:8px;}
-  #tooltip .tt-desc{color:var(--ink-600); line-height:1.5; margin-bottom:10px;}
-  #tooltip .tt-files{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-300); line-height:1.7;
-    background:var(--surface-alt); border-radius:6px; padding:8px 10px; max-height:120px; overflow:auto;}
-  #tooltip .tt-files div{white-space:nowrap;}
-  #tooltip .tt-close{position:absolute; top:8px; right:10px; cursor:pointer; color:var(--ink-300); font-size:14px; display:none;}
-  #tooltip.pinned .tt-close{display:block;}
+      /* ── Tooltip ────────────────────────────────────────── */
+      #tooltip {
+        position: fixed;
+        max-width: 340px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        z-index: 100;
+        display: none;
+        font-size: 12.5px;
+        pointer-events: none;
+      }
+      #tooltip.pinned {
+        pointer-events: auto;
+      }
+      #tooltip .tt-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      #tooltip .tt-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ink-900);
+        flex: 1;
+      }
+      #tooltip .tt-status {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        padding: 3px 7px;
+        border-radius: 5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        flex-shrink: 0;
+      }
+      #tooltip .tt-status.implemented {
+        background: var(--success-soft);
+        color: var(--success);
+      }
+      #tooltip .tt-status.planned {
+        background: var(--danger-soft);
+        color: var(--danger);
+      }
+      #tooltip .tt-tech {
+        font-family: var(--font-mono);
+        color: var(--accent);
+        font-size: 11px;
+        margin-bottom: 8px;
+      }
+      #tooltip .tt-desc {
+        color: var(--ink-600);
+        line-height: 1.5;
+        margin-bottom: 10px;
+      }
+      #tooltip .tt-files {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-300);
+        line-height: 1.7;
+        background: var(--surface-alt);
+        border-radius: 6px;
+        padding: 8px 10px;
+        max-height: 120px;
+        overflow: auto;
+      }
+      #tooltip .tt-files div {
+        white-space: nowrap;
+      }
+      #tooltip .tt-close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        cursor: pointer;
+        color: var(--ink-300);
+        font-size: 14px;
+        display: none;
+      }
+      #tooltip.pinned .tt-close {
+        display: block;
+      }
 
-  /* ── Sidebar ────────────────────────────────────────── */
-  aside{
-    width:340px; flex-shrink:0; background:var(--surface); border-left:1px solid var(--line);
-    overflow-y:auto; padding:18px 16px 40px;
-  }
-  aside h2{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-300);
-    font-family:var(--font-mono); margin:22px 0 10px;}
-  aside h2:first-child{margin-top:0;}
-  .flow-card{
-    border:1px solid var(--line); border-radius:10px; padding:12px 13px; margin-bottom:10px; cursor:pointer;
-    transition:border-color .15s, background .15s; background:var(--surface);
-  }
-  .flow-card:hover{border-color:var(--accent);}
-  .flow-card.active{border-color:var(--accent); background:var(--accent-faint);}
-  .flow-card .fc-name{font-weight:700; font-size:13px; color:var(--ink-900); margin-bottom:4px;}
-  .flow-card .fc-desc{font-size:11.5px; color:var(--ink-600); line-height:1.45; margin-bottom:8px;}
-  .flow-card .fc-steps{font-family:var(--font-mono); font-size:10.5px; color:var(--accent);}
+      /* ── Sidebar ────────────────────────────────────────── */
+      aside {
+        width: 340px;
+        flex-shrink: 0;
+        background: var(--surface);
+        border-left: 1px solid var(--line);
+        overflow-y: auto;
+        padding: 18px 16px 40px;
+      }
+      aside h2 {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-300);
+        font-family: var(--font-mono);
+        margin: 22px 0 10px;
+      }
+      aside h2:first-child {
+        margin-top: 0;
+      }
+      .flow-card {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 13px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        background: var(--surface);
+      }
+      .flow-card:hover {
+        border-color: var(--accent);
+      }
+      .flow-card.active {
+        border-color: var(--accent);
+        background: var(--accent-faint);
+      }
+      .flow-card .fc-name {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--ink-900);
+        margin-bottom: 4px;
+      }
+      .flow-card .fc-desc {
+        font-size: 11.5px;
+        color: var(--ink-600);
+        line-height: 1.45;
+        margin-bottom: 8px;
+      }
+      .flow-card .fc-steps {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--accent);
+      }
 
-  .legend-row{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-600); margin-bottom:7px;}
-  .legend-row .sw{width:16px; height:11px; border-radius:3px; border:1.6px solid; flex-shrink:0;}
-  .legend-row.planned .sw{border-style:dashed;}
+      .legend-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--ink-600);
+        margin-bottom: 7px;
+      }
+      .legend-row .sw {
+        width: 16px;
+        height: 11px;
+        border-radius: 3px;
+        border: 1.6px solid;
+        flex-shrink: 0;
+      }
+      .legend-row.planned .sw {
+        border-style: dashed;
+      }
 
-  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px;}
-  .stat-box{background:var(--surface-alt); border-radius:8px; padding:10px 12px;}
-  .stat-box b{display:block; font-size:19px; font-family:var(--font-mono); color:var(--accent);}
-  .stat-box span{font-size:10.5px; color:var(--ink-300);}
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .stat-box {
+        background: var(--surface-alt);
+        border-radius: 8px;
+        padding: 10px 12px;
+      }
+      .stat-box b {
+        display: block;
+        font-size: 19px;
+        font-family: var(--font-mono);
+        color: var(--accent);
+      }
+      .stat-box span {
+        font-size: 10.5px;
+        color: var(--ink-300);
+      }
 
-  .note-box{
-    font-size:11.5px; color:var(--ink-600); line-height:1.55; background:var(--danger-soft);
-    border:1px solid var(--danger); border-radius:8px; padding:10px 12px; margin-top:6px;
-  }
-  .note-box b{color:var(--danger);}
+      .note-box {
+        font-size: 11.5px;
+        color: var(--ink-600);
+        line-height: 1.55;
+        background: var(--danger-soft);
+        border: 1px solid var(--danger);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-top: 6px;
+      }
+      .note-box b {
+        color: var(--danger);
+      }
 
-  ::-webkit-scrollbar{width:9px; height:9px;}
-  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
-  ::-webkit-scrollbar-track{background:transparent;}
+      ::-webkit-scrollbar {
+        width: 9px;
+        height: 9px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--line);
+        border-radius: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
 
-  @media (max-width:900px){
-    aside{position:fixed; right:0; top:0; bottom:0; transform:translateX(100%); transition:transform .2s; z-index:50;
-      box-shadow:-8px 0 24px rgba(0,0,0,.15);}
-    aside.open{transform:translateX(0);}
-    .header-right .status-legend{display:none;}
-    .sidebar-toggle{display:inline-flex !important;}
-  }
-  .sidebar-toggle{display:none; }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="brand">
-    <div class="brand-mark">HS</div>
-    <div class="brand-text">
-      <b>HydroStack</b>
-      <span>mapa de arquitectura · docs/architecture</span>
-    </div>
-  </div>
-
-  <div class="search-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-    <input id="search" type="text" placeholder="Buscar nodo, archivo o tecnología…" autocomplete="off" />
-  </div>
-
-  <div class="chips" id="type-chips"></div>
-
-  <div class="header-right">
-    <div class="status-legend">
-      <div class="item"><span class="swatch"></span> implementado</div>
-      <div class="item"><span class="swatch dashed"></span> planeado / no cableado</div>
-    </div>
-    <button class="btn-reset" id="btn-clear">Limpiar filtros</button>
-    <button class="btn-reset sidebar-toggle" id="btn-sidebar">Flujos ▸</button>
-  </div>
-</header>
-
-<div class="layout">
-  <div class="canvas-wrap" id="canvas-wrap">
-    <div class="flow-banner" id="flow-banner">
-      <div class="fb-text">
-        <b id="fb-name"></b>
-        <p id="fb-desc"></p>
+      @media (max-width: 900px) {
+        aside {
+          position: fixed;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          transform: translateX(100%);
+          transition: transform 0.2s;
+          z-index: 50;
+          box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+        }
+        aside.open {
+          transform: translateX(0);
+        }
+        .header-right .status-legend {
+          display: none;
+        }
+        .sidebar-toggle {
+          display: inline-flex !important;
+        }
+      }
+      .sidebar-toggle {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <div class="brand-mark">HS</div>
+        <div class="brand-text">
+          <b>HydroStack</b>
+          <span>mapa de arquitectura · docs/architecture</span>
+        </div>
       </div>
-      <button id="fb-close" title="Cerrar">✕</button>
+
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          id="search"
+          type="text"
+          placeholder="Buscar nodo, archivo o tecnología…"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="chips" id="type-chips"></div>
+
+      <div class="header-right">
+        <div class="status-legend">
+          <div class="item"><span class="swatch"></span> implementado</div>
+          <div class="item"><span class="swatch dashed"></span> planeado / no cableado</div>
+        </div>
+        <button class="btn-reset" id="btn-clear">Limpiar filtros</button>
+        <button class="btn-reset sidebar-toggle" id="btn-sidebar">Flujos ▸</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <div class="canvas-wrap" id="canvas-wrap">
+        <div class="flow-banner" id="flow-banner">
+          <div class="fb-text">
+            <b id="fb-name"></b>
+            <p id="fb-desc"></p>
+          </div>
+          <button id="fb-close" title="Cerrar">✕</button>
+        </div>
+        <svg id="graph" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker
+              id="arrow"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M0,0 L10,5 L0,10 z" class="edge-arrow"></path>
+            </marker>
+            <marker
+              id="arrow-hi"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M0,0 L10,5 L0,10 z" class="edge-arrow hi"></path>
+            </marker>
+            <marker
+              id="arrow-planned"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M0,0 L10,5 L0,10 z" class="edge-arrow planned"></path>
+            </marker>
+          </defs>
+          <g id="viewport">
+            <g id="lanes"></g>
+            <g id="edges"></g>
+            <g id="nodes"></g>
+          </g>
+        </svg>
+        <div class="empty-state" id="empty-state">
+          Sin coincidencias — probá otro término o quitá filtros de tipo.
+        </div>
+        <div class="zoom-controls">
+          <button id="zoom-in" title="Acercar">+</button>
+          <button id="zoom-out" title="Alejar">−</button>
+          <button id="zoom-fit" title="Ajustar a pantalla">⤢</button>
+        </div>
+      </div>
+
+      <aside id="sidebar">
+        <h2>Flujos clave</h2>
+        <div id="flow-list"></div>
+
+        <h2>Leyenda de capas</h2>
+        <div id="type-legend"></div>
+        <div class="legend-row planned">
+          <span
+            class="sw"
+            style="border-color: var(--danger); background: var(--danger-soft)"
+          ></span>
+          Planeado / sin cablear al producto
+        </div>
+
+        <h2>Resumen</h2>
+        <div class="stat-grid" id="stat-grid"></div>
+        <div class="note-box">
+          <b>Nota real vs. contexto asumido:</b> el chat del Hydro_Agent corre sobre
+          <b>Groq</b> (llama-3.3-70b), no Anthropic. Anthropic solo se usa en la extracción de
+          pliegos (CLI, no conectada a la UI) y en la descripción del diagrama isométrico. Ver
+          bloque de discrepancias en el README del repo / respuesta del agente.
+        </div>
+      </aside>
     </div>
-    <svg id="graph" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" class="edge-arrow"></path>
-        </marker>
-        <marker id="arrow-hi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" class="edge-arrow hi"></path>
-        </marker>
-        <marker id="arrow-planned" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" class="edge-arrow planned"></path>
-        </marker>
-      </defs>
-      <g id="viewport">
-        <g id="lanes"></g>
-        <g id="edges"></g>
-        <g id="nodes"></g>
-      </g>
-    </svg>
-    <div class="empty-state" id="empty-state">Sin coincidencias — probá otro término o quitá filtros de tipo.</div>
-    <div class="zoom-controls">
-      <button id="zoom-in" title="Acercar">+</button>
-      <button id="zoom-out" title="Alejar">−</button>
-      <button id="zoom-fit" title="Ajustar a pantalla">⤢</button>
-    </div>
-  </div>
 
-  <aside id="sidebar">
-    <h2>Flujos clave</h2>
-    <div id="flow-list"></div>
-
-    <h2>Leyenda de capas</h2>
-    <div id="type-legend"></div>
-    <div class="legend-row planned">
-      <span class="sw" style="border-color:var(--danger); background:var(--danger-soft);"></span>
-      Planeado / sin cablear al producto
+    <div id="tooltip">
+      <span class="tt-close" id="tt-close">✕</span>
+      <div class="tt-head">
+        <div class="tt-title" id="tt-title"></div>
+      </div>
+      <div class="tt-status" id="tt-status" style="display: inline-block; margin-bottom: 8px"></div>
+      <div class="tt-tech" id="tt-tech"></div>
+      <div class="tt-desc" id="tt-desc"></div>
+      <div class="tt-files" id="tt-files"></div>
     </div>
 
-    <h2>Resumen</h2>
-    <div class="stat-grid" id="stat-grid"></div>
-    <div class="note-box">
-      <b>Nota real vs. contexto asumido:</b> el chat del Hydro_Agent corre sobre <b>Groq</b> (llama-3.3-70b), no Anthropic.
-      Anthropic solo se usa en la extracción de pliegos (CLI, no conectada a la UI) y en la descripción del diagrama isométrico.
-      Ver bloque de discrepancias en el README del repo / respuesta del agente.
-    </div>
-  </aside>
-</div>
+    <script type="application/json" id="graph-data">
+      {
+        "nodes": [
+          {
+            "id": "landing-page",
+            "label": "Landing",
+            "type": "frontend",
+            "tech": "Next.js 14 (Pages/App hybrid)",
+            "files": ["app/page.js"],
+            "status": "implemented",
+            "description": "Página de inicio: hero, tarjetas de módulos, ProcesosTicker en vivo."
+          },
+          {
+            "id": "licitaciones-hub",
+            "label": "Licitaciones (vista simple)",
+            "type": "frontend",
+            "tech": "Next.js (Server Component, ISR)",
+            "files": ["app/licitaciones/page.js", "src/components/secop/ProcesosRecientes.tsx"],
+            "status": "implemented",
+            "description": "Ítem de navbar 01. NO es un hub de enlaces: es una página server-rendered (revalidate=300) que lista procesos recientes vía getProcesosRecientes(). Desde ahí se enlaza a /explorar ('búsqueda avanzada') y a /como-participar."
+          },
+          {
+            "id": "licitaciones-explorar",
+            "label": "Licitaciones · Explorar",
+            "type": "frontend",
+            "tech": "React (SecopExplorer.tsx)",
+            "files": [
+              "app/licitaciones/explorar/page.js",
+              "src/components/secop/SecopExplorer.tsx",
+              "src/components/secop/ProcessList.tsx",
+              "src/components/secop/ProcessDetail.tsx",
+              "src/components/secop/LicitacionesTabs.tsx"
+            ],
+            "status": "implemented",
+            "description": "El workbench real: búsqueda/filtros conectados a datos vivos (Postgres/Socrata). Comparte la barra de tabs (LicitacionesTabs.tsx) con Cómo participar y Descubrir."
+          },
+          {
+            "id": "licitaciones-descubrir",
+            "label": "Licitaciones · Descubrir",
+            "type": "frontend",
+            "tech": "React (100% mock)",
+            "files": [
+              "app/licitaciones/descubrir/page.js",
+              "src/components/secop/discovery/LicitacionesDiscovery.tsx",
+              "src/components/secop/discovery/SmartCollections.tsx",
+              "src/components/secop/discovery/FacetedSearchBar.tsx",
+              "src/lib/secop/mock-licitaciones.ts"
+            ],
+            "status": "implemented",
+            "description": "Colecciones inteligentes + búsqueda facetada — UI completa, pero toda la data sale de src/lib/secop/mock-licitaciones.ts. Aislada a propósito: 'no reemplaza ni modifica /licitaciones ni /licitaciones/explorar' (comentario del propio archivo). Sin conexión a Postgres/Socrata. LicitacionesTabs.tsx la marca literalmente como mock:true."
+          },
+          {
+            "id": "licitaciones-como-participar",
+            "label": "Licitaciones · Cómo participar",
+            "type": "frontend",
+            "tech": "React",
+            "files": [
+              "app/licitaciones/como-participar/page.js",
+              "src/components/secop/ComoParticipar.tsx"
+            ],
+            "status": "implemented",
+            "description": "Guía + wizard de perfil de oferente (OferenteWizard.tsx)."
+          },
+          {
+            "id": "chat-hydroagent",
+            "label": "Asistente (Hydro_Agent chat)",
+            "type": "frontend",
+            "tech": "React",
+            "files": [
+              "app/chat/page.js",
+              "src/components/HydroAgent/HydroAgent.jsx",
+              "src/components/HydroAgent/HydroAgentParts.jsx"
+            ],
+            "status": "implemented",
+            "description": "Ítem de navbar 04. Chat conversacional con detección de perfil/sub-escenario, tools de cálculo y búsqueda SECOP."
+          },
+          {
+            "id": "calculators-hub",
+            "label": "Calculadoras (hub)",
+            "type": "frontend",
+            "tech": "Next.js",
+            "files": ["app/calculators/page.js"],
+            "status": "implemented",
+            "description": "Ítem de navbar 03. Índice de las 3 calculadoras SITARD (geo, fosa séptica, mantenimiento) — enlaza dinámicamente a /calculators/${slug}."
+          },
+          {
+            "id": "calc-geo",
+            "label": "Calculadora · Geoespacial",
+            "type": "frontend",
+            "tech": "React + Leaflet",
+            "files": [
+              "app/calculators/geo/page.jsx",
+              "src/components/geo/GeoPanel.jsx",
+              "src/components/geo/LocationPickerMap.jsx",
+              "src/lib/geo/zoning.ts"
+            ],
+            "status": "implemented",
+            "description": "Selector de predio en mapa (Leaflet) + clima/elevación reales (Open-Meteo) + zonificación."
+          },
+          {
+            "id": "calc-fosa-septica",
+            "label": "Calculadora · Fosa séptica",
+            "type": "frontend",
+            "tech": "React",
+            "files": [
+              "app/calculators/fosa-septica/page.js",
+              "src/components/calculator/CalculatorSchematics.jsx"
+            ],
+            "status": "implemented",
+            "description": "Cálculo de tanque séptico + campo de infiltración (Res. 0330/2017) con informe PDF."
+          },
+          {
+            "id": "calc-mantenimiento",
+            "label": "Calculadora · Mantenimiento",
+            "type": "frontend",
+            "tech": "React",
+            "files": ["app/calculators/mantenimiento/page.jsx"],
+            "status": "implemented",
+            "description": "Cronograma de bombeo, riesgo de colmatación, checklist de inspección."
+          },
+          {
+            "id": "build-flow",
+            "label": "Proyectos (Build)",
+            "type": "frontend",
+            "tech": "React",
+            "files": [
+              "app/build/page.jsx",
+              "src/components/HydroAgent/BuildSystemFlow.jsx",
+              "src/components/Navbar.js"
+            ],
+            "status": "implemented",
+            "description": "Ítem de navbar 02, etiquetado 'Proyectos' pero la ruta es /build. Flujo guiado paso a paso que encadena las 3 calculadoras sin pasar por el LLM."
+          },
+          {
+            "id": "isometric-diagram",
+            "label": "Diagrama isométrico 3D",
+            "type": "frontend",
+            "tech": "React + Babylon.js",
+            "files": ["src/components/IsometricDiagram.jsx"],
+            "status": "implemented",
+            "description": "Render isométrico del sistema séptico; pide una descripción visual a Claude antes de dibujar."
+          },
+          {
+            "id": "cuenta-page",
+            "label": "Cuenta",
+            "type": "frontend",
+            "tech": "Next.js",
+            "files": ["app/cuenta/page.tsx"],
+            "status": "implemented",
+            "description": "Preferencias de alertas y perfil de oferente del usuario autenticado."
+          },
+          {
+            "id": "mis-coincidencias",
+            "label": "Mis coincidencias",
+            "type": "frontend",
+            "tech": "Next.js (Server Component)",
+            "files": ["app/mis-coincidencias/page.tsx"],
+            "status": "implemented",
+            "description": "Lista de procesos que hicieron match con el perfil de oferente. Server component: llama getMatchesForPerfil() y enviarDigestAhora() como funciones directas, no vía fetch a una API route."
+          },
+          {
+            "id": "nosotros-page",
+            "label": "Nosotros",
+            "type": "frontend",
+            "tech": "Next.js",
+            "files": ["app/nosotros/page.js"],
+            "status": "implemented",
+            "description": "Ítem de navbar 05. Página institucional, sin llamadas a datos."
+          },
 
-<div id="tooltip">
-  <span class="tt-close" id="tt-close">✕</span>
-  <div class="tt-head">
-    <div class="tt-title" id="tt-title"></div>
-  </div>
-  <div class="tt-status" id="tt-status" style="display:inline-block; margin-bottom:8px;"></div>
-  <div class="tt-tech" id="tt-tech"></div>
-  <div class="tt-desc" id="tt-desc"></div>
-  <div class="tt-files" id="tt-files"></div>
-</div>
+          {
+            "id": "api-agent",
+            "label": "POST /api/agent",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/agent/route.ts"],
+            "status": "implemented",
+            "description": "Orquesta el chat: system prompt por perfil, streaming, hasta 6 rondas de tool-calling contra Groq."
+          },
+          {
+            "id": "api-agent-suggest",
+            "label": "POST /api/agent/suggest",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/agent/suggest/route.ts"],
+            "status": "implemented",
+            "description": "Sugiere próximas preguntas del catálogo según el formState actual."
+          },
+          {
+            "id": "api-secop-search",
+            "label": "GET /api/secop",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/secop/route.ts"],
+            "status": "implemented",
+            "description": "Búsqueda de procesos/contratos: Postgres primero (cache), fallback a Socrata en vivo si la BD falla."
+          },
+          {
+            "id": "api-secop-probe",
+            "label": "POST /api/secop/probe",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/secop/probe/route.ts"],
+            "status": "implemented",
+            "description": "Dispara el probe on-demand de acceso documental (UNKNOWN → PUBLIC/RESTRICTED) y lo persiste best-effort."
+          },
+          {
+            "id": "api-secop-verdict",
+            "label": "POST /api/secop/verdict",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/secop/verdict/route.ts"],
+            "status": "implemented",
+            "description": "Calcula el veredicto de elegibilidad (nunca persiste) al abrir el detalle de un proceso."
+          },
+          {
+            "id": "api-cron-ingest",
+            "label": "GET /api/cron/ingest",
+            "type": "backend",
+            "tech": "Vercel Cron → Route Handler",
+            "files": ["app/api/cron/ingest/route.ts", "vercel.json"],
+            "status": "implemented",
+            "description": "Dispara la ingesta incremental diaria (11:00 UTC), protegida por CRON_SECRET."
+          },
+          {
+            "id": "api-cron-alertas",
+            "label": "GET /api/cron/alertas",
+            "type": "backend",
+            "tech": "Vercel Cron → Route Handler",
+            "files": ["app/api/cron/alertas/route.ts", "vercel.json"],
+            "status": "implemented",
+            "description": "Dispara el envío diario de alertas (12:00 UTC), una hora después de la ingesta."
+          },
+          {
+            "id": "api-report-generate",
+            "label": "POST /api/report/generate",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/report/generate/route.ts"],
+            "status": "implemented",
+            "description": "Genera el PDF técnico directamente desde el formState del wizard /build, sin pasar por el LLM."
+          },
+          {
+            "id": "api-generate-isometric",
+            "label": "POST /api/generate-isometric",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/generate-isometric/route.js"],
+            "status": "implemented",
+            "description": "Pide a Claude (fetch directo, sin SDK) una descripción visual detallada para el diagrama isométrico."
+          },
+          {
+            "id": "api-landing-stats",
+            "label": "GET /api/landing-stats",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/landing-stats/route.ts"],
+            "status": "implemented",
+            "description": "Estadísticas agregadas para el ticker de la landing (Socrata + agregaciones)."
+          },
+          {
+            "id": "api-procesos-recientes",
+            "label": "GET /api/procesos/recientes",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/procesos/recientes/route.ts"],
+            "status": "implemented",
+            "description": "Procesos recientes con fallback DB→live, usado por el widget de la landing."
+          },
+          {
+            "id": "api-perfil",
+            "label": "/api/perfil",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/perfil/route.ts"],
+            "status": "implemented",
+            "description": "CRUD del perfil de oferente (capacidad financiera, cobertura, UNSPSC)."
+          },
+          {
+            "id": "api-alertas-preferencias",
+            "label": "/api/alertas/preferencias",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/alertas/preferencias/route.ts"],
+            "status": "implemented",
+            "description": "Lee/actualiza preferencias de alerta del usuario."
+          },
+          {
+            "id": "api-alertas-enviar-ahora",
+            "label": "POST /api/alertas/enviar-ahora",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/alertas/enviar-ahora/route.ts"],
+            "status": "implemented",
+            "description": "Envío manual/inmediato del digest de alertas. No se encontró ningún caller en el frontend: mis-coincidencias/page.tsx importa enviarDigestAhora() directo como server action, sin pasar por esta ruta — parece código huérfano."
+          },
+          {
+            "id": "api-alertas-unsubscribe",
+            "label": "GET /api/alertas/unsubscribe",
+            "type": "backend",
+            "tech": "Next.js Route Handler",
+            "files": ["app/api/alertas/unsubscribe/route.ts"],
+            "status": "implemented",
+            "description": "Baja de alertas vía token firmado en el enlace del correo."
+          },
+          {
+            "id": "api-auth",
+            "label": "/api/auth/[...nextauth]",
+            "type": "backend",
+            "tech": "Auth.js (next-auth v5 beta)",
+            "files": ["app/api/auth/[...nextauth]/route.ts", "src/lib/auth/config.ts"],
+            "status": "implemented",
+            "description": "Autenticación por magic link (email) con adapter de Drizzle."
+          },
 
-<script type="application/json" id="graph-data">
-{
-  "nodes": [
-    { "id": "landing-page", "label": "Landing", "type": "frontend", "tech": "Next.js 14 (Pages/App hybrid)", "files": ["app/page.js"], "status": "implemented", "description": "Página de inicio: hero, tarjetas de módulos, ProcesosTicker en vivo." },
-    { "id": "licitaciones-hub", "label": "Licitaciones (vista simple)", "type": "frontend", "tech": "Next.js (Server Component, ISR)", "files": ["app/licitaciones/page.js", "src/components/secop/ProcesosRecientes.tsx"], "status": "implemented", "description": "Ítem de navbar 01. NO es un hub de enlaces: es una página server-rendered (revalidate=300) que lista procesos recientes vía getProcesosRecientes(). Desde ahí se enlaza a /explorar ('búsqueda avanzada') y a /como-participar." },
-    { "id": "licitaciones-explorar", "label": "Licitaciones · Explorar", "type": "frontend", "tech": "React (SecopExplorer.tsx)", "files": ["app/licitaciones/explorar/page.js", "src/components/secop/SecopExplorer.tsx", "src/components/secop/ProcessList.tsx", "src/components/secop/ProcessDetail.tsx", "src/components/secop/LicitacionesTabs.tsx"], "status": "implemented", "description": "El workbench real: búsqueda/filtros conectados a datos vivos (Postgres/Socrata). Comparte la barra de tabs (LicitacionesTabs.tsx) con Cómo participar y Descubrir." },
-    { "id": "licitaciones-descubrir", "label": "Licitaciones · Descubrir", "type": "frontend", "tech": "React (100% mock)", "files": ["app/licitaciones/descubrir/page.js", "src/components/secop/discovery/LicitacionesDiscovery.tsx", "src/components/secop/discovery/SmartCollections.tsx", "src/components/secop/discovery/FacetedSearchBar.tsx", "src/lib/secop/mock-licitaciones.ts"], "status": "implemented", "description": "Colecciones inteligentes + búsqueda facetada — UI completa, pero toda la data sale de src/lib/secop/mock-licitaciones.ts. Aislada a propósito: 'no reemplaza ni modifica /licitaciones ni /licitaciones/explorar' (comentario del propio archivo). Sin conexión a Postgres/Socrata. LicitacionesTabs.tsx la marca literalmente como mock:true." },
-    { "id": "licitaciones-como-participar", "label": "Licitaciones · Cómo participar", "type": "frontend", "tech": "React", "files": ["app/licitaciones/como-participar/page.js", "src/components/secop/ComoParticipar.tsx"], "status": "implemented", "description": "Guía + wizard de perfil de oferente (OferenteWizard.tsx)." },
-    { "id": "chat-hydroagent", "label": "Asistente (Hydro_Agent chat)", "type": "frontend", "tech": "React", "files": ["app/chat/page.js", "src/components/HydroAgent/HydroAgent.jsx", "src/components/HydroAgent/HydroAgentParts.jsx"], "status": "implemented", "description": "Ítem de navbar 04. Chat conversacional con detección de perfil/sub-escenario, tools de cálculo y búsqueda SECOP." },
-    { "id": "calculators-hub", "label": "Calculadoras (hub)", "type": "frontend", "tech": "Next.js", "files": ["app/calculators/page.js"], "status": "implemented", "description": "Ítem de navbar 03. Índice de las 3 calculadoras SITARD (geo, fosa séptica, mantenimiento) — enlaza dinámicamente a /calculators/${slug}." },
-    { "id": "calc-geo", "label": "Calculadora · Geoespacial", "type": "frontend", "tech": "React + Leaflet", "files": ["app/calculators/geo/page.jsx", "src/components/geo/GeoPanel.jsx", "src/components/geo/LocationPickerMap.jsx", "src/lib/geo/zoning.ts"], "status": "implemented", "description": "Selector de predio en mapa (Leaflet) + clima/elevación reales (Open-Meteo) + zonificación." },
-    { "id": "calc-fosa-septica", "label": "Calculadora · Fosa séptica", "type": "frontend", "tech": "React", "files": ["app/calculators/fosa-septica/page.js", "src/components/calculator/CalculatorSchematics.jsx"], "status": "implemented", "description": "Cálculo de tanque séptico + campo de infiltración (Res. 0330/2017) con informe PDF." },
-    { "id": "calc-mantenimiento", "label": "Calculadora · Mantenimiento", "type": "frontend", "tech": "React", "files": ["app/calculators/mantenimiento/page.jsx"], "status": "implemented", "description": "Cronograma de bombeo, riesgo de colmatación, checklist de inspección." },
-    { "id": "build-flow", "label": "Proyectos (Build)", "type": "frontend", "tech": "React", "files": ["app/build/page.jsx", "src/components/HydroAgent/BuildSystemFlow.jsx", "src/components/Navbar.js"], "status": "implemented", "description": "Ítem de navbar 02, etiquetado 'Proyectos' pero la ruta es /build. Flujo guiado paso a paso que encadena las 3 calculadoras sin pasar por el LLM." },
-    { "id": "isometric-diagram", "label": "Diagrama isométrico 3D", "type": "frontend", "tech": "React + Babylon.js", "files": ["src/components/IsometricDiagram.jsx"], "status": "implemented", "description": "Render isométrico del sistema séptico; pide una descripción visual a Claude antes de dibujar." },
-    { "id": "cuenta-page", "label": "Cuenta", "type": "frontend", "tech": "Next.js", "files": ["app/cuenta/page.tsx"], "status": "implemented", "description": "Preferencias de alertas y perfil de oferente del usuario autenticado." },
-    { "id": "mis-coincidencias", "label": "Mis coincidencias", "type": "frontend", "tech": "Next.js (Server Component)", "files": ["app/mis-coincidencias/page.tsx"], "status": "implemented", "description": "Lista de procesos que hicieron match con el perfil de oferente. Server component: llama getMatchesForPerfil() y enviarDigestAhora() como funciones directas, no vía fetch a una API route." },
-    { "id": "nosotros-page", "label": "Nosotros", "type": "frontend", "tech": "Next.js", "files": ["app/nosotros/page.js"], "status": "implemented", "description": "Ítem de navbar 05. Página institucional, sin llamadas a datos." },
+          {
+            "id": "ingest-pipeline",
+            "label": "Ingest pipeline",
+            "type": "service",
+            "tech": "TypeScript (SODA client, keyset+sweep)",
+            "files": [
+              "src/lib/ingest/runIngest.ts",
+              "src/lib/ingest/pipeline.ts",
+              "src/lib/ingest/dbIngest.ts",
+              "src/lib/ingest/pagination.ts",
+              "src/lib/ingest/watermark.ts",
+              "src/lib/ingest/mapRecord.ts",
+              "src/lib/ingest/sources.ts"
+            ],
+            "status": "implemented",
+            "description": "Incremental keyset por watermark + sweep de recuperación; escribe landing append-only en raw_record (patrón ELT)."
+          },
+          {
+            "id": "secop-client",
+            "label": "SECOP / Socrata client",
+            "type": "service",
+            "tech": "TypeScript (SODA)",
+            "files": [
+              "src/lib/secop/client.ts",
+              "src/lib/secop/config.ts",
+              "src/lib/secop/datasetResolver.ts"
+            ],
+            "status": "implemented",
+            "description": "Cliente SODA para datos.gov.co. Datasets reales: procesos = p6dx-8zbt, contratos = jbjy-vk9h. Resuelve el id 4x4 vigente vía catálogo en runtime."
+          },
+          {
+            "id": "transform-orchestrator",
+            "label": "Transform orchestrator",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": [
+              "src/lib/transform/orchestrator.ts",
+              "src/lib/transform/mapCanonical.ts",
+              "src/lib/transform/eventWriter.ts",
+              "src/lib/transform/geo.ts"
+            ],
+            "status": "implemented",
+            "description": "raw_record → tablas canónicas (proceso, contrato, entidad, proveedor) + reconstrucción de eventos de contrato."
+          },
+          {
+            "id": "classify-sector",
+            "label": "Clasificador sectorial",
+            "type": "service",
+            "tech": "TypeScript (diccionarios + reglas)",
+            "files": [
+              "src/lib/classify/classifier.ts",
+              "src/lib/classify/adapters.ts",
+              "src/lib/classify/dictionaries.ts"
+            ],
+            "status": "implemented",
+            "description": "Clasifica cada proceso/contrato como sector agua/saneamiento u otro."
+          },
+          {
+            "id": "document-access",
+            "label": "Document access gate",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": ["src/lib/secop/document-access.ts"],
+            "status": "implemented",
+            "description": "PUBLIC / RESTRICTED / NOT_PUBLISHED / UNKNOWN. preclassify() (solo metadata, en cada transform) + probeDocument() (1 GET, on-demand)."
+          },
+          {
+            "id": "verdict-engine",
+            "label": "Verdict / elegibilidad",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": ["src/lib/secop/verdict.ts"],
+            "status": "implemented",
+            "description": "Gates de habilitación (cuantía, competencia, urgencia, apertura). Recomputable, nunca se persiste."
+          },
+          {
+            "id": "oferente-profile",
+            "label": "Perfil de oferente",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": [
+              "src/lib/oferente/types.ts",
+              "src/lib/oferente/wizard.ts",
+              "src/lib/oferente/perfil-store.ts"
+            ],
+            "status": "implemented",
+            "description": "Capacidad financiera (RUP), cobertura geográfica, cuantía objetivo, códigos UNSPSC."
+          },
+          {
+            "id": "matching-engine",
+            "label": "Matching engine",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": ["src/lib/matching/match.ts", "src/lib/matching/get-matches-for-perfil.ts"],
+            "status": "implemented",
+            "description": "Cruza el perfil de oferente contra procesos nuevos para las alertas diarias."
+          },
+          {
+            "id": "pliego-extraction",
+            "label": "Extracción de pliegos (Hydro_Agent Capa 3)",
+            "type": "service",
+            "tech": "TypeScript + Anthropic SDK",
+            "files": [
+              "src/lib/pliego/extractPliego.ts",
+              "src/lib/pliego/schema.ts",
+              "src/lib/pliego/prompt.ts",
+              "src/lib/pliego/validate.ts",
+              "scripts/analyze-pliego.ts"
+            ],
+            "status": "implemented",
+            "description": "PDF → JSON estructurado. El PDF se envía nativo a Claude (document content block); no hay preprocesado con PyMuPDF/pdfplumber. Modelo: claude-opus-4-8 con thinking adaptativo. Solo se invoca hoy desde el script CLI analyze-pliego.ts — no hay ruta API que lo conecte al producto."
+          },
+          {
+            "id": "hydro-agent-tools",
+            "label": "Hydro_Agent tools",
+            "type": "service",
+            "tech": "TypeScript (OpenAI tool-call format)",
+            "files": [
+              "src/lib/agent/tools/index.ts",
+              "src/lib/agent/tools/calculateSepticTank.ts",
+              "src/lib/agent/tools/calculateDrainageField.ts",
+              "src/lib/agent/tools/validateAgainstCte.ts",
+              "src/lib/agent/tools/generatePdfReport.ts",
+              "src/lib/agent/tools/searchSecopTenders.ts"
+            ],
+            "status": "implemented",
+            "description": "5 tools encadenables que el chat invoca vía Groq: tanque → campo de infiltración → validación CTE → PDF, más búsqueda SECOP."
+          },
+          {
+            "id": "septic-calculations",
+            "label": "Cálculos SITARD",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": ["src/lib/calculations", "src/lib/septic"],
+            "status": "implemented",
+            "description": "V_N (Res. 0330/2017 Art. 134-145), Cr=0.85, corrección Van't Hoff, campo de infiltración (perc test ASTM D6391)."
+          },
+          {
+            "id": "reports-pdf",
+            "label": "Generador de PDF",
+            "type": "service",
+            "tech": "pdfkit",
+            "files": ["src/lib/reports/generatePdfReport.ts"],
+            "status": "implemented",
+            "description": "Informe técnico profesional: portada, checklist, datos climáticos Open-Meteo, área de firma."
+          },
+          {
+            "id": "alertas-engine",
+            "label": "Motor de alertas",
+            "type": "service",
+            "tech": "TypeScript",
+            "files": [
+              "src/lib/alertas/run-daily.ts",
+              "src/lib/alertas/enviar-ahora.ts",
+              "src/lib/alertas/preferencias-store.ts"
+            ],
+            "status": "implemented",
+            "description": "Ejecuta el matching diario y arma el digest; idempotencia vía envio_log (insert-first)."
+          },
+          {
+            "id": "email-service",
+            "label": "Servicio de email",
+            "type": "service",
+            "tech": "Resend SDK",
+            "files": [
+              "src/lib/email/send.ts",
+              "src/lib/email/digest.ts",
+              "src/lib/email/unsubscribe-token.ts"
+            ],
+            "status": "implemented",
+            "description": "Magic link de login y digest de alertas, mismo remitente/dominio."
+          },
+          {
+            "id": "auth-config",
+            "label": "Configuración de Auth.js",
+            "type": "service",
+            "tech": "next-auth v5 beta + @auth/drizzle-adapter",
+            "files": ["src/lib/auth/config.ts"],
+            "status": "implemented",
+            "description": "Adapter de Drizzle sobre las tablas usuario/cuenta/sesion/tokenVerificacion."
+          },
+          {
+            "id": "db-schema",
+            "label": "Esquema Drizzle",
+            "type": "db",
+            "tech": "Drizzle ORM (PostgreSQL)",
+            "files": [
+              "src/lib/db/schema/raw.ts",
+              "src/lib/db/schema/catalogos.ts",
+              "src/lib/db/schema/hechos.ts",
+              "src/lib/db/schema/control.ts",
+              "src/lib/db/schema/clasificacion.ts",
+              "src/lib/db/schema/quarantine.ts",
+              "src/lib/db/schema/cuentas.ts",
+              "src/lib/db/schema/index.ts"
+            ],
+            "status": "implemented",
+            "description": "18 tablas: rawRecord, geografia, geografiaAlias, proveedor, entidad, proceso, contrato, contratoEvento, syncLog, clasificacionSectorial, transformQuarantine, usuario, cuenta, sesion, tokenVerificacion, oferentePerfil, envioLog, alertaPreferencias."
+          },
+          {
+            "id": "db-client",
+            "label": "DB client",
+            "type": "db",
+            "tech": "@neondatabase/serverless",
+            "files": ["src/lib/db/client.ts"],
+            "status": "implemented",
+            "description": "Pool/driver serverless de Neon usado por Drizzle en runtime Node.js."
+          },
 
-    { "id": "api-agent", "label": "POST /api/agent", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/agent/route.ts"], "status": "implemented", "description": "Orquesta el chat: system prompt por perfil, streaming, hasta 6 rondas de tool-calling contra Groq." },
-    { "id": "api-agent-suggest", "label": "POST /api/agent/suggest", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/agent/suggest/route.ts"], "status": "implemented", "description": "Sugiere próximas preguntas del catálogo según el formState actual." },
-    { "id": "api-secop-search", "label": "GET /api/secop", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/route.ts"], "status": "implemented", "description": "Búsqueda de procesos/contratos: Postgres primero (cache), fallback a Socrata en vivo si la BD falla." },
-    { "id": "api-secop-probe", "label": "POST /api/secop/probe", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/probe/route.ts"], "status": "implemented", "description": "Dispara el probe on-demand de acceso documental (UNKNOWN → PUBLIC/RESTRICTED) y lo persiste best-effort." },
-    { "id": "api-secop-verdict", "label": "POST /api/secop/verdict", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/verdict/route.ts"], "status": "implemented", "description": "Calcula el veredicto de elegibilidad (nunca persiste) al abrir el detalle de un proceso." },
-    { "id": "api-cron-ingest", "label": "GET /api/cron/ingest", "type": "backend", "tech": "Vercel Cron → Route Handler", "files": ["app/api/cron/ingest/route.ts", "vercel.json"], "status": "implemented", "description": "Dispara la ingesta incremental diaria (11:00 UTC), protegida por CRON_SECRET." },
-    { "id": "api-cron-alertas", "label": "GET /api/cron/alertas", "type": "backend", "tech": "Vercel Cron → Route Handler", "files": ["app/api/cron/alertas/route.ts", "vercel.json"], "status": "implemented", "description": "Dispara el envío diario de alertas (12:00 UTC), una hora después de la ingesta." },
-    { "id": "api-report-generate", "label": "POST /api/report/generate", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/report/generate/route.ts"], "status": "implemented", "description": "Genera el PDF técnico directamente desde el formState del wizard /build, sin pasar por el LLM." },
-    { "id": "api-generate-isometric", "label": "POST /api/generate-isometric", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/generate-isometric/route.js"], "status": "implemented", "description": "Pide a Claude (fetch directo, sin SDK) una descripción visual detallada para el diagrama isométrico." },
-    { "id": "api-landing-stats", "label": "GET /api/landing-stats", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/landing-stats/route.ts"], "status": "implemented", "description": "Estadísticas agregadas para el ticker de la landing (Socrata + agregaciones)." },
-    { "id": "api-procesos-recientes", "label": "GET /api/procesos/recientes", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/procesos/recientes/route.ts"], "status": "implemented", "description": "Procesos recientes con fallback DB→live, usado por el widget de la landing." },
-    { "id": "api-perfil", "label": "/api/perfil", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/perfil/route.ts"], "status": "implemented", "description": "CRUD del perfil de oferente (capacidad financiera, cobertura, UNSPSC)." },
-    { "id": "api-alertas-preferencias", "label": "/api/alertas/preferencias", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/preferencias/route.ts"], "status": "implemented", "description": "Lee/actualiza preferencias de alerta del usuario." },
-    { "id": "api-alertas-enviar-ahora", "label": "POST /api/alertas/enviar-ahora", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/enviar-ahora/route.ts"], "status": "implemented", "description": "Envío manual/inmediato del digest de alertas. No se encontró ningún caller en el frontend: mis-coincidencias/page.tsx importa enviarDigestAhora() directo como server action, sin pasar por esta ruta — parece código huérfano." },
-    { "id": "api-alertas-unsubscribe", "label": "GET /api/alertas/unsubscribe", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/unsubscribe/route.ts"], "status": "implemented", "description": "Baja de alertas vía token firmado en el enlace del correo." },
-    { "id": "api-auth", "label": "/api/auth/[...nextauth]", "type": "backend", "tech": "Auth.js (next-auth v5 beta)", "files": ["app/api/auth/[...nextauth]/route.ts", "src/lib/auth/config.ts"], "status": "implemented", "description": "Autenticación por magic link (email) con adapter de Drizzle." },
+          {
+            "id": "neon-postgres",
+            "label": "Neon Postgres",
+            "type": "external",
+            "tech": "PostgreSQL (Vercel Marketplace)",
+            "files": ["drizzle.config.ts", ".env.example"],
+            "status": "implemented",
+            "description": "Base de datos canónica: landing JSONB append-only + tablas transformadas."
+          },
+          {
+            "id": "socrata-secop",
+            "label": "SECOP II (Socrata / datos.gov.co)",
+            "type": "external",
+            "tech": "API SODA",
+            "files": ["src/lib/secop/config.ts"],
+            "status": "implemented",
+            "description": "Datasets p6dx-8zbt (procesos) y jbjy-vk9h (contratos). SECOP_APP_TOKEN opcional (si falta, throttling ~1k/h)."
+          },
+          {
+            "id": "groq-api",
+            "label": "Groq API",
+            "type": "external",
+            "tech": "llama-3.3-70b-versatile",
+            "files": ["app/api/agent/route.ts", ".env.example"],
+            "status": "implemented",
+            "description": "Motor del chat Hydro_Agent (/api/agent). Protocolo de tool-calls estilo OpenAI."
+          },
+          {
+            "id": "anthropic-api",
+            "label": "Anthropic API",
+            "type": "external",
+            "tech": "Claude (2 modelos distintos)",
+            "files": ["src/lib/pliego/extractPliego.ts", "app/api/generate-isometric/route.js"],
+            "status": "implemented",
+            "description": "Dos usos independientes: claude-opus-4-8 para extracción de pliegos (SDK, PDF nativo) y claude-3-5-sonnet-20241022 para describir el diagrama isométrico (fetch directo, sin SDK)."
+          },
+          {
+            "id": "resend-api",
+            "label": "Resend",
+            "type": "external",
+            "tech": "Email API",
+            "files": ["src/lib/email/send.ts"],
+            "status": "implemented",
+            "description": "Envío de magic links y digest de alertas."
+          },
+          {
+            "id": "open-meteo-api",
+            "label": "Open-Meteo",
+            "type": "external",
+            "tech": "API pública (sin key)",
+            "files": ["src/lib/geo/zoning.ts"],
+            "status": "implemented",
+            "description": "Elevación y pronóstico climático de 7 días para la calculadora geoespacial."
+          },
+          {
+            "id": "vercel-cron",
+            "label": "Vercel Cron",
+            "type": "external",
+            "tech": "Plataforma Vercel",
+            "files": ["vercel.json"],
+            "status": "implemented",
+            "description": "Dispara /api/cron/ingest (11:00 UTC) y /api/cron/alertas (12:00 UTC)."
+          },
 
-    { "id": "ingest-pipeline", "label": "Ingest pipeline", "type": "service", "tech": "TypeScript (SODA client, keyset+sweep)", "files": ["src/lib/ingest/runIngest.ts", "src/lib/ingest/pipeline.ts", "src/lib/ingest/dbIngest.ts", "src/lib/ingest/pagination.ts", "src/lib/ingest/watermark.ts", "src/lib/ingest/mapRecord.ts", "src/lib/ingest/sources.ts"], "status": "implemented", "description": "Incremental keyset por watermark + sweep de recuperación; escribe landing append-only en raw_record (patrón ELT)." },
-    { "id": "secop-client", "label": "SECOP / Socrata client", "type": "service", "tech": "TypeScript (SODA)", "files": ["src/lib/secop/client.ts", "src/lib/secop/config.ts", "src/lib/secop/datasetResolver.ts"], "status": "implemented", "description": "Cliente SODA para datos.gov.co. Datasets reales: procesos = p6dx-8zbt, contratos = jbjy-vk9h. Resuelve el id 4x4 vigente vía catálogo en runtime." },
-    { "id": "transform-orchestrator", "label": "Transform orchestrator", "type": "service", "tech": "TypeScript", "files": ["src/lib/transform/orchestrator.ts", "src/lib/transform/mapCanonical.ts", "src/lib/transform/eventWriter.ts", "src/lib/transform/geo.ts"], "status": "implemented", "description": "raw_record → tablas canónicas (proceso, contrato, entidad, proveedor) + reconstrucción de eventos de contrato." },
-    { "id": "classify-sector", "label": "Clasificador sectorial", "type": "service", "tech": "TypeScript (diccionarios + reglas)", "files": ["src/lib/classify/classifier.ts", "src/lib/classify/adapters.ts", "src/lib/classify/dictionaries.ts"], "status": "implemented", "description": "Clasifica cada proceso/contrato como sector agua/saneamiento u otro." },
-    { "id": "document-access", "label": "Document access gate", "type": "service", "tech": "TypeScript", "files": ["src/lib/secop/document-access.ts"], "status": "implemented", "description": "PUBLIC / RESTRICTED / NOT_PUBLISHED / UNKNOWN. preclassify() (solo metadata, en cada transform) + probeDocument() (1 GET, on-demand)." },
-    { "id": "verdict-engine", "label": "Verdict / elegibilidad", "type": "service", "tech": "TypeScript", "files": ["src/lib/secop/verdict.ts"], "status": "implemented", "description": "Gates de habilitación (cuantía, competencia, urgencia, apertura). Recomputable, nunca se persiste." },
-    { "id": "oferente-profile", "label": "Perfil de oferente", "type": "service", "tech": "TypeScript", "files": ["src/lib/oferente/types.ts", "src/lib/oferente/wizard.ts", "src/lib/oferente/perfil-store.ts"], "status": "implemented", "description": "Capacidad financiera (RUP), cobertura geográfica, cuantía objetivo, códigos UNSPSC." },
-    { "id": "matching-engine", "label": "Matching engine", "type": "service", "tech": "TypeScript", "files": ["src/lib/matching/match.ts", "src/lib/matching/get-matches-for-perfil.ts"], "status": "implemented", "description": "Cruza el perfil de oferente contra procesos nuevos para las alertas diarias." },
-    { "id": "pliego-extraction", "label": "Extracción de pliegos (Hydro_Agent Capa 3)", "type": "service", "tech": "TypeScript + Anthropic SDK", "files": ["src/lib/pliego/extractPliego.ts", "src/lib/pliego/schema.ts", "src/lib/pliego/prompt.ts", "src/lib/pliego/validate.ts", "scripts/analyze-pliego.ts"], "status": "implemented", "description": "PDF → JSON estructurado. El PDF se envía nativo a Claude (document content block); no hay preprocesado con PyMuPDF/pdfplumber. Modelo: claude-opus-4-8 con thinking adaptativo. Solo se invoca hoy desde el script CLI analyze-pliego.ts — no hay ruta API que lo conecte al producto." },
-    { "id": "hydro-agent-tools", "label": "Hydro_Agent tools", "type": "service", "tech": "TypeScript (OpenAI tool-call format)", "files": ["src/lib/agent/tools/index.ts", "src/lib/agent/tools/calculateSepticTank.ts", "src/lib/agent/tools/calculateDrainageField.ts", "src/lib/agent/tools/validateAgainstCte.ts", "src/lib/agent/tools/generatePdfReport.ts", "src/lib/agent/tools/searchSecopTenders.ts"], "status": "implemented", "description": "5 tools encadenables que el chat invoca vía Groq: tanque → campo de infiltración → validación CTE → PDF, más búsqueda SECOP." },
-    { "id": "septic-calculations", "label": "Cálculos SITARD", "type": "service", "tech": "TypeScript", "files": ["src/lib/calculations", "src/lib/septic"], "status": "implemented", "description": "V_N (Res. 0330/2017 Art. 134-145), Cr=0.85, corrección Van't Hoff, campo de infiltración (perc test ASTM D6391)." },
-    { "id": "reports-pdf", "label": "Generador de PDF", "type": "service", "tech": "pdfkit", "files": ["src/lib/reports/generatePdfReport.ts"], "status": "implemented", "description": "Informe técnico profesional: portada, checklist, datos climáticos Open-Meteo, área de firma." },
-    { "id": "alertas-engine", "label": "Motor de alertas", "type": "service", "tech": "TypeScript", "files": ["src/lib/alertas/run-daily.ts", "src/lib/alertas/enviar-ahora.ts", "src/lib/alertas/preferencias-store.ts"], "status": "implemented", "description": "Ejecuta el matching diario y arma el digest; idempotencia vía envio_log (insert-first)." },
-    { "id": "email-service", "label": "Servicio de email", "type": "service", "tech": "Resend SDK", "files": ["src/lib/email/send.ts", "src/lib/email/digest.ts", "src/lib/email/unsubscribe-token.ts"], "status": "implemented", "description": "Magic link de login y digest de alertas, mismo remitente/dominio." },
-    { "id": "auth-config", "label": "Configuración de Auth.js", "type": "service", "tech": "next-auth v5 beta + @auth/drizzle-adapter", "files": ["src/lib/auth/config.ts"], "status": "implemented", "description": "Adapter de Drizzle sobre las tablas usuario/cuenta/sesion/tokenVerificacion." },
-    { "id": "db-schema", "label": "Esquema Drizzle", "type": "db", "tech": "Drizzle ORM (PostgreSQL)", "files": ["src/lib/db/schema/raw.ts", "src/lib/db/schema/catalogos.ts", "src/lib/db/schema/hechos.ts", "src/lib/db/schema/control.ts", "src/lib/db/schema/clasificacion.ts", "src/lib/db/schema/quarantine.ts", "src/lib/db/schema/cuentas.ts", "src/lib/db/schema/index.ts"], "status": "implemented", "description": "18 tablas: rawRecord, geografia, geografiaAlias, proveedor, entidad, proceso, contrato, contratoEvento, syncLog, clasificacionSectorial, transformQuarantine, usuario, cuenta, sesion, tokenVerificacion, oferentePerfil, envioLog, alertaPreferencias." },
-    { "id": "db-client", "label": "DB client", "type": "db", "tech": "@neondatabase/serverless", "files": ["src/lib/db/client.ts"], "status": "implemented", "description": "Pool/driver serverless de Neon usado por Drizzle en runtime Node.js." },
+          {
+            "id": "pliego-upload-ui",
+            "label": "Subida de pliego en UI",
+            "type": "frontend",
+            "tech": "—",
+            "files": [],
+            "status": "planned",
+            "description": "No existe hoy: no hay componente ni ruta API que permita a un usuario subir un pliego desde el navegador. La extracción solo corre por CLI (scripts/analyze-pliego.ts)."
+          }
+        ],
 
-    { "id": "neon-postgres", "label": "Neon Postgres", "type": "external", "tech": "PostgreSQL (Vercel Marketplace)", "files": ["drizzle.config.ts", ".env.example"], "status": "implemented", "description": "Base de datos canónica: landing JSONB append-only + tablas transformadas." },
-    { "id": "socrata-secop", "label": "SECOP II (Socrata / datos.gov.co)", "type": "external", "tech": "API SODA", "files": ["src/lib/secop/config.ts"], "status": "implemented", "description": "Datasets p6dx-8zbt (procesos) y jbjy-vk9h (contratos). SECOP_APP_TOKEN opcional (si falta, throttling ~1k/h)." },
-    { "id": "groq-api", "label": "Groq API", "type": "external", "tech": "llama-3.3-70b-versatile", "files": ["app/api/agent/route.ts", ".env.example"], "status": "implemented", "description": "Motor del chat Hydro_Agent (/api/agent). Protocolo de tool-calls estilo OpenAI." },
-    { "id": "anthropic-api", "label": "Anthropic API", "type": "external", "tech": "Claude (2 modelos distintos)", "files": ["src/lib/pliego/extractPliego.ts", "app/api/generate-isometric/route.js"], "status": "implemented", "description": "Dos usos independientes: claude-opus-4-8 para extracción de pliegos (SDK, PDF nativo) y claude-3-5-sonnet-20241022 para describir el diagrama isométrico (fetch directo, sin SDK)." },
-    { "id": "resend-api", "label": "Resend", "type": "external", "tech": "Email API", "files": ["src/lib/email/send.ts"], "status": "implemented", "description": "Envío de magic links y digest de alertas." },
-    { "id": "open-meteo-api", "label": "Open-Meteo", "type": "external", "tech": "API pública (sin key)", "files": ["src/lib/geo/zoning.ts"], "status": "implemented", "description": "Elevación y pronóstico climático de 7 días para la calculadora geoespacial." },
-    { "id": "vercel-cron", "label": "Vercel Cron", "type": "external", "tech": "Plataforma Vercel", "files": ["vercel.json"], "status": "implemented", "description": "Dispara /api/cron/ingest (11:00 UTC) y /api/cron/alertas (12:00 UTC)." },
+        "edges": [
+          {
+            "from": "api-cron-ingest",
+            "to": "ingest-pipeline",
+            "type": "triggers",
+            "description": "Vercel Cron invoca el route handler, que llama runIngest/runIngestPipeline."
+          },
+          {
+            "from": "ingest-pipeline",
+            "to": "secop-client",
+            "type": "calls",
+            "description": "Pide páginas SODA (keyset por watermark + sweep) para cada IngestSource."
+          },
+          {
+            "from": "secop-client",
+            "to": "socrata-secop",
+            "type": "http",
+            "description": "GET al dataset 4x4 resuelto (p6dx-8zbt / jbjy-vk9h) con SoQL + SECOP_APP_TOKEN opcional."
+          },
+          {
+            "from": "ingest-pipeline",
+            "to": "db-client",
+            "type": "writes",
+            "description": "Inserta cada página como fila JSONB append-only en raw_record."
+          },
+          {
+            "from": "db-client",
+            "to": "db-schema",
+            "type": "uses",
+            "description": "Drizzle sobre el pool de Neon."
+          },
+          {
+            "from": "db-client",
+            "to": "neon-postgres",
+            "type": "connects",
+            "description": "Conexión pooled serverless."
+          },
+          {
+            "from": "transform-orchestrator",
+            "to": "db-client",
+            "type": "reads",
+            "description": "Lee raw_record no transformados."
+          },
+          {
+            "from": "transform-orchestrator",
+            "to": "classify-sector",
+            "type": "calls",
+            "description": "Clasifica cada proyección canónica como sector agua o no."
+          },
+          {
+            "from": "transform-orchestrator",
+            "to": "document-access",
+            "type": "calls",
+            "description": "preclassify() sobre cada proceso, en cada corrida (B2/B3)."
+          },
+          {
+            "from": "transform-orchestrator",
+            "to": "db-client",
+            "type": "writes",
+            "description": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial canónicos."
+          },
 
-    { "id": "pliego-upload-ui", "label": "Subida de pliego en UI", "type": "frontend", "tech": "—", "files": [], "status": "planned", "description": "No existe hoy: no hay componente ni ruta API que permita a un usuario subir un pliego desde el navegador. La extracción solo corre por CLI (scripts/analyze-pliego.ts)." }
-  ],
+          {
+            "from": "licitaciones-hub",
+            "to": "licitaciones-explorar",
+            "type": "links-to",
+            "description": "'Búsqueda avanzada' en ProcesosRecientes.tsx (L36, L44) enlaza al workbench real."
+          },
+          {
+            "from": "licitaciones-hub",
+            "to": "licitaciones-como-participar",
+            "type": "links-to",
+            "description": "ProcesosRecientes.tsx (L93) enlaza a la guía de participación."
+          },
+          {
+            "from": "licitaciones-explorar",
+            "to": "api-secop-search",
+            "type": "calls",
+            "description": "Fetch de búsqueda clásica con filtros de la UI."
+          },
+          {
+            "from": "api-secop-search",
+            "to": "db-client",
+            "type": "reads",
+            "description": "Postgres primero, cacheado en memoria por combinación de filtros."
+          },
+          {
+            "from": "api-secop-search",
+            "to": "secop-client",
+            "type": "fallback",
+            "description": "Si la consulta a Postgres falla, cae a Socrata en vivo (procesos) — contratos siempre en vivo."
+          },
+          {
+            "from": "licitaciones-explorar",
+            "to": "api-secop-verdict",
+            "type": "calls",
+            "description": "Al abrir el detalle de un proceso con perfil guardado."
+          },
+          {
+            "from": "api-secop-verdict",
+            "to": "verdict-engine",
+            "type": "calls",
+            "description": "buildVerdict(proceso, perfil) — nunca persiste."
+          },
+          {
+            "from": "verdict-engine",
+            "to": "oferente-profile",
+            "type": "uses",
+            "description": "Usa los datos del perfil (cuantía, cobertura, UNSPSC) como input."
+          },
+          {
+            "from": "licitaciones-como-participar",
+            "to": "api-perfil",
+            "type": "calls",
+            "description": "El wizard de oferente guarda el perfil vía este endpoint."
+          },
+          {
+            "from": "licitaciones-explorar",
+            "to": "api-secop-probe",
+            "type": "calls",
+            "description": "El usuario abre/se suscribe a un proceso → dispara el probe de acceso documental."
+          },
+          {
+            "from": "api-secop-probe",
+            "to": "document-access",
+            "type": "calls",
+            "description": "probeDocument(url) — 1 GET, resuelve UNKNOWN → PUBLIC/RESTRICTED."
+          },
+          {
+            "from": "api-secop-probe",
+            "to": "db-client",
+            "type": "writes",
+            "description": "Persiste el resultado en la fila del proceso (best-effort)."
+          },
 
-  "edges": [
-    { "from": "api-cron-ingest", "to": "ingest-pipeline", "type": "triggers", "description": "Vercel Cron invoca el route handler, que llama runIngest/runIngestPipeline." },
-    { "from": "ingest-pipeline", "to": "secop-client", "type": "calls", "description": "Pide páginas SODA (keyset por watermark + sweep) para cada IngestSource." },
-    { "from": "secop-client", "to": "socrata-secop", "type": "http", "description": "GET al dataset 4x4 resuelto (p6dx-8zbt / jbjy-vk9h) con SoQL + SECOP_APP_TOKEN opcional." },
-    { "from": "ingest-pipeline", "to": "db-client", "type": "writes", "description": "Inserta cada página como fila JSONB append-only en raw_record." },
-    { "from": "db-client", "to": "db-schema", "type": "uses", "description": "Drizzle sobre el pool de Neon." },
-    { "from": "db-client", "to": "neon-postgres", "type": "connects", "description": "Conexión pooled serverless." },
-    { "from": "transform-orchestrator", "to": "db-client", "type": "reads", "description": "Lee raw_record no transformados." },
-    { "from": "transform-orchestrator", "to": "classify-sector", "type": "calls", "description": "Clasifica cada proyección canónica como sector agua o no." },
-    { "from": "transform-orchestrator", "to": "document-access", "type": "calls", "description": "preclassify() sobre cada proceso, en cada corrida (B2/B3)." },
-    { "from": "transform-orchestrator", "to": "db-client", "type": "writes", "description": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial canónicos." },
+          {
+            "from": "chat-hydroagent",
+            "to": "api-agent",
+            "type": "calls",
+            "description": "Envía el historial + formState + perfil detectado, recibe stream."
+          },
+          {
+            "from": "chat-hydroagent",
+            "to": "api-agent-suggest",
+            "type": "calls",
+            "description": "Pide sugerencias de siguiente pregunta según el formState."
+          },
+          {
+            "from": "api-agent",
+            "to": "groq-api",
+            "type": "http",
+            "description": "Chat completions con streaming y tool-calls (hasta 6 rondas)."
+          },
+          {
+            "from": "api-agent",
+            "to": "hydro-agent-tools",
+            "type": "calls",
+            "description": "executeTool() despacha cada tool_call devuelto por Groq."
+          },
+          {
+            "from": "hydro-agent-tools",
+            "to": "septic-calculations",
+            "type": "calls",
+            "description": "calculate_septic_tank / calculate_drainage_field / validate_against_cte."
+          },
+          {
+            "from": "hydro-agent-tools",
+            "to": "reports-pdf",
+            "type": "calls",
+            "description": "generate_pdf_report ensambla el informe con los resultados previos de la ronda."
+          },
+          {
+            "from": "hydro-agent-tools",
+            "to": "secop-client",
+            "type": "calls",
+            "description": "search_secop_tenders reutiliza el mismo cliente que /licitaciones."
+          },
 
-    { "from": "licitaciones-hub", "to": "licitaciones-explorar", "type": "links-to", "description": "'Búsqueda avanzada' en ProcesosRecientes.tsx (L36, L44) enlaza al workbench real." },
-    { "from": "licitaciones-hub", "to": "licitaciones-como-participar", "type": "links-to", "description": "ProcesosRecientes.tsx (L93) enlaza a la guía de participación." },
-    { "from": "licitaciones-explorar", "to": "api-secop-search", "type": "calls", "description": "Fetch de búsqueda clásica con filtros de la UI." },
-    { "from": "api-secop-search", "to": "db-client", "type": "reads", "description": "Postgres primero, cacheado en memoria por combinación de filtros." },
-    { "from": "api-secop-search", "to": "secop-client", "type": "fallback", "description": "Si la consulta a Postgres falla, cae a Socrata en vivo (procesos) — contratos siempre en vivo." },
-    { "from": "licitaciones-explorar", "to": "api-secop-verdict", "type": "calls", "description": "Al abrir el detalle de un proceso con perfil guardado." },
-    { "from": "api-secop-verdict", "to": "verdict-engine", "type": "calls", "description": "buildVerdict(proceso, perfil) — nunca persiste." },
-    { "from": "verdict-engine", "to": "oferente-profile", "type": "uses", "description": "Usa los datos del perfil (cuantía, cobertura, UNSPSC) como input." },
-    { "from": "licitaciones-como-participar", "to": "api-perfil", "type": "calls", "description": "El wizard de oferente guarda el perfil vía este endpoint." },
-    { "from": "licitaciones-explorar", "to": "api-secop-probe", "type": "calls", "description": "El usuario abre/se suscribe a un proceso → dispara el probe de acceso documental." },
-    { "from": "api-secop-probe", "to": "document-access", "type": "calls", "description": "probeDocument(url) — 1 GET, resuelve UNKNOWN → PUBLIC/RESTRICTED." },
-    { "from": "api-secop-probe", "to": "db-client", "type": "writes", "description": "Persiste el resultado en la fila del proceso (best-effort)." },
+          {
+            "from": "build-flow",
+            "to": "api-report-generate",
+            "type": "calls",
+            "description": "Flujo guiado sin LLM: traduce el formState local a los tool executors."
+          },
+          {
+            "from": "calc-fosa-septica",
+            "to": "api-report-generate",
+            "type": "calls",
+            "description": "Genera el PDF a partir del formState guardado en localStorage."
+          },
+          {
+            "from": "api-report-generate",
+            "to": "septic-calculations",
+            "type": "calls",
+            "description": "Ejecuta los tool executors directamente (sin pasar por el chat)."
+          },
+          {
+            "from": "api-report-generate",
+            "to": "reports-pdf",
+            "type": "calls",
+            "description": "executeGeneratePdfReport() produce el PDF final."
+          },
+          {
+            "from": "reports-pdf",
+            "to": "open-meteo-api",
+            "type": "embeds-data-from",
+            "description": "Incluye los datos climáticos consultados por la calculadora geo en el informe."
+          },
+          {
+            "from": "calc-geo",
+            "to": "open-meteo-api",
+            "type": "http",
+            "description": "GET /v1/elevation y /v1/forecast por lat/lon del predio."
+          },
+          {
+            "from": "calc-geo",
+            "to": "calc-fosa-septica",
+            "type": "feeds",
+            "description": "Geo → Fosa → Mantenimiento: las 3 calculadoras comparten formState."
+          },
+          {
+            "from": "calc-fosa-septica",
+            "to": "calc-mantenimiento",
+            "type": "feeds",
+            "description": "Resultados del tanque alimentan el cronograma de mantenimiento."
+          },
+          {
+            "from": "isometric-diagram",
+            "to": "api-generate-isometric",
+            "type": "calls",
+            "description": "Pide la descripción visual antes de renderizar la escena Babylon.js."
+          },
+          {
+            "from": "api-generate-isometric",
+            "to": "anthropic-api",
+            "type": "http",
+            "description": "fetch directo a api.anthropic.com/v1/messages con claude-3-5-sonnet-20241022."
+          },
+          {
+            "from": "calc-fosa-septica",
+            "to": "isometric-diagram",
+            "type": "renders",
+            "description": "Muestra el diagrama isométrico del sistema calculado."
+          },
 
-    { "from": "chat-hydroagent", "to": "api-agent", "type": "calls", "description": "Envía el historial + formState + perfil detectado, recibe stream." },
-    { "from": "chat-hydroagent", "to": "api-agent-suggest", "type": "calls", "description": "Pide sugerencias de siguiente pregunta según el formState." },
-    { "from": "api-agent", "to": "groq-api", "type": "http", "description": "Chat completions con streaming y tool-calls (hasta 6 rondas)." },
-    { "from": "api-agent", "to": "hydro-agent-tools", "type": "calls", "description": "executeTool() despacha cada tool_call devuelto por Groq." },
-    { "from": "hydro-agent-tools", "to": "septic-calculations", "type": "calls", "description": "calculate_septic_tank / calculate_drainage_field / validate_against_cte." },
-    { "from": "hydro-agent-tools", "to": "reports-pdf", "type": "calls", "description": "generate_pdf_report ensambla el informe con los resultados previos de la ronda." },
-    { "from": "hydro-agent-tools", "to": "secop-client", "type": "calls", "description": "search_secop_tenders reutiliza el mismo cliente que /licitaciones." },
+          {
+            "from": "pliego-extraction",
+            "to": "anthropic-api",
+            "type": "calls",
+            "description": "client.messages.create con document PDF nativo + output_config.json_schema, modelo claude-opus-4-8."
+          },
+          {
+            "from": "pliego-upload-ui",
+            "to": "pliego-extraction",
+            "type": "planned-calls",
+            "description": "Conexión que aún no existe en el producto — hoy solo scripts/analyze-pliego.ts invoca extractPliego()."
+          },
+          {
+            "from": "pliego-upload-ui",
+            "to": "document-access",
+            "type": "planned-calls",
+            "description": "El flujo descrito en el roadmap (extracción condicionada al gate de acceso) no está cableado todavía."
+          },
 
-    { "from": "build-flow", "to": "api-report-generate", "type": "calls", "description": "Flujo guiado sin LLM: traduce el formState local a los tool executors." },
-    { "from": "calc-fosa-septica", "to": "api-report-generate", "type": "calls", "description": "Genera el PDF a partir del formState guardado en localStorage." },
-    { "from": "api-report-generate", "to": "septic-calculations", "type": "calls", "description": "Ejecuta los tool executors directamente (sin pasar por el chat)." },
-    { "from": "api-report-generate", "to": "reports-pdf", "type": "calls", "description": "executeGeneratePdfReport() produce el PDF final." },
-    { "from": "reports-pdf", "to": "open-meteo-api", "type": "embeds-data-from", "description": "Incluye los datos climáticos consultados por la calculadora geo en el informe." },
-    { "from": "calc-geo", "to": "open-meteo-api", "type": "http", "description": "GET /v1/elevation y /v1/forecast por lat/lon del predio." },
-    { "from": "calc-geo", "to": "calc-fosa-septica", "type": "feeds", "description": "Geo → Fosa → Mantenimiento: las 3 calculadoras comparten formState." },
-    { "from": "calc-fosa-septica", "to": "calc-mantenimiento", "type": "feeds", "description": "Resultados del tanque alimentan el cronograma de mantenimiento." },
-    { "from": "isometric-diagram", "to": "api-generate-isometric", "type": "calls", "description": "Pide la descripción visual antes de renderizar la escena Babylon.js." },
-    { "from": "api-generate-isometric", "to": "anthropic-api", "type": "http", "description": "fetch directo a api.anthropic.com/v1/messages con claude-3-5-sonnet-20241022." },
-    { "from": "calc-fosa-septica", "to": "isometric-diagram", "type": "renders", "description": "Muestra el diagrama isométrico del sistema calculado." },
+          {
+            "from": "api-cron-alertas",
+            "to": "alertas-engine",
+            "type": "triggers",
+            "description": "runDailyAlertas(), desacoplado 1h después de la ingesta."
+          },
+          {
+            "from": "alertas-engine",
+            "to": "matching-engine",
+            "type": "calls",
+            "description": "Cruza cada oferentePerfil contra los procesos nuevos del día."
+          },
+          {
+            "from": "matching-engine",
+            "to": "db-client",
+            "type": "reads",
+            "description": "Lee proceso + oferentePerfil."
+          },
+          {
+            "from": "alertas-engine",
+            "to": "email-service",
+            "type": "calls",
+            "description": "Arma y envía el digest; idempotencia vía envio_log insert-first."
+          },
+          {
+            "from": "email-service",
+            "to": "resend-api",
+            "type": "http",
+            "description": "Envío del correo (digest o magic link)."
+          },
+          {
+            "from": "cuenta-page",
+            "to": "api-alertas-preferencias",
+            "type": "calls",
+            "description": "Lee/edita preferencias de alerta del usuario."
+          },
+          {
+            "from": "api-alertas-unsubscribe",
+            "to": "email-service",
+            "type": "calls",
+            "description": "Valida el token firmado y da de baja."
+          },
 
-    { "from": "pliego-extraction", "to": "anthropic-api", "type": "calls", "description": "client.messages.create con document PDF nativo + output_config.json_schema, modelo claude-opus-4-8." },
-    { "from": "pliego-upload-ui", "to": "pliego-extraction", "type": "planned-calls", "description": "Conexión que aún no existe en el producto — hoy solo scripts/analyze-pliego.ts invoca extractPliego()." },
-    { "from": "pliego-upload-ui", "to": "document-access", "type": "planned-calls", "description": "El flujo descrito en el roadmap (extracción condicionada al gate de acceso) no está cableado todavía." },
+          {
+            "from": "api-auth",
+            "to": "auth-config",
+            "type": "uses",
+            "description": "Handler generado por NextAuth() con la config compartida."
+          },
+          {
+            "from": "auth-config",
+            "to": "db-schema",
+            "type": "uses",
+            "description": "@auth/drizzle-adapter sobre usuario/cuenta/sesion/tokenVerificacion."
+          },
+          {
+            "from": "auth-config",
+            "to": "email-service",
+            "type": "calls",
+            "description": "Envía el magic link de inicio de sesión vía Resend."
+          },
 
-    { "from": "api-cron-alertas", "to": "alertas-engine", "type": "triggers", "description": "runDailyAlertas(), desacoplado 1h después de la ingesta." },
-    { "from": "alertas-engine", "to": "matching-engine", "type": "calls", "description": "Cruza cada oferentePerfil contra los procesos nuevos del día." },
-    { "from": "matching-engine", "to": "db-client", "type": "reads", "description": "Lee proceso + oferentePerfil." },
-    { "from": "alertas-engine", "to": "email-service", "type": "calls", "description": "Arma y envía el digest; idempotencia vía envio_log insert-first." },
-    { "from": "email-service", "to": "resend-api", "type": "http", "description": "Envío del correo (digest o magic link)." },
-    { "from": "cuenta-page", "to": "api-alertas-preferencias", "type": "calls", "description": "Lee/edita preferencias de alerta del usuario." },
-    { "from": "api-alertas-unsubscribe", "to": "email-service", "type": "calls", "description": "Valida el token firmado y da de baja." },
+          {
+            "from": "landing-page",
+            "to": "api-landing-stats",
+            "type": "calls",
+            "description": "Estadísticas agregadas para las tarjetas de la landing."
+          },
+          {
+            "from": "landing-page",
+            "to": "api-procesos-recientes",
+            "type": "calls",
+            "description": "ProcesosTicker consume procesos recientes (DB con fallback a live)."
+          },
 
-    { "from": "api-auth", "to": "auth-config", "type": "uses", "description": "Handler generado por NextAuth() con la config compartida." },
-    { "from": "auth-config", "to": "db-schema", "type": "uses", "description": "@auth/drizzle-adapter sobre usuario/cuenta/sesion/tokenVerificacion." },
-    { "from": "auth-config", "to": "email-service", "type": "calls", "description": "Envía el magic link de inicio de sesión vía Resend." },
+          {
+            "from": "vercel-cron",
+            "to": "api-cron-ingest",
+            "type": "triggers",
+            "description": "Schedule '0 11 * * *' en vercel.json."
+          },
+          {
+            "from": "vercel-cron",
+            "to": "api-cron-alertas",
+            "type": "triggers",
+            "description": "Schedule '0 12 * * *' en vercel.json."
+          },
+          {
+            "from": "calculators-hub",
+            "to": "calc-geo",
+            "type": "links-to",
+            "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+          },
+          {
+            "from": "calculators-hub",
+            "to": "calc-fosa-septica",
+            "type": "links-to",
+            "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+          },
+          {
+            "from": "calculators-hub",
+            "to": "calc-mantenimiento",
+            "type": "links-to",
+            "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+          },
 
-    { "from": "landing-page", "to": "api-landing-stats", "type": "calls", "description": "Estadísticas agregadas para las tarjetas de la landing." },
-    { "from": "landing-page", "to": "api-procesos-recientes", "type": "calls", "description": "ProcesosTicker consume procesos recientes (DB con fallback a live)." },
+          {
+            "from": "mis-coincidencias",
+            "to": "auth-config",
+            "type": "uses",
+            "description": "auth() de src/lib/auth/config.ts protege la página (redirect si no hay sesión)."
+          },
+          {
+            "from": "mis-coincidencias",
+            "to": "oferente-profile",
+            "type": "calls",
+            "description": "getPerfilDb() lee el perfil de oferente guardado del usuario."
+          },
+          {
+            "from": "mis-coincidencias",
+            "to": "matching-engine",
+            "type": "calls",
+            "description": "getMatchesForPerfil(perfil) — import directo de función, no fetch."
+          },
+          {
+            "from": "mis-coincidencias",
+            "to": "alertas-engine",
+            "type": "calls",
+            "description": "enviarDigestAhora() — import directo de src/lib/alertas/enviar-ahora.ts, no vía /api/alertas/enviar-ahora."
+          }
+        ],
 
-    { "from": "vercel-cron", "to": "api-cron-ingest", "type": "triggers", "description": "Schedule '0 11 * * *' en vercel.json." },
-    { "from": "vercel-cron", "to": "api-cron-alertas", "type": "triggers", "description": "Schedule '0 12 * * *' en vercel.json." },
-    { "from": "calculators-hub", "to": "calc-geo", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
-    { "from": "calculators-hub", "to": "calc-fosa-septica", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
-    { "from": "calculators-hub", "to": "calc-mantenimiento", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
+        "flows": [
+          {
+            "id": "flow-ingesta",
+            "name": "Ingesta SECOP → normalización → almacenamiento",
+            "description": "Cron diario que aterriza datos crudos de SECOP II en Postgres y los transforma a tablas canónicas, clasificando sector y preclasificando acceso documental.",
+            "steps": [
+              {
+                "nodeId": "vercel-cron",
+                "action": "Dispara GET /api/cron/ingest a las 11:00 UTC",
+                "order": 1
+              },
+              {
+                "nodeId": "api-cron-ingest",
+                "action": "Valida CRON_SECRET y llama al pipeline de ingesta",
+                "order": 2
+              },
+              {
+                "nodeId": "ingest-pipeline",
+                "action": "Pagina SODA por keyset (watermark) + sweep de recuperación",
+                "order": 3
+              },
+              {
+                "nodeId": "secop-client",
+                "action": "GET al dataset SODA resuelto (p6dx-8zbt / jbjy-vk9h)",
+                "order": 4
+              },
+              {
+                "nodeId": "socrata-secop",
+                "action": "Responde con filas JSON del dataset SECOP II",
+                "order": 5
+              },
+              {
+                "nodeId": "db-client",
+                "action": "Inserta cada página como raw_record (JSONB append-only)",
+                "order": 6
+              },
+              {
+                "nodeId": "transform-orchestrator",
+                "action": "Lee raw_record pendientes y arma proyecciones canónicas",
+                "order": 7
+              },
+              {
+                "nodeId": "classify-sector",
+                "action": "Clasifica cada proceso/contrato como sector agua o no",
+                "order": 8
+              },
+              {
+                "nodeId": "document-access",
+                "action": "preclassify(): marca NOT_PUBLISHED/UNKNOWN sin HTTP",
+                "order": 9
+              },
+              {
+                "nodeId": "db-schema",
+                "action": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial",
+                "order": 10
+              }
+            ]
+          },
+          {
+            "id": "flow-pliego",
+            "name": "Extracción de pliegos (estado actual: CLI, no producto)",
+            "description": "Camino real hoy en el repo: un PDF de pliego se analiza por línea de comandos, no desde la UI. Los nodos/aristas rojos marcan lo que el roadmap describe pero aún no existe.",
+            "steps": [
+              {
+                "nodeId": "pliego-upload-ui",
+                "action": "(planeado) Usuario sube un pliego desde el navegador",
+                "order": 1
+              },
+              {
+                "nodeId": "document-access",
+                "action": "(planeado) Verificar que el documento sea PUBLIC antes de extraer",
+                "order": 2
+              },
+              {
+                "nodeId": "pliego-extraction",
+                "action": "extractPliego(pdfPath) — hoy solo se invoca desde scripts/analyze-pliego.ts",
+                "order": 3
+              },
+              {
+                "nodeId": "anthropic-api",
+                "action": "claude-opus-4-8 lee el PDF nativo y devuelve JSON validado contra PLIEGO_JSON_SCHEMA",
+                "order": 4
+              }
+            ]
+          },
+          {
+            "id": "flow-busqueda-licitaciones",
+            "name": "Búsqueda/filtrado en Licitaciones (workbench real)",
+            "description": "El único camino de búsqueda conectado a datos reales es /licitaciones/explorar. 'Descubrir' existe como UI pero corre 100% sobre mock-licitaciones.ts — queda fuera de este flujo a propósito.",
+            "steps": [
+              {
+                "nodeId": "licitaciones-hub",
+                "action": "Vista simple (ISR) enlaza a 'búsqueda avanzada'",
+                "order": 1
+              },
+              {
+                "nodeId": "licitaciones-explorar",
+                "action": "Usuario filtra por texto/departamento/valor en el workbench real",
+                "order": 2
+              },
+              {
+                "nodeId": "api-secop-search",
+                "action": "GET /api/secop con los query params de filtro",
+                "order": 3
+              },
+              {
+                "nodeId": "db-client",
+                "action": "Intenta Postgres cacheado por combinación de filtros",
+                "order": 4
+              },
+              {
+                "nodeId": "secop-client",
+                "action": "Si falla la consulta a Postgres, cae a Socrata en vivo",
+                "order": 5
+              },
+              {
+                "nodeId": "api-secop-verdict",
+                "action": "Al abrir el detalle: calcula elegibilidad on-demand",
+                "order": 6
+              },
+              {
+                "nodeId": "verdict-engine",
+                "action": "Aplica gates de habilitación contra el perfil de oferente",
+                "order": 7
+              }
+            ]
+          },
+          {
+            "id": "flow-chat-agente",
+            "name": "Chat del Hydro_Agent con tool-calling",
+            "description": "El asistente conversacional detecta perfil/sub-escenario y encadena hasta 4 tools de cálculo más búsqueda SECOP, todo sobre Groq (no Anthropic).",
+            "steps": [
+              {
+                "nodeId": "chat-hydroagent",
+                "action": "Usuario escribe un mensaje con datos concretos",
+                "order": 1
+              },
+              {
+                "nodeId": "api-agent",
+                "action": "Arma system prompt por perfil + normativa relevante",
+                "order": 2
+              },
+              {
+                "nodeId": "groq-api",
+                "action": "llama-3.3-70b-versatile decide si llama una tool",
+                "order": 3
+              },
+              {
+                "nodeId": "hydro-agent-tools",
+                "action": "executeTool() corre la tool solicitada",
+                "order": 4
+              },
+              {
+                "nodeId": "septic-calculations",
+                "action": "Calcula tanque/campo de infiltración/validación CTE",
+                "order": 5
+              },
+              {
+                "nodeId": "reports-pdf",
+                "action": "(si se pide) genera el PDF final encadenando resultados previos",
+                "order": 6
+              }
+            ]
+          },
+          {
+            "id": "flow-alertas",
+            "name": "Alertas diarias por perfil de oferente",
+            "description": "Un día después de la ingesta, el motor de matching cruza perfiles guardados contra procesos nuevos y envía el digest por correo.",
+            "steps": [
+              {
+                "nodeId": "vercel-cron",
+                "action": "Dispara GET /api/cron/alertas a las 12:00 UTC",
+                "order": 1
+              },
+              {
+                "nodeId": "api-cron-alertas",
+                "action": "Valida CRON_SECRET y llama runDailyAlertas()",
+                "order": 2
+              },
+              {
+                "nodeId": "matching-engine",
+                "action": "Cruza cada oferentePerfil contra procesos nuevos del día",
+                "order": 3
+              },
+              {
+                "nodeId": "alertas-engine",
+                "action": "Arma el digest; envio_log evita duplicados en reintentos",
+                "order": 4
+              },
+              { "nodeId": "email-service", "action": "Envía el correo vía Resend", "order": 5 }
+            ]
+          }
+        ]
+      }
+    </script>
 
-    { "from": "mis-coincidencias", "to": "auth-config", "type": "uses", "description": "auth() de src/lib/auth/config.ts protege la página (redirect si no hay sesión)." },
-    { "from": "mis-coincidencias", "to": "oferente-profile", "type": "calls", "description": "getPerfilDb() lee el perfil de oferente guardado del usuario." },
-    { "from": "mis-coincidencias", "to": "matching-engine", "type": "calls", "description": "getMatchesForPerfil(perfil) — import directo de función, no fetch." },
-    { "from": "mis-coincidencias", "to": "alertas-engine", "type": "calls", "description": "enviarDigestAhora() — import directo de src/lib/alertas/enviar-ahora.ts, no vía /api/alertas/enviar-ahora." }
-  ],
+    <script>
+      (function () {
+        "use strict";
+        var DATA = JSON.parse(document.getElementById("graph-data").textContent);
+        var NODES = DATA.nodes,
+          EDGES = DATA.edges,
+          FLOWS = DATA.flows;
+        var byId = {};
+        NODES.forEach(function (n) {
+          byId[n.id] = n;
+        });
 
-  "flows": [
-    {
-      "id": "flow-ingesta",
-      "name": "Ingesta SECOP → normalización → almacenamiento",
-      "description": "Cron diario que aterriza datos crudos de SECOP II en Postgres y los transforma a tablas canónicas, clasificando sector y preclasificando acceso documental.",
-      "steps": [
-        { "nodeId": "vercel-cron", "action": "Dispara GET /api/cron/ingest a las 11:00 UTC", "order": 1 },
-        { "nodeId": "api-cron-ingest", "action": "Valida CRON_SECRET y llama al pipeline de ingesta", "order": 2 },
-        { "nodeId": "ingest-pipeline", "action": "Pagina SODA por keyset (watermark) + sweep de recuperación", "order": 3 },
-        { "nodeId": "secop-client", "action": "GET al dataset SODA resuelto (p6dx-8zbt / jbjy-vk9h)", "order": 4 },
-        { "nodeId": "socrata-secop", "action": "Responde con filas JSON del dataset SECOP II", "order": 5 },
-        { "nodeId": "db-client", "action": "Inserta cada página como raw_record (JSONB append-only)", "order": 6 },
-        { "nodeId": "transform-orchestrator", "action": "Lee raw_record pendientes y arma proyecciones canónicas", "order": 7 },
-        { "nodeId": "classify-sector", "action": "Clasifica cada proceso/contrato como sector agua o no", "order": 8 },
-        { "nodeId": "document-access", "action": "preclassify(): marca NOT_PUBLISHED/UNKNOWN sin HTTP", "order": 9 },
-        { "nodeId": "db-schema", "action": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial", "order": 10 }
-      ]
-    },
-    {
-      "id": "flow-pliego",
-      "name": "Extracción de pliegos (estado actual: CLI, no producto)",
-      "description": "Camino real hoy en el repo: un PDF de pliego se analiza por línea de comandos, no desde la UI. Los nodos/aristas rojos marcan lo que el roadmap describe pero aún no existe.",
-      "steps": [
-        { "nodeId": "pliego-upload-ui", "action": "(planeado) Usuario sube un pliego desde el navegador", "order": 1 },
-        { "nodeId": "document-access", "action": "(planeado) Verificar que el documento sea PUBLIC antes de extraer", "order": 2 },
-        { "nodeId": "pliego-extraction", "action": "extractPliego(pdfPath) — hoy solo se invoca desde scripts/analyze-pliego.ts", "order": 3 },
-        { "nodeId": "anthropic-api", "action": "claude-opus-4-8 lee el PDF nativo y devuelve JSON validado contra PLIEGO_JSON_SCHEMA", "order": 4 }
-      ]
-    },
-    {
-      "id": "flow-busqueda-licitaciones",
-      "name": "Búsqueda/filtrado en Licitaciones (workbench real)",
-      "description": "El único camino de búsqueda conectado a datos reales es /licitaciones/explorar. 'Descubrir' existe como UI pero corre 100% sobre mock-licitaciones.ts — queda fuera de este flujo a propósito.",
-      "steps": [
-        { "nodeId": "licitaciones-hub", "action": "Vista simple (ISR) enlaza a 'búsqueda avanzada'", "order": 1 },
-        { "nodeId": "licitaciones-explorar", "action": "Usuario filtra por texto/departamento/valor en el workbench real", "order": 2 },
-        { "nodeId": "api-secop-search", "action": "GET /api/secop con los query params de filtro", "order": 3 },
-        { "nodeId": "db-client", "action": "Intenta Postgres cacheado por combinación de filtros", "order": 4 },
-        { "nodeId": "secop-client", "action": "Si falla la consulta a Postgres, cae a Socrata en vivo", "order": 5 },
-        { "nodeId": "api-secop-verdict", "action": "Al abrir el detalle: calcula elegibilidad on-demand", "order": 6 },
-        { "nodeId": "verdict-engine", "action": "Aplica gates de habilitación contra el perfil de oferente", "order": 7 }
-      ]
-    },
-    {
-      "id": "flow-chat-agente",
-      "name": "Chat del Hydro_Agent con tool-calling",
-      "description": "El asistente conversacional detecta perfil/sub-escenario y encadena hasta 4 tools de cálculo más búsqueda SECOP, todo sobre Groq (no Anthropic).",
-      "steps": [
-        { "nodeId": "chat-hydroagent", "action": "Usuario escribe un mensaje con datos concretos", "order": 1 },
-        { "nodeId": "api-agent", "action": "Arma system prompt por perfil + normativa relevante", "order": 2 },
-        { "nodeId": "groq-api", "action": "llama-3.3-70b-versatile decide si llama una tool", "order": 3 },
-        { "nodeId": "hydro-agent-tools", "action": "executeTool() corre la tool solicitada", "order": 4 },
-        { "nodeId": "septic-calculations", "action": "Calcula tanque/campo de infiltración/validación CTE", "order": 5 },
-        { "nodeId": "reports-pdf", "action": "(si se pide) genera el PDF final encadenando resultados previos", "order": 6 }
-      ]
-    },
-    {
-      "id": "flow-alertas",
-      "name": "Alertas diarias por perfil de oferente",
-      "description": "Un día después de la ingesta, el motor de matching cruza perfiles guardados contra procesos nuevos y envía el digest por correo.",
-      "steps": [
-        { "nodeId": "vercel-cron", "action": "Dispara GET /api/cron/alertas a las 12:00 UTC", "order": 1 },
-        { "nodeId": "api-cron-alertas", "action": "Valida CRON_SECRET y llama runDailyAlertas()", "order": 2 },
-        { "nodeId": "matching-engine", "action": "Cruza cada oferentePerfil contra procesos nuevos del día", "order": 3 },
-        { "nodeId": "alertas-engine", "action": "Arma el digest; envio_log evita duplicados en reintentos", "order": 4 },
-        { "nodeId": "email-service", "action": "Envía el correo vía Resend", "order": 5 }
-      ]
-    }
-  ]
-}
-</script>
+        var LANES = ["frontend", "backend", "service", "db", "external"];
+        var LANE_LABEL = {
+          frontend: "FRONTEND",
+          backend: "BACKEND · API ROUTES",
+          service: "SERVICIOS / LIB",
+          db: "BASE DE DATOS",
+          external: "EXTERNO",
+        };
+        var TYPE_COLOR = {
+          frontend: "#0369A1",
+          backend: "#0C4A6E",
+          service: "#16A34A",
+          db: "#7C3AED",
+          external: "#D97706",
+        };
+        var TYPE_LABEL = {
+          frontend: "Frontend",
+          backend: "Backend (API)",
+          service: "Servicio / lib",
+          db: "Base de datos",
+          external: "Externo",
+        };
 
-<script>
-(function(){
-  "use strict";
-  var DATA = JSON.parse(document.getElementById('graph-data').textContent);
-  var NODES = DATA.nodes, EDGES = DATA.edges, FLOWS = DATA.flows;
-  var byId = {}; NODES.forEach(function(n){ byId[n.id] = n; });
+        var NODE_W = 214,
+          NODE_H = 68,
+          ROW_PITCH = 96,
+          COL_GAP = 360,
+          LANE_X0 = 70,
+          ROW_Y0 = 74;
 
-  var LANES = ['frontend','backend','service','db','external'];
-  var LANE_LABEL = { frontend:'FRONTEND', backend:'BACKEND · API ROUTES', service:'SERVICIOS / LIB', db:'BASE DE DATOS', external:'EXTERNO' };
-  var TYPE_COLOR = {
-    frontend: '#0369A1',
-    backend:  '#0C4A6E',
-    service:  '#16A34A',
-    db:       '#7C3AED',
-    external: '#D97706'
-  };
-  var TYPE_LABEL = { frontend:'Frontend', backend:'Backend (API)', service:'Servicio / lib', db:'Base de datos', external:'Externo' };
+        // ── Layout: group by lane, stack rows ──────────────────────────────
+        var lanesNodes = {};
+        LANES.forEach(function (l) {
+          lanesNodes[l] = [];
+        });
+        NODES.forEach(function (n) {
+          lanesNodes[n.type].push(n);
+        });
 
-  var NODE_W = 214, NODE_H = 68, ROW_PITCH = 96, COL_GAP = 360, LANE_X0 = 70, ROW_Y0 = 74;
+        var maxRows = 0;
+        LANES.forEach(function (lane, li) {
+          var x = LANE_X0 + li * COL_GAP;
+          lanesNodes[lane].forEach(function (n, ri) {
+            n.x = x;
+            n.y = ROW_Y0 + ri * ROW_PITCH;
+            n.w = NODE_W;
+            n.h = NODE_H;
+            n.cx = n.x + n.w / 2;
+            n.cy = n.y + n.h / 2;
+            n.rowIndex = ri;
+            n.laneIndex = li;
+            maxRows = Math.max(maxRows, ri + 1);
+          });
+        });
 
-  // ── Layout: group by lane, stack rows ──────────────────────────────
-  var lanesNodes = {}; LANES.forEach(function(l){ lanesNodes[l] = []; });
-  NODES.forEach(function(n){ lanesNodes[n.type].push(n); });
+        var CANVAS_W = LANE_X0 + LANES.length * COL_GAP + 40;
+        var CANVAS_H = ROW_Y0 + maxRows * ROW_PITCH + 60;
 
-  var maxRows = 0;
-  LANES.forEach(function(lane, li){
-    var x = LANE_X0 + li * COL_GAP;
-    lanesNodes[lane].forEach(function(n, ri){
-      n.x = x; n.y = ROW_Y0 + ri * ROW_PITCH; n.w = NODE_W; n.h = NODE_H;
-      n.cx = n.x + n.w/2; n.cy = n.y + n.h/2; n.rowIndex = ri; n.laneIndex = li;
-      maxRows = Math.max(maxRows, ri + 1);
-    });
-  });
+        // ── SVG setup ──────────────────────────────────────────────────────
+        var svg = document.getElementById("graph");
+        var viewport = document.getElementById("viewport");
+        var lanesG = document.getElementById("lanes");
+        var edgesG = document.getElementById("edges");
+        var nodesG = document.getElementById("nodes");
+        var wrap = document.getElementById("canvas-wrap");
+        var NS = "http://www.w3.org/2000/svg";
 
-  var CANVAS_W = LANE_X0 + LANES.length * COL_GAP + 40;
-  var CANVAS_H = ROW_Y0 + maxRows * ROW_PITCH + 60;
+        function el(tag, attrs, parent) {
+          var e = document.createElementNS(NS, tag);
+          for (var k in attrs) e.setAttribute(k, attrs[k]);
+          if (parent) parent.appendChild(e);
+          return e;
+        }
 
-  // ── SVG setup ──────────────────────────────────────────────────────
-  var svg = document.getElementById('graph');
-  var viewport = document.getElementById('viewport');
-  var lanesG = document.getElementById('lanes');
-  var edgesG = document.getElementById('edges');
-  var nodesG = document.getElementById('nodes');
-  var wrap = document.getElementById('canvas-wrap');
-  var NS = 'http://www.w3.org/2000/svg';
+        // Lane headers + separators
+        LANES.forEach(function (lane, li) {
+          var x = LANE_X0 + li * COL_GAP;
+          var count = lanesNodes[lane].length;
+          var t = el("text", { x: x, y: 40, class: "lane-header" }, lanesG);
+          t.textContent = LANE_LABEL[lane] + "  ·  " + count;
+          el(
+            "rect",
+            { x: x, y: 52, width: NODE_W, height: 3, fill: TYPE_COLOR[lane], rx: 2 },
+            lanesG
+          );
+        });
 
-  function el(tag, attrs, parent){
-    var e = document.createElementNS(NS, tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(e);
-    return e;
-  }
+        // ── Text wrapping helper (max 2 lines) ─────────────────────────────
+        function wrapLabel(text, maxChars) {
+          var words = text.split(" ");
+          var lines = [],
+            cur = "";
+          words.forEach(function (w) {
+            var t = cur ? cur + " " + w : w;
+            if (t.length > maxChars && cur) {
+              lines.push(cur);
+              cur = w;
+            } else cur = t;
+          });
+          if (cur) lines.push(cur);
+          if (lines.length > 2) {
+            lines = lines.slice(0, 2);
+            lines[1] = lines[1].replace(/.{0,3}$/, "") + "…";
+          }
+          return lines;
+        }
 
-  // Lane headers + separators
-  LANES.forEach(function(lane, li){
-    var x = LANE_X0 + li * COL_GAP;
-    var count = lanesNodes[lane].length;
-    var t = el('text', { x: x, y: 40, class: 'lane-header' }, lanesG);
-    t.textContent = LANE_LABEL[lane] + '  ·  ' + count;
-    el('rect', { x: x, y: 52, width: NODE_W, height: 3, fill: TYPE_COLOR[lane], rx: 2 }, lanesG);
-  });
+        // ── Draw nodes ──────────────────────────────────────────────────────
+        var nodeEls = {};
+        NODES.forEach(function (n) {
+          var g = el(
+            "g",
+            {
+              class: "node-box" + (n.status === "planned" ? " node-planned" : ""),
+              "data-id": n.id,
+            },
+            nodesG
+          );
+          var color = n.status === "planned" ? "#DC2626" : TYPE_COLOR[n.type];
+          var fillOpacity = n.status === "planned" ? "0.07" : "0.09";
+          el(
+            "rect",
+            {
+              x: n.x,
+              y: n.y,
+              width: n.w,
+              height: n.h,
+              rx: 10,
+              fill: color,
+              "fill-opacity": fillOpacity,
+              stroke: color,
+            },
+            g
+          );
+          // type dot
+          el("circle", { cx: n.x + 14, cy: n.y + 14, r: 4, fill: color }, g);
+          // label
+          var lines = wrapLabel(n.label, 25);
+          var ty = lines.length === 1 ? n.y + 30 : n.y + 24;
+          lines.forEach(function (line, i) {
+            var t = el(
+              "text",
+              { x: n.x + 24, y: ty + i * 15, class: "node-title", "font-size": 12.5 },
+              g
+            );
+            t.textContent = line;
+          });
+          // meta line: tech (truncated) + file count
+          var metaY = n.y + n.h - 12;
+          var techShort = n.tech.length > 26 ? n.tech.slice(0, 24) + "…" : n.tech;
+          var meta = el("text", { x: n.x + 24, y: metaY, class: "node-meta", "font-size": 9.5 }, g);
+          meta.textContent =
+            techShort +
+            (n.files.length
+              ? "  ·  " + n.files.length + " archivo" + (n.files.length > 1 ? "s" : "")
+              : "");
+          if (n.status === "planned") {
+            var badge = el(
+              "text",
+              {
+                x: n.x + n.w - 10,
+                y: n.y + 14,
+                "text-anchor": "end",
+                class: "node-badge-text",
+                fill: "#DC2626",
+                "font-size": 8.5,
+              },
+              g
+            );
+            badge.textContent = "PLANEADO";
+          }
+          nodeEls[n.id] = g;
 
-  // ── Text wrapping helper (max 2 lines) ─────────────────────────────
-  function wrapLabel(text, maxChars){
-    var words = text.split(' ');
-    var lines = [], cur = '';
-    words.forEach(function(w){
-      var t = cur ? cur + ' ' + w : w;
-      if (t.length > maxChars && cur){ lines.push(cur); cur = w; }
-      else cur = t;
-    });
-    if (cur) lines.push(cur);
-    if (lines.length > 2){
-      lines = lines.slice(0,2);
-      lines[1] = lines[1].replace(/.{0,3}$/, '') + '…';
-    }
-    return lines;
-  }
+          g.addEventListener("mouseenter", function (ev) {
+            if (!pinnedNode) showTooltip(n, ev);
+          });
+          g.addEventListener("mousemove", function (ev) {
+            if (!pinnedNode) positionTooltip(ev);
+          });
+          g.addEventListener("mouseleave", function () {
+            if (!pinnedNode) hideTooltip();
+          });
+          g.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            if (pinnedNode === n.id) {
+              pinnedNode = null;
+              hideTooltip();
+              clearNodePin();
+            } else {
+              pinnedNode = n.id;
+              showTooltip(n, ev, true);
+              clearNodePin();
+              g.classList.add("pinned");
+            }
+          });
+        });
 
-  // ── Draw nodes ──────────────────────────────────────────────────────
-  var nodeEls = {};
-  NODES.forEach(function(n){
-    var g = el('g', { class: 'node-box' + (n.status === 'planned' ? ' node-planned' : ''), 'data-id': n.id }, nodesG);
-    var color = n.status === 'planned' ? '#DC2626' : TYPE_COLOR[n.type];
-    var fillOpacity = n.status === 'planned' ? '0.07' : '0.09';
-    el('rect', {
-      x: n.x, y: n.y, width: n.w, height: n.h, rx: 10,
-      fill: color, 'fill-opacity': fillOpacity, stroke: color
-    }, g);
-    // type dot
-    el('circle', { cx: n.x + 14, cy: n.y + 14, r: 4, fill: color }, g);
-    // label
-    var lines = wrapLabel(n.label, 25);
-    var ty = lines.length === 1 ? n.y + 30 : n.y + 24;
-    lines.forEach(function(line, i){
-      var t = el('text', { x: n.x + 24, y: ty + i * 15, class: 'node-title', 'font-size': 12.5 }, g);
-      t.textContent = line;
-    });
-    // meta line: tech (truncated) + file count
-    var metaY = n.y + n.h - 12;
-    var techShort = n.tech.length > 26 ? n.tech.slice(0,24) + '…' : n.tech;
-    var meta = el('text', { x: n.x + 24, y: metaY, class: 'node-meta', 'font-size': 9.5 }, g);
-    meta.textContent = techShort + (n.files.length ? '  ·  ' + n.files.length + ' archivo' + (n.files.length>1?'s':'') : '');
-    if (n.status === 'planned'){
-      var badge = el('text', { x: n.x + n.w - 10, y: n.y + 14, 'text-anchor': 'end', class: 'node-badge-text', fill: '#DC2626', 'font-size': 8.5 }, g);
-      badge.textContent = 'PLANEADO';
-    }
-    nodeEls[n.id] = g;
+        function clearNodePin() {
+          Object.keys(nodeEls).forEach(function (id) {
+            nodeEls[id].classList.remove("pinned");
+          });
+        }
 
-    g.addEventListener('mouseenter', function(ev){ if (!pinnedNode) showTooltip(n, ev); });
-    g.addEventListener('mousemove', function(ev){ if (!pinnedNode) positionTooltip(ev); });
-    g.addEventListener('mouseleave', function(){ if (!pinnedNode) hideTooltip(); });
-    g.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      if (pinnedNode === n.id){ pinnedNode = null; hideTooltip(); clearNodePin(); }
-      else { pinnedNode = n.id; showTooltip(n, ev, true); clearNodePin(); g.classList.add('pinned'); }
-    });
-  });
+        // ── Draw edges ──────────────────────────────────────────────────────
+        function laneIdx(node) {
+          return LANES.indexOf(node.type);
+        }
 
-  function clearNodePin(){
-    Object.keys(nodeEls).forEach(function(id){ nodeEls[id].classList.remove('pinned'); });
-  }
+        function edgePath(s, t, bulgeSeed) {
+          var sLane = laneIdx(s),
+            tLane = laneIdx(t);
+          if (sLane === tLane) {
+            var x1 = s.x + s.w,
+              y1 = s.cy,
+              x2 = t.x + t.w,
+              y2 = t.cy;
+            var bulge = 46 + (bulgeSeed % 4) * 16;
+            var mx = Math.max(x1, x2) + bulge;
+            return (
+              "M " +
+              x1 +
+              " " +
+              y1 +
+              " C " +
+              mx +
+              " " +
+              y1 +
+              ", " +
+              mx +
+              " " +
+              y2 +
+              ", " +
+              x2 +
+              " " +
+              y2
+            );
+          } else if (tLane > sLane) {
+            var x1b = s.x + s.w,
+              y1b = s.cy,
+              x2b = t.x,
+              y2b = t.cy;
+            var dx = (x2b - x1b) * 0.5;
+            return (
+              "M " +
+              x1b +
+              " " +
+              y1b +
+              " C " +
+              (x1b + dx) +
+              " " +
+              y1b +
+              ", " +
+              (x2b - dx) +
+              " " +
+              y2b +
+              ", " +
+              x2b +
+              " " +
+              y2b
+            );
+          } else {
+            var x1c = s.x,
+              y1c = s.cy,
+              x2c = t.x + t.w,
+              y2c = t.cy;
+            var dxc = (x1c - x2c) * 0.5;
+            return (
+              "M " +
+              x1c +
+              " " +
+              y1c +
+              " C " +
+              (x1c - dxc) +
+              " " +
+              y1c +
+              ", " +
+              (x2c + dxc) +
+              " " +
+              y2c +
+              ", " +
+              x2c +
+              " " +
+              y2c
+            );
+          }
+        }
 
-  // ── Draw edges ──────────────────────────────────────────────────────
-  function laneIdx(node){ return LANES.indexOf(node.type); }
+        var edgeEls = [];
+        EDGES.forEach(function (e, i) {
+          var s = byId[e.from],
+            t = byId[e.to];
+          if (!s || !t) return;
+          var isPlanned =
+            e.type === "planned-calls" || s.status === "planned" || t.status === "planned";
+          var d = edgePath(s, t, i);
+          var p = el(
+            "path",
+            {
+              d: d,
+              class: "edge-path" + (isPlanned ? " planned" : ""),
+              "marker-end": isPlanned ? "url(#arrow-planned)" : "url(#arrow)",
+            },
+            edgesG
+          );
+          edgeEls.push({ el: p, from: e.from, to: e.to, planned: isPlanned });
+        });
 
-  function edgePath(s, t, bulgeSeed){
-    var sLane = laneIdx(s), tLane = laneIdx(t);
-    if (sLane === tLane){
-      var x1 = s.x + s.w, y1 = s.cy, x2 = t.x + t.w, y2 = t.cy;
-      var bulge = 46 + (bulgeSeed % 4) * 16;
-      var mx = Math.max(x1, x2) + bulge;
-      return 'M ' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2;
-    } else if (tLane > sLane){
-      var x1b = s.x + s.w, y1b = s.cy, x2b = t.x, y2b = t.cy;
-      var dx = (x2b - x1b) * 0.5;
-      return 'M ' + x1b + ' ' + y1b + ' C ' + (x1b+dx) + ' ' + y1b + ', ' + (x2b-dx) + ' ' + y2b + ', ' + x2b + ' ' + y2b;
-    } else {
-      var x1c = s.x, y1c = s.cy, x2c = t.x + t.w, y2c = t.cy;
-      var dxc = (x1c - x2c) * 0.5;
-      return 'M ' + x1c + ' ' + y1c + ' C ' + (x1c-dxc) + ' ' + y1c + ', ' + (x2c+dxc) + ' ' + y2c + ', ' + x2c + ' ' + y2c;
-    }
-  }
+        // ── Pan & zoom ──────────────────────────────────────────────────────
+        var tx = 0,
+          ty = 0,
+          scale = 1;
+        function applyTransform() {
+          viewport.setAttribute(
+            "transform",
+            "translate(" + tx + "," + ty + ") scale(" + scale + ")"
+          );
+        }
 
-  var edgeEls = [];
-  EDGES.forEach(function(e, i){
-    var s = byId[e.from], t = byId[e.to];
-    if (!s || !t) return;
-    var isPlanned = e.type === 'planned-calls' || s.status === 'planned' || t.status === 'planned';
-    var d = edgePath(s, t, i);
-    var p = el('path', {
-      d: d, class: 'edge-path' + (isPlanned ? ' planned' : ''),
-      'marker-end': isPlanned ? 'url(#arrow-planned)' : 'url(#arrow)'
-    }, edgesG);
-    edgeEls.push({ el: p, from: e.from, to: e.to, planned: isPlanned });
-  });
+        function fitToScreen() {
+          var wrapRect = wrap.getBoundingClientRect();
+          var pad = 40;
+          var sx = (wrapRect.width - pad * 2) / CANVAS_W;
+          var sy = (wrapRect.height - pad * 2) / CANVAS_H;
+          scale = Math.min(sx, sy, 1);
+          scale = Math.max(scale, 0.18);
+          tx = (wrapRect.width - CANVAS_W * scale) / 2;
+          ty = (wrapRect.height - CANVAS_H * scale) / 2;
+          applyTransform();
+        }
 
-  // ── Pan & zoom ──────────────────────────────────────────────────────
-  var tx = 0, ty = 0, scale = 1;
-  function applyTransform(){ viewport.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + scale + ')'); }
+        var isPanning = false,
+          panStart = { x: 0, y: 0 },
+          txStart = 0,
+          tyStart = 0;
+        wrap.addEventListener("mousedown", function (ev) {
+          if (ev.target.closest(".node-box")) return;
+          isPanning = true;
+          wrap.classList.add("grabbing");
+          panStart.x = ev.clientX;
+          panStart.y = ev.clientY;
+          txStart = tx;
+          tyStart = ty;
+        });
+        window.addEventListener("mousemove", function (ev) {
+          if (!isPanning) return;
+          tx = txStart + (ev.clientX - panStart.x);
+          ty = tyStart + (ev.clientY - panStart.y);
+          applyTransform();
+        });
+        window.addEventListener("mouseup", function () {
+          isPanning = false;
+          wrap.classList.remove("grabbing");
+        });
 
-  function fitToScreen(){
-    var wrapRect = wrap.getBoundingClientRect();
-    var pad = 40;
-    var sx = (wrapRect.width - pad*2) / CANVAS_W;
-    var sy = (wrapRect.height - pad*2) / CANVAS_H;
-    scale = Math.min(sx, sy, 1);
-    scale = Math.max(scale, 0.18);
-    tx = (wrapRect.width - CANVAS_W * scale) / 2;
-    ty = (wrapRect.height - CANVAS_H * scale) / 2;
-    applyTransform();
-  }
+        wrap.addEventListener(
+          "wheel",
+          function (ev) {
+            ev.preventDefault();
+            var rect = wrap.getBoundingClientRect();
+            var mx = ev.clientX - rect.left,
+              my = ev.clientY - rect.top;
+            var factor = ev.deltaY < 0 ? 1.1 : 0.9;
+            var newScale = Math.min(Math.max(scale * factor, 0.15), 3);
+            var wx = (mx - tx) / scale,
+              wy = (my - ty) / scale;
+            tx = mx - wx * newScale;
+            ty = my - wy * newScale;
+            scale = newScale;
+            applyTransform();
+          },
+          { passive: false }
+        );
 
-  var isPanning = false, panStart = {x:0,y:0}, txStart = 0, tyStart = 0;
-  wrap.addEventListener('mousedown', function(ev){
-    if (ev.target.closest('.node-box')) return;
-    isPanning = true; wrap.classList.add('grabbing');
-    panStart.x = ev.clientX; panStart.y = ev.clientY; txStart = tx; tyStart = ty;
-  });
-  window.addEventListener('mousemove', function(ev){
-    if (!isPanning) return;
-    tx = txStart + (ev.clientX - panStart.x);
-    ty = tyStart + (ev.clientY - panStart.y);
-    applyTransform();
-  });
-  window.addEventListener('mouseup', function(){ isPanning = false; wrap.classList.remove('grabbing'); });
+        document.getElementById("zoom-in").addEventListener("click", function () {
+          var rect = wrap.getBoundingClientRect();
+          var mx = rect.width / 2,
+            my = rect.height / 2;
+          var wx = (mx - tx) / scale,
+            wy = (my - ty) / scale;
+          scale = Math.min(scale * 1.25, 3);
+          tx = mx - wx * scale;
+          ty = my - wy * scale;
+          applyTransform();
+        });
+        document.getElementById("zoom-out").addEventListener("click", function () {
+          var rect = wrap.getBoundingClientRect();
+          var mx = rect.width / 2,
+            my = rect.height / 2;
+          var wx = (mx - tx) / scale,
+            wy = (my - ty) / scale;
+          scale = Math.max(scale * 0.8, 0.15);
+          tx = mx - wx * scale;
+          ty = my - wy * scale;
+          applyTransform();
+        });
+        document.getElementById("zoom-fit").addEventListener("click", fitToScreen);
+        window.addEventListener("resize", fitToScreen);
 
-  wrap.addEventListener('wheel', function(ev){
-    ev.preventDefault();
-    var rect = wrap.getBoundingClientRect();
-    var mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
-    var factor = ev.deltaY < 0 ? 1.1 : 0.9;
-    var newScale = Math.min(Math.max(scale * factor, 0.15), 3);
-    var wx = (mx - tx) / scale, wy = (my - ty) / scale;
-    tx = mx - wx * newScale; ty = my - wy * newScale;
-    scale = newScale;
-    applyTransform();
-  }, { passive:false });
+        // ── Tooltip ────────────────────────────────────────────────────────
+        var tooltip = document.getElementById("tooltip");
+        var pinnedNode = null;
+        function showTooltip(n, ev, pin) {
+          document.getElementById("tt-title").textContent = n.label;
+          var statusEl = document.getElementById("tt-status");
+          statusEl.textContent = n.status === "implemented" ? "Implementado" : "Planeado";
+          statusEl.className = "tt-status " + n.status;
+          document.getElementById("tt-tech").textContent = n.tech + "  ·  " + TYPE_LABEL[n.type];
+          document.getElementById("tt-desc").textContent = n.description;
+          var filesEl = document.getElementById("tt-files");
+          filesEl.innerHTML = "";
+          if (n.files.length) {
+            n.files.forEach(function (f) {
+              var d = document.createElement("div");
+              d.textContent = f;
+              filesEl.appendChild(d);
+            });
+            filesEl.style.display = "block";
+          } else {
+            filesEl.style.display = "none";
+          }
+          tooltip.style.display = "block";
+          tooltip.classList.toggle("pinned", !!pin);
+          positionTooltip(ev);
+        }
+        function positionTooltip(ev) {
+          var pad = 16;
+          var x = ev.clientX + pad,
+            y = ev.clientY + pad;
+          var vw = window.innerWidth,
+            vh = window.innerHeight;
+          if (x + 340 > vw) x = ev.clientX - 340 - pad;
+          if (y + 220 > vh) y = vh - 230;
+          tooltip.style.left = x + "px";
+          tooltip.style.top = y + "px";
+        }
+        function hideTooltip() {
+          if (!pinnedNode) tooltip.style.display = "none";
+        }
+        document.getElementById("tt-close").addEventListener("click", function () {
+          pinnedNode = null;
+          tooltip.style.display = "none";
+          tooltip.classList.remove("pinned");
+          clearNodePin();
+        });
+        document.addEventListener("click", function (ev) {
+          if (pinnedNode && !ev.target.closest(".node-box") && !ev.target.closest("#tooltip")) {
+            pinnedNode = null;
+            tooltip.style.display = "none";
+            tooltip.classList.remove("pinned");
+            clearNodePin();
+          }
+        });
 
-  document.getElementById('zoom-in').addEventListener('click', function(){
-    var rect = wrap.getBoundingClientRect();
-    var mx = rect.width/2, my = rect.height/2;
-    var wx=(mx-tx)/scale, wy=(my-ty)/scale;
-    scale = Math.min(scale*1.25, 3);
-    tx = mx - wx*scale; ty = my - wy*scale; applyTransform();
-  });
-  document.getElementById('zoom-out').addEventListener('click', function(){
-    var rect = wrap.getBoundingClientRect();
-    var mx = rect.width/2, my = rect.height/2;
-    var wx=(mx-tx)/scale, wy=(my-ty)/scale;
-    scale = Math.max(scale*0.8, 0.15);
-    tx = mx - wx*scale; ty = my - wy*scale; applyTransform();
-  });
-  document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
-  window.addEventListener('resize', fitToScreen);
+        // ── Type filter chips ──────────────────────────────────────────────
+        var activeTypes = new Set();
+        var chipsWrap = document.getElementById("type-chips");
+        LANES.forEach(function (t) {
+          var chip = document.createElement("div");
+          chip.className = "chip";
+          chip.dataset.type = t;
+          chip.innerHTML =
+            '<span class="dot" style="background:' + TYPE_COLOR[t] + '"></span>' + TYPE_LABEL[t];
+          chip.addEventListener("click", function () {
+            if (activeTypes.has(t)) {
+              activeTypes.delete(t);
+              chip.classList.remove("active");
+            } else {
+              activeTypes.add(t);
+              chip.classList.add("active");
+            }
+            applyFilters();
+          });
+          chipsWrap.appendChild(chip);
+        });
 
-  // ── Tooltip ────────────────────────────────────────────────────────
-  var tooltip = document.getElementById('tooltip');
-  var pinnedNode = null;
-  function showTooltip(n, ev, pin){
-    document.getElementById('tt-title').textContent = n.label;
-    var statusEl = document.getElementById('tt-status');
-    statusEl.textContent = n.status === 'implemented' ? 'Implementado' : 'Planeado';
-    statusEl.className = 'tt-status ' + n.status;
-    document.getElementById('tt-tech').textContent = n.tech + '  ·  ' + TYPE_LABEL[n.type];
-    document.getElementById('tt-desc').textContent = n.description;
-    var filesEl = document.getElementById('tt-files');
-    filesEl.innerHTML = '';
-    if (n.files.length){
-      n.files.forEach(function(f){ var d = document.createElement('div'); d.textContent = f; filesEl.appendChild(d); });
-      filesEl.style.display = 'block';
-    } else {
-      filesEl.style.display = 'none';
-    }
-    tooltip.style.display = 'block';
-    tooltip.classList.toggle('pinned', !!pin);
-    positionTooltip(ev);
-  }
-  function positionTooltip(ev){
-    var pad = 16;
-    var x = ev.clientX + pad, y = ev.clientY + pad;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    if (x + 340 > vw) x = ev.clientX - 340 - pad;
-    if (y + 220 > vh) y = vh - 230;
-    tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
-  }
-  function hideTooltip(){ if (!pinnedNode) tooltip.style.display = 'none'; }
-  document.getElementById('tt-close').addEventListener('click', function(){
-    pinnedNode = null; tooltip.style.display = 'none'; tooltip.classList.remove('pinned'); clearNodePin();
-  });
-  document.addEventListener('click', function(ev){
-    if (pinnedNode && !ev.target.closest('.node-box') && !ev.target.closest('#tooltip')){
-      pinnedNode = null; tooltip.style.display = 'none'; tooltip.classList.remove('pinned'); clearNodePin();
-    }
-  });
+        // ── Type legend (sidebar) ───────────────────────────────────────────
+        var legendWrap = document.getElementById("type-legend");
+        LANES.forEach(function (t) {
+          var row = document.createElement("div");
+          row.className = "legend-row";
+          row.innerHTML =
+            '<span class="sw" style="border-color:' +
+            TYPE_COLOR[t] +
+            "; background:" +
+            TYPE_COLOR[t] +
+            '22;"></span>' +
+            TYPE_LABEL[t] +
+            " (" +
+            lanesNodes[t].length +
+            ")";
+          legendWrap.appendChild(row);
+        });
 
-  // ── Type filter chips ──────────────────────────────────────────────
-  var activeTypes = new Set();
-  var chipsWrap = document.getElementById('type-chips');
-  LANES.forEach(function(t){
-    var chip = document.createElement('div');
-    chip.className = 'chip'; chip.dataset.type = t;
-    chip.innerHTML = '<span class="dot" style="background:' + TYPE_COLOR[t] + '"></span>' + TYPE_LABEL[t];
-    chip.addEventListener('click', function(){
-      if (activeTypes.has(t)){ activeTypes.delete(t); chip.classList.remove('active'); }
-      else { activeTypes.add(t); chip.classList.add('active'); }
-      applyFilters();
-    });
-    chipsWrap.appendChild(chip);
-  });
+        // ── Stats ────────────────────────────────────────────────────────────
+        var implCount = NODES.filter(function (n) {
+          return n.status === "implemented";
+        }).length;
+        var plannedCount = NODES.length - implCount;
+        var statGrid = document.getElementById("stat-grid");
+        [
+          [NODES.length, "nodos"],
+          [EDGES.length, "relaciones"],
+          [implCount, "implementados"],
+          [plannedCount, "planeados"],
+          [FLOWS.length, "flujos clave"],
+          [
+            NODES.filter(function (n) {
+              return n.type === "external";
+            }).length,
+            "servicios externos",
+          ],
+        ].forEach(function (pair) {
+          var box = document.createElement("div");
+          box.className = "stat-box";
+          box.innerHTML = "<b>" + pair[0] + "</b><span>" + pair[1] + "</span>";
+          statGrid.appendChild(box);
+        });
 
-  // ── Type legend (sidebar) ───────────────────────────────────────────
-  var legendWrap = document.getElementById('type-legend');
-  LANES.forEach(function(t){
-    var row = document.createElement('div'); row.className = 'legend-row';
-    row.innerHTML = '<span class="sw" style="border-color:' + TYPE_COLOR[t] + '; background:' + TYPE_COLOR[t] + '22;"></span>' + TYPE_LABEL[t] + ' (' + lanesNodes[t].length + ')';
-    legendWrap.appendChild(row);
-  });
+        // ── Search + filter combine ─────────────────────────────────────────
+        var searchTerm = "";
+        function matchesSearch(n) {
+          if (!searchTerm) return true;
+          var hay = (
+            n.label +
+            " " +
+            n.id +
+            " " +
+            n.tech +
+            " " +
+            n.files.join(" ") +
+            " " +
+            n.description
+          ).toLowerCase();
+          return hay.indexOf(searchTerm) !== -1;
+        }
+        function matchesType(n) {
+          return activeTypes.size === 0 || activeTypes.has(n.type);
+        }
 
-  // ── Stats ────────────────────────────────────────────────────────────
-  var implCount = NODES.filter(function(n){ return n.status === 'implemented'; }).length;
-  var plannedCount = NODES.length - implCount;
-  var statGrid = document.getElementById('stat-grid');
-  [
-    [NODES.length, 'nodos'], [EDGES.length, 'relaciones'],
-    [implCount, 'implementados'], [plannedCount, 'planeados'],
-    [FLOWS.length, 'flujos clave'], [NODES.filter(function(n){return n.type==='external';}).length, 'servicios externos']
-  ].forEach(function(pair){
-    var box = document.createElement('div'); box.className = 'stat-box';
-    box.innerHTML = '<b>' + pair[0] + '</b><span>' + pair[1] + '</span>';
-    statGrid.appendChild(box);
-  });
+        function applyFilters() {
+          if (activeFlow) clearFlow();
+          var anyVisible = false;
+          NODES.forEach(function (n) {
+            var visible = matchesSearch(n) && matchesType(n);
+            if (visible) anyVisible = true;
+            nodeEls[n.id].classList.toggle("dimmed", !visible);
+          });
+          edgeEls.forEach(function (edge) {
+            var sVisible = matchesSearch(byId[edge.from]) && matchesType(byId[edge.from]);
+            var tVisible = matchesSearch(byId[edge.to]) && matchesType(byId[edge.to]);
+            edge.el.classList.toggle("dimmed", !(sVisible && tVisible));
+          });
+          document.getElementById("empty-state").classList.toggle("visible", !anyVisible);
+        }
 
-  // ── Search + filter combine ─────────────────────────────────────────
-  var searchTerm = '';
-  function matchesSearch(n){
-    if (!searchTerm) return true;
-    var hay = (n.label + ' ' + n.id + ' ' + n.tech + ' ' + n.files.join(' ') + ' ' + n.description).toLowerCase();
-    return hay.indexOf(searchTerm) !== -1;
-  }
-  function matchesType(n){
-    return activeTypes.size === 0 || activeTypes.has(n.type);
-  }
+        document.getElementById("search").addEventListener("input", function (ev) {
+          searchTerm = ev.target.value.trim().toLowerCase();
+          applyFilters();
+        });
 
-  function applyFilters(){
-    if (activeFlow) clearFlow();
-    var anyVisible = false;
-    NODES.forEach(function(n){
-      var visible = matchesSearch(n) && matchesType(n);
-      if (visible) anyVisible = true;
-      nodeEls[n.id].classList.toggle('dimmed', !visible);
-    });
-    edgeEls.forEach(function(edge){
-      var sVisible = matchesSearch(byId[edge.from]) && matchesType(byId[edge.from]);
-      var tVisible = matchesSearch(byId[edge.to]) && matchesType(byId[edge.to]);
-      edge.el.classList.toggle('dimmed', !(sVisible && tVisible));
-    });
-    document.getElementById('empty-state').classList.toggle('visible', !anyVisible);
-  }
+        document.getElementById("btn-clear").addEventListener("click", function () {
+          searchTerm = "";
+          document.getElementById("search").value = "";
+          activeTypes.clear();
+          chipsWrap.querySelectorAll(".chip").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          clearFlow();
+          NODES.forEach(function (n) {
+            nodeEls[n.id].classList.remove("dimmed");
+          });
+          edgeEls.forEach(function (e) {
+            e.el.classList.remove("dimmed");
+          });
+        });
 
-  document.getElementById('search').addEventListener('input', function(ev){
-    searchTerm = ev.target.value.trim().toLowerCase();
-    applyFilters();
-  });
+        // ── Flow highlighting ────────────────────────────────────────────────
+        var activeFlow = null;
+        var flowBanner = document.getElementById("flow-banner");
+        var orderBadgesG = null;
 
-  document.getElementById('btn-clear').addEventListener('click', function(){
-    searchTerm = ''; document.getElementById('search').value = '';
-    activeTypes.clear();
-    chipsWrap.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
-    clearFlow();
-    NODES.forEach(function(n){ nodeEls[n.id].classList.remove('dimmed'); });
-    edgeEls.forEach(function(e){ e.el.classList.remove('dimmed'); });
-  });
+        function clearOrderBadges() {
+          if (orderBadgesG) {
+            orderBadgesG.remove();
+            orderBadgesG = null;
+          }
+        }
 
-  // ── Flow highlighting ────────────────────────────────────────────────
-  var activeFlow = null;
-  var flowBanner = document.getElementById('flow-banner');
-  var orderBadgesG = null;
+        function clearFlow() {
+          activeFlow = null;
+          flowBanner.classList.remove("visible");
+          document.querySelectorAll(".flow-card").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          NODES.forEach(function (n) {
+            nodeEls[n.id].classList.remove("dimmed");
+          });
+          edgeEls.forEach(function (e) {
+            e.el.classList.remove("dimmed");
+            e.el.classList.remove("hi");
+            e.el.setAttribute("marker-end", e.planned ? "url(#arrow-planned)" : "url(#arrow)");
+          });
+          clearOrderBadges();
+        }
 
-  function clearOrderBadges(){
-    if (orderBadgesG){ orderBadgesG.remove(); orderBadgesG = null; }
-  }
+        function activateFlow(flow, cardEl) {
+          activeFlow = flow.id;
+          searchTerm = "";
+          document.getElementById("search").value = "";
+          activeTypes.clear();
+          chipsWrap.querySelectorAll(".chip").forEach(function (c) {
+            c.classList.remove("active");
+          });
 
-  function clearFlow(){
-    activeFlow = null;
-    flowBanner.classList.remove('visible');
-    document.querySelectorAll('.flow-card').forEach(function(c){ c.classList.remove('active'); });
-    NODES.forEach(function(n){ nodeEls[n.id].classList.remove('dimmed'); });
-    edgeEls.forEach(function(e){ e.el.classList.remove('dimmed'); e.el.classList.remove('hi'); e.el.setAttribute('marker-end', e.planned ? 'url(#arrow-planned)' : 'url(#arrow)'); });
-    clearOrderBadges();
-  }
+          document.querySelectorAll(".flow-card").forEach(function (c) {
+            c.classList.remove("active");
+          });
+          if (cardEl) cardEl.classList.add("active");
 
-  function activateFlow(flow, cardEl){
-    activeFlow = flow.id;
-    searchTerm = ''; document.getElementById('search').value = '';
-    activeTypes.clear();
-    chipsWrap.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+          document.getElementById("fb-name").textContent = flow.name;
+          document.getElementById("fb-desc").textContent = flow.description;
+          flowBanner.classList.add("visible");
 
-    document.querySelectorAll('.flow-card').forEach(function(c){ c.classList.remove('active'); });
-    if (cardEl) cardEl.classList.add('active');
+          var stepNodeIds = flow.steps
+            .slice()
+            .sort(function (a, b) {
+              return a.order - b.order;
+            })
+            .map(function (s) {
+              return s.nodeId;
+            });
+          var idSet = new Set(stepNodeIds);
 
-    document.getElementById('fb-name').textContent = flow.name;
-    document.getElementById('fb-desc').textContent = flow.description;
-    flowBanner.classList.add('visible');
+          NODES.forEach(function (n) {
+            nodeEls[n.id].classList.toggle("dimmed", !idSet.has(n.id));
+          });
 
-    var stepNodeIds = flow.steps.slice().sort(function(a,b){return a.order-b.order;}).map(function(s){return s.nodeId;});
-    var idSet = new Set(stepNodeIds);
+          // find consecutive real edges
+          var consecutivePairs = new Set();
+          for (var i = 0; i < stepNodeIds.length - 1; i++) {
+            consecutivePairs.add(stepNodeIds[i] + "→" + stepNodeIds[i + 1]);
+          }
+          edgeEls.forEach(function (e) {
+            var key = e.from + "→" + e.to;
+            var isHi = consecutivePairs.has(key);
+            e.el.classList.toggle("dimmed", !isHi);
+            e.el.classList.toggle("hi", isHi);
+            e.el.setAttribute(
+              "marker-end",
+              isHi ? "url(#arrow-hi)" : e.planned ? "url(#arrow-planned)" : "url(#arrow)"
+            );
+          });
 
-    NODES.forEach(function(n){ nodeEls[n.id].classList.toggle('dimmed', !idSet.has(n.id)); });
+          // order badges
+          clearOrderBadges();
+          orderBadgesG = el("g", { id: "order-badges" }, viewport);
+          flow.steps.forEach(function (step) {
+            var n = byId[step.nodeId];
+            if (!n) return;
+            var bg = el("g", { class: "order-badge" }, orderBadgesG);
+            el("circle", { cx: n.x - 10, cy: n.y - 10, r: 11 }, bg);
+            var txt = el("text", { x: n.x - 10, y: n.y - 6, "text-anchor": "middle" }, bg);
+            txt.textContent = step.order;
+          });
+        }
 
-    // find consecutive real edges
-    var consecutivePairs = new Set();
-    for (var i=0; i<stepNodeIds.length-1; i++){
-      consecutivePairs.add(stepNodeIds[i] + '→' + stepNodeIds[i+1]);
-    }
-    edgeEls.forEach(function(e){
-      var key = e.from + '→' + e.to;
-      var isHi = consecutivePairs.has(key);
-      e.el.classList.toggle('dimmed', !isHi);
-      e.el.classList.toggle('hi', isHi);
-      e.el.setAttribute('marker-end', isHi ? 'url(#arrow-hi)' : (e.planned ? 'url(#arrow-planned)' : 'url(#arrow)'));
-    });
+        document.getElementById("fb-close").addEventListener("click", clearFlow);
 
-    // order badges
-    clearOrderBadges();
-    orderBadgesG = el('g', { id: 'order-badges' }, viewport);
-    flow.steps.forEach(function(step){
-      var n = byId[step.nodeId];
-      if (!n) return;
-      var bg = el('g', { class:'order-badge' }, orderBadgesG);
-      el('circle', { cx: n.x - 10, cy: n.y - 10, r: 11 }, bg);
-      var txt = el('text', { x: n.x - 10, y: n.y - 6, 'text-anchor':'middle' }, bg);
-      txt.textContent = step.order;
-    });
-  }
+        var flowListEl = document.getElementById("flow-list");
+        FLOWS.forEach(function (flow) {
+          var card = document.createElement("div");
+          card.className = "flow-card";
+          card.innerHTML =
+            '<div class="fc-name">' +
+            flow.name +
+            "</div>" +
+            '<div class="fc-desc">' +
+            flow.description +
+            "</div>" +
+            '<div class="fc-steps">' +
+            flow.steps.length +
+            " pasos →</div>";
+          card.addEventListener("click", function () {
+            if (activeFlow === flow.id) clearFlow();
+            else activateFlow(flow, card);
+          });
+          flowListEl.appendChild(card);
+        });
 
-  document.getElementById('fb-close').addEventListener('click', clearFlow);
+        // ── Mobile sidebar toggle ───────────────────────────────────────────
+        var sidebar = document.getElementById("sidebar");
+        var sbToggle = document.getElementById("btn-sidebar");
+        if (sbToggle)
+          sbToggle.addEventListener("click", function () {
+            sidebar.classList.toggle("open");
+          });
 
-  var flowListEl = document.getElementById('flow-list');
-  FLOWS.forEach(function(flow){
-    var card = document.createElement('div'); card.className = 'flow-card';
-    card.innerHTML = '<div class="fc-name">' + flow.name + '</div>' +
-      '<div class="fc-desc">' + flow.description + '</div>' +
-      '<div class="fc-steps">' + flow.steps.length + ' pasos →</div>';
-    card.addEventListener('click', function(){
-      if (activeFlow === flow.id) clearFlow();
-      else activateFlow(flow, card);
-    });
-    flowListEl.appendChild(card);
-  });
+        // ── Theme sync (host page may set data-theme on <html>) ─────────────
+        // no-op: CSS already reacts to prefers-color-scheme + [data-theme]
 
-  // ── Mobile sidebar toggle ───────────────────────────────────────────
-  var sidebar = document.getElementById('sidebar');
-  var sbToggle = document.getElementById('btn-sidebar');
-  if (sbToggle) sbToggle.addEventListener('click', function(){ sidebar.classList.toggle('open'); });
-
-  // ── Theme sync (host page may set data-theme on <html>) ─────────────
-  // no-op: CSS already reacts to prefers-color-scheme + [data-theme]
-
-  // ── Init ─────────────────────────────────────────────────────────────
-  fitToScreen();
-})();
-</script>
-</body>
+        // ── Init ─────────────────────────────────────────────────────────────
+        fitToScreen();
+      })();
+    </script>
+  </body>
 </html>

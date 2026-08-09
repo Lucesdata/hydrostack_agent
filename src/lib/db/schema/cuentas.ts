@@ -26,14 +26,14 @@ import {
   jsonb,
   uniqueIndex,
   index,
-} from 'drizzle-orm/pg-core';
+} from "drizzle-orm/pg-core";
 
-export const usuario = pgTable('usuario', {
-  id: text('id').primaryKey(),
-  name: text('name'),
-  email: text('email').notNull().unique(),
-  emailVerified: timestamp('emailVerified', { mode: 'date' }),
-  image: text('image'),
+export const usuario = pgTable("usuario", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  email: text("email").notNull().unique(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  image: text("image"),
 });
 
 /**
@@ -43,16 +43,16 @@ export const usuario = pgTable('usuario', {
  * `id` del tipo es lo que permite promoverlo a fila sin repintar el contrato).
  */
 export const oferentePerfil = pgTable(
-  'oferente_perfil',
+  "oferente_perfil",
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    usuarioId: text('usuario_id')
+    id: uuid("id").defaultRandom().primaryKey(),
+    usuarioId: text("usuario_id")
       .notNull()
-      .references(() => usuario.id, { onDelete: 'cascade' }),
-    perfil: jsonb('perfil').notNull(),
-    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).defaultNow().notNull(),
+      .references(() => usuario.id, { onDelete: "cascade" }),
+    perfil: jsonb("perfil").notNull(),
+    actualizadoEn: timestamp("actualizado_en", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [uniqueIndex('oferente_perfil_usuario_uq').on(t.usuarioId)],
+  (t) => [uniqueIndex("oferente_perfil_usuario_uq").on(t.usuarioId)]
 );
 
 /**
@@ -64,21 +64,21 @@ export const oferentePerfil = pgTable(
  * upsert (un clic repetido el mismo día actualiza el registro, no lo duplica).
  */
 export const envioLog = pgTable(
-  'envio_log',
+  "envio_log",
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    usuarioId: text('usuario_id')
+    id: uuid("id").defaultRandom().primaryKey(),
+    usuarioId: text("usuario_id")
       .notNull()
-      .references(() => usuario.id, { onDelete: 'cascade' }),
-    fecha: date('fecha').notNull(),
+      .references(() => usuario.id, { onDelete: "cascade" }),
+    fecha: date("fecha").notNull(),
     /** 'diario' | 'on_demand' */
-    tipo: text('tipo').notNull(),
-    matches: integer('matches').notNull(),
+    tipo: text("tipo").notNull(),
+    matches: integer("matches").notNull(),
     /** 'enviado' | 'sin_coincidencias' | 'error' */
-    estado: text('estado').notNull(),
-    enviadoEn: timestamp('enviado_en', { withTimezone: true }).defaultNow().notNull(),
+    estado: text("estado").notNull(),
+    enviadoEn: timestamp("enviado_en", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [uniqueIndex('envio_log_usuario_fecha_tipo_uq').on(t.usuarioId, t.fecha, t.tipo)],
+  (t) => [uniqueIndex("envio_log_usuario_fecha_tipo_uq").on(t.usuarioId, t.fecha, t.tipo)]
 );
 
 /**
@@ -86,14 +86,14 @@ export const envioLog = pgTable(
  * `activo` ya existen desde 1.3 porque el unsubscribe de un clic del primer
  * correo necesita algo que apagar).
  */
-export const alertaPreferencias = pgTable('alerta_preferencias', {
-  usuarioId: text('usuario_id')
+export const alertaPreferencias = pgTable("alerta_preferencias", {
+  usuarioId: text("usuario_id")
     .primaryKey()
-    .references(() => usuario.id, { onDelete: 'cascade' }),
-  activo: boolean('activo').default(true).notNull(),
-  horaEnvio: smallint('hora_envio').default(7).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+    .references(() => usuario.id, { onDelete: "cascade" }),
+  activo: boolean("activo").default(true).notNull(),
+  horaEnvio: smallint("hora_envio").default(7).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 /**
@@ -106,14 +106,14 @@ export const alertaPreferencias = pgTable('alerta_preferencias', {
  * query se filtra por usuarioId en código de aplicación.
  */
 export const senalUsuario = pgTable(
-  'senal_usuario',
+  "senal_usuario",
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    usuarioId: text('usuario_id')
+    id: uuid("id").defaultRandom().primaryKey(),
+    usuarioId: text("usuario_id")
       .notNull()
-      .references(() => usuario.id, { onDelete: 'cascade' }),
-    senal: text('senal').notNull(),
-    creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
+      .references(() => usuario.id, { onDelete: "cascade" }),
+    senal: text("senal").notNull(),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index('senal_usuario_usuario_idx').on(t.usuarioId)],
+  (t) => [index("senal_usuario_usuario_idx").on(t.usuarioId)]
 );

@@ -49,8 +49,7 @@ export function buildKeysetPage(opts: {
     const w = soqlEscape(cursor.watermark);
     const id = soqlEscape(cursor.id);
     where =
-      `${watermarkField} > '${w}' ` +
-      `OR (${watermarkField} = '${w}' AND ${idField} > '${id}')`;
+      `${watermarkField} > '${w}' ` + `OR (${watermarkField} = '${w}' AND ${idField} > '${id}')`;
   } else if (sinceExclusive) {
     where = `${watermarkField} > '${soqlEscape(sinceExclusive)}'`;
   }
@@ -79,12 +78,12 @@ function combineWhere(cursorWhere?: string, sectorWhere?: string | null): string
 export function cursorFromRow(
   row: Record<string, unknown>,
   watermarkField: string,
-  idField: string,
+  idField: string
 ): KeysetCursor | null {
   const watermark = row[watermarkField];
   const id = row[idField];
-  if (typeof watermark !== 'string' || !watermark) return null;
-  if (id == null || String(id) === '') return null;
+  if (typeof watermark !== "string" || !watermark) return null;
+  if (id == null || String(id) === "") return null;
   return { watermark, id: String(id) };
 }
 
@@ -122,6 +121,6 @@ export function buildSweepPage(opts: {
   return {
     $order: `${idField} ASC`,
     $limit: limit,
-    $where: conditions.join(' AND '),
+    $where: conditions.join(" AND "),
   };
 }

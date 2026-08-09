@@ -1,4 +1,4 @@
-import { signInWithGoogleAction } from '@/src/lib/supabase/actions';
+import { signInWithGoogleAction } from "@/src/lib/supabase/actions";
 
 export function GoogleButton({ next }: { next: string }) {
   return (

@@ -16,15 +16,10 @@
  *   · IO (`resolveDatasetId`): consulta el catálogo (fetch inyectable) y memoiza.
  */
 
-import {
-  DATASETS,
-  DATASET_NAMES,
-  SOCRATA_CATALOG_DOMAIN,
-  type DatasetKey,
-} from './config';
+import { DATASETS, DATASET_NAMES, SOCRATA_CATALOG_DOMAIN, type DatasetKey } from "./config";
 
 /** Discovery API del catálogo Socrata (cross-domain, host fijo de Socrata). */
-const CATALOG_URL = 'https://api.us.socrata.com/api/catalog/v1';
+const CATALOG_URL = "https://api.us.socrata.com/api/catalog/v1";
 
 /** Formato canónico de un id de recurso Socrata: `xxxx-xxxx`. */
 const FOUR_BY_FOUR = /^[a-z0-9]{4}-[a-z0-9]{4}$/;
@@ -55,10 +50,10 @@ const DESCRIPTORS: Record<DatasetKey, Descriptor> = {
  */
 export function pickDatasetId(
   results: CatalogResult[],
-  descriptor: Descriptor,
+  descriptor: Descriptor
 ): { id: string; resolved: boolean } {
   const match = results.find(
-    (r) => r.resource?.name === descriptor.name && FOUR_BY_FOUR.test(r.resource?.id ?? ''),
+    (r) => r.resource?.name === descriptor.name && FOUR_BY_FOUR.test(r.resource?.id ?? "")
   );
   if (match?.resource?.id) return { id: match.resource.id, resolved: true };
   return { id: descriptor.fallbackId, resolved: false };
@@ -69,15 +64,15 @@ export type CatalogFetcher = (name: string) => Promise<CatalogResult[]>;
 
 async function defaultFetchCatalog(name: string): Promise<CatalogResult[]> {
   const url = new URL(CATALOG_URL);
-  url.searchParams.set('domains', SOCRATA_CATALOG_DOMAIN);
-  url.searchParams.set('q', name);
-  url.searchParams.set('only', 'dataset');
-  url.searchParams.set('limit', '20');
+  url.searchParams.set("domains", SOCRATA_CATALOG_DOMAIN);
+  url.searchParams.set("q", name);
+  url.searchParams.set("only", "dataset");
+  url.searchParams.set("limit", "20");
 
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  if (process.env.SECOP_APP_TOKEN) headers['X-App-Token'] = process.env.SECOP_APP_TOKEN;
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (process.env.SECOP_APP_TOKEN) headers["X-App-Token"] = process.env.SECOP_APP_TOKEN;
 
-  const res = await fetch(url.toString(), { headers, cache: 'no-store' });
+  const res = await fetch(url.toString(), { headers, cache: "no-store" });
   if (!res.ok) throw new Error(`catalog ${res.status}`);
   const body = (await res.json()) as { results?: CatalogResult[] };
   return body.results ?? [];
@@ -104,10 +99,7 @@ export interface ResolveDeps {
  * Devuelve el id 4x4 vigente del dataset. Memoiza el resultado resuelto por TTL.
  * Nunca lanza: ante cualquier problema usa el fallback de `config.DATASETS`.
  */
-export async function resolveDatasetId(
-  key: DatasetKey,
-  deps: ResolveDeps = {},
-): Promise<string> {
+export async function resolveDatasetId(key: DatasetKey, deps: ResolveDeps = {}): Promise<string> {
   const now = deps.now ?? Date.now;
   const fetchCatalog = deps.fetchCatalog ?? defaultFetchCatalog;
   const descriptor = DESCRIPTORS[key];
@@ -121,14 +113,14 @@ export async function resolveDatasetId(
     if (!resolved) {
       // No cacheamos el fallback: queremos reintentar el catálogo en la próxima.
       console.warn(
-        `[datasetResolver] ${key}: sin match en catálogo, usando fallback ${descriptor.fallbackId}`,
+        `[datasetResolver] ${key}: sin match en catálogo, usando fallback ${descriptor.fallbackId}`
       );
       return descriptor.fallbackId;
     }
     if (id !== descriptor.fallbackId) {
       console.warn(
         `[datasetResolver] ${key}: el id rotó ${descriptor.fallbackId} → ${id}. ` +
-          `Actualiza config.DATASETS.${key}.`,
+          `Actualiza config.DATASETS.${key}.`
       );
     }
     cache.set(key, { id, expiresAt: now() + TTL_MS });
@@ -137,7 +129,7 @@ export async function resolveDatasetId(
     console.warn(
       `[datasetResolver] ${key}: catálogo no disponible (${
         e instanceof Error ? e.message : String(e)
-      }), usando fallback ${descriptor.fallbackId}`,
+      }), usando fallback ${descriptor.fallbackId}`
     );
     return descriptor.fallbackId;
   }

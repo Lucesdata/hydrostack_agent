@@ -1,5 +1,5 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * No usa `src/lib/supabase/server.ts` a propósito: ese cliente escribe
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   // 303, no el 307 por defecto: un 307 preserva el método del request
   // original, así que el navegador reintentaría `/` con POST (una página,
   // no un route handler) en vez de GET.
-  const response = NextResponse.redirect(new URL('/', request.url), 303);
+  const response = NextResponse.redirect(new URL("/", request.url), 303);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,11 +25,11 @@ export async function POST(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, options)
           );
         },
       },
-    },
+    }
   );
 
   await supabase.auth.signOut();

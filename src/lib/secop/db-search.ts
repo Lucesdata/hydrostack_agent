@@ -19,31 +19,36 @@
  * Spec: docs/superpowers/specs/2026-07-15-vista-simple-y-elegibilidad-diferida.md
  */
 
-import { FIELDS_PROCESOS, KEYWORDS_AGUA, PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX } from './config';
-import { accessMessage, type DocumentAccess } from './document-access';
-import type { SecopProceso, SecopQuery, SecopResult } from './types';
+import { FIELDS_PROCESOS, KEYWORDS_AGUA, PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX } from "./config";
+import { accessMessage, type DocumentAccess } from "./document-access";
+import type { SecopProceso, SecopQuery, SecopResult } from "./types";
 
 const F = FIELDS_PROCESOS;
 
 function toNumber(v: unknown): number | null {
-  if (v === null || v === undefined || v === '') return null;
+  if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
 /** `urlproceso` llega como `{ url }`, string, o basura (igual que en client.ts). */
 function extractUrl(v: unknown): string | null {
-  if (typeof v === 'string' && v.startsWith('http')) return v;
-  if (typeof v === 'object' && v !== null && 'url' in v) {
+  if (typeof v === "string" && v.startsWith("http")) return v;
+  if (typeof v === "object" && v !== null && "url" in v) {
     const u = (v as { url?: unknown }).url;
-    return typeof u === 'string' && u.startsWith('http') ? u : null;
+    return typeof u === "string" && u.startsWith("http") ? u : null;
   }
   return null;
 }
 
-const DOCUMENT_ACCESS_VALUES: DocumentAccess[] = ['PUBLIC', 'RESTRICTED', 'NOT_PUBLISHED', 'UNKNOWN'];
+const DOCUMENT_ACCESS_VALUES: DocumentAccess[] = [
+  "PUBLIC",
+  "RESTRICTED",
+  "NOT_PUBLISHED",
+  "UNKNOWN",
+];
 function isDocumentAccess(v: unknown): v is DocumentAccess {
-  return typeof v === 'string' && (DOCUMENT_ACCESS_VALUES as string[]).includes(v);
+  return typeof v === "string" && (DOCUMENT_ACCESS_VALUES as string[]).includes(v);
 }
 
 /**
@@ -77,28 +82,30 @@ export interface DbProcesoRow {
 }
 
 export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
-  const documentAccess: DocumentAccess = isDocumentAccess(row.documentAccess) ? row.documentAccess : 'UNKNOWN';
+  const documentAccess: DocumentAccess = isDocumentAccess(row.documentAccess)
+    ? row.documentAccess
+    : "UNKNOWN";
   const apertura = row.estadoAperturaRaw;
   return {
     id: row.secopProcesoId,
-    referencia: row.referencia ?? '',
-    nombre: row.nombreRaw ?? row.objeto ?? '',
-    descripcion: row.descripcionRaw ?? '',
-    entidad: row.entidadNombre ?? '',
-    departamento: row.departamento ?? '',
-    ciudad: row.ciudad ?? '',
-    estado: row.estadoActual ?? '',
-    fase: row.faseRaw ?? '',
-    modalidad: row.modalidad ?? '',
-    tipoContrato: row.tipoContrato ?? '',
+    referencia: row.referencia ?? "",
+    nombre: row.nombreRaw ?? row.objeto ?? "",
+    descripcion: row.descripcionRaw ?? "",
+    entidad: row.entidadNombre ?? "",
+    departamento: row.departamento ?? "",
+    ciudad: row.ciudad ?? "",
+    estado: row.estadoActual ?? "",
+    fase: row.faseRaw ?? "",
+    modalidad: row.modalidad ?? "",
+    tipoContrato: row.tipoContrato ?? "",
     fechaPublicacion: row.fechaPublicacion,
     precioBase: toNumber(row.precioBase),
-    adjudicado: (row.adjudicadoRaw ?? '').toLowerCase() === 'si',
+    adjudicado: (row.adjudicadoRaw ?? "").toLowerCase() === "si",
     valorAdjudicacion: toNumber(row.valorAdjudicacionRaw),
     adjudicatario: row.adjudicatarioRaw ?? null,
     unspsc: row.unspscRaw ?? null,
     url: extractUrl(row.urlRaw),
-    estadoApertura: apertura === 'Abierto' || apertura === 'Cerrado' ? apertura : null,
+    estadoApertura: apertura === "Abierto" || apertura === "Cerrado" ? apertura : null,
     documentAccess,
     accessMessage: accessMessage(documentAccess),
   };
@@ -112,8 +119,8 @@ export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
  */
 async function prepare(query: SecopQuery) {
   const [{ db, schema }, ops] = await Promise.all([
-    import('@/src/lib/db/client'),
-    import('drizzle-orm'),
+    import("@/src/lib/db/client"),
+    import("drizzle-orm"),
   ]);
   const { and, eq, gte, ilike, isNull, or, sql } = ops;
   const { proceso, entidad, geografia, rawRecord } = schema;
@@ -125,7 +132,10 @@ async function prepare(query: SecopQuery) {
 
   const aguaClauses =
     query.soloAgua !== false
-      ? KEYWORDS_AGUA.flatMap((kw) => [ilike(nombreRaw, `%${kw}%`), ilike(descripcionRaw, `%${kw}%`)])
+      ? KEYWORDS_AGUA.flatMap((kw) => [
+          ilike(nombreRaw, `%${kw}%`),
+          ilike(descripcionRaw, `%${kw}%`),
+        ])
       : [];
 
   const conditions = [
@@ -136,10 +146,22 @@ async function prepare(query: SecopQuery) {
     query.valorMin != null ? gte(proceso.valorEstimado, String(query.valorMin)) : undefined,
     query.desde ? gte(proceso.fechaPublicacion, query.desde) : undefined,
     query.apertura ? eq(aperturaRaw, query.apertura) : undefined,
-    query.q ? or(ilike(proceso.objeto, `%${query.q}%`), ilike(entidad.nombre, `%${query.q}%`)) : undefined,
+    query.q
+      ? or(ilike(proceso.objeto, `%${query.q}%`), ilike(entidad.nombre, `%${query.q}%`))
+      : undefined,
   ].filter((c): c is NonNullable<typeof c> => c !== undefined);
 
-  return { db, eq, sql, where: and(...conditions), proceso, entidad, geografia, rawRecord, payload };
+  return {
+    db,
+    eq,
+    sql,
+    where: and(...conditions),
+    proceso,
+    entidad,
+    geografia,
+    rawRecord,
+    payload,
+  };
 }
 
 /**
@@ -149,9 +171,10 @@ async function prepare(query: SecopQuery) {
 export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopResult<SecopProceso>> {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
-  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord, payload } = await prepare(query);
+  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord, payload } =
+    await prepare(query);
 
-  const orderCol = query.orden === 'valor' ? proceso.valorEstimado : proceso.fechaPublicacion;
+  const orderCol = query.orden === "valor" ? proceso.valorEstimado : proceso.fechaPublicacion;
 
   const rows = await db
     .select({

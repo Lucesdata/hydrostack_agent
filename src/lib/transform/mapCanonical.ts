@@ -12,9 +12,9 @@
  * canonicalizeNit), proveedor basura → proveedor null + proveedorRaw texto (D3).
  */
 
-import { cleanText, parseBool, parseDate, parseMoney } from './normalize';
-import { canonicalizeNit, normalizeTipoDoc } from './nit';
-import { normalizeGeoText } from './geo';
+import { cleanText, parseBool, parseDate, parseMoney } from "./normalize";
+import { canonicalizeNit, normalizeTipoDoc } from "./nit";
+import { normalizeGeoText } from "./geo";
 
 type SodaRow = Record<string, unknown>;
 
@@ -95,9 +95,9 @@ function buildEntidad(
   nombre: unknown,
   nivel: unknown,
   rama: unknown,
-  sector: unknown,
+  sector: unknown
 ): EntidadProjection | null {
-  const { nitCanonico, nitDv } = canonicalizeNit(rawNit, 'NIT');
+  const { nitCanonico, nitDv } = canonicalizeNit(rawNit, "NIT");
   if (nitCanonico === null) return null;
   const ramaClean = cleanText(rama);
   return {
@@ -113,63 +113,64 @@ function buildEntidad(
 /** Procesos (`p6dx-8zbt`) → proyección canónica (0.2 §3.1). */
 export function mapProcesoRow(row: SodaRow): ProcesoProjection {
   return {
-    secopProcesoId: String(cleanText(row['id_del_proceso']) ?? ''),
-    portafolioId: cleanText(row['id_del_portafolio']),
-    referencia: cleanText(row['referencia_del_proceso']),
-    modalidad: cleanText(row['modalidad_de_contratacion']),
-    tipoContrato: cleanText(row['tipo_de_contrato']),
-    objeto: cleanText(row['nombre_del_procedimiento']) ?? cleanText(row['descripci_n_del_procedimiento']),
-    valorEstimado: parseMoney(row['precio_base']),
-    fechaPublicacion: parseDate(row['fecha_de_publicacion_del']),
-    estadoActual: cleanText(row['estado_del_procedimiento']),
-    estadoCodigo: cleanText(row['id_estado_del_procedimiento']),
-    entidad: buildEntidad(row['nit_entidad'], row['entidad'], row['ordenentidad'], null, null),
+    secopProcesoId: String(cleanText(row["id_del_proceso"]) ?? ""),
+    portafolioId: cleanText(row["id_del_portafolio"]),
+    referencia: cleanText(row["referencia_del_proceso"]),
+    modalidad: cleanText(row["modalidad_de_contratacion"]),
+    tipoContrato: cleanText(row["tipo_de_contrato"]),
+    objeto:
+      cleanText(row["nombre_del_procedimiento"]) ?? cleanText(row["descripci_n_del_procedimiento"]),
+    valorEstimado: parseMoney(row["precio_base"]),
+    fechaPublicacion: parseDate(row["fecha_de_publicacion_del"]),
+    estadoActual: cleanText(row["estado_del_procedimiento"]),
+    estadoCodigo: cleanText(row["id_estado_del_procedimiento"]),
+    entidad: buildEntidad(row["nit_entidad"], row["entidad"], row["ordenentidad"], null, null),
     geo: {
-      departamento: normalizeGeoText(row['departamento_entidad']),
-      municipio: normalizeGeoText(row['ciudad_entidad']),
+      departamento: normalizeGeoText(row["departamento_entidad"]),
+      municipio: normalizeGeoText(row["ciudad_entidad"]),
     },
   };
 }
 
 /** Contratos (`jbjy-vk9h`) → proyección canónica (0.2 §3.2). */
 export function mapContratoRow(row: SodaRow): ContratoProjection {
-  const doc = canonicalizeNit(row['documento_proveedor'], row['tipodocproveedor']);
-  const razonSocial = cleanText(row['proveedor_adjudicado']);
-  const representante = cleanText(row['nombre_representante_legal']);
+  const doc = canonicalizeNit(row["documento_proveedor"], row["tipodocproveedor"]);
+  const razonSocial = cleanText(row["proveedor_adjudicado"]);
+  const representante = cleanText(row["nombre_representante_legal"]);
   const proveedor: ProveedorProjection | null =
     doc.nitCanonico === null
       ? null
       : {
           nitCanonico: doc.nitCanonico,
           nitDv: doc.nitDv,
-          tipoDocumento: normalizeTipoDoc(row['tipodocproveedor']),
+          tipoDocumento: normalizeTipoDoc(row["tipodocproveedor"]),
           razonSocial,
-          esEstructuraPlural: parseBool(row['es_grupo']) ?? false,
+          esEstructuraPlural: parseBool(row["es_grupo"]) ?? false,
           rawAttrs: representante !== null ? { representante_legal: representante } : null,
         };
 
   return {
-    secopContratoId: String(cleanText(row['id_contrato']) ?? ''),
-    procesoDeCompra: cleanText(row['proceso_de_compra']),
-    referencia: cleanText(row['referencia_del_contrato']),
-    objeto: cleanText(row['objeto_del_contrato']) ?? cleanText(row['descripcion_del_proceso']),
-    modalidad: cleanText(row['modalidad_de_contratacion']),
-    tipoContrato: cleanText(row['tipo_de_contrato']),
-    valorContrato: parseMoney(row['valor_del_contrato']),
-    fechaFirma: parseDate(row['fecha_de_firma']),
-    fechaInicio: parseDate(row['fecha_de_inicio_del_contrato']),
-    fechaFin: parseDate(row['fecha_de_fin_del_contrato']),
-    estadoActual: cleanText(row['estado_contrato']),
-    prorrogable: parseBool(row['el_contrato_puede_ser_prorrogado']),
-    valorFacturado: parseMoney(row['valor_facturado']),
-    valorPagado: parseMoney(row['valor_pagado']),
-    valorPendientePago: parseMoney(row['valor_pendiente_de_pago']),
+    secopContratoId: String(cleanText(row["id_contrato"]) ?? ""),
+    procesoDeCompra: cleanText(row["proceso_de_compra"]),
+    referencia: cleanText(row["referencia_del_contrato"]),
+    objeto: cleanText(row["objeto_del_contrato"]) ?? cleanText(row["descripcion_del_proceso"]),
+    modalidad: cleanText(row["modalidad_de_contratacion"]),
+    tipoContrato: cleanText(row["tipo_de_contrato"]),
+    valorContrato: parseMoney(row["valor_del_contrato"]),
+    fechaFirma: parseDate(row["fecha_de_firma"]),
+    fechaInicio: parseDate(row["fecha_de_inicio_del_contrato"]),
+    fechaFin: parseDate(row["fecha_de_fin_del_contrato"]),
+    estadoActual: cleanText(row["estado_contrato"]),
+    prorrogable: parseBool(row["el_contrato_puede_ser_prorrogado"]),
+    valorFacturado: parseMoney(row["valor_facturado"]),
+    valorPagado: parseMoney(row["valor_pagado"]),
+    valorPendientePago: parseMoney(row["valor_pendiente_de_pago"]),
     entidad: buildEntidad(
-      row['nit_entidad'],
-      row['nombre_entidad'],
-      row['orden'],
-      row['rama'],
-      row['sector'],
+      row["nit_entidad"],
+      row["nombre_entidad"],
+      row["orden"],
+      row["rama"],
+      row["sector"]
     ),
     // proveedor null pero hay razón social → guardamos el texto para no perder la pista (D3)
     proveedor,
@@ -189,10 +190,10 @@ export function mapContratoRow(row: SodaRow): ContratoProjection {
  * fallback. Si tampoco hay fallback, queda null (lo recoge 0.6).
  */
 function geoFromContrato(row: SodaRow): GeoHints {
-  const parsed = parseLocalizacion(row['localizaci_n']);
+  const parsed = parseLocalizacion(row["localizaci_n"]);
   return {
-    departamento: parsed.departamento ?? normalizeGeoText(row['departamento']),
-    municipio: parsed.municipio ?? normalizeGeoText(row['ciudad']),
+    departamento: parsed.departamento ?? normalizeGeoText(row["departamento"]),
+    municipio: parsed.municipio ?? normalizeGeoText(row["ciudad"]),
   };
 }
 
@@ -201,9 +202,9 @@ function parseLocalizacion(value: unknown): GeoHints {
   if (s === null) return { departamento: null, municipio: null };
   // "Colombia, <dep>, <mun>" — el primer segmento es el país, lo descartamos.
   const segments = s
-    .split(',')
+    .split(",")
     .map((p) => normalizeGeoText(p))
-    .filter((p) => p !== 'colombia');
+    .filter((p) => p !== "colombia");
   // Tomamos los dos últimos como (dep, mun). Si solo hay uno, va a municipio
   // (es la pista más específica observada en muestra).
   if (segments.length >= 2) {

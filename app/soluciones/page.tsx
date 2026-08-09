@@ -69,10 +69,12 @@ export default async function SolucionesPage() {
       <style dangerouslySetInnerHTML={{ __html: STYLE }} />
       <div className="clr-sol-inner">
         <div className="clr-sol-hero">
-          <h1 className="clr-sol-h1">¿Un problema de agua potable o vertimientos? Empecemos por entenderlo.</h1>
+          <h1 className="clr-sol-h1">
+            ¿Un problema de agua potable o vertimientos? Empecemos por entenderlo.
+          </h1>
           <p className="clr-sol-sub">
-            No necesitas saber el nombre técnico de lo que te hace falta. Cuéntanos qué está pasando y te
-            mostramos el camino: la solución típica, quién puede ejecutarla y cómo se contrata.
+            No necesitas saber el nombre técnico de lo que te hace falta. Cuéntanos qué está pasando
+            y te mostramos el camino: la solución típica, quién puede ejecutarla y cómo se contrata.
           </p>
         </div>
 
@@ -90,9 +92,12 @@ export default async function SolucionesPage() {
 
         <div className="clr-sol-cta-block" id="contacto">
           <p className="clr-sol-cta-note">
-            Esta sección crecerá con un formulario propio. Por ahora, cuéntanos tu caso y te contactamos.
+            Esta sección crecerá con un formulario propio. Por ahora, cuéntanos tu caso y te
+            contactamos.
           </p>
-          <Link href="#contacto" className="clr-sol-cta">[ Cuéntanos tu caso ]</Link>
+          <Link href="#contacto" className="clr-sol-cta">
+            [ Cuéntanos tu caso ]
+          </Link>
         </div>
       </div>
     </main>

@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Falta el proceso o es inválido" }, { status: 400 });
   }
   if (!isValidPerfil(body.perfil)) {
-    return NextResponse.json({ error: "Falta el perfil de oferente o es inválido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Falta el perfil de oferente o es inválido" },
+      { status: 400 }
+    );
   }
 
   const verdict = buildVerdict(body.perfil, toVerdictInput(body.proceso));

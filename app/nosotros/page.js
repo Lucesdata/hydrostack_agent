@@ -10,9 +10,8 @@ export default function NosotrosPage() {
           <span className="clr-tag">nosotros</span>
           <h1 className="clr-h1">Un ingeniero especialista, no una startup genérica</h1>
           <p className="clr-sub">
-            11 años en agua y saneamiento, planes directores ejecutados y licencia
-            profesional vigente — el método detrás de cada indicador que ves en
-            HydroStack.
+            11 años en agua y saneamiento, planes directores ejecutados y licencia profesional
+            vigente — el método detrás de cada indicador que ves en HydroStack.
           </p>
         </header>
       </div>

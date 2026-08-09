@@ -103,7 +103,10 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
       summary.enviados++;
     } catch (e) {
       const mensaje = e instanceof Error ? e.message : String(e);
-      await db.update(envioLog).set({ estado: "error", matches: 0 }).where(eq(envioLog.id, reservado.id));
+      await db
+        .update(envioLog)
+        .set({ estado: "error", matches: 0 })
+        .where(eq(envioLog.id, reservado.id));
       summary.errores++;
       console.error("[alertas/diario] fallo para", cuenta.usuarioId, mensaje);
     }

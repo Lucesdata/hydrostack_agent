@@ -8,15 +8,15 @@
  * de bogota" apunten al mismo DIVIPOLA es trabajo del seed de alias, no de aquí.
  */
 
-import { cleanText, stripAccents } from './normalize';
+import { cleanText, stripAccents } from "./normalize";
 
 /** Texto geográfico canónico para lookup en `geografia_alias`; `null` si vacío/centinela. */
 export function normalizeGeoText(value: unknown): string | null {
   const s = cleanText(value);
   if (s === null) return null;
   const norm = stripAccents(s.toLowerCase())
-    .replace(/[^a-z0-9\s]/g, ' ') // quita puntos, comas, guiones ("d.c." → "d c")
-    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9\s]/g, " ") // quita puntos, comas, guiones ("d.c." → "d c")
+    .replace(/\s+/g, " ")
     .trim();
   return norm || null;
 }
@@ -30,8 +30,8 @@ export function municipioFromLocalizacion(value: unknown): string | null {
   const s = cleanText(value);
   if (s === null) return null;
   const parts = s
-    .split(',')
+    .split(",")
     .map((p) => normalizeGeoText(p))
-    .filter((p): p is string => p !== null && p !== 'colombia');
+    .filter((p): p is string => p !== null && p !== "colombia");
   return parts.length ? parts[parts.length - 1] : null;
 }

@@ -20,12 +20,12 @@ import {
   sweepWithoutWatermark,
   type IngestSummary,
   type SweepSummary,
-} from './dbIngest';
-import { SOURCE_PROCESOS, SOURCE_CONTRATOS, type IngestSource } from './sources';
-import { runTransform, type TransformSummary } from '@/src/lib/transform/orchestrator';
+} from "./dbIngest";
+import { SOURCE_PROCESOS, SOURCE_CONTRATOS, type IngestSource } from "./sources";
+import { runTransform, type TransformSummary } from "@/src/lib/transform/orchestrator";
 
 export interface PipelineOptions {
-  source: 'procesos' | 'contratos' | 'both';
+  source: "procesos" | "contratos" | "both";
   /** Solo aterrizar a raw_record, sin reconstruir la canónica. */
   skipTransform?: boolean;
   /** Solo pasada 2 (D21a), sin keyset. */
@@ -49,7 +49,7 @@ export interface RunOutput {
   transform: TransformSummary | null;
 }
 
-const SOURCES: Record<'procesos' | 'contratos', IngestSource> = {
+const SOURCES: Record<"procesos" | "contratos", IngestSource> = {
   procesos: SOURCE_PROCESOS,
   contratos: SOURCE_CONTRATOS,
 };
@@ -58,10 +58,7 @@ function emptyRun(): SourceRun {
   return { keyset: null, sweep: null };
 }
 
-async function runSource(
-  key: 'procesos' | 'contratos',
-  opts: PipelineOptions,
-): Promise<SourceRun> {
+async function runSource(key: "procesos" | "contratos", opts: PipelineOptions): Promise<SourceRun> {
   const source = SOURCES[key];
   const run = emptyRun();
 
@@ -74,7 +71,7 @@ async function runSource(
   }
 
   // Sweep D21a aplica a contratos (procesos trae watermark ≈100%).
-  if (key === 'contratos') {
+  if (key === "contratos") {
     run.sweep = await sweepWithoutWatermark(source, {
       pageSize: opts.pageSize,
       maxPages: opts.maxPages,
@@ -91,7 +88,7 @@ async function runSource(
  */
 export async function runIngestPipeline(opts: PipelineOptions): Promise<RunOutput> {
   if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL no definida.');
+    throw new Error("DATABASE_URL no definida.");
   }
 
   const t0 = Date.now();
@@ -104,8 +101,8 @@ export async function runIngestPipeline(opts: PipelineOptions): Promise<RunOutpu
     transform: null,
   };
 
-  const toRun: ('procesos' | 'contratos')[] =
-    opts.source === 'both' ? ['procesos', 'contratos'] : [opts.source];
+  const toRun: ("procesos" | "contratos")[] =
+    opts.source === "both" ? ["procesos", "contratos"] : [opts.source];
 
   for (const key of toRun) {
     out[key] = await runSource(key, opts);

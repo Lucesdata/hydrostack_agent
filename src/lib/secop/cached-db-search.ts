@@ -18,16 +18,20 @@
  * casos que reusan la misma query (mismo cache key).
  */
 
-import { searchProcesosDb, countProcesosDb } from './db-search';
-import { REVALIDATE_SEARCH, REVALIDATE_COUNT } from './config';
-import type { SecopProceso, SecopQuery, SecopResult } from './types';
+import { searchProcesosDb, countProcesosDb } from "./db-search";
+import { REVALIDATE_SEARCH, REVALIDATE_COUNT } from "./config";
+import type { SecopProceso, SecopQuery, SecopResult } from "./types";
 
 interface CacheEntry<R> {
   value: R;
   expires: number;
 }
 
-function memoize<A, R>(fn: (arg: A) => Promise<R>, ttlMs: number, store: Map<string, CacheEntry<R>>) {
+function memoize<A, R>(
+  fn: (arg: A) => Promise<R>,
+  ttlMs: number,
+  store: Map<string, CacheEntry<R>>
+) {
   const memoized = (arg: A): Promise<R> => {
     const key = JSON.stringify(arg);
     const hit = store.get(key);
@@ -46,9 +50,10 @@ const globalForCache = globalThis as unknown as {
   _secopCountCache?: Map<string, CacheEntry<number>>;
 };
 
-const searchStore = globalForCache._secopSearchCache ?? new Map<string, CacheEntry<SecopResult<SecopProceso>>>();
+const searchStore =
+  globalForCache._secopSearchCache ?? new Map<string, CacheEntry<SecopResult<SecopProceso>>>();
 const countStore = globalForCache._secopCountCache ?? new Map<string, CacheEntry<number>>();
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForCache._secopSearchCache = searchStore;
   globalForCache._secopCountCache = countStore;
 }

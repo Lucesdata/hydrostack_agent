@@ -33,7 +33,7 @@ export async function getPreferencias(usuarioId: string): Promise<AlertaPreferen
 
 export async function savePreferencias(
   usuarioId: string,
-  prefs: AlertaPreferencias,
+  prefs: AlertaPreferencias
 ): Promise<AlertaPreferencias> {
   const [row] = await db
     .insert(alertaPreferencias)

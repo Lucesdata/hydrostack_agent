@@ -9,12 +9,12 @@
  * (geografia_alias.texto_normalizado). Re-ejecutar no duplica.
  */
 
-import './_env';
-import { db, pool } from '@/src/lib/db/client';
-import { geografia, geografiaAlias } from '@/src/lib/db/schema';
-import { sql } from 'drizzle-orm';
-import { ALL_DIVIPOLA, type DivipolaEntry } from '@/data/dane/divipola';
-import { normalizeGeoText } from '@/src/lib/transform/geo';
+import "./_env";
+import { db, pool } from "@/src/lib/db/client";
+import { geografia, geografiaAlias } from "@/src/lib/db/schema";
+import { sql } from "drizzle-orm";
+import { ALL_DIVIPOLA, type DivipolaEntry } from "@/data/dane/divipola";
+import { normalizeGeoText } from "@/src/lib/transform/geo";
 
 function aliasesFor(entry: DivipolaEntry): string[] {
   const out = new Set<string>();
@@ -34,7 +34,7 @@ function aliasesFor(entry: DivipolaEntry): string[] {
 
 async function main() {
   if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL no definida. Provisiona la Neon branch.');
+    throw new Error("DATABASE_URL no definida. Provisiona la Neon branch.");
   }
 
   // 1. Upsert geografia
@@ -82,12 +82,8 @@ async function main() {
   process.stdout.write(`geografia_alias: ${aliasUpserts} aliases upserteados\n`);
 
   // 3. Reporte rápido
-  const [g] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(geografia);
-  const [a] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(geografiaAlias);
+  const [g] = await db.select({ n: sql<number>`count(*)::int` }).from(geografia);
+  const [a] = await db.select({ n: sql<number>`count(*)::int` }).from(geografiaAlias);
   process.stdout.write(`total geografia: ${g?.n} · aliases: ${a?.n}\n`);
 
   await pool.end();

@@ -13,31 +13,31 @@
  * exige contexto ("agua potable", "agua residual").
  */
 export const KEYWORDS_DOMINIO = [
-  'acueducto',
-  'alcantarillado',
-  'saneamiento basico',
-  'agua potable',
-  'aguas residuales',
-  'agua residual',
-  'ptar',
-  'ptap',
-  'planta de tratamiento',
-  'pozo septico',
-  'tanque septico',
-  'potabilizacion',
-  'cloracion',
-  'vertimiento',
-  'colector',
-  'interceptor',
-  'emisario',
-  'captacion',
-  'aduccion',
-  'red de distribucion',
-  'micromedicion',
-  'macromedicion',
-  'plan maestro de acueducto',
-  'optimizacion del sistema de acueducto',
-  'lodos',
+  "acueducto",
+  "alcantarillado",
+  "saneamiento basico",
+  "agua potable",
+  "aguas residuales",
+  "agua residual",
+  "ptar",
+  "ptap",
+  "planta de tratamiento",
+  "pozo septico",
+  "tanque septico",
+  "potabilizacion",
+  "cloracion",
+  "vertimiento",
+  "colector",
+  "interceptor",
+  "emisario",
+  "captacion",
+  "aduccion",
+  "red de distribucion",
+  "micromedicion",
+  "macromedicion",
+  "plan maestro de acueducto",
+  "optimizacion del sistema de acueducto",
+  "lodos",
 ] as const;
 
 /**
@@ -45,8 +45,8 @@ export const KEYWORDS_DOMINIO = [
  * de servicios de agua y alcantarillado. Contexto: obra/ingeniería/ambiental/
  * accesorios — suman débil, NO clasifican solos (0.2.1 §1, §5).
  */
-export const UNSPSC_STRONG = ['83101'] as const;
-export const UNSPSC_CONTEXT = ['72141', '81101', '77101', '31162'] as const;
+export const UNSPSC_STRONG = ["83101"] as const;
+export const UNSPSC_CONTEXT = ["72141", "81101", "77101", "31162"] as const;
 
 /**
  * Señal C — patrones de nombre de entidad (fase 1, baja confianza hasta tener el
@@ -65,4 +65,4 @@ export const ENTIDAD_NAME_PATTERNS: readonly RegExp[] = [
 export const ENTIDAD_NIT_ALLOWLIST: readonly string[] = [];
 
 /** Señal D — términos de agua en el campo `sector`/`tipo_contrato` (desempate). */
-export const CONTEXTO_TERMS = ['agua', 'acueducto', 'alcantarillado', 'saneamiento'] as const;
+export const CONTEXTO_TERMS = ["agua", "acueducto", "alcantarillado", "saneamiento"] as const;

@@ -28,7 +28,9 @@ export default function SmartCollections({ activeCollectionIds, onToggle }: Prop
             className={`clr-disc-collection${isActive ? " is-active" : ""}`}
             onClick={() => onToggle(c.id)}
           >
-            <span className="clr-disc-collection-glyph" aria-hidden="true">{c.glyph}</span>
+            <span className="clr-disc-collection-glyph" aria-hidden="true">
+              {c.glyph}
+            </span>
             <span className="clr-disc-collection-title">{c.titulo}</span>
             <span className="clr-disc-collection-desc">{c.descripcion}</span>
           </button>

@@ -85,28 +85,28 @@ const SEED_CONTEXT = ["72141", "81101", "77101", "31162"];
 
 /** Etiquetas de segmento UNSPSC (2 dígitos) — semilla A1-bis del plan. */
 const SEGMENT_LABELS = {
-  "83": "Servicios públicos: agua y alcantarillado",
-  "72": "Construcción / obra civil pesada",
-  "95": "Estructuras no edificatorias (PTAR, tanques, redes)",
-  "81": "Servicios de ingeniería / consultoría",
-  "77": "Servicios medioambientales / saneamiento",
-  "76": "Limpieza / tratamiento de residuos / alcantarillado",
-  "47": "Equipos de tratamiento de agua y residuales (fam. 4710)",
-  "40": "Bombas, tubería, accesorios de fluidos",
-  "41": "Instrumentos de medición y análisis de agua",
-  "70": "Recursos hídricos / agricultura / riego",
-  "12": "Químicos (cloro, coagulantes de potabilización)",
-  "39": "Equipo eléctrico (bombas, iluminación)",
-  "30": "Materiales y componentes estructurales",
-  "31": "Componentes de manufactura (juntas, sellos…)",
-  "80": "Servicios de gestión / administración / PERSONAL",
-  "78": "Transporte / logística",
-  "73": "Servicios industriales de producción",
-  "50": "Alimentos y bebidas (agua embotellada — FP clásico)",
-  "84": "Servicios financieros y de seguros",
-  "85": "Servicios de salud",
-  "86": "Servicios de educación",
-  "93": "Servicios políticos y de asuntos cívicos",
+  83: "Servicios públicos: agua y alcantarillado",
+  72: "Construcción / obra civil pesada",
+  95: "Estructuras no edificatorias (PTAR, tanques, redes)",
+  81: "Servicios de ingeniería / consultoría",
+  77: "Servicios medioambientales / saneamiento",
+  76: "Limpieza / tratamiento de residuos / alcantarillado",
+  47: "Equipos de tratamiento de agua y residuales (fam. 4710)",
+  40: "Bombas, tubería, accesorios de fluidos",
+  41: "Instrumentos de medición y análisis de agua",
+  70: "Recursos hídricos / agricultura / riego",
+  12: "Químicos (cloro, coagulantes de potabilización)",
+  39: "Equipo eléctrico (bombas, iluminación)",
+  30: "Materiales y componentes estructurales",
+  31: "Componentes de manufactura (juntas, sellos…)",
+  80: "Servicios de gestión / administración / PERSONAL",
+  78: "Transporte / logística",
+  73: "Servicios industriales de producción",
+  50: "Alimentos y bebidas (agua embotellada — FP clásico)",
+  84: "Servicios financieros y de seguros",
+  85: "Servicios de salud",
+  86: "Servicios de educación",
+  93: "Servicios políticos y de asuntos cívicos",
 };
 
 /**
@@ -116,7 +116,20 @@ const SEGMENT_LABELS = {
  * A3. NO es un veredicto de precisión — A1 solo señala dónde mirar; A3 etiqueta.
  */
 const CORE_SEGMENTS = new Set([
-  "83", "72", "81", "77", "76", "47", "40", "41", "70", "95", "31", "30", "12", "39",
+  "83",
+  "72",
+  "81",
+  "77",
+  "76",
+  "47",
+  "40",
+  "41",
+  "70",
+  "95",
+  "31",
+  "30",
+  "12",
+  "39",
 ]);
 
 /** Escapa comillas simples para SoQL. */
@@ -135,7 +148,9 @@ function buildAguaWhere() {
 /** Normaliza el código crudo "V1.83101500" → "83101500" (8 dígitos). null si no hay. */
 function digitsOf(raw) {
   if (raw == null) return null;
-  const d = String(raw).replace(/^v\d+\./i, "").replace(/\D/g, "");
+  const d = String(raw)
+    .replace(/^v\d+\./i, "")
+    .replace(/\D/g, "");
   return d || null;
 }
 
@@ -165,18 +180,14 @@ async function main() {
   const where = buildAguaWhere();
 
   process.stderr.write("[A1] total nacional de procesos…\n");
-  const [{ n: totalNacionalRaw }] = await fetchPage(
-    DATASET,
-    { $select: "count(1) AS n" },
-    HEAVY,
-  );
+  const [{ n: totalNacionalRaw }] = await fetchPage(DATASET, { $select: "count(1) AS n" }, HEAVY);
   const totalNacional = Number(totalNacionalRaw);
 
   process.stderr.write("[A1] total de la red de keywords (recall bruto)…\n");
   const [{ n: totalRedRaw }] = await fetchPage(
     DATASET,
     { $select: "count(1) AS n", $where: where },
-    HEAVY,
+    HEAVY
   );
   const totalRed = Number(totalRedRaw);
 
@@ -190,7 +201,7 @@ async function main() {
       $order: "n DESC",
       $limit: TOP_N,
     },
-    HEAVY,
+    HEAVY
   );
 
   // Enriquecer cada fila observada.
@@ -218,7 +229,9 @@ async function main() {
   const sinCodigo = rows.filter((x) => x.digits == null).reduce((s, x) => s + x.n, 0);
 
   // Hallazgos: core (agua genuino) vs no-core (contaminación de keyword → A3).
-  const coreN = rows.filter((x) => x.segmento && CORE_SEGMENTS.has(x.segmento)).reduce((s, x) => s + x.n, 0);
+  const coreN = rows
+    .filter((x) => x.segmento && CORE_SEGMENTS.has(x.segmento))
+    .reduce((s, x) => s + x.n, 0);
   const nonCoreN = cubiertoTopN - coreN - sinCodigo;
   const nonCoreSegs = segmentos.filter((s) => s.segmento !== "—" && !CORE_SEGMENTS.has(s.segmento));
   const dom = nonCoreSegs[0] ?? null; // segmentos ya viene ordenado por n desc
@@ -289,7 +302,7 @@ async function main() {
       `  ⚠ dominante no-core: segmento ${dom?.segmento} (${dom?.familia}) = ${hallazgos.dominanteNoCore?.share.toFixed(1)}%  [${domTopCode?.raw} = ${hallazgos.dominanteNoCore?.topCodigoShare?.toFixed(1)}%]\n` +
       `  semilla strong vista : ${seedSeen.strong.join(", ") || "—"}  | falta: ${seedMissing.strong.join(", ") || "—"}\n` +
       `  semilla context vista: ${seedSeen.context.join(", ") || "—"} | falta: ${seedMissing.context.join(", ") || "—"}\n` +
-      `  → ${OUT_MD}\n`,
+      `  → ${OUT_MD}\n`
   );
 }
 
@@ -316,7 +329,7 @@ function renderMarkdown(m) {
   const topRows = m.rows
     .map(
       (r) =>
-        `| ${r.rank} | \`${r.raw}\` | ${r.digits ?? "—"} | ${fmt(r.n)} | ${r.pctRed.toFixed(2)}% | ${r.pctAcum.toFixed(1)}% | ${r.familia} | ${r.tag} |`,
+        `| ${r.rank} | \`${r.raw}\` | ${r.digits ?? "—"} | ${fmt(r.n)} | ${r.pctRed.toFixed(2)}% | ${r.pctAcum.toFixed(1)}% | ${r.familia} | ${r.tag} |`
     )
     .join("\n");
 

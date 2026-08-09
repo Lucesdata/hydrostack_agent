@@ -236,12 +236,8 @@
           "name": "entidad_geografia_id_geografia_codigo_divipola_fk",
           "tableFrom": "entidad",
           "tableTo": "geografia",
-          "columnsFrom": [
-            "geografia_id"
-          ],
-          "columnsTo": [
-            "codigo_divipola"
-          ],
+          "columnsFrom": ["geografia_id"],
+          "columnsTo": ["codigo_divipola"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -341,12 +337,8 @@
           "name": "geografia_alias_codigo_divipola_geografia_codigo_divipola_fk",
           "tableFrom": "geografia_alias",
           "tableTo": "geografia",
-          "columnsFrom": [
-            "codigo_divipola"
-          ],
-          "columnsTo": [
-            "codigo_divipola"
-          ],
+          "columnsFrom": ["codigo_divipola"],
+          "columnsTo": ["codigo_divipola"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -681,12 +673,8 @@
           "name": "contrato_proceso_id_proceso_id_fk",
           "tableFrom": "contrato",
           "tableTo": "proceso",
-          "columnsFrom": [
-            "proceso_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proceso_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -694,12 +682,8 @@
           "name": "contrato_proveedor_id_proveedor_id_fk",
           "tableFrom": "contrato",
           "tableTo": "proveedor",
-          "columnsFrom": [
-            "proveedor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proveedor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -707,12 +691,8 @@
           "name": "contrato_entidad_id_entidad_id_fk",
           "tableFrom": "contrato",
           "tableTo": "entidad",
-          "columnsFrom": [
-            "entidad_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["entidad_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -720,12 +700,8 @@
           "name": "contrato_geografia_id_geografia_codigo_divipola_fk",
           "tableFrom": "contrato",
           "tableTo": "geografia",
-          "columnsFrom": [
-            "geografia_id"
-          ],
-          "columnsTo": [
-            "codigo_divipola"
-          ],
+          "columnsFrom": ["geografia_id"],
+          "columnsTo": ["codigo_divipola"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -733,12 +709,8 @@
           "name": "contrato_raw_record_id_actual_raw_record_id_fk",
           "tableFrom": "contrato",
           "tableTo": "raw_record",
-          "columnsFrom": [
-            "raw_record_id_actual"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["raw_record_id_actual"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -916,12 +888,8 @@
           "name": "contrato_evento_contrato_id_contrato_id_fk",
           "tableFrom": "contrato_evento",
           "tableTo": "contrato",
-          "columnsFrom": [
-            "contrato_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contrato_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -929,12 +897,8 @@
           "name": "contrato_evento_proveedor_anterior_id_proveedor_id_fk",
           "tableFrom": "contrato_evento",
           "tableTo": "proveedor",
-          "columnsFrom": [
-            "proveedor_anterior_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proveedor_anterior_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -942,12 +906,8 @@
           "name": "contrato_evento_proveedor_nuevo_id_proveedor_id_fk",
           "tableFrom": "contrato_evento",
           "tableTo": "proveedor",
-          "columnsFrom": [
-            "proveedor_nuevo_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proveedor_nuevo_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -955,12 +915,8 @@
           "name": "contrato_evento_raw_record_id_raw_record_id_fk",
           "tableFrom": "contrato_evento",
           "tableTo": "raw_record",
-          "columnsFrom": [
-            "raw_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["raw_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1157,12 +1113,8 @@
           "name": "proceso_entidad_id_entidad_id_fk",
           "tableFrom": "proceso",
           "tableTo": "entidad",
-          "columnsFrom": [
-            "entidad_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["entidad_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1170,12 +1122,8 @@
           "name": "proceso_geografia_id_geografia_codigo_divipola_fk",
           "tableFrom": "proceso",
           "tableTo": "geografia",
-          "columnsFrom": [
-            "geografia_id"
-          ],
-          "columnsTo": [
-            "codigo_divipola"
-          ],
+          "columnsFrom": ["geografia_id"],
+          "columnsTo": ["codigo_divipola"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1183,12 +1131,8 @@
           "name": "proceso_raw_record_id_actual_raw_record_id_fk",
           "tableFrom": "proceso",
           "tableTo": "raw_record",
-          "columnsFrom": [
-            "raw_record_id_actual"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["raw_record_id_actual"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1419,12 +1363,8 @@
           "name": "clasificacion_sectorial_contrato_id_contrato_id_fk",
           "tableFrom": "clasificacion_sectorial",
           "tableTo": "contrato",
-          "columnsFrom": [
-            "contrato_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contrato_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1432,12 +1372,8 @@
           "name": "clasificacion_sectorial_proceso_id_proceso_id_fk",
           "tableFrom": "clasificacion_sectorial",
           "tableTo": "proceso",
-          "columnsFrom": [
-            "proceso_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proceso_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1546,12 +1482,8 @@
           "name": "transform_quarantine_raw_record_id_raw_record_id_fk",
           "tableFrom": "transform_quarantine",
           "tableTo": "raw_record",
-          "columnsFrom": [
-            "raw_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["raw_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

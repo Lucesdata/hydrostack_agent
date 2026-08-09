@@ -50,10 +50,28 @@ const HEAVY = { timeoutMs: 120_000, maxRetries: 6 };
 
 // Misma red de keywords que A1 (debe coincidir con derive-unspsc.mjs).
 const KEYWORDS = [
-  "ACUEDUCTO", "ALCANTARILLADO", "SANEAMIENTO", "AGUA POTABLE", "AGUAS RESIDUALES",
-  "AGUA RESIDUAL", "PTAR", "PTAP", "PLANTA DE TRATAMIENTO", "POTABILIZ", "CAPTACI",
-  "ADUCCI", "POZO SEPTIC", "TANQUE SEPTIC", "VERTIMIENTO", "COLECTOR", "INTERCEPTOR",
-  "EMISARIO", "MICROMEDIC", "MACROMEDIC", "PSMV", "PLAN MAESTRO DE ACUEDUCTO",
+  "ACUEDUCTO",
+  "ALCANTARILLADO",
+  "SANEAMIENTO",
+  "AGUA POTABLE",
+  "AGUAS RESIDUALES",
+  "AGUA RESIDUAL",
+  "PTAR",
+  "PTAP",
+  "PLANTA DE TRATAMIENTO",
+  "POTABILIZ",
+  "CAPTACI",
+  "ADUCCI",
+  "POZO SEPTIC",
+  "TANQUE SEPTIC",
+  "VERTIMIENTO",
+  "COLECTOR",
+  "INTERCEPTOR",
+  "EMISARIO",
+  "MICROMEDIC",
+  "MACROMEDIC",
+  "PSMV",
+  "PLAN MAESTRO DE ACUEDUCTO",
 ];
 
 function soqlEscape(s) {
@@ -68,8 +86,15 @@ function aguaWhere() {
 }
 
 const SELECT = [
-  FIELD_ID, FIELD_NOMBRE, FIELD_DESC, FIELD_UNSPSC, FIELD_ENTIDAD,
-  FIELD_DEPTO, FIELD_MODALIDAD, FIELD_FECHA, FIELD_VALOR,
+  FIELD_ID,
+  FIELD_NOMBRE,
+  FIELD_DESC,
+  FIELD_UNSPSC,
+  FIELD_ENTIDAD,
+  FIELD_DEPTO,
+  FIELD_MODALIDAD,
+  FIELD_FECHA,
+  FIELD_VALOR,
 ].join(", ");
 
 /**
@@ -84,7 +109,7 @@ async function stratum(extraWhere, limit) {
   const rows = await fetchPage(
     DATASET,
     { $select: SELECT, $where: where, $order: ":id", $limit: limit },
-    HEAVY,
+    HEAVY
   );
   return rows;
 }
@@ -97,7 +122,9 @@ function trunc(s, n) {
 
 function digitsOf(raw) {
   if (raw == null) return null;
-  const d = String(raw).replace(/^v\d+\./i, "").replace(/\D/g, "");
+  const d = String(raw)
+    .replace(/^v\d+\./i, "")
+    .replace(/\D/g, "");
   return d || null;
 }
 
@@ -137,8 +164,12 @@ async function main() {
 
   await writeFile(
     OUT_JSON,
-    JSON.stringify({ generatedAt: new Date().toISOString(), keywords: KEYWORDS, muestra }, null, 2) + "\n",
-    "utf8",
+    JSON.stringify(
+      { generatedAt: new Date().toISOString(), keywords: KEYWORDS, muestra },
+      null,
+      2
+    ) + "\n",
+    "utf8"
   );
 
   // Volcado legible para etiquetar.
@@ -151,7 +182,9 @@ async function main() {
         out.push(
           `[${estrato} #${i + 1}] ${m.unspsc} · ${m.departamento ?? "?"} · ${trunc(m.entidad, 45)}` +
             `\n   OBJ: ${trunc(m.nombre, 150)}` +
-            (m.descripcion && m.descripcion !== m.nombre ? `\n   DSC: ${trunc(m.descripcion, 150)}` : ""),
+            (m.descripcion && m.descripcion !== m.nombre
+              ? `\n   DSC: ${trunc(m.descripcion, 150)}`
+              : "")
         );
       });
   }

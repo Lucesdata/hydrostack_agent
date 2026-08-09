@@ -11,17 +11,13 @@
  * `correlation_id` común (otrosí que adiciona y prorroga a la vez) y se ordena.
  */
 
-import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
-import type { NeonDatabase } from 'drizzle-orm/neon-serverless';
-import { contrato, contratoEvento, proveedor, rawRecord } from '@/src/lib/db/schema';
-import type * as schema from '@/src/lib/db/schema';
-import {
-  contratoSnapshotFromRow,
-  diffContrato,
-  type TipoEvento,
-} from './events';
-import { cleanText } from './normalize';
+import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
+import type { NeonDatabase } from "drizzle-orm/neon-serverless";
+import { contrato, contratoEvento, proveedor, rawRecord } from "@/src/lib/db/schema";
+import type * as schema from "@/src/lib/db/schema";
+import { contratoSnapshotFromRow, diffContrato, type TipoEvento } from "./events";
+import { cleanText } from "./normalize";
 
 /** Un snapshot de contrato leído de raw_record, listo para diffear. */
 export interface ContratoSnapshotRow {
@@ -88,7 +84,7 @@ export function groupAndSort(rows: ContratoSnapshotRow[]): Map<string, ContratoS
  */
 export function buildContratoEventos(
   groups: ContratoSnapshotRow[][],
-  newCorrelationId: () => string = randomUUID,
+  newCorrelationId: () => string = randomUUID
 ): BuiltEventRow[] {
   const out: BuiltEventRow[] = [];
   for (const group of groups) {
@@ -97,7 +93,7 @@ export function buildContratoEventos(
       const next = group[i];
       const detected = diffContrato(
         contratoSnapshotFromRow(prev.payload),
-        contratoSnapshotFromRow(next.payload),
+        contratoSnapshotFromRow(next.payload)
       );
       if (detected.length === 0) continue;
       const correlationId = newCorrelationId();
@@ -129,7 +125,7 @@ export function buildContratoEventos(
 
 type Db = NeonDatabase<typeof schema>;
 
-const SOURCE_CONTRATOS = 'secop_ii_contratos';
+const SOURCE_CONTRATOS = "secop_ii_contratos";
 
 export interface EventMetrics {
   gruposTotal: number; // source_record_ids distintos de contratos
@@ -158,18 +154,18 @@ function toInsertRow(
   b: BuiltEventRow,
   contratoId: string,
   proveedorByNit: Map<string, string>,
-  m: EventMetrics,
+  m: EventMetrics
 ): typeof contratoEvento.$inferInsert {
   let proveedorAnteriorId: string | null = null;
   let proveedorNuevoId: string | null = null;
   let delta: Record<string, unknown> | null = null;
 
-  if (b.tipoEvento === 'cesion') {
+  if (b.tipoEvento === "cesion") {
     proveedorAnteriorId = b.docProveedorAnterior
-      ? proveedorByNit.get(b.docProveedorAnterior) ?? null
+      ? (proveedorByNit.get(b.docProveedorAnterior) ?? null)
       : null;
     proveedorNuevoId = b.docProveedorNuevo
-      ? proveedorByNit.get(b.docProveedorNuevo) ?? null
+      ? (proveedorByNit.get(b.docProveedorNuevo) ?? null)
       : null;
     if (proveedorAnteriorId === null || proveedorNuevoId === null) {
       m.cesionesSinProveedorFk++;
@@ -251,7 +247,7 @@ export async function rebuildContratoEventos(db: Db): Promise<EventMetrics> {
   for (const [srcId, group] of grouped) {
     if (group.length >= 2) m.gruposMultiSnapshot++;
 
-    const contratoId = contratoBySecopId.get(cleanText(srcId) ?? '');
+    const contratoId = contratoBySecopId.get(cleanText(srcId) ?? "");
     if (!contratoId) {
       if (group.length >= 2) m.gruposSinContrato++;
       continue;

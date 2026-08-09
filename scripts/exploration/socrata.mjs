@@ -80,7 +80,7 @@ async function fetchWithRetry(url, { timeoutMs, maxRetries }) {
       if (!retriable || attempt === maxRetries) throw err;
       const backoff = BASE_BACKOFF_MS * 2 ** attempt + Math.floor(Math.random() * 200);
       process.stderr.write(
-        `[socrata] reintento ${attempt + 1}/${maxRetries} en ${backoff}ms (status=${status ?? err.code ?? err.name})\n`,
+        `[socrata] reintento ${attempt + 1}/${maxRetries} en ${backoff}ms (status=${status ?? err.code ?? err.name})\n`
       );
       await sleep(backoff);
     }
@@ -106,8 +106,13 @@ export async function fetchPage(dataset, params, opts = {}) {
  * Usa offset por simplicidad de exploración — no es el patrón de producción
  * (producción usa keyset con watermark, ver 0.2-spec-ingesta §6).
  */
-export async function paginate(dataset, { where, select, order, pageSize = 1000, cap = 1000 }, opts = {}) {
-  if (!order) throw new Error("paginate: 'order' es obligatorio para que la paginación sea estable");
+export async function paginate(
+  dataset,
+  { where, select, order, pageSize = 1000, cap = 1000 },
+  opts = {}
+) {
+  if (!order)
+    throw new Error("paginate: 'order' es obligatorio para que la paginación sea estable");
   const rows = [];
   let offset = 0;
   while (rows.length < cap) {
@@ -115,7 +120,7 @@ export async function paginate(dataset, { where, select, order, pageSize = 1000,
     const page = await fetchPage(
       dataset,
       { $where: where, $select: select, $order: order, $limit: limit, $offset: offset },
-      opts,
+      opts
     );
     if (!Array.isArray(page) || page.length === 0) break;
     rows.push(...page);

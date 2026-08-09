@@ -5,10 +5,10 @@
  * src/lib/supabase/get-session-user.ts.
  */
 
-import { db } from '@/src/lib/db/client';
-import { senalUsuario } from '@/src/lib/db/schema/cuentas';
+import { db } from "@/src/lib/db/client";
+import { senalUsuario } from "@/src/lib/db/schema/cuentas";
 
-export type UserSignal = 'oferente' | 'estructurador' | 'comunidad';
+export type UserSignal = "oferente" | "estructurador" | "comunidad";
 
 export async function recordUserSignal(usuarioId: string, signal: UserSignal): Promise<void> {
   try {

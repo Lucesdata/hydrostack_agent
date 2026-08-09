@@ -9,7 +9,7 @@
  * Spec: docs/superpowers/specs/2026-07-15-vista-simple-y-elegibilidad-diferida.md
  */
 
-import type { SecopProceso } from './types';
+import type { SecopProceso } from "./types";
 
 export const RECIENTES_LIMIT = 25;
 
@@ -30,15 +30,15 @@ export interface ProcesoResumen {
 
 export interface ProcesosRecientesResult {
   items: ProcesoResumen[];
-  fuente: 'db' | 'live';
+  fuente: "db" | "live";
 }
 
 /** `urlproceso` llega como `{ url }`, string, o basura. Igual que en client.ts. */
 export function extractUrlProceso(v: unknown): string | null {
-  if (typeof v === 'string' && v.startsWith('http')) return v;
-  if (typeof v === 'object' && v !== null && 'url' in v) {
+  if (typeof v === "string" && v.startsWith("http")) return v;
+  if (typeof v === "object" && v !== null && "url" in v) {
     const u = (v as { url?: unknown }).url;
-    return typeof u === 'string' && u.startsWith('http') ? u : null;
+    return typeof u === "string" && u.startsWith("http") ? u : null;
   }
   return null;
 }
@@ -63,7 +63,7 @@ export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
   return {
     id: r.secopProcesoId,
     referencia: r.referencia,
-    objeto: r.objeto ?? '',
+    objeto: r.objeto ?? "",
     entidad: r.entidadNombre,
     departamento: r.departamento,
     municipio: r.municipio,
@@ -79,7 +79,7 @@ export function mapLiveToResumen(p: SecopProceso): ProcesoResumen {
   return {
     id: p.id,
     referencia: p.referencia || null,
-    objeto: p.nombre || p.descripcion || '',
+    objeto: p.nombre || p.descripcion || "",
     entidad: p.entidad || null,
     departamento: p.departamento || null,
     municipio: p.ciudad || null,
@@ -95,9 +95,9 @@ async function fromDb(): Promise<ProcesoResumen[]> {
   // Import perezoso: si el cliente de base no puede construirse (sin
   // DATABASE_URL), el error queda contenido aquí y aplica el fallback live.
   const [{ db }, schema, { eq, isNull, sql }] = await Promise.all([
-    import('@/src/lib/db/client'),
-    import('@/src/lib/db/schema'),
-    import('drizzle-orm'),
+    import("@/src/lib/db/client"),
+    import("@/src/lib/db/schema"),
+    import("drizzle-orm"),
   ]);
   const { proceso, entidad, geografia, rawRecord } = schema;
 
@@ -127,9 +127,9 @@ async function fromDb(): Promise<ProcesoResumen[]> {
 }
 
 async function fromLive(): Promise<ProcesoResumen[]> {
-  const { searchProcesos } = await import('./client');
+  const { searchProcesos } = await import("./client");
   const result = await searchProcesos({
-    orden: 'fecha',
+    orden: "fecha",
     soloAgua: true,
     page: 1,
     pageSize: RECIENTES_LIMIT,
@@ -141,13 +141,13 @@ async function fromLive(): Promise<ProcesoResumen[]> {
 export async function getProcesosRecientes(): Promise<ProcesosRecientesResult> {
   try {
     const items = await fromDb();
-    if (items.length > 0) return { items, fuente: 'db' };
+    if (items.length > 0) return { items, fuente: "db" };
   } catch {
     // base no disponible → live
   }
   try {
-    return { items: await fromLive(), fuente: 'live' };
+    return { items: await fromLive(), fuente: "live" };
   } catch {
-    return { items: [], fuente: 'live' };
+    return { items: [], fuente: "live" };
   }
 }

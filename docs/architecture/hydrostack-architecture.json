@@ -1,141 +1,995 @@
 {
   "nodes": [
-    { "id": "landing-page", "label": "Landing", "type": "frontend", "tech": "Next.js 14 (Pages/App hybrid)", "files": ["app/page.js"], "status": "implemented", "description": "Página de inicio: hero, tarjetas de módulos, ProcesosTicker en vivo." },
-    { "id": "licitaciones-hub", "label": "Licitaciones (vista simple)", "type": "frontend", "tech": "Next.js (Server Component, ISR)", "files": ["app/licitaciones/page.js", "src/components/secop/ProcesosRecientes.tsx"], "status": "implemented", "description": "Ítem de navbar 01. NO es un hub de enlaces: es una página server-rendered (revalidate=300) que lista procesos recientes vía getProcesosRecientes(). Desde ahí se enlaza a /explorar ('búsqueda avanzada') y a /como-participar." },
-    { "id": "licitaciones-explorar", "label": "Licitaciones · Explorar", "type": "frontend", "tech": "React (SecopExplorer.tsx)", "files": ["app/licitaciones/explorar/page.js", "src/components/secop/SecopExplorer.tsx", "src/components/secop/ProcessList.tsx", "src/components/secop/ProcessDetail.tsx", "src/components/secop/LicitacionesTabs.tsx"], "status": "implemented", "description": "El workbench real: búsqueda/filtros conectados a datos vivos (Postgres/Socrata). Comparte la barra de tabs (LicitacionesTabs.tsx) con Cómo participar y Descubrir." },
-    { "id": "licitaciones-descubrir", "label": "Licitaciones · Descubrir", "type": "frontend", "tech": "React (100% mock)", "files": ["app/licitaciones/descubrir/page.js", "src/components/secop/discovery/LicitacionesDiscovery.tsx", "src/components/secop/discovery/SmartCollections.tsx", "src/components/secop/discovery/FacetedSearchBar.tsx", "src/lib/secop/mock-licitaciones.ts"], "status": "implemented", "description": "Colecciones inteligentes + búsqueda facetada — UI completa, pero toda la data sale de src/lib/secop/mock-licitaciones.ts. Aislada a propósito: 'no reemplaza ni modifica /licitaciones ni /licitaciones/explorar' (comentario del propio archivo). Sin conexión a Postgres/Socrata. LicitacionesTabs.tsx la marca literalmente como mock:true." },
-    { "id": "licitaciones-como-participar", "label": "Licitaciones · Cómo participar", "type": "frontend", "tech": "React", "files": ["app/licitaciones/como-participar/page.js", "src/components/secop/ComoParticipar.tsx"], "status": "implemented", "description": "Guía + wizard de perfil de oferente (OferenteWizard.tsx)." },
-    { "id": "chat-hydroagent", "label": "Asistente (Hydro_Agent chat)", "type": "frontend", "tech": "React", "files": ["app/chat/page.js", "src/components/HydroAgent/HydroAgent.jsx", "src/components/HydroAgent/HydroAgentParts.jsx"], "status": "implemented", "description": "Ítem de navbar 04. Chat conversacional con detección de perfil/sub-escenario, tools de cálculo y búsqueda SECOP." },
-    { "id": "calculators-hub", "label": "Calculadoras (hub)", "type": "frontend", "tech": "Next.js", "files": ["app/calculators/page.js"], "status": "implemented", "description": "Ítem de navbar 03. Índice de las 3 calculadoras SITARD (geo, fosa séptica, mantenimiento) — enlaza dinámicamente a /calculators/${slug}." },
-    { "id": "calc-geo", "label": "Calculadora · Geoespacial", "type": "frontend", "tech": "React + Leaflet", "files": ["app/calculators/geo/page.jsx", "src/components/geo/GeoPanel.jsx", "src/components/geo/LocationPickerMap.jsx", "src/lib/geo/zoning.ts"], "status": "implemented", "description": "Selector de predio en mapa (Leaflet) + clima/elevación reales (Open-Meteo) + zonificación." },
-    { "id": "calc-fosa-septica", "label": "Calculadora · Fosa séptica", "type": "frontend", "tech": "React", "files": ["app/calculators/fosa-septica/page.js", "src/components/calculator/CalculatorSchematics.jsx"], "status": "implemented", "description": "Cálculo de tanque séptico + campo de infiltración (Res. 0330/2017) con informe PDF." },
-    { "id": "calc-mantenimiento", "label": "Calculadora · Mantenimiento", "type": "frontend", "tech": "React", "files": ["app/calculators/mantenimiento/page.jsx"], "status": "implemented", "description": "Cronograma de bombeo, riesgo de colmatación, checklist de inspección." },
-    { "id": "build-flow", "label": "Proyectos (Build)", "type": "frontend", "tech": "React", "files": ["app/build/page.jsx", "src/components/HydroAgent/BuildSystemFlow.jsx", "src/components/Navbar.js"], "status": "implemented", "description": "Ítem de navbar 02, etiquetado 'Proyectos' pero la ruta es /build. Flujo guiado paso a paso que encadena las 3 calculadoras sin pasar por el LLM." },
-    { "id": "isometric-diagram", "label": "Diagrama isométrico 3D", "type": "frontend", "tech": "React + Babylon.js", "files": ["src/components/IsometricDiagram.jsx"], "status": "implemented", "description": "Render isométrico del sistema séptico; pide una descripción visual a Claude antes de dibujar." },
-    { "id": "cuenta-page", "label": "Cuenta", "type": "frontend", "tech": "Next.js", "files": ["app/cuenta/page.tsx"], "status": "implemented", "description": "Preferencias de alertas y perfil de oferente del usuario autenticado." },
-    { "id": "mis-coincidencias", "label": "Mis coincidencias", "type": "frontend", "tech": "Next.js (Server Component)", "files": ["app/mis-coincidencias/page.tsx"], "status": "implemented", "description": "Lista de procesos que hicieron match con el perfil de oferente. Server component: llama getMatchesForPerfil() y enviarDigestAhora() como funciones directas, no vía fetch a una API route." },
-    { "id": "nosotros-page", "label": "Nosotros", "type": "frontend", "tech": "Next.js", "files": ["app/nosotros/page.js"], "status": "implemented", "description": "Página institucional." },
+    {
+      "id": "landing-page",
+      "label": "Landing",
+      "type": "frontend",
+      "tech": "Next.js 14 (Pages/App hybrid)",
+      "files": ["app/page.js"],
+      "status": "implemented",
+      "description": "Página de inicio: hero, tarjetas de módulos, ProcesosTicker en vivo."
+    },
+    {
+      "id": "licitaciones-hub",
+      "label": "Licitaciones (vista simple)",
+      "type": "frontend",
+      "tech": "Next.js (Server Component, ISR)",
+      "files": ["app/licitaciones/page.js", "src/components/secop/ProcesosRecientes.tsx"],
+      "status": "implemented",
+      "description": "Ítem de navbar 01. NO es un hub de enlaces: es una página server-rendered (revalidate=300) que lista procesos recientes vía getProcesosRecientes(). Desde ahí se enlaza a /explorar ('búsqueda avanzada') y a /como-participar."
+    },
+    {
+      "id": "licitaciones-explorar",
+      "label": "Licitaciones · Explorar",
+      "type": "frontend",
+      "tech": "React (SecopExplorer.tsx)",
+      "files": [
+        "app/licitaciones/explorar/page.js",
+        "src/components/secop/SecopExplorer.tsx",
+        "src/components/secop/ProcessList.tsx",
+        "src/components/secop/ProcessDetail.tsx",
+        "src/components/secop/LicitacionesTabs.tsx"
+      ],
+      "status": "implemented",
+      "description": "El workbench real: búsqueda/filtros conectados a datos vivos (Postgres/Socrata). Comparte la barra de tabs (LicitacionesTabs.tsx) con Cómo participar y Descubrir."
+    },
+    {
+      "id": "licitaciones-descubrir",
+      "label": "Licitaciones · Descubrir",
+      "type": "frontend",
+      "tech": "React (100% mock)",
+      "files": [
+        "app/licitaciones/descubrir/page.js",
+        "src/components/secop/discovery/LicitacionesDiscovery.tsx",
+        "src/components/secop/discovery/SmartCollections.tsx",
+        "src/components/secop/discovery/FacetedSearchBar.tsx",
+        "src/lib/secop/mock-licitaciones.ts"
+      ],
+      "status": "implemented",
+      "description": "Colecciones inteligentes + búsqueda facetada — UI completa, pero toda la data sale de src/lib/secop/mock-licitaciones.ts. Aislada a propósito: 'no reemplaza ni modifica /licitaciones ni /licitaciones/explorar' (comentario del propio archivo). Sin conexión a Postgres/Socrata. LicitacionesTabs.tsx la marca literalmente como mock:true."
+    },
+    {
+      "id": "licitaciones-como-participar",
+      "label": "Licitaciones · Cómo participar",
+      "type": "frontend",
+      "tech": "React",
+      "files": [
+        "app/licitaciones/como-participar/page.js",
+        "src/components/secop/ComoParticipar.tsx"
+      ],
+      "status": "implemented",
+      "description": "Guía + wizard de perfil de oferente (OferenteWizard.tsx)."
+    },
+    {
+      "id": "chat-hydroagent",
+      "label": "Asistente (Hydro_Agent chat)",
+      "type": "frontend",
+      "tech": "React",
+      "files": [
+        "app/chat/page.js",
+        "src/components/HydroAgent/HydroAgent.jsx",
+        "src/components/HydroAgent/HydroAgentParts.jsx"
+      ],
+      "status": "implemented",
+      "description": "Ítem de navbar 04. Chat conversacional con detección de perfil/sub-escenario, tools de cálculo y búsqueda SECOP."
+    },
+    {
+      "id": "calculators-hub",
+      "label": "Calculadoras (hub)",
+      "type": "frontend",
+      "tech": "Next.js",
+      "files": ["app/calculators/page.js"],
+      "status": "implemented",
+      "description": "Ítem de navbar 03. Índice de las 3 calculadoras SITARD (geo, fosa séptica, mantenimiento) — enlaza dinámicamente a /calculators/${slug}."
+    },
+    {
+      "id": "calc-geo",
+      "label": "Calculadora · Geoespacial",
+      "type": "frontend",
+      "tech": "React + Leaflet",
+      "files": [
+        "app/calculators/geo/page.jsx",
+        "src/components/geo/GeoPanel.jsx",
+        "src/components/geo/LocationPickerMap.jsx",
+        "src/lib/geo/zoning.ts"
+      ],
+      "status": "implemented",
+      "description": "Selector de predio en mapa (Leaflet) + clima/elevación reales (Open-Meteo) + zonificación."
+    },
+    {
+      "id": "calc-fosa-septica",
+      "label": "Calculadora · Fosa séptica",
+      "type": "frontend",
+      "tech": "React",
+      "files": [
+        "app/calculators/fosa-septica/page.js",
+        "src/components/calculator/CalculatorSchematics.jsx"
+      ],
+      "status": "implemented",
+      "description": "Cálculo de tanque séptico + campo de infiltración (Res. 0330/2017) con informe PDF."
+    },
+    {
+      "id": "calc-mantenimiento",
+      "label": "Calculadora · Mantenimiento",
+      "type": "frontend",
+      "tech": "React",
+      "files": ["app/calculators/mantenimiento/page.jsx"],
+      "status": "implemented",
+      "description": "Cronograma de bombeo, riesgo de colmatación, checklist de inspección."
+    },
+    {
+      "id": "build-flow",
+      "label": "Proyectos (Build)",
+      "type": "frontend",
+      "tech": "React",
+      "files": [
+        "app/build/page.jsx",
+        "src/components/HydroAgent/BuildSystemFlow.jsx",
+        "src/components/Navbar.js"
+      ],
+      "status": "implemented",
+      "description": "Ítem de navbar 02, etiquetado 'Proyectos' pero la ruta es /build. Flujo guiado paso a paso que encadena las 3 calculadoras sin pasar por el LLM."
+    },
+    {
+      "id": "isometric-diagram",
+      "label": "Diagrama isométrico 3D",
+      "type": "frontend",
+      "tech": "React + Babylon.js",
+      "files": ["src/components/IsometricDiagram.jsx"],
+      "status": "implemented",
+      "description": "Render isométrico del sistema séptico; pide una descripción visual a Claude antes de dibujar."
+    },
+    {
+      "id": "cuenta-page",
+      "label": "Cuenta",
+      "type": "frontend",
+      "tech": "Next.js",
+      "files": ["app/cuenta/page.tsx"],
+      "status": "implemented",
+      "description": "Preferencias de alertas y perfil de oferente del usuario autenticado."
+    },
+    {
+      "id": "mis-coincidencias",
+      "label": "Mis coincidencias",
+      "type": "frontend",
+      "tech": "Next.js (Server Component)",
+      "files": ["app/mis-coincidencias/page.tsx"],
+      "status": "implemented",
+      "description": "Lista de procesos que hicieron match con el perfil de oferente. Server component: llama getMatchesForPerfil() y enviarDigestAhora() como funciones directas, no vía fetch a una API route."
+    },
+    {
+      "id": "nosotros-page",
+      "label": "Nosotros",
+      "type": "frontend",
+      "tech": "Next.js",
+      "files": ["app/nosotros/page.js"],
+      "status": "implemented",
+      "description": "Página institucional."
+    },
 
-    { "id": "api-agent", "label": "POST /api/agent", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/agent/route.ts"], "status": "implemented", "description": "Orquesta el chat: system prompt por perfil, streaming, hasta 6 rondas de tool-calling contra Groq." },
-    { "id": "api-agent-suggest", "label": "POST /api/agent/suggest", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/agent/suggest/route.ts"], "status": "implemented", "description": "Sugiere próximas preguntas del catálogo según el formState actual." },
-    { "id": "api-secop-search", "label": "GET /api/secop", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/route.ts"], "status": "implemented", "description": "Búsqueda de procesos/contratos: Postgres primero (cache), fallback a Socrata en vivo si la BD falla." },
-    { "id": "api-secop-probe", "label": "POST /api/secop/probe", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/probe/route.ts"], "status": "implemented", "description": "Dispara el probe on-demand de acceso documental (UNKNOWN → PUBLIC/RESTRICTED) y lo persiste best-effort." },
-    { "id": "api-secop-verdict", "label": "POST /api/secop/verdict", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/secop/verdict/route.ts"], "status": "implemented", "description": "Calcula el veredicto de elegibilidad (nunca persiste) al abrir el detalle de un proceso." },
-    { "id": "api-cron-ingest", "label": "GET /api/cron/ingest", "type": "backend", "tech": "Vercel Cron → Route Handler", "files": ["app/api/cron/ingest/route.ts", "vercel.json"], "status": "implemented", "description": "Dispara la ingesta incremental diaria (11:00 UTC), protegida por CRON_SECRET." },
-    { "id": "api-cron-alertas", "label": "GET /api/cron/alertas", "type": "backend", "tech": "Vercel Cron → Route Handler", "files": ["app/api/cron/alertas/route.ts", "vercel.json"], "status": "implemented", "description": "Dispara el envío diario de alertas (12:00 UTC), una hora después de la ingesta." },
-    { "id": "api-report-generate", "label": "POST /api/report/generate", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/report/generate/route.ts"], "status": "implemented", "description": "Genera el PDF técnico directamente desde el formState del wizard /build, sin pasar por el LLM." },
-    { "id": "api-generate-isometric", "label": "POST /api/generate-isometric", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/generate-isometric/route.js"], "status": "implemented", "description": "Pide a Claude (fetch directo, sin SDK) una descripción visual detallada para el diagrama isométrico." },
-    { "id": "api-landing-stats", "label": "GET /api/landing-stats", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/landing-stats/route.ts"], "status": "implemented", "description": "Estadísticas agregadas para el ticker de la landing (Socrata + agregaciones)." },
-    { "id": "api-procesos-recientes", "label": "GET /api/procesos/recientes", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/procesos/recientes/route.ts"], "status": "implemented", "description": "Procesos recientes con fallback DB→live, usado por el widget de la landing." },
-    { "id": "api-perfil", "label": "/api/perfil", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/perfil/route.ts"], "status": "implemented", "description": "CRUD del perfil de oferente (capacidad financiera, cobertura, UNSPSC)." },
-    { "id": "api-alertas-preferencias", "label": "/api/alertas/preferencias", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/preferencias/route.ts"], "status": "implemented", "description": "Lee/actualiza preferencias de alerta del usuario." },
-    { "id": "api-alertas-enviar-ahora", "label": "POST /api/alertas/enviar-ahora", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/enviar-ahora/route.ts"], "status": "implemented", "description": "Envío manual/inmediato del digest de alertas. No se encontró ningún caller en el frontend (grep 'alertas/enviar-ahora' sobre src/ y app/): mis-coincidencias/page.tsx importa enviarDigestAhora() directo como server action, sin pasar por esta ruta." },
-    { "id": "api-alertas-unsubscribe", "label": "GET /api/alertas/unsubscribe", "type": "backend", "tech": "Next.js Route Handler", "files": ["app/api/alertas/unsubscribe/route.ts"], "status": "implemented", "description": "Baja de alertas vía token firmado en el enlace del correo." },
-    { "id": "api-auth", "label": "/api/auth/[...nextauth]", "type": "backend", "tech": "Auth.js (next-auth v5 beta)", "files": ["app/api/auth/[...nextauth]/route.ts", "src/lib/auth/config.ts"], "status": "implemented", "description": "Autenticación por magic link (email) con adapter de Drizzle." },
+    {
+      "id": "api-agent",
+      "label": "POST /api/agent",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/agent/route.ts"],
+      "status": "implemented",
+      "description": "Orquesta el chat: system prompt por perfil, streaming, hasta 6 rondas de tool-calling contra Groq."
+    },
+    {
+      "id": "api-agent-suggest",
+      "label": "POST /api/agent/suggest",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/agent/suggest/route.ts"],
+      "status": "implemented",
+      "description": "Sugiere próximas preguntas del catálogo según el formState actual."
+    },
+    {
+      "id": "api-secop-search",
+      "label": "GET /api/secop",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/secop/route.ts"],
+      "status": "implemented",
+      "description": "Búsqueda de procesos/contratos: Postgres primero (cache), fallback a Socrata en vivo si la BD falla."
+    },
+    {
+      "id": "api-secop-probe",
+      "label": "POST /api/secop/probe",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/secop/probe/route.ts"],
+      "status": "implemented",
+      "description": "Dispara el probe on-demand de acceso documental (UNKNOWN → PUBLIC/RESTRICTED) y lo persiste best-effort."
+    },
+    {
+      "id": "api-secop-verdict",
+      "label": "POST /api/secop/verdict",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/secop/verdict/route.ts"],
+      "status": "implemented",
+      "description": "Calcula el veredicto de elegibilidad (nunca persiste) al abrir el detalle de un proceso."
+    },
+    {
+      "id": "api-cron-ingest",
+      "label": "GET /api/cron/ingest",
+      "type": "backend",
+      "tech": "Vercel Cron → Route Handler",
+      "files": ["app/api/cron/ingest/route.ts", "vercel.json"],
+      "status": "implemented",
+      "description": "Dispara la ingesta incremental diaria (11:00 UTC), protegida por CRON_SECRET."
+    },
+    {
+      "id": "api-cron-alertas",
+      "label": "GET /api/cron/alertas",
+      "type": "backend",
+      "tech": "Vercel Cron → Route Handler",
+      "files": ["app/api/cron/alertas/route.ts", "vercel.json"],
+      "status": "implemented",
+      "description": "Dispara el envío diario de alertas (12:00 UTC), una hora después de la ingesta."
+    },
+    {
+      "id": "api-report-generate",
+      "label": "POST /api/report/generate",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/report/generate/route.ts"],
+      "status": "implemented",
+      "description": "Genera el PDF técnico directamente desde el formState del wizard /build, sin pasar por el LLM."
+    },
+    {
+      "id": "api-generate-isometric",
+      "label": "POST /api/generate-isometric",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/generate-isometric/route.js"],
+      "status": "implemented",
+      "description": "Pide a Claude (fetch directo, sin SDK) una descripción visual detallada para el diagrama isométrico."
+    },
+    {
+      "id": "api-landing-stats",
+      "label": "GET /api/landing-stats",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/landing-stats/route.ts"],
+      "status": "implemented",
+      "description": "Estadísticas agregadas para el ticker de la landing (Socrata + agregaciones)."
+    },
+    {
+      "id": "api-procesos-recientes",
+      "label": "GET /api/procesos/recientes",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/procesos/recientes/route.ts"],
+      "status": "implemented",
+      "description": "Procesos recientes con fallback DB→live, usado por el widget de la landing."
+    },
+    {
+      "id": "api-perfil",
+      "label": "/api/perfil",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/perfil/route.ts"],
+      "status": "implemented",
+      "description": "CRUD del perfil de oferente (capacidad financiera, cobertura, UNSPSC)."
+    },
+    {
+      "id": "api-alertas-preferencias",
+      "label": "/api/alertas/preferencias",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/alertas/preferencias/route.ts"],
+      "status": "implemented",
+      "description": "Lee/actualiza preferencias de alerta del usuario."
+    },
+    {
+      "id": "api-alertas-enviar-ahora",
+      "label": "POST /api/alertas/enviar-ahora",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/alertas/enviar-ahora/route.ts"],
+      "status": "implemented",
+      "description": "Envío manual/inmediato del digest de alertas. No se encontró ningún caller en el frontend (grep 'alertas/enviar-ahora' sobre src/ y app/): mis-coincidencias/page.tsx importa enviarDigestAhora() directo como server action, sin pasar por esta ruta."
+    },
+    {
+      "id": "api-alertas-unsubscribe",
+      "label": "GET /api/alertas/unsubscribe",
+      "type": "backend",
+      "tech": "Next.js Route Handler",
+      "files": ["app/api/alertas/unsubscribe/route.ts"],
+      "status": "implemented",
+      "description": "Baja de alertas vía token firmado en el enlace del correo."
+    },
+    {
+      "id": "api-auth",
+      "label": "/api/auth/[...nextauth]",
+      "type": "backend",
+      "tech": "Auth.js (next-auth v5 beta)",
+      "files": ["app/api/auth/[...nextauth]/route.ts", "src/lib/auth/config.ts"],
+      "status": "implemented",
+      "description": "Autenticación por magic link (email) con adapter de Drizzle."
+    },
 
-    { "id": "ingest-pipeline", "label": "Ingest pipeline", "type": "service", "tech": "TypeScript (SODA client, keyset+sweep)", "files": ["src/lib/ingest/runIngest.ts", "src/lib/ingest/pipeline.ts", "src/lib/ingest/dbIngest.ts", "src/lib/ingest/pagination.ts", "src/lib/ingest/watermark.ts", "src/lib/ingest/mapRecord.ts", "src/lib/ingest/sources.ts"], "status": "implemented", "description": "Incremental keyset por watermark + sweep de recuperación; escribe landing append-only en raw_record (patrón ELT)." },
-    { "id": "secop-client", "label": "SECOP / Socrata client", "type": "service", "tech": "TypeScript (SODA)", "files": ["src/lib/secop/client.ts", "src/lib/secop/config.ts", "src/lib/secop/datasetResolver.ts"], "status": "implemented", "description": "Cliente SODA para datos.gov.co. Datasets reales: procesos = p6dx-8zbt, contratos = jbjy-vk9h. Resuelve el id 4x4 vigente vía catálogo en runtime." },
-    { "id": "transform-orchestrator", "label": "Transform orchestrator", "type": "service", "tech": "TypeScript", "files": ["src/lib/transform/orchestrator.ts", "src/lib/transform/mapCanonical.ts", "src/lib/transform/eventWriter.ts", "src/lib/transform/geo.ts"], "status": "implemented", "description": "raw_record → tablas canónicas (proceso, contrato, entidad, proveedor) + reconstrucción de eventos de contrato." },
-    { "id": "classify-sector", "label": "Clasificador sectorial", "type": "service", "tech": "TypeScript (diccionarios + reglas)", "files": ["src/lib/classify/classifier.ts", "src/lib/classify/adapters.ts", "src/lib/classify/dictionaries.ts"], "status": "implemented", "description": "Clasifica cada proceso/contrato como sector agua/saneamiento u otro." },
-    { "id": "document-access", "label": "Document access gate", "type": "service", "tech": "TypeScript", "files": ["src/lib/secop/document-access.ts"], "status": "implemented", "description": "PUBLIC / RESTRICTED / NOT_PUBLISHED / UNKNOWN. preclassify() (solo metadata, en cada transform) + probeDocument() (1 GET, on-demand)." },
-    { "id": "verdict-engine", "label": "Verdict / elegibilidad", "type": "service", "tech": "TypeScript", "files": ["src/lib/secop/verdict.ts"], "status": "implemented", "description": "Gates de habilitación (cuantía, competencia, urgencia, apertura). Recomputable, nunca se persiste." },
-    { "id": "oferente-profile", "label": "Perfil de oferente", "type": "service", "tech": "TypeScript", "files": ["src/lib/oferente/types.ts", "src/lib/oferente/wizard.ts", "src/lib/oferente/perfil-store.ts"], "status": "implemented", "description": "Capacidad financiera (RUP), cobertura geográfica, cuantía objetivo, códigos UNSPSC." },
-    { "id": "matching-engine", "label": "Matching engine", "type": "service", "tech": "TypeScript", "files": ["src/lib/matching/match.ts", "src/lib/matching/get-matches-for-perfil.ts"], "status": "implemented", "description": "Cruza el perfil de oferente contra procesos nuevos para las alertas diarias." },
-    { "id": "pliego-extraction", "label": "Extracción de pliegos (Hydro_Agent Capa 3)", "type": "service", "tech": "TypeScript + Anthropic SDK", "files": ["src/lib/pliego/extractPliego.ts", "src/lib/pliego/schema.ts", "src/lib/pliego/prompt.ts", "src/lib/pliego/validate.ts", "scripts/analyze-pliego.ts"], "status": "implemented", "description": "PDF → JSON estructurado. El PDF se envía nativo a Claude (document content block); no hay preprocesado con PyMuPDF/pdfplumber. Modelo: claude-opus-4-8 con thinking adaptativo. Solo se invoca hoy desde el script CLI analyze-pliego.ts — no hay ruta API que lo conecte al producto." },
-    { "id": "hydro-agent-tools", "label": "Hydro_Agent tools", "type": "service", "tech": "TypeScript (OpenAI tool-call format)", "files": ["src/lib/agent/tools/index.ts", "src/lib/agent/tools/calculateSepticTank.ts", "src/lib/agent/tools/calculateDrainageField.ts", "src/lib/agent/tools/validateAgainstCte.ts", "src/lib/agent/tools/generatePdfReport.ts", "src/lib/agent/tools/searchSecopTenders.ts"], "status": "implemented", "description": "5 tools encadenables que el chat invoca vía Groq: tanque → campo de infiltración → validación CTE → PDF, más búsqueda SECOP." },
-    { "id": "septic-calculations", "label": "Cálculos SITARD", "type": "service", "tech": "TypeScript", "files": ["src/lib/calculations", "src/lib/septic"], "status": "implemented", "description": "V_N (Res. 0330/2017 Art. 134-145), Cr=0.85, corrección Van't Hoff, campo de infiltración (perc test ASTM D6391)." },
-    { "id": "reports-pdf", "label": "Generador de PDF", "type": "service", "tech": "pdfkit", "files": ["src/lib/reports/generatePdfReport.ts"], "status": "implemented", "description": "Informe técnico profesional: portada, checklist, datos climáticos Open-Meteo, área de firma." },
-    { "id": "alertas-engine", "label": "Motor de alertas", "type": "service", "tech": "TypeScript", "files": ["src/lib/alertas/run-daily.ts", "src/lib/alertas/enviar-ahora.ts", "src/lib/alertas/preferencias-store.ts"], "status": "implemented", "description": "Ejecuta el matching diario y arma el digest; idempotencia vía envio_log (insert-first)." },
-    { "id": "email-service", "label": "Servicio de email", "type": "service", "tech": "Resend SDK", "files": ["src/lib/email/send.ts", "src/lib/email/digest.ts", "src/lib/email/unsubscribe-token.ts"], "status": "implemented", "description": "Magic link de login y digest de alertas, mismo remitente/dominio." },
-    { "id": "auth-config", "label": "Configuración de Auth.js", "type": "service", "tech": "next-auth v5 beta + @auth/drizzle-adapter", "files": ["src/lib/auth/config.ts"], "status": "implemented", "description": "Adapter de Drizzle sobre las tablas usuario/cuenta/sesion/tokenVerificacion." },
-    { "id": "db-schema", "label": "Esquema Drizzle", "type": "db", "tech": "Drizzle ORM (PostgreSQL)", "files": ["src/lib/db/schema/raw.ts", "src/lib/db/schema/catalogos.ts", "src/lib/db/schema/hechos.ts", "src/lib/db/schema/control.ts", "src/lib/db/schema/clasificacion.ts", "src/lib/db/schema/quarantine.ts", "src/lib/db/schema/cuentas.ts", "src/lib/db/schema/index.ts"], "status": "implemented", "description": "18 tablas: rawRecord, geografia, geografiaAlias, proveedor, entidad, proceso, contrato, contratoEvento, syncLog, clasificacionSectorial, transformQuarantine, usuario, cuenta, sesion, tokenVerificacion, oferentePerfil, envioLog, alertaPreferencias." },
-    { "id": "db-client", "label": "DB client", "type": "db", "tech": "@neondatabase/serverless", "files": ["src/lib/db/client.ts"], "status": "implemented", "description": "Pool/driver serverless de Neon usado por Drizzle en runtime Node.js." },
+    {
+      "id": "ingest-pipeline",
+      "label": "Ingest pipeline",
+      "type": "service",
+      "tech": "TypeScript (SODA client, keyset+sweep)",
+      "files": [
+        "src/lib/ingest/runIngest.ts",
+        "src/lib/ingest/pipeline.ts",
+        "src/lib/ingest/dbIngest.ts",
+        "src/lib/ingest/pagination.ts",
+        "src/lib/ingest/watermark.ts",
+        "src/lib/ingest/mapRecord.ts",
+        "src/lib/ingest/sources.ts"
+      ],
+      "status": "implemented",
+      "description": "Incremental keyset por watermark + sweep de recuperación; escribe landing append-only en raw_record (patrón ELT)."
+    },
+    {
+      "id": "secop-client",
+      "label": "SECOP / Socrata client",
+      "type": "service",
+      "tech": "TypeScript (SODA)",
+      "files": [
+        "src/lib/secop/client.ts",
+        "src/lib/secop/config.ts",
+        "src/lib/secop/datasetResolver.ts"
+      ],
+      "status": "implemented",
+      "description": "Cliente SODA para datos.gov.co. Datasets reales: procesos = p6dx-8zbt, contratos = jbjy-vk9h. Resuelve el id 4x4 vigente vía catálogo en runtime."
+    },
+    {
+      "id": "transform-orchestrator",
+      "label": "Transform orchestrator",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": [
+        "src/lib/transform/orchestrator.ts",
+        "src/lib/transform/mapCanonical.ts",
+        "src/lib/transform/eventWriter.ts",
+        "src/lib/transform/geo.ts"
+      ],
+      "status": "implemented",
+      "description": "raw_record → tablas canónicas (proceso, contrato, entidad, proveedor) + reconstrucción de eventos de contrato."
+    },
+    {
+      "id": "classify-sector",
+      "label": "Clasificador sectorial",
+      "type": "service",
+      "tech": "TypeScript (diccionarios + reglas)",
+      "files": [
+        "src/lib/classify/classifier.ts",
+        "src/lib/classify/adapters.ts",
+        "src/lib/classify/dictionaries.ts"
+      ],
+      "status": "implemented",
+      "description": "Clasifica cada proceso/contrato como sector agua/saneamiento u otro."
+    },
+    {
+      "id": "document-access",
+      "label": "Document access gate",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": ["src/lib/secop/document-access.ts"],
+      "status": "implemented",
+      "description": "PUBLIC / RESTRICTED / NOT_PUBLISHED / UNKNOWN. preclassify() (solo metadata, en cada transform) + probeDocument() (1 GET, on-demand)."
+    },
+    {
+      "id": "verdict-engine",
+      "label": "Verdict / elegibilidad",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": ["src/lib/secop/verdict.ts"],
+      "status": "implemented",
+      "description": "Gates de habilitación (cuantía, competencia, urgencia, apertura). Recomputable, nunca se persiste."
+    },
+    {
+      "id": "oferente-profile",
+      "label": "Perfil de oferente",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": [
+        "src/lib/oferente/types.ts",
+        "src/lib/oferente/wizard.ts",
+        "src/lib/oferente/perfil-store.ts"
+      ],
+      "status": "implemented",
+      "description": "Capacidad financiera (RUP), cobertura geográfica, cuantía objetivo, códigos UNSPSC."
+    },
+    {
+      "id": "matching-engine",
+      "label": "Matching engine",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": ["src/lib/matching/match.ts", "src/lib/matching/get-matches-for-perfil.ts"],
+      "status": "implemented",
+      "description": "Cruza el perfil de oferente contra procesos nuevos para las alertas diarias."
+    },
+    {
+      "id": "pliego-extraction",
+      "label": "Extracción de pliegos (Hydro_Agent Capa 3)",
+      "type": "service",
+      "tech": "TypeScript + Anthropic SDK",
+      "files": [
+        "src/lib/pliego/extractPliego.ts",
+        "src/lib/pliego/schema.ts",
+        "src/lib/pliego/prompt.ts",
+        "src/lib/pliego/validate.ts",
+        "scripts/analyze-pliego.ts"
+      ],
+      "status": "implemented",
+      "description": "PDF → JSON estructurado. El PDF se envía nativo a Claude (document content block); no hay preprocesado con PyMuPDF/pdfplumber. Modelo: claude-opus-4-8 con thinking adaptativo. Solo se invoca hoy desde el script CLI analyze-pliego.ts — no hay ruta API que lo conecte al producto."
+    },
+    {
+      "id": "hydro-agent-tools",
+      "label": "Hydro_Agent tools",
+      "type": "service",
+      "tech": "TypeScript (OpenAI tool-call format)",
+      "files": [
+        "src/lib/agent/tools/index.ts",
+        "src/lib/agent/tools/calculateSepticTank.ts",
+        "src/lib/agent/tools/calculateDrainageField.ts",
+        "src/lib/agent/tools/validateAgainstCte.ts",
+        "src/lib/agent/tools/generatePdfReport.ts",
+        "src/lib/agent/tools/searchSecopTenders.ts"
+      ],
+      "status": "implemented",
+      "description": "5 tools encadenables que el chat invoca vía Groq: tanque → campo de infiltración → validación CTE → PDF, más búsqueda SECOP."
+    },
+    {
+      "id": "septic-calculations",
+      "label": "Cálculos SITARD",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": ["src/lib/calculations", "src/lib/septic"],
+      "status": "implemented",
+      "description": "V_N (Res. 0330/2017 Art. 134-145), Cr=0.85, corrección Van't Hoff, campo de infiltración (perc test ASTM D6391)."
+    },
+    {
+      "id": "reports-pdf",
+      "label": "Generador de PDF",
+      "type": "service",
+      "tech": "pdfkit",
+      "files": ["src/lib/reports/generatePdfReport.ts"],
+      "status": "implemented",
+      "description": "Informe técnico profesional: portada, checklist, datos climáticos Open-Meteo, área de firma."
+    },
+    {
+      "id": "alertas-engine",
+      "label": "Motor de alertas",
+      "type": "service",
+      "tech": "TypeScript",
+      "files": [
+        "src/lib/alertas/run-daily.ts",
+        "src/lib/alertas/enviar-ahora.ts",
+        "src/lib/alertas/preferencias-store.ts"
+      ],
+      "status": "implemented",
+      "description": "Ejecuta el matching diario y arma el digest; idempotencia vía envio_log (insert-first)."
+    },
+    {
+      "id": "email-service",
+      "label": "Servicio de email",
+      "type": "service",
+      "tech": "Resend SDK",
+      "files": [
+        "src/lib/email/send.ts",
+        "src/lib/email/digest.ts",
+        "src/lib/email/unsubscribe-token.ts"
+      ],
+      "status": "implemented",
+      "description": "Magic link de login y digest de alertas, mismo remitente/dominio."
+    },
+    {
+      "id": "auth-config",
+      "label": "Configuración de Auth.js",
+      "type": "service",
+      "tech": "next-auth v5 beta + @auth/drizzle-adapter",
+      "files": ["src/lib/auth/config.ts"],
+      "status": "implemented",
+      "description": "Adapter de Drizzle sobre las tablas usuario/cuenta/sesion/tokenVerificacion."
+    },
+    {
+      "id": "db-schema",
+      "label": "Esquema Drizzle",
+      "type": "db",
+      "tech": "Drizzle ORM (PostgreSQL)",
+      "files": [
+        "src/lib/db/schema/raw.ts",
+        "src/lib/db/schema/catalogos.ts",
+        "src/lib/db/schema/hechos.ts",
+        "src/lib/db/schema/control.ts",
+        "src/lib/db/schema/clasificacion.ts",
+        "src/lib/db/schema/quarantine.ts",
+        "src/lib/db/schema/cuentas.ts",
+        "src/lib/db/schema/index.ts"
+      ],
+      "status": "implemented",
+      "description": "18 tablas: rawRecord, geografia, geografiaAlias, proveedor, entidad, proceso, contrato, contratoEvento, syncLog, clasificacionSectorial, transformQuarantine, usuario, cuenta, sesion, tokenVerificacion, oferentePerfil, envioLog, alertaPreferencias."
+    },
+    {
+      "id": "db-client",
+      "label": "DB client",
+      "type": "db",
+      "tech": "@neondatabase/serverless",
+      "files": ["src/lib/db/client.ts"],
+      "status": "implemented",
+      "description": "Pool/driver serverless de Neon usado por Drizzle en runtime Node.js."
+    },
 
-    { "id": "neon-postgres", "label": "Neon Postgres", "type": "external", "tech": "PostgreSQL (Vercel Marketplace)", "files": ["drizzle.config.ts", ".env.example"], "status": "implemented", "description": "Base de datos canónica: landing JSONB append-only + tablas transformadas." },
-    { "id": "socrata-secop", "label": "SECOP II (Socrata / datos.gov.co)", "type": "external", "tech": "API SODA", "files": ["src/lib/secop/config.ts"], "status": "implemented", "description": "Datasets p6dx-8zbt (procesos) y jbjy-vk9h (contratos). SECOP_APP_TOKEN opcional (si falta, throttling ~1k/h)." },
-    { "id": "groq-api", "label": "Groq API", "type": "external", "tech": "llama-3.3-70b-versatile", "files": ["app/api/agent/route.ts", ".env.example"], "status": "implemented", "description": "Motor del chat Hydro_Agent (/api/agent). Protocolo de tool-calls estilo OpenAI." },
-    { "id": "anthropic-api", "label": "Anthropic API", "type": "external", "tech": "Claude (2 modelos distintos)", "files": ["src/lib/pliego/extractPliego.ts", "app/api/generate-isometric/route.js"], "status": "implemented", "description": "Dos usos independientes: claude-opus-4-8 para extracción de pliegos (SDK, PDF nativo) y claude-3-5-sonnet-20241022 para describir el diagrama isométrico (fetch directo, sin SDK)." },
-    { "id": "resend-api", "label": "Resend", "type": "external", "tech": "Email API", "files": ["src/lib/email/send.ts"], "status": "implemented", "description": "Envío de magic links y digest de alertas." },
-    { "id": "open-meteo-api", "label": "Open-Meteo", "type": "external", "tech": "API pública (sin key)", "files": ["src/lib/geo/zoning.ts"], "status": "implemented", "description": "Elevación y pronóstico climático de 7 días para la calculadora geoespacial." },
-    { "id": "vercel-cron", "label": "Vercel Cron", "type": "external", "tech": "Plataforma Vercel", "files": ["vercel.json"], "status": "implemented", "description": "Dispara /api/cron/ingest (11:00 UTC) y /api/cron/alertas (12:00 UTC)." },
+    {
+      "id": "neon-postgres",
+      "label": "Neon Postgres",
+      "type": "external",
+      "tech": "PostgreSQL (Vercel Marketplace)",
+      "files": ["drizzle.config.ts", ".env.example"],
+      "status": "implemented",
+      "description": "Base de datos canónica: landing JSONB append-only + tablas transformadas."
+    },
+    {
+      "id": "socrata-secop",
+      "label": "SECOP II (Socrata / datos.gov.co)",
+      "type": "external",
+      "tech": "API SODA",
+      "files": ["src/lib/secop/config.ts"],
+      "status": "implemented",
+      "description": "Datasets p6dx-8zbt (procesos) y jbjy-vk9h (contratos). SECOP_APP_TOKEN opcional (si falta, throttling ~1k/h)."
+    },
+    {
+      "id": "groq-api",
+      "label": "Groq API",
+      "type": "external",
+      "tech": "llama-3.3-70b-versatile",
+      "files": ["app/api/agent/route.ts", ".env.example"],
+      "status": "implemented",
+      "description": "Motor del chat Hydro_Agent (/api/agent). Protocolo de tool-calls estilo OpenAI."
+    },
+    {
+      "id": "anthropic-api",
+      "label": "Anthropic API",
+      "type": "external",
+      "tech": "Claude (2 modelos distintos)",
+      "files": ["src/lib/pliego/extractPliego.ts", "app/api/generate-isometric/route.js"],
+      "status": "implemented",
+      "description": "Dos usos independientes: claude-opus-4-8 para extracción de pliegos (SDK, PDF nativo) y claude-3-5-sonnet-20241022 para describir el diagrama isométrico (fetch directo, sin SDK)."
+    },
+    {
+      "id": "resend-api",
+      "label": "Resend",
+      "type": "external",
+      "tech": "Email API",
+      "files": ["src/lib/email/send.ts"],
+      "status": "implemented",
+      "description": "Envío de magic links y digest de alertas."
+    },
+    {
+      "id": "open-meteo-api",
+      "label": "Open-Meteo",
+      "type": "external",
+      "tech": "API pública (sin key)",
+      "files": ["src/lib/geo/zoning.ts"],
+      "status": "implemented",
+      "description": "Elevación y pronóstico climático de 7 días para la calculadora geoespacial."
+    },
+    {
+      "id": "vercel-cron",
+      "label": "Vercel Cron",
+      "type": "external",
+      "tech": "Plataforma Vercel",
+      "files": ["vercel.json"],
+      "status": "implemented",
+      "description": "Dispara /api/cron/ingest (11:00 UTC) y /api/cron/alertas (12:00 UTC)."
+    },
 
-    { "id": "pliego-upload-ui", "label": "Subida de pliego en UI", "type": "frontend", "tech": "—", "files": [], "status": "planned", "description": "No existe hoy: no hay componente ni ruta API que permita a un usuario subir un pliego desde el navegador. La extracción solo corre por CLI (scripts/analyze-pliego.ts)." }
+    {
+      "id": "pliego-upload-ui",
+      "label": "Subida de pliego en UI",
+      "type": "frontend",
+      "tech": "—",
+      "files": [],
+      "status": "planned",
+      "description": "No existe hoy: no hay componente ni ruta API que permita a un usuario subir un pliego desde el navegador. La extracción solo corre por CLI (scripts/analyze-pliego.ts)."
+    }
   ],
 
   "edges": [
-    { "from": "api-cron-ingest", "to": "ingest-pipeline", "type": "triggers", "description": "Vercel Cron invoca el route handler, que llama runIngest/runIngestPipeline." },
-    { "from": "ingest-pipeline", "to": "secop-client", "type": "calls", "description": "Pide páginas SODA (keyset por watermark + sweep) para cada IngestSource." },
-    { "from": "secop-client", "to": "socrata-secop", "type": "http", "description": "GET al dataset 4x4 resuelto (p6dx-8zbt / jbjy-vk9h) con SoQL + SECOP_APP_TOKEN opcional." },
-    { "from": "ingest-pipeline", "to": "db-client", "type": "writes", "description": "Inserta cada página como fila JSONB append-only en raw_record." },
-    { "from": "db-client", "to": "db-schema", "type": "uses", "description": "Drizzle sobre el pool de Neon." },
-    { "from": "db-client", "to": "neon-postgres", "type": "connects", "description": "Conexión pooled serverless." },
-    { "from": "transform-orchestrator", "to": "db-client", "type": "reads", "description": "Lee raw_record no transformados." },
-    { "from": "transform-orchestrator", "to": "classify-sector", "type": "calls", "description": "Clasifica cada proyección canónica como sector agua o no." },
-    { "from": "transform-orchestrator", "to": "document-access", "type": "calls", "description": "preclassify() sobre cada proceso, en cada corrida (B2/B3)." },
-    { "from": "transform-orchestrator", "to": "db-client", "type": "writes", "description": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial canónicos." },
+    {
+      "from": "api-cron-ingest",
+      "to": "ingest-pipeline",
+      "type": "triggers",
+      "description": "Vercel Cron invoca el route handler, que llama runIngest/runIngestPipeline."
+    },
+    {
+      "from": "ingest-pipeline",
+      "to": "secop-client",
+      "type": "calls",
+      "description": "Pide páginas SODA (keyset por watermark + sweep) para cada IngestSource."
+    },
+    {
+      "from": "secop-client",
+      "to": "socrata-secop",
+      "type": "http",
+      "description": "GET al dataset 4x4 resuelto (p6dx-8zbt / jbjy-vk9h) con SoQL + SECOP_APP_TOKEN opcional."
+    },
+    {
+      "from": "ingest-pipeline",
+      "to": "db-client",
+      "type": "writes",
+      "description": "Inserta cada página como fila JSONB append-only en raw_record."
+    },
+    {
+      "from": "db-client",
+      "to": "db-schema",
+      "type": "uses",
+      "description": "Drizzle sobre el pool de Neon."
+    },
+    {
+      "from": "db-client",
+      "to": "neon-postgres",
+      "type": "connects",
+      "description": "Conexión pooled serverless."
+    },
+    {
+      "from": "transform-orchestrator",
+      "to": "db-client",
+      "type": "reads",
+      "description": "Lee raw_record no transformados."
+    },
+    {
+      "from": "transform-orchestrator",
+      "to": "classify-sector",
+      "type": "calls",
+      "description": "Clasifica cada proyección canónica como sector agua o no."
+    },
+    {
+      "from": "transform-orchestrator",
+      "to": "document-access",
+      "type": "calls",
+      "description": "preclassify() sobre cada proceso, en cada corrida (B2/B3)."
+    },
+    {
+      "from": "transform-orchestrator",
+      "to": "db-client",
+      "type": "writes",
+      "description": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial canónicos."
+    },
 
-    { "from": "licitaciones-hub", "to": "licitaciones-explorar", "type": "links-to", "description": "'Búsqueda avanzada' en ProcesosRecientes.tsx (L36, L44) enlaza al workbench real." },
-    { "from": "licitaciones-hub", "to": "licitaciones-como-participar", "type": "links-to", "description": "ProcesosRecientes.tsx (L93) enlaza a la guía de participación." },
-    { "from": "licitaciones-explorar", "to": "api-secop-search", "type": "calls", "description": "Fetch de búsqueda clásica con filtros de la UI." },
-    { "from": "api-secop-search", "to": "db-client", "type": "reads", "description": "Postgres primero, cacheado en memoria por combinación de filtros." },
-    { "from": "api-secop-search", "to": "secop-client", "type": "fallback", "description": "Si la consulta a Postgres falla, cae a Socrata en vivo (procesos) — contratos siempre en vivo." },
-    { "from": "licitaciones-explorar", "to": "api-secop-verdict", "type": "calls", "description": "Al abrir el detalle de un proceso con perfil guardado." },
-    { "from": "api-secop-verdict", "to": "verdict-engine", "type": "calls", "description": "buildVerdict(proceso, perfil) — nunca persiste." },
-    { "from": "verdict-engine", "to": "oferente-profile", "type": "uses", "description": "Usa los datos del perfil (cuantía, cobertura, UNSPSC) como input." },
-    { "from": "licitaciones-como-participar", "to": "api-perfil", "type": "calls", "description": "El wizard de oferente guarda el perfil vía este endpoint." },
-    { "from": "licitaciones-explorar", "to": "api-secop-probe", "type": "calls", "description": "El usuario abre/se suscribe a un proceso → dispara el probe de acceso documental." },
-    { "from": "api-secop-probe", "to": "document-access", "type": "calls", "description": "probeDocument(url) — 1 GET, resuelve UNKNOWN → PUBLIC/RESTRICTED." },
-    { "from": "api-secop-probe", "to": "db-client", "type": "writes", "description": "Persiste el resultado en la fila del proceso (best-effort)." },
+    {
+      "from": "licitaciones-hub",
+      "to": "licitaciones-explorar",
+      "type": "links-to",
+      "description": "'Búsqueda avanzada' en ProcesosRecientes.tsx (L36, L44) enlaza al workbench real."
+    },
+    {
+      "from": "licitaciones-hub",
+      "to": "licitaciones-como-participar",
+      "type": "links-to",
+      "description": "ProcesosRecientes.tsx (L93) enlaza a la guía de participación."
+    },
+    {
+      "from": "licitaciones-explorar",
+      "to": "api-secop-search",
+      "type": "calls",
+      "description": "Fetch de búsqueda clásica con filtros de la UI."
+    },
+    {
+      "from": "api-secop-search",
+      "to": "db-client",
+      "type": "reads",
+      "description": "Postgres primero, cacheado en memoria por combinación de filtros."
+    },
+    {
+      "from": "api-secop-search",
+      "to": "secop-client",
+      "type": "fallback",
+      "description": "Si la consulta a Postgres falla, cae a Socrata en vivo (procesos) — contratos siempre en vivo."
+    },
+    {
+      "from": "licitaciones-explorar",
+      "to": "api-secop-verdict",
+      "type": "calls",
+      "description": "Al abrir el detalle de un proceso con perfil guardado."
+    },
+    {
+      "from": "api-secop-verdict",
+      "to": "verdict-engine",
+      "type": "calls",
+      "description": "buildVerdict(proceso, perfil) — nunca persiste."
+    },
+    {
+      "from": "verdict-engine",
+      "to": "oferente-profile",
+      "type": "uses",
+      "description": "Usa los datos del perfil (cuantía, cobertura, UNSPSC) como input."
+    },
+    {
+      "from": "licitaciones-como-participar",
+      "to": "api-perfil",
+      "type": "calls",
+      "description": "El wizard de oferente guarda el perfil vía este endpoint."
+    },
+    {
+      "from": "licitaciones-explorar",
+      "to": "api-secop-probe",
+      "type": "calls",
+      "description": "El usuario abre/se suscribe a un proceso → dispara el probe de acceso documental."
+    },
+    {
+      "from": "api-secop-probe",
+      "to": "document-access",
+      "type": "calls",
+      "description": "probeDocument(url) — 1 GET, resuelve UNKNOWN → PUBLIC/RESTRICTED."
+    },
+    {
+      "from": "api-secop-probe",
+      "to": "db-client",
+      "type": "writes",
+      "description": "Persiste el resultado en la fila del proceso (best-effort)."
+    },
 
-    { "from": "chat-hydroagent", "to": "api-agent", "type": "calls", "description": "Envía el historial + formState + perfil detectado, recibe stream." },
-    { "from": "chat-hydroagent", "to": "api-agent-suggest", "type": "calls", "description": "Pide sugerencias de siguiente pregunta según el formState." },
-    { "from": "api-agent", "to": "groq-api", "type": "http", "description": "Chat completions con streaming y tool-calls (hasta 6 rondas)." },
-    { "from": "api-agent", "to": "hydro-agent-tools", "type": "calls", "description": "executeTool() despacha cada tool_call devuelto por Groq." },
-    { "from": "hydro-agent-tools", "to": "septic-calculations", "type": "calls", "description": "calculate_septic_tank / calculate_drainage_field / validate_against_cte." },
-    { "from": "hydro-agent-tools", "to": "reports-pdf", "type": "calls", "description": "generate_pdf_report ensambla el informe con los resultados previos de la ronda." },
-    { "from": "hydro-agent-tools", "to": "secop-client", "type": "calls", "description": "search_secop_tenders reutiliza el mismo cliente que /licitaciones." },
+    {
+      "from": "chat-hydroagent",
+      "to": "api-agent",
+      "type": "calls",
+      "description": "Envía el historial + formState + perfil detectado, recibe stream."
+    },
+    {
+      "from": "chat-hydroagent",
+      "to": "api-agent-suggest",
+      "type": "calls",
+      "description": "Pide sugerencias de siguiente pregunta según el formState."
+    },
+    {
+      "from": "api-agent",
+      "to": "groq-api",
+      "type": "http",
+      "description": "Chat completions con streaming y tool-calls (hasta 6 rondas)."
+    },
+    {
+      "from": "api-agent",
+      "to": "hydro-agent-tools",
+      "type": "calls",
+      "description": "executeTool() despacha cada tool_call devuelto por Groq."
+    },
+    {
+      "from": "hydro-agent-tools",
+      "to": "septic-calculations",
+      "type": "calls",
+      "description": "calculate_septic_tank / calculate_drainage_field / validate_against_cte."
+    },
+    {
+      "from": "hydro-agent-tools",
+      "to": "reports-pdf",
+      "type": "calls",
+      "description": "generate_pdf_report ensambla el informe con los resultados previos de la ronda."
+    },
+    {
+      "from": "hydro-agent-tools",
+      "to": "secop-client",
+      "type": "calls",
+      "description": "search_secop_tenders reutiliza el mismo cliente que /licitaciones."
+    },
 
-    { "from": "build-flow", "to": "api-report-generate", "type": "calls", "description": "Flujo guiado sin LLM: traduce el formState local a los tool executors." },
-    { "from": "calc-fosa-septica", "to": "api-report-generate", "type": "calls", "description": "Genera el PDF a partir del formState guardado en localStorage." },
-    { "from": "api-report-generate", "to": "septic-calculations", "type": "calls", "description": "Ejecuta los tool executors directamente (sin pasar por el chat)." },
-    { "from": "api-report-generate", "to": "reports-pdf", "type": "calls", "description": "executeGeneratePdfReport() produce el PDF final." },
-    { "from": "reports-pdf", "to": "open-meteo-api", "type": "embeds-data-from", "description": "Incluye los datos climáticos consultados por la calculadora geo en el informe." },
-    { "from": "calc-geo", "to": "open-meteo-api", "type": "http", "description": "GET /v1/elevation y /v1/forecast por lat/lon del predio." },
-    { "from": "calc-geo", "to": "calc-fosa-septica", "type": "feeds", "description": "Geo → Fosa → Mantenimiento: las 3 calculadoras comparten formState." },
-    { "from": "calc-fosa-septica", "to": "calc-mantenimiento", "type": "feeds", "description": "Resultados del tanque alimentan el cronograma de mantenimiento." },
-    { "from": "isometric-diagram", "to": "api-generate-isometric", "type": "calls", "description": "Pide la descripción visual antes de renderizar la escena Babylon.js." },
-    { "from": "api-generate-isometric", "to": "anthropic-api", "type": "http", "description": "fetch directo a api.anthropic.com/v1/messages con claude-3-5-sonnet-20241022." },
-    { "from": "calc-fosa-septica", "to": "isometric-diagram", "type": "renders", "description": "Muestra el diagrama isométrico del sistema calculado." },
+    {
+      "from": "build-flow",
+      "to": "api-report-generate",
+      "type": "calls",
+      "description": "Flujo guiado sin LLM: traduce el formState local a los tool executors."
+    },
+    {
+      "from": "calc-fosa-septica",
+      "to": "api-report-generate",
+      "type": "calls",
+      "description": "Genera el PDF a partir del formState guardado en localStorage."
+    },
+    {
+      "from": "api-report-generate",
+      "to": "septic-calculations",
+      "type": "calls",
+      "description": "Ejecuta los tool executors directamente (sin pasar por el chat)."
+    },
+    {
+      "from": "api-report-generate",
+      "to": "reports-pdf",
+      "type": "calls",
+      "description": "executeGeneratePdfReport() produce el PDF final."
+    },
+    {
+      "from": "reports-pdf",
+      "to": "open-meteo-api",
+      "type": "embeds-data-from",
+      "description": "Incluye los datos climáticos consultados por la calculadora geo en el informe."
+    },
+    {
+      "from": "calc-geo",
+      "to": "open-meteo-api",
+      "type": "http",
+      "description": "GET /v1/elevation y /v1/forecast por lat/lon del predio."
+    },
+    {
+      "from": "calc-geo",
+      "to": "calc-fosa-septica",
+      "type": "feeds",
+      "description": "Geo → Fosa → Mantenimiento: las 3 calculadoras comparten formState."
+    },
+    {
+      "from": "calc-fosa-septica",
+      "to": "calc-mantenimiento",
+      "type": "feeds",
+      "description": "Resultados del tanque alimentan el cronograma de mantenimiento."
+    },
+    {
+      "from": "isometric-diagram",
+      "to": "api-generate-isometric",
+      "type": "calls",
+      "description": "Pide la descripción visual antes de renderizar la escena Babylon.js."
+    },
+    {
+      "from": "api-generate-isometric",
+      "to": "anthropic-api",
+      "type": "http",
+      "description": "fetch directo a api.anthropic.com/v1/messages con claude-3-5-sonnet-20241022."
+    },
+    {
+      "from": "calc-fosa-septica",
+      "to": "isometric-diagram",
+      "type": "renders",
+      "description": "Muestra el diagrama isométrico del sistema calculado."
+    },
 
-    { "from": "pliego-extraction", "to": "anthropic-api", "type": "calls", "description": "client.messages.create con document PDF nativo + output_config.json_schema, modelo claude-opus-4-8." },
-    { "from": "pliego-upload-ui", "to": "pliego-extraction", "type": "planned-calls", "description": "Conexión que aún no existe en el producto — hoy solo scripts/analyze-pliego.ts invoca extractPliego()." },
-    { "from": "pliego-upload-ui", "to": "document-access", "type": "planned-calls", "description": "El flujo descrito en el roadmap (extracción condicionada al gate de acceso) no está cableado todavía." },
+    {
+      "from": "pliego-extraction",
+      "to": "anthropic-api",
+      "type": "calls",
+      "description": "client.messages.create con document PDF nativo + output_config.json_schema, modelo claude-opus-4-8."
+    },
+    {
+      "from": "pliego-upload-ui",
+      "to": "pliego-extraction",
+      "type": "planned-calls",
+      "description": "Conexión que aún no existe en el producto — hoy solo scripts/analyze-pliego.ts invoca extractPliego()."
+    },
+    {
+      "from": "pliego-upload-ui",
+      "to": "document-access",
+      "type": "planned-calls",
+      "description": "El flujo descrito en el roadmap (extracción condicionada al gate de acceso) no está cableado todavía."
+    },
 
-    { "from": "api-cron-alertas", "to": "alertas-engine", "type": "triggers", "description": "runDailyAlertas(), desacoplado 1h después de la ingesta." },
-    { "from": "alertas-engine", "to": "matching-engine", "type": "calls", "description": "Cruza cada oferentePerfil contra los procesos nuevos del día." },
-    { "from": "matching-engine", "to": "db-client", "type": "reads", "description": "Lee proceso + oferentePerfil." },
-    { "from": "alertas-engine", "to": "email-service", "type": "calls", "description": "Arma y envía el digest; idempotencia vía envio_log insert-first." },
-    { "from": "email-service", "to": "resend-api", "type": "http", "description": "Envío del correo (digest o magic link)." },
-    { "from": "cuenta-page", "to": "api-alertas-preferencias", "type": "calls", "description": "Lee/edita preferencias de alerta del usuario." },
-    { "from": "api-alertas-unsubscribe", "to": "email-service", "type": "calls", "description": "Valida el token firmado y da de baja." },
+    {
+      "from": "api-cron-alertas",
+      "to": "alertas-engine",
+      "type": "triggers",
+      "description": "runDailyAlertas(), desacoplado 1h después de la ingesta."
+    },
+    {
+      "from": "alertas-engine",
+      "to": "matching-engine",
+      "type": "calls",
+      "description": "Cruza cada oferentePerfil contra los procesos nuevos del día."
+    },
+    {
+      "from": "matching-engine",
+      "to": "db-client",
+      "type": "reads",
+      "description": "Lee proceso + oferentePerfil."
+    },
+    {
+      "from": "alertas-engine",
+      "to": "email-service",
+      "type": "calls",
+      "description": "Arma y envía el digest; idempotencia vía envio_log insert-first."
+    },
+    {
+      "from": "email-service",
+      "to": "resend-api",
+      "type": "http",
+      "description": "Envío del correo (digest o magic link)."
+    },
+    {
+      "from": "cuenta-page",
+      "to": "api-alertas-preferencias",
+      "type": "calls",
+      "description": "Lee/edita preferencias de alerta del usuario."
+    },
+    {
+      "from": "api-alertas-unsubscribe",
+      "to": "email-service",
+      "type": "calls",
+      "description": "Valida el token firmado y da de baja."
+    },
 
-    { "from": "api-auth", "to": "auth-config", "type": "uses", "description": "Handler generado por NextAuth() con la config compartida." },
-    { "from": "auth-config", "to": "db-schema", "type": "uses", "description": "@auth/drizzle-adapter sobre usuario/cuenta/sesion/tokenVerificacion." },
-    { "from": "auth-config", "to": "email-service", "type": "calls", "description": "Envía el magic link de inicio de sesión vía Resend." },
+    {
+      "from": "api-auth",
+      "to": "auth-config",
+      "type": "uses",
+      "description": "Handler generado por NextAuth() con la config compartida."
+    },
+    {
+      "from": "auth-config",
+      "to": "db-schema",
+      "type": "uses",
+      "description": "@auth/drizzle-adapter sobre usuario/cuenta/sesion/tokenVerificacion."
+    },
+    {
+      "from": "auth-config",
+      "to": "email-service",
+      "type": "calls",
+      "description": "Envía el magic link de inicio de sesión vía Resend."
+    },
 
-    { "from": "landing-page", "to": "api-landing-stats", "type": "calls", "description": "Estadísticas agregadas para las tarjetas de la landing." },
-    { "from": "landing-page", "to": "api-procesos-recientes", "type": "calls", "description": "ProcesosTicker consume procesos recientes (DB con fallback a live)." },
+    {
+      "from": "landing-page",
+      "to": "api-landing-stats",
+      "type": "calls",
+      "description": "Estadísticas agregadas para las tarjetas de la landing."
+    },
+    {
+      "from": "landing-page",
+      "to": "api-procesos-recientes",
+      "type": "calls",
+      "description": "ProcesosTicker consume procesos recientes (DB con fallback a live)."
+    },
 
-    { "from": "vercel-cron", "to": "api-cron-ingest", "type": "triggers", "description": "Schedule '0 11 * * *' en vercel.json." },
-    { "from": "vercel-cron", "to": "api-cron-alertas", "type": "triggers", "description": "Schedule '0 12 * * *' en vercel.json." },
-    { "from": "calculators-hub", "to": "calc-geo", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
-    { "from": "calculators-hub", "to": "calc-fosa-septica", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
-    { "from": "calculators-hub", "to": "calc-mantenimiento", "type": "links-to", "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)." },
+    {
+      "from": "vercel-cron",
+      "to": "api-cron-ingest",
+      "type": "triggers",
+      "description": "Schedule '0 11 * * *' en vercel.json."
+    },
+    {
+      "from": "vercel-cron",
+      "to": "api-cron-alertas",
+      "type": "triggers",
+      "description": "Schedule '0 12 * * *' en vercel.json."
+    },
+    {
+      "from": "calculators-hub",
+      "to": "calc-geo",
+      "type": "links-to",
+      "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+    },
+    {
+      "from": "calculators-hub",
+      "to": "calc-fosa-septica",
+      "type": "links-to",
+      "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+    },
+    {
+      "from": "calculators-hub",
+      "to": "calc-mantenimiento",
+      "type": "links-to",
+      "description": "<Link href={`/calculators/${m.slug}`}> (app/calculators/page.js L65)."
+    },
 
-    { "from": "mis-coincidencias", "to": "auth-config", "type": "uses", "description": "auth() de src/lib/auth/config.ts protege la página (redirect si no hay sesión)." },
-    { "from": "mis-coincidencias", "to": "oferente-profile", "type": "calls", "description": "getPerfilDb() lee el perfil de oferente guardado del usuario." },
-    { "from": "mis-coincidencias", "to": "matching-engine", "type": "calls", "description": "getMatchesForPerfil(perfil) — import directo de función, no fetch." },
-    { "from": "mis-coincidencias", "to": "alertas-engine", "type": "calls", "description": "enviarDigestAhora() — import directo de src/lib/alertas/enviar-ahora.ts, no vía /api/alertas/enviar-ahora." }
+    {
+      "from": "mis-coincidencias",
+      "to": "auth-config",
+      "type": "uses",
+      "description": "auth() de src/lib/auth/config.ts protege la página (redirect si no hay sesión)."
+    },
+    {
+      "from": "mis-coincidencias",
+      "to": "oferente-profile",
+      "type": "calls",
+      "description": "getPerfilDb() lee el perfil de oferente guardado del usuario."
+    },
+    {
+      "from": "mis-coincidencias",
+      "to": "matching-engine",
+      "type": "calls",
+      "description": "getMatchesForPerfil(perfil) — import directo de función, no fetch."
+    },
+    {
+      "from": "mis-coincidencias",
+      "to": "alertas-engine",
+      "type": "calls",
+      "description": "enviarDigestAhora() — import directo de src/lib/alertas/enviar-ahora.ts, no vía /api/alertas/enviar-ahora."
+    }
   ],
 
   "flows": [
@@ -144,16 +998,56 @@
       "name": "Ingesta SECOP → normalización → almacenamiento",
       "description": "Cron diario que aterriza datos crudos de SECOP II en Postgres y los transforma a tablas canónicas, clasificando sector y preclasificando acceso documental.",
       "steps": [
-        { "nodeId": "vercel-cron", "action": "Dispara GET /api/cron/ingest a las 11:00 UTC", "order": 1 },
-        { "nodeId": "api-cron-ingest", "action": "Valida CRON_SECRET y llama al pipeline de ingesta", "order": 2 },
-        { "nodeId": "ingest-pipeline", "action": "Pagina SODA por keyset (watermark) + sweep de recuperación", "order": 3 },
-        { "nodeId": "secop-client", "action": "GET al dataset SODA resuelto (p6dx-8zbt / jbjy-vk9h)", "order": 4 },
-        { "nodeId": "socrata-secop", "action": "Responde con filas JSON del dataset SECOP II", "order": 5 },
-        { "nodeId": "db-client", "action": "Inserta cada página como raw_record (JSONB append-only)", "order": 6 },
-        { "nodeId": "transform-orchestrator", "action": "Lee raw_record pendientes y arma proyecciones canónicas", "order": 7 },
-        { "nodeId": "classify-sector", "action": "Clasifica cada proceso/contrato como sector agua o no", "order": 8 },
-        { "nodeId": "document-access", "action": "preclassify(): marca NOT_PUBLISHED/UNKNOWN sin HTTP", "order": 9 },
-        { "nodeId": "db-schema", "action": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial", "order": 10 }
+        {
+          "nodeId": "vercel-cron",
+          "action": "Dispara GET /api/cron/ingest a las 11:00 UTC",
+          "order": 1
+        },
+        {
+          "nodeId": "api-cron-ingest",
+          "action": "Valida CRON_SECRET y llama al pipeline de ingesta",
+          "order": 2
+        },
+        {
+          "nodeId": "ingest-pipeline",
+          "action": "Pagina SODA por keyset (watermark) + sweep de recuperación",
+          "order": 3
+        },
+        {
+          "nodeId": "secop-client",
+          "action": "GET al dataset SODA resuelto (p6dx-8zbt / jbjy-vk9h)",
+          "order": 4
+        },
+        {
+          "nodeId": "socrata-secop",
+          "action": "Responde con filas JSON del dataset SECOP II",
+          "order": 5
+        },
+        {
+          "nodeId": "db-client",
+          "action": "Inserta cada página como raw_record (JSONB append-only)",
+          "order": 6
+        },
+        {
+          "nodeId": "transform-orchestrator",
+          "action": "Lee raw_record pendientes y arma proyecciones canónicas",
+          "order": 7
+        },
+        {
+          "nodeId": "classify-sector",
+          "action": "Clasifica cada proceso/contrato como sector agua o no",
+          "order": 8
+        },
+        {
+          "nodeId": "document-access",
+          "action": "preclassify(): marca NOT_PUBLISHED/UNKNOWN sin HTTP",
+          "order": 9
+        },
+        {
+          "nodeId": "db-schema",
+          "action": "Escribe proceso/contrato/contratoEvento/clasificacionSectorial",
+          "order": 10
+        }
       ]
     },
     {
@@ -161,10 +1055,26 @@
       "name": "Extracción de pliegos (estado actual: CLI, no producto)",
       "description": "Camino real hoy en el repo: un PDF de pliego se analiza por línea de comandos, no desde la UI. El diagrama marca en rojo lo que el roadmap describe pero aún no existe.",
       "steps": [
-        { "nodeId": "pliego-upload-ui", "action": "(planeado) Usuario sube un pliego desde el navegador", "order": 1 },
-        { "nodeId": "document-access", "action": "(planeado) Verificar que el documento sea PUBLIC antes de extraer", "order": 2 },
-        { "nodeId": "pliego-extraction", "action": "extractPliego(pdfPath) — hoy solo se invoca desde scripts/analyze-pliego.ts", "order": 3 },
-        { "nodeId": "anthropic-api", "action": "claude-opus-4-8 lee el PDF nativo y devuelve JSON validado contra PLIEGO_JSON_SCHEMA", "order": 4 }
+        {
+          "nodeId": "pliego-upload-ui",
+          "action": "(planeado) Usuario sube un pliego desde el navegador",
+          "order": 1
+        },
+        {
+          "nodeId": "document-access",
+          "action": "(planeado) Verificar que el documento sea PUBLIC antes de extraer",
+          "order": 2
+        },
+        {
+          "nodeId": "pliego-extraction",
+          "action": "extractPliego(pdfPath) — hoy solo se invoca desde scripts/analyze-pliego.ts",
+          "order": 3
+        },
+        {
+          "nodeId": "anthropic-api",
+          "action": "claude-opus-4-8 lee el PDF nativo y devuelve JSON validado contra PLIEGO_JSON_SCHEMA",
+          "order": 4
+        }
       ]
     },
     {
@@ -172,13 +1082,41 @@
       "name": "Búsqueda/filtrado en Licitaciones (workbench real)",
       "description": "El único camino de búsqueda conectado a datos reales es /licitaciones/explorar. 'Descubrir' (colecciones inteligentes + facetas) existe como UI pero corre 100% sobre mock-licitaciones.ts, sin tocar este endpoint — se muestra atenuado/aislado en el diagrama a propósito.",
       "steps": [
-        { "nodeId": "licitaciones-hub", "action": "Vista simple (ISR) enlaza a 'búsqueda avanzada'", "order": 1 },
-        { "nodeId": "licitaciones-explorar", "action": "Usuario filtra por texto/departamento/valor en el workbench real", "order": 2 },
-        { "nodeId": "api-secop-search", "action": "GET /api/secop con los query params de filtro", "order": 3 },
-        { "nodeId": "db-client", "action": "Intenta Postgres cacheado por combinación de filtros", "order": 4 },
-        { "nodeId": "secop-client", "action": "Si falla la consulta a Postgres, cae a Socrata en vivo", "order": 5 },
-        { "nodeId": "api-secop-verdict", "action": "Al abrir el detalle: calcula elegibilidad on-demand", "order": 6 },
-        { "nodeId": "verdict-engine", "action": "Aplica gates de habilitación contra el perfil de oferente", "order": 7 }
+        {
+          "nodeId": "licitaciones-hub",
+          "action": "Vista simple (ISR) enlaza a 'búsqueda avanzada'",
+          "order": 1
+        },
+        {
+          "nodeId": "licitaciones-explorar",
+          "action": "Usuario filtra por texto/departamento/valor en el workbench real",
+          "order": 2
+        },
+        {
+          "nodeId": "api-secop-search",
+          "action": "GET /api/secop con los query params de filtro",
+          "order": 3
+        },
+        {
+          "nodeId": "db-client",
+          "action": "Intenta Postgres cacheado por combinación de filtros",
+          "order": 4
+        },
+        {
+          "nodeId": "secop-client",
+          "action": "Si falla la consulta a Postgres, cae a Socrata en vivo",
+          "order": 5
+        },
+        {
+          "nodeId": "api-secop-verdict",
+          "action": "Al abrir el detalle: calcula elegibilidad on-demand",
+          "order": 6
+        },
+        {
+          "nodeId": "verdict-engine",
+          "action": "Aplica gates de habilitación contra el perfil de oferente",
+          "order": 7
+        }
       ]
     },
     {
@@ -186,12 +1124,36 @@
       "name": "Chat del Hydro_Agent con tool-calling",
       "description": "El asistente conversacional detecta perfil/sub-escenario y encadena hasta 4 tools de cálculo más búsqueda SECOP, todo sobre Groq (no Anthropic).",
       "steps": [
-        { "nodeId": "chat-hydroagent", "action": "Usuario escribe un mensaje con datos concretos", "order": 1 },
-        { "nodeId": "api-agent", "action": "Arma system prompt por perfil + normativa relevante", "order": 2 },
-        { "nodeId": "groq-api", "action": "llama-3.3-70b-versatile decide si llama una tool", "order": 3 },
-        { "nodeId": "hydro-agent-tools", "action": "executeTool() corre la tool solicitada", "order": 4 },
-        { "nodeId": "septic-calculations", "action": "Calcula tanque/campo de infiltración/validación CTE", "order": 5 },
-        { "nodeId": "reports-pdf", "action": "(si se pide) genera el PDF final encadenando resultados previos", "order": 6 }
+        {
+          "nodeId": "chat-hydroagent",
+          "action": "Usuario escribe un mensaje con datos concretos",
+          "order": 1
+        },
+        {
+          "nodeId": "api-agent",
+          "action": "Arma system prompt por perfil + normativa relevante",
+          "order": 2
+        },
+        {
+          "nodeId": "groq-api",
+          "action": "llama-3.3-70b-versatile decide si llama una tool",
+          "order": 3
+        },
+        {
+          "nodeId": "hydro-agent-tools",
+          "action": "executeTool() corre la tool solicitada",
+          "order": 4
+        },
+        {
+          "nodeId": "septic-calculations",
+          "action": "Calcula tanque/campo de infiltración/validación CTE",
+          "order": 5
+        },
+        {
+          "nodeId": "reports-pdf",
+          "action": "(si se pide) genera el PDF final encadenando resultados previos",
+          "order": 6
+        }
       ]
     },
     {
@@ -199,10 +1161,26 @@
       "name": "Alertas diarias por perfil de oferente",
       "description": "Un día después de la ingesta, el motor de matching cruza perfiles guardados contra procesos nuevos y envía el digest por correo.",
       "steps": [
-        { "nodeId": "vercel-cron", "action": "Dispara GET /api/cron/alertas a las 12:00 UTC", "order": 1 },
-        { "nodeId": "api-cron-alertas", "action": "Valida CRON_SECRET y llama runDailyAlertas()", "order": 2 },
-        { "nodeId": "matching-engine", "action": "Cruza cada oferentePerfil contra procesos nuevos del día", "order": 3 },
-        { "nodeId": "alertas-engine", "action": "Arma el digest; envio_log evita duplicados en reintentos", "order": 4 },
+        {
+          "nodeId": "vercel-cron",
+          "action": "Dispara GET /api/cron/alertas a las 12:00 UTC",
+          "order": 1
+        },
+        {
+          "nodeId": "api-cron-alertas",
+          "action": "Valida CRON_SECRET y llama runDailyAlertas()",
+          "order": 2
+        },
+        {
+          "nodeId": "matching-engine",
+          "action": "Cruza cada oferentePerfil contra procesos nuevos del día",
+          "order": 3
+        },
+        {
+          "nodeId": "alertas-engine",
+          "action": "Arma el digest; envio_log evita duplicados en reintentos",
+          "order": 4
+        },
         { "nodeId": "email-service", "action": "Envía el correo vía Resend", "order": 5 }
       ]
     }

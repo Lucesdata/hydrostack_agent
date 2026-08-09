@@ -8,20 +8,20 @@
  * cuentas ya migradas) y al completar el wizard (PUT).
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getSessionUser } from '@/src/lib/supabase/get-session-user';
-import { db } from '@/src/lib/db/client';
-import { oferentePerfil } from '@/src/lib/db/schema/cuentas';
-import { getPerfilDb } from '@/src/lib/oferente/perfil-store';
-import type { OferenteProfile } from '@/src/lib/oferente/types';
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { db } from "@/src/lib/db/client";
+import { oferentePerfil } from "@/src/lib/db/schema/cuentas";
+import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
+import type { OferenteProfile } from "@/src/lib/oferente/types";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 function isValidPerfil(p: unknown): p is OferenteProfile {
-  if (!p || typeof p !== 'object') return false;
+  if (!p || typeof p !== "object") return false;
   const o = p as Record<string, unknown>;
   return (
-    typeof o.id === 'string' &&
+    typeof o.id === "string" &&
     Array.isArray(o.sectoresUnspsc) &&
     !!o.cobertura &&
     !!o.cuantiaObjetivo
@@ -32,7 +32,7 @@ export async function GET() {
   const user = await getSessionUser();
   const usuarioId = user?.id;
   if (!usuarioId) {
-    return NextResponse.json({ error: 'No hay sesión activa' }, { status: 401 });
+    return NextResponse.json({ error: "No hay sesión activa" }, { status: 401 });
   }
 
   const perfil = await getPerfilDb(usuarioId);
@@ -43,18 +43,18 @@ export async function PUT(req: NextRequest) {
   const user = await getSessionUser();
   const usuarioId = user?.id;
   if (!usuarioId) {
-    return NextResponse.json({ error: 'No hay sesión activa' }, { status: 401 });
+    return NextResponse.json({ error: "No hay sesión activa" }, { status: 401 });
   }
 
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
   if (!isValidPerfil(body)) {
-    return NextResponse.json({ error: 'Perfil inválido' }, { status: 400 });
+    return NextResponse.json({ error: "Perfil inválido" }, { status: 400 });
   }
 
   const [row] = await db

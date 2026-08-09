@@ -42,7 +42,7 @@ const CENTINELAS = new Set(
     "ninguna",
     "-",
     "0",
-  ].map((s) => s.toLowerCase()),
+  ].map((s) => s.toLowerCase())
 );
 
 function isCentinela(v) {
@@ -282,7 +282,10 @@ function countTopN(values, n) {
     const k = String(v).trim();
     counts.set(k, (counts.get(k) || 0) + 1);
   }
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, v]) => ({ value: k, count: v }));
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([k, v]) => ({ value: k, count: v }));
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -311,12 +314,12 @@ async function main() {
   const geoProcesos = analyzeGeo(
     procesos,
     ["departamento_entidad", "ciudad_entidad"],
-    procesos.length,
+    procesos.length
   );
   const geoContratos = analyzeGeo(
     contratos,
     ["departamento", "ciudad", "localizaci_n"],
-    contratos.length,
+    contratos.length
   );
 
   // Campos que alimentan eventos (0.1 §2)
@@ -343,31 +346,55 @@ async function main() {
     event_fields: eventFields,
   };
 
-  await writeFile(resolve(SAMPLES_DIR, "_stats.json"), JSON.stringify(stats, null, 2) + "\n", "utf8");
+  await writeFile(
+    resolve(SAMPLES_DIR, "_stats.json"),
+    JSON.stringify(stats, null, 2) + "\n",
+    "utf8"
+  );
 
   // ── Resumen humano a stderr ──────────────────────────────────────────────
   const E = process.stderr.write.bind(process.stderr);
   E(`\n══ ANÁLISIS DE MUESTRAS ══════════════════════════════════════\n`);
-  E(`Procesos: ${procesosAnalysis.total} filas, ${Object.keys(procesosAnalysis.columns).length} columnas (universo metadata+visto)\n`);
-  E(`Contratos: ${contratosAnalysis.total} filas, ${Object.keys(contratosAnalysis.columns).length} columnas\n`);
+  E(
+    `Procesos: ${procesosAnalysis.total} filas, ${Object.keys(procesosAnalysis.columns).length} columnas (universo metadata+visto)\n`
+  );
+  E(
+    `Contratos: ${contratosAnalysis.total} filas, ${Object.keys(contratosAnalysis.columns).length} columnas\n`
+  );
 
   E(`\n── Llave de unión (H1, D11) ────────────────────────────────\n`);
-  E(`  procesos con id_del_portafolio: ${join.procesos_con_portafolio}/${join.procesos_total} (${join.procesos_con_portafolio_pct}%)\n`);
-  E(`  contratos con proceso_de_compra: ${join.contratos_con_proceso_de_compra}/${join.contratos_total} (${join.contratos_con_pdc_pct}%)\n`);
-  E(`  contratos cuyo proceso_de_compra cruza CONTRA id_del_portafolio: ${join.contratos_que_cruzan_via_portafolio} (${join.cruce_via_portafolio_pct}% de los que tienen pdc)\n`);
-  E(`  contratos cuyo proceso_de_compra cruza CONTRA id_del_proceso (control negativo): ${join.contratos_que_cruzan_via_id_proceso} (${join.cruce_via_id_proceso_pct}%)\n`);
+  E(
+    `  procesos con id_del_portafolio: ${join.procesos_con_portafolio}/${join.procesos_total} (${join.procesos_con_portafolio_pct}%)\n`
+  );
+  E(
+    `  contratos con proceso_de_compra: ${join.contratos_con_proceso_de_compra}/${join.contratos_total} (${join.contratos_con_pdc_pct}%)\n`
+  );
+  E(
+    `  contratos cuyo proceso_de_compra cruza CONTRA id_del_portafolio: ${join.contratos_que_cruzan_via_portafolio} (${join.cruce_via_portafolio_pct}% de los que tienen pdc)\n`
+  );
+  E(
+    `  contratos cuyo proceso_de_compra cruza CONTRA id_del_proceso (control negativo): ${join.contratos_que_cruzan_via_id_proceso} (${join.cruce_via_id_proceso_pct}%)\n`
+  );
 
   E(`\n── NIT proveedor en contratos (documento_proveedor) ─────────\n`);
-  E(`  presentes: ${nitProveedorContratos.present}/${nitProveedorContratos.total_rows} (${nitProveedorContratos.present_pct}%)\n`);
+  E(
+    `  presentes: ${nitProveedorContratos.present}/${nitProveedorContratos.total_rows} (${nitProveedorContratos.present_pct}%)\n`
+  );
   E(`  centinelas: ${nitProveedorContratos.centinela} (${nitProveedorContratos.centinela_pct}%)\n`);
   E(`  con DV explícito: ${nitProveedorContratos.with_dv}\n`);
-  E(`  DV correcto (de los con DV): ${nitProveedorContratos.dv_ok}/${nitProveedorContratos.with_dv} (${nitProveedorContratos.dv_ok_pct_of_with_dv}%)\n`);
+  E(
+    `  DV correcto (de los con DV): ${nitProveedorContratos.dv_ok}/${nitProveedorContratos.with_dv} (${nitProveedorContratos.dv_ok_pct_of_with_dv}%)\n`
+  );
   E(`  longitudes: ${JSON.stringify(nitProveedorContratos.length_distribution)}\n`);
   E(`  no numérico: ${nitProveedorContratos.non_numeric}\n`);
 
   E(`\n── NIT entidad en procesos (nit_entidad) ───────────────────\n`);
-  E(`  presentes: ${nitEntidadProcesos.present}/${nitEntidadProcesos.total_rows} (${nitEntidadProcesos.present_pct}%)\n`);
-  E(`  DV correcto (de los con DV): ${nitEntidadProcesos.dv_ok}/${nitEntidadProcesos.with_dv} (${nitEntidadProcesos.dv_ok_pct_of_with_dv}%)\n`);
+  E(
+    `  presentes: ${nitEntidadProcesos.present}/${nitEntidadProcesos.total_rows} (${nitEntidadProcesos.present_pct}%)\n`
+  );
+  E(
+    `  DV correcto (de los con DV): ${nitEntidadProcesos.dv_ok}/${nitEntidadProcesos.with_dv} (${nitEntidadProcesos.dv_ok_pct_of_with_dv}%)\n`
+  );
   E(`  longitudes: ${JSON.stringify(nitEntidadProcesos.length_distribution)}\n`);
 
   E(`\n── Geografía ───────────────────────────────────────────────\n`);
@@ -383,7 +410,9 @@ async function main() {
     if (!s) {
       E(`  ${f}: NO PRESENTE en la muestra\n`);
     } else {
-      E(`  ${f}: ${s.null_rate_pct}% nulos, tipo declarado=${s.declared_type}, tipos vistos=${Object.keys(s.apparent_types).join("|")}\n`);
+      E(
+        `  ${f}: ${s.null_rate_pct}% nulos, tipo declarado=${s.declared_type}, tipos vistos=${Object.keys(s.apparent_types).join("|")}\n`
+      );
     }
   }
 

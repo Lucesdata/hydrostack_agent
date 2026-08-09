@@ -23,8 +23,8 @@
  *     (dedupLastWins), el mismo resultado que dejaban los upserts secuenciales.
  */
 
-import { isNotNull, sql } from 'drizzle-orm';
-import type { NeonDatabase } from 'drizzle-orm/neon-serverless';
+import { isNotNull, sql } from "drizzle-orm";
+import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import {
   contrato,
   entidad,
@@ -32,18 +32,18 @@ import {
   proceso,
   proveedor,
   transformQuarantine,
-} from '@/src/lib/db/schema';
-import type * as schema from '@/src/lib/db/schema';
-import { chunk, dedupLastWins } from '@/src/lib/db/batch';
-import { withTransientRetry } from '@/src/lib/db/transient';
+} from "@/src/lib/db/schema";
+import type * as schema from "@/src/lib/db/schema";
+import { chunk, dedupLastWins } from "@/src/lib/db/batch";
+import { withTransientRetry } from "@/src/lib/db/transient";
 import type {
   ContratoProjection,
   EntidadProjection,
   GeoHints,
   ProcesoProjection,
   ProveedorProjection,
-} from './mapCanonical';
-import type { DocumentAccessResult } from '@/src/lib/secop/document-access';
+} from "./mapCanonical";
+import type { DocumentAccessResult } from "@/src/lib/secop/document-access";
 
 type Db = NeonDatabase<typeof schema>;
 
@@ -65,7 +65,7 @@ export class GeoResolver {
     const rows = await withTransientRetry(() =>
       db
         .select({ texto: geografiaAlias.textoNormalizado, divipola: geografiaAlias.codigoDivipola })
-        .from(geografiaAlias),
+        .from(geografiaAlias)
     );
     return new GeoResolver(new Map(rows.map((r) => [r.texto, r.divipola])));
   }
@@ -98,7 +98,7 @@ export interface EntidadItem {
 /** Upsert por lotes de entidades (nit_canonico UNIQUE). → Map nit → id. */
 export async function batchUpsertEntidades(
   db: Db,
-  items: EntidadItem[],
+  items: EntidadItem[]
 ): Promise<Map<string, string>> {
   const idByNit = new Map<string, string>();
   const deduped = dedupLastWins(items, (i) => i.proj.nitCanonico);
@@ -115,7 +115,7 @@ export async function batchUpsertEntidades(
             sectorAdministrativo: proj.sectorAdministrativo,
             geografiaId,
             rawAttrs: proj.rawAttrs,
-          })),
+          }))
         )
         .onConflictDoUpdate({
           target: entidad.nitCanonico,
@@ -129,7 +129,7 @@ export async function batchUpsertEntidades(
             updatedAt: sql`now()`,
           },
         })
-        .returning({ id: entidad.id, nit: entidad.nitCanonico }),
+        .returning({ id: entidad.id, nit: entidad.nitCanonico })
     );
     for (const r of rows) idByNit.set(r.nit, r.id);
   }
@@ -139,7 +139,7 @@ export async function batchUpsertEntidades(
 /** Upsert por lotes de proveedores (nit_canonico UNIQUE). → Map nit → id. */
 export async function batchUpsertProveedores(
   db: Db,
-  projs: ProveedorProjection[],
+  projs: ProveedorProjection[]
 ): Promise<Map<string, string>> {
   const idByNit = new Map<string, string>();
   const deduped = dedupLastWins(projs, (p) => p.nitCanonico);
@@ -155,7 +155,7 @@ export async function batchUpsertProveedores(
             razonSocial: p.razonSocial,
             esEstructuraPlural: p.esEstructuraPlural,
             rawAttrs: p.rawAttrs,
-          })),
+          }))
         )
         .onConflictDoUpdate({
           target: proveedor.nitCanonico,
@@ -168,7 +168,7 @@ export async function batchUpsertProveedores(
             updatedAt: sql`now()`,
           },
         })
-        .returning({ id: proveedor.id, nit: proveedor.nitCanonico }),
+        .returning({ id: proveedor.id, nit: proveedor.nitCanonico })
     );
     for (const r of rows) idByNit.set(r.nit, r.id);
   }
@@ -214,7 +214,7 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             documentAccessMethod: docAccess.method,
             documentAccessEvaluatedAt: sql`now()`,
             rawRecordIdActual: rawRecordId,
-          })),
+          }))
         )
         .onConflictDoUpdate({
           target: proceso.secopProcesoId,
@@ -240,7 +240,7 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             updatedAt: sql`now()`,
           },
         })
-        .returning({ id: proceso.id }),
+        .returning({ id: proceso.id })
     );
     written += rows.length;
   }
@@ -298,7 +298,7 @@ export async function batchUpsertContratos(db: Db, items: ContratoItem[]): Promi
                 proj.valorPendientePago !== null ? String(proj.valorPendientePago) : null,
               rawRecordIdActual: rawRecordId,
             };
-          }),
+          })
         )
         .onConflictDoUpdate({
           target: contrato.secopContratoId,
@@ -327,7 +327,7 @@ export async function batchUpsertContratos(db: Db, items: ContratoItem[]): Promi
             updatedAt: sql`now()`,
           },
         })
-        .returning({ id: contrato.id }),
+        .returning({ id: contrato.id })
     );
     written += rows.length;
   }
@@ -347,7 +347,7 @@ export async function loadPortafolioIndex(db: Db): Promise<Map<string, string>> 
     db
       .select({ id: proceso.id, portafolioId: proceso.portafolioId })
       .from(proceso)
-      .where(isNotNull(proceso.portafolioId)),
+      .where(isNotNull(proceso.portafolioId))
   );
   const byPortafolio = new Map<string, string>();
   for (const r of rows) {
@@ -383,8 +383,8 @@ export async function batchQuarantine(db: Db, entries: QuarantineEntry[]): Promi
           reason: entry.reason,
           detail: entry.detail ?? null,
           batchId: entry.batchId,
-        })),
-      ),
+        }))
+      )
     );
   }
 }

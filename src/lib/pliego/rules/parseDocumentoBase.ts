@@ -19,8 +19,8 @@
  * extractPliegoGroq.ts) — este módulo no toca el PDF directamente.
  */
 
-import { ParseoNoConfiable } from './errors';
-import type { RequisitosHabilitantes } from '../schema';
+import { ParseoNoConfiable } from "./errors";
+import type { RequisitosHabilitantes } from "../schema";
 
 export interface DocumentoBaseExtraccion {
   reglas_presupuesto: string[];
@@ -42,9 +42,9 @@ const TOC_LINEA = /\.{4,}\s*\d+\s*$/;
 
 function limpiarTexto(texto: string): string {
   return texto
-    .split('\n')
+    .split("\n")
     .filter((linea) => !TOC_LINEA.test(linea) && !BOILERPLATE.some((re) => re.test(linea)))
-    .join('\n');
+    .join("\n");
 }
 
 /** Recorta el texto entre el heading de inicio (incluido) y el de fin (excluido). */
@@ -61,28 +61,28 @@ function extraerBloque(textoLimpio: string, inicioRe: RegExp, finRe: RegExp): st
 /** Colapsa saltos de línea de word-wrap en un solo párrafo legible. */
 function aParrafo(bloque: string): string {
   return bloque
-    .split('\n')
+    .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
+    .join(" ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 /** "A. texto…\nB. texto…" → ["texto…", "texto…"], exigiendo secuencia A,B,C… para evitar falsos positivos. */
 function parseListaLetras(bloque: string): string[] {
   const items: string[] = [];
-  let actual = '';
-  let siguienteLetra = 'A'.charCodeAt(0);
+  let actual = "";
+  let siguienteLetra = "A".charCodeAt(0);
 
-  for (const lineaRaw of bloque.split('\n')) {
+  for (const lineaRaw of bloque.split("\n")) {
     const m = /^\s{0,6}([A-Z])\.\s+(.*)$/.exec(lineaRaw);
     if (m && m[1].charCodeAt(0) === siguienteLetra) {
       if (actual.trim()) items.push(aParrafo(actual));
       actual = m[2];
       siguienteLetra += 1;
-    } else if (siguienteLetra > 'A'.charCodeAt(0)) {
-      actual += '\n' + lineaRaw;
+    } else if (siguienteLetra > "A".charCodeAt(0)) {
+      actual += "\n" + lineaRaw;
     }
   }
   if (actual.trim()) items.push(aParrafo(actual));
@@ -95,11 +95,11 @@ export function parseDocumentoBaseTexto(textoCrudo: string): DocumentoBaseExtrac
   const bloqueRechazo = extraerBloque(
     texto,
     /^\s*1\.15\.\s+CAUSALES DE RECHAZO\s*$/m,
-    /^\s*1\.16\./m,
+    /^\s*1\.16\./m
   );
   const reglas_presupuesto = parseListaLetras(bloqueRechazo);
   if (reglas_presupuesto.length === 0) {
-    throw new ParseoNoConfiable('CAUSALES DE RECHAZO no tiene ítems con formato A./B./C.…');
+    throw new ParseoNoConfiable("CAUSALES DE RECHAZO no tiene ítems con formato A./B./C.…");
   }
 
   // Solo la introducción de 3.5 — el heading tiene hasta 7 subsecciones anidadas
@@ -109,26 +109,26 @@ export function parseDocumentoBaseTexto(textoCrudo: string): DocumentoBaseExtrac
     extraerBloque(
       texto,
       /^\s*3\.5\.\s+EXPERIENCIA\s*$/m,
-      /^\s*(3\.5\.1\.|3\.6\.\s+CAPACIDAD FINANCIERA)/m,
-    ),
+      /^\s*(3\.5\.1\.|3\.6\.\s+CAPACIDAD FINANCIERA)/m
+    )
   );
   const capacidad_financiera = aParrafo(
     extraerBloque(
       texto,
       /^\s*3\.6\.\s+CAPACIDAD FINANCIERA\s*$/m,
-      /^\s*3\.8\.\s+CAPACIDAD ORGANIZACIONAL/m,
-    ),
+      /^\s*3\.8\.\s+CAPACIDAD ORGANIZACIONAL/m
+    )
   );
   const capacidad_organizacional = aParrafo(
-    extraerBloque(
-      texto,
-      /^\s*3\.8\.\s+CAPACIDAD ORGANIZACIONAL\s*$/m,
-      /^\s*3\.9\.\s+ACREDITACIÓN/m,
-    ),
+    extraerBloque(texto, /^\s*3\.8\.\s+CAPACIDAD ORGANIZACIONAL\s*$/m, /^\s*3\.9\.\s+ACREDITACIÓN/m)
   );
 
   return {
     reglas_presupuesto,
-    requisitos_habilitantes: { experiencia_especifica, capacidad_financiera, capacidad_organizacional },
+    requisitos_habilitantes: {
+      experiencia_especifica,
+      capacidad_financiera,
+      capacidad_organizacional,
+    },
   };
 }

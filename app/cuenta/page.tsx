@@ -115,8 +115,8 @@ export default async function CuentaPage() {
               </span>
             </form>
             <p className="clr-cuenta-prefs-note">
-              La hora se guarda para cuando el envío por horario esté disponible; por ahora
-              el correo diario sale a una hora fija para todas las cuentas.
+              La hora se guarda para cuando el envío por horario esté disponible; por ahora el
+              correo diario sale a una hora fija para todas las cuentas.
             </p>
           </div>
         )}

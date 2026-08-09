@@ -83,9 +83,7 @@ export default function ProcessDetail({
           {(p.estadoApertura ?? p.estado ?? "—").toUpperCase()}
         </span>
         {p.modalidad && <span className="clr-badge clr-badge--neutral">{p.modalidad}</span>}
-        {p.tipoContrato && (
-          <span className="clr-badge clr-badge--neutral">{p.tipoContrato}</span>
-        )}
+        {p.tipoContrato && <span className="clr-badge clr-badge--neutral">{p.tipoContrato}</span>}
       </div>
 
       <h2 className="clr-pdetail-title">{sentenceCaseTitle(p.nombre || p.referencia)}</h2>
@@ -101,9 +99,7 @@ export default function ProcessDetail({
         <div>
           <span className="clr-pdetail-label">Publicado</span>
           <span>
-            {p.fechaPublicacion
-              ? new Date(p.fechaPublicacion).toLocaleDateString("es-CO")
-              : "—"}
+            {p.fechaPublicacion ? new Date(p.fechaPublicacion).toLocaleDateString("es-CO") : "—"}
           </span>
         </div>
         <div>
@@ -138,11 +134,16 @@ export default function ProcessDetail({
         <section className="clr-elig" aria-label="Elegibilidad">
           <header className="clr-elig-head">
             <span>Elegibilidad · nivel 0</span>
-            <span className="clr-elig-count">{passCount} de {gateTotal} compuertas</span>
+            <span className="clr-elig-count">
+              {passCount} de {gateTotal} compuertas
+            </span>
           </header>
           <div className="clr-elig-bar">
             {GATE_LABEL.map(([key]) => (
-              <span key={key} className={`clr-elig-seg clr-elig-seg--${STATUS[v.gates[key].status].cls}`} />
+              <span
+                key={key}
+                className={`clr-elig-seg clr-elig-seg--${STATUS[v.gates[key].status].cls}`}
+              />
             ))}
           </div>
           <ul className="clr-elig-gates">

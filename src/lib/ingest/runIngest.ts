@@ -12,20 +12,15 @@
  * payload_hash, no la ingesta — aquí todo snapshot nuevo entra.
  */
 
-import { randomUUID } from 'crypto';
-import type { IngestSource } from './sources';
-import { windowStart, maxWatermark } from './watermark';
-import {
-  buildKeysetPage,
-  buildSweepPage,
-  cursorFromRow,
-  type SodaPageParams,
-} from './pagination';
-import { toRawRecord, type RawRecordInsert } from './mapRecord';
+import { randomUUID } from "crypto";
+import type { IngestSource } from "./sources";
+import { windowStart, maxWatermark } from "./watermark";
+import { buildKeysetPage, buildSweepPage, cursorFromRow, type SodaPageParams } from "./pagination";
+import { toRawRecord, type RawRecordInsert } from "./mapRecord";
 
 export type SodaFetcher = (
   dataset: string,
-  params: SodaPageParams,
+  params: SodaPageParams
 ) => Promise<Record<string, unknown>[]>;
 
 /** Inserta los registros y devuelve cuántos entraron de verdad (el adaptador
@@ -60,7 +55,7 @@ const DEFAULT_MAX_PAGES = 10_000;
 
 export async function runIngest(
   deps: { fetchPage: SodaFetcher; sink: RawSink },
-  opts: IngestOptions,
+  opts: IngestOptions
 ): Promise<IngestSummary> {
   const { source, lastWatermark } = opts;
   const batchId = opts.batchId ?? randomUUID();
@@ -152,7 +147,7 @@ const DEFAULT_SWEEP_MAX_PAGES = 10_000;
  */
 export async function runSweep(
   deps: { fetchPage: SodaFetcher; sink: RawSink },
-  opts: SweepOptions,
+  opts: SweepOptions
 ): Promise<SweepSummary> {
   const { source } = opts;
   const batchId = opts.batchId ?? randomUUID();
@@ -183,7 +178,7 @@ export async function runSweep(
     pages += 1;
 
     const lastId = rows[rows.length - 1][source.idField];
-    cursor = typeof lastId === 'string' && lastId ? lastId : null;
+    cursor = typeof lastId === "string" && lastId ? lastId : null;
     if (cursor === null) break;
     if (rows.length < pageSize) break;
 

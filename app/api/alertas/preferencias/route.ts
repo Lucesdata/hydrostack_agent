@@ -9,7 +9,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
-import { getPreferencias, savePreferencias, type AlertaPreferencias } from "@/src/lib/alertas/preferencias-store";
+import {
+  getPreferencias,
+  savePreferencias,
+  type AlertaPreferencias,
+} from "@/src/lib/alertas/preferencias-store";
 
 export const runtime = "nodejs";
 

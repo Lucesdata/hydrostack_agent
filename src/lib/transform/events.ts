@@ -15,10 +15,10 @@
  *   cambia documento_proveedor         → cesion
  */
 
-import { cleanText, parseDate, parseMoney, stripAccents } from './normalize';
-import { canonicalizeNit } from './nit';
+import { cleanText, parseDate, parseMoney, stripAccents } from "./normalize";
+import { canonicalizeNit } from "./nit";
 
-export type TipoEvento = 'adicion' | 'prorroga' | 'suspension' | 'terminacion' | 'cesion';
+export type TipoEvento = "adicion" | "prorroga" | "suspension" | "terminacion" | "cesion";
 
 /** Subconjunto normalizado del contrato que dispara eventos. */
 export interface ContratoSnapshot {
@@ -46,24 +46,24 @@ type SodaRow = Record<string, unknown>;
 /** Extrae el snapshot que dispara eventos desde una fila cruda de Contratos. */
 export function contratoSnapshotFromRow(row: SodaRow): ContratoSnapshot {
   return {
-    valor: parseMoney(row['valor_del_contrato']),
-    fechaFin: parseDate(row['fecha_de_fin_del_contrato']),
-    estado: cleanText(row['estado_contrato']),
-    docProveedor: canonicalizeNit(row['documento_proveedor'], row['tipodocproveedor']).nitCanonico,
+    valor: parseMoney(row["valor_del_contrato"]),
+    fechaFin: parseDate(row["fecha_de_fin_del_contrato"]),
+    estado: cleanText(row["estado_contrato"]),
+    docProveedor: canonicalizeNit(row["documento_proveedor"], row["tipodocproveedor"]).nitCanonico,
   };
 }
 
 /** `true` si el estado limpio indica suspensión. */
 function isSuspended(estado: string | null): boolean {
   if (estado === null) return false;
-  return stripAccents(estado.toLowerCase()).includes('suspend');
+  return stripAccents(estado.toLowerCase()).includes("suspend");
 }
 
 /** `true` si el estado limpio indica terminación/cierre/liquidación. */
 function isTerminated(estado: string | null): boolean {
   if (estado === null) return false;
   const k = stripAccents(estado.toLowerCase());
-  return k.includes('terminad') || k.includes('cerrad') || k.includes('liquidad');
+  return k.includes("terminad") || k.includes("cerrad") || k.includes("liquidad");
 }
 
 /**
@@ -76,20 +76,32 @@ export function diffContrato(prev: ContratoSnapshot, next: ContratoSnapshot): De
 
   // adicion: el valor sube (estrictamente). Una baja no es evento contractual normal.
   if (prev.valor !== null && next.valor !== null && next.valor > prev.valor) {
-    events.push({ tipoEvento: 'adicion', valorAnterior: prev.valor, valorNuevo: next.valor });
+    events.push({ tipoEvento: "adicion", valorAnterior: prev.valor, valorNuevo: next.valor });
   }
 
   // prorroga: la fecha de fin se mueve hacia adelante (orden lexicográfico = cronológico en ISO).
   if (prev.fechaFin !== null && next.fechaFin !== null && next.fechaFin > prev.fechaFin) {
-    events.push({ tipoEvento: 'prorroga', fechaAnterior: prev.fechaFin, fechaNueva: next.fechaFin });
+    events.push({
+      tipoEvento: "prorroga",
+      fechaAnterior: prev.fechaFin,
+      fechaNueva: next.fechaFin,
+    });
   }
 
   // suspension / terminacion: transición HACIA el estado (no se re-emite si ya estaba).
   if (isSuspended(next.estado) && !isSuspended(prev.estado)) {
-    events.push({ tipoEvento: 'suspension', estadoAnterior: prev.estado, estadoNuevo: next.estado });
+    events.push({
+      tipoEvento: "suspension",
+      estadoAnterior: prev.estado,
+      estadoNuevo: next.estado,
+    });
   }
   if (isTerminated(next.estado) && !isTerminated(prev.estado)) {
-    events.push({ tipoEvento: 'terminacion', estadoAnterior: prev.estado, estadoNuevo: next.estado });
+    events.push({
+      tipoEvento: "terminacion",
+      estadoAnterior: prev.estado,
+      estadoNuevo: next.estado,
+    });
   }
 
   // cesion: cambia el documento del proveedor (ambos presentes y distintos).
@@ -99,7 +111,7 @@ export function diffContrato(prev: ContratoSnapshot, next: ContratoSnapshot): De
     prev.docProveedor !== next.docProveedor
   ) {
     events.push({
-      tipoEvento: 'cesion',
+      tipoEvento: "cesion",
       docProveedorAnterior: prev.docProveedor,
       docProveedorNuevo: next.docProveedor,
     });

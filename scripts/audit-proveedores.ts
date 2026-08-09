@@ -5,12 +5,12 @@
  *
  * Uso: tsx scripts/audit-proveedores.ts
  */
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function r11_razonesMultiples() {
-  console.log('\n=== R1.1 — NITs con razones sociales múltiples ===');
+  console.log("\n=== R1.1 — NITs con razones sociales múltiples ===");
   // proveedor es UNIQUE por nit_canonico → si hay >1 razón social vemos
   // colisiones en raw_record. Las miramos vía payload del último snapshot.
   const { rows } = await pool.query(`
@@ -54,14 +54,14 @@ async function r11_razonesMultiples() {
     ORDER BY n_razones DESC
     LIMIT 10;
   `);
-  console.log('  top 10:');
+  console.log("  top 10:");
   for (const row of top.rows) {
-    console.log(`    ${row.nit_raw} (${row.n_razones} razones): ${row.muestra.join(' | ')}`);
+    console.log(`    ${row.nit_raw} (${row.n_razones} razones): ${row.muestra.join(" | ")}`);
   }
 }
 
 async function r12_nitBasura() {
-  console.log('\n=== R1.2 — Patrones de NIT basura no contemplados ===');
+  console.log("\n=== R1.2 — Patrones de NIT basura no contemplados ===");
   // Los actuales contemplados: regex de centinelas en normalize.ts +
   // el chequeo "documento sin dígitos". Buscamos textos que entraron como
   // proveedor_raw (proveedor_id IS NULL) y agrupamos.
@@ -74,24 +74,26 @@ async function r12_nitBasura() {
     LIMIT 20;
   `);
   if (!rows.length) {
-    console.log('  (sin filas con proveedor_id NULL — el normalizador resolvió todo)');
+    console.log("  (sin filas con proveedor_id NULL — el normalizador resolvió todo)");
     return;
   }
-  console.log('  patrones que terminaron en proveedor_raw:');
+  console.log("  patrones que terminaron en proveedor_raw:");
   for (const row of rows) {
     console.log(`    [${row.n}] ${row.proveedor_raw}`);
   }
-  console.log('  → si hay patrones que NO son centinela legítimo, ampliar normalize.ts SENTINELS');
+  console.log("  → si hay patrones que NO son centinela legítimo, ampliar normalize.ts SENTINELS");
 }
 
 async function r13_tipoDocMal() {
-  console.log('\n=== R1.3 — tipo_documento sospechoso ===');
+  console.log("\n=== R1.3 — tipo_documento sospechoso ===");
   // Caso 1: tipo_documento = NIT pero el número tiene <= 7 dígitos (más típico de CC)
   const cc = await pool.query(`
     SELECT COUNT(*) AS n_nit_corto FROM proveedor
     WHERE tipo_documento='NIT' AND length(nit_canonico) <= 7;
   `);
-  console.log(`  proveedores con tipo_documento='NIT' y length(nit_canonico)<=7: ${cc.rows[0].n_nit_corto}`);
+  console.log(
+    `  proveedores con tipo_documento='NIT' y length(nit_canonico)<=7: ${cc.rows[0].n_nit_corto}`
+  );
 
   // Caso 2: tipo_documento != NIT pero el número tiene >= 9 dígitos (típico NIT empresa)
   const nit = await pool.query(`
@@ -100,11 +102,11 @@ async function r13_tipoDocMal() {
     WHERE tipo_documento <> 'NIT' AND length(nit_canonico) >= 9
     GROUP BY tipo_documento;
   `);
-  console.log('  proveedores con tipo_documento != NIT y length(nit_canonico)>=9:');
+  console.log("  proveedores con tipo_documento != NIT y length(nit_canonico)>=9:");
   for (const row of nit.rows) {
     console.log(`    ${row.tipo_documento}: ${row.n_largo}`);
   }
-  console.log('  → si los conteos son significativos, revisar normalizeTipoDoc en nit.ts');
+  console.log("  → si los conteos son significativos, revisar normalizeTipoDoc en nit.ts");
 }
 
 async function main() {
@@ -115,6 +117,9 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error('audit-proveedores falló:', e);
-  pool.end().catch(() => {}).finally(() => process.exit(1));
+  console.error("audit-proveedores falló:", e);
+  pool
+    .end()
+    .catch(() => {})
+    .finally(() => process.exit(1));
 });

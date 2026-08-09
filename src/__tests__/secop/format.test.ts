@@ -1,22 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   sentenceCaseTitle,
   formatCopCompact,
   formatCopFull,
   formatShortDate,
   verdictScore,
-} from '@/src/components/secop/format';
-import type { Verdict, GateResult, GateStatus } from '@/src/lib/secop/verdict';
+} from "@/src/components/secop/format";
+import type { Verdict, GateResult, GateStatus } from "@/src/lib/secop/verdict";
 
 function gate(status: GateStatus, requiredLevel: 0 | 2 = 0): GateResult {
-  return { status, reason: 'test', resolvedBy: 'metadata', requiredLevel };
+  return { status, reason: "test", resolvedBy: "metadata", requiredLevel };
 }
 
-function makeVerdict(
-  s: [GateStatus, GateStatus, GateStatus, GateStatus, GateStatus],
-): Verdict {
+function makeVerdict(s: [GateStatus, GateStatus, GateStatus, GateStatus, GateStatus]): Verdict {
   return {
-    overall: 'WARN',
+    overall: "WARN",
     gates: {
       sectorial: gate(s[0]),
       cuantia: gate(s[1]),
@@ -27,89 +25,92 @@ function makeVerdict(
   } as Verdict;
 }
 
-describe('sentenceCaseTitle', () => {
-  it('convierte títulos EN MAYÚSCULAS a sentence case', () => {
-    expect(sentenceCaseTitle('CONSTRUCCION DEL ALCANTARILLADO PLUVIAL')).toBe(
-      'Construccion del alcantarillado pluvial',
+describe("sentenceCaseTitle", () => {
+  it("convierte títulos EN MAYÚSCULAS a sentence case", () => {
+    expect(sentenceCaseTitle("CONSTRUCCION DEL ALCANTARILLADO PLUVIAL")).toBe(
+      "Construccion del alcantarillado pluvial"
     );
   });
 
-  it('preserva siglas conocidas del sector', () => {
-    expect(sentenceCaseTitle('OPTIMIZACIÓN DE LA PTAP MUNICIPAL')).toBe(
-      'Optimización de la PTAP municipal',
+  it("preserva siglas conocidas del sector", () => {
+    expect(sentenceCaseTitle("OPTIMIZACIÓN DE LA PTAP MUNICIPAL")).toBe(
+      "Optimización de la PTAP municipal"
     );
   });
 
-  it('preserva siglas también al inicio del título', () => {
-    expect(sentenceCaseTitle('PTAP MUNICIPAL DE LA CUMBRE')).toBe(
-      'PTAP municipal de la cumbre',
-    );
+  it("preserva siglas también al inicio del título", () => {
+    expect(sentenceCaseTitle("PTAP MUNICIPAL DE LA CUMBRE")).toBe("PTAP municipal de la cumbre");
   });
 
-  it('no toca títulos que ya vienen en caso mixto', () => {
-    expect(sentenceCaseTitle('Interventoría acueducto La Cumbre')).toBe(
-      'Interventoría acueducto La Cumbre',
+  it("no toca títulos que ya vienen en caso mixto", () => {
+    expect(sentenceCaseTitle("Interventoría acueducto La Cumbre")).toBe(
+      "Interventoría acueducto La Cumbre"
     );
   });
 
   it('recorta ".." sobrante al final del nombre de entidad', () => {
-    expect(sentenceCaseTitle('MUNICIPIO DE SOACHA..')).toBe('Municipio de soacha');
+    expect(sentenceCaseTitle("MUNICIPIO DE SOACHA..")).toBe("Municipio de soacha");
   });
 
   it('conserva un solo punto final (no lo confunde con el artefacto de "..")', () => {
-    expect(sentenceCaseTitle('MUNICIPIO DE SOACHA.')).toBe('Municipio de soacha.');
+    expect(sentenceCaseTitle("MUNICIPIO DE SOACHA.")).toBe("Municipio de soacha.");
   });
 });
 
-describe('formatCopCompact', () => {
-  it('abrevia millones con separador es-CO', () => {
-    expect(formatCopCompact(2_450_000_000)).toBe('$2.450 M');
+describe("formatCopCompact", () => {
+  it("abrevia millones con separador es-CO", () => {
+    expect(formatCopCompact(2_450_000_000)).toBe("$2.450 M");
   });
-  it('muestra valores pequeños completos', () => {
-    expect(formatCopCompact(850_000)).toContain('850.000');
+  it("muestra valores pequeños completos", () => {
+    expect(formatCopCompact(850_000)).toContain("850.000");
   });
-  it('null → guion', () => {
-    expect(formatCopCompact(null)).toBe('—');
-    expect(formatCopFull(null)).toBe('—');
+  it("null → guion", () => {
+    expect(formatCopCompact(null)).toBe("—");
+    expect(formatCopFull(null)).toBe("—");
   });
 });
 
-describe('formatShortDate', () => {
-  it('formatea ISO a día + mes corto', () => {
-    expect(formatShortDate('2026-07-02T00:00:00.000')).toBe('2 jul');
+describe("formatShortDate", () => {
+  it("formatea ISO a día + mes corto", () => {
+    expect(formatShortDate("2026-07-02T00:00:00.000")).toBe("2 jul");
   });
-  it('canario: la salida ICU cruda de es-CO sigue siendo la esperada', () => {
+  it("canario: la salida ICU cruda de es-CO sigue siendo la esperada", () => {
     // La normalización de formatShortDate (quitar " de " y puntos) se escribió
     // contra esta forma exacta. Si un upgrade de Node/ICU cambia el formato,
     // este test lo hace visible en vez de pasar en silencio.
-    const raw = new Date('2026-07-02T00:00:00.000').toLocaleDateString('es-CO', {
-      day: 'numeric',
-      month: 'short',
+    const raw = new Date("2026-07-02T00:00:00.000").toLocaleDateString("es-CO", {
+      day: "numeric",
+      month: "short",
     });
-    expect(raw).toBe('2 de jul');
+    expect(raw).toBe("2 de jul");
   });
-  it('null o inválida → cadena vacía', () => {
-    expect(formatShortDate(null)).toBe('');
-    expect(formatShortDate('no-es-fecha')).toBe('');
+  it("null o inválida → cadena vacía", () => {
+    expect(formatShortDate(null)).toBe("");
+    expect(formatShortDate("no-es-fecha")).toBe("");
   });
 });
 
-describe('verdictScore', () => {
-  it('cuenta PASS y asigna tono success con 4+', () => {
-    expect(verdictScore(makeVerdict(['PASS', 'PASS', 'PASS', 'PASS', 'UNKNOWN'])))
-      .toEqual({ pass: 4, total: 5, tone: 'success' });
+describe("verdictScore", () => {
+  it("cuenta PASS y asigna tono success con 4+", () => {
+    expect(verdictScore(makeVerdict(["PASS", "PASS", "PASS", "PASS", "UNKNOWN"]))).toEqual({
+      pass: 4,
+      total: 5,
+      tone: "success",
+    });
   });
-  it('tono warn con 2-3 PASS', () => {
-    expect(verdictScore(makeVerdict(['PASS', 'PASS', 'FAIL', 'FAIL', 'UNKNOWN'])).tone)
-      .toBe('warn');
+  it("tono warn con 2-3 PASS", () => {
+    expect(verdictScore(makeVerdict(["PASS", "PASS", "FAIL", "FAIL", "UNKNOWN"])).tone).toBe(
+      "warn"
+    );
   });
-  it('tono fail con 0-1 PASS (y no todo UNKNOWN)', () => {
-    expect(verdictScore(makeVerdict(['FAIL', 'FAIL', 'PASS', 'FAIL', 'UNKNOWN'])).tone)
-      .toBe('fail');
+  it("tono fail con 0-1 PASS (y no todo UNKNOWN)", () => {
+    expect(verdictScore(makeVerdict(["FAIL", "FAIL", "PASS", "FAIL", "UNKNOWN"])).tone).toBe(
+      "fail"
+    );
   });
-  it('tono neutral cuando todo es UNKNOWN', () => {
+  it("tono neutral cuando todo es UNKNOWN", () => {
     expect(
-      verdictScore(makeVerdict(['UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN'])).tone,
-    ).toBe('neutral');
+      verdictScore(makeVerdict(["UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"])).tone
+    ).toBe("neutral");
   });
 });

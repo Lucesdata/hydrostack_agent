@@ -12,28 +12,24 @@
  * distinto solo por el orden de serialización.
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 /** Serialización determinista: claves ordenadas recursivamente. */
 export function stableStringify(value: unknown): string {
-  if (value === undefined) return 'null';
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (value === undefined) return "null";
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) {
-    return '[' + value.map(stableStringify).join(',') + ']';
+    return "[" + value.map(stableStringify).join(",") + "]";
   }
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  return (
-    '{' +
-    keys.map((k) => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') +
-    '}'
-  );
+  return "{" + keys.map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",") + "}";
 }
 
 /** Copia del row sin los campos volátiles (solo al nivel raíz). */
 export function stripVolatile(
   row: Record<string, unknown>,
-  volatileFields: readonly string[],
+  volatileFields: readonly string[]
 ): Record<string, unknown> {
   const exclude = new Set(volatileFields);
   const out: Record<string, unknown> = {};
@@ -46,8 +42,8 @@ export function stripVolatile(
 /** SHA-256 (hex) del JSON canónico del row menos los campos volátiles. */
 export function payloadHash(
   row: Record<string, unknown>,
-  volatileFields: readonly string[],
+  volatileFields: readonly string[]
 ): string {
   const canonical = stableStringify(stripVolatile(row, volatileFields));
-  return createHash('sha256').update(canonical).digest('hex');
+  return createHash("sha256").update(canonical).digest("hex");
 }

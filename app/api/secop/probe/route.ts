@@ -14,26 +14,26 @@
  * Respuesta: { state, reason, method, canExtract, message }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { eq, sql } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { proceso } from '@/src/lib/db/schema';
-import { probeDocument, canExtract, accessMessage } from '@/src/lib/secop/document-access';
+import { NextRequest, NextResponse } from "next/server";
+import { eq, sql } from "drizzle-orm";
+import { db } from "@/src/lib/db/client";
+import { proceso } from "@/src/lib/db/schema";
+import { probeDocument, canExtract, accessMessage } from "@/src/lib/secop/document-access";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   let body: { url?: unknown; secopProcesoId?: unknown };
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const url = typeof body.url === 'string' ? body.url : null;
-  const secopProcesoId = typeof body.secopProcesoId === 'string' ? body.secopProcesoId : null;
+  const url = typeof body.url === "string" ? body.url : null;
+  const secopProcesoId = typeof body.secopProcesoId === "string" ? body.secopProcesoId : null;
   if (!url) {
-    return NextResponse.json({ error: 'Falta `url` del proceso' }, { status: 400 });
+    return NextResponse.json({ error: "Falta `url` del proceso" }, { status: 400 });
   }
 
   const result = await probeDocument(url);

@@ -13,12 +13,12 @@
  * el JSON Schema en la API.
  */
 
-import { PLIEGO_JSON_SCHEMA, parsePliegoExtraction, type PliegoExtraction } from './schema';
-import { buildExtractionPrompt } from './prompt';
-import { pdfToText } from './rules/pdfToText';
+import { PLIEGO_JSON_SCHEMA, parsePliegoExtraction, type PliegoExtraction } from "./schema";
+import { buildExtractionPrompt } from "./prompt";
+import { pdfToText } from "./rules/pdfToText";
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 const DEFAULT_MAX_TOKENS = 32000;
 
 export interface ExtractGroqOptions {
@@ -27,37 +27,37 @@ export interface ExtractGroqOptions {
 
 export async function extractPliegoGroq(
   pdf: string | Buffer,
-  opts: ExtractGroqOptions = {},
+  opts: ExtractGroqOptions = {}
 ): Promise<PliegoExtraction> {
   if (!process.env.GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY no definida. Configúrala en .env.local.');
+    throw new Error("GROQ_API_KEY no definida. Configúrala en .env.local.");
   }
 
   const text = await pdfToText(pdf);
 
   const systemPrompt = [
     buildExtractionPrompt(),
-    '',
-    '# FORMATO DE SALIDA',
-    'Responde ÚNICAMENTE con un JSON que cumpla exactamente este JSON Schema (sin texto antes ni',
-    'después, sin markdown, sin ```):',
+    "",
+    "# FORMATO DE SALIDA",
+    "Responde ÚNICAMENTE con un JSON que cumpla exactamente este JSON Schema (sin texto antes ni",
+    "después, sin markdown, sin ```):",
     JSON.stringify(PLIEGO_JSON_SCHEMA),
-  ].join('\n');
+  ].join("\n");
 
   const response = await fetch(GROQ_API_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
       temperature: 0,
       max_tokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Texto del pliego (extraído del PDF con pdftotext):\n\n${text}` },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Texto del pliego (extraído del PDF con pdftotext):\n\n${text}` },
       ],
     }),
   });
@@ -69,18 +69,18 @@ export async function extractPliegoGroq(
 
   const data = await response.json();
   const choice = data.choices?.[0];
-  if (choice?.finish_reason === 'length') {
-    throw new Error('Salida truncada (max_tokens). El pliego es muy grande para una sola pasada.');
+  if (choice?.finish_reason === "length") {
+    throw new Error("Salida truncada (max_tokens). El pliego es muy grande para una sola pasada.");
   }
 
   const content: string | undefined = choice?.message?.content;
-  if (!content) throw new Error('Groq no devolvió contenido.');
+  if (!content) throw new Error("Groq no devolvió contenido.");
 
   let raw: unknown;
   try {
     raw = JSON.parse(content);
   } catch {
-    throw new Error('La salida de Groq no es JSON válido.');
+    throw new Error("La salida de Groq no es JSON válido.");
   }
   return parsePliegoExtraction(raw);
 }

@@ -103,9 +103,7 @@ export default function PliegoPage() {
         </form>
 
         {status === "loading" && (
-          <p className="clr-pl-note">
-            Puede tardar 10–40 segundos. No cierres esta pestaña.
-          </p>
+          <p className="clr-pl-note">Puede tardar 10–40 segundos. No cierres esta pestaña.</p>
         )}
 
         {status === "error" && error && <div className="clr-pl-error">{error}</div>}
@@ -114,8 +112,12 @@ export default function PliegoPage() {
       </div>
 
       <style jsx>{`
-        .clr-pl-container { max-width: 780px; }
-        .clr-pl-header { margin-bottom: 28px; }
+        .clr-pl-container {
+          max-width: 780px;
+        }
+        .clr-pl-header {
+          margin-bottom: 28px;
+        }
         .clr-pl-upload {
           display: flex;
           gap: 12px;
@@ -140,8 +142,12 @@ export default function PliegoPage() {
           background: var(--surface-alt);
           transition: border-color 0.15s;
         }
-        .clr-pl-file:hover { border-color: var(--accent); }
-        .clr-pl-file input { display: none; }
+        .clr-pl-file:hover {
+          border-color: var(--accent);
+        }
+        .clr-pl-file input {
+          display: none;
+        }
         .clr-pl-btn {
           font-family: var(--font-sans);
           font-weight: 600;
@@ -154,7 +160,10 @@ export default function PliegoPage() {
           cursor: pointer;
           transition: opacity 0.15s;
         }
-        .clr-pl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .clr-pl-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
         .clr-pl-note {
           margin-top: 12px;
           font-size: 12.5px;
@@ -166,8 +175,8 @@ export default function PliegoPage() {
           padding: 14px 16px;
           border-radius: 10px;
           background: rgba(220, 38, 38, 0.08);
-          border: 1px solid var(--danger, #DC2626);
-          color: var(--danger, #DC2626);
+          border: 1px solid var(--danger, #dc2626);
+          color: var(--danger, #dc2626);
           font-size: 13px;
           line-height: 1.5;
         }
@@ -177,9 +186,7 @@ export default function PliegoPage() {
 }
 
 function OrigenBadge({ origen }: { origen: CampoOrigen }) {
-  return (
-    <span className={`clr-pl-origen clr-pl-origen-${origen}`}>{ORIGEN_LABEL[origen]}</span>
-  );
+  return <span className={`clr-pl-origen clr-pl-origen-${origen}`}>{ORIGEN_LABEL[origen]}</span>;
 }
 
 function PliegoResult({ data }: { data: ExtractResponse }) {
@@ -196,20 +203,47 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
       <section className="clr-pl-section">
         <h2 className="clr-pl-h2">Resumen</h2>
         <dl className="clr-pl-dl">
-          <div><dt>Proceso</dt><dd>{x.proceso}</dd></div>
-          <div><dt>Entidad</dt><dd>{x.entidad}</dd></div>
-          <div><dt>Objeto</dt><dd>{x.objeto_contrato}</dd></div>
-          <div><dt>Modalidad</dt><dd>{x.modalidad_contratacion}</dd></div>
-          <div><dt>Publicación</dt><dd>{x.fecha_publicacion}</dd></div>
-          <div><dt>Cierre</dt><dd>{x.fecha_cierre}</dd></div>
-          <div><dt>Presupuesto oficial</dt><dd>{formatCopFull(x.presupuesto_oficial_cop)} {x.moneda}</dd></div>
+          <div>
+            <dt>Proceso</dt>
+            <dd>{x.proceso}</dd>
+          </div>
+          <div>
+            <dt>Entidad</dt>
+            <dd>{x.entidad}</dd>
+          </div>
+          <div>
+            <dt>Objeto</dt>
+            <dd>{x.objeto_contrato}</dd>
+          </div>
+          <div>
+            <dt>Modalidad</dt>
+            <dd>{x.modalidad_contratacion}</dd>
+          </div>
+          <div>
+            <dt>Publicación</dt>
+            <dd>{x.fecha_publicacion}</dd>
+          </div>
+          <div>
+            <dt>Cierre</dt>
+            <dd>{x.fecha_cierre}</dd>
+          </div>
+          <div>
+            <dt>Presupuesto oficial</dt>
+            <dd>
+              {formatCopFull(x.presupuesto_oficial_cop)} {x.moneda}
+            </dd>
+          </div>
         </dl>
       </section>
 
       <section className="clr-pl-section">
         <h2 className="clr-pl-h2">Verificación del modelo</h2>
         <p>
-          Confianza: <span className="clr-pl-badge" style={{ color: confianzaColor, borderColor: confianzaColor }}>
+          Confianza:{" "}
+          <span
+            className="clr-pl-badge"
+            style={{ color: confianzaColor, borderColor: confianzaColor }}
+          >
             {CONFIANZA_LABEL[x.verificacion.confianza_general] ?? x.verificacion.confianza_general}
           </span>
         </p>
@@ -223,28 +257,40 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
 
       <section className="clr-pl-section">
         <h2 className="clr-pl-h2">
-          Validación de consistencia {v.ok ? <span className="clr-pl-ok">✓ consistente</span> : <span className="clr-pl-warn">✗ {v.inconsistencias.length} inconsistencia(s)</span>}
+          Validación de consistencia{" "}
+          {v.ok ? (
+            <span className="clr-pl-ok">✓ consistente</span>
+          ) : (
+            <span className="clr-pl-warn">✗ {v.inconsistencias.length} inconsistencia(s)</span>
+          )}
         </h2>
         {v.inconsistencias.length > 0 && (
           <ul className="clr-pl-list">
             {v.inconsistencias.map((i, idx) => (
-              <li key={idx}><b>{i.tipo}</b> — {i.ubicacion}: {i.detalle}</li>
+              <li key={idx}>
+                <b>{i.tipo}</b> — {i.ubicacion}: {i.detalle}
+              </li>
             ))}
           </ul>
         )}
         {v.notas.length > 0 && (
           <ul className="clr-pl-list clr-pl-list-muted">
-            {v.notas.map((n, idx) => <li key={idx}>{n}</li>)}
+            {v.notas.map((n, idx) => (
+              <li key={idx}>{n}</li>
+            ))}
           </ul>
         )}
       </section>
 
       <section className="clr-pl-section">
         <h2 className="clr-pl-h2">
-          Causales de rechazo ({x.reglas_presupuesto.length}) <OrigenBadge origen={origen.reglas_presupuesto} />
+          Causales de rechazo ({x.reglas_presupuesto.length}){" "}
+          <OrigenBadge origen={origen.reglas_presupuesto} />
         </h2>
         <ul className="clr-pl-list">
-          {x.reglas_presupuesto.map((r, idx) => <li key={idx}>{r}</li>)}
+          {x.reglas_presupuesto.map((r, idx) => (
+            <li key={idx}>{r}</li>
+          ))}
         </ul>
       </section>
 
@@ -253,9 +299,18 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           Requisitos habilitantes <OrigenBadge origen={origen.requisitos_habilitantes} />
         </h2>
         <dl className="clr-pl-dl">
-          <div><dt>Experiencia específica</dt><dd>{x.requisitos_habilitantes.experiencia_especifica}</dd></div>
-          <div><dt>Capacidad financiera</dt><dd>{x.requisitos_habilitantes.capacidad_financiera}</dd></div>
-          <div><dt>Capacidad organizacional</dt><dd>{x.requisitos_habilitantes.capacidad_organizacional}</dd></div>
+          <div>
+            <dt>Experiencia específica</dt>
+            <dd>{x.requisitos_habilitantes.experiencia_especifica}</dd>
+          </div>
+          <div>
+            <dt>Capacidad financiera</dt>
+            <dd>{x.requisitos_habilitantes.capacidad_financiera}</dd>
+          </div>
+          <div>
+            <dt>Capacidad organizacional</dt>
+            <dd>{x.requisitos_habilitantes.capacidad_organizacional}</dd>
+          </div>
         </dl>
       </section>
 
@@ -264,7 +319,9 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           <h2 className="clr-pl-h2">Cronograma</h2>
           <ul className="clr-pl-list">
             {x.cronograma.map((h, idx) => (
-              <li key={idx}><b>{h.hito}</b> — {h.fecha}</li>
+              <li key={idx}>
+                <b>{h.hito}</b> — {h.fecha}
+              </li>
             ))}
           </ul>
         </section>
@@ -281,7 +338,13 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
             <div className="clr-pl-table-wrap">
               <table className="clr-pl-table">
                 <thead>
-                  <tr><th>Código</th><th>Descripción</th><th>Cant.</th><th>V. unitario</th><th>V. total</th></tr>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cant.</th>
+                    <th>V. unitario</th>
+                    <th>V. total</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {cap.items.map((it, ii) => (
@@ -306,7 +369,9 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           <ul className="clr-pl-list">
             {x.lagunas_pendientes.map((l) => (
               <li key={l.id}>
-                <span className="clr-pl-sev" data-sev={l.severidad}>{SEVERIDAD_LABEL[l.severidad] ?? l.severidad}</span>{" "}
+                <span className="clr-pl-sev" data-sev={l.severidad}>
+                  {SEVERIDAD_LABEL[l.severidad] ?? l.severidad}
+                </span>{" "}
                 <b>{l.tipo}</b> — {l.descripcion}
               </li>
             ))}
@@ -315,7 +380,9 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
       )}
 
       <style jsx>{`
-        .clr-pl-result { margin-top: 28px; }
+        .clr-pl-result {
+          margin-top: 28px;
+        }
         .clr-pl-section {
           background: var(--surface);
           border: 1px solid var(--line);
@@ -343,13 +410,42 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           border-radius: 999px;
           border: 1px solid;
         }
-        .clr-pl-origen-reglas { color: #16A34A; border-color: #16A34A; background: rgba(22,163,74,0.08); }
-        .clr-pl-origen-llm { color: var(--ink-300); border-color: var(--line); background: var(--surface-alt); }
-        .clr-pl-dl { display: grid; gap: 8px; }
-        .clr-pl-dl > div { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; }
-        .clr-pl-dl dt { flex: 0 0 170px; color: var(--ink-300); font-family: var(--font-mono); font-size: 11.5px; }
-        .clr-pl-dl dd { margin: 0; color: var(--ink-900); }
-        .clr-pl-muted { color: var(--ink-600); font-size: 12.5px; line-height: 1.5; margin: 6px 0 0; }
+        .clr-pl-origen-reglas {
+          color: #16a34a;
+          border-color: #16a34a;
+          background: rgba(22, 163, 74, 0.08);
+        }
+        .clr-pl-origen-llm {
+          color: var(--ink-300);
+          border-color: var(--line);
+          background: var(--surface-alt);
+        }
+        .clr-pl-dl {
+          display: grid;
+          gap: 8px;
+        }
+        .clr-pl-dl > div {
+          display: flex;
+          gap: 10px;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+        .clr-pl-dl dt {
+          flex: 0 0 170px;
+          color: var(--ink-300);
+          font-family: var(--font-mono);
+          font-size: 11.5px;
+        }
+        .clr-pl-dl dd {
+          margin: 0;
+          color: var(--ink-900);
+        }
+        .clr-pl-muted {
+          color: var(--ink-600);
+          font-size: 12.5px;
+          line-height: 1.5;
+          margin: 6px 0 0;
+        }
         .clr-pl-badge {
           font-family: var(--font-mono);
           font-size: 11px;
@@ -358,15 +454,46 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           border: 1px solid;
           border-radius: 999px;
         }
-        .clr-pl-ok { color: #16A34A; font-size: 12px; font-weight: 600; }
-        .clr-pl-warn { color: #DC2626; font-size: 12px; font-weight: 600; }
-        .clr-pl-list { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--ink-600); line-height: 1.7; }
-        .clr-pl-list-muted { color: var(--ink-300); }
-        .clr-pl-cap { margin-bottom: 18px; }
-        .clr-pl-cap:last-child { margin-bottom: 0; }
-        .clr-pl-cap h3 { font-size: 13px; font-weight: 600; color: var(--ink-900); margin: 0 0 8px; }
-        .clr-pl-table-wrap { overflow-x: auto; }
-        .clr-pl-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .clr-pl-ok {
+          color: #16a34a;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .clr-pl-warn {
+          color: #dc2626;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .clr-pl-list {
+          margin: 0;
+          padding-left: 18px;
+          font-size: 12.5px;
+          color: var(--ink-600);
+          line-height: 1.7;
+        }
+        .clr-pl-list-muted {
+          color: var(--ink-300);
+        }
+        .clr-pl-cap {
+          margin-bottom: 18px;
+        }
+        .clr-pl-cap:last-child {
+          margin-bottom: 0;
+        }
+        .clr-pl-cap h3 {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--ink-900);
+          margin: 0 0 8px;
+        }
+        .clr-pl-table-wrap {
+          overflow-x: auto;
+        }
+        .clr-pl-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12px;
+        }
         .clr-pl-table th {
           text-align: left;
           font-family: var(--font-mono);
@@ -390,9 +517,18 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           padding: 1px 6px;
           border-radius: 4px;
         }
-        .clr-pl-sev[data-sev="alta"] { background: rgba(220,38,38,0.1); color: #DC2626; }
-        .clr-pl-sev[data-sev="media"] { background: rgba(217,119,6,0.1); color: #D97706; }
-        .clr-pl-sev[data-sev="baja"] { background: rgba(22,163,74,0.1); color: #16A34A; }
+        .clr-pl-sev[data-sev="alta"] {
+          background: rgba(220, 38, 38, 0.1);
+          color: #dc2626;
+        }
+        .clr-pl-sev[data-sev="media"] {
+          background: rgba(217, 119, 6, 0.1);
+          color: #d97706;
+        }
+        .clr-pl-sev[data-sev="baja"] {
+          background: rgba(22, 163, 74, 0.1);
+          color: #16a34a;
+        }
       `}</style>
     </div>
   );

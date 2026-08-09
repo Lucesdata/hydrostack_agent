@@ -37,38 +37,38 @@
  * ──────────────────────────────────────────────────────────────────────────
  */
 
-import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from './config';
+import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from "./config";
 
 /** Prefijo de versión del código UNSPSC, tal como llega de Socrata ("V1.83101500"). */
-export const UNSPSC_PREFIX = 'V1.';
+export const UNSPSC_PREFIX = "V1.";
 
 /**
  * Keywords de dominio (accent-safe, mayúsculas). Driver de recall. Debe coincidir
  * con la red usada en la derivación A1 (`scripts/exploration/derive-unspsc.mjs`).
  */
 export const SECTOR_KEYWORDS: readonly string[] = [
-  'ACUEDUCTO',
-  'ALCANTARILLADO',
-  'SANEAMIENTO',
-  'AGUA POTABLE',
-  'AGUAS RESIDUALES',
-  'AGUA RESIDUAL',
-  'PTAR',
-  'PTAP',
-  'PLANTA DE TRATAMIENTO',
-  'POTABILIZ', // potabilización
-  'CAPTACI', // captación
-  'ADUCCI', // aducción
-  'POZO SEPTIC', // pozo séptico
-  'TANQUE SEPTIC', // tanque séptico
-  'VERTIMIENTO',
-  'COLECTOR',
-  'INTERCEPTOR',
-  'EMISARIO',
-  'MICROMEDIC', // micromedición
-  'MACROMEDIC', // macromedición
-  'PSMV',
-  'PLAN MAESTRO DE ACUEDUCTO',
+  "ACUEDUCTO",
+  "ALCANTARILLADO",
+  "SANEAMIENTO",
+  "AGUA POTABLE",
+  "AGUAS RESIDUALES",
+  "AGUA RESIDUAL",
+  "PTAR",
+  "PTAP",
+  "PLANTA DE TRATAMIENTO",
+  "POTABILIZ", // potabilización
+  "CAPTACI", // captación
+  "ADUCCI", // aducción
+  "POZO SEPTIC", // pozo séptico
+  "TANQUE SEPTIC", // tanque séptico
+  "VERTIMIENTO",
+  "COLECTOR",
+  "INTERCEPTOR",
+  "EMISARIO",
+  "MICROMEDIC", // micromedición
+  "MACROMEDIC", // macromedición
+  "PSMV",
+  "PLAN MAESTRO DE ACUEDUCTO",
 ];
 
 /**
@@ -78,10 +78,10 @@ export const SECTOR_KEYWORDS: readonly string[] = [
  * de obra/ingeniería/ambiente (72141, 81101, 77101…) NO van aquí — son CONTEXT en
  * el clasificador (sin keyword capturarían demasiado no-agua).
  */
-export const WATER_EXCLUSIVE_UNSPSC: readonly string[] = ['83101'];
+export const WATER_EXCLUSIVE_UNSPSC: readonly string[] = ["83101"];
 
 /** Segmentos UNSPSC (2 dígitos) EXCLUIDOS por ruido (A3: seg-80 ≈0% relevante). */
-export const EXCLUDED_UNSPSC_SEGMENTS: readonly string[] = ['80'];
+export const EXCLUDED_UNSPSC_SEGMENTS: readonly string[] = ["80"];
 
 /** Campos SODA que necesita la red, por dataset. */
 export interface SectorNetFields {
@@ -111,22 +111,22 @@ function keywordClause(fields: SectorNetFields): string {
   return SECTOR_KEYWORDS.map((kw) => {
     const k = soqlEscape(kw.toUpperCase());
     const perField = fields.textFields.map((f) => `upper(${f}) like '%${k}%'`);
-    return `(${perField.join(' OR ')})`;
-  }).join(' OR ');
+    return `(${perField.join(" OR ")})`;
+  }).join(" OR ");
 }
 
 /** Cláusula UNSPSC water-exclusivo: OR de `campo like 'V1.83101%'`. */
 function unspscIncludeClause(fields: SectorNetFields): string {
   return WATER_EXCLUSIVE_UNSPSC.map(
-    (p) => `${fields.unspscField} like '${UNSPSC_PREFIX}${p}%'`,
-  ).join(' OR ');
+    (p) => `${fields.unspscField} like '${UNSPSC_PREFIX}${p}%'`
+  ).join(" OR ");
 }
 
 /** Cláusula de exclusión: `campo like 'V1.80%'`. */
 function unspscExcludeClause(fields: SectorNetFields): string {
   return EXCLUDED_UNSPSC_SEGMENTS.map(
-    (s) => `${fields.unspscField} like '${UNSPSC_PREFIX}${s}%'`,
-  ).join(' OR ');
+    (s) => `${fields.unspscField} like '${UNSPSC_PREFIX}${s}%'`
+  ).join(" OR ");
 }
 
 /**
@@ -145,8 +145,8 @@ export function buildSectorWhere(fields: SectorNetFields): string {
 function unspscDigits(raw: unknown): string | null {
   if (raw == null) return null;
   const d = String(raw)
-    .replace(/^v\d+\./i, '')
-    .replace(/\D/g, '');
+    .replace(/^v\d+\./i, "")
+    .replace(/\D/g, "");
   return d || null;
 }
 
@@ -155,10 +155,7 @@ function unspscDigits(raw: unknown): string | null {
  * para clasificación client-side sin re-consultar Socrata. Una fila pasa la red si
  * (texto matchea keyword O código es water-exclusivo) Y el código no es excluido.
  */
-export function matchesSectorNet(
-  row: Record<string, unknown>,
-  fields: SectorNetFields,
-): boolean {
+export function matchesSectorNet(row: Record<string, unknown>, fields: SectorNetFields): boolean {
   const digits = unspscDigits(row[fields.unspscField]);
 
   const excluded = digits != null && EXCLUDED_UNSPSC_SEGMENTS.some((s) => digits.startsWith(s));

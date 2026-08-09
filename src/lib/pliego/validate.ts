@@ -16,10 +16,10 @@
  *     que un humano lo juzgue, no como fallo de extracción.
  */
 
-import { NO_ENCONTRADO, type PliegoExtraction } from './schema';
+import { NO_ENCONTRADO, type PliegoExtraction } from "./schema";
 
 export interface Inconsistencia {
-  tipo: 'aritmetica_item' | 'capitulo_duplicado' | 'cita_faltante';
+  tipo: "aritmetica_item" | "capitulo_duplicado" | "cita_faltante";
   ubicacion: string;
   detalle: string;
 }
@@ -45,16 +45,16 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
       const esperado = item.cantidad * item.valor_unitario;
       if (Math.abs(esperado - item.valor_total) > TOLERANCIA_ITEM) {
         inconsistencias.push({
-          tipo: 'aritmetica_item',
+          tipo: "aritmetica_item",
           ubicacion,
           detalle: `cantidad×valor_unitario=${esperado} ≠ valor_total=${item.valor_total}`,
         });
       }
       if (!item.cita_textual.trim()) {
         inconsistencias.push({
-          tipo: 'cita_faltante',
+          tipo: "cita_faltante",
           ubicacion,
-          detalle: 'el ítem no trae cita_textual — no verificable contra el documento',
+          detalle: "el ítem no trae cita_textual — no verificable contra el documento",
         });
       }
     });
@@ -69,7 +69,7 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
   for (const [key, n] of conteo) {
     if (n > 1) {
       inconsistencias.push({
-        tipo: 'capitulo_duplicado',
+        tipo: "capitulo_duplicado",
         ubicacion: key,
         detalle: `el capítulo aparece ${n} veces`,
       });
@@ -80,14 +80,14 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
   const totalItems = p.capitulos.reduce((n, c) => n + c.items.length, 0);
   const sumaItems = p.capitulos.reduce(
     (acc, c) => acc + c.items.reduce((s, it) => s + it.valor_total, 0),
-    0,
+    0
   );
   const tolSuma = Math.max(totalItems, 1);
   if (Math.abs(sumaItems - p.presupuesto_oficial_cop) > tolSuma) {
     notas.push(
       `La suma de los ítems (${sumaItems}) difiere del presupuesto oficial ` +
         `(${p.presupuesto_oficial_cop}). Puede deberse a IVA global del formato ` +
-        `o a ítems faltantes — verificar.`,
+        `o a ítems faltantes — verificar.`
     );
   }
 

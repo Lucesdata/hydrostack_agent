@@ -25,8 +25,17 @@ import OferenteWizard from "./OferenteWizard";
 import LicitacionesTabs from "./LicitacionesTabs";
 
 const DEPARTAMENTOS = [
-  "VALLE DEL CAUCA", "ANTIOQUIA", "CUNDINAMARCA", "BOGOTÁ", "ATLÁNTICO",
-  "BOLÍVAR", "SANTANDER", "NARIÑO", "CAUCA", "CÓRDOBA", "MAGDALENA",
+  "VALLE DEL CAUCA",
+  "ANTIOQUIA",
+  "CUNDINAMARCA",
+  "BOGOTÁ",
+  "ATLÁNTICO",
+  "BOLÍVAR",
+  "SANTANDER",
+  "NARIÑO",
+  "CAUCA",
+  "CÓRDOBA",
+  "MAGDALENA",
 ];
 
 const PAGE_SIZES = [10, 25, 50];
@@ -43,7 +52,10 @@ type ProbeState = { state: DocumentAccess; message: string };
 export default function SecopExplorer() {
   const router = useRouter();
   const [filters, setFilters] = useState<Filters>({
-    q: "", departamento: "", estado: "", valorMin: "",
+    q: "",
+    departamento: "",
+    estado: "",
+    valorMin: "",
   });
   const [incluirCerrados, setIncluirCerrados] = useState(false);
   const [orden, setOrden] = useState<"fecha" | "valor">("fecha");
@@ -108,35 +120,38 @@ export default function SecopExplorer() {
   // Solo-abiertos aplica si el usuario no pidió cerrados ni un estado concreto.
   const soloAbiertos = !incluirCerrados && !filters.estado;
 
-  const fetchData = useCallback(async (signal: AbortSignal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams({
-        tipo: "procesos",
-        page: String(page),
-        pageSize: String(pageSize),
-        orden,
-      });
-      if (soloAbiertos) params.set("apertura", "Abierto");
-      if (filters.q) params.set("q", filters.q);
-      if (filters.departamento) params.set("departamento", filters.departamento);
-      if (filters.estado) params.set("estado", filters.estado);
-      if (filters.valorMin) params.set("valorMin", filters.valorMin);
-      const res = await fetch(`/api/secop?${params}`, { signal });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => ({}));
-        throw new Error(payload.detail ?? "Error de consulta");
+  const fetchData = useCallback(
+    async (signal: AbortSignal) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          tipo: "procesos",
+          page: String(page),
+          pageSize: String(pageSize),
+          orden,
+        });
+        if (soloAbiertos) params.set("apertura", "Abierto");
+        if (filters.q) params.set("q", filters.q);
+        if (filters.departamento) params.set("departamento", filters.departamento);
+        if (filters.estado) params.set("estado", filters.estado);
+        if (filters.valorMin) params.set("valorMin", filters.valorMin);
+        const res = await fetch(`/api/secop?${params}`, { signal });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.detail ?? "Error de consulta");
+        }
+        setData(await res.json());
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setError(e instanceof Error ? e.message : "Error desconocido");
+        setData(null);
+      } finally {
+        if (!signal.aborted) setLoading(false);
       }
-      setData(await res.json());
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
-      setError(e instanceof Error ? e.message : "Error desconocido");
-      setData(null);
-    } finally {
-      if (!signal.aborted) setLoading(false);
-    }
-  }, [filters, page, pageSize, orden, soloAbiertos]);
+    },
+    [filters, page, pageSize, orden, soloAbiertos]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -229,17 +244,15 @@ export default function SecopExplorer() {
   }
 
   const set =
-    (k: keyof Filters) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (k: keyof Filters) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setPage(1);
       setFilters((f) => ({ ...f, [k]: e.target.value }));
     };
 
-  const totalPages =
-    data?.total != null ? Math.max(1, Math.ceil(data.total / pageSize)) : null;
+  const totalPages = data?.total != null ? Math.max(1, Math.ceil(data.total / pageSize)) : null;
 
   const access = selected
-    ? probed[selected.id] ?? { state: selected.documentAccess, message: selected.accessMessage }
+    ? (probed[selected.id] ?? { state: selected.documentAccess, message: selected.accessMessage })
     : null;
 
   return (
@@ -252,8 +265,8 @@ export default function SecopExplorer() {
           <span className="clr-tag">SECOP II · Datos abiertos</span>
           <h1 className="clr-h1">Licitaciones · Agua y saneamiento</h1>
           <p className="clr-sub">
-            Procesos de contratación pública del sector agua potable y saneamiento
-            básico en Colombia.
+            Procesos de contratación pública del sector agua potable y saneamiento básico en
+            Colombia.
           </p>
         </header>
 
@@ -264,13 +277,25 @@ export default function SecopExplorer() {
             value={filters.q}
             onChange={set("q")}
           />
-          <select className="clr-select" value={filters.departamento} onChange={set("departamento")}>
+          <select
+            className="clr-select"
+            value={filters.departamento}
+            onChange={set("departamento")}
+          >
             <option value="">Todos los departamentos</option>
-            {DEPARTAMENTOS.map((d) => <option key={d} value={d}>{d}</option>)}
+            {DEPARTAMENTOS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
           </select>
           <select className="clr-select" value={filters.estado} onChange={set("estado")}>
             <option value="">Todos los estados</option>
-            {ESTADOS_PROCESO.map((e) => <option key={e} value={e}>{e}</option>)}
+            {ESTADOS_PROCESO.map((e) => (
+              <option key={e} value={e}>
+                {e}
+              </option>
+            ))}
           </select>
           <input
             className="clr-input"
@@ -282,7 +307,10 @@ export default function SecopExplorer() {
           <select
             className="clr-select"
             value={orden}
-            onChange={(e) => { setPage(1); setOrden(e.target.value as "fecha" | "valor"); }}
+            onChange={(e) => {
+              setPage(1);
+              setOrden(e.target.value as "fecha" | "valor");
+            }}
             aria-label="Ordenar resultados"
           >
             <option value="fecha">Recientes primero</option>
@@ -294,30 +322,40 @@ export default function SecopExplorer() {
           <span className="clr-wb-count">
             {data?.total != null ? (
               <>
-                <strong>{data.total.toLocaleString("es-CO")}</strong>
-                {" "}procesos{soloAbiertos ? " abiertos" : ""}
+                <strong>{data.total.toLocaleString("es-CO")}</strong> procesos
+                {soloAbiertos ? " abiertos" : ""}
               </>
             ) : (
               "Procesos"
-            )}
-            {" "}· sector agua y saneamiento
+            )}{" "}
+            · sector agua y saneamiento
           </span>
           <span className="clr-wb-context-right">
             <label className="clr-wb-toggle">
               <input
                 type="checkbox"
                 checked={incluirCerrados}
-                onChange={(e) => { setPage(1); setIncluirCerrados(e.target.checked); }}
+                onChange={(e) => {
+                  setPage(1);
+                  setIncluirCerrados(e.target.checked);
+                }}
               />
               Incluir cerrados y cancelados
             </label>
             <select
               className="clr-select clr-wb-pagesize"
               value={pageSize}
-              onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
+              onChange={(e) => {
+                setPage(1);
+                setPageSize(Number(e.target.value));
+              }}
               aria-label="Resultados por página"
             >
-              {PAGE_SIZES.map((n) => <option key={n} value={n}>{n} / pág.</option>)}
+              {PAGE_SIZES.map((n) => (
+                <option key={n} value={n}>
+                  {n} / pág.
+                </option>
+              ))}
             </select>
           </span>
         </div>
@@ -330,14 +368,18 @@ export default function SecopExplorer() {
               items={data?.items ?? []}
               selectedId={selectedId}
               loading={loading}
-              onSelect={(p) => { setSelectedId(p.id); setDetailOpen(true); }}
+              onSelect={(p) => {
+                setSelectedId(p.id);
+                setDetailOpen(true);
+              }}
             />
             <div className="clr-secop-pager">
               <button disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)}>
                 ← Anterior
               </button>
               <span>
-                Página {page}{totalPages != null ? ` de ${totalPages.toLocaleString("es-CO")}` : ""}
+                Página {page}
+                {totalPages != null ? ` de ${totalPages.toLocaleString("es-CO")}` : ""}
               </span>
               <button
                 disabled={
@@ -354,7 +396,10 @@ export default function SecopExplorer() {
 
           <div className={`clr-wb-detailcol${detailOpen ? " is-open" : ""}`}>
             {wizardOpen ? (
-              <OferenteWizard onComplete={handlePerfilCompleto} onCancel={() => setWizardOpen(false)} />
+              <OferenteWizard
+                onComplete={handlePerfilCompleto}
+                onCancel={() => setWizardOpen(false)}
+              />
             ) : selected && access ? (
               <ProcessDetail
                 key={selected.id}
@@ -375,9 +420,7 @@ export default function SecopExplorer() {
               />
             ) : (
               !loading && (
-                <div className="clr-secop-empty">
-                  Selecciona un proceso para ver el detalle.
-                </div>
+                <div className="clr-secop-empty">Selecciona un proceso para ver el detalle.</div>
               )
             )}
           </div>

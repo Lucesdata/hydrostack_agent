@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
 /**
  * Cliente Supabase para Server Components, Route Handlers y Server Actions.
@@ -21,13 +21,13 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(name, value, options)
             );
           } catch {
             // Server Component sin permiso de escritura — el middleware refresca.
           }
         },
       },
-    },
+    }
   );
 }
