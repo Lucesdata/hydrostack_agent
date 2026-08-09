@@ -120,4 +120,32 @@ describe('POST /api/assistant', () => {
     expect(mockSaveMessages).toHaveBeenCalledTimes(1);
     expect(mockSaveMessages).toHaveBeenCalledWith('conv-1', [finalMessages[1]]);
   });
+
+  it('onEnd persiste por id incluso si el cliente no conocía todos los mensajes ya guardados', async () => {
+    mockAuth.mockResolvedValue({ id: 'user-1', email: 'a@b.com' });
+    // Simula otra pestaña que ya guardó un turno completo (m1, m2) que este
+    // cliente no conoce todavía.
+    mockLoadMessages.mockResolvedValue([
+      { id: 'm1', role: 'user', parts: [] },
+      { id: 'm2', role: 'assistant', parts: [] },
+    ]);
+    const { POST } = await import('@/app/api/assistant/route');
+
+    const res = await POST(postReq({ context: 'ejecucion', messages: [{ id: 'm1', role: 'user', parts: [] }] }));
+    expect(res.status).toBe(200);
+    expect(capturedOnEnd).toBeDefined();
+
+    // Lo que ESTE cliente ve: m1 + un turno nuevo (m3, m4). No conoce m2.
+    // El viejo `slice(alreadySaved.length)` == slice(2) sobre [m1, m3, m4]
+    // habría dejado solo [m4], perdiendo m3 silenciosamente.
+    const finalMessages = [
+      { id: 'm1', role: 'user', parts: [] },
+      { id: 'm3', role: 'user', parts: [] },
+      { id: 'm4', role: 'assistant', parts: [] },
+    ];
+    await capturedOnEnd!({ messages: finalMessages });
+
+    expect(mockSaveMessages).toHaveBeenCalledTimes(1);
+    expect(mockSaveMessages).toHaveBeenCalledWith('conv-1', [finalMessages[1], finalMessages[2]]);
+  });
 });
