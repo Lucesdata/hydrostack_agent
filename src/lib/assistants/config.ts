@@ -83,5 +83,7 @@ export const ASSISTANT_CONTEXTS: Record<AssistantContextSlug, AssistantContext> 
 };
 
 export function getAssistantContext(slug: string): AssistantContext | null {
-  return slug in ASSISTANT_CONTEXTS ? ASSISTANT_CONTEXTS[slug as AssistantContextSlug] : null;
+  return Object.prototype.hasOwnProperty.call(ASSISTANT_CONTEXTS, slug)
+    ? ASSISTANT_CONTEXTS[slug as AssistantContextSlug]
+    : null;
 }
