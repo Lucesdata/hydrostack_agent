@@ -47,7 +47,7 @@ export async function uploadDocument(params: {
   }
 
   const supabase = await createClient();
-  const rutaStorage = `${usuarioId}/${contexto}/${randomUUID()}-${nombreArchivo}`;
+  const rutaStorage = `${usuarioId}/${contexto}/${randomUUID()}.pdf`;
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
     .upload(rutaStorage, file, { contentType: 'application/pdf' });
@@ -55,10 +55,17 @@ export async function uploadDocument(params: {
     throw new DocumentUploadError(`No se pudo guardar el archivo: ${uploadError.message}`);
   }
 
-  const [row] = await db
-    .insert(documento)
-    .values({ usuarioId, contexto, tipo, nombreArchivo, rutaStorage, textoExtraido })
-    .returning({ id: documento.id });
+  let row: { id: string };
+  try {
+    [row] = await db
+      .insert(documento)
+      .values({ usuarioId, contexto, tipo, nombreArchivo, rutaStorage, textoExtraido })
+      .returning({ id: documento.id });
+  } catch (e) {
+    await supabase.storage.from(BUCKET).remove([rutaStorage]).catch(() => {});
+    const message = e instanceof Error ? e.message : String(e);
+    throw new DocumentUploadError(`No se pudo guardar el documento: ${message}`);
+  }
 
   return { id: row.id, textoExtraido };
 }
