@@ -10,7 +10,10 @@ import { NextResponse, type NextRequest } from 'next/server';
  * `src/lib/supabase/middleware.ts`.
  */
 export async function POST(request: NextRequest) {
-  const response = NextResponse.redirect(new URL('/', request.url));
+  // 303, no el 307 por defecto: un 307 preserva el método del request
+  // original, así que el navegador reintentaría `/` con POST (una página,
+  // no un route handler) en vez de GET.
+  const response = NextResponse.redirect(new URL('/', request.url), 303);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
