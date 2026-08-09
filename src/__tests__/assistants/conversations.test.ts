@@ -46,6 +46,14 @@ describe('getOrCreateConversation', () => {
     expect(id).toBe('conv-2');
     expect(insertValuesMock).toHaveBeenCalledWith({ usuarioId: 'user-1', contexto: 'operacion' });
   });
+
+  it('falls back to a re-select when the insert loses a create race', async () => {
+    selectMock.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 'conv-3' }]);
+    returningMock.mockResolvedValueOnce([]);
+    const { getOrCreateConversation } = await import('@/src/lib/assistants/conversations');
+    const id = await getOrCreateConversation('user-1', 'ejecucion');
+    expect(id).toBe('conv-3');
+  });
 });
 
 describe('loadMessages', () => {
@@ -57,5 +65,28 @@ describe('loadMessages', () => {
     const { loadMessages } = await import('@/src/lib/assistants/conversations');
     const messages = await loadMessages('conv-1');
     expect(messages).toEqual([stored]);
+  });
+});
+
+describe('saveMessages', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('does nothing for an empty messages array', async () => {
+    const { saveMessages } = await import('@/src/lib/assistants/conversations');
+    await saveMessages('conv-1', []);
+    expect(insertValuesMock).not.toHaveBeenCalled();
+  });
+
+  it('stringifies and inserts each message with its role', async () => {
+    const { saveMessages } = await import('@/src/lib/assistants/conversations');
+    const messages = [
+      { id: 'm1', role: 'user' as const, parts: [{ type: 'text' as const, text: 'hola' }] },
+      { id: 'm2', role: 'assistant' as const, parts: [{ type: 'text' as const, text: 'hola de vuelta' }] },
+    ];
+    await saveMessages('conv-1', messages);
+    expect(insertValuesMock).toHaveBeenCalledWith([
+      { conversacionId: 'conv-1', rol: 'user', contenido: JSON.stringify(messages[0]) },
+      { conversacionId: 'conv-1', rol: 'assistant', contenido: JSON.stringify(messages[1]) },
+    ]);
   });
 });
