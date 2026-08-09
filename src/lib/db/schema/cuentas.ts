@@ -105,15 +105,15 @@ export const alertaPreferencias = pgTable('alerta_preferencias', {
  * CLAUDE.md §4). El aislamiento es el mismo de siempre en este repo: cada
  * query se filtra por usuarioId en código de aplicación.
  */
-export const userSignal = pgTable(
-  'user_signals',
+export const senalUsuario = pgTable(
+  'senal_usuario',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    usuarioId: text('user_id')
+    usuarioId: text('usuario_id')
       .notNull()
       .references(() => usuario.id, { onDelete: 'cascade' }),
-    signal: text('signal').notNull(),
-    creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    senal: text('senal').notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index('user_signals_usuario_idx').on(t.usuarioId)],
+  (t) => [index('senal_usuario_usuario_idx').on(t.usuarioId)],
 );

@@ -6,13 +6,13 @@
  */
 
 import { db } from '@/src/lib/db/client';
-import { userSignal } from '@/src/lib/db/schema/cuentas';
+import { senalUsuario } from '@/src/lib/db/schema/cuentas';
 
 export type UserSignal = 'oferente' | 'estructurador' | 'comunidad';
 
 export async function recordUserSignal(usuarioId: string, signal: UserSignal): Promise<void> {
   try {
-    await db.insert(userSignal).values({ usuarioId, signal });
+    await db.insert(senalUsuario).values({ usuarioId, senal: signal });
   } catch {
     // Captura silenciosa — ver docstring del módulo.
   }
