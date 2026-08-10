@@ -52,6 +52,8 @@ interface Props {
   verdictLoading?: boolean;
   /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
   hasPerfil: boolean;
+  /** Hay perfil base pero sin experiencia RUP cargada: el CTA abre RupWizard en vez de OferenteWizard. */
+  faltaExperiencia: boolean;
   onRequestPerfil: () => void;
 }
 
@@ -63,6 +65,7 @@ export default function ProcessDetail({
   verdict: v,
   verdictLoading,
   hasPerfil,
+  faltaExperiencia,
   onRequestPerfil,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -124,6 +127,15 @@ export default function ProcessDetail({
           <p>¿Puedo participar? Cuéntanos de ti y te decimos si este proceso te conviene.</p>
           <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
             Cuéntanos de ti →
+          </button>
+        </section>
+      )}
+
+      {hasPerfil && faltaExperiencia && (
+        <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
+          <p>Para ver tu habilitación exacta, cuéntanos tu experiencia y capacidad financiera.</p>
+          <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
+            Completar mi RUP →
           </button>
         </section>
       )}

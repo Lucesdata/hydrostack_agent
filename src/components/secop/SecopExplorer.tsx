@@ -242,7 +242,7 @@ export default function SecopExplorer() {
       }).catch(() => {});
     }
     if (selected) {
-      verdictAttempted.current.delete(selected.id); // fuerza recalcular con los nuevos datos RUP
+      verdictAttempted.current.add(selected.id);
       fetchVerdict(selected, nuevoPerfil);
     }
   }
@@ -386,6 +386,7 @@ export default function SecopExplorer() {
                 verdict={verdicts[selected.id]}
                 verdictLoading={!!verdictLoading[selected.id]}
                 hasPerfil={!!perfil}
+                faltaExperiencia={!!perfil && !perfil.experiencia?.length}
                 onRequestPerfil={() => {
                   if (!hasSession) {
                     router.push("/login?next=/licitaciones");
