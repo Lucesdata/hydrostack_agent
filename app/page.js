@@ -537,6 +537,30 @@ export default function LandingPage() {
   const fx = useBlueprintFX();
   const { heroRef, statsRef, problemRef, howRef, pillarsRef } = fx.refs;
 
+  const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | loading | done | error
+  const [waitlistError, setWaitlistError] = useState(null);
+
+  async function handleWaitlist() {
+    setWaitlistStatus("loading");
+    setWaitlistError(null);
+    try {
+      const res = await fetch("/api/mercado/waitlist", { method: "POST" });
+      if (res.status === 401) {
+        window.location.href = "/login?next=" + encodeURIComponent("/#asistentes-proyecto");
+        return;
+      }
+      if (!res.ok) {
+        setWaitlistStatus("error");
+        setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
+        return;
+      }
+      setWaitlistStatus("done");
+    } catch {
+      setWaitlistStatus("error");
+      setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
+    }
+  }
+
   return (
     <div
       className="bp-page"
@@ -797,6 +821,54 @@ export default function LandingPage() {
                 </span>
               </Link>
             ))}
+          </div>
+        </div>
+
+        <div className="bp-pillars-wrap" id="asistentes-proyecto">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 06 — Asistentes de proyecto</span>
+          </div>
+          <div className="bp-pillars-grid">
+            <Link href="/asistente/ejecucion" className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
+              <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+              <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 01 ]</span>
+              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Gané un contrato, ¿ahora qué?</div>
+              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Sube tu contrato y te acompañamos en la ejecución: actas, pólizas, informes, liquidación.</p>
+              <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ EMPEZAR <span className="bp-card-arrow">→</span> ]</span>
+            </Link>
+
+            <Link href="/asistente/operacion" className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
+              <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+              <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 02 ]</span>
+              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Opero un acueducto o una ESP</div>
+              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Resuelve dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.</p>
+              <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ CONSULTAR <span className="bp-card-arrow">→</span> ]</span>
+            </Link>
+
+            <div className="bp-card" aria-live="polite" style={{ position: "relative", border: "1px dashed #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
+              <span style={{ position: "absolute", top: 10, right: 14, font: "9px var(--font-jetbrains-mono),monospace", color: "#6B746F", letterSpacing: ".08em", textTransform: "uppercase" }}>Próximamente</span>
+              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 03 ]</span>
+              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Vendo o fabrico soluciones</div>
+              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Pronto: oportunidades reales de comunidades y ESP que necesitan lo que ofreces.</p>
+              {waitlistStatus === "done" ? (
+                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#16A34A" }}>[ Te avisaremos ]</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleWaitlist}
+                  disabled={waitlistStatus === "loading"}
+                  style={{ alignSelf: "flex-start", cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
+                >
+                  {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
+                </button>
+              )}
+              {waitlistStatus === "error" && waitlistError && (
+                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>{waitlistError}</span>
+              )}
+            </div>
           </div>
         </div>
 
