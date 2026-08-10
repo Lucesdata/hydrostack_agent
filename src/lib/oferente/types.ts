@@ -48,6 +48,24 @@ export interface CapacidadFinancieraRUP {
    * incluso en modo manual. `null` si no se declaró.
    */
   vigenciaHasta: string | null;
+  /**
+   * Nivel 2 — indicadores que exige habilitacionGate cuando el pliego los pide.
+   * Opcionales: un perfil sin estos valores hace que esas comparaciones
+   * concretas caigan en VERIFICAR en vez de romper el tipo.
+   */
+  rentabilidadPatrimonio?: number; // proporción 0–1
+  rentabilidadActivo?: number; // proporción 0–1
+  patrimonioSmmlv?: number;
+  /** Duplica capitalTrabajoCop en SMMLV — así lo exigen la mayoría de pliegos. */
+  capitalTrabajoSmmlv?: number;
+}
+
+/** Un contrato terminado que el oferente puede aportar como experiencia (Nivel 2). */
+export interface ExperienciaContrato {
+  objeto: string;
+  valorSmmlv: number;
+  unspscCodigos: UnspscCodigo[];
+  anioTerminacion: number;
 }
 
 /**
@@ -81,4 +99,6 @@ export interface OferenteProfile {
   kCapacidadResidualCop: number | null;
   cobertura: CoberturaGeografica;
   cuantiaObjetivo: CuantiaObjetivo;
+  /** Nivel 2 — contratos aportables para la compuerta Habilitación. */
+  experiencia?: ExperienciaContrato[];
 }
