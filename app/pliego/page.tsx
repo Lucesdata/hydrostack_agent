@@ -34,6 +34,23 @@ export default function PliegoPage() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractResponse | null>(null);
+  const [procesoId, setProcesoId] = useState("");
+  const [linkStatus, setLinkStatus] = useState<"idle" | "linking" | "linked" | "error">("idle");
+
+  async function handleLinkToProcess() {
+    if (!result || !procesoId.trim()) return;
+    setLinkStatus("linking");
+    try {
+      const res = await fetch("/api/eligibility/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ procesoId: procesoId.trim(), extraction: result.extraction }),
+      });
+      setLinkStatus(res.ok ? "linked" : "error");
+    } catch {
+      setLinkStatus("error");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -111,6 +128,21 @@ export default function PliegoPage() {
         {status === "error" && error && <div className="clr-pl-error">{error}</div>}
 
         {status === "done" && result && <PliegoResult data={result} />}
+
+        {result && (
+          <div style={{ marginTop: 16, display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              placeholder="ID del proceso SECOP (ej. CO1.REQ.123456)"
+              value={procesoId}
+              onChange={(e) => setProcesoId(e.target.value)}
+            />
+            <button type="button" onClick={handleLinkToProcess} disabled={!procesoId.trim() || linkStatus === "linking"}>
+              {linkStatus === "linking" ? "Vinculando…" : "Vincular a este proceso"}
+            </button>
+            {linkStatus === "linked" && <span>Vinculado ✓ — ya se puede verificar habilitación en /licitaciones</span>}
+            {linkStatus === "error" && <span>No se pudo vincular — intenta de nuevo.</span>}
+          </div>
+        )}
       </div>
 
       <style jsx>{`
