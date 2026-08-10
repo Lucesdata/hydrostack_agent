@@ -74,6 +74,12 @@ export default function ProcessList({ items, selectedId, onSelect, loading }: Pr
                   {score.pass}/{score.total}
                 </span>
               )}
+              {p.verdict?.gates.habilitacion.status === "FAIL" && (
+                <span className="clr-prow-score clr-prow-score--fail">[✗] Habilitación</span>
+              )}
+              {p.verdict?.gates.habilitacion.status === "PASS" && (
+                <span className="clr-prow-score clr-prow-score--pass">[✓] Habilitación</span>
+              )}
             </span>
           </button>
         );

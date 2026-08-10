@@ -22,6 +22,7 @@ import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientSto
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
 import OferenteWizard from "./OferenteWizard";
+import RupWizard from "./RupWizard";
 import LicitacionesTabs from "./LicitacionesTabs";
 
 const DEPARTAMENTOS = [
@@ -62,6 +63,7 @@ export default function SecopExplorer() {
   // veredictos calculados on-demand, cacheados por procesoId en memoria.
   const [perfil, setPerfil] = useState<OferenteProfile | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [rupWizardOpen, setRupWizardOpen] = useState(false);
   const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({});
   const [verdictLoading, setVerdictLoading] = useState<Record<string, boolean>>({});
   const verdictAttempted = useRef<Set<string>>(new Set());
@@ -228,6 +230,23 @@ export default function SecopExplorer() {
     }
   }
 
+  function handleRupCompleto(nuevoPerfil: OferenteProfile) {
+    saveOferentePerfil(nuevoPerfil);
+    setPerfil(nuevoPerfil);
+    setRupWizardOpen(false);
+    if (hasSession) {
+      fetch("/api/perfil", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoPerfil),
+      }).catch(() => {});
+    }
+    if (selected) {
+      verdictAttempted.current.delete(selected.id); // fuerza recalcular con los nuevos datos RUP
+      fetchVerdict(selected, nuevoPerfil);
+    }
+  }
+
   const set =
     (k: keyof Filters) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -355,6 +374,8 @@ export default function SecopExplorer() {
           <div className={`clr-wb-detailcol${detailOpen ? " is-open" : ""}`}>
             {wizardOpen ? (
               <OferenteWizard onComplete={handlePerfilCompleto} onCancel={() => setWizardOpen(false)} />
+            ) : rupWizardOpen && perfil ? (
+              <RupWizard perfil={perfil} onComplete={handleRupCompleto} onSkip={() => setRupWizardOpen(false)} />
             ) : selected && access ? (
               <ProcessDetail
                 key={selected.id}
@@ -370,7 +391,14 @@ export default function SecopExplorer() {
                     router.push("/login?next=/licitaciones");
                     return;
                   }
-                  setWizardOpen(true);
+                  if (!perfil) {
+                    setWizardOpen(true);
+                    return;
+                  }
+                  if (!perfil.experiencia?.length) {
+                    setRupWizardOpen(true);
+                    return;
+                  }
                 }}
               />
             ) : (
@@ -467,6 +495,7 @@ const CSS = `
 .clr-prow-score--success{ color: var(--success); }
 .clr-prow-score--warn{ color: var(--warning); }
 .clr-prow-score--fail{ color: #DC2626; }
+.clr-prow-score--pass{ color: var(--success); }
 .clr-prow-score--neutral{ color: var(--ink-600); }
 .clr-prow-dot{ width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
@@ -519,6 +548,11 @@ const CSS = `
 .clr-elig-glyph--unknown{ color: var(--ink-600); }
 .clr-elig-name{ color: var(--ink-900); }
 .clr-elig-reason{ color: var(--ink-600); line-height: 1.4; }
+.clr-elig-subgates{ list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.clr-elig-nota{
+  margin: 0; font-size: 11.5px; color: var(--ink-600); line-height: 1.5;
+  border-top: 1px dashed var(--line); padding-top: 8px;
+}
 .clr-elig-cta{
   display: flex; justify-content: space-between; align-items: center;
   gap: 12px; flex-wrap: wrap;

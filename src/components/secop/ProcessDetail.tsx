@@ -149,18 +149,35 @@ export default function ProcessDetail({
             {GATE_LABEL.map(([key, label]) => {
               const g = v.gates[key];
               const s = STATUS[g.status];
+              const esHabilitacion = key === "habilitacion";
+              const partes = esHabilitacion ? g.reason.split(" · ") : [g.reason];
               return (
                 <li key={key} className="clr-elig-gate">
                   <span className={`clr-elig-glyph clr-elig-glyph--${s.cls}`}>{s.glyph}</span>
                   <span className="clr-elig-name">{label}</span>
                   <span className="clr-elig-reason">
-                    {g.reason}
-                    {g.requiredLevel === 2 ? " · requiere revisar pliego (nivel 2)" : ""}
+                    {partes.length > 1 ? (
+                      <ul className="clr-elig-subgates">
+                        {partes.map((parte, i) => (
+                          <li key={i}>{parte}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        {g.reason}
+                        {g.requiredLevel === 2 && key !== "habilitacion" ? " · requiere revisar pliego (nivel 2)" : ""}
+                      </>
+                    )}
                   </span>
                 </li>
               );
             })}
           </ul>
+          {v.gates.habilitacion.status === "FAIL" && (
+            <p className="clr-elig-nota">
+              Una brecha se puede cerrar en consorcio o unión temporal.
+            </p>
+          )}
         </section>
       )}
 
