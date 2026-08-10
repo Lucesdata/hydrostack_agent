@@ -11,7 +11,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { buildVerdict, toVerdictInput } from "@/src/lib/secop/verdict";
+import { db } from "@/src/lib/db/client";
+import { requisitosProceso } from "@/src/lib/db/schema/eligibility";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/schema";
 import type { SecopProceso } from "@/src/lib/secop/types";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 
@@ -54,6 +60,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Falta el perfil de oferente o es inválido" }, { status: 400 });
   }
 
-  const verdict = buildVerdict(body.perfil, toVerdictInput(body.proceso));
+  const [cached] = await db
+    .select()
+    .from(requisitosProceso)
+    .where(eq(requisitosProceso.procesoId, body.proceso.id))
+    .limit(1);
+  const requisitosHabilitantes = (cached?.requisitos as RequisitosHabilitantesEstructurados | undefined) ?? null;
+
+  const verdict = buildVerdict(body.perfil, toVerdictInput(body.proceso, { requisitosHabilitantes }));
+
+  const user = await getSessionUser();
+  if (user) {
+    await recordUserSignal(user.id, "oferente");
+  }
+
   return NextResponse.json({ verdict });
 }

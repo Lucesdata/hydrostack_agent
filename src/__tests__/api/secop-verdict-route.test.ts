@@ -1,7 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import type { SecopProceso } from '@/src/lib/secop/types';
 import type { OferenteProfile } from '@/src/lib/oferente/types';
+
+const mockLimit = vi.fn();
+vi.mock('@/src/lib/db/client', () => ({
+  db: { select: () => ({ from: () => ({ where: () => ({ limit: mockLimit }) }) }) },
+}));
+
+const mockAuth = vi.fn();
+vi.mock('@/src/lib/supabase/get-session-user', () => ({ getSessionUser: () => mockAuth() }));
+
+const mockSignal = vi.fn();
+vi.mock('@/src/lib/signals/record-signal', () => ({ recordUserSignal: (...a: unknown[]) => mockSignal(...a) }));
+
 import { POST } from '@/app/api/secop/verdict/route';
 
 const proceso: SecopProceso = {
@@ -34,6 +46,12 @@ const postReq = (body: unknown) =>
   });
 
 describe('POST /api/secop/verdict — veredicto Nivel 0 on-demand', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockLimit.mockResolvedValue([]); // sin requisitos cacheados por defecto
+    mockAuth.mockResolvedValue(null); // sin sesión por defecto
+  });
+
   it('devuelve el veredicto para un proceso y perfil válidos', async () => {
     const res = await POST(postReq({ proceso, perfil }));
     expect(res.status).toBe(200);
@@ -63,5 +81,16 @@ describe('POST /api/secop/verdict — veredicto Nivel 0 on-demand', () => {
   it('400 si el JSON es inválido', async () => {
     const res = await POST(postReq('no-es-json'));
     expect(res.status).toBe(400);
+  });
+
+  it('registra la señal oferente cuando hay sesión', async () => {
+    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
+    await POST(postReq({ proceso, perfil }));
+    expect(mockSignal).toHaveBeenCalledWith('u1', 'oferente');
+  });
+
+  it('no registra señal sin sesión', async () => {
+    await POST(postReq({ proceso, perfil }));
+    expect(mockSignal).not.toHaveBeenCalled();
   });
 });
