@@ -16,6 +16,18 @@ interface AssistantChatProps {
 
 type UploadStatus = 'idle' | 'uploading' | 'error';
 
+function formatChatError(message: string): string {
+  try {
+    const parsed: unknown = JSON.parse(message);
+    if (parsed && typeof parsed === 'object' && 'error' in parsed && typeof parsed.error === 'string') {
+      return parsed.error;
+    }
+  } catch {
+    // No era JSON — se muestra el mensaje tal cual.
+  }
+  return message;
+}
+
 export default function AssistantChat({
   contextSlug,
   titulo,
@@ -121,7 +133,7 @@ export default function AssistantChat({
           </div>
         ))}
         {isBusy && <div className="asc-bubble asc-bubble-assistant asc-pending">[ ... ]</div>}
-        {error && <div className="asc-error">{error.message}</div>}
+        {error && <div className="asc-error">{formatChatError(error.message)}</div>}
         <div ref={bottomRef} />
       </div>
 

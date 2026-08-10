@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     alreadySavedIds = new Set(alreadySaved.map((m) => m.id));
 
     const document = body.documentId
-      ? await getDocumentById(user.id, body.documentId)
+      ? await getDocumentById(user.id, context.slug, body.documentId)
       : await getLatestDocument(user.id, context.slug);
 
     systemPrompt = document

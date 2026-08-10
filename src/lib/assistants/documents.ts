@@ -95,12 +95,19 @@ export async function getLatestDocument(
 
 export async function getDocumentById(
   usuarioId: string,
+  contexto: AssistantContextSlug,
   documentId: string,
 ): Promise<DocumentForAssistant | null> {
   const rows = await db
     .select({ nombreArchivo: documento.nombreArchivo, textoExtraido: documento.textoExtraido })
     .from(documento)
-    .where(and(eq(documento.usuarioId, usuarioId), eq(documento.id, documentId)))
+    .where(
+      and(
+        eq(documento.usuarioId, usuarioId),
+        eq(documento.contexto, contexto),
+        eq(documento.id, documentId),
+      ),
+    )
     .limit(1);
   return rows[0] ? truncateForPrompt(rows[0]) : null;
 }

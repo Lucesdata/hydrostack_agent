@@ -106,13 +106,13 @@ describe('getDocumentById', () => {
   it('returns null when no matching document exists', async () => {
     selectMock.mockResolvedValue([]);
     const { getDocumentById } = await import('@/src/lib/assistants/documents');
-    expect(await getDocumentById('user-1', 'doc-1')).toBeNull();
+    expect(await getDocumentById('user-1', 'ejecucion', 'doc-1')).toBeNull();
   });
 
   it('returns the row when present', async () => {
     selectMock.mockResolvedValue([{ nombreArchivo: 'contrato.pdf', textoExtraido: 'texto' }]);
     const { getDocumentById } = await import('@/src/lib/assistants/documents');
-    expect(await getDocumentById('user-1', 'doc-1')).toEqual({
+    expect(await getDocumentById('user-1', 'ejecucion', 'doc-1')).toEqual({
       nombreArchivo: 'contrato.pdf',
       textoExtraido: 'texto',
     });
