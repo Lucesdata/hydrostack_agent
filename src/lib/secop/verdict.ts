@@ -371,7 +371,14 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
     const aportado = (p.experiencia ?? [])
       .filter((c) =>
         req.experiencia.unspsc_exigidos.length === 0 ||
-        c.unspscCodigos.some((code) => req.experiencia.unspsc_exigidos.includes(code)),
+        c.unspscCodigos.some((code) => {
+          const cDigits = unspscDigits(code);
+          if (cDigits == null) return false;
+          return req.experiencia.unspsc_exigidos.some((ex) => {
+            const exDigits = unspscDigits(ex);
+            return exDigits != null && (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits));
+          });
+        }),
       )
       .reduce((sum, c) => sum + c.valorSmmlv, 0);
     const exigido = req.experiencia.valor_min_smmlv;

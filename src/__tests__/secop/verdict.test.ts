@@ -313,4 +313,17 @@ describe('habilitacionGate (L2 — con requisitos estructurados)', () => {
     expect(r.status).toBe('FAIL');
     expect(r.reason).toMatch(/2000/);
   });
+
+  it('granularidad UNSPSC distinta (familia 5 díg vs clase 8 díg) igual cuenta como match', () => {
+    // perfilConRup declara experiencia en '83101500' (clase, 8 díg); el pliego
+    // exige la familia '83101' (5 díg) — deben intersecar igual que sectorialGate.
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 3000, unspsc_exigidos: ['83101'], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('PASS');
+  });
 });
