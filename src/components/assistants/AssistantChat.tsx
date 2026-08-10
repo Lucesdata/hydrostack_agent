@@ -63,7 +63,10 @@ export default function AssistantChat({
       setDocumentName(file.name);
       setUploadStatus('idle');
       if (documentoConfig.mensajePosSubida) {
-        sendMessage({ text: documentoConfig.mensajePosSubida });
+        sendMessage(
+          { text: documentoConfig.mensajePosSubida },
+          { body: { documentId: responseBody.documentId } },
+        );
       }
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : String(e));
@@ -107,7 +110,7 @@ export default function AssistantChat({
 
       {uploadError && <div className="asc-error">{uploadError}</div>}
 
-      <div className="asc-messages">
+      <div className="asc-messages" aria-live="polite">
         {messages.length === 0 && <div className="asc-welcome">{mensajeBienvenida}</div>}
         {messages.map((m) => (
           <div key={m.id} className={`asc-bubble asc-bubble-${m.role}`}>
@@ -128,6 +131,7 @@ export default function AssistantChat({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe tu pregunta…"
+          aria-label="Mensaje"
           disabled={isBusy}
         />
         <button className="asc-send" type="submit" disabled={isBusy || !input.trim()}>
