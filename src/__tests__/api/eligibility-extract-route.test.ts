@@ -55,6 +55,10 @@ describe('POST /api/eligibility/extract', () => {
     const body = await res.json();
     expect(body.requisitos.experiencia.valor_min_smmlv).toBe(3000);
     expect(mockExtract).toHaveBeenCalledWith(extraction.requisitos_habilitantes);
+    expect(mockOnConflict).toHaveBeenCalledWith({
+      target: expect.anything(),
+      set: expect.objectContaining({ requisitos: expect.any(Object) }),
+    });
   });
 
   it('502 si la estructuración falla', async () => {
