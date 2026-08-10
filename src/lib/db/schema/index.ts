@@ -5,3 +5,4 @@ export * from './control';
 export * from './clasificacion';
 export * from './quarantine';
 export * from './cuentas';
+export * from './eligibility';
