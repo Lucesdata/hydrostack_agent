@@ -93,4 +93,25 @@ describe('POST /api/secop/verdict — veredicto Nivel 0 on-demand', () => {
     await POST(postReq({ proceso, perfil }));
     expect(mockSignal).not.toHaveBeenCalled();
   });
+
+  it('usa los requisitos cacheados: habilitacionGate deja de ser UNKNOWN', async () => {
+    mockLimit.mockResolvedValue([
+      {
+        procesoId: proceso.id,
+        requisitos: {
+          experiencia: {
+            valor_min_smmlv: 0,
+            unspsc_exigidos: [],
+            max_contratos_aportables: null,
+            verificar_manual: true, // fuerza WARN, no depende del perfil
+            cita_textual: 'Se debe acreditar experiencia mínima según el RUP.',
+          },
+          indicadores_financieros: [],
+        },
+      },
+    ]);
+    const res = await POST(postReq({ proceso, perfil }));
+    const body = await res.json();
+    expect(body.verdict.gates.habilitacion.status).toBe('WARN');
+  });
 });
