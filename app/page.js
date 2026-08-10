@@ -376,7 +376,7 @@ export default function LandingPage() {
               <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ CONSULTAR <span className="bp-card-arrow">→</span> ]</span>
             </Link>
 
-            <div className="bp-card" style={{ position: "relative", border: "1px dashed #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
+            <div className="bp-card" aria-live="polite" style={{ position: "relative", border: "1px dashed #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
               <span style={{ position: "absolute", top: 10, right: 14, font: "9px var(--font-jetbrains-mono),monospace", color: "#6B746F", letterSpacing: ".08em", textTransform: "uppercase" }}>Próximamente</span>
               <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 03 ]</span>
               <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Vendo o fabrico soluciones</div>
@@ -388,7 +388,7 @@ export default function LandingPage() {
                   type="button"
                   onClick={handleWaitlist}
                   disabled={waitlistStatus === "loading"}
-                  style={{ alignSelf: "flex-start", cursor: "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
+                  style={{ alignSelf: "flex-start", cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
                 >
                   {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
                 </button>
