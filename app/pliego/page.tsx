@@ -131,10 +131,17 @@ export default function PliegoPage() {
 
         {result && (
           <div style={{ marginTop: 16, display: "flex", gap: 8, alignItems: "center" }}>
+            <label htmlFor="pliego-proceso-id" style={{ fontSize: 12 }}>
+              ID del proceso SECOP
+            </label>
             <input
+              id="pliego-proceso-id"
               placeholder="ID del proceso SECOP (ej. CO1.REQ.123456)"
               value={procesoId}
-              onChange={(e) => setProcesoId(e.target.value)}
+              onChange={(e) => {
+                setProcesoId(e.target.value);
+                if (linkStatus === "linked" || linkStatus === "error") setLinkStatus("idle");
+              }}
             />
             <button type="button" onClick={handleLinkToProcess} disabled={!procesoId.trim() || linkStatus === "linking"}>
               {linkStatus === "linking" ? "Vinculando…" : "Vincular a este proceso"}
