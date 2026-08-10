@@ -49,6 +49,8 @@ const INDICADORES_VALIDOS: IndicadorFinancieroCodigo[] = [
   'capital_trabajo_smmlv',
 ];
 
+const OPERADORES_VALIDOS: Operador[] = ['gte', 'lte'];
+
 export const REQUISITOS_JSON_SCHEMA = {
   type: 'object',
   additionalProperties: false,
@@ -72,7 +74,7 @@ export const REQUISITOS_JSON_SCHEMA = {
         additionalProperties: false,
         properties: {
           indicador: { type: 'string', enum: INDICADORES_VALIDOS },
-          operador: { type: 'string', enum: ['gte', 'lte'] },
+          operador: { type: 'string', enum: OPERADORES_VALIDOS },
           valor: { type: 'number' },
           verificar_manual: { type: 'boolean' },
           cita_textual: { type: 'string' },
@@ -95,6 +97,10 @@ function asBoolean(v: unknown, field: string): boolean {
 function asNumberOrNull(v: unknown, field: string): number | null {
   if (v === null) return null;
   if (typeof v !== 'number' || Number.isNaN(v)) throw new Error(`campo ${field} debe ser número o null`);
+  return v;
+}
+function asNumber(v: unknown, field: string): number {
+  if (typeof v !== 'number' || Number.isNaN(v)) throw new Error(`campo ${field} debe ser número`);
   return v;
 }
 
@@ -126,13 +132,13 @@ export function parseRequisitosEstructurados(raw: unknown): RequisitosHabilitant
       throw new Error(`indicadores_financieros[${i}].indicador inválido: ${indicador}`);
     }
     const operador = asString(ii.operador, `indicadores_financieros[${i}].operador`);
-    if (operador !== 'gte' && operador !== 'lte') {
+    if (!OPERADORES_VALIDOS.includes(operador as Operador)) {
       throw new Error(`indicadores_financieros[${i}].operador debe ser gte|lte`);
     }
     return {
       indicador: indicador as IndicadorFinancieroCodigo,
-      operador,
-      valor: typeof ii.valor === 'number' ? ii.valor : (() => { throw new Error(`indicadores_financieros[${i}].valor debe ser número`); })(),
+      operador: operador as Operador,
+      valor: asNumber(ii.valor, `indicadores_financieros[${i}].valor`),
       verificar_manual: asBoolean(ii.verificar_manual, `indicadores_financieros[${i}].verificar_manual`),
       cita_textual: asString(ii.cita_textual, `indicadores_financieros[${i}].cita_textual`),
     };

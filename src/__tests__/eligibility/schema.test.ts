@@ -53,4 +53,31 @@ describe('parseRequisitosEstructurados', () => {
     expect(r.experiencia.verificar_manual).toBe(true);
     expect(r.experiencia.valor_min_smmlv).toBeNull();
   });
+
+  it('lanza si un indicador tiene valor=NaN', () => {
+    const invalido = {
+      ...valido,
+      indicadores_financieros: [{ ...valido.indicadores_financieros[0], valor: NaN }],
+    };
+    expect(() => parseRequisitosEstructurados(invalido)).toThrow();
+  });
+
+  it('lanza si unspsc_exigidos no es un array', () => {
+    const invalido = {
+      ...valido,
+      experiencia: {
+        ...valido.experiencia,
+        unspsc_exigidos: 'no es array',
+      },
+    };
+    expect(() => parseRequisitosEstructurados(invalido)).toThrow();
+  });
+
+  it('lanza si un indicador tiene indicador con código inválido', () => {
+    const invalido = {
+      ...valido,
+      indicadores_financieros: [{ ...valido.indicadores_financieros[0], indicador: 'codigo_inexistente' }],
+    };
+    expect(() => parseRequisitosEstructurados(invalido)).toThrow();
+  });
 });
