@@ -36,9 +36,9 @@ export default function RupWizard({ perfil, onComplete, onSkip }: Props) {
   const [stepIdx, setStepIdx] = useState(0);
   const [experiencia, setExperiencia] = useState<ExperienciaContrato[]>(perfil.experiencia ?? []);
   const [query, setQuery] = useState("");
-  const [indiceLiquidez, setIndiceLiquidez] = useState(String(perfil.capacidadFinanciera.indiceLiquidez || ""));
-  const [indiceEndeudamiento, setIndiceEndeudamiento] = useState(String(perfil.capacidadFinanciera.indiceEndeudamiento || ""));
-  const [razonCoberturaIntereses, setRazonCoberturaIntereses] = useState(String(perfil.capacidadFinanciera.razonCoberturaIntereses || ""));
+  const [indiceLiquidez, setIndiceLiquidez] = useState(String(perfil.capacidadFinanciera.indiceLiquidez ?? ""));
+  const [indiceEndeudamiento, setIndiceEndeudamiento] = useState(String(perfil.capacidadFinanciera.indiceEndeudamiento ?? ""));
+  const [razonCoberturaIntereses, setRazonCoberturaIntereses] = useState(String(perfil.capacidadFinanciera.razonCoberturaIntereses ?? ""));
   const [rentabilidadPatrimonio, setRentabilidadPatrimonio] = useState(String(perfil.capacidadFinanciera.rentabilidadPatrimonio ?? ""));
   const [rentabilidadActivo, setRentabilidadActivo] = useState(String(perfil.capacidadFinanciera.rentabilidadActivo ?? ""));
   const [patrimonioSmmlv, setPatrimonioSmmlv] = useState(String(perfil.capacidadFinanciera.patrimonioSmmlv ?? ""));
@@ -105,14 +105,14 @@ export default function RupWizard({ perfil, onComplete, onSkip }: Props) {
                 type="number"
                 min={0}
                 placeholder="Valor (SMMLV)"
-                value={c.valorSmmlv || ""}
+                value={c.valorSmmlv ?? ""}
                 onChange={(e) => updateContrato(i, { valorSmmlv: Number(e.target.value) })}
               />
               <input
                 className="clr-input"
                 type="number"
                 placeholder="Año de terminación"
-                value={c.anioTerminacion || ""}
+                value={c.anioTerminacion ?? ""}
                 onChange={(e) => updateContrato(i, { anioTerminacion: Number(e.target.value) })}
               />
               <input
