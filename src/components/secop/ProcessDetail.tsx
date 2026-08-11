@@ -133,7 +133,7 @@ export default function ProcessDetail({
 
       {hasPerfil && faltaExperiencia && (
         <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
-          <p>Para ver tu habilitación exacta, cuéntanos tu experiencia y capacidad financiera.</p>
+          <p>Tu evaluación de habilitación está incompleta — cuéntanos tu experiencia y capacidad financiera para verla completa.</p>
           <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
             Completar mi RUP →
           </button>
