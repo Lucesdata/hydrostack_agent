@@ -380,19 +380,15 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
       }),
     );
     const maxContratos = req.experiencia.max_contratos_aportables;
-    if (maxContratos != null && contratosQueMatchean.length > maxContratos) {
-      razones.push({
-        status: 'FAIL',
-        texto: `experiencia: aportas ${contratosQueMatchean.length} contratos pero el pliego exige máximo ${maxContratos}`,
-      });
+    const contratosConsiderados = maxContratos != null
+      ? [...contratosQueMatchean].sort((a, b) => b.valorSmmlv - a.valorSmmlv).slice(0, maxContratos)
+      : contratosQueMatchean;
+    const aportado = contratosConsiderados.reduce((sum, c) => sum + c.valorSmmlv, 0);
+    const exigido = req.experiencia.valor_min_smmlv;
+    if (aportado >= exigido) {
+      razones.push({ status: 'PASS', texto: `experiencia: aportas ${aportado} SMMLV, exigen ${exigido}` });
     } else {
-      const aportado = contratosQueMatchean.reduce((sum, c) => sum + c.valorSmmlv, 0);
-      const exigido = req.experiencia.valor_min_smmlv;
-      if (aportado >= exigido) {
-        razones.push({ status: 'PASS', texto: `experiencia: aportas ${aportado} SMMLV, exigen ${exigido}` });
-      } else {
-        razones.push({ status: 'FAIL', texto: `experiencia: te faltan ${exigido - aportado} SMMLV (aportas ${aportado} de ${exigido} exigidos)` });
-      }
+      razones.push({ status: 'FAIL', texto: `experiencia: te faltan ${exigido - aportado} SMMLV (aportas ${aportado} de ${exigido} exigidos)` });
     }
   }
 

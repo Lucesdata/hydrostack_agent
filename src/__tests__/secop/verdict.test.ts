@@ -327,10 +327,12 @@ describe('habilitacionGate (L2 — con requisitos estructurados)', () => {
     expect(r.status).toBe('PASS');
   });
 
-  it('max_contratos_aportables: más contratos que el tope → FAIL aunque la suma alcance', () => {
-    // el pliego exige 3.000 SMMLV con máximo 1 contrato; el perfil aporta 2
-    // contratos que matchean el UNSPSC exigido y suman 4.000 SMMLV (más que
-    // suficiente si no hubiera tope) — el tope de contratos debe hacer fallar.
+  it('max_contratos_aportables: el mejor subconjunto de tamaño N no alcanza el umbral → FAIL', () => {
+    // el pliego exige 3.000 SMMLV con máximo 1 contrato aportable; el perfil
+    // tiene 2 contratos que matchean el UNSPSC exigido (2.000 c/u, suman
+    // 4.000 si no hubiera tope) — pero el MEJOR subconjunto de tamaño 1
+    // (2.000) sigue sin alcanzar el umbral de 3.000, así que debe fallar
+    // por el déficit real, no por "exceso de contratos".
     const perfilConVariosContratos: OferenteProfile = {
       ...profile,
       experiencia: [
@@ -346,7 +348,33 @@ describe('habilitacionGate (L2 — con requisitos estructurados)', () => {
     });
     const r = habilitacionGate(perfilConVariosContratos, p);
     expect(r.status).toBe('FAIL');
-    expect(r.reason).toMatch(/2 contratos/);
-    expect(r.reason).toMatch(/máximo 1/);
+    // aportado = mejor 1 contrato = 2000; faltan 1000 de los 3000 exigidos.
+    expect(r.reason).toMatch(/te faltan 1000 SMMLV/);
+    expect(r.reason).toMatch(/aportas 2000 de 3000/);
+  });
+
+  it('max_contratos_aportables: el mejor subconjunto de tamaño N SÍ alcanza el umbral → PASS (no descalifica por exceso de contratos)', () => {
+    // el pliego exige 1.000 SMMLV con máximo 2 contratos aportables; el
+    // perfil tiene 3 contratos que matchean (600, 500, 50 SMMLV). Los
+    // mejores 2 (600+500=1100) superan el umbral aunque haya un tercer
+    // contrato elegible sin usar — un oferente real simplemente presenta
+    // sus mejores 2, no debe fallar por tener contratos de más "en archivo".
+    const perfilConVariosContratos: OferenteProfile = {
+      ...profile,
+      experiencia: [
+        { objeto: 'PTAP municipal A', valorSmmlv: 600, unspscCodigos: ['83101500'], anioTerminacion: 2021 },
+        { objeto: 'PTAP municipal B', valorSmmlv: 500, unspscCodigos: ['83101500'], anioTerminacion: 2022 },
+        { objeto: 'PTAP municipal C', valorSmmlv: 50, unspscCodigos: ['83101500'], anioTerminacion: 2023 },
+      ],
+    };
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 1000, unspsc_exigidos: ['83101500'], max_contratos_aportables: 2, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConVariosContratos, p);
+    expect(r.status).toBe('PASS');
+    expect(r.reason).toMatch(/aportas 1100 SMMLV/);
   });
 });
