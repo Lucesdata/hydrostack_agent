@@ -738,6 +738,14 @@ export default function LandingPage() {
                 <span>[✓] CAPACIDAD_FINANCIERA ........ OK</span>
                 <span>[!] UNSPSC ...................... PARCIAL</span>
               </div>
+              <div style={{ marginTop: 14 }}>
+                <Link
+                  href="/licitaciones"
+                  style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".04em" }}
+                >
+                  [ Evalúa tu propio RUP → ]
+                </Link>
+              </div>
             </div>
           </div>
         </div>

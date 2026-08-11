@@ -149,6 +149,9 @@ function UserMenu({ user }) {
               <div className="clr-nav-user-email">{user.email}</div>
             </div>
           </div>
+          <Link href="/perfil" onClick={() => setOpen(false)}>
+            Mi perfil RUP
+          </Link>
           {/* Sin onSubmit: el submit navega fuera de la página (redirect a /),
               cerrar el dropdown acá desmontaría el <form> a mitad del envío
               ("Form submission canceled because the form is not connected"). */}

@@ -1,6 +1,6 @@
 {
-  "id": "573af884-35e2-42ad-a018-9db6a3f712c4",
-  "prevId": "16c4e88d-1996-4507-8510-4d11eee064f5",
+  "id": "d64ba1c4-5459-4043-b760-58668e41962c",
+  "prevId": "573af884-35e2-42ad-a018-9db6a3f712c4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2202,6 +2202,38 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.requisitos_proceso": {
+      "name": "requisitos_proceso",
+      "schema": "",
+      "columns": {
+        "proceso_id": {
+          "name": "proceso_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "requisitos": {
+          "name": "requisitos",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extraido_en": {
+          "name": "extraido_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

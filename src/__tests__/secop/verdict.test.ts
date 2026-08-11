@@ -325,3 +325,142 @@ describe("buildVerdict (orquestador)", () => {
     expect(v.overall).toBe("WARN");
   });
 });
+
+describe('habilitacionGate (L2 — con requisitos estructurados)', () => {
+  const perfilConRup: OferenteProfile = {
+    ...profile,
+    experiencia: [
+      { objeto: 'PTAP municipal', valorSmmlv: 3500, unspscCodigos: ['83101500'], anioTerminacion: 2023 },
+    ],
+    capacidadFinanciera: { ...profile.capacidadFinanciera, indiceLiquidez: 1.1 },
+  };
+
+  it('experiencia suficiente + indicador cumple → PASS', () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 3000, unspsc_exigidos: ['83101500'], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [
+          { indicador: 'indice_liquidez', operador: 'gte', valor: 1, verificar_manual: false, cita_textual: 'y' },
+        ],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('PASS');
+    expect(r.requiredLevel).toBe(2);
+  });
+
+  it('brecha de experiencia cuantificada exacta', () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 5000, unspsc_exigidos: ['83101500'], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('FAIL');
+    expect(r.reason).toMatch(/1500/); // 5000 exigido - 3500 aportado
+  });
+
+  it('brecha de indicador financiero cuantificada exacta', () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 1000, unspsc_exigidos: [], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [
+          { indicador: 'indice_liquidez', operador: 'gte', valor: 1.5, verificar_manual: false, cita_textual: 'y' },
+        ],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('FAIL');
+    expect(r.reason).toMatch(/1[.,]1/); // el perfil declara 1.1
+    expect(r.reason).toMatch(/1[.,]5/); // exigen 1.5
+  });
+
+  it('verificar_manual=true en un requisito → VERIFICAR (mapeado a WARN) con la cita', () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: null, unspsc_exigidos: [], max_contratos_aportables: null, verificar_manual: true, cita_textual: 'remite al anexo 3' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('WARN');
+    expect(r.reason).toContain('remite al anexo 3');
+  });
+
+  it('perfil sin experiencia declarada + requisito de experiencia → FAIL con el faltante completo', () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 2000, unspsc_exigidos: [], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(profile, p); // `profile` no tiene `experiencia`
+    expect(r.status).toBe('FAIL');
+    expect(r.reason).toMatch(/2000/);
+  });
+
+  it('granularidad UNSPSC distinta (familia 5 díg vs clase 8 díg) igual cuenta como match', () => {
+    // perfilConRup declara experiencia en '83101500' (clase, 8 díg); el pliego
+    // exige la familia '83101' (5 díg) — deben intersecar igual que sectorialGate.
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 3000, unspsc_exigidos: ['83101'], max_contratos_aportables: null, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe('PASS');
+  });
+
+  it('max_contratos_aportables: el mejor subconjunto de tamaño N no alcanza el umbral → FAIL', () => {
+    // el pliego exige 3.000 SMMLV con máximo 1 contrato aportable; el perfil
+    // tiene 2 contratos que matchean el UNSPSC exigido (2.000 c/u, suman
+    // 4.000 si no hubiera tope) — pero el MEJOR subconjunto de tamaño 1
+    // (2.000) sigue sin alcanzar el umbral de 3.000, así que debe fallar
+    // por el déficit real, no por "exceso de contratos".
+    const perfilConVariosContratos: OferenteProfile = {
+      ...profile,
+      experiencia: [
+        { objeto: 'PTAP municipal', valorSmmlv: 2000, unspscCodigos: ['83101500'], anioTerminacion: 2022 },
+        { objeto: 'PTAR municipal', valorSmmlv: 2000, unspscCodigos: ['83101500'], anioTerminacion: 2023 },
+      ],
+    };
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 3000, unspsc_exigidos: ['83101500'], max_contratos_aportables: 1, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConVariosContratos, p);
+    expect(r.status).toBe('FAIL');
+    // aportado = mejor 1 contrato = 2000; faltan 1000 de los 3000 exigidos.
+    expect(r.reason).toMatch(/te faltan 1000 SMMLV/);
+    expect(r.reason).toMatch(/aportas 2000 de 3000/);
+  });
+
+  it('max_contratos_aportables: el mejor subconjunto de tamaño N SÍ alcanza el umbral → PASS (no descalifica por exceso de contratos)', () => {
+    // el pliego exige 1.000 SMMLV con máximo 2 contratos aportables; el
+    // perfil tiene 3 contratos que matchean (600, 500, 50 SMMLV). Los
+    // mejores 2 (600+500=1100) superan el umbral aunque haya un tercer
+    // contrato elegible sin usar — un oferente real simplemente presenta
+    // sus mejores 2, no debe fallar por tener contratos de más "en archivo".
+    const perfilConVariosContratos: OferenteProfile = {
+      ...profile,
+      experiencia: [
+        { objeto: 'PTAP municipal A', valorSmmlv: 600, unspscCodigos: ['83101500'], anioTerminacion: 2021 },
+        { objeto: 'PTAP municipal B', valorSmmlv: 500, unspscCodigos: ['83101500'], anioTerminacion: 2022 },
+        { objeto: 'PTAP municipal C', valorSmmlv: 50, unspscCodigos: ['83101500'], anioTerminacion: 2023 },
+      ],
+    };
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 1000, unspsc_exigidos: ['83101500'], max_contratos_aportables: 2, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConVariosContratos, p);
+    expect(r.status).toBe('PASS');
+    expect(r.reason).toMatch(/aportas 1100 SMMLV/);
+  });
+});

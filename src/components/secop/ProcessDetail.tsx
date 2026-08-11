@@ -52,6 +52,8 @@ interface Props {
   verdictLoading?: boolean;
   /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
   hasPerfil: boolean;
+  /** Hay perfil base pero sin experiencia RUP cargada: el CTA abre RupWizard en vez de OferenteWizard. */
+  faltaExperiencia: boolean;
   onRequestPerfil: () => void;
 }
 
@@ -63,6 +65,7 @@ export default function ProcessDetail({
   verdict: v,
   verdictLoading,
   hasPerfil,
+  faltaExperiencia,
   onRequestPerfil,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -124,6 +127,15 @@ export default function ProcessDetail({
         </section>
       )}
 
+      {hasPerfil && faltaExperiencia && (
+        <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
+          <p>Tu evaluación de habilitación está incompleta — cuéntanos tu experiencia y capacidad financiera para verla completa.</p>
+          <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
+            Completar mi RUP →
+          </button>
+        </section>
+      )}
+
       {hasPerfil && verdictLoading && !v && (
         <section className="clr-elig" aria-label="Elegibilidad">
           <p className="clr-elig-loading">Calculando elegibilidad…</p>
@@ -150,18 +162,35 @@ export default function ProcessDetail({
             {GATE_LABEL.map(([key, label]) => {
               const g = v.gates[key];
               const s = STATUS[g.status];
+              const esHabilitacion = key === "habilitacion";
+              const partes = esHabilitacion ? g.reason.split(" · ") : [g.reason];
               return (
                 <li key={key} className="clr-elig-gate">
                   <span className={`clr-elig-glyph clr-elig-glyph--${s.cls}`}>{s.glyph}</span>
                   <span className="clr-elig-name">{label}</span>
                   <span className="clr-elig-reason">
-                    {g.reason}
-                    {g.requiredLevel === 2 ? " · requiere revisar pliego (nivel 2)" : ""}
+                    {partes.length > 1 ? (
+                      <ul className="clr-elig-subgates">
+                        {partes.map((parte, i) => (
+                          <li key={i}>{parte}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        {g.reason}
+                        {g.requiredLevel === 2 && key !== "habilitacion" ? " · requiere revisar pliego (nivel 2)" : ""}
+                      </>
+                    )}
                   </span>
                 </li>
               );
             })}
           </ul>
+          {v.gates.habilitacion.status === "FAIL" && (
+            <p className="clr-elig-nota">
+              Una brecha se puede cerrar en consorcio o unión temporal.
+            </p>
+          )}
         </section>
       )}
 

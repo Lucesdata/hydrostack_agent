@@ -24,6 +24,7 @@
  */
 
 import type { OferenteProfile } from "@/src/lib/oferente/types";
+import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/schema";
 import type { SecopProceso } from "./types";
 import { DEPARTAMENTOS, MUNICIPIOS } from "@/data/dane/divipola";
 import { normalizeGeoText } from "@/src/lib/transform/geo";
@@ -58,6 +59,14 @@ export interface VerdictProcessInput extends SecopProceso {
   sectorAgua: boolean | null;
   /** Contempla ambas variantes de origen del UNSPSC (Procesos vs Contratos). */
   categoriaUnspscOrigen?: "proceso" | "contrato";
+  /**
+   * Nivel 2 — requisitos cuantificados ya estructurados (Task 6/7), leídos
+   * de `requisitos_proceso` por el caller (la ruta API, no este módulo:
+   * verdict.ts sigue sin I/O). `undefined`/`null` = sin pliego vinculado
+   * todavía → habilitacionGate se comporta exactamente igual que antes
+   * (siempre UNKNOWN).
+   */
+  requisitosHabilitantes?: RequisitosHabilitantesEstructurados | null;
 }
 
 // ===========================================================================
@@ -400,17 +409,152 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
   };
 };
 
+/** Etiqueta legible de cada indicador financiero, para mensajes de brecha. */
+const INDICADOR_LABEL: Record<string, string> = {
+  indice_liquidez: 'índice de liquidez',
+  indice_endeudamiento: 'índice de endeudamiento',
+  razon_cobertura_intereses: 'razón de cobertura de intereses',
+  rentabilidad_patrimonio: 'rentabilidad del patrimonio',
+  rentabilidad_activo: 'rentabilidad del activo',
+  patrimonio_smmlv: 'patrimonio (SMMLV)',
+  capital_trabajo_smmlv: 'capital de trabajo (SMMLV)',
+};
+
+/** Lee el valor del perfil correspondiente a un código de indicador financiero. */
+function valorPerfilIndicador(p: OferenteProfile, indicador: string): number | undefined {
+  const cf = p.capacidadFinanciera;
+  switch (indicador) {
+    case 'indice_liquidez': return cf.indiceLiquidez;
+    case 'indice_endeudamiento': return cf.indiceEndeudamiento;
+    case 'razon_cobertura_intereses': return cf.razonCoberturaIntereses;
+    case 'rentabilidad_patrimonio': return cf.rentabilidadPatrimonio;
+    case 'rentabilidad_activo': return cf.rentabilidadActivo;
+    case 'patrimonio_smmlv': return cf.patrimonioSmmlv;
+    case 'capital_trabajo_smmlv': return cf.capitalTrabajoSmmlv;
+    default: return undefined;
+  }
+}
+
 /**
- * Habilitación (L2): los umbrales RUP/jurídicos exigidos viven en el pliego. En
- * Nivel 0 SIEMPRE UNKNOWN + requiredLevel 2 (protege el probing lazy).
+ * Habilitación (L2): compara el perfil RUP ampliado contra los requisitos
+ * cuantificados del pliego (Task 6/7). Sin requisitos vinculados todavía →
+ * UNKNOWN (mismo comportamiento que el stub original, protege el probing
+ * lazy). Con requisitos: worst-of sobre experiencia + cada indicador
+ * financiero, con brechas cuantificadas exactas en `reason`.
  */
-export const habilitacionGate: HabilitacionGate = () => ({
-  status: "UNKNOWN",
-  reason:
-    "requiere pliego: los indicadores RUP/jurídicos exigidos están en el pliego de condiciones",
-  resolvedBy: "document",
-  requiredLevel: 2,
-});
+export const habilitacionGate: HabilitacionGate = (p, proc) => {
+  const req = proc.requisitosHabilitantes;
+  if (!req) {
+    return {
+      status: "UNKNOWN",
+      reason:
+        "requiere pliego: los indicadores RUP/jurídicos exigidos están en el pliego de condiciones",
+      resolvedBy: "document",
+      requiredLevel: 2,
+    };
+  }
+
+  const razones: { status: GateStatus; texto: string }[] = [];
+
+  // Experiencia
+  if (req.experiencia.verificar_manual) {
+    razones.push({
+      status: "WARN",
+      texto: `experiencia: verificar manualmente — "${req.experiencia.cita_textual}"`,
+    });
+  } else if (req.experiencia.valor_min_smmlv != null) {
+    const contratosQueMatchean = (p.experiencia ?? []).filter(
+      (c) =>
+        req.experiencia.unspsc_exigidos.length === 0 ||
+        c.unspscCodigos.some((code) => {
+          const cDigits = unspscDigits(code);
+          if (cDigits == null) return false;
+          return req.experiencia.unspsc_exigidos.some((ex) => {
+            const exDigits = unspscDigits(ex);
+            return (
+              exDigits != null &&
+              (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits))
+            );
+          });
+        }),
+    );
+    const maxContratos = req.experiencia.max_contratos_aportables;
+    const contratosConsiderados =
+      maxContratos != null
+        ? [...contratosQueMatchean]
+            .sort((a, b) => b.valorSmmlv - a.valorSmmlv)
+            .slice(0, maxContratos)
+        : contratosQueMatchean;
+    const aportado = contratosConsiderados.reduce((sum, c) => sum + c.valorSmmlv, 0);
+    const exigido = req.experiencia.valor_min_smmlv;
+    if (aportado >= exigido) {
+      razones.push({
+        status: "PASS",
+        texto: `experiencia: aportas ${aportado} SMMLV, exigen ${exigido}`,
+      });
+    } else {
+      razones.push({
+        status: "FAIL",
+        texto: `experiencia: te faltan ${exigido - aportado} SMMLV (aportas ${aportado} de ${exigido} exigidos)`,
+      });
+    }
+  }
+
+  // Indicadores financieros
+  for (const ind of req.indicadores_financieros) {
+    const label = INDICADOR_LABEL[ind.indicador] ?? ind.indicador;
+    if (ind.verificar_manual) {
+      razones.push({
+        status: "WARN",
+        texto: `${label}: verificar manualmente — "${ind.cita_textual}"`,
+      });
+      continue;
+    }
+    const valorPerfil = valorPerfilIndicador(p, ind.indicador);
+    if (valorPerfil == null) {
+      razones.push({
+        status: "WARN",
+        texto: `${label}: no declaraste este dato en tu perfil (exigen ${ind.operador === "gte" ? "≥" : "≤"} ${ind.valor})`,
+      });
+      continue;
+    }
+    const cumple =
+      ind.operador === "gte" ? valorPerfil >= ind.valor : valorPerfil <= ind.valor;
+    if (cumple) {
+      razones.push({
+        status: "PASS",
+        texto: `${label}: tu valor es ${valorPerfil}, exigen ${ind.operador === "gte" ? "≥" : "≤"} ${ind.valor}`,
+      });
+    } else {
+      razones.push({
+        status: "FAIL",
+        texto: `${label}: tu ${label} es ${valorPerfil} y exigen ${ind.operador === "gte" ? "≥" : "≤"} ${ind.valor}`,
+      });
+    }
+  }
+
+  if (razones.length === 0) {
+    return {
+      status: "UNKNOWN",
+      reason: "el pliego no declara requisitos habilitantes cuantificables",
+      resolvedBy: "document",
+      requiredLevel: 2,
+    };
+  }
+
+  const overall: GateStatus = razones.some((r) => r.status === "FAIL")
+    ? "FAIL"
+    : razones.some((r) => r.status === "WARN")
+      ? "WARN"
+      : "PASS";
+
+  return {
+    status: overall,
+    reason: razones.map((r) => r.texto).join(" · "),
+    resolvedBy: "document",
+    requiredLevel: 2,
+  };
+};
 
 /**
  * D6 — worst-of sobre las compuertas resueltas (no UNKNOWN): cualquier FAIL→FAIL;
@@ -439,13 +583,15 @@ export function toVerdictInput(
     sectorAgua?: boolean | null;
     fechaCierre?: string | null;
     categoriaUnspscOrigen?: "proceso" | "contrato";
-  } = {}
+    requisitosHabilitantes?: RequisitosHabilitantesEstructurados | null;
+  } = {},
 ): VerdictProcessInput {
   return {
     ...proceso,
     sectorAgua: extra.sectorAgua ?? null,
     fechaCierre: extra.fechaCierre ?? null,
     categoriaUnspscOrigen: extra.categoriaUnspscOrigen,
+    requisitosHabilitantes: extra.requisitosHabilitantes ?? null,
   };
 }
 

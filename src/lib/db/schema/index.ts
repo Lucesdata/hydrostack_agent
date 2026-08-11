@@ -6,3 +6,4 @@ export * from "./clasificacion";
 export * from "./quarantine";
 export * from "./cuentas";
 export * from "./asistentes";
+export * from "./eligibility";
