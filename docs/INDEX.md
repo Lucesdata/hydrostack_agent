@@ -12,7 +12,6 @@ deprecación del dominio séptico anterior.
 | [../README.md](../README.md) | Overview del proyecto, stack, estructura |
 | [../CLAUDE.md](../CLAUDE.md) | Reglas de comportamiento del agente |
 | [../PENDIENTES.md](../PENDIENTES.md) | Pendientes activos |
-| [../AUDITORIA_ARQUITECTONICA_2026-08-08.md](../AUDITORIA_ARQUITECTONICA_2026-08-08.md) | Estado arquitectónico vigente — mapa de sistema, hallazgos, roadmap técnico |
 | [../AUDIT_REPORT.md](../AUDIT_REPORT.md) | Auditoría 2026-08-02 (landing, pliego, SECOP) |
 | [../AUDITORIA_TECH_DEBT.md](../AUDITORIA_TECH_DEBT.md) | Auditoría 2026-07-18 (lint, deps, duplicación) |
 
@@ -37,6 +36,4 @@ ya implementadas.
 
 ## docs/architecture/
 
-Mapa de arquitectura generado (JSON/HTML) — complementario a
-`AUDITORIA_ARQUITECTONICA_2026-08-08.md`, que es la referencia narrativa
-vigente.
+Mapa de arquitectura generado (JSON/HTML).

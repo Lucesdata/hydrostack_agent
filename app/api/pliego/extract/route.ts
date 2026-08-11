@@ -7,9 +7,8 @@
  * el extractor híbrido: reglas primero, Gemini solo para lo que las reglas no
  * resuelven con confianza estructural (ver extractPliegoHybrid.ts).
  *
- * Usa Gemini y no Claude: no requiere crédito pagado de Anthropic para
- * funcionar. Si más adelante se quiere la ruta de mayor calidad (Opus,
- * `extractPliego.ts`), es un swap de una línea.
+ * Usa Gemini: no requiere crédito pagado, la cuota gratis es amplia para
+ * el tamaño típico de estos documentos.
  *
  * No hay URL de SECOP que probar aquí (el archivo lo trae el usuario, no lo
  * trae la ingesta), así que el gate de `document-access.ts` no aplica tal

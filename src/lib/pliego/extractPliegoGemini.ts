@@ -1,14 +1,14 @@
 /**
- * Adaptador IO alterno: PDF de pliego → extracción estructurada vía Gemini.
+ * Adaptador IO: PDF de pliego → extracción estructurada vía Gemini.
  *
- * Igual que `extractPliego.ts` (Claude): el PDF se manda nativo, sin
- * preprocesamiento local, y la salida se constriñe con un JSON Schema en la
- * propia API. Gemini no soporta `additionalProperties` en su schema (subset
- * de OpenAPI), así que se limpia recursivamente antes de pasarlo.
+ * El PDF se manda nativo, sin preprocesamiento local, y la salida se
+ * constriñe con un JSON Schema en la propia API. Gemini no soporta
+ * `additionalProperties` en su schema (subset de OpenAPI), así que se
+ * limpia recursivamente antes de pasarlo.
  *
- * Ruta gratuita (sin tarjeta) para probar el pipeline cuando no hay crédito
- * de Anthropic ni cupo de Groq — la cuota gratis de Gemini es mucho más
- * amplia que la de Groq para un documento de este tamaño.
+ * Único extractor LLM del pipeline (ver extractPliegoHybrid.ts, que lo
+ * invoca para el Documento Base). Ruta gratuita (sin tarjeta): la cuota
+ * gratis de Gemini es amplia para un documento de este tamaño.
  */
 
 import { readFile } from "node:fs/promises";

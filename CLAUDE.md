@@ -24,8 +24,7 @@ de inmediato y mantén hasta nueva indicación.
 
 ## 2. Dominio del producto
 
-Entidades y flujos principales (ver `AUDITORIA_ARQUITECTONICA_2026-08-08.md`
-sección C/D para el detalle completo):
+Entidades y flujos principales:
 
 - **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
   transform → entidades canónicas (`proceso`, `contrato`,
@@ -44,7 +43,7 @@ sección C/D para el detalle completo):
 
 - **Framework**: Next.js 14.2.3 + React 18
 - **Base de datos**: Postgres (Neon) vía Drizzle ORM
-- **Auth**: Auth.js (NextAuth v5) con Resend (magic link)
+- **Auth**: Supabase Auth (`@supabase/ssr` + `@supabase/supabase-js`) — email/password y Google OAuth
 - **LLM**: Gemini (extractor de pliegos, `GEMINI_API_KEY`)
 - **Diseño**: tokens en `app/globals.css` — `--bg:#FAFAF7`,
   `--accent:#0369A1`
@@ -56,15 +55,15 @@ sección C/D para el detalle completo):
   `app/api/cron/{ingest,alertas}/route.ts`.
 - No hay RLS en Postgres — la única defensa multi-tenant es el `WHERE
   usuarioId=...` de cada query de aplicación. No asumir que esto está
-  resuelto; ver hallazgo F.2 de la auditoría antes de tocar tablas de
-  cuentas/oferente.
+  resuelto; auditar manualmente cada query sobre tablas de
+  cuentas/oferente antes de tocarlas.
 
 ## 5. Estado del roadmap
 
 Ver `PENDIENTES.md` para pendientes activos y `docs/fase-*/` para el
-historial de decisiones de diseño por fase. Para el estado arquitectónico
-completo, `AUDITORIA_ARQUITECTONICA_2026-08-08.md` es la referencia vigente
-más reciente.
+historial de decisiones de diseño por fase. `AUDIT_REPORT.md` (2026-08-02)
+y `AUDITORIA_TECH_DEBT.md` (2026-07-18) son las auditorías más recientes
+que existen en el repo.
 
 ---
 
