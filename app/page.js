@@ -9,15 +9,30 @@ import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
 
-const PROBLEM_POINTS = [
-  { n: "01", text: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta." },
+const PROBLEM_SOLUTION = [
+  {
+    n: "01",
+    icon: "doc-x",
+    pain: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
+    label: "Pre-evaluación RUP",
+    answer:
+      "HydroStack cruza tu RUP con los requisitos habilitantes antes de que escribas una sola página.",
+  },
   {
     n: "02",
-    text: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
+    icon: "search-stack",
+    pain: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
+    label: "Decodificación de pliegos",
+    answer:
+      "El asistente extrae requisitos legales, técnicos y financieros y te los muestra como checklist.",
   },
   {
     n: "03",
-    text: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
+    icon: "dimension",
+    pain: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
+    label: "Estructuración",
+    answer:
+      "Te ayudamos a armar el presupuesto con las cotas y validaciones del sector agua.",
   },
 ];
 
@@ -43,19 +58,6 @@ const INTENT_ROUTES = [
     href: "/soluciones",
     cta: "VER EL CAMINO",
   },
-];
-
-const HOW_STEPS = [
-  {
-    n: "01",
-    text: "Explora los procesos activos en agua y saneamiento directamente en HydroStack, sin loguearte en SECOP.",
-  },
-  { n: "02", text: "Evalúa tu RUP contra los requisitos habilitantes del proceso que elijas." },
-  {
-    n: "03",
-    text: "Si te falta algo, ves exactamente qué es: experiencia, capacidad financiera, clasificación.",
-  },
-  { n: "04", text: "HydroStack decodifica el pliego y te ayuda a estructurar el presupuesto." },
 ];
 
 const PILLARS = [
@@ -128,7 +130,13 @@ const BLUEPRINT_CSS = `
 .bp-hero-wrap { position: relative; padding: 88px 48px 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; }
 .bp-coord-label { position: absolute; top: 88px; right: 48px; font: 10px var(--font-jetbrains-mono),monospace; color: #6B746F; }
-.bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
+.bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
+.bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
+.bp-ps-pain { grid-area: pain; display: flex; align-items: flex-start; justify-content: flex-end; gap: 12px; }
+.bp-ps-pain-text { text-align: right; }
+.bp-ps-connector { grid-area: connector; display: flex; align-items: center; justify-content: center; }
+.bp-ps-answer { grid-area: answer; padding-left: 22px; }
 .bp-pillars-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
 .bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 .bp-closing-wrap { padding: 56px 48px; border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
@@ -139,7 +147,11 @@ const BLUEPRINT_CSS = `
 }
 @media (max-width: 900px) {
   .bp-hero-grid { grid-template-columns: 1fr; gap: 36px; }
-  .bp-probhow-wrap { grid-template-columns: 1fr; }
+  .bp-ps-row { grid-template-columns: 1fr; grid-template-areas: "pain" "answer"; row-gap: 12px; padding: 20px 0; }
+  .bp-ps-connector { display: none; }
+  .bp-ps-pain { justify-content: flex-start; }
+  .bp-ps-pain-text { text-align: left; }
+  .bp-ps-answer { padding-left: 0; }
 }
 @media (max-width: 640px) {
   .bp-hero-wrap { padding: 48px 20px 40px; }
@@ -151,6 +163,75 @@ const BLUEPRINT_CSS = `
   .bp-coord-label { display: none; }
 }
 `;
+
+/* ── Iconos monoline (plano técnico) para la fila dolor→respuesta ── */
+const PAIN_ICON_PATHS = {
+  "doc-x": (
+    <>
+      <path d="M5 2.5h6l3 3v12H5z" />
+      <path d="M11 2.5v3h3" />
+      <path d="M8 10.5l4 4M12 10.5l-4 4" />
+    </>
+  ),
+  "search-stack": (
+    <>
+      <rect x="2.3" y="5.2" width="9" height="10.5" />
+      <rect x="4.7" y="2.5" width="9" height="10.5" />
+      <circle cx="14.6" cy="14.6" r="2.5" />
+      <path d="M16.5 16.5l1.6 1.6" />
+    </>
+  ),
+  dimension: (
+    <>
+      <path d="M2 6.5v7M18 6.5v7" />
+      <path d="M2 10h5.5M12.5 10H18" />
+      <path d="M8 8.3l1.5 3.4M10.5 8.3L9 11.7" />
+    </>
+  ),
+};
+
+function PainIcon({ type }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="#0369A1"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ flexShrink: 0, marginTop: 1 }}
+      aria-hidden="true"
+    >
+      {PAIN_ICON_PATHS[type]}
+    </svg>
+  );
+}
+
+function ConnectorArrow() {
+  return (
+    <svg width="56" height="20" viewBox="0 0 56 20" style={{ display: "block" }} aria-hidden="true">
+      <line
+        x1="4"
+        y1="10"
+        x2="42"
+        y2="10"
+        stroke="#0369A1"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+      <polyline
+        points="37,5 46,10 37,15"
+        fill="none"
+        stroke="#0369A1"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
 function useBlueprintFX() {
@@ -885,7 +966,12 @@ export default function LandingPage() {
         </div>
 
         <div className="bp-probhow-wrap">
-          <div ref={problemRef}>
+          <div
+            ref={(el) => {
+              problemRef.current = el;
+              howRef.current = el;
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, background: "#0369A1" }} />
               <span
@@ -896,7 +982,7 @@ export default function LandingPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Fig. 03 — El problema
+                Fig. 03 — Problema y respuesta
               </span>
             </div>
             <svg
@@ -917,88 +1003,61 @@ export default function LandingPage() {
                 style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
               />
             </svg>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              {PROBLEM_POINTS.map((p) => (
-                <div key={p.n} style={{ display: "flex", gap: 14 }}>
-                  <span
-                    style={{
-                      font: "600 11px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      flexShrink: 0,
-                    }}
-                  >
-                    [{p.n}]
-                  </span>
-                  <p
-                    style={{
-                      font: "14.5px/1.55 var(--font-inter)",
-                      color: "#0A1F1C",
-                      margin: 0,
-                      maxWidth: 360,
-                    }}
-                  >
-                    {p.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div ref={howRef}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span
-                style={{
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  color: "#0369A1",
-                  letterSpacing: ".12em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Fig. 04 — Cómo funciona
-              </span>
-            </div>
-            <svg
-              viewBox="0 0 460 8"
-              width="460"
-              height="8"
-              style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}
-            >
-              <line
-                x1="0"
-                y1="4"
-                x2="460"
-                y2="4"
-                stroke="#0369A1"
-                strokeWidth="1"
-                strokeDasharray="500"
-                strokeDashoffset={fx.lineDDashoffset}
-                style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1) .2s" }}
-              />
-            </svg>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {HOW_STEPS.map((s) => (
-                <div
-                  key={s.n}
-                  style={{
-                    display: "flex",
-                    gap: 14,
-                    padding: "12px 0",
-                    borderLeft: "1px dashed #DADAD2",
-                    paddingLeft: 16,
-                  }}
-                >
-                  <span
-                    style={{
-                      font: "600 11px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      flexShrink: 0,
-                    }}
-                  >
-                    [{s.n}]
-                  </span>
-                  <p style={{ font: "13.5px/1.55 var(--font-inter)", color: "#0A1F1C", margin: 0 }}>
-                    {s.text}
-                  </p>
+            <div>
+              {PROBLEM_SOLUTION.map((row) => (
+                <div key={row.n} className="bp-ps-row">
+                  <div className="bp-ps-pain">
+                    <PainIcon type={row.icon} />
+                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                      <span
+                        style={{
+                          font: "600 11px var(--font-jetbrains-mono),monospace",
+                          color: "#0369A1",
+                          flexShrink: 0,
+                        }}
+                      >
+                        [{row.n}]
+                      </span>
+                      <p
+                        className="bp-ps-pain-text"
+                        style={{
+                          font: "14.5px/1.55 var(--font-inter)",
+                          color: "#0A1F1C",
+                          margin: 0,
+                          maxWidth: 340,
+                        }}
+                      >
+                        {row.pain}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bp-ps-connector">
+                    <ConnectorArrow />
+                  </div>
+                  <div className="bp-ps-answer">
+                    <span
+                      style={{
+                        display: "block",
+                        font: "10px var(--font-jetbrains-mono),monospace",
+                        color: "#0369A1",
+                        letterSpacing: ".1em",
+                        textTransform: "uppercase",
+                        marginBottom: 6,
+                      }}
+                    >
+                      {row.label}
+                    </span>
+                    <p
+                      style={{
+                        font: "13.5px/1.55 var(--font-inter)",
+                        color: "#525B5A",
+                        margin: 0,
+                        maxWidth: 380,
+                      }}
+                    >
+                      {row.answer}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
