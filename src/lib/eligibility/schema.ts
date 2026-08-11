@@ -59,9 +59,9 @@ export const REQUISITOS_JSON_SCHEMA = {
       type: 'object',
       additionalProperties: false,
       properties: {
-        valor_min_smmlv: { type: ['number', 'null'] },
+        valor_min_smmlv: { type: 'number', nullable: true },
         unspsc_exigidos: { type: 'array', items: { type: 'string' } },
-        max_contratos_aportables: { type: ['number', 'null'] },
+        max_contratos_aportables: { type: 'number', nullable: true },
         verificar_manual: { type: 'boolean' },
         cita_textual: { type: 'string' },
       },

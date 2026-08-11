@@ -368,24 +368,31 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
   if (req.experiencia.verificar_manual) {
     razones.push({ status: 'WARN', texto: `experiencia: verificar manualmente — "${req.experiencia.cita_textual}"` });
   } else if (req.experiencia.valor_min_smmlv != null) {
-    const aportado = (p.experiencia ?? [])
-      .filter((c) =>
-        req.experiencia.unspsc_exigidos.length === 0 ||
-        c.unspscCodigos.some((code) => {
-          const cDigits = unspscDigits(code);
-          if (cDigits == null) return false;
-          return req.experiencia.unspsc_exigidos.some((ex) => {
-            const exDigits = unspscDigits(ex);
-            return exDigits != null && (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits));
-          });
-        }),
-      )
-      .reduce((sum, c) => sum + c.valorSmmlv, 0);
-    const exigido = req.experiencia.valor_min_smmlv;
-    if (aportado >= exigido) {
-      razones.push({ status: 'PASS', texto: `experiencia: aportas ${aportado} SMMLV, exigen ${exigido}` });
+    const contratosQueMatchean = (p.experiencia ?? []).filter((c) =>
+      req.experiencia.unspsc_exigidos.length === 0 ||
+      c.unspscCodigos.some((code) => {
+        const cDigits = unspscDigits(code);
+        if (cDigits == null) return false;
+        return req.experiencia.unspsc_exigidos.some((ex) => {
+          const exDigits = unspscDigits(ex);
+          return exDigits != null && (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits));
+        });
+      }),
+    );
+    const maxContratos = req.experiencia.max_contratos_aportables;
+    if (maxContratos != null && contratosQueMatchean.length > maxContratos) {
+      razones.push({
+        status: 'FAIL',
+        texto: `experiencia: aportas ${contratosQueMatchean.length} contratos pero el pliego exige máximo ${maxContratos}`,
+      });
     } else {
-      razones.push({ status: 'FAIL', texto: `experiencia: te faltan ${exigido - aportado} SMMLV (aportas ${aportado} de ${exigido} exigidos)` });
+      const aportado = contratosQueMatchean.reduce((sum, c) => sum + c.valorSmmlv, 0);
+      const exigido = req.experiencia.valor_min_smmlv;
+      if (aportado >= exigido) {
+        razones.push({ status: 'PASS', texto: `experiencia: aportas ${aportado} SMMLV, exigen ${exigido}` });
+      } else {
+        razones.push({ status: 'FAIL', texto: `experiencia: te faltan ${exigido - aportado} SMMLV (aportas ${aportado} de ${exigido} exigidos)` });
+      }
     }
   }
 

@@ -326,4 +326,27 @@ describe('habilitacionGate (L2 — con requisitos estructurados)', () => {
     const r = habilitacionGate(perfilConRup, p);
     expect(r.status).toBe('PASS');
   });
+
+  it('max_contratos_aportables: más contratos que el tope → FAIL aunque la suma alcance', () => {
+    // el pliego exige 3.000 SMMLV con máximo 1 contrato; el perfil aporta 2
+    // contratos que matchean el UNSPSC exigido y suman 4.000 SMMLV (más que
+    // suficiente si no hubiera tope) — el tope de contratos debe hacer fallar.
+    const perfilConVariosContratos: OferenteProfile = {
+      ...profile,
+      experiencia: [
+        { objeto: 'PTAP municipal', valorSmmlv: 2000, unspscCodigos: ['83101500'], anioTerminacion: 2022 },
+        { objeto: 'PTAR municipal', valorSmmlv: 2000, unspscCodigos: ['83101500'], anioTerminacion: 2023 },
+      ],
+    };
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: { valor_min_smmlv: 3000, unspsc_exigidos: ['83101500'], max_contratos_aportables: 1, verificar_manual: false, cita_textual: 'x' },
+        indicadores_financieros: [],
+      },
+    });
+    const r = habilitacionGate(perfilConVariosContratos, p);
+    expect(r.status).toBe('FAIL');
+    expect(r.reason).toMatch(/2 contratos/);
+    expect(r.reason).toMatch(/máximo 1/);
+  });
 });

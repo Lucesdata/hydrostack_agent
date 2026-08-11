@@ -114,4 +114,12 @@ describe('POST /api/secop/verdict — veredicto Nivel 0 on-demand', () => {
     const body = await res.json();
     expect(body.verdict.gates.habilitacion.status).toBe('WARN');
   });
+
+  it('fila cacheada corrupta no produce 500 — se trata como si no hubiera caché (UNKNOWN)', async () => {
+    mockLimit.mockResolvedValue([{ procesoId: proceso.id, requisitos: { garbage: true } }]);
+    const res = await POST(postReq({ proceso, perfil }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.verdict.gates.habilitacion.status).toBe('UNKNOWN');
+  });
 });

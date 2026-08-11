@@ -17,6 +17,7 @@ import { db } from "@/src/lib/db/client";
 import { requisitosProceso } from "@/src/lib/db/schema/eligibility";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import { parseRequisitosEstructurados } from "@/src/lib/eligibility/schema";
 import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/schema";
 import type { SecopProceso } from "@/src/lib/secop/types";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
@@ -65,7 +66,14 @@ export async function POST(req: NextRequest) {
     .from(requisitosProceso)
     .where(eq(requisitosProceso.procesoId, body.proceso.id))
     .limit(1);
-  const requisitosHabilitantes = (cached?.requisitos as RequisitosHabilitantesEstructurados | undefined) ?? null;
+  let requisitosHabilitantes: RequisitosHabilitantesEstructurados | null = null;
+  if (cached?.requisitos) {
+    try {
+      requisitosHabilitantes = parseRequisitosEstructurados(cached.requisitos);
+    } catch {
+      requisitosHabilitantes = null; // fila cacheada corrupta — se comporta como si no hubiera caché
+    }
+  }
 
   const verdict = buildVerdict(body.perfil, toVerdictInput(body.proceso, { requisitosHabilitantes }));
 
