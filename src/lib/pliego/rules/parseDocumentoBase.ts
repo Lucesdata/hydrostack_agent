@@ -16,7 +16,7 @@
  * dejan siempre al extractor LLM.
  *
  * Requiere el texto ya extraído (mismo `pdftotext -layout` que usa
- * extractPliegoGroq.ts) — este módulo no toca el PDF directamente.
+ * extractPliegoHybrid.ts) — este módulo no toca el PDF directamente.
  */
 
 import { ParseoNoConfiable } from "./errors";
