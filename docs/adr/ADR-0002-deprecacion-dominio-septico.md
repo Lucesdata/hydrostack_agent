@@ -107,3 +107,21 @@ Si se decide retomar el dominio séptico:
    este repo — la razón de esta ADR es precisamente que compartir
    runtime entre dos dominios sin relación generó los hallazgos F.3, F.5
    y G de la auditoría del 2026-08-08.
+
+## Nota posterior (2026-08-12) — reasignación del nombre "Hydro_Agent"
+
+Este ADR usa "Hydro_Agent" (línea 11) para referirse al asistente
+conversacional del dominio séptico, deprecado y retirado del runtime por
+esta misma decisión. Ese uso queda como registro histórico y no cambia.
+
+Sin embargo, el nombre sigue vivo en el código del dominio SECOP activo
+— como etiqueta del extractor de pliegos (Capa 3): UI de `/pliego`,
+comentarios en `extractPliegoHybrid.ts`/`route.ts` y en
+`document-access.ts`. Esa reutilización es posterior a este ADR y no fue
+una decisión tomada aquí.
+
+Se resuelve así: **"Hydro_Agent" queda oficialmente como el nombre del
+extractor de pliegos** (dominio SECOP, Capa 3), desligado del agente
+conversacional original descrito arriba. No se renombra código — el
+nombre deja de ser ambiguo una vez que el agente conversacional que
+originalmente lo llevaba dejó de existir en el runtime.
