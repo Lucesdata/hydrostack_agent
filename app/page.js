@@ -91,15 +91,95 @@ const BLUEPRINT_CSS = `
 .bp-page a { text-decoration: none; cursor: pointer; }
 
 .bp-h1 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-ibm-plex-sans-condensed), var(--font-inter), sans-serif;
   font-size: 46px;
   line-height: 1.15;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: #0A1F1C;
   margin: 0 0 20px;
   max-width: 520px;
-  transition: font-variation-settings 1.1s cubic-bezier(.16,1,.3,1);
+}
+
+/* Hero rediseño 2026-08-15: mask reveal por línea + subrayado trazado en la palabra clave */
+.hero-mask { display: block; overflow: hidden; }
+.hero-mask > span {
+  display: block;
+  transform: translateY(110%);
+  animation: hero-riseLine .9s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-mask-1 > span { animation-delay: .2s; }
+.hero-mask-2 > span { animation-delay: .32s; }
+@keyframes hero-riseLine { to { transform: translateY(0); } }
+
+.hero-draw {
+  position: relative;
+  display: inline-block;
+  color: #0369A1;
+}
+.hero-draw::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.04em;
+  height: 0.08em;
+  width: 100%;
+  background: #0369A1;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: hero-drawLine .75s cubic-bezier(.16,1,.3,1) 1.3s forwards;
+}
+@keyframes hero-drawLine { to { transform: scaleX(1); } }
+
+.hero-fade-up {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: hero-fadeUp .7s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes hero-fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* Panel de evaluación: wrapper externo hace la entrada (fade+scale), la
+   tarjeta interna hace el hover — separados para que no se pisen las dos
+   transiciones de "transform" (ver nota técnica del rediseño). */
+.hero-panel-enter {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  animation: hero-panelIn .8s cubic-bezier(.16,1,.3,1) 1.15s forwards;
+}
+@keyframes hero-panelIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.hero-glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 12px;
+  box-shadow:
+    0 20px 40px -18px rgba(19, 77, 116, 0.30),
+    0 2px 6px rgba(19, 77, 116, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+}
+.hero-glass-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 32px 56px -16px rgba(19, 77, 116, 0.36),
+    0 4px 10px rgba(19, 77, 116, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+/* .bp-card:hover pisa border-color más abajo en esta hoja; esta regla más
+   específica (2 clases + :hover) mantiene el borde de vidrio en hover. */
+.bp-card.hero-glass-card:hover { border-color: rgba(255, 255, 255, 0.65); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mask > span, .hero-fade-up, .hero-panel-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hero-draw::after { animation: none !important; transform: scaleX(1) !important; }
+  .hero-glass-card { transition: none !important; }
 }
 
 .bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s, background .2s; }
@@ -674,15 +754,24 @@ export default function LandingPage() {
                   Fig. 01 — Elegibilidad SECOP
                 </span>
               </div>
-              <h1 className="bp-h1" style={{ fontVariationSettings: `'wght' ${fx.h1Weight}` }}>
-                Precisión de ingeniería, aplicada a tu oferta.
+              <h1 className="bp-h1">
+                <span className="hero-mask hero-mask-1">
+                  <span>
+                    <span className="hero-draw">Precisión</span> de ingeniería,
+                  </span>
+                </span>
+                <span className="hero-mask hero-mask-2">
+                  <span>aplicada a tu oferta.</span>
+                </span>
               </h1>
               <p
+                className="hero-fade-up"
                 style={{
                   font: "15px/1.6 var(--font-inter)",
                   color: "#525B5A",
                   maxWidth: 460,
                   margin: "0 0 28px",
+                  animationDelay: ".75s",
                 }}
               >
                 HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento —
@@ -690,7 +779,7 @@ export default function LandingPage() {
               </p>
               <Link
                 href="/licitaciones"
-                className="bp-cta"
+                className="bp-cta hero-fade-up"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -699,6 +788,7 @@ export default function LandingPage() {
                   color: "#fff",
                   font: "600 13px var(--font-jetbrains-mono),monospace",
                   letterSpacing: ".04em",
+                  animationDelay: ".9s",
                 }}
               >
                 [ Prueba un proceso ]
@@ -725,12 +815,12 @@ export default function LandingPage() {
               </svg>
             </div>
 
+            <div className="hero-panel-enter">
             <div
+              className="hero-glass-card"
               style={{
                 position: "relative",
-                border: "1px solid #0369A1",
                 padding: 22,
-                background: "#fff",
               }}
             >
               <span
@@ -828,6 +918,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
+            </div>
           </div>
         </div>
 
@@ -850,11 +941,9 @@ export default function LandingPage() {
               <Link
                 key={c.n}
                 href={c.href}
-                className="bp-card"
+                className="bp-card hero-glass-card"
                 style={{
-                  border: "1px solid #DADAD2",
                   padding: 22,
-                  background: "#fff",
                   color: "#0A1F1C",
                   display: "flex",
                   flexDirection: "column",
