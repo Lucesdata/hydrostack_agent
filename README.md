@@ -63,7 +63,6 @@ npm run start
 ```
 ├── CLAUDE.md                    # Reglas de comportamiento del agente
 ├── PENDIENTES.md                # Pendientes activos
-├── AUDITORIA_ARQUITECTONICA_2026-08-08.md   # Estado arquitectónico vigente
 │
 ├── docs/
 │   ├── adr/                     # Decisiones arquitectónicas
@@ -135,14 +134,13 @@ npm run analyze-pliego-hybrid  # Prueba el extractor híbrido contra un PDF loca
 ## 🔒 Seguridad
 
 - `/api/cron/*` exige `CRON_SECRET` como `Bearer` y falla cerrado (401) si la variable no está definida.
-- No hay RLS en Postgres — la defensa multi-tenant depende del `WHERE usuarioId=...` de cada query de aplicación. Ver `AUDITORIA_ARQUITECTONICA_2026-08-08.md` hallazgo F.2 antes de tocar tablas de cuentas/oferente.
+- No hay RLS en Postgres — la defensa multi-tenant depende del `WHERE usuarioId=...` de cada query de aplicación. Auditar manualmente cada query sobre tablas de cuentas/oferente antes de tocarlas.
 
 ---
 
 ## 📚 Documentación
 
 - **[CLAUDE.md](./CLAUDE.md)** — reglas de comportamiento del agente sobre este repo
-- **[AUDITORIA_ARQUITECTONICA_2026-08-08.md](./AUDITORIA_ARQUITECTONICA_2026-08-08.md)** — mapa de arquitectura, hallazgos y roadmap técnico vigente
 - **[docs/adr/](./docs/adr/)** — decisiones arquitectónicas
 - **[PENDIENTES.md](./PENDIENTES.md)** — pendientes activos
 

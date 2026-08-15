@@ -1,6 +1,6 @@
 /**
  * PDF (path o Buffer) → texto plano vía `pdftotext -layout` (poppler).
- * Compartido entre extractPliegoGroq.ts y extractPliegoHybrid.ts. `-layout`
+ * Usado por extractPliegoHybrid.ts para el parser de reglas. `-layout`
  * conserva mejor la posición de columnas que el modo por defecto, aunque
  * tablas anchas igual quedan mezcladas línea por línea (ver
  * parseDocumentoBase.ts para el detalle de qué texto sí es confiable).

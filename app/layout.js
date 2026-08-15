@@ -1,4 +1,10 @@
-import { Orbitron, IBM_Plex_Mono, Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Orbitron,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans_Condensed,
+  Inter,
+  JetBrains_Mono,
+} from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
@@ -39,6 +45,14 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// Solo para el headline del hero (rediseño "vidrio flotante" 2026-08-15).
+const ibmPlexSansCondensed = IBM_Plex_Sans_Condensed({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-ibm-plex-sans-condensed",
+  display: "swap",
+});
+
 export const metadata = {
   title: "HydroStack — Inteligencia para contratación pública en agua y saneamiento",
   description:
@@ -53,7 +67,7 @@ export default async function RootLayout({ children }) {
   return (
     <html
       lang="es"
-      className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
     >
       <body>
         <Navbar user={user} />
