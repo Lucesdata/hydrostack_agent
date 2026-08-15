@@ -139,6 +139,29 @@ const BLUEPRINT_CSS = `
 }
 @keyframes hero-fadeUp { to { opacity: 1; transform: translateY(0); } }
 
+.hero-list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.hero-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font: 14.5px/1.5 var(--font-inter);
+  color: #0A1F1C;
+}
+.hero-list-n {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font: 600 11px/1.9 var(--font-jetbrains-mono), monospace;
+  color: #0369A1;
+}
+
 /* Panel de evaluación: wrapper externo hace la entrada (fade+scale), la
    tarjeta interna hace el hover — separados para que no se pisen las dos
    transiciones de "transform" (ver nota técnica del rediseño). */
@@ -751,7 +774,7 @@ export default function LandingPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Fig. 01 — Elegibilidad SECOP
+                  Fig. 01 — Elige tu ruta
                 </span>
               </div>
               <h1 className="bp-h1">
@@ -761,38 +784,57 @@ export default function LandingPage() {
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>aplicada a tu oferta.</span>
+                  <span>aplicada a tu caso.</span>
                 </span>
               </h1>
-              <p
-                className="hero-fade-up"
-                style={{
-                  font: "15px/1.6 var(--font-inter)",
-                  color: "#525B5A",
-                  maxWidth: 460,
-                  margin: "0 0 28px",
-                  animationDelay: ".75s",
-                }}
-              >
-                HydroStack cruza tu RUP con los pliegos activos de SECOP en agua y saneamiento —
-                cada requisito habilitante, verificado como una cota en un plano.
-              </p>
-              <Link
-                href="/licitaciones"
-                className="bp-cta hero-fade-up"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "#0A1F1C",
-                  color: "#fff",
-                  font: "600 13px var(--font-jetbrains-mono),monospace",
-                  letterSpacing: ".04em",
-                  animationDelay: ".9s",
-                }}
-              >
-                [ Prueba un proceso ]
-              </Link>
+
+              <ul className="hero-list hero-fade-up" style={{ animationDelay: ".75s" }}>
+                <li>
+                  <span className="hero-list-n" aria-hidden="true">01</span>
+                  Encuentra proyectos de agua y saneamiento.
+                </li>
+                <li>
+                  <span className="hero-list-n" aria-hidden="true">02</span>
+                  Modela soluciones y genera informes y planos en PDF.
+                </li>
+                <li>
+                  <span className="hero-list-n" aria-hidden="true">03</span>
+                  Haz seguimiento de obras, acueductos y vertimientos.
+                </li>
+                <li>
+                  <span className="hero-list-n" aria-hidden="true">04</span>
+                  Usa agentes de IA para articular tus soluciones.
+                </li>
+              </ul>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                <Link
+                  href="/licitaciones"
+                  className="bp-cta hero-fade-up"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    background: "#0A1F1C",
+                    color: "#fff",
+                    font: "600 13px var(--font-jetbrains-mono),monospace",
+                    letterSpacing: ".04em",
+                    animationDelay: ".9s",
+                  }}
+                >
+                  [ Prueba un proceso ]
+                </Link>
+                <span
+                  className="hero-fade-up"
+                  style={{
+                    font: "11px var(--font-jetbrains-mono),monospace",
+                    color: "#6B746F",
+                    animationDelay: ".95s",
+                  }}
+                >
+                  sin cuenta · resultado en 2 min
+                </span>
+              </div>
               <svg
                 viewBox="0 0 520 16"
                 width="520"
