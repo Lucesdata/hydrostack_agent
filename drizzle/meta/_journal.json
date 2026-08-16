@@ -71,6 +71,20 @@
       "when": 1786403965266,
       "tag": "0009_silly_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786784638118,
+      "tag": "0010_strong_richard_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786880196602,
+      "tag": "0011_cool_echo",
+      "breakpoints": true
     }
   ]
 }

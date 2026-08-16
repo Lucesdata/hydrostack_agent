@@ -16,9 +16,9 @@
  * estado canónico (UPSERTs por clave natural; reescribe todas las columnas
  * no-PK en UPDATE para no dejar columnas zombi).
  *
- * Una sola fila por source_record_id (la MÁS RECIENTE por ingested_at), aunque
- * raw_record tenga varios snapshots (append-only). Eso preserva la semántica
- * de "foto actual" de la canónica.
+ * Una sola fila por source_record_id: desde 2026-08-16 raw_record hace upsert
+ * (una fila por registro), así que el DISTINCT ON por ingested_at es un no-op
+ * defensivo — no hace daño si algún día vuelve a haber múltiples snapshots.
  */
 
 import { randomUUID } from "node:crypto";
@@ -45,7 +45,6 @@ import {
   type ProcesoItem,
   type QuarantineEntry,
 } from "./writers";
-import { rebuildContratoEventos, type EventMetrics } from "./eventWriter";
 import { preclassify } from "@/src/lib/secop/document-access";
 
 export interface SourceMetrics {
@@ -66,7 +65,6 @@ export interface TransformSummary {
   batchId: string;
   procesos: SourceMetrics;
   contratos: SourceMetrics;
-  eventos: EventMetrics;
 }
 
 function emptyMetrics(): SourceMetrics {
@@ -292,6 +290,5 @@ export async function runTransform(): Promise<TransformSummary> {
   // (loadPortafolioIndex) en contratos encuentre algo.
   const procesos = await transformProcesos(geo, batchId);
   const contratos = await transformContratos(geo, batchId);
-  const eventos = await rebuildContratoEventos(db);
-  return { batchId, procesos, contratos, eventos };
+  return { batchId, procesos, contratos };
 }

@@ -5,7 +5,6 @@ import {
   numeric,
   date,
   boolean,
-  jsonb,
   timestamp,
   index,
   uniqueIndex,
@@ -96,35 +95,9 @@ export const contrato = pgTable(
   ]
 );
 
-/**
- * Log append-only de cambios detectados por diff entre snapshots (0.1 §2).
- * tipo_evento es text (no enum) para añadir tipos sin migración.
- */
-export const contratoEvento = pgTable(
-  "contrato_evento",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    contratoId: uuid("contrato_id")
-      .notNull()
-      .references(() => contrato.id),
-    tipoEvento: text("tipo_evento").notNull(), // adicion | prorroga | suspension | cesion | ...
-    sourceObservedAt: timestamp("source_observed_at", { withTimezone: true }),
-    detectedAt: timestamp("detected_at", { withTimezone: true }).defaultNow().notNull(),
-    correlationId: uuid("correlation_id"), // agrupa eventos del mismo snapshot (otrosí múltiple)
-    valorAnterior: money("valor_anterior"),
-    valorNuevo: money("valor_nuevo"),
-    fechaAnterior: date("fecha_anterior"),
-    fechaNueva: date("fecha_nueva"),
-    estadoAnterior: text("estado_anterior"),
-    estadoNuevo: text("estado_nuevo"),
-    proveedorAnteriorId: uuid("proveedor_anterior_id").references(() => proveedor.id),
-    proveedorNuevoId: uuid("proveedor_nuevo_id").references(() => proveedor.id),
-    delta: jsonb("delta"), // cambios no tipados (escape hatch)
-    rawRecordId: uuid("raw_record_id").references(() => rawRecord.id),
-  },
-  (t) => [
-    index("contrato_evento_contrato_obs_idx").on(t.contratoId, t.sourceObservedAt),
-    index("contrato_evento_tipo_obs_idx").on(t.tipoEvento, t.sourceObservedAt),
-    index("contrato_evento_correlation_idx").on(t.correlationId),
-  ]
-);
+// contrato_evento (log append-only de cambios detectados por diff entre
+// snapshots) se eliminó el 2026-08-16: no tenía ningún lector (ninguna vista,
+// API o email la usaba) y dependía del raw_record append-only que llenó la
+// cuota de Neon. Si en el futuro hace falta historial de cambios, reconstruir
+// como log acotado (ej. últimos N eventos por contrato), no antes de que algo
+// lo lea.
