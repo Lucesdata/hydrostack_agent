@@ -57,14 +57,23 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Perfil inválido" }, { status: 400 });
   }
 
-  const [row] = await db
-    .insert(oferentePerfil)
-    .values({ usuarioId, perfil: body })
-    .onConflictDoUpdate({
-      target: oferentePerfil.usuarioId,
-      set: { perfil: body, actualizadoEn: new Date() },
-    })
-    .returning();
+  try {
+    const [row] = await db
+      .insert(oferentePerfil)
+      .values({ usuarioId, perfil: body })
+      .onConflictDoUpdate({
+        target: oferentePerfil.usuarioId,
+        set: { perfil: body, actualizadoEn: new Date() },
+      })
+      .returning();
 
-  return NextResponse.json({ perfil: row.perfil as OferenteProfile });
+    return NextResponse.json({ perfil: row.perfil as OferenteProfile });
+  } catch {
+    // Base no alcanzable (p. ej. cuota de Neon excedida, o migración en curso
+    // a Supabase) — modo concierge: devolvemos el perfil recibido (ya
+    // validado arriba) para que el cliente lo ofrezca por correo en vez de
+    // perderlo. No es un dato nuevo: es lo que el usuario ya envió en este
+    // mismo request.
+    return NextResponse.json({ error: "DB_UNAVAILABLE", perfil: body }, { status: 503 });
+  }
 }

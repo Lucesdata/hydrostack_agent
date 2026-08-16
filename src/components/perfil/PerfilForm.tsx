@@ -28,7 +28,7 @@ function defaultPerfil(): OferenteProfile {
 
 export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteProfile | null }) {
   const [perfil, setPerfil] = useState<OferenteProfile>(perfilInicial ?? defaultPerfil());
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error" | "concierge">("idle");
   const [unspscQuery, setUnspscQuery] = useState("");
   const unspscOpciones = searchUnspsc(unspscQuery).slice(0, 8);
 
@@ -40,10 +40,26 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(perfil),
       });
-      setStatus(res.ok ? "saved" : "error");
+      if (res.ok) {
+        setStatus("saved");
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      setStatus(body?.error === "DB_UNAVAILABLE" ? "concierge" : "error");
     } catch {
       setStatus("error");
     }
+  }
+
+  function mailtoConcierge(): string {
+    const contacto = process.env.NEXT_PUBLIC_CONCIERGE_EMAIL || "";
+    const subject = `Perfil RUP — registro manual (${perfil.id})`;
+    const cuerpo = [
+      "No se pudo guardar automáticamente. Copio mi perfil para que lo registren manualmente:",
+      "",
+      JSON.stringify(perfil, null, 2),
+    ].join("\n");
+    return `mailto:${contacto}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(cuerpo)}`;
   }
 
   function toggleSector(codigo: string) {
@@ -275,6 +291,15 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
       </button>
       {status === "saved" && <span>Guardado ✓</span>}
       {status === "error" && <span>Error al guardar — intenta de nuevo.</span>}
+      {status === "concierge" && (
+        <div className="clr-perfil-concierge" role="alert">
+          <p>
+            No pudimos guardar tu perfil automáticamente. Envíanoslo por correo y lo registramos
+            nosotros mientras tanto — ya viene listo para copiar y pegar.
+          </p>
+          <a href={mailtoConcierge()}>Enviar mi perfil por correo →</a>
+        </div>
+      )}
     </div>
   );
 }

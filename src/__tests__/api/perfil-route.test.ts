@@ -99,4 +99,14 @@ describe("GET/PUT /api/perfil", () => {
     expect(res.status).toBe(200);
     expect((await res.json()).perfil.id).toBe("oferente-1");
   });
+
+  it("PUT 503 + eco del perfil si la escritura falla (base inalcanzable — modo concierge)", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "u1@example.com" });
+    mockReturning.mockRejectedValue(new Error("connection refused"));
+    const res = await PUT(putReq(perfil));
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.error).toBe("DB_UNAVAILABLE");
+    expect(body.perfil.id).toBe("oferente-1");
+  });
 });
