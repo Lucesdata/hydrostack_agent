@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
+import PlantaHero from "@/src/components/landing/PlantaHero";
 
 const PROBLEM_SOLUTION = [
   {
@@ -857,110 +858,7 @@ export default function LandingPage() {
               </svg>
             </div>
 
-            <div className="hero-panel-enter">
-            <div
-              className="hero-glass-card"
-              style={{
-                position: "relative",
-                padding: 22,
-              }}
-            >
-              <span
-                style={{
-                  position: "absolute",
-                  top: -1,
-                  left: -1,
-                  width: 12,
-                  height: 12,
-                  borderTop: "2px solid #0369A1",
-                  borderLeft: "2px solid #0369A1",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  top: -1,
-                  right: -1,
-                  width: 12,
-                  height: 12,
-                  borderTop: "2px solid #0369A1",
-                  borderRight: "2px solid #0369A1",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: -1,
-                  left: -1,
-                  width: 12,
-                  height: 12,
-                  borderBottom: "2px solid #0369A1",
-                  borderLeft: "2px solid #0369A1",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: -1,
-                  right: -1,
-                  width: 12,
-                  height: 12,
-                  borderBottom: "2px solid #0369A1",
-                  borderRight: "2px solid #0369A1",
-                }}
-              />
-              <div
-                style={{
-                  font: "10px var(--font-jetbrains-mono),monospace",
-                  color: "#0369A1",
-                  letterSpacing: ".12em",
-                  textTransform: "uppercase",
-                  marginBottom: 14,
-                }}
-              >
-                Evaluación — muestra 001
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  font: "14px var(--font-inter)",
-                  color: "#0A1F1C",
-                  marginBottom: 16,
-                  borderBottom: "1px dashed #DADAD2",
-                  paddingBottom: 14,
-                }}
-              >
-                <strong>EPS Nariño</strong>
-                <span
-                  style={{ fontFamily: "var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
-                >
-                  $3.850M
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                  font: "12px var(--font-jetbrains-mono),monospace",
-                  color: "#525B5A",
-                }}
-              >
-                <span>[✓] EXPERIENCIA ................ OK</span>
-                <span>[✓] CAPACIDAD_FINANCIERA ........ OK</span>
-                <span>[!] UNSPSC ...................... PARCIAL</span>
-              </div>
-              <div style={{ marginTop: 14 }}>
-                <Link
-                  href="/licitaciones"
-                  style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".04em" }}
-                >
-                  [ Evalúa tu propio RUP → ]
-                </Link>
-              </div>
-            </div>
-            </div>
+            <PlantaHero />
           </div>
         </div>
 
