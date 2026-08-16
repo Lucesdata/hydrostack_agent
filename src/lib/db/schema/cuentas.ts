@@ -82,6 +82,36 @@ export const envioLog = pgTable(
 );
 
 /**
+ * Coincidencias detectadas por cuenta — respalda el badge de notificación en
+ * el Navbar (avatar). El cron diario (`runDailyAlertas`) inserta una fila la
+ * primera vez que un proceso aparece en el matching de un usuario;
+ * `onConflictDoNothing` evita reinsertar los que ya existían. Independiente
+ * de `alerta_preferencias.activo`: apagar el correo no apaga el badge.
+ * `vista_en` se marca al entrar a `/mis-coincidencias`.
+ */
+export const coincidencia = pgTable(
+  "coincidencia",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    usuarioId: text("usuario_id")
+      .notNull()
+      .references(() => usuario.id, { onDelete: "cascade" }),
+    // Id nativo de SECOP (Match.proceso.id / secopProcesoId) — no FK al uuid
+    // interno de `proceso`: el motor de matching solo conoce el id nativo,
+    // igual que el resto de referencias externas del repo.
+    procesoId: text("proceso_id").notNull(),
+    /** 'PASS' | 'WARN' | 'UNKNOWN' (getMatchesForPerfil ya descarta 'FAIL') */
+    veredictoOverall: text("veredicto_overall").notNull(),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
+    vistaEn: timestamp("vista_en", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("coincidencia_usuario_proceso_uq").on(t.usuarioId, t.procesoId),
+    index("coincidencia_usuario_no_vista_idx").on(t.usuarioId, t.vistaEn),
+  ]
+);
+
+/**
  * Preferencias de alerta por cuenta (Fase 1.5 trae la UI; la fila y el campo
  * `activo` ya existen desde 1.3 porque el unsubscribe de un clic del primer
  * correo necesita algo que apagar).

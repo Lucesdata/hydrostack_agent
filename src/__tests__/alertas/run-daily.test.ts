@@ -50,7 +50,7 @@ const cuenta = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-const matches = [{ proceso: { id: "p1" } }] as unknown as Match[];
+const matches = [{ proceso: { id: "p1" }, verdict: { overall: "PASS" } }] as unknown as Match[];
 
 describe("runDailyAlertas", () => {
   beforeEach(() => {

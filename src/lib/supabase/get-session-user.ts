@@ -27,12 +27,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 }
 
 export interface DisplayUser {
+  id: string;
   email: string;
   fullName: string | null;
   avatarUrl: string | null;
 }
 
-/** Para el Navbar: nombre + foto a mostrar (con fallback a correo/iniciales). */
+/** Para el Navbar: id + nombre + foto a mostrar (con fallback a correo/iniciales). */
 export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
   try {
     const supabase = await createClient();
@@ -49,7 +50,7 @@ export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
         : typeof meta.picture === "string"
           ? meta.picture
           : null;
-    return { email: user.email, fullName, avatarUrl };
+    return { id: user.id, email: user.email, fullName, avatarUrl };
   } catch {
     return null;
   }

@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
 import { getSessionDisplayUser } from "@/src/lib/supabase/get-session-user";
+import { hasCoincidenciasNoVistas } from "@/src/lib/matching/record-coincidencias";
 import "./globals.css";
 
 // Las 4 familias reales de la landing + calculadoras + Hydro_Agent, self-hosted
@@ -63,6 +64,7 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const user = await getSessionDisplayUser();
+  const hasNewMatches = user ? await hasCoincidenciasNoVistas(user.id) : false;
 
   return (
     <html
@@ -70,7 +72,7 @@ export default async function RootLayout({ children }) {
       className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
     >
       <body>
-        <Navbar user={user} />
+        <Navbar user={user} hasNewMatches={hasNewMatches} />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         <Analytics />
         <SpeedInsights />

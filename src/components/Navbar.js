@@ -45,6 +45,10 @@ const AUTH_CSS = `
   position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px;
   border-radius: 50%; background: #16a34a; border: 1.5px solid #fff;
 }
+.clr-avatar-badge{
+  position: absolute; top: -1px; right: -1px; width: 9px; height: 9px;
+  border-radius: 50%; background: var(--accent, #0369A1); border: 1.5px solid #fff;
+}
 .clr-nav-user-menu{
   position: absolute; top: calc(100% + 6px); right: 0; min-width: 220px;
   background: var(--surface, #fff); border: 1px solid var(--line, #E5E5E0);
@@ -68,6 +72,7 @@ const AUTH_CSS = `
   color: var(--ink-900, #0A1F1C); padding: 9px 14px; cursor: pointer;
 }
 .clr-nav-user-menu button:hover{ background: var(--bg, #FAFAF7); }
+.clr-nav-user-sep{ border-top: 1px solid var(--line, #E5E5E0); margin: 4px 0; }
 .clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 10px; gap: 8px; }
 .clr-mobile-user{ display: flex; align-items: center; gap: 10px; padding: 0 4px 6px; }
 `;
@@ -80,7 +85,7 @@ function initials(fullName, email) {
   return (email?.[0] ?? "?").toUpperCase();
 }
 
-function Avatar({ user, withDot }) {
+function Avatar({ user, withDot, hasNew }) {
   const label = initials(user.fullName, user.email);
   return (
     <span className="clr-avatar">
@@ -92,6 +97,7 @@ function Avatar({ user, withDot }) {
         </span>
       )}
       {withDot && <span className="clr-avatar-dot" title="Conectado" />}
+      {hasNew && <span className="clr-avatar-badge" title="Tienes coincidencias nuevas" />}
     </span>
   );
 }
@@ -126,7 +132,7 @@ function CoteGlyph() {
   );
 }
 
-function UserMenu({ user }) {
+function UserMenu({ user, hasNewMatches }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -138,7 +144,7 @@ function UserMenu({ user }) {
         aria-expanded={open}
         aria-label="Menú de cuenta"
       >
-        <Avatar user={user} withDot />
+        <Avatar user={user} withDot hasNew={hasNewMatches} />
       </button>
       {open && (
         <div className="clr-nav-user-menu">
@@ -152,6 +158,13 @@ function UserMenu({ user }) {
           <Link href="/perfil" onClick={() => setOpen(false)}>
             Mi perfil RUP
           </Link>
+          <Link href="/mis-coincidencias" onClick={() => setOpen(false)}>
+            Mis coincidencias
+          </Link>
+          <Link href="/cuenta" onClick={() => setOpen(false)}>
+            Preferencias de alerta
+          </Link>
+          <div className="clr-nav-user-sep" aria-hidden="true" />
           {/* Sin onSubmit: el submit navega fuera de la página (redirect a /),
               cerrar el dropdown acá desmontaría el <form> a mitad del envío
               ("Form submission canceled because the form is not connected"). */}
@@ -164,7 +177,7 @@ function UserMenu({ user }) {
   );
 }
 
-export default function Navbar({ user }) {
+export default function Navbar({ user, hasNewMatches }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -210,7 +223,7 @@ export default function Navbar({ user }) {
 
         <div className="clr-nav-auth">
           {user ? (
-            <UserMenu user={user} />
+            <UserMenu user={user} hasNewMatches={hasNewMatches} />
           ) : (
             <>
               <Link href="/login" className="clr-nav-auth-link">
@@ -256,7 +269,7 @@ export default function Navbar({ user }) {
           {user ? (
             <>
               <div className="clr-mobile-user">
-                <Avatar user={user} withDot />
+                <Avatar user={user} withDot hasNew={hasNewMatches} />
                 <div style={{ minWidth: 0 }}>
                   <div className="clr-nav-user-name">{user.fullName || user.email}</div>
                   <div className="clr-nav-user-email">{user.email}</div>

@@ -19,6 +19,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
+import { markCoincidenciasVistas } from "@/src/lib/matching/record-coincidencias";
 import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ahora";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import {
@@ -125,6 +126,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
   }
 
   const matches = await getMatchesForPerfil(perfil);
+  await markCoincidenciasVistas(usuarioId);
 
   async function handleEnviarAhora() {
     "use server";
