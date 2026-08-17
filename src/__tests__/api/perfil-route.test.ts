@@ -74,6 +74,20 @@ describe("GET/PUT /api/perfil", () => {
     expect(body.perfil.id).toBe("oferente-1");
   });
 
+  it("GET devuelve perfil:null si lo guardado es un PerfilMinimo (sin cuantiaObjetivo)", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "u1@example.com" });
+    const perfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: ["83101"],
+      cobertura: { departamentos: ["76"], municipios: [] },
+    };
+    mockLimit.mockResolvedValue([{ perfil: perfilMinimo }]);
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.perfil).toBeNull();
+  });
+
   it("PUT 401 sin sesión", async () => {
     mockAuth.mockResolvedValue(null);
     const res = await PUT(putReq(perfil));

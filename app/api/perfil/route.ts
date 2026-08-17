@@ -13,6 +13,7 @@ import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { db } from "@/src/lib/db/client";
 import { oferentePerfil } from "@/src/lib/db/schema/cuentas";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
+import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 
 export const runtime = "nodejs";
@@ -35,7 +36,8 @@ export async function GET() {
     return NextResponse.json({ error: "No hay sesión activa" }, { status: 401 });
   }
 
-  const perfil = await getPerfilDb(usuarioId);
+  const guardado = await getPerfilDb(usuarioId);
+  const perfil = guardado && isPerfilCompleto(guardado) ? guardado : null;
   return NextResponse.json({ perfil });
 }
 
