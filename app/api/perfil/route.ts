@@ -6,6 +6,11 @@
  * viviendo solo en `clientStore` (localStorage), como hoy. El cliente
  * (`SecopExplorer`) decide cuándo llamar esto: al montar (GET, para hidratar
  * cuentas ya migradas) y al completar el wizard (PUT).
+ *
+ * Si lo guardado es un `PerfilMinimo` (setup inline sector+zona de
+ * /mis-coincidencias, sin cuantiaObjetivo), GET devuelve `null` — este
+ * endpoint solo expone `OferenteProfile` completo; el único consumidor
+ * (`SecopExplorer`) ya sabe abrir el wizard completo cuando `perfil` es null.
  */
 
 import { NextRequest, NextResponse } from "next/server";
