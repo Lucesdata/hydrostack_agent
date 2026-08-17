@@ -45,10 +45,16 @@ import { runDailyAlertas } from "@/src/lib/alertas/run-daily";
 const cuenta = (over: Record<string, unknown> = {}) => ({
   usuarioId: "u1",
   email: "a@b.com",
-  perfil: { id: "oferente-1" },
+  perfil: { id: "oferente-1", cuantiaObjetivo: { minCop: 0, maxCop: 1_000_000_000 } },
   activo: true,
   ...over,
 });
+
+const perfilMinimo = {
+  id: "u1",
+  sectoresUnspsc: ["83101"],
+  cobertura: { departamentos: ["76"], municipios: [] },
+};
 
 const matches = [{ proceso: { id: "p1" }, verdict: { overall: "PASS" } }] as unknown as Match[];
 
@@ -69,6 +75,23 @@ describe("runDailyAlertas", () => {
     const r = await runDailyAlertas();
     expect(r.saltados).toBe(1);
     expect(mockInsertReturning).not.toHaveBeenCalled();
+  });
+
+  it("cuenta dada de baja con perfil mínimo: se salta sin intentar matching (badge)", async () => {
+    mockSelectResult.mockResolvedValue([cuenta({ activo: false, perfil: perfilMinimo })]);
+    const r = await runDailyAlertas();
+    expect(r.saltados).toBe(1);
+    expect(mockGetMatches).not.toHaveBeenCalled();
+  });
+
+  it("cuenta activa con perfil mínimo: se salta como saltados, no como error", async () => {
+    mockSelectResult.mockResolvedValue([cuenta({ perfil: perfilMinimo })]);
+    mockInsertReturning.mockResolvedValue([{ id: "log-1" }]);
+    const r = await runDailyAlertas();
+    expect(r.saltados).toBe(1);
+    expect(r.errores).toBe(0);
+    expect(mockGetMatches).not.toHaveBeenCalled();
+    expect(mockUpdateWhere).toHaveBeenCalledTimes(1);
   });
 
   it("sin fila de preferencias (activo=null) se trata como activa por defecto", async () => {

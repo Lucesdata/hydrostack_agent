@@ -33,7 +33,15 @@ vi.mock("@/src/lib/email/send", () => ({
 
 import { enviarDigestAhora } from "@/src/lib/alertas/enviar-ahora";
 
-const perfil = { id: "oferente-1" } as OferenteProfile;
+const perfil = {
+  id: "oferente-1",
+  cuantiaObjetivo: { minCop: 0, maxCop: 1_000_000_000 },
+} as OferenteProfile;
+const perfilMinimo = {
+  id: "u1",
+  sectoresUnspsc: ["83101"],
+  cobertura: { departamentos: ["76"], municipios: [] },
+};
 const matches = [{ proceso: { id: "p1" } }, { proceso: { id: "p2" } }] as unknown as Match[];
 
 describe("enviarDigestAhora", () => {
@@ -47,6 +55,15 @@ describe("enviarDigestAhora", () => {
     const r = await enviarDigestAhora("u1");
     expect(r).toEqual({ estado: "error", matches: 0, error: expect.stringContaining("perfil") });
     expect(mockGetMatches).not.toHaveBeenCalled();
+  });
+
+  it("perfil mínimo (sin cuantiaObjetivo) devuelve error claro, no crashea", async () => {
+    mockGetPerfilDb.mockResolvedValue(perfilMinimo);
+    const r = await enviarDigestAhora("u1");
+    expect(r.estado).toBe("error");
+    expect(r.error).toMatch(/licitaciones\/explorar/);
+    expect(mockGetMatches).not.toHaveBeenCalled();
+    expect(mockSelectLimit).not.toHaveBeenCalled();
   });
 
   it("usuario no encontrado en DB → error", async () => {

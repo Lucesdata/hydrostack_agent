@@ -27,7 +27,8 @@ import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { recordCoincidencias } from "@/src/lib/matching/record-coincidencias";
 import { renderDigest } from "@/src/lib/email/digest";
 import { sendDigestEmail } from "@/src/lib/email/send";
-import type { OferenteProfile } from "@/src/lib/oferente/types";
+import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
+import type { PerfilGuardado } from "@/src/lib/oferente/perfil-minimo";
 
 export interface DailyRunSummary {
   cuentas: number;
@@ -69,18 +70,21 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
       // El correo está apagado, pero el badge de coincidencias del Navbar es
       // independiente de esa preferencia (D: apagar alertas no debe apagar
       // el badge) — se registra igual, en una rama separada del envío.
-      try {
-        const perfil = cuenta.perfil as OferenteProfile;
-        const matches = await getMatchesForPerfil(perfil);
-        await recordCoincidencias(cuenta.usuarioId, matches);
-      } catch (e) {
-        const mensaje = e instanceof Error ? e.message : String(e);
-        console.error(
-          "[alertas/diario] fallo calculando coincidencias (badge) para",
-          cuenta.usuarioId,
-          mensaje
-        );
+      const perfilGuardado = cuenta.perfil as PerfilGuardado;
+      if (isPerfilCompleto(perfilGuardado)) {
+        try {
+          const matches = await getMatchesForPerfil(perfilGuardado);
+          await recordCoincidencias(cuenta.usuarioId, matches);
+        } catch (e) {
+          const mensaje = e instanceof Error ? e.message : String(e);
+          console.error(
+            "[alertas/diario] fallo calculando coincidencias (badge) para",
+            cuenta.usuarioId,
+            mensaje
+          );
+        }
       }
+      // Perfil mínimo: fuera de alcance del badge hasta completar el wizard.
       summary.saltados++;
       continue;
     }
@@ -97,9 +101,18 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
       continue;
     }
 
+    const perfilGuardado = cuenta.perfil as PerfilGuardado;
+    if (!isPerfilCompleto(perfilGuardado)) {
+      await db
+        .update(envioLog)
+        .set({ estado: "sin_coincidencias", matches: 0 })
+        .where(eq(envioLog.id, reservado.id));
+      summary.saltados++;
+      continue;
+    }
+
     try {
-      const perfil = cuenta.perfil as OferenteProfile;
-      const matches = await getMatchesForPerfil(perfil);
+      const matches = await getMatchesForPerfil(perfilGuardado);
       await recordCoincidencias(cuenta.usuarioId, matches);
 
       if (matches.length === 0) {

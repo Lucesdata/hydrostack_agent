@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { usuario, envioLog } from "@/src/lib/db/schema/cuentas";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
+import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { renderDigest } from "@/src/lib/email/digest";
 import { sendDigestEmail } from "@/src/lib/email/send";
@@ -42,6 +43,14 @@ export async function enviarDigestAhora(usuarioId: string): Promise<EnvioResulta
   const perfil = await getPerfilDb(usuarioId);
   if (!perfil) {
     return { estado: "error", matches: 0, error: "No tienes un perfil de oferente guardado." };
+  }
+
+  if (!isPerfilCompleto(perfil)) {
+    return {
+      estado: "error",
+      matches: 0,
+      error: "Completa tu perfil en /licitaciones/explorar para recibir alertas por correo.",
+    };
   }
 
   const [u] = await db.select().from(usuario).where(eq(usuario.id, usuarioId)).limit(1);
