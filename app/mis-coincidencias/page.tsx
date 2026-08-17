@@ -1,27 +1,27 @@
 // app/mis-coincidencias/page.tsx
-
 /**
- * Mis coincidencias (Fase 1.2) — procesos que le convienen a la cuenta,
- * calculados on-demand con el mismo motor de veredicto Nivel 0 que ya corre en
- * /licitaciones/explorar (src/lib/secop/verdict.ts vía src/lib/matching/match.ts).
- * Server component puro: sin filtros, sin wizard — el perfil se completa en
- * /licitaciones/explorar (ya sincroniza a la cuenta desde Fase 1.1).
- *
- * Prefiltro SQL deliberadamente sin `departamento`: `searchProcesosDb` filtra
- * por nombre de departamento, pero `OferenteProfile.cobertura` guarda códigos
- * DIVIPOLA — traducir agregaría una dependencia no verificada. Se sobre-trae
- * y `ubicacionGate` filtra en memoria (mismo trade-off ya aceptado en
- * docs/plan-arquitectura-roadmap.md §3.2 para los falsos positivos del prefiltro).
+ * Mis coincidencias — dos calidades de perfil, ambas reales (sin mock):
+ * - PerfilMinimo (sector+zona, setup inline): matchProcesosMinimo, sin
+ *   semáforo de elegibilidad completo.
+ * - OferenteProfile completo (wizard en /licitaciones/explorar): el veredicto
+ *   Nivel 0 de siempre (src/lib/secop/verdict.ts vía src/lib/matching/match.ts).
+ * Server component puro. Ver docs/superpowers/plans/2026-08-17-mis-coincidencias-refinamiento.md.
  */
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
+import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
+import { getMatchesForPerfilMinimo } from "@/src/lib/matching/get-matches-for-perfil-minimo";
+import { coincideEnLabel, type MatchMinimo } from "@/src/lib/matching/match-minimo";
+import type { Match } from "@/src/lib/matching/match";
 import { markCoincidenciasVistas } from "@/src/lib/matching/record-coincidencias";
 import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ahora";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import { getEnJuegoMes } from "@/src/lib/secop/landingStats";
+import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
 import {
   sentenceCaseTitle,
   formatCopCompact,
@@ -34,6 +34,11 @@ const BANNER: Record<EnvioEstado, string> = {
   sin_coincidencias: "No hay coincidencias hoy — no se envió correo.",
   error:
     "No se pudo enviar el correo. Revisa la configuración de Resend (AUTH_RESEND_KEY / EMAIL_FROM).",
+};
+
+const PERFIL_ERROR: Record<string, string> = {
+  vacio: "Marca al menos un sector o una zona antes de continuar.",
+  db_unavailable: "No pudimos guardar tu perfil ahora mismo. Intenta de nuevo en unos minutos.",
 };
 
 const STYLE = `
@@ -65,6 +70,11 @@ const STYLE = `
   .clr-mc-score--warn .clr-mc-dot{ background: #d97706; }
   .clr-mc-score--fail .clr-mc-dot{ background: #dc2626; }
   .clr-mc-score--neutral .clr-mc-dot{ background: var(--ink-600); }
+  .clr-mc-badge{
+    font-size: 11.5px; font-family: var(--font-mono); color: var(--accent);
+    background: var(--accent-faint); border: 1px solid var(--accent-soft);
+    border-radius: 999px; padding: 3px 9px;
+  }
   .clr-mc-link{ font-size: 12px; color: var(--accent); text-decoration: none; }
   .clr-mc-link:hover{ text-decoration: underline; }
   .clr-mc-actions{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -78,6 +88,18 @@ const STYLE = `
     border: 1px solid var(--accent-soft); border-radius: var(--radius-md);
     padding: 10px 14px; margin-bottom: 16px;
   }
+  .clr-mc-teaser{
+    background: var(--card, #fff); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 28px 24px; text-align: center; filter: blur(0); position: relative;
+  }
+  .clr-mc-teaser-num{ font-size: 32px; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
+  .clr-mc-teaser-sub{ font-size: 13px; color: var(--ink-600); margin: 6px 0 20px; }
+  .clr-mc-cta{
+    display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #fff;
+    text-decoration: none; font-size: 13px; font-weight: 500; padding: 10px 18px;
+    border-radius: var(--radius-md);
+  }
+  .clr-mc-cta:hover{ opacity: 0.9; }
 `;
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -90,21 +112,37 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 interface Props {
-  searchParams: { resultado?: string };
+  searchParams: { resultado?: string; resultadoError?: string; perfilError?: string };
 }
 
 export default async function MisCoincidenciasPage({ searchParams }: Props) {
   const user = await getSessionUser();
   const usuarioId = user?.id;
-  const banner = BANNER[searchParams.resultado as EnvioEstado] ?? null;
+  const estado = searchParams.resultado as EnvioEstado | undefined;
+  const banner =
+    estado === "error" && searchParams.resultadoError
+      ? decodeURIComponent(searchParams.resultadoError)
+      : estado
+        ? (BANNER[estado] ?? null)
+        : null;
+  const perfilError = PERFIL_ERROR[searchParams.perfilError ?? ""] ?? null;
 
   if (!usuarioId) {
+    const enJuego = await getEnJuegoMes().catch(() => ({ totalCop: null, procesos: null }));
     return (
       <Shell>
         <h1 className="clr-mc-title">Mis coincidencias</h1>
-        <div className="clr-mc-empty">
-          Necesitas una cuenta para ver tus coincidencias.{" "}
-          <Link href="/login?next=/mis-coincidencias">Ingresar →</Link>
+        <div className="clr-mc-teaser">
+          <div className="clr-mc-teaser-num">
+            {enJuego.procesos != null ? enJuego.procesos : "—"}
+          </div>
+          <p className="clr-mc-teaser-sub">
+            procesos del sector agua abiertos este mes. Regístrate para ver cuáles calzan con tu
+            sector y tu zona.
+          </p>
+          <Link href="/login?next=/mis-coincidencias" className="clr-mc-cta">
+            Regístrate con Google →
+          </Link>
         </div>
       </Shell>
     );
@@ -112,20 +150,69 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
 
   await recordUserSignal(usuarioId, "oferente");
 
-  const perfil = await getPerfilDb(usuarioId);
-  if (!perfil) {
+  const perfilGuardado = await getPerfilDb(usuarioId);
+
+  if (!perfilGuardado) {
     return (
       <Shell>
         <h1 className="clr-mc-title">Mis coincidencias</h1>
-        <div className="clr-mc-empty">
-          Aún no tienes un perfil de oferente guardado.{" "}
-          <Link href="/licitaciones/explorar">Complétalo en Licitaciones →</Link>
-        </div>
+        <p className="clr-mc-sub">Cuéntanos en qué sector y zona trabajas para ver tus coincidencias.</p>
+        {perfilError && <div className="clr-mc-banner">{perfilError}</div>}
+        <SectorZonaSetup />
       </Shell>
     );
   }
 
-  const matches = await getMatchesForPerfil(perfil);
+  if (!isPerfilCompleto(perfilGuardado)) {
+    const matches = await getMatchesForPerfilMinimo(perfilGuardado);
+    return (
+      <Shell>
+        <h1 className="clr-mc-title">Mis coincidencias</h1>
+        <p className="clr-mc-sub" style={{ margin: "0 0 24px" }}>
+          {matches.length} proceso{matches.length === 1 ? "" : "s"} del sector agua que calzan con
+          tu perfil.{" "}
+          <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver también tu
+          semáforo de elegibilidad y recibir alertas por correo.
+        </p>
+        {matches.length === 0 ? (
+          <div className="clr-mc-empty">
+            Sin coincidencias por ahora. Revisa tu sector y zona en{" "}
+            <Link href="/licitaciones/explorar">Licitaciones</Link>.
+          </div>
+        ) : (
+          <div className="clr-mc-list">
+            {matches.map((m: MatchMinimo) => (
+              <div key={m.proceso.id} className="clr-mc-card">
+                <div className="clr-mc-card-top">
+                  <p className="clr-mc-card-title">
+                    {sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)}
+                  </p>
+                  <span className="clr-mc-badge">{coincideEnLabel(m)}</span>
+                </div>
+                <span className="clr-mc-card-meta">
+                  {m.proceso.entidad}
+                  {m.proceso.departamento ? ` · ${m.proceso.departamento}` : ""}
+                  {formatShortDate(m.proceso.fechaPublicacion) ? ` · ${formatShortDate(m.proceso.fechaPublicacion)}` : ""}
+                </span>
+                <div className="clr-mc-card-foot">
+                  <span className="clr-mc-val">
+                    {formatCopCompact(m.proceso.valorAdjudicacion ?? m.proceso.precioBase)}
+                  </span>
+                  {m.proceso.url && (
+                    <a href={m.proceso.url} target="_blank" rel="noreferrer" className="clr-mc-link">
+                      Ver en SECOP ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Shell>
+    );
+  }
+
+  const matches = await getMatchesForPerfil(perfilGuardado);
   await markCoincidenciasVistas(usuarioId);
 
   async function handleEnviarAhora() {
@@ -133,7 +220,11 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
     const s = await getSessionUser();
     if (!s?.id) return;
     const resultado = await enviarDigestAhora(s.id);
-    redirect(`/mis-coincidencias?resultado=${resultado.estado}`);
+    const params = new URLSearchParams({ resultado: resultado.estado });
+    if (resultado.estado === "error" && resultado.error) {
+      params.set("resultadoError", resultado.error);
+    }
+    redirect(`/mis-coincidencias?${params.toString()}`);
   }
 
   return (
@@ -160,7 +251,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="clr-mc-list">
-          {matches.map(({ proceso, verdict }) => {
+          {matches.map(({ proceso, verdict }: Match) => {
             const score = verdictScore(verdict);
             const fecha = formatShortDate(proceso.fechaPublicacion);
             return (
