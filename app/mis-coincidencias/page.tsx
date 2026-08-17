@@ -121,7 +121,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
   const estado = searchParams.resultado as EnvioEstado | undefined;
   const banner =
     estado === "error" && searchParams.resultadoError
-      ? decodeURIComponent(searchParams.resultadoError)
+      ? searchParams.resultadoError
       : estado
         ? (BANNER[estado] ?? null)
         : null;
