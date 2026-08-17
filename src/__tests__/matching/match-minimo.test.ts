@@ -95,4 +95,16 @@ describe("matchProcesosMinimo — campos opcionales", () => {
     expect(m.gates.sectorial.status).toBe("FAIL");
     expect(m.overall).toBe("FAIL");
   });
+
+  it("sector y zona ambos vacíos: overall UNKNOWN para cualquier proceso", () => {
+    const perfilVacio: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: [],
+      cobertura: { departamentos: [], municipios: [] },
+    };
+    const [m] = matchProcesosMinimo(perfilVacio, [proceso()]);
+    expect(m.gates.sectorial.status).toBe("UNKNOWN");
+    expect(m.gates.ubicacion.status).toBe("UNKNOWN");
+    expect(m.overall).toBe("UNKNOWN");
+  });
 });

@@ -9,6 +9,7 @@ import {
   sectorialGate,
   ubicacionGate,
   toVerdictInput,
+  aggregateGateStatuses,
   type GateResult,
   type GateStatus,
 } from "@/src/lib/secop/verdict";
@@ -42,20 +43,6 @@ const SIN_ZONA: GateResult = {
   requiredLevel: 0,
 };
 
-/**
- * Espejo local de la regla D6 de aggregateVerdict (verdict.ts): worst-of
- * sobre las compuertas resueltas (no UNKNOWN); si ninguna resolvió, UNKNOWN.
- * No se puede reusar aggregateVerdict directamente: su tipo exige las 5
- * claves de Verdict["gates"], y aquí solo hay 2 (sectorial, ubicacion).
- */
-function aggregateMinimo(sectorial: GateResult, ubicacion: GateResult): GateStatus {
-  const resolved = [sectorial.status, ubicacion.status].filter((s) => s !== "UNKNOWN");
-  if (resolved.length === 0) return "UNKNOWN";
-  if (resolved.includes("FAIL")) return "FAIL";
-  if (resolved.includes("WARN")) return "WARN";
-  return "PASS";
-}
-
 export function matchProcesosMinimo(perfil: PerfilMinimo, procesos: SecopProceso[]): MatchMinimo[] {
   return procesos.map((proceso) => {
     const input = toVerdictInput(proceso);
@@ -67,7 +54,7 @@ export function matchProcesosMinimo(perfil: PerfilMinimo, procesos: SecopProceso
     return {
       proceso,
       gates: { sectorial, ubicacion },
-      overall: aggregateMinimo(sectorial, ubicacion),
+      overall: aggregateGateStatuses([sectorial.status, ubicacion.status]),
     };
   });
 }

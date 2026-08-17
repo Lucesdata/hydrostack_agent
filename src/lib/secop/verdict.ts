@@ -566,16 +566,20 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
  * D6 — worst-of sobre las compuertas resueltas (no UNKNOWN): cualquier FAIL→FAIL;
  * si no, cualquier WARN→WARN; si todas PASS→PASS. Si todas son UNKNOWN→UNKNOWN.
  * Las UNKNOWN no fuerzan rojo (se reportan aparte). Sin veto sectorial duro.
+ * No depende de la forma de Verdict["gates"] — cualquier lista de GateStatus
+ * sirve, incluidos subconjuntos como el perfil mínimo (match-minimo.ts).
  */
-export const aggregateVerdict: AggregateVerdict = (gates) => {
-  const resolved = Object.values(gates)
-    .map((g) => g.status)
-    .filter((s) => s !== "UNKNOWN");
+export function aggregateGateStatuses(statuses: GateStatus[]): GateStatus {
+  const resolved = statuses.filter((s) => s !== "UNKNOWN");
   if (resolved.length === 0) return "UNKNOWN";
   if (resolved.includes("FAIL")) return "FAIL";
   if (resolved.includes("WARN")) return "WARN";
   return "PASS";
-};
+}
+
+/** Aplica la regla D6 (`aggregateGateStatuses`) sobre las cinco compuertas del perfil completo. */
+export const aggregateVerdict: AggregateVerdict = (gates) =>
+  aggregateGateStatuses(Object.values(gates).map((g) => g.status));
 
 /**
  * Adapta la foto normalizada (`SecopProceso`) al insumo del veredicto, sumando lo
