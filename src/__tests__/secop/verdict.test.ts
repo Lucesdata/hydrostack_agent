@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/secop/verdict";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 import type { SecopProceso } from "@/src/lib/secop/types";
+import type { PerfilMinimo } from "@/src/lib/oferente/perfil-minimo";
 
 const NOW = new Date("2026-06-27T00:00:00Z");
 const DAY = 86_400_000;
@@ -85,6 +86,16 @@ describe("sectorialGate (L0 — UNSPSC ∩ perfil)", () => {
     const r = sectorialGate(profile, proc({ unspsc: "UNSPECIFIED", sectorAgua: null }));
     expect(r.status).toBe("UNKNOWN");
     expect(r.requiredLevel).toBe(0);
+  });
+
+  it("sectorialGate acepta un PerfilMinimo (sin capacidadFinanciera/cuantiaObjetivo)", () => {
+    const minimo: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: ["83101"],
+      cobertura: { departamentos: ["76"], municipios: [] },
+    };
+    const r = sectorialGate(minimo, proc({ unspsc: "83101500" }));
+    expect(r.status).toBe("PASS");
   });
 });
 
@@ -186,6 +197,16 @@ describe("ubicacionGate (L0 — DIVIPOLA depto)", () => {
     expect(
       ubicacionGate(soloMuni, proc({ departamento: "Valle del Cauca", ciudad: "Palmira" })).status
     ).toBe("FAIL");
+  });
+
+  it("ubicacionGate acepta un PerfilMinimo", () => {
+    const minimo: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: [],
+      cobertura: { departamentos: ["76"], municipios: [] },
+    };
+    const r = ubicacionGate(minimo, proc({ departamento: "Valle del Cauca" }));
+    expect(r.status).toBe("PASS");
   });
 });
 

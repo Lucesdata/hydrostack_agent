@@ -112,7 +112,10 @@ export interface CuantiaBandsConfig {
  * clasificación ya hecha (`clasificacion_sectorial.sector_agua`, que entró por
  * keyword), para no producir falso negativo en los procesos sin código.
  */
-export type SectorialGate = (p: OferenteProfile, proc: VerdictProcessInput) => GateResult; // L0
+export type SectorialGate = (
+  p: Pick<OferenteProfile, "sectoresUnspsc">,
+  proc: VerdictProcessInput
+) => GateResult; // L0
 
 /**
  * Valor del proceso vs rango objetivo, 3 bandas (D5). El chequeo *vs capacidad K*
@@ -132,7 +135,10 @@ export type CuantiaGate = (
 export type PlazoGate = (proc: VerdictProcessInput, now: Date) => GateResult; // L0 parcial
 
 /** Ubicación del proceso (DIVIPOLA) ∈ cobertura del perfil. */
-export type UbicacionGate = (p: OferenteProfile, proc: VerdictProcessInput) => GateResult; // L0
+export type UbicacionGate = (
+  p: Pick<OferenteProfile, "cobertura">,
+  proc: VerdictProcessInput
+) => GateResult; // L0
 
 // ── NIVEL 2 (requiere pliego) ─────────────────────────────────────────────
 
