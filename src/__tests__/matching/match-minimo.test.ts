@@ -61,3 +61,38 @@ describe("coincideEnLabel", () => {
     expect(coincideEnLabel(m)).toBe("Coincide en: Sector");
   });
 });
+
+describe("matchProcesosMinimo — campos opcionales", () => {
+  it("solo sector (zona vacía): un proceso que calza en sector da overall PASS, no FAIL", () => {
+    const perfilSoloSector: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: ["83101"],
+      cobertura: { departamentos: [], municipios: [] },
+    };
+    const [m] = matchProcesosMinimo(perfilSoloSector, [proceso()]);
+    expect(m.gates.ubicacion.status).toBe("UNKNOWN");
+    expect(m.overall).toBe("PASS");
+  });
+
+  it("solo zona (sector vacío): un proceso que calza en zona da overall PASS, no FAIL", () => {
+    const perfilSoloZona: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: [],
+      cobertura: { departamentos: ["76"], municipios: [] },
+    };
+    const [m] = matchProcesosMinimo(perfilSoloZona, [proceso()]);
+    expect(m.gates.sectorial.status).toBe("UNKNOWN");
+    expect(m.overall).toBe("PASS");
+  });
+
+  it("solo sector, proceso fuera de sector: overall FAIL (la zona no rescata un sector que sí falla)", () => {
+    const perfilSoloSector: PerfilMinimo = {
+      id: "u1",
+      sectoresUnspsc: ["83101"],
+      cobertura: { departamentos: [], municipios: [] },
+    };
+    const [m] = matchProcesosMinimo(perfilSoloSector, [proceso({ unspsc: "99999999" })]);
+    expect(m.gates.sectorial.status).toBe("FAIL");
+    expect(m.overall).toBe("FAIL");
+  });
+});

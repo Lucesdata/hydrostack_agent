@@ -21,21 +21,53 @@ export interface MatchMinimo {
   overall: GateStatus;
 }
 
-const RANK: Record<GateStatus, number> = { PASS: 0, WARN: 1, UNKNOWN: 2, FAIL: 3 };
+/**
+ * Un campo vacío en PerfilMinimo significa "no especificado" (opcional), no
+ * "no coincide con nada". sectorialGate/ubicacionGate (compartidas con el
+ * perfil completo, donde un array vacío no ocurre por construcción del
+ * wizard) tratarían [] como FAIL explícito. Estas constantes sustituyen esa
+ * llamada por UNKNOWN cuando el campo está vacío, sin tocar las compuertas.
+ */
+const SIN_SECTOR: GateResult = {
+  status: "UNKNOWN",
+  reason: "sector no especificado",
+  resolvedBy: "metadata",
+  requiredLevel: 0,
+};
 
-function worstOf(a: GateStatus, b: GateStatus): GateStatus {
-  return RANK[a] >= RANK[b] ? a : b;
+const SIN_ZONA: GateResult = {
+  status: "UNKNOWN",
+  reason: "zona no especificada",
+  resolvedBy: "metadata",
+  requiredLevel: 0,
+};
+
+/**
+ * Espejo local de la regla D6 de aggregateVerdict (verdict.ts): worst-of
+ * sobre las compuertas resueltas (no UNKNOWN); si ninguna resolvió, UNKNOWN.
+ * No se puede reusar aggregateVerdict directamente: su tipo exige las 5
+ * claves de Verdict["gates"], y aquí solo hay 2 (sectorial, ubicacion).
+ */
+function aggregateMinimo(sectorial: GateResult, ubicacion: GateResult): GateStatus {
+  const resolved = [sectorial.status, ubicacion.status].filter((s) => s !== "UNKNOWN");
+  if (resolved.length === 0) return "UNKNOWN";
+  if (resolved.includes("FAIL")) return "FAIL";
+  if (resolved.includes("WARN")) return "WARN";
+  return "PASS";
 }
 
 export function matchProcesosMinimo(perfil: PerfilMinimo, procesos: SecopProceso[]): MatchMinimo[] {
   return procesos.map((proceso) => {
     const input = toVerdictInput(proceso);
-    const sectorial = sectorialGate(perfil, input);
-    const ubicacion = ubicacionGate(perfil, input);
+    const sectorial = perfil.sectoresUnspsc.length === 0 ? SIN_SECTOR : sectorialGate(perfil, input);
+    const ubicacion =
+      perfil.cobertura.departamentos.length === 0 && perfil.cobertura.municipios.length === 0
+        ? SIN_ZONA
+        : ubicacionGate(perfil, input);
     return {
       proceso,
       gates: { sectorial, ubicacion },
-      overall: worstOf(sectorial.status, ubicacion.status),
+      overall: aggregateMinimo(sectorial, ubicacion),
     };
   });
 }
