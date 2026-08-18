@@ -30,11 +30,20 @@ export async function markCoincidenciasVistas(usuarioId: string): Promise<void> 
     .where(and(eq(coincidencia.usuarioId, usuarioId), isNull(coincidencia.vistaEn)));
 }
 
+/**
+ * Se llama desde el layout raíz en cada request de un usuario con sesión —
+ * si la base no responde (ej. cuota de Neon excedida), degrada a "sin
+ * badge" en vez de tumbar el render de toda la app.
+ */
 export async function hasCoincidenciasNoVistas(usuarioId: string): Promise<boolean> {
-  const [row] = await db
-    .select({ id: coincidencia.id })
-    .from(coincidencia)
-    .where(and(eq(coincidencia.usuarioId, usuarioId), isNull(coincidencia.vistaEn)))
-    .limit(1);
-  return Boolean(row);
+  try {
+    const [row] = await db
+      .select({ id: coincidencia.id })
+      .from(coincidencia)
+      .where(and(eq(coincidencia.usuarioId, usuarioId), isNull(coincidencia.vistaEn)))
+      .limit(1);
+    return Boolean(row);
+  } catch {
+    return false;
+  }
 }

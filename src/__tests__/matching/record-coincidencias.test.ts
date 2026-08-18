@@ -83,4 +83,9 @@ describe("hasCoincidenciasNoVistas", () => {
     selectLimitMock.mockResolvedValue([]);
     await expect(hasCoincidenciasNoVistas("u1")).resolves.toBe(false);
   });
+
+  it("false si falla la consulta (ej. cuota de Neon excedida) — degrada sin crashear", async () => {
+    selectLimitMock.mockRejectedValue(new Error("data transfer quota exceeded"));
+    await expect(hasCoincidenciasNoVistas("u1")).resolves.toBe(false);
+  });
 });
