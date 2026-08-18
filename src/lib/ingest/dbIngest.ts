@@ -83,15 +83,27 @@ export async function readLastWatermark(source: string): Promise<string | null> 
  * Sink: upsert por (source, source_record_id) — una fila por registro, se
  * sobrescribe al cambiar el hash. Reemplaza el modelo append-only (2026-08-16):
  * antes cada cambio insertaba una fila nueva sin techo, lo que llenó la cuota
- * de Neon. El conteo devuelto es `records.length` (filas tocadas), no "filas
- * que cambiaron" — el propio `ON CONFLICT` resuelve el dedup en el server.
+ * de Neon. Deduplica por (source, sourceRecordId) DENTRO del lote antes del
+ * insert — un mismo id repetido dos veces en un solo `ON CONFLICT DO UPDATE`
+ * hace que Postgres rechace todo el statement (código 21000), no solo la fila
+ * repetida (hallazgo 2026-08-18, bloqueaba la ingesta completa). El conteo
+ * devuelto es `deduped.length` (filas realmente tocadas tras deduplicar), no
+ * "filas que cambiaron" — el propio `ON CONFLICT` resuelve ese dedup en el server.
  */
 export function makeDbSink(source: string): RawSink {
   return async (records: RawRecordInsert[]): Promise<number> => {
     if (records.length === 0) return 0;
+    // Postgres rechaza un ON CONFLICT DO UPDATE que afecte la misma fila dos
+    // veces en un solo statement — deduplicar por (source, sourceRecordId)
+    // dentro del lote es obligatorio, no solo una optimización. Se queda con
+    // la última ocurrencia (la más reciente dentro de esta página).
+    const bySourceRecordId = new Map<string, RawRecordInsert>();
+    for (const r of records) bySourceRecordId.set(r.sourceRecordId, r);
+    const deduped = [...bySourceRecordId.values()];
+
     await db
       .insert(rawRecord)
-      .values(records)
+      .values(deduped)
       .onConflictDoUpdate({
         target: [rawRecord.source, rawRecord.sourceRecordId],
         set: {
@@ -102,7 +114,7 @@ export function makeDbSink(source: string): RawSink {
           batchId: sql`excluded.batch_id`,
         },
       });
-    return records.length;
+    return deduped.length;
   };
 }
 
