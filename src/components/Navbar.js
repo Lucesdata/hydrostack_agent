@@ -67,11 +67,12 @@ const AUTH_CSS = `
   font: 11px var(--font-mono, monospace); color: var(--ink-600, #525B5A);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.clr-nav-user-menu button{
+.clr-nav-user-menu button, .clr-nav-user-menu a{
   background: none; border: none; text-align: left; font-size: 12.5px;
   color: var(--ink-900, #0A1F1C); padding: 9px 14px; cursor: pointer;
+  text-decoration: none; display: block;
 }
-.clr-nav-user-menu button:hover{ background: var(--bg, #FAFAF7); }
+.clr-nav-user-menu button:hover, .clr-nav-user-menu a:hover{ background: var(--bg, #FAFAF7); }
 .clr-nav-user-sep{ border-top: 1px solid var(--line, #E5E5E0); margin: 4px 0; }
 .clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 10px; gap: 8px; }
 .clr-mobile-user{ display: flex; align-items: center; gap: 10px; padding: 0 4px 6px; }
