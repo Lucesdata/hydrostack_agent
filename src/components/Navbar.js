@@ -11,7 +11,10 @@ const NAV_ITEMS = [
 ];
 
 const AUTH_CSS = `
-.clr-nav-auth{ display: flex; align-items: center; gap: 10px; margin-left: 8px; }
+.clr-nav-auth{ display: none; align-items: center; gap: 10px; margin-left: 8px; }
+@media (min-width: 1024px) {
+  .clr-nav-auth{ display: flex; }
+}
 .clr-nav-auth-link{
   font: 500 12.5px var(--font-sans, sans-serif); color: var(--ink-600, #525B5A);
   text-decoration: none; padding: 6px 10px; white-space: nowrap;

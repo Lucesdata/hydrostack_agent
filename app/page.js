@@ -40,15 +40,15 @@ const PROBLEM_SOLUTION = [
 const INTENT_ROUTES = [
   {
     n: "01",
-    title: "Quiero ganar contratos",
-    desc: "Busca procesos activos de agua y saneamiento y verifica si calificas.",
+    title: "Busco contratos",
+    desc: "Procesos activos de agua y saneamiento, con verificación de si calificas.",
     href: "/licitaciones",
     cta: "BUSCAR PROCESOS",
   },
   {
     n: "02",
-    title: "Necesito estructurar o entender un pliego",
-    desc: "Decodifica requisitos habilitantes, técnicos y legales en minutos.",
+    title: "Tengo un pliego que descifrar",
+    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist.",
     href: "/pliego",
     cta: "DECODIFICAR PLIEGO",
   },
@@ -58,6 +58,20 @@ const INTENT_ROUTES = [
     desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
     href: "/soluciones",
     cta: "VER EL CAMINO",
+  },
+  {
+    n: "04",
+    title: "Gané un contrato, ¿ahora qué?",
+    desc: "Acompañamiento en ejecución: actas, pólizas, informes, liquidación.",
+    href: "/asistente/ejecucion",
+    cta: "EMPEZAR",
+  },
+  {
+    n: "05",
+    title: "Opero un acueducto o una ESP",
+    desc: "Dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
+    href: "/asistente/operacion",
+    cta: "CONSULTAR",
   },
 ];
 
@@ -88,7 +102,6 @@ const BLUEPRINT_CSS = `
 @keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 @keyframes bp-ripple { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:.55} 100%{transform:translate(-50%,-50%) scale(2.6);opacity:0} }
 @keyframes bp-flash { 0%{opacity:1;filter:brightness(1.9)} 60%{opacity:.5} 100%{opacity:0} }
-.bp-page { cursor: crosshair; }
 .bp-page a { text-decoration: none; cursor: pointer; }
 
 .bp-h1 {
@@ -140,29 +153,6 @@ const BLUEPRINT_CSS = `
 }
 @keyframes hero-fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-.hero-list {
-  list-style: none;
-  margin: 0 0 22px;
-  padding: 0;
-  max-width: 460px;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.hero-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font: 14.5px/1.5 var(--font-inter);
-  color: #0A1F1C;
-}
-.hero-list-n {
-  flex-shrink: 0;
-  margin-top: 1px;
-  font: 600 11px/1.9 var(--font-jetbrains-mono), monospace;
-  color: #0369A1;
-}
-
 /* Panel de evaluación: wrapper externo hace la entrada (fade+scale), la
    tarjeta interna hace el hover — separados para que no se pisen las dos
    transiciones de "transform" (ver nota técnica del rediseño). */
@@ -173,29 +163,6 @@ const BLUEPRINT_CSS = `
 }
 @keyframes hero-panelIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
-.hero-glass-card {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 12px;
-  box-shadow:
-    0 20px 40px -18px rgba(19, 77, 116, 0.30),
-    0 2px 6px rgba(19, 77, 116, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
-}
-.hero-glass-card:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    0 32px 56px -16px rgba(19, 77, 116, 0.36),
-    0 4px 10px rgba(19, 77, 116, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-/* .bp-card:hover pisa border-color más abajo en esta hoja; esta regla más
-   específica (2 clases + :hover) mantiene el borde de vidrio en hover. */
-.bp-card.hero-glass-card:hover { border-color: rgba(255, 255, 255, 0.65); }
-
 @media (prefers-reduced-motion: reduce) {
   .hero-mask > span, .hero-fade-up, .hero-panel-enter {
     animation: none !important;
@@ -203,7 +170,6 @@ const BLUEPRINT_CSS = `
     transform: none !important;
   }
   .hero-draw::after { animation: none !important; transform: scaleX(1) !important; }
-  .hero-glass-card { transition: none !important; }
 }
 
 .bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s, background .2s; }
@@ -231,9 +197,8 @@ const BLUEPRINT_CSS = `
 .bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
 .bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
 
-.bp-hero-wrap { position: relative; padding: 88px 48px 64px; }
+.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: 88px 48px 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; }
-.bp-coord-label { position: absolute; top: 88px; right: 48px; font: 10px var(--font-jetbrains-mono),monospace; color: #6B746F; }
 .bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
@@ -264,7 +229,6 @@ const BLUEPRINT_CSS = `
   .bp-pillars-grid { grid-template-columns: 1fr; }
   .bp-closing-wrap { padding: 40px 20px; }
   .bp-footer-wrap { padding: 20px; }
-  .bp-coord-label { display: none; }
 }
 `;
 
@@ -406,26 +370,87 @@ function useBlueprintFX() {
     lineBScale: visible.stats ? 1 : 0,
     lineCDashoffset: visible.problem ? 0 : 500,
     lineDDashoffset: visible.how ? 0 : 500,
-    inletOpacity: visible.hero ? 0.16 : 0.045,
-    tankOpacity: visible.stats ? 0.16 : 0.045,
-    drainOpacity: visible.problem || visible.how ? 0.16 : 0.045,
-    outletOpacity: visible.pillars ? 0.16 : 0.045,
     waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
     depthLabel: (p * 6).toFixed(1) + "m",
-    inletFlashStyle: visible.hero
-      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
-      : { opacity: 0 },
-    tankFlashStyle: visible.stats
-      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
-      : { opacity: 0 },
-    drainFlashStyle:
-      visible.problem || visible.how
-        ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
-        : { opacity: 0 },
-    outletFlashStyle: visible.pillars
-      ? { opacity: 1, animation: "bp-flash 1s ease-out forwards" }
-      : { opacity: 0 },
   };
+}
+
+/* ── Fondo del hero: "infinity cove" — foco de luz cálido con profundidad
+   fotográfica de estudio. Solo dentro de .bp-hero-wrap (position:relative +
+   isolation:isolate), capas en z-index negativo de atrás hacia adelante. ── */
+function HeroCove() {
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -3,
+          background:
+            "radial-gradient(circle at 56% 40%, #ffffff 0%, #FBFAF5 24%, #F0F3F2 44%, #dfe9ee 62%, #c3d8e4 82%, #a9c8db 100%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 180,
+          zIndex: -3,
+          background: "linear-gradient(to bottom, rgba(252,252,249,0), #FCFCF9)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-8%",
+          right: "-8%",
+          top: "40%",
+          bottom: 0,
+          zIndex: -2,
+          background:
+            "radial-gradient(ellipse 70% 100% at 50% 0%, rgba(0,0,0,.16) 0%, rgba(0,0,0,.08) 35%, transparent 70%)",
+          filter: "blur(50px)",
+          opacity: 0.35,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -2,
+          backgroundImage:
+            "linear-gradient(rgba(19,77,116,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(19,77,116,.05) 1px,transparent 1px)",
+          backgroundSize: "32px 32px",
+          maskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
+          WebkitMaskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -1,
+          opacity: 0.03,
+          mixBlendMode: "multiply",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "180px 180px",
+          pointerEvents: "none",
+        }}
+      />
+    </>
+  );
 }
 
 function BlueprintBackground({ fx }) {
@@ -448,174 +473,6 @@ function BlueprintBackground({ fx }) {
           willChange: "transform",
         }}
       />
-
-      <svg
-        aria-hidden="true"
-        role="presentation"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMid slice"
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100vh",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-        fill="none"
-        stroke="#0369A1"
-        strokeWidth="1.4"
-      >
-        <g style={{ opacity: fx.inletOpacity, transition: "opacity 1s ease" }}>
-          <line x1="0" y1="120" x2="220" y2="120" />
-          <line x1="0" y1="150" x2="180" y2="150" />
-          <path d="M180,150 L220,150 L220,120" />
-          <circle cx="60" cy="120" r="3" fill="#0369A1" stroke="none" />
-          <circle cx="140" cy="150" r="3" fill="#0369A1" stroke="none" />
-          <circle r="2.6" fill="#0369A1" stroke="none">
-            <animateMotion dur="4.5s" repeatCount="indefinite" path="M0,120 L220,120 L220,140" />
-          </circle>
-          <circle r="2.2" fill="#0369A1" stroke="none">
-            <animateMotion
-              dur="4.5s"
-              begin="2.2s"
-              repeatCount="indefinite"
-              path="M0,150 L180,150 L220,150 L220,140"
-            />
-          </circle>
-          <text
-            x="20"
-            y="105"
-            fontFamily="var(--font-jetbrains-mono),monospace"
-            fontSize="12"
-            fill="#0369A1"
-            stroke="none"
-          >
-            Ø160mm
-          </text>
-          <path
-            d="M0,120 L220,120 L220,140"
-            stroke="#7DD3FC"
-            strokeWidth="2.4"
-            style={fx.inletFlashStyle}
-          />
-        </g>
-        <g style={{ opacity: fx.tankOpacity, transition: "opacity 1s ease" }}>
-          <rect x="220" y="140" width="360" height="260" rx="6" />
-          <line x1="220" y1="200" x2="580" y2="200" strokeDasharray="4 6" />
-          <line x1="220" y1="280" x2="580" y2="280" strokeDasharray="4 6" />
-          <line x1="400" y1="140" x2="400" y2="400" strokeDasharray="2 8" strokeWidth="1" />
-          <circle r="2.6" fill="#0369A1" stroke="none">
-            <animateMotion dur="5s" repeatCount="indefinite" path="M230,200 L570,200" />
-          </circle>
-          <circle r="2.6" fill="#0369A1" stroke="none">
-            <animateMotion
-              dur="5s"
-              begin="2.5s"
-              repeatCount="indefinite"
-              path="M570,280 L230,280"
-            />
-          </circle>
-          <text
-            x="232"
-            y="130"
-            fontFamily="var(--font-jetbrains-mono),monospace"
-            fontSize="12"
-            fill="#0369A1"
-            stroke="none"
-          >
-            H:2.4m
-          </text>
-          <text
-            x="232"
-            y="418"
-            fontFamily="var(--font-jetbrains-mono),monospace"
-            fontSize="12"
-            fill="#0369A1"
-            stroke="none"
-          >
-            V:12m³
-          </text>
-          <rect
-            x="220"
-            y="140"
-            width="360"
-            height="260"
-            rx="6"
-            stroke="#7DD3FC"
-            strokeWidth="2"
-            style={fx.tankFlashStyle}
-          />
-        </g>
-        <g style={{ opacity: fx.drainOpacity, transition: "opacity 1s ease" }}>
-          <line x1="640" y1="430" x2="1080" y2="430" />
-          <line x1="640" y1="470" x2="1080" y2="470" />
-          <line x1="640" y1="510" x2="1080" y2="510" />
-          <line x1="700" y1="410" x2="700" y2="530" strokeWidth="1" strokeDasharray="2 6" />
-          <line x1="800" y1="410" x2="800" y2="530" strokeWidth="1" strokeDasharray="2 6" />
-          <line x1="900" y1="410" x2="900" y2="530" strokeWidth="1" strokeDasharray="2 6" />
-          <line x1="1000" y1="410" x2="1000" y2="530" strokeWidth="1" strokeDasharray="2 6" />
-          <circle r="2.4" fill="#0369A1" stroke="none">
-            <animateMotion dur="4s" repeatCount="indefinite" path="M650,430 L1070,430" />
-          </circle>
-          <circle r="2.4" fill="#0369A1" stroke="none">
-            <animateMotion
-              dur="4s"
-              begin="1.3s"
-              repeatCount="indefinite"
-              path="M650,470 L1070,470"
-            />
-          </circle>
-          <circle r="2.4" fill="#0369A1" stroke="none">
-            <animateMotion
-              dur="4s"
-              begin="2.6s"
-              repeatCount="indefinite"
-              path="M650,510 L1070,510"
-            />
-          </circle>
-          <text
-            x="650"
-            y="398"
-            fontFamily="var(--font-jetbrains-mono),monospace"
-            fontSize="12"
-            fill="#0369A1"
-            stroke="none"
-          >
-            L:440mm
-          </text>
-          <path
-            d="M640,430 L1080,430 M640,470 L1080,470 M640,510 L1080,510"
-            stroke="#7DD3FC"
-            strokeWidth="2.2"
-            style={fx.drainFlashStyle}
-          />
-        </g>
-        <g style={{ opacity: fx.outletOpacity, transition: "opacity 1s ease" }}>
-          <line x1="1140" y1="600" x2="1140" y2="760" />
-          <path d="M1122,742 L1140,764 L1158,742" />
-          <circle cx="1140" cy="620" r="3" fill="#0369A1" stroke="none" />
-          <circle r="2.6" fill="#0369A1" stroke="none">
-            <animateMotion dur="3.5s" repeatCount="indefinite" path="M1140,600 L1140,758" />
-          </circle>
-          <text
-            x="1090"
-            y="600"
-            fontFamily="var(--font-jetbrains-mono),monospace"
-            fontSize="12"
-            fill="#0369A1"
-            stroke="none"
-          >
-            Ø200mm
-          </text>
-          <path
-            d="M1140,600 L1140,760"
-            stroke="#7DD3FC"
-            strokeWidth="2.4"
-            style={fx.outletFlashStyle}
-          />
-        </g>
-      </svg>
 
       <div
         style={{
@@ -762,8 +619,8 @@ export default function LandingPage() {
         <ProcesosTicker />
 
         <div ref={heroRef} className="bp-hero-wrap">
-          <span className="bp-coord-label">x:1440 y:0</span>
-          <div className="bp-hero-grid">
+          <HeroCove />
+          <div className="bp-hero-grid" style={{ position: "relative" }}>
             <div style={{ position: "relative" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -789,34 +646,15 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <ul className="hero-list hero-fade-up" style={{ animationDelay: ".75s" }}>
-                <li>
-                  <span className="hero-list-n" aria-hidden="true">01</span>
-                  Encuentra proyectos de agua y saneamiento.
-                </li>
-                <li>
-                  <span className="hero-list-n" aria-hidden="true">02</span>
-                  Modela soluciones y genera informes y planos en PDF.
-                </li>
-                <li>
-                  <span className="hero-list-n" aria-hidden="true">03</span>
-                  Haz seguimiento de obras, acueductos y vertimientos.
-                </li>
-                <li>
-                  <span className="hero-list-n" aria-hidden="true">04</span>
-                  Usa agentes de IA para articular tus soluciones.
-                </li>
-              </ul>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginTop: 30 }}>
                 <Link
                   href="/licitaciones"
-                  className="bp-cta hero-fade-up"
+                  className="bp-cta bp-cta-dark hero-fade-up"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 8,
-                    background: "#0A1F1C",
+                    background: "#0369A1",
                     color: "#fff",
                     font: "600 13px var(--font-jetbrains-mono),monospace",
                     letterSpacing: ".04em",
@@ -862,7 +700,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="bp-pillars-wrap">
+        <div className="bp-pillars-wrap" id="asistentes-proyecto">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
             <span
@@ -873,7 +711,7 @@ export default function LandingPage() {
                 textTransform: "uppercase",
               }}
             >
-              Fig. 02 — ¿Qué necesitas resolver?
+              Fig. 02 — ¿En qué momento estás?
             </span>
           </div>
           <div className="bp-pillars-grid">
@@ -881,9 +719,11 @@ export default function LandingPage() {
               <Link
                 key={c.n}
                 href={c.href}
-                className="bp-card hero-glass-card"
+                className="bp-card"
                 style={{
+                  border: "1px solid #DADAD2",
                   padding: 22,
+                  background: "#fff",
                   color: "#0A1F1C",
                   display: "flex",
                   flexDirection: "column",
@@ -939,38 +779,34 @@ export default function LandingPage() {
                 </span>
               </Link>
             ))}
-          </div>
-        </div>
 
-        <div className="bp-pillars-wrap" id="asistentes-proyecto">
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase" }}>Fig. 06 — Asistentes de proyecto</span>
-          </div>
-          <div className="bp-pillars-grid">
-            <Link href="/asistente/ejecucion" className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
-              <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-              <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 01 ]</span>
-              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Gané un contrato, ¿ahora qué?</div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Sube tu contrato y te acompañamos en la ejecución: actas, pólizas, informes, liquidación.</p>
-              <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ EMPEZAR <span className="bp-card-arrow">→</span> ]</span>
-            </Link>
-
-            <Link href="/asistente/operacion" className="bp-card" style={{ border: "1px solid #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
-              <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-              <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 02 ]</span>
-              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Opero un acueducto o una ESP</div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Resuelve dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.</p>
-              <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>[ CONSULTAR <span className="bp-card-arrow">→</span> ]</span>
-            </Link>
-
-            <div className="bp-card" aria-live="polite" style={{ position: "relative", border: "1px dashed #DADAD2", padding: 22, background: "#fff", color: "#0A1F1C", display: "flex", flexDirection: "column", gap: 12, minHeight: 180 }}>
-              <span style={{ position: "absolute", top: 10, right: 14, font: "9px var(--font-jetbrains-mono),monospace", color: "#6B746F", letterSpacing: ".08em", textTransform: "uppercase" }}>Próximamente</span>
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>[ 03 ]</span>
-              <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>Vendo o fabrico soluciones</div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>Pronto: oportunidades reales de comunidades y ESP que necesitan lo que ofreces.</p>
+            <div
+              aria-live="polite"
+              style={{
+                padding: 22,
+                minHeight: 180,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                gap: 10,
+              }}
+            >
+              <span
+                style={{
+                  font: "10px var(--font-jetbrains-mono),monospace",
+                  color: "#6B746F",
+                  letterSpacing: ".1em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Próximamente
+              </span>
+              <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
+                Vendo o fabrico soluciones
+              </div>
+              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
+                Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
+              </p>
               {waitlistStatus === "done" ? (
                 <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#16A34A" }}>[ Te avisaremos ]</span>
               ) : (
@@ -1199,7 +1035,7 @@ export default function LandingPage() {
           </span>
           <Link
             href="/licitaciones"
-            className="bp-cta"
+            className="bp-cta bp-cta-dark"
             style={{
               display: "inline-flex",
               background: "#0369A1",
@@ -1208,7 +1044,7 @@ export default function LandingPage() {
               letterSpacing: ".04em",
             }}
           >
-            [ PRUEBA UN PROCESO ]
+            [ Prueba un proceso ]
           </Link>
         </div>
 

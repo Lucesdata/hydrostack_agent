@@ -867,9 +867,6 @@ select {
   .clr-links {
     display: flex;
   }
-  .clr-hamburger {
-    display: none;
-  }
 }
 .clr-nav-link {
   position: relative;
@@ -963,6 +960,11 @@ select {
 }
 .clr-hamburger:hover {
   border-color: var(--accent-soft);
+}
+@media (min-width: 1024px) {
+  .clr-hamburger {
+    display: none;
+  }
 }
 .clr-hamburger-icon {
   position: relative;

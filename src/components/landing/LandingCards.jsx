@@ -161,17 +161,18 @@ const CARDS_CSS = `
   gap: 8px;
   margin-top: auto;
   padding: 13px 24px;
-  background: var(--accent);
-  color: #fff;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
   font-weight: 600;
   font-size: 14px;
   border-radius: 10px;
   text-decoration: none;
-  transition: transform .18s, box-shadow .18s;
+  transition: background .18s, color .18s;
 }
 .lc-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
+  background: var(--accent);
+  color: #fff;
 }
 .lc-stat-card:focus-visible,
 .lc-cta-btn:focus-visible {
@@ -329,7 +330,7 @@ export default function LandingCards() {
                 <p className="lc-locked-msg">🔒 Detalle disponible al registrarte</p>
 
                 <Link href="/licitaciones" className="lc-cta-btn">
-                  Evalúa tu elegibilidad completa — gratis
+                  Ver este proceso completo →
                 </Link>
               </>
             ) : (
