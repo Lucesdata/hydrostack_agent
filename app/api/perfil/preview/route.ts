@@ -14,10 +14,15 @@ import { isValidPerfil } from "@/src/lib/oferente/validate";
 
 export const runtime = "nodejs";
 
-interface PreviewEjemplo {
+export interface PreviewEjemplo {
   nombre: string;
   entidad: string;
   valor: number | null;
+}
+
+export interface PreviewResponse {
+  count: number;
+  ejemplos: PreviewEjemplo[];
 }
 
 export async function POST(req: NextRequest) {

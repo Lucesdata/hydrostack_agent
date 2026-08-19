@@ -125,6 +125,7 @@ describe("POST /api/perfil/preview", () => {
     expect(body.ejemplos).toHaveLength(3);
     expect(body.ejemplos[0]).toEqual({ nombre: "Proceso A", entidad: "Entidad A", valor: 100 });
     expect(body.ejemplos[1]).toEqual({ nombre: "Proceso B", entidad: "Entidad B", valor: 200 });
+    expect(mockGetMatches).toHaveBeenCalledWith(perfil);
   });
 
   it("503 si getMatchesForPerfil lanza (base inalcanzable)", async () => {
