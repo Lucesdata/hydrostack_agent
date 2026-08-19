@@ -106,7 +106,7 @@ const BLUEPRINT_CSS = `
 
 .bp-h1 {
   font-family: var(--font-ibm-plex-sans-condensed), var(--font-inter), sans-serif;
-  font-size: 46px;
+  font-size: clamp(32px, 4.2vw, 46px);
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -197,25 +197,25 @@ const BLUEPRINT_CSS = `
 .bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
 .bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
 
-.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: 88px 48px 64px; }
-.bp-hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; }
-.bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
+.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) clamp(24px,4vw,48px) 64px; }
+.bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 48px; align-items: start; }
+.bp-probhow-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
 .bp-ps-pain { grid-area: pain; display: flex; align-items: flex-start; justify-content: flex-end; gap: 12px; }
 .bp-ps-pain-text { text-align: right; }
 .bp-ps-connector { grid-area: connector; display: flex; align-items: center; justify-content: center; }
 .bp-ps-answer { grid-area: answer; padding-left: 22px; }
-.bp-pillars-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
+.bp-pillars-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
 .bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.bp-closing-wrap { padding: 56px 48px; border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.bp-footer-wrap { padding: 20px 48px; border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
+.bp-closing-wrap { padding: 56px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.bp-footer-wrap { padding: 20px clamp(24px,4vw,48px); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 
 @media (max-width: 1100px) {
   .bp-pillars-grid { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 900px) {
-  .bp-hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .bp-hero-grid { gap: 36px; }
   .bp-ps-row { grid-template-columns: 1fr; grid-template-areas: "pain" "answer"; row-gap: 12px; padding: 20px 0; }
   .bp-ps-connector { display: none; }
   .bp-ps-pain { justify-content: flex-start; }
@@ -223,11 +223,11 @@ const BLUEPRINT_CSS = `
   .bp-ps-answer { padding-left: 0; }
 }
 @media (max-width: 640px) {
-  .bp-hero-wrap { padding: 48px 20px 40px; }
-  .bp-probhow-wrap { padding: 48px 20px; }
-  .bp-pillars-wrap { padding: 48px 20px; }
+  .bp-hero-wrap { padding-top: 48px; padding-bottom: 40px; }
+  .bp-probhow-wrap { padding-top: 48px; padding-bottom: 48px; }
+  .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-pillars-grid { grid-template-columns: 1fr; }
-  .bp-closing-wrap { padding: 40px 20px; }
+  .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
 }
 `;
