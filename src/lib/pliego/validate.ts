@@ -93,3 +93,13 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
 
   return { ok: inconsistencias.length === 0, inconsistencias, notas };
 }
+
+/** Tope compartido para la subida directa del Documento Base (PDF). */
+export const MAX_BYTES_PDF = 20 * 1024 * 1024;
+
+const PDF_MAGIC = "%PDF-";
+
+/** Chequeo barato de magic bytes — descarta un HTML de captcha/login antes de gastar una llamada al extractor. */
+export function isPdfBuffer(buffer: Buffer): boolean {
+  return buffer.subarray(0, PDF_MAGIC.length).toString("ascii") === PDF_MAGIC;
+}

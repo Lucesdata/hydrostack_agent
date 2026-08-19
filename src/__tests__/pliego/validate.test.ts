@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validatePliego } from "@/src/lib/pliego/validate";
+import { validatePliego, isPdfBuffer } from "@/src/lib/pliego/validate";
 import { parsePliegoExtraction, type PliegoExtraction } from "@/src/lib/pliego/schema";
 
 function item(o: Partial<PliegoExtraction["capitulos"][number]["items"][number]> = {}) {
@@ -198,5 +198,21 @@ describe("parsePliegoExtraction", () => {
   it("lanza si una laguna tiene severidad inválida", () => {
     const bad = extraction({ lagunas_pendientes: [laguna({ severidad: "critica" as never })] });
     expect(() => parsePliegoExtraction(bad)).toThrow(/severidad/);
+  });
+});
+
+// --- isPdfBuffer -------------------------------------------------------
+
+describe("isPdfBuffer", () => {
+  it("acepta un buffer que empieza con %PDF-", () => {
+    expect(isPdfBuffer(Buffer.from("%PDF-1.7\n%âãÏÓ\n1 0 obj"))).toBe(true);
+  });
+
+  it("rechaza un buffer que no empieza con %PDF-", () => {
+    expect(isPdfBuffer(Buffer.from("<html><body>captcha</body></html>"))).toBe(false);
+  });
+
+  it("rechaza un buffer vacío", () => {
+    expect(isPdfBuffer(Buffer.alloc(0))).toBe(false);
   });
 });
