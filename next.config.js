@@ -6,6 +6,13 @@ const nextConfig = {
   // ("t.mask is not a function") under the Vercel serverless runtime — external avoids it.
   experimental: {
     serverComponentsExternalPackages: ["pdfkit", "ws", "@neondatabase/serverless"],
+    // Default Server Actions body limit is 1MB — too small for a real pliego PDF
+    // upload (uploadPliegoAction in src/lib/secop/pliego-actions.ts). Match the
+    // 20MB ceiling that MAX_BYTES_PDF (src/lib/pliego/validate.ts) already enforces
+    // in application code, so that check isn't dead code for 1MB-20MB files.
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
   },
   // El repo no tenía .eslintrc.json antes de 2026-07-13; `next build` corría sin
   // linter (no había config que activarlo). Agregar la config para que
