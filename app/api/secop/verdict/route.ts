@@ -18,6 +18,7 @@ import { requisitosProceso } from "@/src/lib/db/schema/eligibility";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import { parseRequisitosEstructurados } from "@/src/lib/eligibility/schema";
+import { isValidPerfil } from "@/src/lib/oferente/validate";
 import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/schema";
 import type { SecopProceso } from "@/src/lib/secop/types";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
@@ -33,17 +34,6 @@ function isValidProceso(p: unknown): p is SecopProceso {
   if (!p || typeof p !== "object") return false;
   const o = p as Record<string, unknown>;
   return typeof o.id === "string" && typeof o.referencia === "string";
-}
-
-function isValidPerfil(p: unknown): p is OferenteProfile {
-  if (!p || typeof p !== "object") return false;
-  const o = p as Record<string, unknown>;
-  return (
-    typeof o.id === "string" &&
-    Array.isArray(o.sectoresUnspsc) &&
-    !!o.cobertura &&
-    !!o.cuantiaObjetivo
-  );
 }
 
 export async function POST(req: NextRequest) {
