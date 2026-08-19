@@ -52,15 +52,21 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
   }, [perfil]);
 
   async function guardar() {
+    const perfilAlGuardar = JSON.stringify(perfil);
     setStatus("saving");
     try {
       const res = await fetch("/api/perfil", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(perfil),
+        body: perfilAlGuardar,
       });
       if (res.ok) {
-        setStatus("saved");
+        // Solo marcar saved si el perfil no cambió mientras guardábamos
+        if (JSON.stringify(perfil) === perfilAlGuardar) {
+          setStatus("saved");
+        } else {
+          setStatus("error");
+        }
         return;
       }
       const body = await res.json().catch(() => null);

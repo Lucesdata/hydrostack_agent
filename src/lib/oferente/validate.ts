@@ -19,7 +19,7 @@ export function isValidPerfil(p: unknown): p is OferenteProfile {
     Array.isArray(cobertura.departamentos) &&
     Array.isArray(cobertura.municipios) &&
     !!cuantia &&
-    typeof cuantia.minCop === "number" &&
-    typeof cuantia.maxCop === "number"
+    Number.isFinite(cuantia.minCop) &&
+    Number.isFinite(cuantia.maxCop)
   );
 }
