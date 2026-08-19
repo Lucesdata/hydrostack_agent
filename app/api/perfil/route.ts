@@ -19,20 +19,10 @@ import { db } from "@/src/lib/db/client";
 import { oferentePerfil } from "@/src/lib/db/schema/cuentas";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
+import { isValidPerfil } from "@/src/lib/oferente/validate";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 
 export const runtime = "nodejs";
-
-function isValidPerfil(p: unknown): p is OferenteProfile {
-  if (!p || typeof p !== "object") return false;
-  const o = p as Record<string, unknown>;
-  return (
-    typeof o.id === "string" &&
-    Array.isArray(o.sectoresUnspsc) &&
-    !!o.cobertura &&
-    !!o.cuantiaObjetivo
-  );
-}
 
 export async function GET() {
   const user = await getSessionUser();
