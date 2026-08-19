@@ -205,6 +205,10 @@ const BLUEPRINT_CSS = `
 .bp-pillars-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
 .bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
+  .bp-credentials-strip > div:first-child { border-top: none; padding-top: 0 !important; }
+}
 .bp-closing-wrap { padding: 56px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px clamp(24px,4vw,48px); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 
@@ -224,8 +228,6 @@ const BLUEPRINT_CSS = `
   .bp-probhow-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-pillars-grid { grid-template-columns: 1fr; }
-  .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
-  .bp-credentials-strip > div:first-child { border-top: none; padding-top: 0 !important; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
 }
