@@ -22,6 +22,8 @@ import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ah
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import { getEnJuegoMes } from "@/src/lib/secop/landingStats";
 import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
+import { PliegoUploadBlock } from "@/src/components/secop/PliegoUploadBlock";
+import { getPliegoStatusForProcesos } from "@/src/lib/secop/pliego-status";
 import {
   sentenceCaseTitle,
   formatCopCompact,
@@ -40,6 +42,14 @@ const PERFIL_ERROR: Record<string, string> = {
   vacio: "Marca al menos un sector o una zona antes de continuar.",
   db_unavailable: "No pudimos guardar tu perfil ahora mismo. Intenta de nuevo en unos minutos.",
 };
+const pliegoBanner = (searchParams: Props["searchParams"]): string | null => {
+  if (searchParams.pliego === "ok") return "Pliego cargado y extraído.";
+  if (searchParams.pliego === "error") {
+    return `No se pudo procesar el pliego: ${searchParams.pliegoDetalle ?? "error desconocido"}.`;
+  }
+  return null;
+};
+
 
 const STYLE = `
   .clr-mc{
@@ -100,6 +110,28 @@ const STYLE = `
     border-radius: var(--radius-md);
   }
   .clr-mc-cta:hover{ opacity: 0.9; }
+  .clr-mc-pliego{ margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .clr-mc-pliego-summary{
+    cursor: pointer; font-size: 12px; color: var(--ink-600); display: flex;
+    align-items: center; gap: 6px; list-style: none;
+  }
+  .clr-mc-pliego-summary::-webkit-details-marker{ display: none; }
+  .clr-mc-pliego-glyph{
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 14px; height: 14px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  }
+  .clr-mc-pliego-glyph--pass{ background: #dcfce7; color: #16a34a; }
+  .clr-mc-pliego-glyph--fail{ background: #fee2e2; color: #dc2626; }
+  .clr-mc-pliego-body{ margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+  .clr-mc-pliego-fields{ font-size: 12px; color: var(--ink-900); margin: 0; }
+  .clr-mc-pliego-hint{ font-size: 11.5px; color: var(--ink-600); margin: 0; }
+  .clr-mc-pliego-hint a{ color: var(--accent); }
+  .clr-mc-pliego-form{ display: flex; align-items: center; gap: 8px; }
+  .clr-mc-pliego-form input[type="file"]{ font-size: 11.5px; max-width: 220px; }
+  .clr-mc-pliego-form button{
+    background: var(--accent); color: #fff; border: none; font-size: 11.5px;
+    padding: 5px 10px; border-radius: var(--radius-md); cursor: pointer;
+  }
 `;
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -112,7 +144,13 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 interface Props {
-  searchParams: { resultado?: string; resultadoError?: string; perfilError?: string };
+  searchParams: {
+    resultado?: string;
+    resultadoError?: string;
+    perfilError?: string;
+    pliego?: string;
+    pliegoDetalle?: string;
+  };
 }
 
 export default async function MisCoincidenciasPage({ searchParams }: Props) {
@@ -125,6 +163,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
       : estado
         ? (BANNER[estado] ?? null)
         : null;
+  const pliegoResultBanner = pliegoBanner(searchParams);
   const perfilError = PERFIL_ERROR[searchParams.perfilError ?? ""] ?? null;
 
   if (!usuarioId) {
@@ -165,6 +204,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
 
   if (!isPerfilCompleto(perfilGuardado)) {
     const matches = await getMatchesForPerfilMinimo(perfilGuardado);
+    const pliegoStatusMap = await getPliegoStatusForProcesos(matches.map((m) => m.proceso.id));
     return (
       <Shell>
         <h1 className="clr-mc-title">Mis coincidencias</h1>
@@ -174,6 +214,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver también tu
           semáforo de elegibilidad y recibir alertas por correo.
         </p>
+        {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
         {matches.length === 0 ? (
           <div className="clr-mc-empty">
             Sin coincidencias por ahora. Revisa tu sector y zona en{" "}
@@ -204,6 +245,11 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                     </a>
                   )}
                 </div>
+                <PliegoUploadBlock
+                  procesoId={m.proceso.id}
+                  procesoUrl={m.proceso.url}
+                  status={pliegoStatusMap.get(m.proceso.id)}
+                />
               </div>
             ))}
           </div>
@@ -213,6 +259,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
   }
 
   const matches = await getMatchesForPerfil(perfilGuardado);
+  const pliegoStatusMap = await getPliegoStatusForProcesos(matches.map((m) => m.proceso.id));
   await markCoincidenciasVistas(usuarioId);
 
   async function handleEnviarAhora() {
@@ -244,6 +291,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         </form>
       </div>
       {banner && <div className="clr-mc-banner">{banner}</div>}
+      {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
       {matches.length === 0 ? (
         <div className="clr-mc-empty">
           Sin coincidencias por ahora con tu perfil actual. Revisa tu cobertura y sectores en{" "}
@@ -280,6 +328,11 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                     </a>
                   )}
                 </div>
+                <PliegoUploadBlock
+                  procesoId={proceso.id}
+                  procesoUrl={proceso.url}
+                  status={pliegoStatusMap.get(proceso.id)}
+                />
               </div>
             );
           })}

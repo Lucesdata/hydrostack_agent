@@ -161,4 +161,23 @@ describe("uploadPliego", () => {
     expect(r).toEqual({ ok: false, error: "Extracción falló: Gemini no disponible" });
     expect(insertValuesMock).not.toHaveBeenCalled();
   });
+
+  it("rechaza un archivo > 20MB sin persistir", async () => {
+    // Create a buffer larger than MAX_BYTES_PDF (20MB)
+    // Must start with valid PDF magic bytes "%PDF-" so it passes isPdfBuffer check
+    const bigBuffer = Buffer.alloc(21 * 1024 * 1024); // 21MB
+    // Write "%PDF-" at the start
+    Buffer.from("%PDF-").copy(bigBuffer, 0);
+
+    const r = await uploadPliego({
+      procesoId: "CO1.REQ.1",
+      subidoPorUsuarioId: "u1",
+      nombreArchivo: "big.pdf",
+      buffer: bigBuffer,
+    });
+
+    expect(r).toEqual({ ok: false, error: expect.stringContaining("supera el máximo") });
+    expect(extractPliegoHybridMock).not.toHaveBeenCalled();
+    expect(insertValuesMock).not.toHaveBeenCalled();
+  });
 });
