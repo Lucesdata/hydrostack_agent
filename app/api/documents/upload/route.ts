@@ -11,12 +11,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/src/lib/supabase/get-session-user';
 import { uploadDocument, DocumentUploadError } from '@/src/lib/assistants/documents';
 import { getAssistantContext } from '@/src/lib/assistants/config';
+import { isPdfBuffer, MAX_BYTES_PDF as MAX_BYTES } from '@/src/lib/pliego/validate';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
-
-const MAX_BYTES = 20 * 1024 * 1024;
-const PDF_MAGIC = '%PDF-';
 
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
@@ -55,8 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const looksLikePdf = buffer.subarray(0, PDF_MAGIC.length).toString('ascii') === PDF_MAGIC;
-  if (!looksLikePdf) {
+  if (!isPdfBuffer(buffer)) {
     return NextResponse.json({ error: 'El archivo no es un PDF válido (no empieza con %PDF-).' }, { status: 400 });
   }
 

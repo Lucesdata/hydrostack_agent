@@ -20,16 +20,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { extractPliegoHybrid } from "@/src/lib/pliego/extractPliegoHybrid";
-import { validatePliego } from "@/src/lib/pliego/validate";
+import { validatePliego, isPdfBuffer, MAX_BYTES_PDF } from "@/src/lib/pliego/validate";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-const MAX_BYTES_PDF = 20 * 1024 * 1024; // 20MB — margen cómodo bajo el límite de request de la API de Gemini tras base64.
 const MAX_BYTES_XLS = 10 * 1024 * 1024;
-const PDF_MAGIC = "%PDF-";
 
 export async function POST(req: NextRequest) {
   if (!process.env.GEMINI_API_KEY) {
@@ -67,8 +65,7 @@ export async function POST(req: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const looksLikePdf = buffer.subarray(0, PDF_MAGIC.length).toString("ascii") === PDF_MAGIC;
-  if (!looksLikePdf) {
+  if (!isPdfBuffer(buffer)) {
     return NextResponse.json(
       { error: "El archivo no es un PDF válido (no empieza con %PDF-)." },
       { status: 400 }
