@@ -75,25 +75,21 @@ const INTENT_ROUTES = [
   },
 ];
 
-const PILLARS = [
+const CREDENTIALS = [
   {
-    n: "02",
-    title: "Planes directores de alcantarillado en Cali",
-    desc: "3 corregimientos, modelado hidráulico y gemelo digital.",
-    href: "/nosotros",
+    label: "Experiencia",
+    title: "11 años en agua y saneamiento",
+    body: "Un ingeniero especialista con licencia profesional vigente, no una startup de software.",
   },
   {
-    n: "03",
-    title: "Lee un pliego de 100 páginas en minutos",
-    desc: "El asistente extrae los requisitos legales y técnicos automáticamente.",
-    href: "/pliego",
+    label: "Proyecto",
+    title: "3 planes directores en Cali",
+    body: "Alcantarillado de tres corregimientos, con modelado hidráulico y gemelo digital.",
   },
   {
-    n: "04",
-    title: "Un ingeniero especialista, no una startup",
-    desc: "11 años en agua y saneamiento, licencia profesional vigente.",
-    href: "/nosotros",
-    dark: true,
+    label: "Resultado",
+    title: "Un pliego de 100 páginas, en minutos",
+    body: "Requisitos legales y técnicos extraídos y citados, listos para verificar.",
   },
 ];
 
@@ -208,6 +204,7 @@ const BLUEPRINT_CSS = `
 .bp-ps-answer { grid-area: answer; padding-left: 22px; }
 .bp-pillars-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
 .bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.bp-credentials-strip { display: flex; flex-wrap: wrap; }
 .bp-closing-wrap { padding: 56px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px clamp(24px,4vw,48px); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 
@@ -227,6 +224,8 @@ const BLUEPRINT_CSS = `
   .bp-probhow-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-pillars-grid { grid-template-columns: 1fr; }
+  .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
+  .bp-credentials-strip > div:first-child { border-top: none; padding-top: 0 !important; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
 }
@@ -940,91 +939,44 @@ export default function LandingPage() {
                 textTransform: "uppercase",
               }}
             >
-              Fig. 05 — Herramientas de soporte
+              Fig. 04 — Quién está detrás
             </span>
           </div>
-          <div className="bp-pillars-grid">
-            {PILLARS.map((c) => (
-              <Link
-                key={c.n}
-                href={c.href}
-                className={`bp-card${c.dark ? " bp-card-dark" : ""}`}
+          <div className="bp-credentials-strip">
+            {CREDENTIALS.map((c, i) => (
+              <div
+                key={c.label}
                 style={{
-                  border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`,
-                  padding: 22,
-                  background: c.dark ? "#0A1F1C" : "#fff",
-                  color: c.dark ? "#fff" : "#0A1F1C",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  minHeight: 200,
+                  flex: "1 1 260px",
+                  padding: i === 0 ? "4px 32px 4px 0" : "4px 32px",
+                  borderLeft: i === 0 ? "none" : "1px solid #DADAD2",
                 }}
               >
-                <span className="bp-card-seal">
-                  {c.dark ? (
-                    <>
-                      11 AÑOS
-                      <br />
-                      LIC. VIG.
-                    </>
-                  ) : (
-                    <>
-                      APROB.
-                      <br />
-                      RAS-2000
-                    </>
-                  )}
-                </span>
                 <span
                   style={{
-                    position: "absolute",
-                    top: -1,
-                    left: -1,
-                    width: 10,
-                    height: 10,
-                    borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: -1,
-                    right: -1,
-                    width: 10,
-                    height: 10,
-                    borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
+                    display: "block",
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F",
+                    color: "#6B746F",
+                    letterSpacing: ".1em",
+                    textTransform: "uppercase",
+                    marginBottom: 10,
                   }}
                 >
-                  [ {c.n} ]
+                  {c.label}
                 </span>
-                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p
+                <div
                   style={{
-                    font: "13px/1.5 var(--font-inter)",
-                    color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A",
-                    flexGrow: 1,
-                    margin: 0,
+                    font: "600 15px/1.4 var(--font-inter)",
+                    color: "#0A1F1C",
+                    marginBottom: 6,
                   }}
                 >
-                  {c.desc}
+                  {c.title}
+                </div>
+                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
+                  {c.body}
                 </p>
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "#7DD3FC" : "#0369A1",
-                  }}
-                >
-                  [ VER MÁS <span className="bp-card-arrow">→</span> ]
-                </span>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
