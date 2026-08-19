@@ -172,8 +172,8 @@ const BLUEPRINT_CSS = `
   .hero-draw::after { animation: none !important; transform: scaleX(1) !important; }
 }
 
-.bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s, background .2s; }
-.bp-card:hover { border-color: #0369A1; }
+.bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
+.bp-card:hover { border-color: #0369A1; transform: translateY(-2px); }
 .bp-card-seal {
   position: absolute; top: -10px; right: 14px; width: 46px; height: 46px; border-radius: 50%;
   border: 1.5px dashed #0369A1; display: flex; align-items: center; justify-content: center;
@@ -190,7 +190,7 @@ const BLUEPRINT_CSS = `
   cursor: pointer;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   padding: 13px 26px 13px 24px;
-  transition: background .2s;
+  transition: background .16s ease;
 }
 .bp-cta:hover { background: #0369A1 !important; }
 .bp-cta-dark:hover { background: #0A1F1C !important; }
