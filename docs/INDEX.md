@@ -37,3 +37,5 @@ ya implementadas.
 ## docs/architecture/
 
 Mapa de arquitectura generado (JSON/HTML).
+
+- [agenthydro-etapas-gates.md](./architecture/agenthydro-etapas-gates.md) — mapeo del vocabulario de etapas/gates de un prompt de AgentHydro externo a la arquitectura real (qué ya existe, qué no, qué está desactualizado)
