@@ -9,6 +9,7 @@ import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
+import IntentJourney from "@/src/components/landing/IntentJourney";
 
 const PROBLEM_SOLUTION = [
   {
@@ -37,63 +38,21 @@ const PROBLEM_SOLUTION = [
   },
 ];
 
-const INTENT_ROUTES = [
+const CREDENTIALS = [
   {
-    n: "01",
-    title: "Busco contratos",
-    desc: "Procesos activos de agua y saneamiento, con verificación de si calificas.",
-    href: "/licitaciones",
-    cta: "BUSCAR PROCESOS",
+    label: "Experiencia",
+    title: "11 años en agua y saneamiento",
+    body: "Un ingeniero especialista con licencia profesional vigente, no una startup de software.",
   },
   {
-    n: "02",
-    title: "Tengo un pliego que descifrar",
-    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist.",
-    href: "/pliego",
-    cta: "DECODIFICAR PLIEGO",
+    label: "Proyecto",
+    title: "3 planes directores en Cali",
+    body: "Alcantarillado de tres corregimientos, con modelado hidráulico y gemelo digital.",
   },
   {
-    n: "03",
-    title: "Tengo un problema de agua o vertimientos",
-    desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
-    href: "/soluciones",
-    cta: "VER EL CAMINO",
-  },
-  {
-    n: "04",
-    title: "Gané un contrato, ¿ahora qué?",
-    desc: "Acompañamiento en ejecución: actas, pólizas, informes, liquidación.",
-    href: "/asistente/ejecucion",
-    cta: "EMPEZAR",
-  },
-  {
-    n: "05",
-    title: "Opero un acueducto o una ESP",
-    desc: "Dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
-    href: "/asistente/operacion",
-    cta: "CONSULTAR",
-  },
-];
-
-const PILLARS = [
-  {
-    n: "02",
-    title: "Planes directores de alcantarillado en Cali",
-    desc: "3 corregimientos, modelado hidráulico y gemelo digital.",
-    href: "/nosotros",
-  },
-  {
-    n: "03",
-    title: "Lee un pliego de 100 páginas en minutos",
-    desc: "El asistente extrae los requisitos legales y técnicos automáticamente.",
-    href: "/pliego",
-  },
-  {
-    n: "04",
-    title: "Un ingeniero especialista, no una startup",
-    desc: "11 años en agua y saneamiento, licencia profesional vigente.",
-    href: "/nosotros",
-    dark: true,
+    label: "Resultado",
+    title: "Un pliego de 100 páginas, en minutos",
+    body: "Requisitos legales y técnicos extraídos y citados, listos para verificar.",
   },
 ];
 
@@ -106,7 +65,7 @@ const BLUEPRINT_CSS = `
 
 .bp-h1 {
   font-family: var(--font-ibm-plex-sans-condensed), var(--font-inter), sans-serif;
-  font-size: 46px;
+  font-size: clamp(32px, 4.2vw, 46px);
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -172,8 +131,8 @@ const BLUEPRINT_CSS = `
   .hero-draw::after { animation: none !important; transform: scaleX(1) !important; }
 }
 
-.bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s, background .2s; }
-.bp-card:hover { border-color: #0369A1; }
+.bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
+.bp-card:hover { border-color: #0369A1; transform: translateY(-2px); }
 .bp-card-seal {
   position: absolute; top: -10px; right: 14px; width: 46px; height: 46px; border-radius: 50%;
   border: 1.5px dashed #0369A1; display: flex; align-items: center; justify-content: center;
@@ -190,32 +149,33 @@ const BLUEPRINT_CSS = `
   cursor: pointer;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   padding: 13px 26px 13px 24px;
-  transition: background .2s;
+  transition: background .16s ease;
 }
 .bp-cta:hover { background: #0369A1 !important; }
 .bp-cta-dark:hover { background: #0A1F1C !important; }
 .bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
 .bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
 
-.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: 88px 48px 64px; }
-.bp-hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: start; }
-.bp-probhow-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
+.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) clamp(24px,4vw,48px) 64px; }
+.bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
+.bp-probhow-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
 .bp-ps-pain { grid-area: pain; display: flex; align-items: flex-start; justify-content: flex-end; gap: 12px; }
 .bp-ps-pain-text { text-align: right; }
 .bp-ps-connector { grid-area: connector; display: flex; align-items: center; justify-content: center; }
 .bp-ps-answer { grid-area: answer; padding-left: 22px; }
-.bp-pillars-wrap { padding: 64px 48px; border-top: 1px dashed #DADAD2; }
-.bp-pillars-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.bp-closing-wrap { padding: 56px 48px; border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.bp-footer-wrap { padding: 20px 48px; border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
-
-@media (max-width: 1100px) {
-  .bp-pillars-grid { grid-template-columns: repeat(2,1fr); }
-}
+.bp-pillars-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
+.bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
-  .bp-hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
+  .bp-credentials-strip > div:first-child { border-top: none; padding-top: 0 !important; }
+}
+.bp-closing-wrap { padding: 56px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.bp-footer-wrap { padding: 20px clamp(24px,4vw,48px); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
+
+@media (max-width: 900px) {
+  .bp-hero-grid { gap: 36px; }
   .bp-ps-row { grid-template-columns: 1fr; grid-template-areas: "pain" "answer"; row-gap: 12px; padding: 20px 0; }
   .bp-ps-connector { display: none; }
   .bp-ps-pain { justify-content: flex-start; }
@@ -223,11 +183,10 @@ const BLUEPRINT_CSS = `
   .bp-ps-answer { padding-left: 0; }
 }
 @media (max-width: 640px) {
-  .bp-hero-wrap { padding: 48px 20px 40px; }
-  .bp-probhow-wrap { padding: 48px 20px; }
-  .bp-pillars-wrap { padding: 48px 20px; }
-  .bp-pillars-grid { grid-template-columns: 1fr; }
-  .bp-closing-wrap { padding: 40px 20px; }
+  .bp-hero-wrap { padding-top: 48px; padding-bottom: 40px; }
+  .bp-probhow-wrap { padding-top: 48px; padding-bottom: 48px; }
+  .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
+  .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
 }
 `;
@@ -714,116 +673,11 @@ export default function LandingPage() {
               Fig. 02 — ¿En qué momento estás?
             </span>
           </div>
-          <div className="bp-pillars-grid">
-            {INTENT_ROUTES.map((c) => (
-              <Link
-                key={c.n}
-                href={c.href}
-                className="bp-card"
-                style={{
-                  border: "1px solid #DADAD2",
-                  padding: 22,
-                  background: "#fff",
-                  color: "#0A1F1C",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  minHeight: 180,
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    top: -1,
-                    left: -1,
-                    width: 10,
-                    height: 10,
-                    borderTop: "2px solid #0369A1",
-                    borderLeft: "2px solid #0369A1",
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: -1,
-                    right: -1,
-                    width: 10,
-                    height: 10,
-                    borderBottom: "2px solid #0369A1",
-                    borderRight: "2px solid #0369A1",
-                  }}
-                />
-                <span
-                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
-                >
-                  [ {c.n} ]
-                </span>
-                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p
-                  style={{
-                    font: "13px/1.5 var(--font-inter)",
-                    color: "#525B5A",
-                    flexGrow: 1,
-                    margin: 0,
-                  }}
-                >
-                  {c.desc}
-                </p>
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#0369A1",
-                  }}
-                >
-                  [ {c.cta} <span className="bp-card-arrow">→</span> ]
-                </span>
-              </Link>
-            ))}
-
-            <div
-              aria-live="polite"
-              style={{
-                padding: 22,
-                minHeight: 180,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  font: "10px var(--font-jetbrains-mono),monospace",
-                  color: "#6B746F",
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Próximamente
-              </span>
-              <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
-                Vendo o fabrico soluciones
-              </div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
-                Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
-              </p>
-              {waitlistStatus === "done" ? (
-                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#16A34A" }}>[ Te avisaremos ]</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleWaitlist}
-                  disabled={waitlistStatus === "loading"}
-                  style={{ alignSelf: "flex-start", cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
-                >
-                  {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
-                </button>
-              )}
-              {waitlistStatus === "error" && waitlistError && (
-                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>{waitlistError}</span>
-              )}
-            </div>
-          </div>
+          <IntentJourney
+            waitlistStatus={waitlistStatus}
+            waitlistError={waitlistError}
+            onWaitlist={handleWaitlist}
+          />
         </div>
 
         <div ref={statsRef}>
@@ -940,91 +794,44 @@ export default function LandingPage() {
                 textTransform: "uppercase",
               }}
             >
-              Fig. 05 — Herramientas de soporte
+              Fig. 04 — Quién está detrás
             </span>
           </div>
-          <div className="bp-pillars-grid">
-            {PILLARS.map((c) => (
-              <Link
-                key={c.n}
-                href={c.href}
-                className={`bp-card${c.dark ? " bp-card-dark" : ""}`}
+          <div className="bp-credentials-strip">
+            {CREDENTIALS.map((c, i) => (
+              <div
+                key={c.label}
                 style={{
-                  border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`,
-                  padding: 22,
-                  background: c.dark ? "#0A1F1C" : "#fff",
-                  color: c.dark ? "#fff" : "#0A1F1C",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  minHeight: 200,
+                  flex: "1 1 260px",
+                  padding: i === 0 ? "4px 32px 4px 0" : "4px 32px",
+                  borderLeft: i === 0 ? "none" : "1px solid #DADAD2",
                 }}
               >
-                <span className="bp-card-seal">
-                  {c.dark ? (
-                    <>
-                      11 AÑOS
-                      <br />
-                      LIC. VIG.
-                    </>
-                  ) : (
-                    <>
-                      APROB.
-                      <br />
-                      RAS-2000
-                    </>
-                  )}
-                </span>
                 <span
                   style={{
-                    position: "absolute",
-                    top: -1,
-                    left: -1,
-                    width: 10,
-                    height: 10,
-                    borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: -1,
-                    right: -1,
-                    width: 10,
-                    height: 10,
-                    borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
+                    display: "block",
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F",
+                    color: "#6B746F",
+                    letterSpacing: ".1em",
+                    textTransform: "uppercase",
+                    marginBottom: 10,
                   }}
                 >
-                  [ {c.n} ]
+                  {c.label}
                 </span>
-                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p
+                <div
                   style={{
-                    font: "13px/1.5 var(--font-inter)",
-                    color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A",
-                    flexGrow: 1,
-                    margin: 0,
+                    font: "600 15px/1.4 var(--font-inter)",
+                    color: "#0A1F1C",
+                    marginBottom: 6,
                   }}
                 >
-                  {c.desc}
+                  {c.title}
+                </div>
+                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
+                  {c.body}
                 </p>
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "#7DD3FC" : "#0369A1",
-                  }}
-                >
-                  [ VER MÁS <span className="bp-card-arrow">→</span> ]
-                </span>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
