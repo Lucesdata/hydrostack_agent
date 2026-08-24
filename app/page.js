@@ -9,6 +9,11 @@ import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
+import S2WhyHydroStack from "@/src/components/landing/S2WhyHydroStack";
+import S3EverythingInOne from "@/src/components/landing/S3EverythingInOne";
+import S4Invitation from "@/src/components/landing/S4Invitation";
+import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
+import S6Footer from "@/src/components/landing/S6Footer";
 
 const PROBLEM_SOLUTION = [
   {
@@ -304,19 +309,11 @@ function ConnectorArrow() {
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
 function useBlueprintFX() {
   const heroRef = useRef(null);
-  const statsRef = useRef(null);
-  const problemRef = useRef(null);
-  const howRef = useRef(null);
-  const pillarsRef = useRef(null);
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [parallax, setParallax] = useState(0);
   const [visible, setVisible] = useState({
     hero: false,
-    stats: false,
-    problem: false,
-    how: false,
-    pillars: false,
   });
 
   useEffect(() => {
@@ -329,29 +326,23 @@ function useBlueprintFX() {
     window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
 
-    const targets = [
-      [heroRef, "hero"],
-      [statsRef, "stats"],
-      [problemRef, "problem"],
-      [howRef, "how"],
-      [pillarsRef, "pillars"],
-    ];
     let io;
     if ("IntersectionObserver" in window) {
       io = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
             if (!e.isIntersecting) return;
-            const hit = targets.find(([ref]) => ref.current === e.target);
-            if (hit) setVisible((v) => ({ ...v, [hit[1]]: true }));
+            if (e.target === heroRef.current) {
+              setVisible((v) => ({ ...v, hero: true }));
+            }
             io.unobserve(e.target);
           });
         },
         { threshold: 0.3 }
       );
-      targets.forEach(([ref]) => ref.current && io.observe(ref.current));
+      if (heroRef.current) io.observe(heroRef.current);
     } else {
-      setVisible({ hero: true, stats: true, problem: true, how: true, pillars: true });
+      setVisible({ hero: true });
     }
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -362,14 +353,11 @@ function useBlueprintFX() {
 
   const p = scrollProgress;
   return {
-    refs: { heroRef, statsRef, problemRef, howRef, pillarsRef },
+    refs: { heroRef },
     h1Weight: visible.hero ? 700 : 500,
     gridTransform: `translate3d(0, ${parallax.toFixed(1)}px, 0)`,
     scanTopPct: (p * 100).toFixed(1),
     lineADashoffset: visible.hero ? 0 : 560,
-    lineBScale: visible.stats ? 1 : 0,
-    lineCDashoffset: visible.problem ? 0 : 500,
-    lineDDashoffset: visible.how ? 0 : 500,
     waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
     depthLabel: (p * 6).toFixed(1) + "m",
   };
@@ -577,7 +565,7 @@ function BlueprintBackground({ fx }) {
 
 export default function LandingPage() {
   const fx = useBlueprintFX();
-  const { heroRef, statsRef, problemRef, howRef, pillarsRef } = fx.refs;
+  const { heroRef } = fx.refs;
 
   const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | loading | done | error
   const [waitlistError, setWaitlistError] = useState(null);
@@ -622,31 +610,24 @@ export default function LandingPage() {
           <HeroCove />
           <div className="bp-hero-grid" style={{ position: "relative" }}>
             <div style={{ position: "relative" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-                <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-                <span
-                  style={{
-                    font: "11px var(--font-jetbrains-mono),monospace",
-                    color: "#0369A1",
-                    letterSpacing: ".12em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Fig. 01 — Elige tu ruta
-                </span>
+              <div style={{ display: "inline-block", padding: "8px 14px", background: "rgba(3, 105, 161, 0.08)", color: "#0369A1", borderRadius: 4, marginBottom: 24, font: "11px var(--font-jetbrains-mono),monospace", fontWeight: 600, letterSpacing: ".05em", textTransform: "uppercase" }}>
+                AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    <span className="hero-draw">Precisión</span> de ingeniería,
+                    Todo tu trabajo de <span className="hero-draw">agua</span>,
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>aplicada a tu caso.</span>
+                  <span>en un solo lugar.</span>
                 </span>
               </h1>
+              <p style={{ font: "15px/1.6 var(--font-inter)", color: "#525B5A", marginTop: 20, marginBottom: 30, maxWidth: 520 }}>
+                Desde una duda de norma hasta un pliego de cien páginas. Incluye los procesos de agua y saneamiento del SECOP II, con las compuertas de elegibilidad revisadas una por una.
+              </p>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginTop: 30 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 30, marginBottom: 20 }}>
                 <Link
                   href="/licitaciones"
                   className="bp-cta bp-cta-dark hero-fade-up"
@@ -663,22 +644,47 @@ export default function LandingPage() {
                 >
                   [ Prueba un proceso ]
                 </Link>
-                <span
+                <button
                   className="hero-fade-up"
+                  onClick={() => {}}
                   style={{
-                    font: "11px var(--font-jetbrains-mono),monospace",
-                    color: "#6B746F",
-                    animationDelay: ".95s",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    background: "transparent",
+                    color: "#0369A1",
+                    border: "1px solid #0369A1",
+                    padding: "11px 20px",
+                    borderRadius: 2,
+                    font: "600 13px var(--font-jetbrains-mono),monospace",
+                    letterSpacing: ".04em",
+                    cursor: "pointer",
+                    animationDelay: ".92s",
                   }}
                 >
-                  sin cuenta · resultado en 2 min
-                </span>
+                  [ Ver cómo funciona ]
+                </button>
+              </div>
+
+              <div
+                className="hero-fade-up"
+                style={{
+                  display: "flex",
+                  gap: 24,
+                  font: "11px var(--font-jetbrains-mono),monospace",
+                  color: "#6B746F",
+                  animationDelay: ".95s",
+                  marginBottom: 32,
+                }}
+              >
+                <span>✓ Sin cuenta</span>
+                <span>✓ Resultado en 2 minutos</span>
               </div>
               <svg
                 viewBox="0 0 520 16"
                 width="520"
                 height="16"
-                style={{ display: "block", marginTop: 36, overflow: "visible", maxWidth: "100%" }}
+                style={{ display: "block", marginTop: 20, overflow: "visible", maxWidth: "100%", marginBottom: 48 }}
               >
                 <line
                   x1="0"
@@ -694,13 +700,48 @@ export default function LandingPage() {
                 <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
                 <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
               </svg>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "32px", textAlign: "center" }}>
+                <div>
+                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>127</div>
+                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Procesos nuevos · 7 días</div>
+                </div>
+                <div>
+                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>$4.2B</div>
+                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>En juego · este mes</div>
+                </div>
+                <div>
+                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>11</div>
+                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Años en agua y saneamiento</div>
+                </div>
+                <div>
+                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>24/7</div>
+                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Actualización SECOP II</div>
+                </div>
+              </div>
             </div>
 
             <PlantaHero />
           </div>
         </div>
 
-        <div className="bp-pillars-wrap" id="asistentes-proyecto">
+        {/* S2 — Por qué HydroStack */}
+        <S2WhyHydroStack />
+
+        {/* S3 — Todo en un solo lugar */}
+        <S3EverythingInOne />
+
+        {/* S4 — Banda de invitación */}
+        <S4Invitation />
+
+        {/* S5 — Banda oscura de cierre */}
+        <S5DarkClosing />
+
+        {/* S6 — Pie */}
+        <S6Footer />
+
+        {/* EXTRA: Sección de INTENT_ROUTES (¿En qué momento estás?) */}
+        <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
             <span
@@ -711,7 +752,7 @@ export default function LandingPage() {
                 textTransform: "uppercase",
               }}
             >
-              Fig. 02 — ¿En qué momento estás?
+              ¿En qué momento estás?
             </span>
           </div>
           <div className="bp-pillars-grid">
@@ -823,240 +864,6 @@ export default function LandingPage() {
                 <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>{waitlistError}</span>
               )}
             </div>
-          </div>
-        </div>
-
-        <div ref={statsRef}>
-          <LandingCards />
-        </div>
-
-        <div className="bp-probhow-wrap">
-          <div
-            ref={(el) => {
-              problemRef.current = el;
-              howRef.current = el;
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-              <span
-                style={{
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  color: "#0369A1",
-                  letterSpacing: ".12em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Fig. 03 — Problema y respuesta
-              </span>
-            </div>
-            <svg
-              viewBox="0 0 460 8"
-              width="460"
-              height="8"
-              style={{ display: "block", marginBottom: 22, overflow: "visible", maxWidth: "100%" }}
-            >
-              <line
-                x1="0"
-                y1="4"
-                x2="460"
-                y2="4"
-                stroke="#0369A1"
-                strokeWidth="1"
-                strokeDasharray="500"
-                strokeDashoffset={fx.lineCDashoffset}
-                style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
-              />
-            </svg>
-            <div>
-              {PROBLEM_SOLUTION.map((row) => (
-                <div key={row.n} className="bp-ps-row">
-                  <div className="bp-ps-pain">
-                    <PainIcon type={row.icon} />
-                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <span
-                        style={{
-                          font: "600 11px var(--font-jetbrains-mono),monospace",
-                          color: "#0369A1",
-                          flexShrink: 0,
-                        }}
-                      >
-                        [{row.n}]
-                      </span>
-                      <p
-                        className="bp-ps-pain-text"
-                        style={{
-                          font: "14.5px/1.55 var(--font-inter)",
-                          color: "#0A1F1C",
-                          margin: 0,
-                          maxWidth: 340,
-                        }}
-                      >
-                        {row.pain}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="bp-ps-connector">
-                    <ConnectorArrow />
-                  </div>
-                  <div className="bp-ps-answer">
-                    <span
-                      style={{
-                        display: "block",
-                        font: "10px var(--font-jetbrains-mono),monospace",
-                        color: "#0369A1",
-                        letterSpacing: ".1em",
-                        textTransform: "uppercase",
-                        marginBottom: 6,
-                      }}
-                    >
-                      {row.label}
-                    </span>
-                    <p
-                      style={{
-                        font: "13.5px/1.55 var(--font-inter)",
-                        color: "#525B5A",
-                        margin: 0,
-                        maxWidth: 380,
-                      }}
-                    >
-                      {row.answer}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div ref={pillarsRef} className="bp-pillars-wrap">
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
-            <span
-              style={{
-                font: "11px var(--font-jetbrains-mono),monospace",
-                color: "#0369A1",
-                letterSpacing: ".12em",
-                textTransform: "uppercase",
-              }}
-            >
-              Fig. 05 — Herramientas de soporte
-            </span>
-          </div>
-          <div className="bp-pillars-grid">
-            {PILLARS.map((c) => (
-              <Link
-                key={c.n}
-                href={c.href}
-                className={`bp-card${c.dark ? " bp-card-dark" : ""}`}
-                style={{
-                  border: `1px solid ${c.dark ? "#0A1F1C" : "#DADAD2"}`,
-                  padding: 22,
-                  background: c.dark ? "#0A1F1C" : "#fff",
-                  color: c.dark ? "#fff" : "#0A1F1C",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  minHeight: 200,
-                }}
-              >
-                <span className="bp-card-seal">
-                  {c.dark ? (
-                    <>
-                      11 AÑOS
-                      <br />
-                      LIC. VIG.
-                    </>
-                  ) : (
-                    <>
-                      APROB.
-                      <br />
-                      RAS-2000
-                    </>
-                  )}
-                </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: -1,
-                    left: -1,
-                    width: 10,
-                    height: 10,
-                    borderTop: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderLeft: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: -1,
-                    right: -1,
-                    width: 10,
-                    height: 10,
-                    borderBottom: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                    borderRight: `2px solid ${c.dark ? "#7DD3FC" : "#0369A1"}`,
-                  }}
-                />
-                <span
-                  style={{
-                    font: "10px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "rgba(255,255,255,0.5)" : "#6B746F",
-                  }}
-                >
-                  [ {c.n} ]
-                </span>
-                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p
-                  style={{
-                    font: "13px/1.5 var(--font-inter)",
-                    color: c.dark ? "rgba(255,255,255,0.6)" : "#525B5A",
-                    flexGrow: 1,
-                    margin: 0,
-                  }}
-                >
-                  {c.desc}
-                </p>
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: c.dark ? "#7DD3FC" : "#0369A1",
-                  }}
-                >
-                  [ VER MÁS <span className="bp-card-arrow">→</span> ]
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="bp-closing-wrap">
-          <span style={{ font: "14px var(--font-jetbrains-mono),monospace", color: "#0A1F1C" }}>
-            ▸ Deja de descubrir tarde que no calificabas.
-          </span>
-          <Link
-            href="/licitaciones"
-            className="bp-cta bp-cta-dark"
-            style={{
-              display: "inline-flex",
-              background: "#0369A1",
-              color: "#fff",
-              font: "600 13px var(--font-jetbrains-mono),monospace",
-              letterSpacing: ".04em",
-            }}
-          >
-            [ Prueba un proceso ]
-          </Link>
-        </div>
-
-        <div className="bp-footer-wrap">
-          <div style={{ display: "flex", gap: 12 }}>
-            <strong style={{ color: "#0A1F1C" }}>HydroStack</strong>
-            <span>·</span>
-            <span>Plataforma de contratación pública</span>
-          </div>
-          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} />
-            <span>Datos SECOP II · actualización diaria</span>
           </div>
         </div>
       </div>
