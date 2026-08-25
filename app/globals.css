@@ -741,7 +741,7 @@ select {
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  padding: 0 28px;
+  padding: 0 clamp(24px, 4vw, 48px);
 }
 .clr-nav-inner {
   max-width: var(--container);

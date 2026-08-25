@@ -168,7 +168,7 @@ const CARDS_CSS = `
   font-size: 14px;
   border-radius: 10px;
   text-decoration: none;
-  transition: background .18s, color .18s;
+  transition: background .16s ease, color .16s ease;
 }
 .lc-cta-btn:hover {
   background: var(--accent);
@@ -327,7 +327,12 @@ export default function LandingCards() {
                     <span className="clr-verdict-glyph">?</span> Habilitación
                   </li>
                 </ul>
-                <p className="lc-locked-msg">🔒 Detalle disponible al registrarte</p>
+                <p className="lc-locked-msg">
+                  <span style={{ font: "10px var(--font-mono)", color: "#6B746F" }} aria-hidden="true">
+                    [ ● ]
+                  </span>{" "}
+                  Detalle disponible al registrarte
+                </p>
 
                 <Link href="/licitaciones" className="lc-cta-btn">
                   Ver este proceso completo →

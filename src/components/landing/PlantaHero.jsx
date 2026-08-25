@@ -35,9 +35,6 @@ const PLANTA_CSS = `
 @keyframes pt-level  { 0%,100% { transform: translateY(-4px); } 50% { transform: translateY(6px); } }
 @keyframes pt-drift  { to { transform: translate(48px,24px); } }
 @keyframes pt-bub    { 0% { opacity:0; transform:translateY(3px) scale(.45); } 25% { opacity:.7; } 100% { opacity:0; transform:translateY(-15px) scale(1.15); } }
-@keyframes pt-lampA  { 0%,44% { opacity:1; } 48%,60% { opacity:0; } 64%,100% { opacity:1; } }
-@keyframes pt-lampB  { 0%,20% { opacity:0; } 25%,70% { opacity:1; } 75%,100% { opacity:0; } }
-@keyframes pt-lampC  { 0%,100% { opacity:1; } 30%,34% { opacity:.15; } 68%,72% { opacity:.4; } }
 
 .pt-wrap  { position: relative; display: flex; align-items: center; justify-content: center; padding: 20px 0 40px; opacity: 0; animation: pt-in .9s cubic-bezier(.16,1,.3,1) .9s forwards; }
 .pt-shade { position: absolute; bottom: 30px; left: 21%; width: 58%; height: 26px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(19,77,116,.5), transparent 70%); filter: blur(10px); animation: pt-shadow 7s ease-in-out infinite; pointer-events: none; }
@@ -88,15 +85,7 @@ export default function PlantaHero() {
         </g>
         <g>
         {WINDOWS.map((d, i) => (
-          <path key={"off" + i} d={d} fill="#8E9BA2"></path>
-        ))}
-        {WINDOWS.map((d, i) => (
-          <path
-            key={"on" + i}
-            d={d}
-            fill="#F2C24A"
-            style={{ animation: `${["pt-lampA", "pt-lampC", "pt-lampB", "pt-lampC", "pt-lampA"][i % 5]} ${14 + (i % 7) * 3.5}s ease-in-out ${((i * 1.9) % 13).toFixed(1)}s infinite` }}
-          ></path>
+          <path key={"on" + i} d={d} fill="#F2C24A"></path>
         ))}
         </g>
         <defs>
