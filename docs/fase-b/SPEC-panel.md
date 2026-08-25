@@ -158,8 +158,9 @@ la barra pública, girado a vertical.
 ### 3.2 Iconografía
 
 SVG en línea, trazo `1.6`, rejilla de `18 px`, `currentColor`. **Ni un
-emoji.** Nueve iconos en total: lupa, diana, libro abierto, marcador,
-documento, campana, persona, controles, destello. Se dibujan una vez en
+emoji.** Diez iconos en total: lupa, diana, libro abierto, marcador,
+documento, campana, persona, controles, destello y flecha (esta última para
+las llamadas a la acción, no para el menú). Se dibujan una vez en
 `src/components/panel/icons.tsx` y no se importa ninguna librería.
 
 ---
@@ -513,7 +514,7 @@ app/panel/preferencias/page.tsx         Mueve el contenido de /cuenta
 src/components/panel/Sidebar.tsx        Menú en dos mitades
 src/components/panel/Topbar.tsx         Migas + buscador + estado de sincronía
 src/components/panel/AguaLicitaPanel.tsx  Estados A y B. Sin lógica de chat
-src/components/panel/icons.tsx          Los nueve SVG
+src/components/panel/icons.tsx          Los diez SVG
 src/components/panel/AvisoRow.tsx       Fila de «Lo que corre»
 src/components/panel/VerdictCard.tsx    Tarjeta de coincidencia con porqués
 
