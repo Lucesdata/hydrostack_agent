@@ -206,26 +206,7 @@ export default function Navbar({ user, hasNewMatches }) {
           <span className="clr-status-label">En línea</span>
         </span>
 
-        <span className="clr-nav-divider" aria-hidden="true" />
-
-        <div className="clr-links">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="clr-nav-link"
-              {...navAria(isActive(item))}
-            >
-              <span className="clr-nav-index" aria-hidden="true">
-                {item.index}/
-              </span>
-              {item.label}
-              <CoteGlyph />
-            </Link>
-          ))}
-        </div>
-
-        <div className="clr-nav-auth">
+        <div style={{ marginLeft: "auto" }} className="clr-nav-auth">
           {user ? (
             <UserMenu user={user} hasNewMatches={hasNewMatches} />
           ) : (
@@ -255,20 +236,6 @@ export default function Navbar({ user, hasNewMatches }) {
       </div>
 
       <div id="clr-mobile-menu" className={`clr-mobile-menu${open ? " open" : ""}`}>
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="clr-mobile-link"
-            {...navAria(isActive(item))}
-            onClick={close}
-          >
-            <span className="clr-nav-index" aria-hidden="true">
-              {item.index}/
-            </span>
-            {item.label}
-          </Link>
-        ))}
         <div className="clr-mobile-auth">
           {user ? (
             <>
