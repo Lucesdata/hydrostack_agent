@@ -60,6 +60,44 @@ const CREDENTIALS = [
   },
 ];
 
+const INTENT_ROUTES = [
+  {
+    n: "01",
+    title: "Busco contratos",
+    desc: "Procesos activos de agua y saneamiento, con verificación de si calificas.",
+    href: "/licitaciones",
+    cta: "BUSCAR PROCESOS",
+  },
+  {
+    n: "02",
+    title: "Tengo un pliego que descifrar",
+    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist.",
+    href: "/pliego",
+    cta: "DECODIFICAR PLIEGO",
+  },
+  {
+    n: "03",
+    title: "Tengo un problema de agua o vertimientos",
+    desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
+    href: "/soluciones",
+    cta: "VER EL CAMINO",
+  },
+  {
+    n: "04",
+    title: "Gané un contrato, ¿ahora qué?",
+    desc: "Acompañamiento en ejecución: actas, pólizas, informes, liquidación.",
+    href: "/asistente/ejecucion",
+    cta: "EMPEZAR",
+  },
+  {
+    n: "05",
+    title: "Opero un acueducto o una ESP",
+    desc: "Dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
+    href: "/asistente/operacion",
+    cta: "CONSULTAR",
+  },
+];
+
 /* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
 const BLUEPRINT_CSS = `
 @keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
@@ -713,11 +751,65 @@ export default function LandingPage() {
               ¿En qué momento estás?
             </span>
           </div>
-          <IntentJourney
-            waitlistStatus={waitlistStatus}
-            waitlistError={waitlistError}
-            onWaitlist={handleWaitlist}
-          />
+          <div className="bp-pillars-grid">
+            {INTENT_ROUTES.map((c) => (
+              <Link
+                key={c.n}
+                href={c.href}
+                className="bp-card"
+                style={{
+                  border: "1px solid #DADAD2",
+                  padding: 22,
+                  background: "#fff",
+                  color: "#0A1F1C",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  minHeight: 180,
+                }}
+              >
+                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
+                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
+                <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>
+                  [ {c.n} ]
+                </span>
+                <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
+                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>
+                  {c.desc}
+                </p>
+                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>
+                  [ {c.cta} <span className="bp-card-arrow">→</span> ]
+                </span>
+              </Link>
+            ))}
+
+            <div aria-live="polite" style={{ padding: 22, minHeight: 180, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 10 }}>
+              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F", letterSpacing: ".1em", textTransform: "uppercase" }}>
+                Próximamente
+              </span>
+              <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
+                Vendo o fabrico soluciones
+              </div>
+              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
+                Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
+              </p>
+              {waitlistStatus === "done" ? (
+                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#16A34A" }}>[ Te avisaremos ]</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleWaitlist}
+                  disabled={waitlistStatus === "loading"}
+                  style={{ alignSelf: "flex-start", cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
+                >
+                  {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
+                </button>
+              )}
+              {waitlistStatus === "error" && waitlistError && (
+                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>{waitlistError}</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
