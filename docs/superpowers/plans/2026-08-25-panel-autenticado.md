@@ -42,6 +42,28 @@ Aplican a **todas** las tareas. No se repiten en cada una.
 - **Degradación honesta.** Si un dato no se puede obtener, la interfaz
   muestra `—`, nunca `0` ni un valor inventado. Patrón de referencia:
   `app/api/landing-stats/route.ts`.
+- **Reutiliza la ingesta. No consultes SECOP en vivo ni escribas consultas
+  nuevas sobre `proceso`.** Ya existe una capa completa sobre los datos
+  ingeridos y es la que hay que usar:
+  - `searchProcesosDb(query)` y `countProcesosDb(query)` en
+    `src/lib/secop/db-search.ts` — consultan `proceso` con sus joins a
+    `entidad`, `geografia` y `raw_record`, y aceptan el mismo `SecopQuery`
+    que la búsqueda en vivo.
+  - `mapDbRowToProceso(row)` en el mismo archivo — convierte una fila de la
+    base en un `SecopProceso`, que es **exactamente el tipo que consume
+    `verdict.ts`**. Esa función es la bisagra entre la ingesta y el
+    semáforo: úsala en vez de armar el objeto a mano.
+  - `searchProcesosDbCached` / `countProcesosDbCached` en
+    `cached-db-search.ts` — memoización por combinación de filtros. **Usa
+    siempre las versiones cacheadas en render de página**; el filtro de
+    agua es un escaneo sin índice de ~10 s en frío.
+  - `KEYWORDS_AGUA` en `config.ts` — la única definición del sector. No
+    escribas otra lista ni otro `ILIKE`.
+
+  Si necesitas un dato que esta capa no expone, **amplíala** (por ejemplo,
+  añadiendo un filtro a `SecopQuery`) en vez de escribir una consulta
+  paralela. Duplicar el filtro de sector es el error más caro que puedes
+  cometer aquí: son dos definiciones de qué es «agua y saneamiento».
 - **Id de proceso:** siempre el id NATIVO de SECOP (`text`, formato
   `CO1.REQ.xxxx`), nunca el uuid interno de la tabla `proceso`. Es el
   criterio de `coincidencia.procesoId` y `pliego_proceso.procesoId`.
@@ -1196,41 +1218,102 @@ git commit -m "feat(seguimiento): construirAvisos() para el bloque Lo que corre"
 
 ---
 
-## Tarea 6: la serie de seis meses
+## Tarea 6: la serie de seis meses — sobre la ingesta, no sobre Socrata
 
 **Archivos:**
+- Modificar: `src/lib/secop/db-search.ts` (añadir `countProcesosPorMesDb`)
 - Crear: `src/lib/panel/serie-mensual.ts`
 - Test: `src/__tests__/panel/serie-mensual.test.ts`
 
 **Interfaces:**
-- Consume: `proceso` de `@/src/lib/db/schema/hechos`,
-  `clasificacionSectorial` de `@/src/lib/db/schema/clasificacion`.
+- Consume: `countProcesosPorMesDb` (que añades aquí a `db-search.ts`).
 - Produce: `interface PuntoMes { etiqueta: string; anio: number; mes: number;
-  procesos: number }`, `ultimosSeisMeses(ahora: Date): {anio,mes}[]` (pura),
-  `rellenarSerie(crudo, meses): PuntoMes[]` (pura),
+  procesos: number }`, `ultimosSeisMeses(ahora)` (pura),
+  `rellenarSerie(crudo, meses)` (pura),
   `getSerieMensual(ahora?): Promise<PuntoMes[] | null>`. Lo consume la
   Tarea 11.
 
-Se resuelve **contra Postgres, no contra Socrata** (SPEC-panel §6.3): la
-tabla `proceso` ya tiene los datos ingeridos y `clasificacion_sectorial`
-marca los de agua con `sector_agua`. Como el resto del panel, devuelve
-`null` si la base no responde — nunca ceros inventados.
+> ### Lee esto antes de escribir una sola línea
+>
+> **`clasificacion_sectorial` está vacía.** Lo documenta la cabecera de
+> `src/lib/secop/cached-db-search.ts`, y `PENDIENTES.md` lo arrastra desde
+> julio. Una consulta que filtre por `sector_agua = true` devolverá **cero
+> en los seis meses** y parecerá que el mes está muerto.
+>
+> El filtro de sector que **sí funciona hoy** es el de
+> `db-search.ts` → `prepare()`: `ILIKE` de `KEYWORDS_AGUA` sobre
+> `nombre` y `descripción` extraídos de `raw_record.payload`. Es la única
+> definición viva de «agua y saneamiento» sobre datos ingeridos.
+>
+> Por eso esta tarea **no escribe una consulta nueva**: añade una función
+> al archivo que ya tiene ese predicado, para que la definición de sector
+> siga siendo una sola.
+>
+> **Coste:** ese `ILIKE` escanea sin índice — ~10 s en frío, medido en dev.
+> Por eso la serie se resuelve en **una** consulta agrupada, no en seis
+> llamadas a `countProcesosDb`.
 
-- [ ] **Paso 1: escribir el test que falla**
+- [ ] **Paso 1: añadir el agregado a `db-search.ts`**
+
+Va **en `db-search.ts`**, junto a `countProcesosDb`, para que reuse
+`prepare()` y con él el predicado de agua. No lo pongas en otro archivo.
+
+```ts
+/**
+ * Procesos por mes de publicación, para la serie del panel. Reusa el mismo
+ * `prepare()` que la búsqueda —y por tanto el mismo filtro KEYWORDS_AGUA—
+ * para que no existan dos definiciones de "sector agua" sobre la base.
+ *
+ * Una sola consulta agrupada en vez de N llamadas a countProcesosDb: el
+ * predicado de agua escanea sin índice y repetirlo seis veces es seis
+ * veces el coste.
+ */
+export async function countProcesosPorMesDb(
+  desde: string,
+  query: SecopQuery = {}
+): Promise<{ anio: number; mes: number; procesos: number }[]> {
+  const { db, sql, where, proceso, entidad, geografia, rawRecord } = await prepare({
+    ...query,
+    desde,
+  });
+  const { eq } = await import("drizzle-orm");
+
+  const filas = await db
+    .select({
+      anio: sql<number>`EXTRACT(YEAR FROM ${proceso.fechaPublicacion})::int`,
+      mes: sql<number>`EXTRACT(MONTH FROM ${proceso.fechaPublicacion})::int`,
+      procesos: sql<number>`COUNT(*)::int`,
+    })
+    .from(proceso)
+    .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
+    .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
+    .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
+    .where(where)
+    .groupBy(sql`1, 2`)
+    .orderBy(sql`1, 2`);
+
+  return filas.map((f) => ({
+    anio: Number(f.anio),
+    mes: Number(f.mes),
+    procesos: Number(f.procesos),
+  }));
+}
+```
+
+**Los tres `leftJoin` son obligatorios** aunque el `SELECT` no use sus
+columnas: el `where` que devuelve `prepare()` referencia `raw_record.payload`
+(el filtro de agua) y `geografia` (el de departamento). Sin ellos, Postgres
+falla.
+
+- [ ] **Paso 2: escribir el test que falla**
 
 ```ts
 // src/__tests__/panel/serie-mensual.test.ts
 import { describe, it, expect, vi } from "vitest";
 
-const rowsMock = vi.fn().mockResolvedValue([]);
-vi.mock("@/src/lib/db/client", () => ({
-  db: {
-    select: () => ({
-      from: () => ({
-        innerJoin: () => ({ where: () => ({ groupBy: () => ({ orderBy: () => rowsMock() }) }) }),
-      }),
-    }),
-  },
+const porMesMock = vi.fn().mockResolvedValue([]);
+vi.mock("@/src/lib/secop/db-search", () => ({
+  countProcesosPorMesDb: (...a: unknown[]) => porMesMock(...a),
 }));
 
 import { ultimosSeisMeses, rellenarSerie, getSerieMensual } from "@/src/lib/panel/serie-mensual";
@@ -1240,12 +1323,8 @@ const AHORA = new Date("2026-08-25T12:00:00Z");
 describe("ultimosSeisMeses", () => {
   it("devuelve seis meses terminando en el actual", () => {
     expect(ultimosSeisMeses(AHORA)).toEqual([
-      { anio: 2026, mes: 3 },
-      { anio: 2026, mes: 4 },
-      { anio: 2026, mes: 5 },
-      { anio: 2026, mes: 6 },
-      { anio: 2026, mes: 7 },
-      { anio: 2026, mes: 8 },
+      { anio: 2026, mes: 3 }, { anio: 2026, mes: 4 }, { anio: 2026, mes: 5 },
+      { anio: 2026, mes: 6 }, { anio: 2026, mes: 7 }, { anio: 2026, mes: 8 },
     ]);
   });
 
@@ -1269,25 +1348,30 @@ describe("rellenarSerie", () => {
 });
 
 describe("getSerieMensual", () => {
-  it("devuelve null si la base no responde", async () => {
-    rowsMock.mockRejectedValueOnce(new Error("boom"));
-    expect(await getSerieMensual(AHORA)).toBeNull();
+  it("pide a la capa de búsqueda desde el primer día de la ventana", async () => {
+    await getSerieMensual(AHORA);
+    expect(porMesMock).toHaveBeenCalledWith("2026-03-01");
   });
 
-  it("mapea las filas de la base a la serie rellenada", async () => {
-    rowsMock.mockResolvedValueOnce([{ anio: 2026, mes: 8, procesos: 14 }]);
+  it("mapea las filas a la serie rellenada", async () => {
+    porMesMock.mockResolvedValueOnce([{ anio: 2026, mes: 8, procesos: 14 }]);
     const s = await getSerieMensual(AHORA);
     expect(s?.[5].procesos).toBe(14);
+  });
+
+  it("devuelve null si la consulta falla", async () => {
+    porMesMock.mockRejectedValueOnce(new Error("boom"));
+    expect(await getSerieMensual(AHORA)).toBeNull();
   });
 });
 ```
 
-- [ ] **Paso 2: correr el test y verificar que falla**
+- [ ] **Paso 3: correr el test y verificar que falla**
 
 Run: `npx vitest run src/__tests__/panel/serie-mensual.test.ts`
 Esperado: FAIL — no se resuelve el módulo `serie-mensual`.
 
-- [ ] **Paso 3: implementación mínima**
+- [ ] **Paso 4: implementación mínima**
 
 ```ts
 // src/lib/panel/serie-mensual.ts
@@ -1296,19 +1380,17 @@ Esperado: FAIL — no se resuelve el módulo `serie-mensual`.
  * Procesos de agua y saneamiento abiertos por mes, últimos seis meses.
  * Alimenta el bloque "Agosto en SECOP II" del panel (SPEC-panel §4 P2).
  *
- * Se resuelve contra Postgres, NO contra Socrata: `proceso` ya tiene lo
- * ingerido y `clasificacion_sectorial.sector_agua` marca el sector — la
- * misma bandera que usa la compuerta sectorial como fallback.
+ * Se resuelve contra la INGESTA (tabla `proceso`) reutilizando
+ * countProcesosPorMesDb, que a su vez reusa el predicado KEYWORDS_AGUA de
+ * db-search.ts. No consulta Socrata y no define su propio filtro de sector:
+ * una sola definición de "agua" sobre la base.
  *
- * El troceado por mes y el relleno de huecos son puros y viven aparte para
- * testearse sin base. Devuelve null si la base no responde: el panel oculta
- * el bloque en vez de dibujar seis ceros que no son verdad.
+ * El troceado y el relleno son puros y viven aparte para testearse sin
+ * base. Devuelve null si la consulta falla: el panel oculta el bloque en
+ * vez de dibujar seis ceros que no son verdad.
  */
 
-import { and, eq, gte, isNull, sql } from "drizzle-orm";
-import { db } from "@/src/lib/db/client";
-import { proceso } from "@/src/lib/db/schema/hechos";
-import { clasificacionSectorial } from "@/src/lib/db/schema/clasificacion";
+import { countProcesosPorMesDb } from "@/src/lib/secop/db-search";
 
 export interface PuntoMes {
   /** Versalitas de tres letras para el eje: MAR, ABR… */
@@ -1324,7 +1406,7 @@ export interface FilaCruda {
   procesos: number;
 }
 
-const ETIQUETAS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+const ETIQUETAS = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 
 export function ultimosSeisMeses(ahora: Date): { anio: number; mes: number }[] {
   const out: { anio: number; mes: number }[] = [];
@@ -1348,57 +1430,42 @@ export function rellenarSerie(
 export async function getSerieMensual(ahora: Date = new Date()): Promise<PuntoMes[] | null> {
   const meses = ultimosSeisMeses(ahora);
   const desde = `${meses[0].anio}-${String(meses[0].mes).padStart(2, "0")}-01`;
-
   try {
-    const filas = await db
-      .select({
-        anio: sql<number>`EXTRACT(YEAR FROM ${proceso.fechaPublicacion})::int`,
-        mes: sql<number>`EXTRACT(MONTH FROM ${proceso.fechaPublicacion})::int`,
-        procesos: sql<number>`COUNT(*)::int`,
-      })
-      .from(proceso)
-      .innerJoin(clasificacionSectorial, eq(clasificacionSectorial.procesoId, proceso.id))
-      .where(
-        and(
-          eq(clasificacionSectorial.sectorAgua, true),
-          gte(proceso.fechaPublicacion, desde),
-          isNull(proceso.deletedAt)
-        )
-      )
-      .groupBy(sql`1, 2`)
-      .orderBy(sql`1, 2`);
-
-    return rellenarSerie(filas as FilaCruda[], meses);
+    return rellenarSerie(await countProcesosPorMesDb(desde), meses);
   } catch {
     return null;
   }
 }
 ```
 
-- [ ] **Paso 4: correr el test y verificar que pasa**
+- [ ] **Paso 5: correr el test y verificar que pasa**
 
 Run: `npx vitest run src/__tests__/panel/serie-mensual.test.ts`
-Esperado: PASS, 6 tests.
+Esperado: PASS, 7 tests. Corre también la suite de búsqueda para
+comprobar que no rompiste `prepare()`:
+`npx vitest run src/__tests__/secop`
 
-- [ ] **Paso 5: comprobar contra la base real**
-
-`clasificacion_sectorial` estaba vacía en julio de 2026. Comprueba si
-todavía lo está:
+- [ ] **Paso 6: medir el coste real contra la base**
 
 ```bash
-psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM clasificacion_sectorial WHERE sector_agua;"
+npx tsx -e "import('./src/lib/panel/serie-mensual.ts').then(async m => { const t = Date.now(); console.log(await m.getSerieMensual()); console.log('ms:', Date.now() - t); })"
 ```
 
-Si devuelve `0`, la serie saldrá plana a cero. **No cambies la consulta para
-maquillarlo:** anótalo en el commit y avisa — significa que el bloque
-«Agosto en SECOP II» no se puede mostrar todavía, y la Tarea 11 tendrá que
-ocultarlo por la vía honesta (`null`).
+Anota el tiempo en el commit. **Si tarda más de ~3 s**, la Tarea 11 debe
+envolver la llamada en la memoización de `cached-db-search.ts` (mismo
+patrón `globalThis` + TTL) antes de ponerla en el render del panel. No
+metas la serie en la página sin haber medido esto.
 
-- [ ] **Paso 6: commit**
+Si la serie sale plana a cero con datos reales, no cambies la consulta para
+maquillarlo: significa que la ingesta no tiene procesos de agua en la
+ventana. Anótalo y avisa.
+
+- [ ] **Paso 7: commit**
 
 ```bash
-git add src/lib/panel/serie-mensual.ts src/__tests__/panel/serie-mensual.test.ts
-git commit -m "feat(panel): serie de seis meses de procesos de agua"
+git add src/lib/secop/db-search.ts src/lib/panel/serie-mensual.ts \
+        src/__tests__/panel/serie-mensual.test.ts
+git commit -m "feat(panel): serie mensual sobre la ingesta, reusando el filtro de agua"
 ```
 
 ---
@@ -2138,7 +2205,10 @@ git commit -m "feat(panel): primer ingreso con y sin perfil, sin pantalla vacía
 **Interfaces:**
 - Consume: `construirAvisos`, `AvisoEntrada` (Tarea 5); `listarSeguidos`
   (Tarea 4); `getPliegoStatusForProcesos` de
-  `@/src/lib/secop/pliego-status`.
+  `@/src/lib/secop/pliego-status`; `searchProcesosDb`, `mapDbRowToProceso`
+  y `countProcesosDbCached` de la capa de ingesta.
+- Modifica: `src/lib/secop/types.ts` (`SecopQuery.procesoIds`) y
+  `src/lib/secop/db-search.ts` (`prepare()`).
 - Produce: `<AvisoRow aviso={Aviso} />`.
 
 **El punto delicado de esta tarea es de dónde sale `fechaCierre`.** No está
@@ -2184,15 +2254,33 @@ Acción a la derecha: `Abrir taller →` / `Extraer →`.
 
 - [ ] **Paso 2: resolver título y entidad de cada proceso seguido**
 
-`proceso_seguido` solo guarda el id nativo. Para el título y la entidad,
-consulta la tabla `proceso` uniendo con `entidad`, filtrando por
-`secopProcesoId IN (…)`. Sigue el patrón de `src/lib/secop/db-search.ts`,
-que ya hace ese join — **léelo antes de escribir el tuyo** y reusa sus
-helpers si encajan.
+`proceso_seguido` solo guarda el id nativo. **No escribas un join nuevo
+para hidratarlo.** `db-search.ts` ya tiene todo:
 
-Un proceso seguido cuyo id no aparezca en la tabla `proceso` (fue
-purgado, o se siguió desde una búsqueda en vivo) **se omite del bloque de
-avisos**, no se pinta con el título vacío.
+- `searchProcesosDb` hace el join a `entidad` y `geografia`.
+- `mapDbRowToProceso` convierte la fila en un `SecopProceso`, con `nombre`,
+  `entidad`, `referencia` y `estadoApertura` ya resueltos — y es el mismo
+  tipo que consume `verdict.ts`, así que la misma hidratación sirve para
+  los avisos y para las tarjetas de veredicto.
+
+Lo único que falta es filtrar por una lista de ids nativos, y `SecopQuery`
+no lo contempla. **Amplíala** (así se hace en este plan cuando la capa
+existente no llega, según las restricciones globales): añade
+`procesoIds?: string[]` a `SecopQuery` en `src/lib/secop/types.ts`, y en
+`prepare()` de `db-search.ts` la condición correspondiente:
+
+```ts
+query.procesoIds?.length ? inArray(proceso.secopProcesoId, query.procesoIds) : undefined,
+```
+
+**Importante:** cuando pases `procesoIds`, pasa también `soloAgua: false`.
+El usuario ya decidió seguir ese proceso; volver a filtrarlo por palabras
+clave podría hacerlo desaparecer de sus propios avisos, y además evita el
+escaneo caro.
+
+Un proceso seguido cuyo id no vuelva en el resultado (fue purgado, o se
+siguió desde una búsqueda en vivo que nunca se ingirió) **se omite del
+bloque de avisos**, no se pinta con el título vacío.
 
 - [ ] **Paso 3: coincidencias nuevas**
 
@@ -2203,14 +2291,32 @@ Tarea 12** — ver «Orden y dependencias» arriba. Enlace `Ver las N →` a
 - [ ] **Paso 4: el encabezado con las cifras del mes**
 
 ```
-Este mes SECOP II abrió {N} procesos de agua y saneamiento por {$X}.
+Este mes SECOP II abrió {N} procesos de agua y saneamiento.
 {M} cruzan con tu sector y tu zona.
 ```
 
-`N` y `X` salen de `getEnJuegoMes()`. **Si cualquiera viene `null`, usa la
-variante corta** — `Tienes {M} coincidencias abiertas este mes.` — en vez
-de escribir un cero. Y si `M` es 0, la frase es
-`Este mes no hay ningún proceso que cruce con tu perfil.`
+**`N` sale de la ingesta, no de Socrata.** `getEnJuegoMes()` en
+`landingStats.ts` consulta la API en vivo (`sodaFetch`): sirve para la
+portada pública, donde no hay sesión ni base garantizada, pero dentro del
+panel contradice la regla de reutilizar la ingesta y hace depender la home
+autenticada de una API externa. Usa:
+
+```ts
+const N = await countProcesosDbCached({ apertura: "Abierto", desde: inicioDeMesBogota });
+```
+
+`M` es el número de coincidencias, que ya tienes cargadas.
+
+**El monto en pesos (`$8.412 M`) del mockup no entra en v1.**
+`countProcesosDb` cuenta filas, no suma `valorEstimado`, y añadir un
+`SUM()` significa otro escaneo con el predicado caro. La frase se queda sin
+la cifra de dinero. Si más adelante se quiere, va como un segundo agregado
+en `countProcesosPorMesDb`, no como una llamada a Socrata.
+
+Degradación: si la consulta falla, variante corta —
+`Tienes {M} coincidencias abiertas este mes.` Si `M` es 0 —
+`Este mes no hay ningún proceso que cruce con tu perfil.` Nunca un cero
+inventado.
 
 - [ ] **Paso 5: verificar**
 
@@ -2224,8 +2330,10 @@ En el navegador:
    tarjeta vacía ni un «todo en orden».
 2. Sigue un proceso **sin pliego** → aparece el aviso neutro de pliego sin
    analizar, y **ningún** aviso de cierre ni cuenta atrás.
-3. Corta la red a Socrata (o exporta un `SECOP_APP_TOKEN` inválido) y
-   recarga → el encabezado usa la variante corta, no un `0`.
+3. **Comprueba que la home no llama a Socrata.** Con el servidor en
+   marcha, mira los logs mientras cargas `/panel`: no debe aparecer
+   ninguna petición a `datos.gov.co`. Si aparece, algo quedó apuntando a
+   `landingStats` o al cliente en vivo.
 
 - [ ] **Paso 6: commit**
 

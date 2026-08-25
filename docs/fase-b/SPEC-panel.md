@@ -380,8 +380,9 @@ excepción.
 
 | Dato del panel | Origen | Estado |
 |---|---|---|
-| Procesos abiertos y monto del mes | `getEnJuegoMes()` en `landingStats.ts` | Listo |
-| Nuevos en 7 días | `getNuevos7d()` | Listo |
+| Procesos abiertos del mes | `countProcesosDbCached({apertura:"Abierto", desde})` — **sobre la ingesta** | Listo |
+| Hidratación de un proceso a `SecopProceso` | `searchProcesosDb` + `mapDbRowToProceso` | Listo |
+| Definición del sector agua | `KEYWORDS_AGUA` en `secop/config.ts` | Listo — **única definición viva** |
 | Coincidencias y su veredicto | `getMatchesForPerfil` / `…Minimo` + `verdict.ts` | Listo |
 | Coincidencias sin ver (badge) | tabla `coincidencia`, campo `vista_en` | Listo |
 | Completitud del perfil | `isPerfilCompleto()` sobre `oferente_perfil` | Listo — el % es nuevo (§6.3) |
@@ -390,6 +391,32 @@ excepción.
 | Fecha de cierre de un proceso | `getPliegoStatusForProcesos().fechaCierre` — **solo si hay pliego extraído** (§6.4b) | Listo, pero parcial por naturaleza |
 | Apertura (Abierto/Cerrado) sin pliego | `SecopProceso.estadoApertura` | Listo |
 | Extracción completa y validación | tabla `pliego_proceso` | Listo |
+
+### 6.1.1 La regla: el panel se alimenta de la ingesta
+
+Instrucción del owner del 2026-08-25: *«debemos reutilizar todo lo que se
+ha construido, hablo de los datos y su ingesta»*. En concreto:
+
+- **El panel no consulta SECOP en vivo.** `landingStats.ts`
+  (`getEnJuegoMes`, `getNuevos7d`, `getDestacado`) va contra Socrata vía
+  `sodaFetch` y es correcto para la **portada pública**, donde no hay
+  sesión ni base garantizada. Dentro del panel se usa `db-search.ts`.
+- **Una sola definición de «agua y saneamiento».** Hoy son las
+  `KEYWORDS_AGUA` aplicadas con `ILIKE` sobre `raw_record.payload` en
+  `prepare()`. Cualquier consulta nueva del panel la reusa, no la copia.
+- **`mapDbRowToProceso` es la bisagra** entre la ingesta y el semáforo:
+  convierte una fila de `proceso` en el `SecopProceso` que consume
+  `verdict.ts`. Nada del panel arma ese objeto a mano.
+- **Si la capa no llega, se amplía.** Ejemplos que este spec autoriza:
+  `SecopQuery.procesoIds` (hidratar procesos seguidos) y
+  `countProcesosPorMesDb` (la serie). Ambos viven en `db-search.ts`.
+
+> ⚠️ **`clasificacion_sectorial` sigue vacía.** Está documentado en la
+> cabecera de `cached-db-search.ts` y arrastrado desde julio de 2026.
+> Cualquier consulta del panel que filtre por `sector_agua = true` devuelve
+> cero. Por eso el filtro vivo es el de palabras clave — que además escanea
+> sin índice (~10 s en frío), razón por la que existe `cached-db-search.ts`
+> y por la que el panel debe usar siempre las versiones cacheadas.
 
 ### 6.2 Corrección al plan de recorrido
 
@@ -416,9 +443,9 @@ de interfaz.
   devuelva el porcentaje **y la lista de lo que falta**, porque la interfaz
   nombra el hueco, no solo lo mide. Es aritmética sobre campos, sin
   consulta: se testea sola.
-- **Serie de seis meses.** Requiere una consulta agregada nueva sobre
-  `proceso`. Si `getEnJuegoMes()` ya es lenta contra Socrata, esta se
-  resuelve contra Postgres, no contra la API.
+- **Serie de seis meses.** Un agregado nuevo, pero **dentro de
+  `db-search.ts`** (`countProcesosPorMesDb`), para que reuse el `prepare()`
+  que ya define el filtro de sector. No es una consulta paralela.
 
 ### 6.4 Lo que hay que construir — «Seguidos», decidido el 2026-08-25
 
