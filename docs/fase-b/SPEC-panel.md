@@ -223,7 +223,9 @@ degrada a la variante corta sin ese dato — nunca a un cero inventado.
 - **«Lo que corre»** — hasta tres avisos, ordenados por urgencia. Tres
   tipos, cada uno con su borde izquierdo de `2 px`:
   - Cierre próximo (`--danger` si ≤ 5 días, `--warning` si ≤ 10), con el
-    número de días en mono a la izquierda.
+    número de días en mono a la izquierda. **Solo para procesos seguidos
+    con pliego extraído** — sin pliego no hay fecha de cierre que contar
+    (§6.4b).
   - Adenda nueva sobre un proceso seguido (`--warning`).
   - Pliego guardado sin analizar (`--line`, neutro).
   Si no hay ningún aviso, el bloque **no se renderiza**. No hay estado
@@ -253,8 +255,9 @@ igual.
   sobre una lista corta.
 - Tarjeta por proceso, con borde izquierdo de `2 px` en el color del
   veredicto, título en sentence case, línea de procedencia en mono
-  (`ENTIDAD · REFERENCIA · DEPARTAMENTO · UNSPSC`), cuantía y cierre a la
-  derecha.
+  (`ENTIDAD · REFERENCIA · DEPARTAMENTO · UNSPSC`), cuantía y plazo a la
+  derecha. **El plazo es cuenta atrás solo si hay pliego extraído**; si no,
+  es `Abierto` / `Cerrado` a secas (§6.4b).
 - Semáforo: la píldora del veredicto **primero**, las cinco compuertas
   después, en el orden `Sector · Cuantía · Plazo · Ubicación ·
   Habilitación`, con los glifos `✓ ! ✕ ?` ya definidos en
@@ -383,6 +386,8 @@ excepción.
 | Completitud del perfil | `isPerfilCompleto()` sobre `oferente_perfil` | Listo — el % es nuevo (§6.3) |
 | Hora de la alerta y si está activa | tabla `alerta_preferencias` | Listo |
 | Estado del pliego por proceso | `getPliegoStatusForProcesos()` | Listo |
+| Fecha de cierre de un proceso | `getPliegoStatusForProcesos().fechaCierre` — **solo si hay pliego extraído** (§6.4b) | Listo, pero parcial por naturaleza |
+| Apertura (Abierto/Cerrado) sin pliego | `SecopProceso.estadoApertura` | Listo |
 | Extracción completa y validación | tabla `pliego_proceso` | Listo |
 
 ### 6.2 Corrección al plan de recorrido
@@ -424,14 +429,36 @@ Consecuencia: el panel nace con las dos columnas completas, y los pasos 6 y
 trabajo futuro y pasan a ser parte de este spec. Lo que se construye está
 en el §8.2.
 
-**Lo que sigue sin existir y por tanto se degrada:** el aviso de *adenda
-nueva* de «Lo que corre». Detectar que un proceso seguido cambió exige
-comparar la versión ingerida con la anterior, y eso es el paso 9 del plan
-(«el calendario avisa»), que no entra aquí. En v1 «Lo que corre» emite dos
-de sus tres tipos de aviso: **cierre próximo** (calculable desde
-`proceso.fechaCierre` y la lista de seguidos) y **pliego sin analizar**
-(cruce de seguidos contra `pliego_proceso`). El tipo *adenda* se diseña
-ahora y se enciende cuando exista el paso 9 — no se simula mientras tanto.
+**Lo que sigue degradado, y por dos razones distintas:**
+
+**a) El aviso de *adenda nueva* no entra.** Detectar que un proceso seguido
+cambió exige comparar la versión ingerida con la anterior, y eso es el paso
+9 del plan («el calendario avisa»). Se diseña ahora y se enciende cuando
+exista el paso 9 — no se simula mientras tanto.
+
+**b) La cuenta atrás de cierre solo existe si hay pliego extraído.** Esto
+es una restricción del dato, no una decisión de diseño, y hay que decirla
+sin rodeos:
+
+> `fechaCierre` **no existe en el dataset Procesos de SECOP.** Vive en el
+> cronograma del pliego. Está documentado en el propio contrato de
+> `VerdictProcessInput` (`src/lib/secop/verdict.ts`, campo `fechaCierre`,
+> decisión D1) y es la razón de que `plazoGate` en Nivel 0 se resuelva solo
+> con `estadoApertura` (`Cerrado`→FAIL, `Abierto`→WARN, ninguno→UNKNOWN).
+
+Consecuencia para las tres pantallas que muestran plazos:
+
+| Situación | Qué se muestra |
+|---|---|
+| Proceso con pliego extraído (`pliego_proceso` tiene fila) | `cierra 14 sep · 20 días`, en cuenta atrás, desde `getPliegoStatusForProcesos().fechaCierre` |
+| Proceso sin pliego | `Abierto` o `Cerrado` a secas, desde `estadoApertura`. **Sin número de días** |
+| Ninguno de los dos | `—` |
+
+Por tanto el aviso «cierre próximo» de «Lo que corre» **solo se emite para
+procesos seguidos que además tienen pliego extraído**. Los mockups pintan
+la cuenta atrás en todas las tarjetas: eso es el estado ideal, no el de v1.
+Es además un argumento de producto a favor de subir el pliego, y conviene
+que la interfaz lo diga en vez de esconderlo.
 
 ---
 
