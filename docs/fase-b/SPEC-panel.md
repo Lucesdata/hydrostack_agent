@@ -414,16 +414,24 @@ de interfaz.
   `proceso`. Si `getEnJuegoMes()` ya es lenta contra Socrata, esta se
   resuelve contra Postgres, no contra la API.
 
-### 6.4 Lo que no existe todavía
+### 6.4 Lo que hay que construir — «Seguidos», decidido el 2026-08-25
 
-Procesos seguidos, sus estados, y los avisos de «Lo que corre» (cierre
-próximo, adenda nueva). Todo eso depende del §8.2.
+Procesos seguidos, sus seis estados y los avisos de «Lo que corre» **entran
+en v1**. Decisión del owner; cierra el punto 2 del §10.
 
-**Mientras no exista**, la columna B del panel no muestra el bloque «Mis
-procesos», y «Lo que corre» solo puede emitir el aviso de pliego sin
-analizar. El panel se degrada a una columna. **Es un estado feo pero
-honesto, y es el que hay que implementar primero**, en vez de rellenarlo
-con datos de mentira.
+Consecuencia: el panel nace con las dos columnas completas, y los pasos 6 y
+8 del plan de recorrido (guardar un proceso, los estados) dejan de ser
+trabajo futuro y pasan a ser parte de este spec. Lo que se construye está
+en el §8.2.
+
+**Lo que sigue sin existir y por tanto se degrada:** el aviso de *adenda
+nueva* de «Lo que corre». Detectar que un proceso seguido cambió exige
+comparar la versión ingerida con la anterior, y eso es el paso 9 del plan
+(«el calendario avisa»), que no entra aquí. En v1 «Lo que corre» emite dos
+de sus tres tipos de aviso: **cierre próximo** (calculable desde
+`proceso.fechaCierre` y la lista de seguidos) y **pliego sin analizar**
+(cruce de seguidos contra `pliego_proceso`). El tipo *adenda* se diseña
+ahora y se enciende cuando exista el paso 9 — no se simula mientras tanto.
 
 ---
 
@@ -485,13 +493,28 @@ src/components/panel/VerdictCard.tsx    Tarjeta de coincidencia con porqués
 src/lib/oferente/completitud.ts         perfilCompletitud() — función pura
 ```
 
-### 8.2 Lo que se crea solo si entra «Seguidos»
+### 8.2 «Seguidos» — en v1
 
 ```
 src/lib/db/schema/seguimiento.ts        tabla proceso_seguido
 drizzle/0013_proceso_seguido.sql        migración
-src/lib/seguimiento/                    guardar, listar, cambiar estado
+src/lib/seguimiento/guardar.ts          seguir / dejar de seguir (idempotente)
+src/lib/seguimiento/listar.ts           por usuario, agrupado por estado
+src/lib/seguimiento/estado.ts           transición de estado + máquina pura
+src/components/panel/EstadoSelect.tsx   control de cambio de estado
+app/panel/seguidos/page.tsx             lista agrupada por estado
 ```
+
+Igual que `pliego_proceso`, `proceso_seguido` referencia el **id nativo de
+SECOP** (`text`, tipo `CO1.REQ.xxxx`), no el uuid interno de la tabla
+`proceso`: es el criterio que ya siguen `coincidencia.procesoId` y
+`pliego_proceso.procesoId`, y el único id que conoce el motor de matching.
+Índice único `(usuarioId, procesoId)` para que seguir dos veces sea
+idempotente.
+
+La transición de estado se implementa como **función pura sobre un mapa de
+transiciones permitidas**, separada de la escritura en base. Así se testea
+sin base de datos, que es la única parte de esto con reglas de verdad.
 
 `proceso_seguido` es **multi-tenant y no hay RLS** (`CLAUDE.md` §4). Cada
 consulta que la toque lleva `WHERE usuarioId = …` en código de aplicación,
@@ -589,15 +612,17 @@ patrón de `.clr-mobile-menu`, que ya existe.
 
 ## 10. Lo que hay que resolver antes de implementar
 
-1. **Tomar la decisión del §9.1.** Una frase del owner. Determina si se
-   construye P1-a o solo P1-b.
-2. **Decidir si «Seguidos» entra en v1** (§8.2). Si no entra, el panel nace
-   con una sola columna y sin pipeline, y hay que aceptarlo por escrito en
-   vez de descubrirlo a mitad de camino.
-3. **Comprobar el tamaño de la base en Neon** antes de escribir cualquier
-   migración.
+1. ~~**Decidir si «Seguidos» entra en v1.**~~ **Resuelto el 2026-08-25: sí
+   entra.** Ver §6.4 y §8.2.
+2. **Tomar la decisión del §9.1** — el alcance de «no perfilar usuarios».
+   Una frase del owner. **Sigue abierta.** Determina si se construye P1-a o
+   solo P1-b; no bloquea nada más.
+3. **Comprobar el tamaño de la base en Neon** antes de escribir la
+   migración `0013`. Ahora es obligatorio, no precautorio: «Seguidos» en v1
+   significa que hay migración sí o sí.
 4. **Fijar la fecha de revisión de AguaLicita** (§7). La propuesta es
    2026-10-25; si no se fija, el estado B se queda para siempre.
 
-Nada de esto bloquea escribir el plan de implementación. Los cuatro puntos
-se pueden resolver en paralelo mientras se descompone el trabajo en pasos.
+Ninguno de los tres que siguen abiertos bloquea escribir el plan de
+implementación. El plan asume **P1-b como línea base** —la pantalla que hay
+que construir de todas formas— y deja P1-a como un paso condicional al §9.1.
