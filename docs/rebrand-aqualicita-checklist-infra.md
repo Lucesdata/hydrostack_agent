@@ -39,19 +39,31 @@ Esa env var es el único sitio del que salen las URLs absolutas de la app:
 `src/lib/supabase/actions.ts` (`redirectTo` del OAuth de Google). No hay
 ningún host escrito a mano en el runtime.
 
-## 2. Supabase — antes de volver a entrar
+## 2. Supabase — lo único que falta, y hay que hacerlo
 
-- [ ] *Authentication* → *URL Configuration* → *Site URL* y *Redirect URLs*
-      al dominio nuevo.
+Dashboard → *Authentication* → *URL Configuration*:
+
+- [ ] **Redirect URLs**: AÑADIR `https://aqualicita.vercel.app/**`
+      **sin borrar** la entrada de `hydrostacks.vercel.app`. Es una lista de
+      permitidos: tener las dos activas a la vez elimina cualquier ventana en
+      la que el login quede roto. La vieja se borra días después.
+- [ ] **Site URL**: cambiar a `https://aqualicita.vercel.app`. Este campo es
+      uno solo, así que cámbialo justo antes del `git push`.
 - [ ] Project Settings → renombrar el proyecto a `aqualicita` (cosmético).
 
-## 3. Google Cloud — credenciales OAuth
+El `redirectTo` que la app le pasa a Supabase es
+`${NEXT_PUBLIC_APP_URL}/auth/callback` (`src/lib/supabase/actions.ts`), y
+Supabase rechaza cualquier destino que no esté en la lista de Redirect URLs.
+Si esto no se hace, el login con Google falla en cuanto el deploy nuevo esté
+arriba — para ti también.
 
-- [ ] Añadir el origen y el redirect URI nuevos a las credenciales OAuth.
+## 3. Google Cloud — NO hace falta tocar nada
 
-**Si 2 y 3 quedan desfasados, el login con Google falla con
-`redirect_uri_mismatch` y no podrás entrar ni tú.** Es lo primero que se rompe
-y lo más fácil de no notar hasta que alguien lo intenta.
+El flujo es app → Supabase → Google → Supabase → app. El redirect URI
+registrado en Google apunta a **Supabase**
+(`https://prnipcaspjadhypsclyi.supabase.co/auth/v1/callback`), no a tu
+dominio, así que renombrar el proyecto de Vercel no lo afecta. Solo habría
+que tocarlo si algún día migras fuera de Supabase Auth.
 
 ## 4. GitHub
 
