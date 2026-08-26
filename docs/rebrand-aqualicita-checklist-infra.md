@@ -27,6 +27,10 @@ renombrar el proyecto de Vercel, que es gratis e instantáneo.
       Tuvo que crearse como *non-sensitive*: Vercel rechaza visibilidad
       secreta en cualquier variable con prefijo `NEXT_PUBLIC`.
 - [x] `.vercel/project.json` local actualizado.
+- [x] Borrado el proyecto huérfano `hydrostack` (creado 212 días antes,
+      último deploy 41 días antes, sin dominios y con solo las dos variables
+      públicas de Supabase). La cuenta queda con un único proyecto de este
+      producto.
 
 **El alias nuevo todavía no resuelve.** `aqualicita.vercel.app` da 404 y
 `hydrostacks.vercel.app` sigue sirviendo 200 con el build viejo: Vercel asigna
