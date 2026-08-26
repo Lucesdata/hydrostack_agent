@@ -23,47 +23,44 @@ renombrar el proyecto de Vercel, que es gratis e instantáneo.
 
 - [x] Proyecto `hydrostacks` renombrado a `aqualicita`
       (`vercel project rename`).
-- [x] `NEXT_PUBLIC_APP_URL` en **Production** = `https://hydrostacks.vercel.app`.
+- [x] `NEXT_PUBLIC_APP_URL` en **Production** = `https://aqualicita.vercel.app`.
       Tuvo que crearse como *non-sensitive*: Vercel rechaza visibilidad
-      secreta en cualquier variable con prefijo `NEXT_PUBLIC`. Apuntó
-      brevemente a `aqualicita.vercel.app` hasta descubrir que esa URL está
-      tras el SSO (ver abajo).
+      secreta en cualquier variable con prefijo `NEXT_PUBLIC`.
 - [x] `.vercel/project.json` local actualizado.
 - [x] Borrado el proyecto huérfano `hydrostack` (creado 212 días antes,
       último deploy 41 días antes, sin dominios y con solo las dos variables
       públicas de Supabase). La cuenta queda con un único proyecto de este
       producto.
 
-### La URL pública NO puede llevar la marca nueva sin dominio propio
+### La URL de producción es `https://aqualicita.vercel.app` ✅
 
-Comprobado el 2026-08-26 después del push, y es la conclusión más importante
-de todo el rebrand:
+Resuelto el 2026-08-26, y con una lección que conviene no repetir.
 
-- Renombrar el proyecto **no migra** el subdominio corto. `hydrostacks.vercel.app`
-  sigue siendo el dominio de producción público y ahora sirve el build con la
-  marca nueva; `aqualicita.vercel.app` no se creó solo.
-- Asignarlo a mano (`vercel alias set`) **tampoco sirve**: la URL responde,
-  pero con la pantalla *"Login – Vercel"*.
-- La causa está en la configuración del proyecto:
-  `ssoProtection.deploymentType = "all_except_custom_domains"`. Todo lo que no
-  sea un **dominio propio** queda detrás del SSO de Vercel. Un alias
-  `.vercel.app` nunca es un dominio propio.
+Renombrar el proyecto **no cambia** el subdominio corto por sí solo:
+`hydrostacks.vercel.app` siguió siendo la URL de producción. El error fue
+intentar arreglarlo con `vercel alias set`, que crea un **alias de
+despliegue** — y esos sí caen bajo
+`ssoProtection.deploymentType = "all_except_custom_domains"`, así que la URL
+respondía con la pantalla *"Login – Vercel"*. Eso llevó a la conclusión
+equivocada de que hacía falta comprar un dominio propio.
 
-**Por tanto: comprar `aqualicita.com` o `.co` deja de ser opcional** si se
-quiere que la URL pública lleve la marca. Es el paso 5 de este documento, y
-pasa a ser el camino principal, no un "cuando haya a quién enseñárselo". La
-alternativa sería bajar `ssoProtection` a `none`, lo que dejaría públicos
-también todos los deployments de preview — decisión de seguridad aparte.
+Lo correcto es que el subdominio esté asignado **al proyecto**, no a un
+deployment. `vercel domains add aqualicita.vercel.app aqualicita` respondió
+`domain_already_assigned`: ya lo estaba desde el rename, y era el alias de
+despliegue el que lo tapaba. Al borrarlo con `vercel alias rm`, la URL quedó
+pública sirviendo la aplicación.
 
-Mientras tanto, `NEXT_PUBLIC_APP_URL` vuelve a `https://hydrostacks.vercel.app`,
-que es la única URL pública que existe. **Ojo:** las env vars se congelan por
-deployment, así que un cambio de esta variable no surte efecto hasta el
-siguiente build.
+**Regla para la próxima vez:** para un subdominio `.vercel.app` usar
+`vercel domains add <dominio> <proyecto>`, nunca `vercel alias set`. El alias
+apunta a un deployment concreto y hereda la protección SSO; el dominio del
+proyecto no.
 
-Esa env var es el único sitio del que salen las URLs absolutas de la app:
-`src/lib/email/digest.ts` (enlaces de los correos) y
-`src/lib/supabase/actions.ts` (`redirectTo` del OAuth de Google). No hay
-ningún host escrito a mano en el runtime.
+Las dos URLs conviven hoy y ambas sirven la aplicación:
+`aqualicita.vercel.app` (la buena) y `hydrostacks.vercel.app` (heredada). La
+vieja puede retirarse cuando se quiera desde *Settings → Domains*.
+
+**Trampa de las env vars de Vercel:** se congelan por deployment. Cambiar
+`NEXT_PUBLIC_APP_URL` no surte efecto hasta el siguiente build.
 
 ## 2. Supabase — lo único que falta, y hay que hacerlo
 
@@ -76,11 +73,8 @@ Dashboard → *Authentication* → *URL Configuration*:
       no el comodín `/**`, para replicar el formato que ya funcionaba. Las dos
       de producción conviven: no hay ventana con el login roto. La vieja se
       borra días después del push.
-- [ ] **Site URL**: debe volver a `https://hydrostacks.vercel.app`. Se cambió
-      a `aqualicita.vercel.app` durante el rebrand y hay que revertirlo,
-      porque esa URL está tras el SSO de Vercel. Este campo alimenta
-      `{{ .SiteURL }}` de las plantillas de correo (confirmación de
-      registro). Se cambiará por fin cuando exista el dominio propio.
+- [x] **Site URL** = `https://aqualicita.vercel.app` (2026-08-26). Alimenta
+      `{{ .SiteURL }}` de las plantillas de correo de Supabase.
 - [ ] Project Settings → renombrar el proyecto a `aqualicita` (cosmético;
       hoy se llama `hydrostacks`).
 
@@ -121,9 +115,13 @@ que tocarlo si algún día migras fuera de Supabase Auth.
       buen momento para soltarlo.)
 - [ ] `git remote set-url origin git@github.com:Lucesdata/aqualicita.git`
 
-## 5. Dominio propio — cuando haya a quién enseñárselo
+## 5. Dominio propio — opcional, ya no bloquea nada
 
-No es necesario para que el rebrand quede completo.
+El rebrand está completo sin él: la URL de producción ya lleva la marca.
+Precios reales del registrador de Vercel el 2026-08-26, todos disponibles:
+`.com` $11,25 (renueva igual), `.app` $9,99 (renueva $15), `.co` $29,99
+(renueva $24,80), `.io` $30 (renueva $46). El `.com` es el único que no sube
+al renovar.
 
 - [ ] Verificado libre el 2026-08-26: `aqualicita.com`, `aqualicita.io`,
       `aqualicita.co`, `aqualicita.com.co`, `aqualicita.app`.
