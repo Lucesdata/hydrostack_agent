@@ -19,15 +19,20 @@ literales vuelve a ser un dato que vive fuera del repo y exige migración.
 Por la misma razón no hace falta comprar dominio propio todavía. Basta con
 renombrar el proyecto de Vercel, que es gratis e instantáneo.
 
-## 1. Vercel — renombrar el proyecto
+## 1. Vercel — renombrar el proyecto ✅ HECHO 2026-08-26
 
-- [ ] Dashboard → proyecto `hydrostacks` → *Settings* → *General* →
-      *Project Name* → `aqualicita`.
-- [ ] La URL de producción pasa a `https://aqualicita.vercel.app`.
-      La anterior deja de resolver: no hay nada apuntándole (ningún correo en
-      circulación), así que no rompe nada.
-- [ ] Actualizar la env var `NEXT_PUBLIC_APP_URL` en **Production** a
-      `https://aqualicita.vercel.app`.
+- [x] Proyecto `hydrostacks` renombrado a `aqualicita`
+      (`vercel project rename`).
+- [x] `NEXT_PUBLIC_APP_URL` en **Production** = `https://aqualicita.vercel.app`.
+      Tuvo que crearse como *non-sensitive*: Vercel rechaza visibilidad
+      secreta en cualquier variable con prefijo `NEXT_PUBLIC`.
+- [x] `.vercel/project.json` local actualizado.
+
+**El alias nuevo todavía no resuelve.** `aqualicita.vercel.app` da 404 y
+`hydrostacks.vercel.app` sigue sirviendo 200 con el build viejo: Vercel asigna
+los alias del proyecto al *siguiente* deployment de producción. Es decir, la
+URL nueva se enciende con el `git push`, no antes. Mientras tanto no hay nada
+roto.
 
 Esa env var es el único sitio del que salen las URLs absolutas de la app:
 `src/lib/email/digest.ts` (enlaces de los correos) y
