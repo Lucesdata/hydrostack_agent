@@ -2,7 +2,7 @@
 
 **Plataforma que cruza el perfil de un oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.**
 
-**Live:** https://hydrostack.io — dominio heredado; la migración a `aqualicita.io` está pendiente (ver checklist de infra del rebrand 2026-08-26).
+**Live:** https://aqualicita.vercel.app
 **Status:** ✅ En producción
 
 ---

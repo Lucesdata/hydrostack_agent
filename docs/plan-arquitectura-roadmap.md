@@ -32,7 +32,7 @@ El objetivo es que todo lo nuevo sea **aditivo**: módulos nuevos que consumen l
 │  searchProcesosDb / verdict.ts ──────┼─►│        ▼                        │
 │                                      │  │  src/lib/email/digest.ts        │
 │  clientStore (localStorage)          │  │   (plantilla + Resend SDK)      │
-│   hydrostack_oferente_perfil ─migra─►│  │                                 │
+│   aqualicita_oferente_perfil ─migra─►│  │                                 │
 └──────────────────────────────────────┘  │  Auth.js: /api/auth/[...]       │
                                           │  Tablas: usuario · perfil ·     │
                                           │  alerta_pref · envio_log        │
@@ -54,7 +54,7 @@ Nuevo módulo `src/lib/db/schema/cuentas.ts`:
 
 Archivos nuevos: `src/lib/auth/config.ts` (config Auth.js), `app/api/auth/[...nextauth]/route.ts`, `app/cuenta/page.tsx` (login + estado de sesión), `app/api/perfil/route.ts` (GET/PUT del perfil de la cuenta).
 
-**Migración del perfil**: al iniciar sesión por primera vez, un componente cliente lee `hydrostack_oferente_perfil` del `clientStore` y si la cuenta no tiene perfil, hace `PUT /api/perfil`. El wizard existente sigue escribiendo en localStorage para anónimos (cero cambio); con sesión, escribe además vía `PUT /api/perfil`. localStorage queda como caché para anónimos, la DB es la fuente de verdad con cuenta.
+**Migración del perfil**: al iniciar sesión por primera vez, un componente cliente lee `aqualicita_oferente_perfil` del `clientStore` y si la cuenta no tiene perfil, hace `PUT /api/perfil`. El wizard existente sigue escribiendo en localStorage para anónimos (cero cambio); con sesión, escribe además vía `PUT /api/perfil`. localStorage queda como caché para anónimos, la DB es la fuente de verdad con cuenta.
 
 **Prueba (la del roadmap)**: registrarse → cerrar sesión → entrar desde otro navegador → mismo perfil. Añadir test de integración del PUT/GET de perfil con el patrón de mocks de DB ya usado en `src/__tests__/db/`.
 

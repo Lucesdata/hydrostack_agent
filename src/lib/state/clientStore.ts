@@ -18,14 +18,13 @@ const KEYS = {
   // Licitaciones: perfil de oferente del mini-wizard (Fase 2, un solo perfil
   // por navegador, sin cuenta). Reemplaza a OFERENTE_PILOTO hardcodeado.
   //
-  // NO RENOMBRAR. Conserva el prefijo `hydrostack_` a propósito tras el
-  // rebrand a AquaLicita (2026-08-26): la clave vive en el navegador del
-  // usuario, así que cambiarla borraría en silencio el perfil de todo
-  // oferente anónimo que ya completó el wizard, y rompería la migración
-  // localStorage → cuenta descrita en docs/plan-arquitectura-roadmap.md.
-  // El nombre nunca es visible para el usuario. Blindado por
+  // Renombrada en el rebrand a AquaLicita (2026-08-26) sin código de
+  // migración, a propósito: en ese momento existía un único perfil de prueba
+  // y escribir un puente para leer la clave vieja habría sido código nacido
+  // muerto. Esa ventana ya se cerró — de aquí en adelante la clave vive en el
+  // navegador de gente real, así que renombrarla exige migrar primero. Ver
   // src/__tests__/state/clientStore-keys.test.ts.
-  oferentePerfil: "hydrostack_oferente_perfil",
+  oferentePerfil: "aqualicita_oferente_perfil",
 } as const;
 
 function isBrowser(): boolean {

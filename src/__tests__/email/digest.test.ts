@@ -63,7 +63,7 @@ function match(over: Partial<SecopProceso> = {}): Match {
 describe("renderDigest", () => {
   beforeEach(() => {
     process.env.AUTH_SECRET = "test-secret";
-    process.env.NEXT_PUBLIC_APP_URL = "https://hydrostacks.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL = "https://aqualicita.vercel.app";
   });
 
   afterEach(() => {
@@ -87,8 +87,8 @@ describe("renderDigest", () => {
   it("incluye el título y el link con UTM de cada proceso en html y text", () => {
     const d = renderDigest([match()], { id: "u1", email: "a@b.com" });
     expect(d.html).toContain("Optimización del sistema de acueducto");
-    expect(d.html).toContain("utm_source=hydrostack");
-    expect(d.text).toContain("utm_source=hydrostack");
+    expect(d.html).toContain("utm_source=aqualicita");
+    expect(d.text).toContain("utm_source=aqualicita");
   });
 
   it("el link de unsubscribe usa el usuarioId y aparece en html, text y unsubscribeUrl", () => {

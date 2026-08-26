@@ -2,14 +2,16 @@
  * Blindaje de las claves de localStorage del clientStore.
  *
  * Estas claves viven en el navegador del usuario, no en el repo: renombrarlas
- * no es un refactor, es una migración de datos. Tras el rebrand HydroStack →
- * AquaLicita (2026-08-26) el prefijo `hydrostack_` se conservó a propósito —
- * cambiarlo borraría en silencio el perfil de todo oferente anónimo que ya
- * completó el mini-wizard y rompería la migración localStorage → cuenta
- * (docs/plan-arquitectura-roadmap.md).
+ * no es un refactor, es una migración de datos. El rebrand a AquaLicita
+ * (2026-08-26) pudo cambiar `hydrostack_oferente_perfil` por
+ * `aqualicita_oferente_perfil` sin puente de migración solo porque en ese
+ * momento existía un único perfil de prueba. Esa ventana ya se cerró.
  *
  * Si este test falla, la pregunta no es "¿cómo lo arreglo?" sino "¿escribí el
  * código de migración que lee la clave vieja antes de dejar de usarla?".
+ * Cambiar la constante de abajo para que el test pase vuelve a dejar sin
+ * perfil a todo oferente anónimo que ya completó el mini-wizard, y rompe la
+ * migración localStorage → cuenta de docs/plan-arquitectura-roadmap.md.
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
@@ -19,7 +21,7 @@ import {
 } from "@/src/lib/state/clientStore";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 
-const CLAVE_PERFIL_OFERENTE = "hydrostack_oferente_perfil";
+const CLAVE_PERFIL_OFERENTE = "aqualicita_oferente_perfil";
 
 const perfil = { id: "oferente-blindaje" } as unknown as OferenteProfile;
 
@@ -42,18 +44,18 @@ afterEach(() => {
   delete (globalThis as Record<string, unknown>).localStorage;
 });
 
-describe("clientStore — claves de localStorage congeladas", () => {
-  it("escribe el perfil de oferente bajo la clave heredada", () => {
+describe("clientStore — claves de localStorage estables", () => {
+  it("escribe el perfil de oferente bajo la clave estable", () => {
     saveOferentePerfil(perfil);
     expect([...store.keys()]).toEqual([CLAVE_PERFIL_OFERENTE]);
   });
 
-  it("lee el perfil escrito previamente bajo la clave heredada", () => {
+  it("lee el perfil escrito previamente bajo la clave estable", () => {
     store.set(CLAVE_PERFIL_OFERENTE, JSON.stringify(perfil));
     expect(getOferentePerfil()).toEqual(perfil);
   });
 
-  it("borra exactamente la clave heredada", () => {
+  it("borra exactamente la clave estable", () => {
     store.set(CLAVE_PERFIL_OFERENTE, JSON.stringify(perfil));
     clearOferentePerfil();
     expect(store.has(CLAVE_PERFIL_OFERENTE)).toBe(false);
