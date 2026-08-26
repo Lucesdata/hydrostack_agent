@@ -25,6 +25,9 @@ function appUrl(): string {
 /** UTM de campaña — el destino real de cada ítem sigue siendo la URL de SECOP. */
 function withUtm(url: string): string {
   const sep = url.includes("?") ? "&" : "?";
+  // `utm_source=hydrostack` se conserva tras el rebrand a AquaLicita
+  // (2026-08-26) para no partir en dos la serie histórica de analítica de
+  // los correos. Es un identificador de campaña, no copy visible.
   return `${url}${sep}utm_source=hydrostack&utm_medium=email&utm_campaign=digest`;
 }
 
@@ -46,7 +49,7 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
 
   const html = [
     '<div style="font-family:system-ui,sans-serif;color:#0A1F1C;max-width:560px;margin:0 auto;">',
-    `<p>Estos procesos abiertos del sector agua calzan con tu perfil en HydroStack:</p>`,
+    `<p>Estos procesos abiertos del sector agua calzan con tu perfil en AquaLicita:</p>`,
     "<div>",
     ...filas.map(
       (f) => `
@@ -61,13 +64,13 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
     ),
     "</div>",
     `<p style="margin-top:24px;font-size:11px;color:#8A938F;">` +
-      `Recibes esto porque tienes un perfil de oferente en HydroStack. ` +
+      `Recibes esto porque tienes un perfil de oferente en AquaLicita. ` +
       `<a href="${unsubscribeUrl}" style="color:#8A938F;">Darme de baja de estas alertas</a>.</p>`,
     "</div>",
   ].join("\n");
 
   const text = [
-    "Estos procesos abiertos del sector agua calzan con tu perfil en HydroStack:",
+    "Estos procesos abiertos del sector agua calzan con tu perfil en AquaLicita:",
     "",
     ...filas.map(
       (f) =>

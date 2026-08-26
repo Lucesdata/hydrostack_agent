@@ -17,6 +17,14 @@ import type { OferenteProfile } from "../oferente/types";
 const KEYS = {
   // Licitaciones: perfil de oferente del mini-wizard (Fase 2, un solo perfil
   // por navegador, sin cuenta). Reemplaza a OFERENTE_PILOTO hardcodeado.
+  //
+  // NO RENOMBRAR. Conserva el prefijo `hydrostack_` a propósito tras el
+  // rebrand a AquaLicita (2026-08-26): la clave vive en el navegador del
+  // usuario, así que cambiarla borraría en silencio el perfil de todo
+  // oferente anónimo que ya completó el wizard, y rompería la migración
+  // localStorage → cuenta descrita en docs/plan-arquitectura-roadmap.md.
+  // El nombre nunca es visible para el usuario. Blindado por
+  // src/__tests__/state/clientStore-keys.test.ts.
   oferentePerfil: "hydrostack_oferente_perfil",
 } as const;
 
