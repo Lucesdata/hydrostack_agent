@@ -198,7 +198,11 @@ export default function Navbar({ user, hasNewMatches }) {
           <span className="clr-logo-mark">
             <ValveGlyph />
           </span>
-          <span className="clr-logo-text">ydroStack</span>
+          {/* El wordmark iba truncado a propósito ("ydroStack"): el cuadro con
+              el glifo de válvula hacía de "H" inicial. Con "AquaLicita" ese
+              juego no se sostiene, así que el glifo pasa a ser un ícono y el
+              wordmark se escribe completo. Rebrand 2026-08-26. */}
+          <span className="clr-logo-text">AquaLicita</span>
         </Link>
 
         <span className="clr-status" title="Sistema activo">
