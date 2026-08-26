@@ -58,10 +58,23 @@ Entidades y flujos principales:
 - Los endpoints `/api/cron/*` exigen `CRON_SECRET` como `Bearer` y fallan
   cerrado (401) si la env var no está definida — ver
   `app/api/cron/{ingest,alertas}/route.ts`.
-- No hay RLS en Postgres — la única defensa multi-tenant es el `WHERE
-  usuarioId=...` de cada query de aplicación. No asumir que esto está
-  resuelto; auditar manualmente cada query sobre tablas de
-  cuentas/oferente antes de tocarlas.
+- **ABIERTO (2026-08-26) — la Data API de Supabase expone las 22 tablas de
+  `public` a cualquiera.** Ninguna tiene RLS y los roles `anon` y
+  `authenticated` conservan `SELECT, INSERT, UPDATE, DELETE, TRUNCATE` sobre
+  todas. Como `NEXT_PUBLIC_SUPABASE_ANON_KEY` viaja en el bundle del
+  navegador, un `curl` a `/rest/v1/usuario` con esa clave devuelve datos —
+  verificado. Antes de la migración de Neon (2026-08-15) esto no importaba
+  porque no había API pública; ahora el `WHERE usuarioId=...` de la
+  aplicación es una puerta que se puede rodear entera.
+- El arreglo no rompe la app: el código solo usa `supabase.auth.*` y un
+  `supabase.storage.from`, nunca `.from()` sobre tablas — los datos van por
+  Drizzle con conexión Postgres directa. Basta activar RLS sin políticas en
+  las 22 tablas (o revocar los grants a `anon`/`authenticated`) para cerrar
+  la API sin tocar el runtime. Ojo con Storage, que tiene sus propias
+  políticas en `storage.objects`.
+- Aparte de eso, la única defensa multi-tenant sigue siendo el `WHERE
+  usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
+  de cuentas/oferente antes de tocarlas.
 
 ## 5. Estado del roadmap
 
