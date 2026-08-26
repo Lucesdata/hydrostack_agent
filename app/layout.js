@@ -55,9 +55,9 @@ const ibmPlexSansCondensed = IBM_Plex_Sans_Condensed({
 });
 
 export const metadata = {
-  title: "HydroStack — Inteligencia para contratación pública en agua y saneamiento",
+  title: "AquaLicita — Inteligencia para contratación pública en agua y saneamiento",
   description:
-    "HydroStack cruza tu perfil de oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.",
+    "AquaLicita cruza tu perfil de oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.",
   keywords:
     "SECOP II, licitaciones agua y saneamiento, contratación pública Colombia, RUP, pliegos de condiciones",
 };

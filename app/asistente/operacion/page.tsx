@@ -11,7 +11,7 @@ import { getOrCreateConversation, loadMessages } from '@/src/lib/assistants/conv
 import AssistantChat from '@/src/components/assistants/AssistantChat';
 
 export const metadata = {
-  title: 'Operación de acueducto o ESP — HydroStack',
+  title: 'Operación de acueducto o ESP — AquaLicita',
   description: 'Resuelve dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.',
 };
 

@@ -1,7 +1,7 @@
 import LicitacionesDiscovery from "@/src/components/secop/discovery/LicitacionesDiscovery";
 
 export const metadata = {
-  title: "Descubrir licitaciones — HydroStack",
+  title: "Descubrir licitaciones — AquaLicita",
   description:
     "Colecciones inteligentes y búsqueda facetada para licitaciones de agua y saneamiento en SECOP II.",
 };

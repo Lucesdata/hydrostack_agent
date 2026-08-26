@@ -2,7 +2,7 @@
 "use client";
 
 /**
- * SecopExplorer · sección "Licitaciones" de HydroStack — workbench v2.
+ * SecopExplorer · sección "Licitaciones" de AquaLicita — workbench v2.
  *
  * Orquestador master-detail: lista compacta (ProcessList) + panel de detalle
  * (ProcessDetail). Llama a /api/secop (proxy server-side a SECOP II).

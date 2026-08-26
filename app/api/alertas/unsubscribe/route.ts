@@ -17,7 +17,7 @@ export const runtime = "nodejs";
 
 function pagina(mensaje: string): NextResponse {
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8">
-    <title>HydroStack — Alertas</title></head>
+    <title>AquaLicita — Alertas</title></head>
     <body style="font-family:system-ui,sans-serif;max-width:480px;margin:80px auto;color:#0A1F1C;">
       <p>${mensaje}</p>
     </body></html>`;
@@ -40,5 +40,5 @@ export async function GET(req: NextRequest) {
       set: { activo: false, updatedAt: new Date() },
     });
 
-  return pagina("Listo — ya no recibirás alertas de HydroStack en tu correo.");
+  return pagina("Listo — ya no recibirás alertas de AquaLicita en tu correo.");
 }

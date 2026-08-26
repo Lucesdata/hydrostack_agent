@@ -1,4 +1,4 @@
-export default function S2WhyHydroStack() {
+export default function S2WhyAquaLicita() {
   const cards = [
     {
       icon: "✓",
@@ -31,7 +31,7 @@ export default function S2WhyHydroStack() {
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "64px", maxWidth: 800, marginLeft: "auto", marginRight: "auto" }}>
           <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 16 }}>
-            Por qué HydroStack
+            Por qué AquaLicita
           </div>
           <h2 style={{ font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)", color: "#0A1F1C", marginBottom: 20 }}>
             Hecho para agua, no para todo lo demás.

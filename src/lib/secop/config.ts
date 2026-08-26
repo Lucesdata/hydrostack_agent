@@ -1,6 +1,6 @@
 /**
  * ──────────────────────────────────────────────────────────────────────────
- *  SECOP · Configuración central  (HydroStack › Licitaciones)
+ *  SECOP · Configuración central  (AquaLicita › Licitaciones)
  * ──────────────────────────────────────────────────────────────────────────
  *
  *  ⚠️  ESTE ES EL ÚNICO ARCHIVO QUE DEBES VERIFICAR/AJUSTAR.

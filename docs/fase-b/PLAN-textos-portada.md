@@ -54,8 +54,8 @@ a armar el presupuesto con las cotas y validaciones del sector agua» es la
 etapa 04 del recorrido: el hueco principal, lo último del plan. Es la
 promesa más grande de la portada y la única que no tiene nada detrás.
 
-**La herramienta es el sujeto, contra tu propia regla.** «HydroStack cruza
-tu RUP con los requisitos habilitantes» — el que cruza es HydroStack, no el
+**La herramienta es el sujeto, contra tu propia regla.** «AquaLicita cruza
+tu RUP con los requisitos habilitantes» — el que cruza es AquaLicita, no el
 usuario. La auditoría de coherencia que hiciste dice lo contrario.
 
 ---
@@ -151,7 +151,7 @@ Se cambia **solo** esto:
 
 ## 6. Cinco reglas permanentes
 
-1. **El usuario es el sujeto.** «Cruzas tu perfil», nunca «HydroStack cruza
+1. **El usuario es el sujeto.** «Cruzas tu perfil», nunca «AquaLicita cruza
    tu RUP». Vale para CTA, para respuestas y para microcopia.
 2. **El sector y el país en la primera pantalla.** Es lo único defendible
    frente a un generalista con dos millones de licitaciones.

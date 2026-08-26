@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Nosotros · HydroStack",
+  title: "Nosotros · AquaLicita",
 };
 
 export default function NosotrosPage() {
@@ -11,7 +11,7 @@ export default function NosotrosPage() {
           <h1 className="clr-h1">Un ingeniero especialista, no una startup genérica</h1>
           <p className="clr-sub">
             11 años en agua y saneamiento, planes directores ejecutados y licencia profesional
-            vigente — el método detrás de cada indicador que ves en HydroStack.
+            vigente — el método detrás de cada indicador que ves en AquaLicita.
           </p>
         </header>
       </div>

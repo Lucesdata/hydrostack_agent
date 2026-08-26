@@ -15,8 +15,8 @@ gana el de textos.
 
 Rehacer la portada con el esqueleto de la landing de Tendios —seis bloques,
 en su orden— **conservando la paleta, el logo y la planta isométrica de
-HydroStack**, y sustituyendo cada captura de producto suya por lo que
-HydroStack tiene de propio.
+AquaLicita**, y sustituyendo cada captura de producto suya por lo que
+AquaLicita tiene de propio.
 
 Dictado por el usuario, textual: *"quiero que nuestra landing se vea así,
 pero en vez del video deja la planta de tratamiento que tenemos"* y
@@ -37,7 +37,7 @@ geométrica, ni el tono ("gana más", "solo las que puedes ganar").
 
 ## 2. Encuadre del producto
 
-**HydroStack es una plataforma de tratamiento de aguas. Las licitaciones de
+**AquaLicita es una plataforma de tratamiento de aguas. Las licitaciones de
 agua y saneamiento básico son una de sus funciones, no el producto entero.**
 
 Esto lo dictó el usuario y cambia dos cosas respecto a lo que hay escrito
@@ -51,7 +51,7 @@ Ya está respaldado por el producto: `INTENT_ROUTES` en `app/page.js` tiene
 cinco rutas (`/licitaciones`, `/pliego`, `/soluciones`,
 `/asistente/ejecucion`, `/asistente/operacion`) y solo una es licitar.
 
-> ⚠️ **Choca con `CLAUDE.md`**, que declara HydroStack "plataforma de
+> ⚠️ **Choca con `CLAUDE.md`**, que declara AquaLicita "plataforma de
 > inteligencia para contratación pública" y "único producto activo". Antes
 > de publicar esta portada hay que actualizar esa sección de `CLAUDE.md`, o
 > la documentación y el sitio dirán cosas distintas.
@@ -79,7 +79,7 @@ Ninguno es nuevo: los dos últimos ya viven en la tarjeta oscura de
 
 **Traducción de cada color de Tendios:**
 
-| Tendios | HydroStack |
+| Tendios | AquaLicita |
 |---|---|
 | Píldora azul claro | Píldora `#0369A1` sobre `rgba(3,105,161,.08)` |
 | Titular tricolor (marino + azul + dorado) | **Un solo acento**: `#0A1F1C` con las palabras clave en `#0369A1`. No se inventa un segundo color para imitar el dorado. |
@@ -93,7 +93,7 @@ Ninguno es nuevo: los dos últimos ya viven en la tarjeta oscura de
 Tendios es **redondo y blando**: tarjetas de radio ~16px, botones de ~12px,
 sombras difusas, tipografía geométrica.
 
-La portada de HydroStack hoy es **recta y técnica**: radio 0, marcas de
+La portada de AquaLicita hoy es **recta y técnica**: radio 0, marcas de
 esquina en L, etiquetas en monoespaciada, `[ corchetes ]`, `Fig. 02 —`,
 líneas de plano que se trazan al entrar. Es un lenguaje de plano de
 ingeniería, y es coherente con lo que vende.
@@ -152,7 +152,7 @@ deliberada: ellos enseñan una interfaz, nosotros enseñamos una planta.
 > - Botón 1: `Prueba un proceso →` · Botón 2: `Ver cómo funciona`
 > - Checks: `Sin cuenta` · `Resultado en 2 minutos`
 
-### S2 · "Por qué HydroStack"
+### S2 · "Por qué AquaLicita"
 
 **Cabecera centrada**, tres piezas: eyebrow en mayúsculas y acento → titular
 grande a dos líneas, centrado, construido como oposición → subtítulo gris
@@ -192,7 +192,7 @@ nombres en texto plano, espaciados, en gris medio. **Sin logos** — Tendios
 tampoco los usa.
 
 Tendios lista herramientas de oficina (HubSpot, Salesforce, SAP). Para
-HydroStack pesan más las fuentes y la norma. Ver decisión **D2**.
+AquaLicita pesan más las fuentes y la norma. Ver decisión **D2**.
 
 **S3.b — Bloque a dos columnas.** Izquierda: eyebrow → titular grande a dos
 líneas, alineado a la izquierda → subtítulo gris → **tres viñetas** con
@@ -334,5 +334,5 @@ del plan de textos y por la pregunta de qué versión (A/B/C) está publicada.
    portada sale antes, sale prometiendo cosas que el producto no sostiene —
    que es exactamente el error que ese plan vino a corregir.
 3. **Regla 4:** ninguna frase puede dar un veredicto único. El "solo de las
-   que puede ganar" de Tendios no se copia. HydroStack dice qué compuerta
+   que puede ganar" de Tendios no se copia. AquaLicita dice qué compuerta
    pasa y por qué.

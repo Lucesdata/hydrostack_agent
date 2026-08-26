@@ -1,6 +1,6 @@
-# Hydrostack — Instrucciones del Proyecto
+# AquaLicita — Instrucciones del Proyecto
 
-HydroStack es una plataforma de inteligencia para contratación pública en
+AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
 pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto
 activo**. El dominio séptico (calculadoras de fosa séptica, agente
@@ -71,7 +71,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-08-08.
+Última actualización: 2026-08-26 (rebrand HydroStack → AquaLicita).
 
 ## graphify
 

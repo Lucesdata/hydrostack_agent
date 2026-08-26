@@ -22,7 +22,7 @@ export default function S6Footer() {
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} />
           <span>Datos SECOP II · actualización diaria</span>
         </div>
-        <p style={{ margin: 0 }}>© 2026 HydroStack. Todos los derechos reservados.</p>
+        <p style={{ margin: 0 }}>© 2026 AquaLicita. Todos los derechos reservados.</p>
       </div>
     </footer>
   );

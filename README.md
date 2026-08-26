@@ -1,8 +1,8 @@
-# 🌊 HydroStack — Inteligencia para contratación pública en agua y saneamiento
+# 🌊 AquaLicita — Inteligencia para contratación pública en agua y saneamiento
 
 **Plataforma que cruza el perfil de un oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.**
 
-**Live:** https://hydrostack.io
+**Live:** https://hydrostack.io — dominio heredado; la migración a `aqualicita.io` está pendiente (ver checklist de infra del rebrand 2026-08-26).
 **Status:** ✅ En producción
 
 ---
@@ -36,7 +36,7 @@
 
 ```bash
 git clone <repo-url>
-cd hydrostack-2
+cd aqualicita
 npm install
 cp .env.example .env.local
 # completa DATABASE_URL, AUTH_SECRET, AUTH_RESEND_KEY, GEMINI_API_KEY (ver .env.example)

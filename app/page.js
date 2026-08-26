@@ -9,7 +9,7 @@ import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
-import S2WhyHydroStack from "@/src/components/landing/S2WhyHydroStack";
+import S2WhyAquaLicita from "@/src/components/landing/S2WhyAquaLicita";
 import S3EverythingInOne from "@/src/components/landing/S3EverythingInOne";
 import S4Invitation from "@/src/components/landing/S4Invitation";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
@@ -22,7 +22,7 @@ const PROBLEM_SOLUTION = [
     pain: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
     label: "Pre-evaluación RUP",
     answer:
-      "HydroStack cruza tu RUP con los requisitos habilitantes antes de que escribas una sola página.",
+      "AquaLicita cruza tu RUP con los requisitos habilitantes antes de que escribas una sola página.",
   },
   {
     n: "02",
@@ -721,8 +721,8 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* S2 — Por qué HydroStack */}
-        <S2WhyHydroStack />
+        {/* S2 — Por qué AquaLicita */}
+        <S2WhyAquaLicita />
 
         {/* S3 — Todo en un solo lugar */}
         <S3EverythingInOne />

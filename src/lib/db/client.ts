@@ -20,8 +20,8 @@ interface MinimalPool {
 
 // Singleton en dev para no agotar conexiones en cada recarga de HMR.
 const globalForDb = globalThis as unknown as {
-  _hydrostackPool?: MinimalPool;
-  _hydrostackDb?: NeonDatabase<typeof schema>;
+  _aqualicitaPool?: MinimalPool;
+  _aqualicitaDb?: NeonDatabase<typeof schema>;
 };
 
 function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
@@ -45,13 +45,13 @@ function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
 }
 
 const built =
-  globalForDb._hydrostackDb && globalForDb._hydrostackPool
-    ? { db: globalForDb._hydrostackDb, pool: globalForDb._hydrostackPool }
+  globalForDb._aqualicitaDb && globalForDb._aqualicitaPool
+    ? { db: globalForDb._aqualicitaDb, pool: globalForDb._aqualicitaPool }
     : build();
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb._hydrostackPool = built.pool;
-  globalForDb._hydrostackDb = built.db;
+  globalForDb._aqualicitaPool = built.pool;
+  globalForDb._aqualicitaDb = built.db;
 }
 
 export const db = built.db;

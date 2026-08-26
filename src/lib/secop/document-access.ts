@@ -271,7 +271,7 @@ export async function probeDocument(
     const res = await fetchImpl(url, {
       redirect: "follow",
       signal: ctl.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (HydroStack probe)" },
+      headers: { "User-Agent": "Mozilla/5.0 (AquaLicita probe)" },
     });
     const contentType = res.headers.get("content-type");
     let bodySample: string | null = null;

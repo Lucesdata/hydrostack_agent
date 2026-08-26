@@ -5,7 +5,7 @@ export default function S5DarkClosing() {
         <div style={{ fontSize: "48px", marginBottom: 32 }}>💧</div>
 
         <h2 style={{ font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)", color: "white", marginBottom: 20 }}>
-          HydroStack: tu compañero <span style={{ color: "#7DD3FC" }}>de agua</span>
+          AquaLicita: tu compañero <span style={{ color: "#7DD3FC" }}>de agua</span>
         </h2>
 
         <p style={{ font: "15px/1.6 var(--font-inter)", color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>

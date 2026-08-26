@@ -1,6 +1,6 @@
 # Loop SECOP — Backlog de mejora continua
 
-Eres un agente corriendo en loop sobre el módulo de licitaciones/SECOP de HydroStack.
+Eres un agente corriendo en loop sobre el módulo de licitaciones/SECOP de AquaLicita.
 Cada iteración: (1) lee `loops/secop/PROGRESS.md`, (2) toma LA SIGUIENTE tarea pendiente
 del backlog de abajo, (3) impleméntala, (4) verifica, (5) commitea con mensaje
 `loop(secop): <qué hiciste>`, (6) marca el avance en PROGRESS.md. Una tarea (o sub-tarea)

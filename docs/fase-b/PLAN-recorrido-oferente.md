@@ -26,7 +26,7 @@ Ante cualquier pantalla de Tendios que dé ganas de copiar, la pregunta es:
 > **¿Esto funciona con cuarenta procesos al mes, o necesita cuarenta mil?**
 
 Si necesita cuarenta mil, no es para nosotros por muy bien resuelto que
-esté. Tendios está diseñado para reducir abundancia. HydroStack vive en la
+esté. Tendios está diseñado para reducir abundancia. AquaLicita vive en la
 escasez: un sector, un país, una fuente. La escasez no pide herramientas de
 criba — pide que le digas al usuario *estos son los ocho que te sirven, y
 por qué cada uno*.

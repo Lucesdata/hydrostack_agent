@@ -194,7 +194,7 @@ export default function Navbar({ user, hasNewMatches }) {
     <nav className="clr-nav" aria-label="Menú principal">
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-nav-inner">
-        <Link href="/" className="clr-logo" onClick={close} aria-label="HydroStack inicio">
+        <Link href="/" className="clr-logo" onClick={close} aria-label="AquaLicita inicio">
           <span className="clr-logo-mark">
             <ValveGlyph />
           </span>

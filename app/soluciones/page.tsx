@@ -14,7 +14,7 @@ import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 
 export const metadata = {
-  title: "Soluciones — HydroStack",
+  title: "Soluciones — AquaLicita",
   description:
     "¿Un problema de agua potable o vertimientos? Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
 };

@@ -1,9 +1,17 @@
-# 📚 Índice de documentación — HydroStack
+# 📚 Índice de documentación — AquaLicita
 
-HydroStack es una plataforma de inteligencia para contratación pública en
+AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento (SECOP II). Ver
 [ADR-0002](./adr/ADR-0002-deprecacion-dominio-septico.md) sobre la
 deprecación del dominio séptico anterior.
+
+> **Nota de marca (2026-08-26).** El producto se llamaba **HydroStack** hasta
+> el 2026-08-26. Los documentos con fecha anterior conservan el nombre viejo a
+> propósito: son registros históricos (ADRs, auditorías, cierres de fase,
+> planes y specs ya ejecutados) y reescribirlos falsearía lo que se decidió en
+> su momento. Donde leas "HydroStack" en un documento fechado antes de esa
+> fecha, entiende "AquaLicita". Los documentos vivos —README, CLAUDE.md,
+> PENDIENTES.md, este índice y `docs/fase-b/`— sí usan el nombre nuevo.
 
 ## Top-level
 

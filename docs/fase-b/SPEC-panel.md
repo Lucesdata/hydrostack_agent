@@ -31,7 +31,7 @@ Decisiones tomadas por el usuario el 2026-08-25:
 
 | Pregunta | Respuesta |
 |---|---|
-| Identidad visual | Tema claro HydroStack — se copia la estructura de Tendios, no su piel oscura |
+| Identidad visual | Tema claro AquaLicita — se copia la estructura de Tendios, no su piel oscura |
 | Alcance v1 | Carcasa + home + rediseño por dentro de los módulos |
 | AguaLicita | Espacio reservado y visible, marcado «Pronto». Sin lógica de chat |
 
@@ -103,7 +103,7 @@ deliberado: quien entró por la puerta 01 de la portada encuentra el mismo
 recorrido dentro, sin que se le crucen las otras audiencias.
 
 **La única fricción real es con `SPEC-portada-v2.md` §2**, que encuadra
-HydroStack como plataforma de tratamiento de aguas donde licitar es *una
+AquaLicita como plataforma de tratamiento de aguas donde licitar es *una
 función entre cinco*. Pero ese choque ya está arbitrado por el propio spec
 de portada, que se declara subordinado en materia de palabras: *«el plan
 hermano de textos manda sobre las palabras… cuando choquen, gana el de

@@ -1,7 +1,7 @@
 import ComoParticipar from "@/src/components/secop/ComoParticipar";
 
 export const metadata = {
-  title: "Cómo participar en una licitación — HydroStack",
+  title: "Cómo participar en una licitación — AquaLicita",
   description:
     "Guía práctica para empresas y personas naturales que quieren ofertar en procesos de contratación pública del sector agua y saneamiento en Colombia.",
 };

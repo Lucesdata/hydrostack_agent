@@ -2,7 +2,7 @@ import ProcesosRecientes from "@/src/components/secop/ProcesosRecientes";
 import { getProcesosRecientes } from "@/src/lib/secop/recientes";
 
 export const metadata = {
-  title: "Licitaciones — HydroStack",
+  title: "Licitaciones — AquaLicita",
   description:
     "Últimas licitaciones públicas del sector agua y saneamiento básico en Colombia (SECOP II).",
 };

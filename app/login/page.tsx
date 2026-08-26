@@ -18,7 +18,7 @@ export default async function LoginPage({
     <AuthCard
       figLabel="Fig. 05 — Acceso"
       title="Ingresar"
-      subtitle="Entra a tu cuenta de HydroStack."
+      subtitle="Entra a tu cuenta de AquaLicita."
     >
       {error && <p className="clr-auth-msg clr-auth-msg--error">{error}</p>}
       {notice && <p className="clr-auth-msg clr-auth-msg--notice">{notice}</p>}
