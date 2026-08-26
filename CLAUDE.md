@@ -42,7 +42,12 @@ Entidades y flujos principales:
 ## 3. Configuración Técnica
 
 - **Framework**: Next.js 14.2.3 + React 18
-- **Base de datos**: Postgres (Neon) vía Drizzle ORM
+- **Base de datos**: Postgres vía Drizzle ORM. **La base viva es la de
+  Supabase** (`DATABASE_URL` → `aws-1-eu-west-1.pooler.supabase.com`), no
+  Neon: la migración se hizo el 2026-08-15 y se verificó el 2026-08-26 (la
+  ingesta del día escribió ahí). `DATABASE_URL_UNPOOLED` todavía apunta a
+  Neon, que es un residuo y hoy responde `exceeded the data transfer quota` —
+  no usarlo. El mismo proyecto de Supabase sirve Auth y datos.
 - **Auth**: Supabase Auth (`@supabase/ssr` + `@supabase/supabase-js`) — email/password y Google OAuth
 - **LLM**: Gemini (extractor de pliegos, `GEMINI_API_KEY`)
 - **Diseño**: tokens en `app/globals.css` — `--bg:#FAFAF7`,
