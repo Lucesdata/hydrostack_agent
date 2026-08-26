@@ -13,4 +13,4 @@ export const requisitosProceso = pgTable('requisitos_proceso', {
   procesoId: text('proceso_id').primaryKey(),
   requisitos: jsonb('requisitos').notNull(),
   extraidoEn: timestamp('extraido_en', { withTimezone: true }).defaultNow().notNull(),
-});
+}).enableRLS();

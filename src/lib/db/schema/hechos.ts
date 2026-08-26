@@ -48,7 +48,7 @@ export const proceso = pgTable(
     index("proceso_portafolio_idx").on(t.portafolioId),
     index("proceso_doc_access_idx").on(t.documentAccess),
   ]
-);
+).enableRLS();
 
 /**
  * Contrato. Foto de estado (mutable).
@@ -93,7 +93,7 @@ export const contrato = pgTable(
     index("contrato_entidad_idx").on(t.entidadId),
     index("contrato_estado_idx").on(t.estadoActual),
   ]
-);
+).enableRLS();
 
 // contrato_evento (log append-only de cambios detectados por diff entre
 // snapshots) se eliminó el 2026-08-16: no tenía ningún lector (ninguna vista,

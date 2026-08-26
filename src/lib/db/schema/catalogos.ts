@@ -7,7 +7,7 @@ export const geografia = pgTable("geografia", {
   departamentoNombre: text("departamento_nombre"),
   municipioCodigo: text("municipio_codigo"),
   municipioNombre: text("municipio_nombre"),
-});
+}).enableRLS();
 
 /**
  * Puente texto → DIVIPOLA (D12). La fuente da nombres ("Bogotá D.C."), no códigos.
@@ -23,7 +23,7 @@ export const geografiaAlias = pgTable(
       .references(() => geografia.codigoDivipola),
   },
   (t) => [uniqueIndex("geografia_alias_texto_uq").on(t.textoNormalizado)]
-);
+).enableRLS();
 
 /**
  * Proveedor. PK UUID interno; NIT canónico UNIQUE (D2).
@@ -44,7 +44,7 @@ export const proveedor = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("proveedor_nit_uq").on(t.nitCanonico)]
-);
+).enableRLS();
 
 /**
  * Entidad estatal compradora. PK UUID interno; NIT canónico UNIQUE (D2).
@@ -69,4 +69,4 @@ export const entidad = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("entidad_nit_uq").on(t.nitCanonico)]
-);
+).enableRLS();

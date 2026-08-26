@@ -41,4 +41,4 @@ export const rawRecord = pgTable(
     batchId: uuid("batch_id").notNull(),
   },
   (t) => [uniqueIndex("raw_record_source_recid_uq").on(t.source, t.sourceRecordId)]
-);
+).enableRLS();

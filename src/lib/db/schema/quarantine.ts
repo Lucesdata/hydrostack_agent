@@ -30,4 +30,4 @@ export const transformQuarantine = pgTable(
     index("quarantine_source_reason_idx").on(t.source, t.reason),
     index("quarantine_batch_idx").on(t.batchId),
   ]
-);
+).enableRLS();

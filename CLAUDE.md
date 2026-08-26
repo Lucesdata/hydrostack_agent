@@ -58,20 +58,27 @@ Entidades y flujos principales:
 - Los endpoints `/api/cron/*` exigen `CRON_SECRET` como `Bearer` y fallan
   cerrado (401) si la env var no está definida — ver
   `app/api/cron/{ingest,alertas}/route.ts`.
-- **ABIERTO (2026-08-26) — la Data API de Supabase expone las 22 tablas de
-  `public` a cualquiera.** Ninguna tiene RLS y los roles `anon` y
+- **CERRADO el 2026-08-26 (migración `drizzle/0014`) — la Data API de Supabase
+  exponía las 22 tablas de `public` a cualquiera.** Ninguna tenía RLS y los
+  roles `anon` y
   `authenticated` conservan `SELECT, INSERT, UPDATE, DELETE, TRUNCATE` sobre
   todas. Como `NEXT_PUBLIC_SUPABASE_ANON_KEY` viaja en el bundle del
   navegador, un `curl` a `/rest/v1/usuario` con esa clave devuelve datos —
   verificado. Antes de la migración de Neon (2026-08-15) esto no importaba
   porque no había API pública; ahora el `WHERE usuarioId=...` de la
   aplicación es una puerta que se puede rodear entera.
-- El arreglo no rompe la app: el código solo usa `supabase.auth.*` y un
-  `supabase.storage.from`, nunca `.from()` sobre tablas — los datos van por
-  Drizzle con conexión Postgres directa. Basta activar RLS sin políticas en
-  las 22 tablas (o revocar los grants a `anon`/`authenticated`) para cerrar
-  la API sin tocar el runtime. Ojo con Storage, que tiene sus propias
-  políticas en `storage.objects`.
+  Se cerró activando RLS sin políticas en las 22 tablas (`.enableRLS()` en el
+  esquema Drizzle, para que ninguna migración futura lo deshaga). No tocó el
+  runtime: el código solo usa `supabase.auth.*` y un `supabase.storage.from`,
+  nunca `.from()` sobre tablas — los datos van por Drizzle con conexión
+  Postgres directa, cuyo rol ignora RLS. Verificado después: la API devuelve
+  `[]` y la conexión directa sigue leyendo las 127.566 filas.
+- **Refuerzo pendiente, menor:** `anon` y `authenticated` conservan los GRANT
+  (incluido `TRUNCATE`, que en Postgres *no* está sujeto a RLS). Hoy no es
+  explotable porque PostgREST no expone `TRUNCATE` y nadie tiene credenciales
+  de Postgres para esos roles, pero revocar los grants sería defensa en
+  profundidad. Ojo con Storage, que tiene políticas propias en
+  `storage.objects`.
 - Aparte de eso, la única defensa multi-tenant sigue siendo el `WHERE
   usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
   de cuentas/oferente antes de tocarlas.

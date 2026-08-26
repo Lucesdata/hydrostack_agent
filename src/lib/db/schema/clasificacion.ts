@@ -33,4 +33,4 @@ export const clasificacionSectorial = pgTable(
     index("clasif_proceso_idx").on(t.procesoId),
     index("clasif_agua_idx").on(t.sectorAgua),
   ]
-);
+).enableRLS();

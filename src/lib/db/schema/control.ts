@@ -23,4 +23,4 @@ export const syncLog = pgTable(
     batchId: uuid("batch_id"), // liga la corrida con las filas de raw_record que produjo
   },
   (t) => [index("sync_log_source_status_idx").on(t.source, t.status)]
-);
+).enableRLS();

@@ -34,7 +34,7 @@ export const usuario = pgTable("usuario", {
   email: text("email").notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-});
+}).enableRLS();
 
 /**
  * Perfil del oferente por cuenta (Fase 1.1). Reemplaza gradualmente al único
@@ -53,7 +53,7 @@ export const oferentePerfil = pgTable(
     actualizadoEn: timestamp("actualizado_en", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("oferente_perfil_usuario_uq").on(t.usuarioId)]
-);
+).enableRLS();
 
 /**
  * Log de envíos de alertas (Fase 1.3 — bajo demanda; Fase 1.4 reusa `tipo:
@@ -79,7 +79,7 @@ export const envioLog = pgTable(
     enviadoEn: timestamp("enviado_en", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("envio_log_usuario_fecha_tipo_uq").on(t.usuarioId, t.fecha, t.tipo)]
-);
+).enableRLS();
 
 /**
  * Coincidencias detectadas por cuenta — respalda el badge de notificación en
@@ -109,7 +109,7 @@ export const coincidencia = pgTable(
     uniqueIndex("coincidencia_usuario_proceso_uq").on(t.usuarioId, t.procesoId),
     index("coincidencia_usuario_no_vista_idx").on(t.usuarioId, t.vistaEn),
   ]
-);
+).enableRLS();
 
 /**
  * Preferencias de alerta por cuenta (Fase 1.5 trae la UI; la fila y el campo
@@ -124,7 +124,7 @@ export const alertaPreferencias = pgTable("alerta_preferencias", {
   horaEnvio: smallint("hora_envio").default(7).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}).enableRLS();
 
 /**
  * Señal pasiva de intención (Prompt 02 — rutas sin perfilamiento). Ningún
@@ -146,4 +146,4 @@ export const senalUsuario = pgTable(
     creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("senal_usuario_usuario_idx").on(t.usuarioId)]
-);
+).enableRLS();

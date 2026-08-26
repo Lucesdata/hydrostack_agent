@@ -1,0 +1,22 @@
+ALTER TABLE "raw_record" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "entidad" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "geografia" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "geografia_alias" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "proveedor" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "contrato" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "proceso" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "sync_log" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "clasificacion_sectorial" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "transform_quarantine" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "alerta_preferencias" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "coincidencia" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "envio_log" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "oferente_perfil" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "senal_usuario" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "usuario" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "conversacion" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "documento" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "lista_espera_mercado" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "mensaje" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "requisitos_proceso" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "pliego_proceso" ENABLE ROW LEVEL SECURITY;

@@ -32,7 +32,7 @@ export const documento = pgTable(
     creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index('documento_usuario_contexto_idx').on(t.usuarioId, t.contexto)],
-);
+).enableRLS();
 
 /**
  * Una conversación por (usuario, contexto) — el motor de chat es único pero
@@ -50,7 +50,7 @@ export const conversacion = pgTable(
     creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex('conversacion_usuario_contexto_uq').on(t.usuarioId, t.contexto)],
-);
+).enableRLS();
 
 /** Un turno de la conversación. `contenido` guarda el UIMessage completo (parts incluidas). */
 export const mensaje = pgTable(
@@ -66,7 +66,7 @@ export const mensaje = pgTable(
     creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index('mensaje_conversacion_idx').on(t.conversacionId)],
-);
+).enableRLS();
 
 /** Interés registrado para el contexto 'mercado' (Fase 2, aún sin implementar). */
 export const listaEsperaMercado = pgTable(
@@ -79,4 +79,4 @@ export const listaEsperaMercado = pgTable(
     creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex('lista_espera_mercado_usuario_uq').on(t.usuarioId)],
-);
+).enableRLS();

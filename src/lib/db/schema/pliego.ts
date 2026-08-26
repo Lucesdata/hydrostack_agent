@@ -50,4 +50,4 @@ export const pliegoProceso = pgTable(
     uniqueIndex("pliego_proceso_proceso_id_uq").on(t.procesoId),
     index("pliego_proceso_gate_idx").on(t.gateMatematicoPasado),
   ]
-);
+).enableRLS();
