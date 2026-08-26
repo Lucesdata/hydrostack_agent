@@ -55,6 +55,16 @@ Dashboard → *Authentication* → *URL Configuration*:
       uno solo, así que cámbialo justo antes del `git push`.
 - [ ] Project Settings → renombrar el proyecto a `aqualicita` (cosmético).
 
+> **No uses `supabase config push` para esto.** El CLI solo tiene `push`, no
+> `pull`: empuja el `supabase/config.toml` local al proyecto remoto y
+> sobrescribe la configuración de auth con lo que diga el archivo. Este repo
+> no tiene carpeta `supabase/`, así que `supabase init` generaría un
+> config.toml por defecto — con el provider de Google **deshabilitado**. El
+> push apagaría el login con Google entero para arreglar dos campos.
+> Estado verificado el 2026-08-26 vía `/auth/v1/settings`: `google: true`,
+> `email: true`, `disable_signup: false`. Si algún día se adopta
+> `config.toml`, hay que reconstruirlo a mano contra el dashboard primero.
+
 El `redirectTo` que la app le pasa a Supabase es
 `${NEXT_PUBLIC_APP_URL}/auth/callback` (`src/lib/supabase/actions.ts`), y
 Supabase rechaza cualquier destino que no esté en la lista de Redirect URLs.
