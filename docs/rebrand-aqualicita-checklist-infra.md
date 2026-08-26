@@ -47,13 +47,26 @@ ningún host escrito a mano en el runtime.
 
 Dashboard → *Authentication* → *URL Configuration*:
 
-- [ ] **Redirect URLs**: AÑADIR `https://aqualicita.vercel.app/**`
-      **sin borrar** la entrada de `hydrostacks.vercel.app`. Es una lista de
-      permitidos: tener las dos activas a la vez elimina cualquier ventana en
-      la que el login quede roto. La vieja se borra días después.
-- [ ] **Site URL**: cambiar a `https://aqualicita.vercel.app`. Este campo es
-      uno solo, así que cámbialo justo antes del `git push`.
-- [ ] Project Settings → renombrar el proyecto a `aqualicita` (cosmético).
+- [x] **Redirect URLs** — HECHO 2026-08-26. La lista quedó con 3 entradas:
+      `http://localhost:3000/auth/callback`,
+      `https://hydrostacks.vercel.app/auth/callback` y la nueva
+      `https://aqualicita.vercel.app/auth/callback`. Se usó la ruta exacta,
+      no el comodín `/**`, para replicar el formato que ya funcionaba. Las dos
+      de producción conviven: no hay ventana con el login roto. La vieja se
+      borra días después del push.
+- [ ] **Site URL**: cambiar a `https://aqualicita.vercel.app`. **Todavía no.**
+      Este campo alimenta `{{ .SiteURL }}` de las plantillas de correo de
+      Supabase (confirmación de registro). Cambiarlo antes del push haría que
+      esos correos apunten a un host que hoy responde 404. Se cambia en el
+      mismo momento del `git push`.
+- [ ] Project Settings → renombrar el proyecto a `aqualicita` (cosmético;
+      hoy se llama `hydrostacks`).
+
+> **Aparte, y urgente:** el dashboard muestra **`EXCEEDING USAGE LIMITS`**
+> sobre la organización `giovanny` (plan Free) el 2026-08-26. No tiene que ver
+> con el rebrand, pero Supabase restringe o pausa proyectos que se pasan de
+> los límites del plan gratuito — y si el proyecto de auth se pausa, nadie
+> entra. Conviene revisar el uso antes que el rebrand.
 
 > **No uses `supabase config push` para esto.** El CLI solo tiene `push`, no
 > `pull`: empuja el `supabase/config.toml` local al proyecto remoto y
