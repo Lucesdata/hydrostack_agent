@@ -24,6 +24,7 @@ import { getEnJuegoMes } from "@/src/lib/secop/landingStats";
 import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
 import { PanelBloqueantes } from "@/src/components/diagnostico/PanelBloqueantes";
 import { getDiagnosticoVigente } from "@/src/lib/diagnostico/diagnostico-store";
+import { avisoEscalon } from "@/src/lib/diagnostico/modalidad";
 import { PliegoUploadBlock } from "@/src/components/secop/PliegoUploadBlock";
 import { getPliegoStatusForProcesos } from "@/src/lib/secop/pliego-status";
 import {
@@ -112,6 +113,12 @@ const STYLE = `
     border-radius: var(--radius-md);
   }
   .clr-mc-cta:hover{ opacity: 0.9; }
+  .clr-mc-badges{ display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .clr-mc-escalon{
+    font-size: 11.5px; font-family: var(--font-mono); color: var(--warning);
+    background: rgba(217, 119, 6, 0.07); border: 1px solid rgba(217, 119, 6, 0.28);
+    border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+  }
   .clr-mc-teaser-alt{ font-size: 12.5px; color: var(--ink-600); margin: 16px 0 0; }
   .clr-mc-teaser-alt a{ color: var(--accent); }
   .clr-mc-teaser-alt a:hover{ text-decoration: underline; }
@@ -236,13 +243,23 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           </div>
         ) : (
           <div className="clr-mc-list">
-            {matches.map((m: MatchMinimo) => (
+            {matches.map((m: MatchMinimo) => {
+              // Escalón → modalidad: avisa cuando el proceso exige más de lo
+              // que el diagnóstico dice que alcanza hoy. Calla si no hay
+              // diagnóstico o si la modalidad no es un peldaño de la escalera.
+              const aviso = diagnostico
+                ? avisoEscalon(diagnostico.escalon, m.proceso.modalidad)
+                : null;
+              return (
               <div key={m.proceso.id} className="clr-mc-card">
                 <div className="clr-mc-card-top">
                   <p className="clr-mc-card-title">
                     {sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)}
                   </p>
-                  <span className="clr-mc-badge">{coincideEnLabel(m)}</span>
+                  <span className="clr-mc-badges">
+                    {aviso && <span className="clr-mc-escalon">{aviso}</span>}
+                    <span className="clr-mc-badge">{coincideEnLabel(m)}</span>
+                  </span>
                 </div>
                 <span className="clr-mc-card-meta">
                   {m.proceso.entidad}
@@ -265,7 +282,8 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                   status={pliegoStatusMap.get(m.proceso.id)}
                 />
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Shell>
@@ -317,15 +335,21 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           {matches.map(({ proceso, verdict }: Match) => {
             const score = verdictScore(verdict);
             const fecha = formatShortDate(proceso.fechaPublicacion);
+            const aviso = diagnostico
+              ? avisoEscalon(diagnostico.escalon, proceso.modalidad)
+              : null;
             return (
               <div key={proceso.id} className="clr-mc-card">
                 <div className="clr-mc-card-top">
                   <p className="clr-mc-card-title">
                     {sentenceCaseTitle(proceso.nombre || proceso.referencia)}
                   </p>
-                  <span className={`clr-mc-score clr-mc-score--${score.tone}`}>
-                    <span className="clr-mc-dot" />
-                    {score.pass}/{score.total}
+                  <span className="clr-mc-badges">
+                    {aviso && <span className="clr-mc-escalon">{aviso}</span>}
+                    <span className={`clr-mc-score clr-mc-score--${score.tone}`}>
+                      <span className="clr-mc-dot" />
+                      {score.pass}/{score.total}
+                    </span>
                   </span>
                 </div>
                 <span className="clr-mc-card-meta">

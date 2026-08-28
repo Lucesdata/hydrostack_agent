@@ -142,9 +142,15 @@ Vale la pena registrarlo, porque el reconocimiento no salió gratis:
 Cuatro fases, cinco commits, 71 archivos de test y 533 tests en verde.
 `verdict.ts` sin tocar y la invariante D18 intacta.
 
-**Pendiente identificado y no construido:** escalón → `modalidad` del proceso.
-Necesita un normalizador sobre un `SELECT DISTINCT modalidad` de datos reales,
-y se dejó fuera a propósito para no inventar la tabla de equivalencias.
+**Escalón → `modalidad`: construido** (2026-08-28, después de cerrar la Fase 4).
+La tabla de equivalencias salió de un `SELECT DISTINCT modalidad` sobre las
+89 585 filas de `proceso`: 15 valores distintos. Al clasificarlos apareció un
+dato de producto que no esperábamos: **el 79 % del catálogo no corresponde a
+ningún peldaño de la escalera**, y más de la mitad (55 %) es "Contratación
+régimen especial" — el régimen privado de la Ley 142 que el propio disclaimer
+del diagnóstico declara fuera de alcance. El aviso calla ahí a propósito.
+Sobre lo que sí es clasificable, un oferente en mínima cuantía ve el aviso en
+el 10 % de los procesos, y uno en licitación pública nunca.
 
 **Sin verificar a mano:** el reclamo con una cuenta real. Está cubierto por
 tests de `reclamar.ts` y del callback, pero no se probó de punta a punta
