@@ -417,27 +417,35 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
 
 /** Etiqueta legible de cada indicador financiero, para mensajes de brecha. */
 const INDICADOR_LABEL: Record<string, string> = {
-  indice_liquidez: 'índice de liquidez',
-  indice_endeudamiento: 'índice de endeudamiento',
-  razon_cobertura_intereses: 'razón de cobertura de intereses',
-  rentabilidad_patrimonio: 'rentabilidad del patrimonio',
-  rentabilidad_activo: 'rentabilidad del activo',
-  patrimonio_smmlv: 'patrimonio (SMMLV)',
-  capital_trabajo_smmlv: 'capital de trabajo (SMMLV)',
+  indice_liquidez: "índice de liquidez",
+  indice_endeudamiento: "índice de endeudamiento",
+  razon_cobertura_intereses: "razón de cobertura de intereses",
+  rentabilidad_patrimonio: "rentabilidad del patrimonio",
+  rentabilidad_activo: "rentabilidad del activo",
+  patrimonio_smmlv: "patrimonio (SMMLV)",
+  capital_trabajo_smmlv: "capital de trabajo (SMMLV)",
 };
 
 /** Lee el valor del perfil correspondiente a un código de indicador financiero. */
 function valorPerfilIndicador(p: OferenteProfile, indicador: string): number | undefined {
   const cf = p.capacidadFinanciera;
   switch (indicador) {
-    case 'indice_liquidez': return cf.indiceLiquidez;
-    case 'indice_endeudamiento': return cf.indiceEndeudamiento;
-    case 'razon_cobertura_intereses': return cf.razonCoberturaIntereses;
-    case 'rentabilidad_patrimonio': return cf.rentabilidadPatrimonio;
-    case 'rentabilidad_activo': return cf.rentabilidadActivo;
-    case 'patrimonio_smmlv': return cf.patrimonioSmmlv;
-    case 'capital_trabajo_smmlv': return cf.capitalTrabajoSmmlv;
-    default: return undefined;
+    case "indice_liquidez":
+      return cf.indiceLiquidez;
+    case "indice_endeudamiento":
+      return cf.indiceEndeudamiento;
+    case "razon_cobertura_intereses":
+      return cf.razonCoberturaIntereses;
+    case "rentabilidad_patrimonio":
+      return cf.rentabilidadPatrimonio;
+    case "rentabilidad_activo":
+      return cf.rentabilidadActivo;
+    case "patrimonio_smmlv":
+      return cf.patrimonioSmmlv;
+    case "capital_trabajo_smmlv":
+      return cf.capitalTrabajoSmmlv;
+    default:
+      return undefined;
   }
 }
 
@@ -478,11 +486,10 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
           return req.experiencia.unspsc_exigidos.some((ex) => {
             const exDigits = unspscDigits(ex);
             return (
-              exDigits != null &&
-              (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits))
+              exDigits != null && (cDigits.startsWith(exDigits) || exDigits.startsWith(cDigits))
             );
           });
-        }),
+        })
     );
     const maxContratos = req.experiencia.max_contratos_aportables;
     const contratosConsiderados =
@@ -524,8 +531,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
       });
       continue;
     }
-    const cumple =
-      ind.operador === "gte" ? valorPerfil >= ind.valor : valorPerfil <= ind.valor;
+    const cumple = ind.operador === "gte" ? valorPerfil >= ind.valor : valorPerfil <= ind.valor;
     if (cumple) {
       razones.push({
         status: "PASS",
@@ -594,7 +600,7 @@ export function toVerdictInput(
     fechaCierre?: string | null;
     categoriaUnspscOrigen?: "proceso" | "contrato";
     requisitosHabilitantes?: RequisitosHabilitantesEstructurados | null;
-  } = {},
+  } = {}
 ): VerdictProcessInput {
   return {
     ...proceso,

@@ -90,8 +90,8 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
               !
             </span>
             <span>
-              {absolutos.join(" · ")}. Hasta resolverlo, la entidad rechaza tu oferta sin
-              evaluarla, sin importar el proceso.
+              {absolutos.join(" · ")}. Hasta resolverlo, la entidad rechaza tu oferta sin evaluarla,
+              sin importar el proceso.
             </span>
           </p>
         )}
@@ -118,9 +118,7 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
               ))}
             </ul>
             <div className="clr-pb-pie">
-              <span className="clr-pb-restantes">
-                {restantesTexto(duros.length, blandos)}
-              </span>
+              <span className="clr-pb-restantes">{restantesTexto(duros.length, blandos)}</span>
               <Link href="/diagnostico" className="clr-pb-link">
                 Ver tu plan completo →
               </Link>
@@ -131,4 +129,3 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
     </>
   );
 }
-

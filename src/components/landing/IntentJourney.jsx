@@ -81,8 +81,16 @@ const NORMATIVA_PREVIEW = {
 
 const RUTA_PREVIEW_STEPS = [
   { n: "01", title: "Diagnóstico", desc: "Caudal, carga contaminante y norma que te aplica" },
-  { n: "02", title: "Alternativa técnica", desc: "Qué tecnología resuelve tu caso y qué cuesta operarla" },
-  { n: "03", title: "Cómo contratarlo", desc: "Modalidad, presupuesto oficial y quién puede ejecutarlo" },
+  {
+    n: "02",
+    title: "Alternativa técnica",
+    desc: "Qué tecnología resuelve tu caso y qué cuesta operarla",
+  },
+  {
+    n: "03",
+    title: "Cómo contratarlo",
+    desc: "Modalidad, presupuesto oficial y quién puede ejecutarlo",
+  },
 ];
 
 const INTENT_JOURNEY_CSS = `

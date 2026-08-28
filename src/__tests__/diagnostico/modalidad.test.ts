@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  normalizarModalidad,
-  alcanzaEscalon,
-  avisoEscalon,
-} from "@/src/lib/diagnostico/modalidad";
+import { normalizarModalidad, alcanzaEscalon, avisoEscalon } from "@/src/lib/diagnostico/modalidad";
 
 /**
  * Los 15 valores distintos de `proceso.modalidad` en la base, tal cual

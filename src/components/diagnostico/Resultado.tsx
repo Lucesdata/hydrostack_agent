@@ -61,18 +61,14 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         </p>
       )}
 
-      <section
-        className={`clr-diag-veredicto${bloqueado ? " clr-diag-veredicto--bloqueado" : ""}`}
-      >
+      <section className={`clr-diag-veredicto${bloqueado ? " clr-diag-veredicto--bloqueado" : ""}`}>
         <div className="clr-diag-fig">
           <span className="clr-diag-fig-dot" />
           <span className="clr-diag-fig-label">{veredicto.antetitulo}</span>
         </div>
         <h1 className="clr-diag-h2">{veredicto.titulo}</h1>
         <p>{veredicto.texto}</p>
-        <p className="clr-diag-puntaje">
-          Nivel de preparación: {resultado.puntajeTotal} / 100
-        </p>
+        <p className="clr-diag-puntaje">Nivel de preparación: {resultado.puntajeTotal} / 100</p>
       </section>
 
       <div className="clr-diag-sec">
@@ -177,8 +173,8 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
           <h3>Conserva este plan y encuentra los procesos que te calzan</h3>
           <p>
             Ya viste tu resultado completo. Con una cuenta lo guardas, retomas el plan cuando
-            avances y activas las coincidencias con los procesos abiertos de agua y saneamiento
-            en tu zona.
+            avances y activas las coincidencias con los procesos abiertos de agua y saneamiento en
+            tu zona.
           </p>
           <div className="clr-diag-guardar-acciones">
             <Link href="/registro?next=/diagnostico" className="clr-diag-btn">
@@ -197,9 +193,9 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
           <span className="clr-diag-esq clr-diag-esq--br" />
           <h3>Activa tus coincidencias</h3>
           <p>
-            Ya sabes qué te falta para licitar. Dinos en qué sector y en qué zona trabajas —lo
-            único que este cuestionario no pregunta— y verás los procesos abiertos de agua y
-            saneamiento que te calzan.
+            Ya sabes qué te falta para licitar. Dinos en qué sector y en qué zona trabajas —lo único
+            que este cuestionario no pregunta— y verás los procesos abiertos de agua y saneamiento
+            que te calzan.
           </p>
           <SectorZonaSetup />
         </section>
@@ -222,7 +218,11 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
 
       <div className="clr-diag-acciones">
         <CopiarPlan resultado={resultado} />
-        <button type="button" className="clr-diag-btn clr-diag-btn--ghost" onClick={() => window.print()}>
+        <button
+          type="button"
+          className="clr-diag-btn clr-diag-btn--ghost"
+          onClick={() => window.print()}
+        >
           Imprime o guarda en PDF
         </button>
         <button type="button" className="clr-diag-btn clr-diag-btn--ghost" onClick={onRepetir}>
@@ -241,10 +241,8 @@ export function planComoTexto(resultado: ResultadoDiagnostico): string {
   const lineas = [
     "DIAGNÓSTICO DE CONTRATACIÓN PÚBLICA — AGUA Y SANEAMIENTO",
     `Nivel de preparación: ${resultado.puntajeTotal} / 100`,
-    (resultado.bloqueoAbsoluto.length > 0
-      ? VEREDICTO_BLOQUEADO
-      : VEREDICTOS[resultado.banda]
-    ).titulo,
+    (resultado.bloqueoAbsoluto.length > 0 ? VEREDICTO_BLOQUEADO : VEREDICTOS[resultado.banda])
+      .titulo,
     "",
     `ESCALÓN RECOMENDADO: ${escalon?.nombre ?? resultado.escalon}`,
     "",

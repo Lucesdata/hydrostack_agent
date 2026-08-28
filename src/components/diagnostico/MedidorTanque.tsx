@@ -35,29 +35,29 @@ export function MedidorTanque({ porcentaje, conTicks = false, anunciar = false }
           ticks se posicionan contra el bloque entero, el 0 queda a la altura
           de la lectura y no del fondo del vaso. */}
       <div className="clr-diag-vaso-wrap">
-      <div
-        className="clr-diag-vaso"
-        role="img"
-        aria-label={`Nivel de preparación: ${valor} de 100`}
-      >
-        <span className="clr-diag-esq clr-diag-esq--tl" />
-        <span className="clr-diag-esq clr-diag-esq--tr" />
-        <span className="clr-diag-esq clr-diag-esq--bl" />
-        <span className="clr-diag-esq clr-diag-esq--br" />
-        <div className="clr-diag-relleno" style={{ height: `${valor}%` }} />
-        <div className="clr-diag-umbral" style={{ bottom: `${UMBRAL_MINIMO}%` }}>
-          <span>nivel mínimo</span>
+        <div
+          className="clr-diag-vaso"
+          role="img"
+          aria-label={`Nivel de preparación: ${valor} de 100`}
+        >
+          <span className="clr-diag-esq clr-diag-esq--tl" />
+          <span className="clr-diag-esq clr-diag-esq--tr" />
+          <span className="clr-diag-esq clr-diag-esq--bl" />
+          <span className="clr-diag-esq clr-diag-esq--br" />
+          <div className="clr-diag-relleno" style={{ height: `${valor}%` }} />
+          <div className="clr-diag-umbral" style={{ bottom: `${UMBRAL_MINIMO}%` }}>
+            <span>nivel mínimo</span>
+          </div>
         </div>
-      </div>
-      {conTicks && (
-        <div className="clr-diag-ticks" aria-hidden="true">
-          <span>100</span>
-          <span>75</span>
-          <span>50</span>
-          <span>25</span>
-          <span>0</span>
-        </div>
-      )}
+        {conTicks && (
+          <div className="clr-diag-ticks" aria-hidden="true">
+            <span>100</span>
+            <span>75</span>
+            <span>50</span>
+            <span>25</span>
+            <span>0</span>
+          </div>
+        )}
       </div>
       <div className="clr-diag-lectura" aria-live={anunciar ? "polite" : "off"}>
         <b>{valor}%</b>

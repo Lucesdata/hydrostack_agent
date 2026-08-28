@@ -35,8 +35,7 @@ export function mapPliegoRow(row: PliegoProcesoRow): PliegoStatus {
     gateMatematicoPasado: row.gateMatematicoPasado,
     createdAt: row.createdAt,
     presupuestoOficialCop: row.extraction.presupuesto_oficial_cop,
-    fechaCierre:
-      row.extraction.fecha_cierre === NO_ENCONTRADO ? null : row.extraction.fecha_cierre,
+    fechaCierre: row.extraction.fecha_cierre === NO_ENCONTRADO ? null : row.extraction.fecha_cierre,
   };
 }
 

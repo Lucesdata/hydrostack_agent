@@ -141,10 +141,16 @@ export default function PliegoPage() {
                 if (linkStatus === "linked" || linkStatus === "error") setLinkStatus("idle");
               }}
             />
-            <button type="button" onClick={handleLinkToProcess} disabled={!procesoId.trim() || linkStatus === "linking"}>
+            <button
+              type="button"
+              onClick={handleLinkToProcess}
+              disabled={!procesoId.trim() || linkStatus === "linking"}
+            >
               {linkStatus === "linking" ? "Vinculando…" : "Vincular a este proceso"}
             </button>
-            {linkStatus === "linked" && <span>Vinculado ✓ — ya se puede verificar habilitación en /licitaciones</span>}
+            {linkStatus === "linked" && (
+              <span>Vinculado ✓ — ya se puede verificar habilitación en /licitaciones</span>
+            )}
             {linkStatus === "error" && <span>No se pudo vincular — intenta de nuevo.</span>}
           </div>
         )}

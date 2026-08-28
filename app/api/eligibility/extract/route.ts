@@ -31,7 +31,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Falta procesoId" }, { status: 400 });
   }
   if (!body.extraction?.requisitos_habilitantes) {
-    return NextResponse.json({ error: "Falta extraction.requisitos_habilitantes" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Falta extraction.requisitos_habilitantes" },
+      { status: 400 }
+    );
   }
 
   try {

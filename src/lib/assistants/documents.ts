@@ -10,15 +10,15 @@
  * diferencia de las tablas de Neon donde esa comparación nunca aplicaría.
  */
 
-import { randomUUID } from 'node:crypto';
-import { and, desc, eq } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { documento } from '@/src/lib/db/schema/asistentes';
-import { createClient } from '@/src/lib/supabase/server';
-import { pdfToText } from '@/src/lib/pliego/rules/pdfToText';
-import type { AssistantContextSlug } from './config';
+import { randomUUID } from "node:crypto";
+import { and, desc, eq } from "drizzle-orm";
+import { db } from "@/src/lib/db/client";
+import { documento } from "@/src/lib/db/schema/asistentes";
+import { createClient } from "@/src/lib/supabase/server";
+import { pdfToText } from "@/src/lib/pliego/rules/pdfToText";
+import type { AssistantContextSlug } from "./config";
 
-const BUCKET = 'contracts';
+const BUCKET = "contracts";
 /** Tope defensivo para no exceder la ventana de contexto del modelo con un PDF muy largo. */
 const MAX_PROMPT_CHARS = 400_000;
 
@@ -32,7 +32,7 @@ export interface UploadedDocument {
 export async function uploadDocument(params: {
   usuarioId: string;
   contexto: AssistantContextSlug;
-  tipo: 'contrato' | 'referencia';
+  tipo: "contrato" | "referencia";
   file: Buffer;
   nombreArchivo: string;
 }): Promise<UploadedDocument> {
@@ -50,7 +50,7 @@ export async function uploadDocument(params: {
   const rutaStorage = `${usuarioId}/${contexto}/${randomUUID()}.pdf`;
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
-    .upload(rutaStorage, file, { contentType: 'application/pdf' });
+    .upload(rutaStorage, file, { contentType: "application/pdf" });
   if (uploadError) {
     throw new DocumentUploadError(`No se pudo guardar el archivo: ${uploadError.message}`);
   }
@@ -62,7 +62,10 @@ export async function uploadDocument(params: {
       .values({ usuarioId, contexto, tipo, nombreArchivo, rutaStorage, textoExtraido })
       .returning({ id: documento.id });
   } catch (e) {
-    await supabase.storage.from(BUCKET).remove([rutaStorage]).catch(() => {});
+    await supabase.storage
+      .from(BUCKET)
+      .remove([rutaStorage])
+      .catch(() => {});
     const message = e instanceof Error ? e.message : String(e);
     throw new DocumentUploadError(`No se pudo guardar el documento: ${message}`);
   }
@@ -82,7 +85,7 @@ function truncateForPrompt(doc: DocumentForAssistant): DocumentForAssistant {
 
 export async function getLatestDocument(
   usuarioId: string,
-  contexto: AssistantContextSlug,
+  contexto: AssistantContextSlug
 ): Promise<DocumentForAssistant | null> {
   const rows = await db
     .select({ nombreArchivo: documento.nombreArchivo, textoExtraido: documento.textoExtraido })
@@ -96,7 +99,7 @@ export async function getLatestDocument(
 export async function getDocumentById(
   usuarioId: string,
   contexto: AssistantContextSlug,
-  documentId: string,
+  documentId: string
 ): Promise<DocumentForAssistant | null> {
   const rows = await db
     .select({ nombreArchivo: documento.nombreArchivo, textoExtraido: documento.textoExtraido })
@@ -105,8 +108,8 @@ export async function getDocumentById(
       and(
         eq(documento.usuarioId, usuarioId),
         eq(documento.contexto, contexto),
-        eq(documento.id, documentId),
-      ),
+        eq(documento.id, documentId)
+      )
     )
     .limit(1);
   return rows[0] ? truncateForPrompt(rows[0]) : null;

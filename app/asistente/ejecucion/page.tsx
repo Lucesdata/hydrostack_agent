@@ -6,14 +6,15 @@
  * vacía) y se lo pasa a AssistantChat como estado inicial.
  */
 
-import { getSessionUser } from '@/src/lib/supabase/get-session-user';
-import { ASSISTANT_CONTEXTS } from '@/src/lib/assistants/config';
-import { getOrCreateConversation, loadMessages } from '@/src/lib/assistants/conversations';
-import AssistantChat from '@/src/components/assistants/AssistantChat';
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { ASSISTANT_CONTEXTS } from "@/src/lib/assistants/config";
+import { getOrCreateConversation, loadMessages } from "@/src/lib/assistants/conversations";
+import AssistantChat from "@/src/components/assistants/AssistantChat";
 
 export const metadata = {
-  title: 'Ejecución de contrato — AquaLicita',
-  description: 'Sube tu contrato y te acompañamos en la ejecución: actas, pólizas, informes, liquidación.',
+  title: "Ejecución de contrato — AquaLicita",
+  description:
+    "Sube tu contrato y te acompañamos en la ejecución: actas, pólizas, informes, liquidación.",
 };
 
 export default async function AsistenteEjecucionPage() {

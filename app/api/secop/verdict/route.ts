@@ -68,7 +68,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const verdict = buildVerdict(body.perfil, toVerdictInput(body.proceso, { requisitosHabilitantes }));
+  const verdict = buildVerdict(
+    body.perfil,
+    toVerdictInput(body.proceso, { requisitosHabilitantes })
+  );
 
   const user = await getSessionUser();
   if (user) {

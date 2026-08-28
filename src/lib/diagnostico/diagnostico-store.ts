@@ -23,11 +23,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { diagnostico } from "@/src/lib/db/schema/diagnostico";
 import { VERSION_CUESTIONARIO } from "./cuestionario/co-apsb-v1";
-import {
-  bandaDePuntaje,
-  estadoRupDeRespuestas,
-  filtrarBloqueoAbsoluto,
-} from "./calcular";
+import { bandaDePuntaje, estadoRupDeRespuestas, filtrarBloqueoAbsoluto } from "./calcular";
 import type {
   CategoriaId,
   EscalonContratacion,
@@ -44,9 +40,7 @@ export interface DiagnosticoGuardado extends ResultadoDiagnostico {
   creadoEn: Date;
 }
 
-export type ResultadoGuardar =
-  | { ok: true; id: string }
-  | { ok: false; error: "DB_UNAVAILABLE" };
+export type ResultadoGuardar = { ok: true; id: string } | { ok: false; error: "DB_UNAVAILABLE" };
 
 /** Fila cruda tal como la devuelve el SELECT. */
 interface FilaDiagnostico {
@@ -182,9 +176,7 @@ export async function reclamarDiagnosticos(
     const filas = await db
       .update(diagnostico)
       .set({ usuarioId, reclamadoEn: new Date() })
-      .where(
-        and(eq(diagnostico.sessionToken, sessionToken), isNull(diagnostico.usuarioId))
-      )
+      .where(and(eq(diagnostico.sessionToken, sessionToken), isNull(diagnostico.usuarioId)))
       .returning({ id: diagnostico.id });
 
     return filas.length;

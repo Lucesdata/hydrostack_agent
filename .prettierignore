@@ -7,3 +7,12 @@ node_modules
 .env
 .env.local
 *.md
+
+# Generado por drizzle-kit: formatearlo aquí solo consigue que la siguiente
+# migración lo reescriba con SU formato y el check vuelva a rojo.
+drizzle/meta
+
+# Copia literal de una fuente externa, con su sha256 registrado en el docstring
+# de src/lib/diagnostico/cuestionario/co-apsb-v1.ts. Reformatearla rompe esa
+# trazabilidad.
+docs/referencia

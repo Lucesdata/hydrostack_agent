@@ -6,11 +6,15 @@
  * criterio de grounding: si el texto no da un número claro, verificar_manual.
  */
 
-import { GoogleGenerativeAI, type Schema } from '@google/generative-ai';
-import type { RequisitosHabilitantes } from '@/src/lib/pliego/schema';
-import { REQUISITOS_JSON_SCHEMA, parseRequisitosEstructurados, type RequisitosHabilitantesEstructurados } from './schema';
+import { GoogleGenerativeAI, type Schema } from "@google/generative-ai";
+import type { RequisitosHabilitantes } from "@/src/lib/pliego/schema";
+import {
+  REQUISITOS_JSON_SCHEMA,
+  parseRequisitosEstructurados,
+  type RequisitosHabilitantesEstructurados,
+} from "./schema";
 
-const MODEL = 'gemini-flash-lite-latest';
+const MODEL = "gemini-flash-lite-latest";
 
 export interface ExtractRequirementsOptions {
   apiKey?: string;
@@ -19,10 +23,10 @@ export interface ExtractRequirementsOptions {
 /** Gemini no acepta `additionalProperties` — lo despoja recursivamente del JSON Schema. */
 function stripAdditionalProperties(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(stripAdditionalProperties);
-  if (node !== null && typeof node === 'object') {
+  if (node !== null && typeof node === "object") {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(node)) {
-      if (k === 'additionalProperties') continue;
+      if (k === "additionalProperties") continue;
       out[k] = stripAdditionalProperties(v);
     }
     return out;
@@ -48,18 +52,18 @@ Capacidad organizacional: "${req.capacidad_organizacional}"`;
 
 export async function extractStructuredRequirements(
   requisitos: RequisitosHabilitantes,
-  opts: ExtractRequirementsOptions = {},
+  opts: ExtractRequirementsOptions = {}
 ): Promise<RequisitosHabilitantesEstructurados> {
   const apiKey = opts.apiKey ?? process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY no definida. Configúrala en .env.local.');
+    throw new Error("GEMINI_API_KEY no definida. Configúrala en .env.local.");
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: MODEL,
     generationConfig: {
-      responseMimeType: 'application/json',
+      responseMimeType: "application/json",
       responseSchema: GEMINI_SCHEMA,
       temperature: 0,
     },
@@ -68,8 +72,8 @@ export async function extractStructuredRequirements(
   const result = await model.generateContent([{ text: buildPrompt(requisitos) }]);
   const response = result.response;
   const finishReason = response.candidates?.[0]?.finishReason;
-  if (finishReason === 'MAX_TOKENS') {
-    throw new Error('Estructuración truncada (maxOutputTokens).');
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error("Estructuración truncada (maxOutputTokens).");
   }
 
   const text = response.text();
@@ -77,7 +81,7 @@ export async function extractStructuredRequirements(
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error('La salida de Gemini no es JSON válido.');
+    throw new Error("La salida de Gemini no es JSON válido.");
   }
   return parseRequisitosEstructurados(raw);
 }

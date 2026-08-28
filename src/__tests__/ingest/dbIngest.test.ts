@@ -34,7 +34,10 @@ describe("makeDbSink", () => {
 
   it("inserta las filas tal cual si no hay (source, sourceRecordId) repetidos", async () => {
     const sink = makeDbSink("secop_ii_procesos");
-    const records = [record({ sourceRecordId: "CO1.REQ.1" }), record({ sourceRecordId: "CO1.REQ.2" })];
+    const records = [
+      record({ sourceRecordId: "CO1.REQ.1" }),
+      record({ sourceRecordId: "CO1.REQ.2" }),
+    ];
     const n = await sink(records);
     expect(insertValuesMock).toHaveBeenCalledWith(records);
     expect(n).toBe(2);
@@ -47,7 +50,7 @@ describe("makeDbSink", () => {
     const dup = record({ sourceRecordId: "CO1.REQ.1", payloadHash: "new" });
     const n = await sink([first, second, dup]);
 
-    const inserted = insertValuesMock.mock.calls[0][0] as typeof first[];
+    const inserted = insertValuesMock.mock.calls[0][0] as (typeof first)[];
     expect(inserted).toHaveLength(2);
     expect(inserted.map((r) => r.sourceRecordId).sort()).toEqual(["CO1.REQ.1", "CO1.REQ.2"]);
     expect(inserted.find((r) => r.sourceRecordId === "CO1.REQ.1")?.payloadHash).toBe("new");

@@ -5,14 +5,14 @@
  * Mismo patrón que app/asistente/ejecucion/page.tsx.
  */
 
-import { getSessionUser } from '@/src/lib/supabase/get-session-user';
-import { ASSISTANT_CONTEXTS } from '@/src/lib/assistants/config';
-import { getOrCreateConversation, loadMessages } from '@/src/lib/assistants/conversations';
-import AssistantChat from '@/src/components/assistants/AssistantChat';
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { ASSISTANT_CONTEXTS } from "@/src/lib/assistants/config";
+import { getOrCreateConversation, loadMessages } from "@/src/lib/assistants/conversations";
+import AssistantChat from "@/src/components/assistants/AssistantChat";
 
 export const metadata = {
-  title: 'Operación de acueducto o ESP — AquaLicita',
-  description: 'Resuelve dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.',
+  title: "Operación de acueducto o ESP — AquaLicita",
+  description: "Resuelve dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
 };
 
 export default async function AsistenteOperacionPage() {

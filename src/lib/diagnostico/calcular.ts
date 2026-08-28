@@ -16,12 +16,7 @@
  * idéntico y está cubierto por test.
  */
 
-import {
-  CATEGORIAS,
-  PREGUNTAS,
-  REMEDIOS,
-  VERSION_CUESTIONARIO,
-} from "./cuestionario/co-apsb-v1";
+import { CATEGORIAS, PREGUNTAS, REMEDIOS, VERSION_CUESTIONARIO } from "./cuestionario/co-apsb-v1";
 import type {
   BandaPreparacion,
   CategoriaId,

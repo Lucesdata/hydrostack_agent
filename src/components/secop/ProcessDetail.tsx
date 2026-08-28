@@ -129,7 +129,10 @@ export default function ProcessDetail({
 
       {hasPerfil && faltaExperiencia && (
         <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
-          <p>Tu evaluación de habilitación está incompleta — cuéntanos tu experiencia y capacidad financiera para verla completa.</p>
+          <p>
+            Tu evaluación de habilitación está incompleta — cuéntanos tu experiencia y capacidad
+            financiera para verla completa.
+          </p>
           <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
             Completar mi RUP →
           </button>
@@ -178,7 +181,9 @@ export default function ProcessDetail({
                     ) : (
                       <>
                         {g.reason}
-                        {g.requiredLevel === 2 && key !== "habilitacion" ? " · requiere revisar pliego (nivel 2)" : ""}
+                        {g.requiredLevel === 2 && key !== "habilitacion"
+                          ? " · requiere revisar pliego (nivel 2)"
+                          : ""}
                       </>
                     )}
                   </span>

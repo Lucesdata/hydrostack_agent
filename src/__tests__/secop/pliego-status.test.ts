@@ -50,7 +50,9 @@ describe("mapPliegoRow (fila DB → PliegoStatus)", () => {
   });
 
   it("normaliza NO_ENCONTRADO en fecha_cierre a null", () => {
-    const status = mapPliegoRow(row({ extraction: { ...row().extraction, fecha_cierre: NO_ENCONTRADO } }));
+    const status = mapPliegoRow(
+      row({ extraction: { ...row().extraction, fecha_cierre: NO_ENCONTRADO } })
+    );
     expect(status.fechaCierre).toBeNull();
   });
 });

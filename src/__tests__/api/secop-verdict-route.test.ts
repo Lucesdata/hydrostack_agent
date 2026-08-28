@@ -104,18 +104,18 @@ describe("POST /api/secop/verdict — veredicto Nivel 0 on-demand", () => {
     expect(res.status).toBe(400);
   });
 
-  it('registra la señal oferente cuando hay sesión', async () => {
-    mockAuth.mockResolvedValue({ id: 'u1', email: 'u1@example.com' });
+  it("registra la señal oferente cuando hay sesión", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "u1@example.com" });
     await POST(postReq({ proceso, perfil }));
-    expect(mockSignal).toHaveBeenCalledWith('u1', 'oferente');
+    expect(mockSignal).toHaveBeenCalledWith("u1", "oferente");
   });
 
-  it('no registra señal sin sesión', async () => {
+  it("no registra señal sin sesión", async () => {
     await POST(postReq({ proceso, perfil }));
     expect(mockSignal).not.toHaveBeenCalled();
   });
 
-  it('usa los requisitos cacheados: habilitacionGate deja de ser UNKNOWN', async () => {
+  it("usa los requisitos cacheados: habilitacionGate deja de ser UNKNOWN", async () => {
     mockLimit.mockResolvedValue([
       {
         procesoId: proceso.id,
@@ -125,7 +125,7 @@ describe("POST /api/secop/verdict — veredicto Nivel 0 on-demand", () => {
             unspsc_exigidos: [],
             max_contratos_aportables: null,
             verificar_manual: true, // fuerza WARN, no depende del perfil
-            cita_textual: 'Se debe acreditar experiencia mínima según el RUP.',
+            cita_textual: "Se debe acreditar experiencia mínima según el RUP.",
           },
           indicadores_financieros: [],
         },
@@ -133,14 +133,14 @@ describe("POST /api/secop/verdict — veredicto Nivel 0 on-demand", () => {
     ]);
     const res = await POST(postReq({ proceso, perfil }));
     const body = await res.json();
-    expect(body.verdict.gates.habilitacion.status).toBe('WARN');
+    expect(body.verdict.gates.habilitacion.status).toBe("WARN");
   });
 
-  it('fila cacheada corrupta no produce 500 — se trata como si no hubiera caché (UNKNOWN)', async () => {
+  it("fila cacheada corrupta no produce 500 — se trata como si no hubiera caché (UNKNOWN)", async () => {
     mockLimit.mockResolvedValue([{ procesoId: proceso.id, requisitos: { garbage: true } }]);
     const res = await POST(postReq({ proceso, perfil }));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.verdict.gates.habilitacion.status).toBe('UNKNOWN');
+    expect(body.verdict.gates.habilitacion.status).toBe("UNKNOWN");
   });
 });

@@ -7,10 +7,10 @@
  * misma extracción.
  */
 
-import { pgTable, text, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, jsonb, timestamp } from "drizzle-orm/pg-core";
 
-export const requisitosProceso = pgTable('requisitos_proceso', {
-  procesoId: text('proceso_id').primaryKey(),
-  requisitos: jsonb('requisitos').notNull(),
-  extraidoEn: timestamp('extraido_en', { withTimezone: true }).defaultNow().notNull(),
+export const requisitosProceso = pgTable("requisitos_proceso", {
+  procesoId: text("proceso_id").primaryKey(),
+  requisitos: jsonb("requisitos").notNull(),
+  extraidoEn: timestamp("extraido_en", { withTimezone: true }).defaultNow().notNull(),
 }).enableRLS();

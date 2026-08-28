@@ -9,22 +9,26 @@
  * turno (los que el cliente aún no tenía guardados) al terminar el stream.
  */
 
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import {
   streamText,
   convertToModelMessages,
   createUIMessageStreamResponse,
   toUIMessageStream,
   type UIMessage,
-} from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { getSessionUser } from '@/src/lib/supabase/get-session-user';
-import { recordUserSignal } from '@/src/lib/signals/record-signal';
-import { getAssistantContext } from '@/src/lib/assistants/config';
-import { getOrCreateConversation, loadMessages, saveMessages } from '@/src/lib/assistants/conversations';
-import { getDocumentById, getLatestDocument } from '@/src/lib/assistants/documents';
+} from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import { getAssistantContext } from "@/src/lib/assistants/config";
+import {
+  getOrCreateConversation,
+  loadMessages,
+  saveMessages,
+} from "@/src/lib/assistants/conversations";
+import { getDocumentById, getLatestDocument } from "@/src/lib/assistants/documents";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export const maxDuration = 120;
 
 interface AssistantRequestBody {
@@ -35,19 +39,22 @@ interface AssistantRequestBody {
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'ANTHROPIC_API_KEY no configurada en el servidor.' }, { status: 500 });
+    return NextResponse.json(
+      { error: "ANTHROPIC_API_KEY no configurada en el servidor." },
+      { status: 500 }
+    );
   }
 
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
+    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
   let body: AssistantRequestBody;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Body inválido: se espera JSON.' }, { status: 400 });
+    return NextResponse.json({ error: "Body inválido: se espera JSON." }, { status: 400 });
   }
 
   const context = body.context ? getAssistantContext(body.context) : null;
@@ -55,7 +62,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Contexto desconocido: ${body.context}` }, { status: 400 });
   }
   if (!Array.isArray(body.messages) || body.messages.length === 0) {
-    return NextResponse.json({ error: 'Falta `messages`.' }, { status: 400 });
+    return NextResponse.json({ error: "Falta `messages`." }, { status: 400 });
   }
   const clientMessages = body.messages;
 
@@ -79,13 +86,16 @@ export async function POST(req: Request) {
     modelMessages = await convertToModelMessages(clientMessages);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: `No se pudo preparar la conversación: ${message}` }, { status: 502 });
+    return NextResponse.json(
+      { error: `No se pudo preparar la conversación: ${message}` },
+      { status: 502 }
+    );
   }
 
   await recordUserSignal(user.id, context.senal);
 
   const result = streamText({
-    model: anthropic('claude-sonnet-4-5'),
+    model: anthropic("claude-sonnet-4-5"),
     system: systemPrompt,
     messages: modelMessages,
   });

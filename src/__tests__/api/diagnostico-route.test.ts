@@ -24,8 +24,16 @@ import { DIAGNOSTICO_COOKIE, nuevoSessionToken } from "@/src/lib/diagnostico/ses
 import type { RespuestasDiagnostico } from "@/src/lib/diagnostico/types";
 
 const RESPUESTAS: RespuestasDiagnostico = {
-  rup: 0, unspsc: 0, exp: 0, fin: 0, secop: 0,
-  poliza: 0, tec: 0, pila: 0, antec: 0, union: 0,
+  rup: 0,
+  unspsc: 0,
+  exp: 0,
+  fin: 0,
+  secop: 0,
+  poliza: 0,
+  tec: 0,
+  pila: 0,
+  antec: 0,
+  union: 0,
 };
 
 const post = (body: unknown, cookie?: string) => {
