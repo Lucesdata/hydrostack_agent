@@ -64,6 +64,24 @@ const ESTADO_RUP_POR_OPCION: readonly EstadoRup[] = [
   "desconocido",
 ];
 
+/**
+ * Estado del RUP declarado. Extraído aparte de `calcularDiagnostico` porque el
+ * store lo necesita para reconstruirlo desde una fila guardada: no es columna,
+ * se deriva de las respuestas.
+ */
+export function estadoRupDeRespuestas(respuestas: RespuestasDiagnostico): EstadoRup {
+  return ESTADO_RUP_POR_OPCION[respuestas.rup] ?? "desconocido";
+}
+
+/**
+ * Los bloqueantes que rigen en cualquier modalidad. Igual que el anterior: se
+ * deriva del catálogo, no se guarda, y el store lo recalcula al leer.
+ * Conserva el orden de la lista que recibe.
+ */
+export function filtrarBloqueoAbsoluto(bloqueantes: readonly RemedioId[]): RemedioId[] {
+  return bloqueantes.filter((f) => REMEDIOS[f]?.absoluto);
+}
+
 // ===========================================================================
 //  Guard de frontera
 // ===========================================================================
@@ -147,9 +165,9 @@ export function calcularDiagnostico(respuestas: RespuestasDiagnostico): Resultad
     banda: bandaDePuntaje(puntajeTotal),
     puntajeAreas,
     escalon: calcularEscalon(puntosPorPregunta, puntajeTotal),
-    estadoRup: ESTADO_RUP_POR_OPCION[respuestas.rup] ?? "desconocido",
+    estadoRup: estadoRupDeRespuestas(respuestas),
     bloqueantes,
-    bloqueoAbsoluto: bloqueantes.filter((f) => REMEDIOS[f].absoluto),
+    bloqueoAbsoluto: filtrarBloqueoAbsoluto(bloqueantes),
   };
 }
 
