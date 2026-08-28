@@ -8,15 +8,15 @@
  * el texto — se necesita para reconstruir la UI al recargar la página.
  */
 
-import type { UIMessage } from 'ai';
-import { and, asc, eq } from 'drizzle-orm';
-import { db } from '@/src/lib/db/client';
-import { conversacion, mensaje } from '@/src/lib/db/schema/asistentes';
-import type { AssistantContextSlug } from './config';
+import type { UIMessage } from "ai";
+import { and, asc, eq } from "drizzle-orm";
+import { db } from "@/src/lib/db/client";
+import { conversacion, mensaje } from "@/src/lib/db/schema/asistentes";
+import type { AssistantContextSlug } from "./config";
 
 export async function getOrCreateConversation(
   usuarioId: string,
-  contexto: AssistantContextSlug,
+  contexto: AssistantContextSlug
 ): Promise<string> {
   const existing = await db
     .select({ id: conversacion.id })
@@ -57,6 +57,6 @@ export async function saveMessages(conversacionId: string, messages: UIMessage[]
       conversacionId,
       rol: m.role,
       contenido: JSON.stringify(m),
-    })),
+    }))
   );
 }

@@ -24,16 +24,7 @@
 
 /** Las 10 preguntas, en el orden en que se presentan. */
 export type PreguntaKey =
-  | "rup"
-  | "unspsc"
-  | "exp"
-  | "fin"
-  | "secop"
-  | "poliza"
-  | "tec"
-  | "pila"
-  | "antec"
-  | "union";
+  "rup" | "unspsc" | "exp" | "fin" | "secop" | "poliza" | "tec" | "pila" | "antec" | "union";
 
 /**
  * Las 6 categorías. Se usan como clave de `puntajeAreas` (jsonb), por eso son
@@ -41,12 +32,7 @@ export type PreguntaKey =
  * romper los diagnósticos guardados.
  */
 export type CategoriaId =
-  | "juridica"
-  | "experiencia"
-  | "financiera"
-  | "tecnica"
-  | "secop"
-  | "estrategia";
+  "juridica" | "experiencia" | "financiera" | "tecnica" | "secop" | "estrategia";
 
 /** Los 17 remedios del catálogo. Un id por bloqueante detectable. */
 export type RemedioId =

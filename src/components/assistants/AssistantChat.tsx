@@ -1,10 +1,10 @@
 // src/components/assistants/AssistantChat.tsx
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, type UIMessage } from 'ai';
-import type { AssistantContextSlug, AssistantDocumentConfig } from '@/src/lib/assistants/config';
+import { useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import type { AssistantContextSlug, AssistantDocumentConfig } from "@/src/lib/assistants/config";
 
 interface AssistantChatProps {
   contextSlug: AssistantContextSlug;
@@ -14,12 +14,17 @@ interface AssistantChatProps {
   initialMessages: UIMessage[];
 }
 
-type UploadStatus = 'idle' | 'uploading' | 'error';
+type UploadStatus = "idle" | "uploading" | "error";
 
 function formatChatError(message: string): string {
   try {
     const parsed: unknown = JSON.parse(message);
-    if (parsed && typeof parsed === 'object' && 'error' in parsed && typeof parsed.error === 'string') {
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "error" in parsed &&
+      typeof parsed.error === "string"
+    ) {
       return parsed.error;
     }
   } catch {
@@ -35,54 +40,54 @@ export default function AssistantChat({
   documentoConfig,
   initialMessages,
 }: AssistantChatProps) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [documentId, setDocumentId] = useState<string | undefined>(undefined);
   const [documentName, setDocumentName] = useState<string | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status, error } = useChat({
     messages: initialMessages,
     transport: new DefaultChatTransport({
-      api: '/api/assistant',
+      api: "/api/assistant",
       body: () => ({ context: contextSlug, documentId }),
     }),
   });
 
-  const isBusy = status === 'submitted' || status === 'streaming';
+  const isBusy = status === "submitted" || status === "streaming";
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   async function handleUpload(file: File) {
     if (!documentoConfig) return;
-    setUploadStatus('uploading');
+    setUploadStatus("uploading");
     setUploadError(null);
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('context', contextSlug);
-      const res = await fetch('/api/documents/upload', { method: 'POST', body: formData });
+      formData.append("file", file);
+      formData.append("context", contextSlug);
+      const res = await fetch("/api/documents/upload", { method: "POST", body: formData });
       const responseBody = await res.json();
       if (!res.ok) {
         setUploadError(responseBody.error || `Error ${res.status}`);
-        setUploadStatus('error');
+        setUploadStatus("error");
         return;
       }
       setDocumentId(responseBody.documentId);
       setDocumentName(file.name);
-      setUploadStatus('idle');
+      setUploadStatus("idle");
       if (documentoConfig.mensajePosSubida) {
         sendMessage(
           { text: documentoConfig.mensajePosSubida },
-          { body: { documentId: responseBody.documentId } },
+          { body: { documentId: responseBody.documentId } }
         );
       }
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : String(e));
-      setUploadStatus('error');
+      setUploadStatus("error");
     }
   }
 
@@ -90,7 +95,7 @@ export default function AssistantChat({
     e.preventDefault();
     if (!input.trim() || isBusy) return;
     sendMessage({ text: input });
-    setInput('');
+    setInput("");
   }
 
   return (
@@ -102,16 +107,16 @@ export default function AssistantChat({
             <input
               type="file"
               accept={documentoConfig.accept}
-              disabled={uploadStatus === 'uploading'}
+              disabled={uploadStatus === "uploading"}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) handleUpload(f);
-                e.target.value = '';
+                e.target.value = "";
               }}
             />
             <span>
-              {uploadStatus === 'uploading'
-                ? 'Subiendo…'
+              {uploadStatus === "uploading"
+                ? "Subiendo…"
                 : documentName
                   ? `Documento: ${documentName}`
                   : `[ Subir ${documentoConfig.label} ]`}
@@ -126,9 +131,11 @@ export default function AssistantChat({
         {messages.length === 0 && <div className="asc-welcome">{mensajeBienvenida}</div>}
         {messages.map((m) => (
           <div key={m.id} className={`asc-bubble asc-bubble-${m.role}`}>
-            <span className="asc-role">{m.role === 'user' ? 'TÚ' : 'ASISTENTE'}</span>
+            <span className="asc-role">{m.role === "user" ? "TÚ" : "ASISTENTE"}</span>
             <div className="asc-text">
-              {m.parts.map((part, i) => (part.type === 'text' ? <span key={`${m.id}-${i}`}>{part.text}</span> : null))}
+              {m.parts.map((part, i) =>
+                part.type === "text" ? <span key={`${m.id}-${i}`}>{part.text}</span> : null
+              )}
             </div>
           </div>
         ))}

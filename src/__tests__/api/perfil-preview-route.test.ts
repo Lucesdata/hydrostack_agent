@@ -113,8 +113,20 @@ describe("POST /api/perfil/preview", () => {
   it("200 con count y hasta 3 ejemplos, valor con fallback precioBase→valorAdjudicacion", async () => {
     mockAuth.mockResolvedValue({ id: "u1", email: "u1@example.com" });
     mockGetMatches.mockResolvedValue([
-      match({ id: "A", nombre: "Proceso A", entidad: "Entidad A", precioBase: 100, valorAdjudicacion: null }),
-      match({ id: "B", nombre: "Proceso B", entidad: "Entidad B", precioBase: null, valorAdjudicacion: 200 }),
+      match({
+        id: "A",
+        nombre: "Proceso A",
+        entidad: "Entidad A",
+        precioBase: 100,
+        valorAdjudicacion: null,
+      }),
+      match({
+        id: "B",
+        nombre: "Proceso B",
+        entidad: "Entidad B",
+        precioBase: null,
+        valorAdjudicacion: 200,
+      }),
       match({ id: "C", nombre: "Proceso C", entidad: "Entidad C" }),
       match({ id: "D", nombre: "Proceso D", entidad: "Entidad D" }),
     ]);

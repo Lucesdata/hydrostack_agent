@@ -53,7 +53,6 @@ const pliegoBanner = (searchParams: Props["searchParams"]): string | null => {
   return null;
 };
 
-
 const STYLE = `
   .clr-mc{
     min-height: 100vh; background: var(--bg); cursor: auto;
@@ -214,7 +213,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
     return (
       <Shell>
         <h1 className="clr-mc-title">Mis coincidencias</h1>
-        <p className="clr-mc-sub">Cuéntanos en qué sector y zona trabajas para ver tus coincidencias.</p>
+        <p className="clr-mc-sub">
+          Cuéntanos en qué sector y zona trabajas para ver tus coincidencias.
+        </p>
         {perfilError && <div className="clr-mc-banner">{perfilError}</div>}
         <PanelBloqueantes diagnostico={diagnostico} />
         <SectorZonaSetup />
@@ -230,9 +231,8 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <h1 className="clr-mc-title">Mis coincidencias</h1>
         <p className="clr-mc-sub" style={{ margin: "0 0 24px" }}>
           {matches.length} proceso{matches.length === 1 ? "" : "s"} del sector agua que calzan con
-          tu perfil.{" "}
-          <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver también tu
-          semáforo de elegibilidad y recibir alertas por correo.
+          tu perfil. <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver
+          también tu semáforo de elegibilidad y recibir alertas por correo.
         </p>
         <PanelBloqueantes diagnostico={diagnostico} />
         {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
@@ -251,37 +251,44 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                 ? avisoEscalon(diagnostico.escalon, m.proceso.modalidad)
                 : null;
               return (
-              <div key={m.proceso.id} className="clr-mc-card">
-                <div className="clr-mc-card-top">
-                  <p className="clr-mc-card-title">
-                    {sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)}
-                  </p>
-                  <span className="clr-mc-badges">
-                    {aviso && <span className="clr-mc-escalon">{aviso}</span>}
-                    <span className="clr-mc-badge">{coincideEnLabel(m)}</span>
+                <div key={m.proceso.id} className="clr-mc-card">
+                  <div className="clr-mc-card-top">
+                    <p className="clr-mc-card-title">
+                      {sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)}
+                    </p>
+                    <span className="clr-mc-badges">
+                      {aviso && <span className="clr-mc-escalon">{aviso}</span>}
+                      <span className="clr-mc-badge">{coincideEnLabel(m)}</span>
+                    </span>
+                  </div>
+                  <span className="clr-mc-card-meta">
+                    {m.proceso.entidad}
+                    {m.proceso.departamento ? ` · ${m.proceso.departamento}` : ""}
+                    {formatShortDate(m.proceso.fechaPublicacion)
+                      ? ` · ${formatShortDate(m.proceso.fechaPublicacion)}`
+                      : ""}
                   </span>
+                  <div className="clr-mc-card-foot">
+                    <span className="clr-mc-val">
+                      {formatCopCompact(m.proceso.valorAdjudicacion ?? m.proceso.precioBase)}
+                    </span>
+                    {m.proceso.url && (
+                      <a
+                        href={m.proceso.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="clr-mc-link"
+                      >
+                        Ver en SECOP ↗
+                      </a>
+                    )}
+                  </div>
+                  <PliegoUploadBlock
+                    procesoId={m.proceso.id}
+                    procesoUrl={m.proceso.url}
+                    status={pliegoStatusMap.get(m.proceso.id)}
+                  />
                 </div>
-                <span className="clr-mc-card-meta">
-                  {m.proceso.entidad}
-                  {m.proceso.departamento ? ` · ${m.proceso.departamento}` : ""}
-                  {formatShortDate(m.proceso.fechaPublicacion) ? ` · ${formatShortDate(m.proceso.fechaPublicacion)}` : ""}
-                </span>
-                <div className="clr-mc-card-foot">
-                  <span className="clr-mc-val">
-                    {formatCopCompact(m.proceso.valorAdjudicacion ?? m.proceso.precioBase)}
-                  </span>
-                  {m.proceso.url && (
-                    <a href={m.proceso.url} target="_blank" rel="noreferrer" className="clr-mc-link">
-                      Ver en SECOP ↗
-                    </a>
-                  )}
-                </div>
-                <PliegoUploadBlock
-                  procesoId={m.proceso.id}
-                  procesoUrl={m.proceso.url}
-                  status={pliegoStatusMap.get(m.proceso.id)}
-                />
-              </div>
               );
             })}
           </div>
@@ -335,9 +342,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           {matches.map(({ proceso, verdict }: Match) => {
             const score = verdictScore(verdict);
             const fecha = formatShortDate(proceso.fechaPublicacion);
-            const aviso = diagnostico
-              ? avisoEscalon(diagnostico.escalon, proceso.modalidad)
-              : null;
+            const aviso = diagnostico ? avisoEscalon(diagnostico.escalon, proceso.modalidad) : null;
             return (
               <div key={proceso.id} className="clr-mc-card">
                 <div className="clr-mc-card-top">

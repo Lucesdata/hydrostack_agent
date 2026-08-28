@@ -194,9 +194,16 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
         <section>
           <h3>Experiencia (contratos aportables)</h3>
           {(perfil.experiencia ?? []).map((c, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
+            <div
+              key={i}
+              style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}
+            >
               <div style={{ display: "flex", gap: 8 }}>
-                <input placeholder="Objeto" value={c.objeto} onChange={(e) => updateContrato(i, { objeto: e.target.value })} />
+                <input
+                  placeholder="Objeto"
+                  value={c.objeto}
+                  onChange={(e) => updateContrato(i, { objeto: e.target.value })}
+                />
                 <input
                   type="number"
                   placeholder="Valor (SMMLV)"
@@ -209,7 +216,9 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
                   value={c.anioTerminacion ?? ""}
                   onChange={(e) => updateContrato(i, { anioTerminacion: Number(e.target.value) })}
                 />
-                <button type="button" onClick={() => removeContrato(i)}>Quitar</button>
+                <button type="button" onClick={() => removeContrato(i)}>
+                  Quitar
+                </button>
               </div>
               <div>
                 <label>
@@ -246,7 +255,9 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
               </div>
             </div>
           ))}
-          <button type="button" onClick={addContrato}>+ Añadir contrato</button>
+          <button type="button" onClick={addContrato}>
+            + Añadir contrato
+          </button>
         </section>
 
         <section>
@@ -258,7 +269,13 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
               step="0.01"
               value={perfil.capacidadFinanciera.indiceLiquidez}
               onChange={(e) =>
-                setPerfil((p) => ({ ...p, capacidadFinanciera: { ...p.capacidadFinanciera, indiceLiquidez: Number(e.target.value) } }))
+                setPerfil((p) => ({
+                  ...p,
+                  capacidadFinanciera: {
+                    ...p.capacidadFinanciera,
+                    indiceLiquidez: Number(e.target.value),
+                  },
+                }))
               }
             />
           </label>
@@ -269,7 +286,13 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
               step="0.01"
               value={perfil.capacidadFinanciera.indiceEndeudamiento}
               onChange={(e) =>
-                setPerfil((p) => ({ ...p, capacidadFinanciera: { ...p.capacidadFinanciera, indiceEndeudamiento: Number(e.target.value) } }))
+                setPerfil((p) => ({
+                  ...p,
+                  capacidadFinanciera: {
+                    ...p.capacidadFinanciera,
+                    indiceEndeudamiento: Number(e.target.value),
+                  },
+                }))
               }
             />
           </label>
@@ -279,7 +302,13 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
               type="number"
               value={perfil.capacidadFinanciera.patrimonioSmmlv ?? ""}
               onChange={(e) =>
-                setPerfil((p) => ({ ...p, capacidadFinanciera: { ...p.capacidadFinanciera, patrimonioSmmlv: Number(e.target.value) } }))
+                setPerfil((p) => ({
+                  ...p,
+                  capacidadFinanciera: {
+                    ...p.capacidadFinanciera,
+                    patrimonioSmmlv: Number(e.target.value),
+                  },
+                }))
               }
             />
           </label>
@@ -290,7 +319,13 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
               step="0.01"
               value={perfil.capacidadFinanciera.razonCoberturaIntereses}
               onChange={(e) =>
-                setPerfil((p) => ({ ...p, capacidadFinanciera: { ...p.capacidadFinanciera, razonCoberturaIntereses: Number(e.target.value) } }))
+                setPerfil((p) => ({
+                  ...p,
+                  capacidadFinanciera: {
+                    ...p.capacidadFinanciera,
+                    razonCoberturaIntereses: Number(e.target.value),
+                  },
+                }))
               }
             />
           </label>
@@ -305,7 +340,8 @@ export default function PerfilForm({ perfilInicial }: { perfilInicial: OferenteP
                   ...p,
                   capacidadFinanciera: {
                     ...p.capacidadFinanciera,
-                    rentabilidadPatrimonio: e.target.value === "" ? undefined : Number(e.target.value),
+                    rentabilidadPatrimonio:
+                      e.target.value === "" ? undefined : Number(e.target.value),
                   },
                 }))
               }

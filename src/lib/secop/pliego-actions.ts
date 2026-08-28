@@ -38,7 +38,9 @@ export async function uploadPliegoAction(formData: FormData): Promise<void> {
   });
 
   if (resultado.ok === false) {
-    redirect(`/mis-coincidencias?pliego=error&pliegoDetalle=${encodeURIComponent(resultado.error)}`);
+    redirect(
+      `/mis-coincidencias?pliego=error&pliegoDetalle=${encodeURIComponent(resultado.error)}`
+    );
   }
 
   redirect("/mis-coincidencias?pliego=ok");

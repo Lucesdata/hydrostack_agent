@@ -45,7 +45,9 @@ describe("matchProcesosMinimo", () => {
   });
 
   it("fuera de cobertura → overall FAIL", () => {
-    const [m] = matchProcesosMinimo(perfil, [proceso({ departamento: "Cundinamarca", ciudad: "Bogotá" })]);
+    const [m] = matchProcesosMinimo(perfil, [
+      proceso({ departamento: "Cundinamarca", ciudad: "Bogotá" }),
+    ]);
     expect(m.overall).toBe("FAIL");
   });
 });
@@ -57,7 +59,9 @@ describe("coincideEnLabel", () => {
   });
 
   it("solo sector PASS → 'Sector'", () => {
-    const [m] = matchProcesosMinimo(perfil, [proceso({ departamento: "Cundinamarca", ciudad: "Bogotá", unspsc: "83101500" })]);
+    const [m] = matchProcesosMinimo(perfil, [
+      proceso({ departamento: "Cundinamarca", ciudad: "Bogotá", unspsc: "83101500" }),
+    ]);
     expect(coincideEnLabel(m)).toBe("Coincide en: Sector");
   });
 });

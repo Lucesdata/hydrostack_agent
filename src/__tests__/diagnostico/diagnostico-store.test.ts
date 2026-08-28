@@ -42,8 +42,16 @@ import { calcularDiagnostico } from "@/src/lib/diagnostico/calcular";
 import type { RespuestasDiagnostico } from "@/src/lib/diagnostico/types";
 
 const RESPUESTAS: RespuestasDiagnostico = {
-  rup: 0, unspsc: 0, exp: 0, fin: 0, secop: 0,
-  poliza: 0, tec: 0, pila: 1, antec: 2, union: 0,
+  rup: 0,
+  unspsc: 0,
+  exp: 0,
+  fin: 0,
+  secop: 0,
+  poliza: 0,
+  tec: 0,
+  pila: 1,
+  antec: 2,
+  union: 0,
 };
 const RESULTADO = calcularDiagnostico(RESPUESTAS);
 

@@ -37,10 +37,7 @@ export async function POST(req: NextRequest) {
 
   const respuestas = parseRespuestas((body as { respuestas?: unknown } | null)?.respuestas);
   if (!respuestas) {
-    return NextResponse.json(
-      { error: "Respuestas incompletas o fuera de rango" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Respuestas incompletas o fuera de rango" }, { status: 400 });
   }
 
   const resultado = calcularDiagnostico(respuestas);

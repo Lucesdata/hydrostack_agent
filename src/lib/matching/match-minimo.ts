@@ -46,7 +46,8 @@ const SIN_ZONA: GateResult = {
 export function matchProcesosMinimo(perfil: PerfilMinimo, procesos: SecopProceso[]): MatchMinimo[] {
   return procesos.map((proceso) => {
     const input = toVerdictInput(proceso);
-    const sectorial = perfil.sectoresUnspsc.length === 0 ? SIN_SECTOR : sectorialGate(perfil, input);
+    const sectorial =
+      perfil.sectoresUnspsc.length === 0 ? SIN_SECTOR : sectorialGate(perfil, input);
     const ubicacion =
       perfil.cobertura.departamentos.length === 0 && perfil.cobertura.municipios.length === 0
         ? SIN_ZONA

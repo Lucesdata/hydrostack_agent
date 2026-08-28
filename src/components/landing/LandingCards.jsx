@@ -328,7 +328,10 @@ export default function LandingCards() {
                   </li>
                 </ul>
                 <p className="lc-locked-msg">
-                  <span style={{ font: "10px var(--font-mono)", color: "#6B746F" }} aria-hidden="true">
+                  <span
+                    style={{ font: "10px var(--font-mono)", color: "#6B746F" }}
+                    aria-hidden="true"
+                  >
                     [ ● ]
                   </span>{" "}
                   Detalle disponible al registrarte

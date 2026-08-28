@@ -18,8 +18,16 @@ import type { RespuestasDiagnostico, PreguntaKey } from "@/src/lib/diagnostico/t
  * `resp({ exp: 4 })` degrada solo esa pregunta.
  */
 const PERFECTAS: RespuestasDiagnostico = {
-  rup: 0, unspsc: 0, exp: 0, fin: 0, secop: 0,
-  poliza: 0, tec: 0, pila: 0, antec: 0, union: 0,
+  rup: 0,
+  unspsc: 0,
+  exp: 0,
+  fin: 0,
+  secop: 0,
+  poliza: 0,
+  tec: 0,
+  pila: 0,
+  antec: 0,
+  union: 0,
 };
 const resp = (overrides: Partial<RespuestasDiagnostico> = {}): RespuestasDiagnostico => ({
   ...PERFECTAS,
@@ -33,10 +41,7 @@ const PEORES = Object.fromEntries(
 describe("integridad del contenido co-apsb-v1", () => {
   it("son 10 preguntas y suman exactamente 100 puntos", () => {
     expect(PREGUNTAS).toHaveLength(10);
-    const maximo = PREGUNTAS.reduce(
-      (s, q) => s + Math.max(...q.opciones.map((o) => o.puntos)),
-      0
-    );
+    const maximo = PREGUNTAS.reduce((s, q) => s + Math.max(...q.opciones.map((o) => o.puntos)), 0);
     expect(maximo).toBe(100);
   });
 
@@ -51,9 +56,7 @@ describe("integridad del contenido co-apsb-v1", () => {
   });
 
   it("todo flag apunta a un remedio existente y no hay remedios muertos", () => {
-    const usados = new Set(
-      PREGUNTAS.flatMap((q) => q.opciones.map((o) => o.flag).filter(Boolean))
-    );
+    const usados = new Set(PREGUNTAS.flatMap((q) => q.opciones.map((o) => o.flag).filter(Boolean)));
     for (const id of usados) expect(REMEDIOS[id!]).toBeDefined();
     expect(usados.size).toBe(Object.keys(REMEDIOS).length);
     expect(usados.size).toBe(16);
@@ -123,9 +126,7 @@ describe("calcularDiagnostico — las cuatro bandas de veredicto", () => {
 
   it("banda en_camino", () => {
     // 64 anterior, además -9 unspsc y -9 secop = 46
-    const r = calcularDiagnostico(
-      resp({ exp: 4, fin: 3, poliza: 2, tec: 2, unspsc: 2, secop: 2 })
-    );
+    const r = calcularDiagnostico(resp({ exp: 4, fin: 3, poliza: 2, tec: 2, unspsc: 2, secop: 2 }));
     expect(r.puntajeTotal).toBe(46);
     expect(r.banda).toBe("en_camino");
   });
@@ -185,8 +186,16 @@ describe("calcularDiagnostico — orden del plan de acción", () => {
   it("la peor respuesta posible dispara un bloqueante por pregunta", () => {
     const r = calcularDiagnostico(PEORES);
     expect(r.bloqueantes).toEqual([
-      "rup_no", "fin_no", "secop_no", "antec_mal",
-      "unspsc", "exp_cero", "poliza", "tec", "pila_sin", "solo",
+      "rup_no",
+      "fin_no",
+      "secop_no",
+      "antec_mal",
+      "unspsc",
+      "exp_cero",
+      "poliza",
+      "tec",
+      "pila_sin",
+      "solo",
     ]);
     expect(new Set(r.bloqueantes).size).toBe(r.bloqueantes.length);
   });
@@ -264,12 +273,28 @@ describe("calcularDiagnostico — determinismo", () => {
 
   it("el orden de las claves del objeto no cambia el resultado", () => {
     const a: RespuestasDiagnostico = {
-      rup: 1, unspsc: 2, exp: 3, fin: 1, secop: 1,
-      poliza: 2, tec: 1, pila: 2, antec: 1, union: 2,
+      rup: 1,
+      unspsc: 2,
+      exp: 3,
+      fin: 1,
+      secop: 1,
+      poliza: 2,
+      tec: 1,
+      pila: 2,
+      antec: 1,
+      union: 2,
     };
     const b: RespuestasDiagnostico = {
-      union: 2, antec: 1, pila: 2, tec: 1, poliza: 2,
-      secop: 1, fin: 1, exp: 3, unspsc: 2, rup: 1,
+      union: 2,
+      antec: 1,
+      pila: 2,
+      tec: 1,
+      poliza: 2,
+      secop: 1,
+      fin: 1,
+      exp: 3,
+      unspsc: 2,
+      rup: 1,
     };
     expect(calcularDiagnostico(a)).toEqual(calcularDiagnostico(b));
   });

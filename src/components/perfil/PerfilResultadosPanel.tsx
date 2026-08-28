@@ -109,7 +109,9 @@ export function PerfilResultadosPanel({
       {hasResult && (
         <>
           {status === "loading" && <p style={{ opacity: 0.6 }}>Actualizando…</p>}
-          {status === "error" && <p>No pudimos actualizar — mostrando el último resultado conocido.</p>}
+          {status === "error" && (
+            <p>No pudimos actualizar — mostrando el último resultado conocido.</p>
+          )}
           <p>
             <strong>{count}</strong> proceso{count === 1 ? "" : "s"} coincide
             {count === 1 ? "" : "n"} con tu perfil.

@@ -9,12 +9,7 @@ import { db } from "@/src/lib/db/client";
 import { senalUsuario } from "@/src/lib/db/schema/cuentas";
 
 export type UserSignal =
-  | "oferente"
-  | "estructurador"
-  | "comunidad"
-  | "ejecutor"
-  | "operador"
-  | "proveedor";
+  "oferente" | "estructurador" | "comunidad" | "ejecutor" | "operador" | "proveedor";
 
 export async function recordUserSignal(usuarioId: string, signal: UserSignal): Promise<void> {
   try {

@@ -37,8 +37,7 @@ const PROBLEM_SOLUTION = [
     icon: "dimension",
     pain: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
     label: "Estructuración",
-    answer:
-      "Te ayudamos a armar el presupuesto con las cotas y validaciones del sector agua.",
+    answer: "Te ayudamos a armar el presupuesto con las cotas y validaciones del sector agua.",
   },
 ];
 
@@ -281,15 +280,7 @@ function PainIcon({ type }) {
 function ConnectorArrow() {
   return (
     <svg width="56" height="20" viewBox="0 0 56 20" style={{ display: "block" }} aria-hidden="true">
-      <line
-        x1="4"
-        y1="10"
-        x2="42"
-        y2="10"
-        stroke="#0369A1"
-        strokeWidth="1"
-        strokeDasharray="4 4"
-      />
+      <line x1="4" y1="10" x2="42" y2="10" stroke="#0369A1" strokeWidth="1" strokeDasharray="4 4" />
       <polyline
         points="37,5 46,10 37,15"
         fill="none"
@@ -606,7 +597,20 @@ export default function LandingPage() {
           <HeroCove />
           <div className="bp-hero-grid" style={{ position: "relative" }}>
             <div style={{ position: "relative" }}>
-              <div style={{ display: "inline-block", padding: "8px 14px", background: "rgba(3, 105, 161, 0.08)", color: "#0369A1", borderRadius: 4, marginBottom: 24, font: "11px var(--font-jetbrains-mono),monospace", fontWeight: 600, letterSpacing: ".05em", textTransform: "uppercase" }}>
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "8px 14px",
+                  background: "rgba(3, 105, 161, 0.08)",
+                  color: "#0369A1",
+                  borderRadius: 4,
+                  marginBottom: 24,
+                  font: "11px var(--font-jetbrains-mono),monospace",
+                  fontWeight: 600,
+                  letterSpacing: ".05em",
+                  textTransform: "uppercase",
+                }}
+              >
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
@@ -619,11 +623,30 @@ export default function LandingPage() {
                   <span>en un solo lugar.</span>
                 </span>
               </h1>
-              <p style={{ font: "15px/1.6 var(--font-inter)", color: "#525B5A", marginTop: 20, marginBottom: 30, maxWidth: 520 }}>
-                Desde una duda de norma hasta un pliego de cien páginas. Incluye los procesos de agua y saneamiento del SECOP II, con las compuertas de elegibilidad revisadas una por una.
+              <p
+                style={{
+                  font: "15px/1.6 var(--font-inter)",
+                  color: "#525B5A",
+                  marginTop: 20,
+                  marginBottom: 30,
+                  maxWidth: 520,
+                }}
+              >
+                Desde una duda de norma hasta un pliego de cien páginas. Incluye los procesos de
+                agua y saneamiento del SECOP II, con las compuertas de elegibilidad revisadas una
+                por una.
               </p>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 30, marginBottom: 20 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  marginTop: 30,
+                  marginBottom: 20,
+                }}
+              >
                 <Link
                   href="/licitaciones"
                   className="bp-cta bp-cta-dark hero-fade-up"
@@ -699,7 +722,13 @@ export default function LandingPage() {
                 viewBox="0 0 520 16"
                 width="520"
                 height="16"
-                style={{ display: "block", marginTop: 20, overflow: "visible", maxWidth: "100%", marginBottom: 48 }}
+                style={{
+                  display: "block",
+                  marginTop: 20,
+                  overflow: "visible",
+                  maxWidth: "100%",
+                  marginBottom: 48,
+                }}
               >
                 <line
                   x1="0"
@@ -716,22 +745,97 @@ export default function LandingPage() {
                 <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
               </svg>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "32px", textAlign: "center" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: "32px",
+                  textAlign: "center",
+                }}
+              >
                 <div>
-                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>127</div>
-                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Procesos nuevos · 7 días</div>
+                  <div
+                    style={{
+                      font: "600 28px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      marginBottom: 8,
+                    }}
+                  >
+                    127
+                  </div>
+                  <div
+                    style={{
+                      font: "11px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                      textTransform: "uppercase",
+                      letterSpacing: ".05em",
+                    }}
+                  >
+                    Procesos nuevos · 7 días
+                  </div>
                 </div>
                 <div>
-                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>$4.2B</div>
-                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>En juego · este mes</div>
+                  <div
+                    style={{
+                      font: "600 28px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      marginBottom: 8,
+                    }}
+                  >
+                    $4.2B
+                  </div>
+                  <div
+                    style={{
+                      font: "11px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                      textTransform: "uppercase",
+                      letterSpacing: ".05em",
+                    }}
+                  >
+                    En juego · este mes
+                  </div>
                 </div>
                 <div>
-                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>11</div>
-                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Años en agua y saneamiento</div>
+                  <div
+                    style={{
+                      font: "600 28px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      marginBottom: 8,
+                    }}
+                  >
+                    11
+                  </div>
+                  <div
+                    style={{
+                      font: "11px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                      textTransform: "uppercase",
+                      letterSpacing: ".05em",
+                    }}
+                  >
+                    Años en agua y saneamiento
+                  </div>
                 </div>
                 <div>
-                  <div style={{ font: "600 28px var(--font-jetbrains-mono),monospace", color: "#0369A1", marginBottom: 8 }}>24/7</div>
-                  <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em" }}>Actualización SECOP II</div>
+                  <div
+                    style={{
+                      font: "600 28px var(--font-jetbrains-mono),monospace",
+                      color: "#0369A1",
+                      marginBottom: 8,
+                    }}
+                  >
+                    24/7
+                  </div>
+                  <div
+                    style={{
+                      font: "11px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                      textTransform: "uppercase",
+                      letterSpacing: ".05em",
+                    }}
+                  >
+                    Actualización SECOP II
+                  </div>
                 </div>
               </div>
             </div>
@@ -787,23 +891,74 @@ export default function LandingPage() {
                   minHeight: 180,
                 }}
               >
-                <span style={{ position: "absolute", top: -1, left: -1, width: 10, height: 10, borderTop: "2px solid #0369A1", borderLeft: "2px solid #0369A1" }} />
-                <span style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, borderBottom: "2px solid #0369A1", borderRight: "2px solid #0369A1" }} />
-                <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    left: -1,
+                    width: 10,
+                    height: 10,
+                    borderTop: "2px solid #0369A1",
+                    borderLeft: "2px solid #0369A1",
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: -1,
+                    right: -1,
+                    width: 10,
+                    height: 10,
+                    borderBottom: "2px solid #0369A1",
+                    borderRight: "2px solid #0369A1",
+                  }}
+                />
+                <span
+                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
+                >
                   [ {c.n} ]
                 </span>
                 <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
-                <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", flexGrow: 1, margin: 0 }}>
+                <p
+                  style={{
+                    font: "13px/1.5 var(--font-inter)",
+                    color: "#525B5A",
+                    flexGrow: 1,
+                    margin: 0,
+                  }}
+                >
                   {c.desc}
                 </p>
-                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}>
+                <span
+                  style={{
+                    font: "600 12px var(--font-jetbrains-mono),monospace",
+                    color: "#0369A1",
+                  }}
+                >
                   [ {c.cta} <span className="bp-card-arrow">→</span> ]
                 </span>
               </Link>
             ))}
 
-            <div aria-live="polite" style={{ padding: 22, minHeight: 180, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 10 }}>
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F", letterSpacing: ".1em", textTransform: "uppercase" }}>
+            <div
+              aria-live="polite"
+              style={{
+                padding: 22,
+                minHeight: 180,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                gap: 10,
+              }}
+            >
+              <span
+                style={{
+                  font: "10px var(--font-jetbrains-mono),monospace",
+                  color: "#6B746F",
+                  letterSpacing: ".1em",
+                  textTransform: "uppercase",
+                }}
+              >
                 Próximamente
               </span>
               <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
@@ -813,19 +968,36 @@ export default function LandingPage() {
                 Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
               </p>
               {waitlistStatus === "done" ? (
-                <span style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#16A34A" }}>[ Te avisaremos ]</span>
+                <span
+                  style={{
+                    font: "600 12px var(--font-jetbrains-mono),monospace",
+                    color: "#16A34A",
+                  }}
+                >
+                  [ Te avisaremos ]
+                </span>
               ) : (
                 <button
                   type="button"
                   onClick={handleWaitlist}
                   disabled={waitlistStatus === "loading"}
-                  style={{ alignSelf: "flex-start", cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer", background: "transparent", border: "1px solid #0369A1", padding: "6px 12px", font: "600 12px var(--font-jetbrains-mono),monospace", color: "#0369A1" }}
+                  style={{
+                    alignSelf: "flex-start",
+                    cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer",
+                    background: "transparent",
+                    border: "1px solid #0369A1",
+                    padding: "6px 12px",
+                    font: "600 12px var(--font-jetbrains-mono),monospace",
+                    color: "#0369A1",
+                  }}
                 >
                   {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
                 </button>
               )}
               {waitlistStatus === "error" && waitlistError && (
-                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>{waitlistError}</span>
+                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>
+                  {waitlistError}
+                </span>
               )}
             </div>
           </div>

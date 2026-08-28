@@ -29,20 +29,39 @@ interface Props {
 }
 
 function emptyContrato(): ExperienciaContrato {
-  return { objeto: "", valorSmmlv: 0, unspscCodigos: [], anioTerminacion: new Date().getFullYear() };
+  return {
+    objeto: "",
+    valorSmmlv: 0,
+    unspscCodigos: [],
+    anioTerminacion: new Date().getFullYear(),
+  };
 }
 
 export default function RupWizard({ perfil, onComplete, onSkip }: Props) {
   const [stepIdx, setStepIdx] = useState(0);
   const [experiencia, setExperiencia] = useState<ExperienciaContrato[]>(perfil.experiencia ?? []);
   const [query, setQuery] = useState("");
-  const [indiceLiquidez, setIndiceLiquidez] = useState(String(perfil.capacidadFinanciera.indiceLiquidez ?? ""));
-  const [indiceEndeudamiento, setIndiceEndeudamiento] = useState(String(perfil.capacidadFinanciera.indiceEndeudamiento ?? ""));
-  const [razonCoberturaIntereses, setRazonCoberturaIntereses] = useState(String(perfil.capacidadFinanciera.razonCoberturaIntereses ?? ""));
-  const [rentabilidadPatrimonio, setRentabilidadPatrimonio] = useState(String(perfil.capacidadFinanciera.rentabilidadPatrimonio ?? ""));
-  const [rentabilidadActivo, setRentabilidadActivo] = useState(String(perfil.capacidadFinanciera.rentabilidadActivo ?? ""));
-  const [patrimonioSmmlv, setPatrimonioSmmlv] = useState(String(perfil.capacidadFinanciera.patrimonioSmmlv ?? ""));
-  const [capitalTrabajoSmmlv, setCapitalTrabajoSmmlv] = useState(String(perfil.capacidadFinanciera.capitalTrabajoSmmlv ?? ""));
+  const [indiceLiquidez, setIndiceLiquidez] = useState(
+    String(perfil.capacidadFinanciera.indiceLiquidez ?? "")
+  );
+  const [indiceEndeudamiento, setIndiceEndeudamiento] = useState(
+    String(perfil.capacidadFinanciera.indiceEndeudamiento ?? "")
+  );
+  const [razonCoberturaIntereses, setRazonCoberturaIntereses] = useState(
+    String(perfil.capacidadFinanciera.razonCoberturaIntereses ?? "")
+  );
+  const [rentabilidadPatrimonio, setRentabilidadPatrimonio] = useState(
+    String(perfil.capacidadFinanciera.rentabilidadPatrimonio ?? "")
+  );
+  const [rentabilidadActivo, setRentabilidadActivo] = useState(
+    String(perfil.capacidadFinanciera.rentabilidadActivo ?? "")
+  );
+  const [patrimonioSmmlv, setPatrimonioSmmlv] = useState(
+    String(perfil.capacidadFinanciera.patrimonioSmmlv ?? "")
+  );
+  const [capitalTrabajoSmmlv, setCapitalTrabajoSmmlv] = useState(
+    String(perfil.capacidadFinanciera.capitalTrabajoSmmlv ?? "")
+  );
 
   const step = STEPS[stepIdx];
   const isLast = stepIdx === STEPS.length - 1;
@@ -86,7 +105,9 @@ export default function RupWizard({ perfil, onComplete, onSkip }: Props) {
   return (
     <div className="clr-wiz-card">
       <header className="clr-wiz-head">
-        <span className="clr-wiz-step">Paso {stepIdx + 1} de {STEPS.length} · perfil RUP</span>
+        <span className="clr-wiz-step">
+          Paso {stepIdx + 1} de {STEPS.length} · perfil RUP
+        </span>
         <h3 className="clr-wiz-title">{STEP_TITLE[step]}</h3>
       </header>
 
@@ -164,31 +185,71 @@ export default function RupWizard({ perfil, onComplete, onSkip }: Props) {
         <div className="clr-wiz-cuantia">
           <label className="clr-wiz-field">
             Índice de liquidez (veces)
-            <input className="clr-input" type="number" step="0.01" value={indiceLiquidez} onChange={(e) => setIndiceLiquidez(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              step="0.01"
+              value={indiceLiquidez}
+              onChange={(e) => setIndiceLiquidez(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Índice de endeudamiento (0–1)
-            <input className="clr-input" type="number" step="0.01" value={indiceEndeudamiento} onChange={(e) => setIndiceEndeudamiento(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              step="0.01"
+              value={indiceEndeudamiento}
+              onChange={(e) => setIndiceEndeudamiento(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Razón de cobertura de intereses (veces)
-            <input className="clr-input" type="number" step="0.01" value={razonCoberturaIntereses} onChange={(e) => setRazonCoberturaIntereses(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              step="0.01"
+              value={razonCoberturaIntereses}
+              onChange={(e) => setRazonCoberturaIntereses(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Rentabilidad del patrimonio (0–1)
-            <input className="clr-input" type="number" step="0.01" value={rentabilidadPatrimonio} onChange={(e) => setRentabilidadPatrimonio(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              step="0.01"
+              value={rentabilidadPatrimonio}
+              onChange={(e) => setRentabilidadPatrimonio(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Rentabilidad del activo (0–1)
-            <input className="clr-input" type="number" step="0.01" value={rentabilidadActivo} onChange={(e) => setRentabilidadActivo(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              step="0.01"
+              value={rentabilidadActivo}
+              onChange={(e) => setRentabilidadActivo(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Patrimonio (SMMLV)
-            <input className="clr-input" type="number" value={patrimonioSmmlv} onChange={(e) => setPatrimonioSmmlv(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              value={patrimonioSmmlv}
+              onChange={(e) => setPatrimonioSmmlv(e.target.value)}
+            />
           </label>
           <label className="clr-wiz-field">
             Capital de trabajo (SMMLV)
-            <input className="clr-input" type="number" value={capitalTrabajoSmmlv} onChange={(e) => setCapitalTrabajoSmmlv(e.target.value)} />
+            <input
+              className="clr-input"
+              type="number"
+              value={capitalTrabajoSmmlv}
+              onChange={(e) => setCapitalTrabajoSmmlv(e.target.value)}
+            />
           </label>
         </div>
       )}

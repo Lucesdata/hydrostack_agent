@@ -59,7 +59,9 @@ const REGLAS: ReadonlyArray<{ contiene: string; escalon: EscalonContratacion }> 
  * los tres peldaños (régimen especial, contratación directa, concurso de
  * méritos, solicitud de información…).
  */
-export function normalizarModalidad(modalidad: string | null | undefined): EscalonContratacion | null {
+export function normalizarModalidad(
+  modalidad: string | null | undefined
+): EscalonContratacion | null {
   if (!modalidad) return null;
   const texto = normalizar(modalidad);
   for (const regla of REGLAS) {

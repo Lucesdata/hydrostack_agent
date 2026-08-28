@@ -7,16 +7,16 @@
  * (lista_espera_mercado_usuario_uq).
  */
 
-import { NextResponse } from 'next/server';
-import { db } from '@/src/lib/db/client';
-import { listaEsperaMercado } from '@/src/lib/db/schema/asistentes';
-import { getSessionUser } from '@/src/lib/supabase/get-session-user';
-import { recordUserSignal } from '@/src/lib/signals/record-signal';
+import { NextResponse } from "next/server";
+import { db } from "@/src/lib/db/client";
+import { listaEsperaMercado } from "@/src/lib/db/schema/asistentes";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { recordUserSignal } from "@/src/lib/signals/record-signal";
 
 export async function POST() {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
+    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
   await db
@@ -24,7 +24,7 @@ export async function POST() {
     .values({ usuarioId: user.id })
     .onConflictDoNothing({ target: listaEsperaMercado.usuarioId });
 
-  await recordUserSignal(user.id, 'proveedor');
+  await recordUserSignal(user.id, "proveedor");
 
   return NextResponse.json({ ok: true });
 }

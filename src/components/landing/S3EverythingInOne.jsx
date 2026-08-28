@@ -32,7 +32,15 @@ export default function S3EverythingInOne() {
             flexWrap: "wrap",
           }}
         >
-          <div style={{ font: "600 12px var(--font-jetbrains-mono),monospace", color: "#6B746F", textTransform: "uppercase", letterSpacing: ".05em", whiteSpace: "nowrap" }}>
+          <div
+            style={{
+              font: "600 12px var(--font-jetbrains-mono),monospace",
+              color: "#6B746F",
+              textTransform: "uppercase",
+              letterSpacing: ".05em",
+              whiteSpace: "nowrap",
+            }}
+          >
             Fuentes
           </div>
           <div style={{ display: "flex", gap: "32px", flexWrap: "wrap", justifyContent: "center" }}>
@@ -45,19 +53,43 @@ export default function S3EverythingInOne() {
         </div>
 
         {/* Bloque a dos columnas */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "center" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "64px",
+            alignItems: "center",
+          }}
+        >
           <div>
-            <div style={{ font: "11px var(--font-jetbrains-mono),monospace", color: "#0369A1", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 16 }}>
+            <div
+              style={{
+                font: "11px var(--font-jetbrains-mono),monospace",
+                color: "#0369A1",
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+                marginBottom: 16,
+              }}
+            >
               Capacidades
             </div>
-            <h2 style={{ font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)", color: "#0A1F1C", marginBottom: 20 }}>
+            <h2
+              style={{
+                font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)",
+                color: "#0A1F1C",
+                marginBottom: 20,
+              }}
+            >
               Todo en un solo lugar.
             </h2>
             <p style={{ font: "15px/1.6 var(--font-inter)", color: "#525B5A", marginBottom: 32 }}>
-              No saltes entre cinco pestañas. Las compuertas, los requisitos, la norma — reunidos, cruzados, citables.
+              No saltes entre cinco pestañas. Las compuertas, los requisitos, la norma — reunidos,
+              cruzados, citables.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: 32 }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: 32 }}
+            >
               {features.map((f, i) => (
                 <div key={i} style={{ display: "flex", gap: 12 }}>
                   <div
@@ -78,8 +110,13 @@ export default function S3EverythingInOne() {
                     ✓
                   </div>
                   <div>
-                    <strong style={{ font: "600 15px var(--font-inter)", color: "#0A1F1C" }}>{f.title}</strong>
-                    <span style={{ font: "15px var(--font-inter)", color: "#525B5A" }}> {f.desc}</span>
+                    <strong style={{ font: "600 15px var(--font-inter)", color: "#0A1F1C" }}>
+                      {f.title}
+                    </strong>
+                    <span style={{ font: "15px var(--font-inter)", color: "#525B5A" }}>
+                      {" "}
+                      {f.desc}
+                    </span>
                   </div>
                 </div>
               ))}

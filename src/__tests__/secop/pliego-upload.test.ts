@@ -136,7 +136,10 @@ describe("uploadPliego", () => {
   it("persiste con gateMatematicoPasado:false cuando la aritmética no cuadra", async () => {
     const inconsistente = extraccion();
     inconsistente.capitulos[0].items[0].valor_total = 9999;
-    extractPliegoHybridMock.mockResolvedValueOnce({ extraction: inconsistente, origen: ORIGEN_LLM });
+    extractPliegoHybridMock.mockResolvedValueOnce({
+      extraction: inconsistente,
+      origen: ORIGEN_LLM,
+    });
 
     const r = await uploadPliego({
       procesoId: "CO1.REQ.1",

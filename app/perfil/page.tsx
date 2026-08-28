@@ -16,8 +16,8 @@ export default async function PerfilPage() {
       <div className="clr-container" style={{ maxWidth: 720, padding: "40px 20px" }}>
         <h1 className="clr-h1">Mi perfil RUP</h1>
         <p className="clr-sub">
-          Estos datos se usan para calcular tu elegibilidad en cada proceso — nunca se
-          publican ni se comparten.
+          Estos datos se usan para calcular tu elegibilidad en cada proceso — nunca se publican ni
+          se comparten.
         </p>
         <PerfilForm perfilInicial={perfilCompleto} />
       </div>

@@ -15,10 +15,7 @@ import {
   getDiagnosticoVigente,
   type DiagnosticoGuardado,
 } from "@/src/lib/diagnostico/diagnostico-store";
-import {
-  DIAGNOSTICO_COOKIE,
-  esSessionTokenValido,
-} from "@/src/lib/diagnostico/session-token";
+import { DIAGNOSTICO_COOKIE, esSessionTokenValido } from "@/src/lib/diagnostico/session-token";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { DiagnosticoApp } from "@/src/components/diagnostico/DiagnosticoApp";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";

@@ -14,7 +14,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { calcularDiagnostico } from "@/src/lib/diagnostico/calcular";
-import { PORTADA, FACTS, PREGUNTAS, CATEGORIAS } from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
+import {
+  PORTADA,
+  FACTS,
+  PREGUNTAS,
+  CATEGORIAS,
+} from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
 import type {
   RespuestasDiagnostico,
   RespuestasParciales,
@@ -54,34 +59,31 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
     return elegida === undefined ? suma : suma + q.opciones[elegida].puntos;
   }, 0);
 
-  const enviar = useCallback(
-    async (completas: RespuestasDiagnostico) => {
-      setEnviando(true);
-      // Fallback local: si la red falla, el resultado no se pierde.
-      let calculado = calcularDiagnostico(completas);
-      let persistido = false;
+  const enviar = useCallback(async (completas: RespuestasDiagnostico) => {
+    setEnviando(true);
+    // Fallback local: si la red falla, el resultado no se pierde.
+    let calculado = calcularDiagnostico(completas);
+    let persistido = false;
 
-      try {
-        const res = await fetch("/api/diagnostico", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ respuestas: completas }),
-        });
-        const cuerpo = await res.json();
-        if (cuerpo?.resultado) calculado = cuerpo.resultado as ResultadoDiagnostico;
-        persistido = cuerpo?.guardado === true;
-      } catch {
-        // Se queda con el cálculo local y `persistido` en false.
-      }
+    try {
+      const res = await fetch("/api/diagnostico", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ respuestas: completas }),
+      });
+      const cuerpo = await res.json();
+      if (cuerpo?.resultado) calculado = cuerpo.resultado as ResultadoDiagnostico;
+      persistido = cuerpo?.guardado === true;
+    } catch {
+      // Se queda con el cálculo local y `persistido` en false.
+    }
 
-      setResultado(calculado);
-      setGuardado(persistido);
-      setEnviando(false);
-      setEtapa("resultado");
-      window.scrollTo({ top: 0 });
-    },
-    []
-  );
+    setResultado(calculado);
+    setGuardado(persistido);
+    setEnviando(false);
+    setEtapa("resultado");
+    window.scrollTo({ top: 0 });
+  }, []);
 
   const responder = useCallback(
     (opcionIdx: number) => {
@@ -169,7 +171,8 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
             <div>
               <div className="clr-diag-q-head">
                 <span className="clr-diag-q-num">
-                  {String(indice + 1).padStart(2, "0")} / {String(PREGUNTAS.length).padStart(2, "0")}
+                  {String(indice + 1).padStart(2, "0")} /{" "}
+                  {String(PREGUNTAS.length).padStart(2, "0")}
                 </span>
                 <span className="clr-diag-q-cat">{CATEGORIA_LABEL.get(pregunta.categoria)}</span>
               </div>
