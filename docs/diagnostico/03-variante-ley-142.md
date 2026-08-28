@@ -1,8 +1,8 @@
 # Variante Ley 142 — reconocimiento y diseño
 
 **Fecha:** 2026-08-28 · **Pendiente #12 de `PENDIENTES.md`.**
-**Estado:** diseño. Sin código todavía — hay una decisión de producto y un
-insumo de contenido que resolver antes.
+**Estado:** camino (B) **implementado** el 2026-08-28. (A) sigue bloqueado por
+contenido; (C) es un módulo aparte del roadmap.
 
 ---
 
@@ -39,15 +39,15 @@ código.
 | | Procesos | % del cajón |
 |---|---|---|
 | **Total "Contratación régimen especial"** (con y sin ofertas) | **51 290** | 100 % |
-| Parecen E.S.P. (Ley 142), por nombre de entidad | 31 188 | 60,8 % |
+| **E.S.P. (Ley 142)**, según la heurística final | **35 214** | **68,7 %** |
 | E.S.E. — hospitales (Ley 100) | 3 735 | 7,3 % |
 | Universidades (Ley 30, autonomía) | 1 579 | 3,1 % |
 | Resto sin clasificar | ~14 800 | ~28,8 % |
 
-El "resto" incluye más ESP que el patrón de nombre no atrapa —EMCALI, ACUASAN,
-"Empresa de Servicios Públicos de Sopó"— y también entidades que no lo son:
-Ecopetrol (416), Banco de la República (364). **La cifra real de ESP está entre
-el 61 % y el 75 % del cajón**, no en el 100 %.
+Cifra medida con `pareceEsp` ya afinada: **456 entidades, 35 214 procesos,
+68,7 % del cajón** — no el 100 %. El resto son hospitales, universidades,
+Ecopetrol (416), Banco de la República (364), Banco Agrario, Refinería de
+Cartagena, ENTerritorio.
 
 Las mayores son exactamente las que importan para agua y saneamiento: Acueducto
 de Bogotá (5 821), EMPOCALDAS (1 672), EPM (1 059), Aguas de Manizales (696),
@@ -114,7 +114,7 @@ régimen de inhabilidades, que **sí sigue aplicando**.
 - **Coste técnico:** medio. Obliga a los cambios de §4.
 - **Coste de contenido:** hay que redactarlo y validarlo. No existe fuente.
 
-### (B) Solo explicar, sin cuestionario nuevo — *el más barato*
+### (B) Solo explicar, sin cuestionario nuevo — ✅ **implementado 2026-08-28**
 
 Cuando el usuario tiene diagnóstico y mira un proceso de régimen especial de
 una E.S.P., mostrar una nota: *"esta empresa contrata bajo derecho privado
@@ -125,6 +125,24 @@ de la Ley 80 no aplica aquí"*, con enlace al manual si la entidad lo publica.
 - **Cierra el agujero real**: hoy el usuario ve el aviso de escalón callado en
   la mitad del catálogo y no sabe por qué.
 - **No responde** qué le falta para venderle a una ESP.
+
+**Cómo quedó** (`src/lib/diagnostico/regimen-especial.ts`): insignia neutra
+"Ley 142 · régimen privado" en la tarjeta, y la explicación larga **una sola
+vez** sobre la lista — por tarjeta sería un párrafo repetido en media pantalla.
+El color separa los dos mensajes: **ámbar** es una advertencia sobre el alcance
+del oferente (aviso de escalón), **gris** es una aclaración sobre la entidad.
+
+La insignia exige que se cumplan **las dos** condiciones —modalidad de régimen
+especial Y entidad que parece E.S.P.— así que un proceso de régimen especial de
+la Universidad Nacional no lleva nada: no sabemos qué régimen lo gobierna y
+afirmar Ley 142 sería inventarlo.
+
+**Afinar la heurística contra los datos encontró dos errores que la primera
+versión no veía:** "EMPRESA DE AGUA POTABLE Y SANEAMIENTO BÁSICO DE ORITO"
+(302 procesos) es una E.S.P. y se escapaba por no llevar sigla ni la palabra
+"acueducto"; y al añadir esa regla entró la **CRA**, la Comisión de Regulación
+de Agua Potable, que es el regulador y no presta el servicio. Los dos casos
+están fijados por test con su nombre real.
 
 ### (C) Ficha por entidad, con su manual de contratación — *el producto de verdad*
 
