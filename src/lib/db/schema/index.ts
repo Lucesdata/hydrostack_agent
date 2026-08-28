@@ -8,3 +8,4 @@ export * from "./cuentas";
 export * from "./asistentes";
 export * from "./eligibility";
 export * from "./pliego";
+export * from "./diagnostico";
