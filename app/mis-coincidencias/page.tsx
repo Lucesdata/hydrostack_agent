@@ -25,6 +25,7 @@ import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
 import { PanelBloqueantes } from "@/src/components/diagnostico/PanelBloqueantes";
 import { getDiagnosticoVigente } from "@/src/lib/diagnostico/diagnostico-store";
 import { avisoEscalon } from "@/src/lib/diagnostico/modalidad";
+import { avisoRegimenPrivado, NOTA_REGIMEN_PRIVADO } from "@/src/lib/diagnostico/regimen-especial";
 import { PliegoUploadBlock } from "@/src/components/secop/PliegoUploadBlock";
 import { getPliegoStatusForProcesos } from "@/src/lib/secop/pliego-status";
 import {
@@ -118,6 +119,17 @@ const STYLE = `
     background: rgba(217, 119, 6, 0.07); border: 1px solid rgba(217, 119, 6, 0.28);
     border-radius: 999px; padding: 3px 9px; white-space: nowrap;
   }
+  .clr-mc-regimen{
+    font-size: 11.5px; font-family: var(--font-mono); color: var(--ink-600);
+    background: var(--surface-alt); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+  }
+  .clr-mc-nota{
+    font-size: 12.5px; color: var(--ink-600); line-height: 1.55;
+    background: var(--surface-alt); border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px;
+  }
   .clr-mc-teaser-alt{ font-size: 12.5px; color: var(--ink-600); margin: 16px 0 0; }
   .clr-mc-teaser-alt a{ color: var(--accent); }
   .clr-mc-teaser-alt a:hover{ text-decoration: underline; }
@@ -144,6 +156,19 @@ const STYLE = `
     padding: 5px 10px; border-radius: var(--radius-md); cursor: pointer;
   }
 `;
+
+/**
+ * ¿Alguna coincidencia la publica una E.S.P. bajo régimen especial? Decide si
+ * se muestra la nota de la Ley 142, que va una sola vez sobre la lista — por
+ * tarjeta sería un párrafo repetido en media pantalla.
+ */
+function hayRegimenPrivado(
+  matches: Array<{ proceso: { modalidad: string; entidad: string } }>,
+  diagnostico: unknown
+): boolean {
+  if (!diagnostico) return false;
+  return matches.some((m) => avisoRegimenPrivado(m.proceso.modalidad, m.proceso.entidad) !== null);
+}
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -235,6 +260,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           también tu semáforo de elegibilidad y recibir alertas por correo.
         </p>
         <PanelBloqueantes diagnostico={diagnostico} />
+        {hayRegimenPrivado(matches, diagnostico) && (
+          <p className="clr-mc-nota">{NOTA_REGIMEN_PRIVADO}</p>
+        )}
         {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
         {matches.length === 0 ? (
           <div className="clr-mc-empty">
@@ -249,6 +277,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
               // diagnóstico o si la modalidad no es un peldaño de la escalera.
               const aviso = diagnostico
                 ? avisoEscalon(diagnostico.escalon, m.proceso.modalidad)
+                : null;
+              const regimen = diagnostico
+                ? avisoRegimenPrivado(m.proceso.modalidad, m.proceso.entidad)
                 : null;
               return (
                 <div key={m.proceso.id} className="clr-mc-card">
@@ -330,6 +361,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         </form>
       </div>
       <PanelBloqueantes diagnostico={diagnostico} />
+      {hayRegimenPrivado(matches, diagnostico) && (
+        <p className="clr-mc-nota">{NOTA_REGIMEN_PRIVADO}</p>
+      )}
       {banner && <div className="clr-mc-banner">{banner}</div>}
       {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
       {matches.length === 0 ? (
@@ -343,6 +377,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
             const score = verdictScore(verdict);
             const fecha = formatShortDate(proceso.fechaPublicacion);
             const aviso = diagnostico ? avisoEscalon(diagnostico.escalon, proceso.modalidad) : null;
+            const regimen = diagnostico
+              ? avisoRegimenPrivado(proceso.modalidad, proceso.entidad)
+              : null;
             return (
               <div key={proceso.id} className="clr-mc-card">
                 <div className="clr-mc-card-top">
@@ -351,6 +388,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                   </p>
                   <span className="clr-mc-badges">
                     {aviso && <span className="clr-mc-escalon">{aviso}</span>}
+                    {regimen && <span className="clr-mc-regimen">{regimen}</span>}
                     <span className={`clr-mc-score clr-mc-score--${score.tone}`}>
                       <span className="clr-mc-dot" />
                       {score.pass}/{score.total}

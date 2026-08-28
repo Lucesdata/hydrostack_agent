@@ -80,7 +80,7 @@ Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con conve
 
 Del cierre de las cuatro fases del módulo. Detalle en `docs/diagnostico/`.
 
-### 12. Variante del cuestionario para régimen especial (Ley 142)
+### 12. Variante del cuestionario para régimen especial (Ley 142) — ⚠️ parcial 2026-08-28
 Estaba anotado como "fuera de alcance" en la spec, pero clasificar el catálogo
 lo ascendió a prioridad: **el 55 % de los procesos de `proceso` son
 "Contratación régimen especial"** — el régimen de derecho privado de la Ley 142
@@ -93,8 +93,24 @@ En total, el 79 % de los procesos no corresponde a ningún peldaño: régimen
 especial (55 %), contratación directa (15 %), solicitud de información,
 concurso de méritos.
 
-Acción: cuestionario `co-apsb-esp-v1` con las reglas de la Ley 142, o al menos
-un texto que explique al usuario por qué esos procesos no llevan aviso.
+**Hecho:** la segunda mitad de esa acción — el texto que explica el silencio.
+Las coincidencias de una E.S.P. bajo régimen especial llevan una insignia
+"Ley 142 · régimen privado" y una nota que dice por qué el escalón no aplica
+ahí (`src/lib/diagnostico/regimen-especial.ts`).
+
+**Sigue abierto:** el cuestionario `co-esp-v1`. Y al ir a los datos apareció
+por qué no es un simple "escribir diez preguntas": la Ley 142 **no tiene
+escalera de contratación**. Cada E.S.P. fija sus modalidades y topes en su
+propio manual, aprobado por su junta, así que "a qué escalón puedes aspirar" no
+tiene respuesta universal. Ver `docs/diagnostico/03-variante-ley-142.md` §2 y
+§3, con los tres caminos y su coste.
+
+**Bloqueado por contenido:** las 10 preguntas de `co-apsb-v1` se copiaron de un
+prototipo validado normativamente; para la Ley 142 no existe ese insumo. Hace
+falta la fuente, o una propuesta redactada y aprobada antes de entrar a código.
+
+**Además, si entra:** `diagnostico.escalon` es `NOT NULL` y un cuestionario sin
+escalón pediría migración `0016`.
 
 ### 13. Verificar a mano el reclamo del diagnóstico con una cuenta real
 El único tramo del flujo sin probar de punta a punta: responder sin sesión,
