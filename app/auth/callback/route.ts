@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/src/lib/supabase/server";
 import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
+import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
 
 /**
  * Callback único para OAuth (Google) y verificación de correo — Supabase
@@ -18,6 +19,8 @@ export async function GET(request: NextRequest) {
 
     if (!error && data.user) {
       await syncUsuario(data.user);
+      // Si respondió el diagnóstico sin cuenta, ahora es suyo.
+      await reclamarDiagnosticoAnonimo(data.user.id);
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

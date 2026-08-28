@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { borrarSessionToken } from "@/src/lib/diagnostico/session-token";
 
 /**
  * No usa `src/lib/supabase/server.ts` a propósito: ese cliente escribe
@@ -33,6 +34,11 @@ export async function POST(request: NextRequest) {
   );
 
   await supabase.auth.signOut();
+
+  // La cookie del diagnóstico anónimo muere con la sesión: si no, la
+  // siguiente cuenta que entre en este navegador reclamaría un diagnóstico
+  // que no es suyo.
+  borrarSessionToken(response);
 
   return response;
 }

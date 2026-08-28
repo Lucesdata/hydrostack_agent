@@ -36,6 +36,17 @@ Entidades y flujos principales:
   `/api/pliego/extract`.
 - **Oferente / matching**: perfil de oferente (`src/lib/oferente/`) cruzado
   contra oportunidades (`src/lib/matching/`).
+- **Diagnóstico de preparación** (`src/lib/diagnostico/`): cuestionario público
+  de 10 preguntas en `/diagnostico` que devuelve nivel de preparación, escalón
+  de contratación y plan de acción. Cálculo puro y determinístico, **sin IA**
+  (`calcular.ts`); contenido congelado por versión en
+  `cuestionario/co-apsb-v1.ts` — un cambio normativo crea `v2`, no se edita el
+  `v1`, porque hay filas que apuntan a él. Se responde sin cuenta y se persiste
+  desde el primer envío; el registro reclama la fila por `session_token`.
+  Alimenta el panel de habilitación de `/mis-coincidencias` y el cruce
+  escalón ↔ `proceso.modalidad`. **No alimenta `habilitacionGate`**: es
+  cualitativo y no produce indicadores RUP ni contratos en SMMLV. Diseño y
+  decisiones en `docs/diagnostico/`.
 - **Alertas**: envío diario idempotente (`src/lib/alertas/`,
   `envio_log` UNIQUE).
 
@@ -73,6 +84,16 @@ Entidades y flujos principales:
   nunca `.from()` sobre tablas — los datos van por Drizzle con conexión
   Postgres directa, cuyo rol ignora RLS. Verificado después: la API devuelve
   `[]` y la conexión directa sigue leyendo las 127.566 filas.
+- **Toda tabla nueva debe nacer con `.enableRLS()` en el esquema Drizzle.** Es
+  la regla que deja permanente lo anterior. `diagnostico` (`drizzle/0015`,
+  2026-08-28) la cumple: verificado en la base, hoy son 23 tablas en `public` y
+  **0 sin RLS**.
+- `diagnostico` admite filas anónimas (`usuario_id` NULL) direccionables por
+  `session_token`, que viaja en una cookie **httpOnly** y por tanto lo controla
+  el cliente. Por eso se valida que tenga forma de UUID antes de usarlo en un
+  `WHERE` (`src/lib/diagnostico/session-token.ts`), y se borra al reclamarlo y
+  al cerrar sesión — si no, en un navegador compartido la siguiente cuenta
+  heredaría el diagnóstico de otra persona.
 - **Refuerzo pendiente, menor:** `anon` y `authenticated` conservan los GRANT
   (incluido `TRUNCATE`, que en Postgres *no* está sujeto a RLS). Hoy no es
   explotable porque PostgREST no expone `TRUNCATE` y nadie tiene credenciales
@@ -86,7 +107,9 @@ Entidades y flujos principales:
 ## 5. Estado del roadmap
 
 Ver `PENDIENTES.md` para pendientes activos y `docs/fase-*/` para el
-historial de decisiones de diseño por fase. `AUDIT_REPORT.md` (2026-08-02)
+historial de decisiones de diseño por fase. `docs/diagnostico/` documenta el
+módulo de diagnóstico de principio a fin: reconocimiento, spec, contrato del
+cuestionario y lecciones. `AUDIT_REPORT.md` (2026-08-02)
 y `AUDITORIA_TECH_DEBT.md` (2026-07-18) son las auditorías más recientes
 que existen en el repo.
 
@@ -96,7 +119,8 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-08-26 (rebrand HydroStack → AquaLicita).
+Última actualización: 2026-08-28 (módulo de diagnóstico de preparación
+para licitar).
 
 ## graphify
 

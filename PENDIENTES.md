@@ -76,6 +76,58 @@ Tema oscuro "cyberpunk" (calculadoras) y tema claro (landing) conviven con conve
 
 ---
 
+## Módulo de diagnóstico (abiertos el 2026-08-28)
+
+Del cierre de las cuatro fases del módulo. Detalle en `docs/diagnostico/`.
+
+### 12. Variante del cuestionario para régimen especial (Ley 142)
+Estaba anotado como "fuera de alcance" en la spec, pero clasificar el catálogo
+lo ascendió a prioridad: **el 55 % de los procesos de `proceso` son
+"Contratación régimen especial"** — el régimen de derecho privado de la Ley 142
+con manual de contratación propio. Hoy el diagnóstico le calcula un escalón al
+usuario y luego calla ante más de la mitad del catálogo, porque esas
+modalidades no son peldaños de la escalera y `normalizarModalidad` devuelve
+`null` a propósito (encajarlas sería inventarse un veredicto).
+
+En total, el 79 % de los procesos no corresponde a ningún peldaño: régimen
+especial (55 %), contratación directa (15 %), solicitud de información,
+concurso de méritos.
+
+Acción: cuestionario `co-apsb-esp-v1` con las reglas de la Ley 142, o al menos
+un texto que explique al usuario por qué esos procesos no llevan aviso.
+
+### 13. Verificar a mano el reclamo del diagnóstico con una cuenta real
+El único tramo del flujo sin probar de punta a punta: responder sin sesión,
+registrarse y confirmar que el diagnóstico aparece en la cuenta. Cubierto por
+tests (`src/__tests__/diagnostico/reclamar.test.ts`,
+`src/__tests__/api/auth-callback-route.test.ts`) pero no ejecutado con
+credenciales.
+
+Los **tres** caminos hay que probarlos por separado, porque el enganche está en
+tres sitios: Google y verificación de correo (`app/auth/callback/route.ts`),
+alta con contraseña y login (`signUpAction` / `signInWithPasswordAction` en
+`src/lib/supabase/actions.ts`).
+
+### 14. HABILITACIÓN sigue sin fuente numérica — límite conocido, no bug
+El diagnóstico **no** puede alimentar `habilitacionGate`: es cualitativo y no
+produce `ExperienciaContrato[]` en SMMLV ni los seis indicadores de
+`CapacidadFinancieraRUP`. Sin pliego extraído, la compuerta sigue en gris
+"requiere pliego", que es lo correcto — la invariante D18 de `verdict.ts`
+prohíbe que una compuerta documental pinte verde o rojo sin el pliego.
+
+La única fuente numérica sigue siendo `RupWizard`. El diagnóstico manda ahí a
+quien ya está en escalón de menor cuantía o superior.
+
+### 15. Revocar los GRANT de `anon` y `authenticated` (defensa en profundidad)
+Ya estaba anotado en `CLAUDE.md` §4 como "refuerzo pendiente, menor" y no
+figuraba aquí. Los dos roles conservan `SELECT, INSERT, UPDATE, DELETE,
+TRUNCATE` sobre las 23 tablas; RLS los contiene, pero `TRUNCATE` **no** está
+sujeto a RLS en Postgres. No es explotable hoy (PostgREST no expone `TRUNCATE`
+y nadie tiene credenciales de Postgres para esos roles). Ojo con Storage, que
+tiene políticas propias en `storage.objects`.
+
+---
+
 ## Decisión pendiente del usuario (no es bug)
 
 ### 11. Alcance de la regla "no perfilar usuarios"
