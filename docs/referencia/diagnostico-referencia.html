@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Tu empresa puede licitar? · Diagnóstico agua y saneamiento</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --papel:#EEF2F1;
+  --papel-2:#FFFFFF;
+  --tinta:#0B2420;
+  --tinta-2:#3D5A55;
+  --agua:#00B7A8;
+  --agua-hondo:#008E84;
+  --agua-claro:#B9EAE5;
+  --ambar:#D98E1F;
+  --alerta:#BF4130;
+  --linea:#CBD8D5;
+  --sombra:0 1px 0 var(--linea);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--papel);
+  color:var(--tinta);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Archivo',system-ui,sans-serif;font-weight:800;letter-spacing:-.03em;line-height:1.02}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--agua-hondo);
+}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* ---------- barra superior ---------- */
+.topbar{
+  border-bottom:1px solid var(--linea);background:var(--papel);
+  position:sticky;top:0;z-index:20;
+}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--agua);flex:none}
+.topbar .meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--tinta-2);letter-spacing:.08em}
+
+/* ---------- portada ---------- */
+.hero{padding:72px 0 64px;border-bottom:1px solid var(--linea)}
+.hero-grid{display:grid;grid-template-columns:1fr 280px;gap:56px;align-items:center}
+.hero h1{font-size:clamp(38px,6.2vw,68px);margin:18px 0 20px;max-width:15ch}
+.hero h1 em{font-style:normal;color:var(--agua-hondo)}
+.hero p.lede{font-size:18px;color:var(--tinta-2);max-width:46ch;margin-bottom:32px}
+
+.facts{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--linea);margin-top:36px}
+.fact{flex:1 1 160px;padding:18px 20px 16px;border-right:1px solid var(--linea)}
+.fact:last-child{border-right:none}
+.fact b{display:block;font-family:'Archivo',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.fact span{font-size:13px;color:var(--tinta-2);display:block;margin-top:2px}
+
+/* ---------- botones ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--tinta);color:var(--papel);border:none;
+  font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;
+  padding:15px 26px;border-radius:2px;cursor:pointer;
+  transition:background .15s ease,transform .15s ease;
+}
+.btn:hover{background:var(--agua-hondo)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--tinta);border:1px solid var(--tinta)}
+.btn.ghost:hover{background:var(--tinta);color:var(--papel)}
+.btn.small{padding:11px 18px;font-size:13px}
+:focus-visible{outline:2px solid var(--agua-hondo);outline-offset:3px}
+
+/* ---------- el tanque (elemento firma) ---------- */
+.tank-shell{position:relative;width:100%;max-width:240px;margin:0 auto}
+.tank{
+  position:relative;width:100%;aspect-ratio:.62;
+  border:2px solid var(--tinta);border-top-width:6px;border-radius:3px;
+  background:var(--papel-2);overflow:hidden;
+}
+.tank .fill{
+  position:absolute;left:0;right:0;bottom:0;height:0%;
+  background:linear-gradient(180deg,var(--agua) 0%,var(--agua-hondo) 100%);
+  transition:height .7s cubic-bezier(.22,1,.36,1);
+}
+.tank .fill::before{
+  content:"";position:absolute;top:-9px;left:-50%;width:200%;height:18px;
+  background:radial-gradient(ellipse 50% 100% at 50% 100%,var(--agua) 60%,transparent 61%);
+  background-size:44px 18px;background-repeat:repeat-x;
+  animation:drift 7s linear infinite;
+}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(44px)}}
+.tank .threshold{
+  position:absolute;left:0;right:0;bottom:60%;border-top:2px dashed var(--tinta);
+  opacity:.5;
+}
+.tank .threshold span{
+  position:absolute;right:4px;top:-17px;font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+}
+.ticks{
+  position:absolute;top:0;bottom:0;left:calc(100% + 10px);width:44px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tinta-2);
+}
+.tank-read{text-align:center;margin-top:14px}
+.tank-read b{font-family:'Archivo',sans-serif;font-size:34px;font-weight:800;letter-spacing:-.03em;display:block}
+.tank-read span{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-2)}
+
+/* ---------- cuestionario ---------- */
+.stage{display:none;padding:56px 0 80px}
+.stage.on{display:block}
+.q-grid{display:grid;grid-template-columns:1fr 240px;gap:56px;align-items:start}
+
+.q-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.q-num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--agua-hondo);font-weight:600}
+.q-cat{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-2)}
+.q-text{font-size:clamp(24px,3.4vw,34px);margin:6px 0 10px;max-width:22ch}
+.q-help{font-size:14px;color:var(--tinta-2);max-width:52ch;margin-bottom:26px;border-left:2px solid var(--agua-claro);padding-left:14px}
+
+.opts{display:flex;flex-direction:column;gap:9px;max-width:560px}
+.opt{
+  text-align:left;background:var(--papel-2);border:1px solid var(--linea);
+  border-radius:2px;padding:16px 18px;cursor:pointer;font:inherit;color:inherit;
+  display:flex;align-items:center;gap:14px;
+  transition:border-color .12s ease,background .12s ease,transform .12s ease;
+}
+.opt:hover{border-color:var(--tinta);transform:translateX(3px)}
+.opt .key{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--tinta-2);
+  border:1px solid var(--linea);width:22px;height:22px;flex:none;
+  display:grid;place-items:center;border-radius:2px;
+}
+.opt:hover .key{border-color:var(--tinta);color:var(--tinta)}
+
+.q-nav{margin-top:28px;display:flex;gap:12px;align-items:center}
+.q-nav .step{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--tinta-2)}
+
+/* ---------- resultados ---------- */
+.verdict{border-top:3px solid var(--tinta);padding-top:26px;margin-bottom:44px}
+.verdict h2{font-size:clamp(30px,5vw,50px);margin:12px 0 14px;max-width:20ch}
+.verdict p{font-size:17px;color:var(--tinta-2);max-width:58ch}
+
+.bars{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);margin-bottom:48px}
+.bar-row{background:var(--papel-2);padding:15px 18px;display:grid;grid-template-columns:1fr 92px 78px;gap:14px;align-items:center}
+.bar-row .name{font-weight:600;font-size:14px}
+.bar-row .track{height:7px;background:var(--papel);border-radius:0}
+.bar-row .val{height:100%;background:var(--agua);transition:width .7s cubic-bezier(.22,1,.36,1)}
+.bar-row .val.warn{background:var(--ambar)}
+.bar-row .val.bad{background:var(--alerta)}
+.bar-row .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:right}
+
+.sec-title{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--linea);padding-bottom:10px;margin-bottom:26px}
+.sec-title h3{font-size:22px}
+
+.plan{list-style:none;display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);margin-bottom:48px}
+.plan li{background:var(--papel-2);padding:20px 22px;display:grid;grid-template-columns:34px 1fr;gap:18px}
+.plan .idx{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--agua-hondo);padding-top:3px}
+.plan h4{font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;margin-bottom:5px;letter-spacing:0}
+.plan p{font-size:14px;color:var(--tinta-2);margin-bottom:9px}
+.plan .chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;border:1px solid var(--linea);padding:3px 8px;color:var(--tinta-2);
+}
+.chip.hard{border-color:var(--alerta);color:var(--alerta)}
+.chip.soft{border-color:var(--ambar);color:var(--ambar)}
+
+.route{background:var(--tinta);color:var(--papel);padding:34px;margin-bottom:48px}
+.route .eyebrow{color:var(--agua-claro)}
+.route h3{font-size:28px;margin:12px 0 12px;color:var(--papel)}
+.route p{color:#B6C9C5;max-width:58ch;font-size:15px}
+.route .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2A4742;margin-top:26px;border:1px solid #2A4742}
+.route .rung{background:var(--tinta);padding:18px}
+.route .rung.now{background:var(--agua-hondo)}
+.route .rung b{display:block;font-family:'Archivo',sans-serif;font-size:15px;margin-bottom:5px}
+.route .rung span{font-size:13px;color:#B6C9C5;display:block}
+.route .rung.now span{color:#DFF6F3}
+
+.myths{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--linea);border:1px solid var(--linea);margin-bottom:48px}
+.myth{background:var(--papel-2);padding:22px}
+.myth .m{font-weight:600;font-size:15px;margin-bottom:8px}
+.myth .m::before{content:"✕ ";color:var(--alerta);font-family:'IBM Plex Mono',monospace}
+.myth .r{font-size:14px;color:var(--tinta-2)}
+.myth .r::before{content:"→ ";color:var(--agua-hondo);font-family:'IBM Plex Mono',monospace}
+
+.actions{display:flex;flex-wrap:wrap;gap:12px;padding-bottom:20px}
+.disclaimer{font-size:12px;color:var(--tinta-2);border-top:1px solid var(--linea);padding:20px 0 60px;max-width:70ch}
+
+/* ---------- responsive ---------- */
+@media(max-width:820px){
+  .hero{padding:44px 0 40px}
+  .hero-grid,.q-grid{grid-template-columns:1fr;gap:34px}
+  .hero-grid .tank-shell{max-width:150px;margin:0}
+  .ticks{display:none}
+  .q-grid .tank-shell{max-width:120px;margin:0}
+  .q-grid .side{display:flex;align-items:center;gap:22px;order:-1;
+    border:1px solid var(--linea);background:var(--papel-2);padding:14px 18px}
+  .q-grid .side .tank{aspect-ratio:.9}
+  .tank-read{text-align:left;margin-top:0}
+  .tank-read b{font-size:26px}
+  .myths{grid-template-columns:1fr}
+  .route{padding:24px}
+  .route .ladder{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:1fr 70px 66px;gap:10px}
+  .fact{flex:1 1 100%;border-right:none;border-bottom:1px solid var(--linea)}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media print{
+  .topbar,.actions,.opts,.q-nav{display:none}
+  body{background:#fff}
+  .stage{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span><span id="brandName">Diagnóstico de contratación pública</span></div>
+    <div class="meta">AGUA POTABLE Y SANEAMIENTO · COLOMBIA</div>
+  </div>
+</header>
+
+<!-- ===================== PORTADA ===================== -->
+<section class="stage on" id="stageIntro">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">10 preguntas · 3 minutos</div>
+        <h1>Averigua si tu empresa <em>ya puede</em> presentarse a un proceso público.</h1>
+        <p class="lede">La mayoría de empresas de acueducto, alcantarillado y saneamiento nunca licita porque nadie les dijo qué les falta exactamente. Esto te lo dice: qué tienes listo, qué te bloquea hoy y en qué orden resolverlo.</p>
+        <button class="btn" id="startBtn">Empezar el diagnóstico →</button>
+      </div>
+      <div class="tank-shell">
+        <div class="tank">
+          <div class="fill" id="heroFill" style="height:0%"></div>
+          <div class="threshold"><span>nivel mínimo</span></div>
+        </div>
+        <div class="ticks"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><b>Sin RUP</b><span>La mínima cuantía no exige registro de proponentes</span></div>
+      <div class="fact"><b>Sin pólizas</b><span>En mínima cuantía la garantía suele ser opcional</span></div>
+      <div class="fact"><b>En consorcio</b><span>Puedes usar la experiencia y los indicadores de un aliado</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PREGUNTAS ===================== -->
+<section class="stage" id="stageQuiz">
+  <div class="wrap">
+    <div class="q-grid">
+      <div>
+        <div class="q-head">
+          <span class="q-num" id="qNum">01 / 10</span>
+          <span class="q-cat" id="qCat"></span>
+        </div>
+        <h2 class="q-text" id="qText"></h2>
+        <p class="q-help" id="qHelp"></p>
+        <div class="opts" id="qOpts"></div>
+        <div class="q-nav">
+          <button class="btn ghost small" id="backBtn">← Anterior</button>
+          <span class="step" id="stepInfo"></span>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="tank-shell">
+          <div class="tank">
+            <div class="fill" id="quizFill" style="height:0%"></div>
+            <div class="threshold"></div>
+          </div>
+        </div>
+        <div class="tank-read" aria-live="polite">
+          <b id="quizPct">0%</b>
+          <span>nivel de preparación</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RESULTADO ===================== -->
+<section class="stage" id="stageResult">
+  <div class="wrap">
+
+    <div class="verdict">
+      <div class="eyebrow" id="vEyebrow">Resultado</div>
+      <h2 id="vTitle"></h2>
+      <p id="vText"></p>
+    </div>
+
+    <div class="sec-title"><span class="eyebrow">A</span><h3>Dónde estás por área</h3></div>
+    <div class="bars" id="bars"></div>
+
+    <div class="route">
+      <div class="eyebrow">Por dónde empezar</div>
+      <h3 id="routeTitle"></h3>
+      <p id="routeText"></p>
+      <div class="ladder" id="ladder"></div>
+    </div>
+
+    <div class="sec-title"><span class="eyebrow">B</span><h3>Tu plan de acción, en orden</h3></div>
+    <ol class="plan" id="plan"></ol>
+
+    <div class="sec-title"><span class="eyebrow">C</span><h3>Lo que se dice y lo que es</h3></div>
+    <div class="myths">
+      <div class="myth"><div class="m">"Sin contactos adentro no hay nada que hacer."</div><div class="r">Los documentos tipo fijan requisitos y puntajes que la entidad no puede alterar. Si el pliego se desvía, eso se observa y se corrige.</div></div>
+      <div class="myth"><div class="m">"Eso es solo para empresas grandes."</div><div class="r">Los municipios de categoría 5 y 6 contratan permanentemente por mínima y menor cuantía, montos que una empresa pequeña ejecuta sin problema.</div></div>
+      <div class="myth"><div class="m">"Necesito años de trámites antes de poder presentarme."</div><div class="r">Usuario en SECOP II y RUT bastan para una mínima cuantía. El RUP toma semanas, no años.</div></div>
+      <div class="myth"><div class="m">"Si no gano, perdí la plata."</div><div class="r">Presentarse no cuesta inscripción. El costo real es el tiempo de armar la oferta, y ese trabajo se reutiliza en el siguiente proceso.</div></div>
+      <div class="myth"><div class="m">"No tengo la experiencia que piden."</div><div class="r">En consorcio o unión temporal la experiencia se suma. Es la vía normal de entrada, no un atajo.</div></div>
+      <div class="myth"><div class="m">"El pliego siempre viene con nombre propio."</div><div class="r">Ocurre, y por eso existe la etapa de observaciones al proyecto de pliego. Un requisito sin respaldo en el análisis del sector se puede tumbar.</div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="copyBtn">Copiar mi plan</button>
+      <button class="btn ghost" onclick="window.print()">Imprimir / PDF</button>
+      <button class="btn ghost" id="againBtn">Repetir diagnóstico</button>
+    </div>
+
+    <p class="disclaimer">Este diagnóstico es una guía de preparación, no un concepto jurídico. Los umbrales de mínima y menor cuantía dependen del presupuesto anual de cada entidad, y las empresas de servicios públicos contratan bajo derecho privado (Ley 142 de 1994) con manual propio. Verifica siempre el pliego y la versión vigente de los documentos tipo antes de presentar una oferta.</p>
+  </div>
+</section>
+
+<script>
+const QUESTIONS = [
+  {
+    cat:"Habilitación jurídica",
+    text:"¿La empresa está inscrita en el RUP y renovada este año?",
+    help:"El Registro Único de Proponentes se renueva a más tardar el quinto día hábil de abril. Si no se renovó, cesan sus efectos y no sirve para acreditar nada.",
+    key:"rup",
+    opts:[
+      {t:"Sí, inscrita y renovada", p:10},
+      {t:"Inscrita, pero sin renovar este año", p:4, flag:"rup_vencido"},
+      {t:"No estamos inscritos", p:2, flag:"rup_no"},
+      {t:"No sé qué es el RUP", p:0, flag:"rup_no"}
+    ]
+  },
+  {
+    cat:"Habilitación jurídica",
+    text:"¿Tienen inscritos los códigos UNSPSC de agua y saneamiento?",
+    help:"Es el clasificador de bienes y servicios. Si tu experiencia no está inscrita bajo el código que pide el pliego, la entidad no la puede contar aunque el contrato exista.",
+    key:"unspsc",
+    opts:[
+      {t:"Sí, los tenemos identificados", p:10},
+      {t:"Tenemos RUP pero no sé cuáles quedaron", p:5, flag:"unspsc"},
+      {t:"No, todavía no", p:1, flag:"unspsc"}
+    ]
+  },
+  {
+    cat:"Experiencia",
+    text:"¿Qué contratos terminados puede certificar la empresa?",
+    help:"Sirven contratos de acueducto, alcantarillado, PTAP, PTAR, aseo u obras complementarias. Se acreditan con el contrato más el acta de liquidación o una certificación del contratante.",
+    key:"exp",
+    opts:[
+      {t:"Varios con entidades públicas", p:10},
+      {t:"Con empresas privadas o E.S.P.", p:8},
+      {t:"Uno o dos, pequeños", p:5},
+      {t:"Trabajos hechos pero sin contrato formal", p:2, flag:"exp_informal"},
+      {t:"Ninguno todavía", p:0, flag:"exp_cero"}
+    ]
+  },
+  {
+    cat:"Capacidad financiera",
+    text:"¿Los estados financieros están al día y firmados?",
+    help:"De ahí salen los indicadores que evalúa la entidad: liquidez, endeudamiento, cobertura de intereses, patrimonio, ROE y ROA. Se reportan al RUP con el mejor de los últimos tres años.",
+    key:"fin",
+    opts:[
+      {t:"Sí, con revisor fiscal", p:10},
+      {t:"Sí, firmados por contador", p:8},
+      {t:"Existen pero están atrasados", p:3, flag:"fin_atraso"},
+      {t:"No los tenemos preparados", p:0, flag:"fin_no"}
+    ]
+  },
+  {
+    cat:"Operación en SECOP II",
+    text:"¿Tienen usuario de proveedor creado en SECOP II?",
+    help:"Es gratuito y obligatorio para presentar ofertas. Sin el usuario configurado y con permisos, la plataforma no deja enviar nada el día del cierre.",
+    key:"secop",
+    opts:[
+      {t:"Sí, y ya lo hemos usado", p:10},
+      {t:"Está creado pero nunca lo usamos", p:6, flag:"secop_frio"},
+      {t:"No lo hemos creado", p:1, flag:"secop_no"}
+    ]
+  },
+  {
+    cat:"Capacidad financiera",
+    text:"¿Tienen relación con una aseguradora o corredor de seguros?",
+    help:"La garantía de seriedad acompaña la oferta y la garantía única acompaña el contrato. Conviene saber de antemano hasta qué monto te aprueban cupo.",
+    key:"poliza",
+    opts:[
+      {t:"Sí, ya nos han expedido pólizas", p:10},
+      {t:"No, pero tenemos con quién gestionarlo", p:6},
+      {t:"No sabemos si nos aprobarían", p:2, flag:"poliza"}
+    ]
+  },
+  {
+    cat:"Capacidad técnica",
+    text:"¿Cuentan con ingeniero con matrícula profesional vigente?",
+    help:"Civil, sanitario o ambiental según el objeto. La matrícula del COPNIA debe estar vigente y sin sanciones al momento de la verificación.",
+    key:"tec",
+    opts:[
+      {t:"Sí, en nómina", p:10},
+      {t:"Disponible por contrato cuando se necesite", p:8},
+      {t:"No tenemos a nadie identificado", p:2, flag:"tec"}
+    ]
+  },
+  {
+    cat:"Habilitación jurídica",
+    text:"¿La empresa está al día en seguridad social y parafiscales?",
+    help:"Se certifica por los últimos seis meses, firmada por el revisor fiscal si la empresa está obligada a tenerlo, o por el representante legal si no.",
+    key:"pila",
+    opts:[
+      {t:"Sí, al día", p:10},
+      {t:"Con alguna mora pendiente", p:2, flag:"pila_mora"},
+      {t:"No tenemos empleados vinculados", p:6, flag:"pila_sin"}
+    ]
+  },
+  {
+    cat:"Habilitación jurídica",
+    text:"¿Han verificado los antecedentes de la empresa y del representante legal?",
+    help:"Contraloría, Procuraduría, antecedentes judiciales, medidas correctivas y REDAM. Un reporte activo del representante legal inhabilita a toda la empresa.",
+    key:"antec",
+    opts:[
+      {t:"Sí, verificados y limpios", p:10},
+      {t:"Nunca los hemos revisado", p:4, flag:"antec_rev"},
+      {t:"Sabemos que hay un reporte activo", p:0, flag:"antec_mal"}
+    ]
+  },
+  {
+    cat:"Estrategia",
+    text:"¿Estarían dispuestos a presentarse en consorcio o unión temporal?",
+    help:"Es la forma más rápida de entrar: la experiencia y los indicadores financieros se suman entre los integrantes, y la responsabilidad frente a la entidad es solidaria.",
+    key:"union",
+    opts:[
+      {t:"Sí, y ya tenemos aliados posibles", p:10},
+      {t:"Estaríamos abiertos a buscarlos", p:8},
+      {t:"Preferimos presentarnos solos", p:5, flag:"solo"}
+    ]
+  }
+];
+
+const CATS = ["Habilitación jurídica","Experiencia","Capacidad financiera","Capacidad técnica","Operación en SECOP II","Estrategia"];
+
+const REMEDIOS = {
+  antec_mal:{sev:"hard",h:"Resuelve primero el reporte activo",p:"Una inhabilidad del representante legal o de la empresa hace que la oferta se rechace sin evaluar nada más. Verifica el origen, gestiona el paz y salvo o, si no se puede levantar, evalúa cambiar la representación legal.",c:["Bloqueante","Contraloría · Procuraduría · REDAM"]},
+  pila_mora:{sev:"hard",h:"Ponte al día en seguridad social y parafiscales",p:"La certificación de los últimos seis meses es requisito habilitante y no admite mora. Acuerda un plan de pago y solicita el paz y salvo antes de mirar cualquier proceso.",c:["Bloqueante","1 a 4 semanas"]},
+  rup_no:{sev:"hard",h:"Inscríbete en el RUP",p:"Se tramita en la cámara de comercio de tu domicilio, con estados financieros, certificaciones de experiencia y los códigos UNSPSC. Queda en firme diez días hábiles después de la publicación. No lo necesitas para mínima cuantía, pero sí para todo lo demás.",c:["Cámara de comercio","3 a 6 semanas"]},
+  rup_vencido:{sev:"hard",h:"Renueva el RUP",p:"Sin renovación, el registro no produce efectos y no puedes acreditar experiencia ni indicadores. Es un trámite mucho más corto que la inscripción inicial.",c:["Cámara de comercio","1 a 2 semanas"]},
+  fin_no:{sev:"hard",h:"Prepara los estados financieros",p:"Sin balance y estado de resultados firmados no hay indicadores que reportar, y sin indicadores no hay RUP útil. Empieza por el último año cerrado.",c:["Contador","2 a 6 semanas"]},
+  fin_atraso:{sev:"soft",h:"Actualiza los estados financieros atrasados",p:"El RUP toma el mejor de los últimos tres años fiscales. Si hay un buen año sin reportar, puede cambiar por completo tu capacidad de participar.",c:["Contador","2 a 4 semanas"]},
+  secop_no:{sev:"hard",h:"Crea el usuario de proveedor en SECOP II",p:"Registro gratuito en la plataforma de Colombia Compra Eficiente. Después configura los permisos de quien va a enviar ofertas: ese detalle es el que deja empresas por fuera el día del cierre.",c:["Gratis","1 a 3 días"]},
+  secop_frio:{sev:"soft",h:"Haz un simulacro completo en SECOP II",p:"Entra a un proceso abierto, arma la oferta y llévala hasta el paso previo al envío. Descubrirás los límites de tamaño de archivo y los permisos faltantes sin la presión del reloj.",c:["1 tarde"]},
+  unspsc:{sev:"soft",h:"Revisa y amplía tus códigos UNSPSC",p:"Compara los códigos inscritos en tu RUP con los que exigen los procesos de acueducto, alcantarillado y tratamiento que te interesan. Ampliarlos es una actualización del registro.",c:["Cámara de comercio","1 a 2 semanas"]},
+  exp_cero:{sev:"soft",h:"Entra por mínima cuantía o en consorcio",p:"Sin experiencia acreditable, la ruta es doble: procesos de mínima cuantía donde el requisito es liviano, y unión temporal con una empresa que ya tenga trayectoria. El primer contrato ejecutado se convierte en la experiencia del siguiente.",c:["Estrategia de entrada"]},
+  exp_informal:{sev:"soft",h:"Formaliza la experiencia que ya tienes",p:"Pide certificaciones a tus contratantes anteriores con objeto, valor, plazo, fechas y actividades ejecutadas. Un trabajo sin papel no existe para una entidad pública.",c:["2 a 4 semanas"]},
+  poliza:{sev:"soft",h:"Consulta tu cupo con una aseguradora",p:"Habla con un corredor antes de escoger procesos: saber hasta qué monto te aprueban garantía define a qué presupuestos puedes aspirar de forma realista.",c:["1 semana"]},
+  tec:{sev:"soft",h:"Vincula un ingeniero con matrícula vigente",p:"Civil, sanitario o ambiental según el objeto. No hace falta nómina desde el primer día: una carta de compromiso con hoja de vida y matrícula del COPNIA suele bastar para presentarse.",c:["1 a 2 semanas"]},
+  antec_rev:{sev:"soft",h:"Verifica antecedentes antes de cada oferta",p:"Contraloría, Procuraduría, Policía, medidas correctivas y REDAM, tanto de la empresa como del representante legal. Son consultas gratuitas en línea y evitan un rechazo evitable.",c:["Gratis","30 minutos"]},
+  pila_sin:{sev:"soft",h:"Define cómo vas a certificar los aportes",p:"Si no hay empleados vinculados, la certificación la firma el representante legal declarando la situación. Deja claro el soporte antes del cierre, no después.",c:["30 minutos"]},
+  solo:{sev:"soft",h:"Reconsidera el consorcio para el primer proceso",p:"Presentarse solo desde el inicio significa cargar toda la experiencia, todos los indicadores y todo el riesgo. La mayoría de empresas nuevas entra acompañada y se independiza en el tercer o cuarto contrato.",c:["Estrategia de entrada"]}
+};
+
+let idx = 0;
+const answers = new Array(QUESTIONS.length).fill(null);
+
+const $ = id => document.getElementById(id);
+const stages = {intro:$("stageIntro"), quiz:$("stageQuiz"), result:$("stageResult")};
+
+function show(name){
+  Object.values(stages).forEach(s=>s.classList.remove("on"));
+  stages[name].classList.add("on");
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function liveScore(){
+  let got=0, max=0;
+  answers.forEach((a,i)=>{ if(a!==null){ got+=a.p; max+=10; } });
+  const answeredPct = max? got/max : 0;
+  return Math.round(answeredPct * (max/(QUESTIONS.length*10)) * 100);
+}
+
+function render(){
+  const q = QUESTIONS[idx];
+  $("qNum").textContent = String(idx+1).padStart(2,"0") + " / " + String(QUESTIONS.length).padStart(2,"0");
+  $("qCat").textContent = q.cat;
+  $("qText").textContent = q.text;
+  $("qHelp").textContent = q.help;
+  $("stepInfo").textContent = "Pregunta " + (idx+1) + " de " + QUESTIONS.length;
+  $("backBtn").style.visibility = idx===0 ? "hidden" : "visible";
+
+  const box = $("qOpts");
+  box.innerHTML = "";
+  q.opts.forEach((o,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = '<span class="key">'+(i+1)+'</span><span>'+o.t+'</span>';
+    b.onclick = ()=>pick(o);
+    box.appendChild(b);
+  });
+
+  const pct = liveScore();
+  $("quizFill").style.height = pct + "%";
+  $("quizPct").textContent = pct + "%";
+}
+
+function pick(o){
+  answers[idx] = o;
+  if(idx < QUESTIONS.length-1){ idx++; render(); }
+  else { finish(); }
+}
+
+document.addEventListener("keydown", e=>{
+  if(!stages.quiz.classList.contains("on")) return;
+  const n = parseInt(e.key,10);
+  const q = QUESTIONS[idx];
+  if(n>=1 && n<=q.opts.length) pick(q.opts[n-1]);
+});
+
+$("startBtn").onclick = ()=>{ show("quiz"); render(); };
+$("backBtn").onclick = ()=>{ if(idx>0){ idx--; render(); } };
+$("againBtn").onclick = ()=>{ idx=0; answers.fill(null); $("heroFill").style.height="0%"; show("intro"); };
+
+function finish(){
+  const total = answers.reduce((s,a)=>s+a.p,0);
+  const pct = Math.round(total / (QUESTIONS.length*10) * 100);
+
+  // --- veredicto ---
+  let title, text, eyebrow;
+  if(pct >= 78){
+    eyebrow="Listo"; title="Puedes presentarte a un proceso esta misma semana.";
+    text="Tienes lo esencial en orden. Lo que falta es método: escoger procesos que encajen con tu experiencia real, leer el pliego completo y armar la primera carpeta. La segunda oferta te tomará la mitad del tiempo que la primera.";
+  } else if(pct >= 58){
+    eyebrow="Casi"; title="Te separan dos o tres trámites de tu primera oferta.";
+    text="La base está. Resuelve los puntos marcados abajo en el orden indicado y en unas semanas puedes presentarte sin depender de nadie. Mientras tanto, nada te impide entrar ya a un proceso de mínima cuantía.";
+  } else if(pct >= 35){
+    eyebrow="En camino"; title="Empieza por mínima cuantía mientras completas el resto.";
+    text="Todavía no estás para una licitación pública, pero eso no significa esperar. Hay procesos de mínima cuantía que puedes atender hoy, y cada uno que ejecutes se convierte en la experiencia que te habilita para el siguiente escalón.";
+  } else {
+    eyebrow="Punto de partida"; title="El camino existe y es más corto de lo que parece.";
+    text="Ninguno de los pendientes es difícil por separado; el problema es no saber el orden. Abajo está la secuencia. Empieza por el primero, ignora los demás por ahora, y en dos meses tendrás un panorama distinto.";
+  }
+  $("vEyebrow").textContent = eyebrow;
+  $("vTitle").textContent = title;
+  $("vText").textContent = text;
+
+  // --- barras por categoría ---
+  const agg = {};
+  CATS.forEach(c=>agg[c]={got:0,max:0});
+  QUESTIONS.forEach((q,i)=>{ agg[q.cat].got += answers[i].p; agg[q.cat].max += 10; });
+  const bars = $("bars"); bars.innerHTML="";
+  CATS.forEach(c=>{
+    const v = Math.round(agg[c].got/agg[c].max*100);
+    const cls = v>=75 ? "" : (v>=45 ? "warn" : "bad");
+    const tag = v>=75 ? "Listo" : (v>=45 ? "Parcial" : "Pendiente");
+    const row = document.createElement("div");
+    row.className="bar-row";
+    row.innerHTML = '<span class="name">'+c+'</span>'+
+      '<span class="track"><span class="val '+cls+'" style="width:'+v+'%"></span></span>'+
+      '<span class="tag">'+tag+'</span>';
+    bars.appendChild(row);
+  });
+
+  // --- ruta recomendada ---
+  const tieneRup = answers[0].p >= 10;
+  const tieneExp = answers[2].p >= 8;
+  let step;
+  if(tieneRup && tieneExp && pct>=70) step = 2;
+  else if(tieneRup && pct>=55) step = 1;
+  else step = 0;
+
+  const rungs = [
+    {b:"Mínima cuantía", s:"No exige RUP ni suele exigir garantía. Un solo requisito técnico y la oferta más económica. Es el escalón de entrada."},
+    {b:"Selección abreviada de menor cuantía", s:"Ya pide RUP, experiencia acreditada e indicadores financieros. Hay etapa de manifestación de interés y sorteo si hay muchos interesados."},
+    {b:"Licitación pública", s:"Documentos tipo obligatorios, audiencia de riesgos, evaluación con puntaje y adjudicación en audiencia pública. Es el objetivo, no el punto de partida."}
+  ];
+  $("routeTitle").textContent = ["Tu escalón hoy: mínima cuantía","Tu escalón hoy: menor cuantía","Tu escalón hoy: licitación pública"][step];
+  $("routeText").textContent = [
+    "Los montos son pequeños y la competencia también. Los umbrales dependen del presupuesto anual de cada entidad, así que revisa el tope de mínima cuantía de la alcaldía o empresa que te interesa.",
+    "Ya puedes competir donde la mayoría de empresas nuevas no llega. Vigila especialmente la correspondencia entre tus códigos UNSPSC y los del pliego.",
+    "Estás en condiciones de ir por los procesos grandes. Ahí el diferencial deja de ser la habilitación y pasa a ser la lectura del pliego y la estrategia de precio."
+  ][step];
+  const lad = $("ladder"); lad.innerHTML="";
+  rungs.forEach((r,i)=>{
+    const d = document.createElement("div");
+    d.className = "rung" + (i===step?" now":"");
+    d.innerHTML = "<b>"+(i===step?"▸ ":"")+r.b+"</b><span>"+r.s+"</span>";
+    lad.appendChild(d);
+  });
+
+  // --- plan de acción ---
+  const flags = answers.map(a=>a.flag).filter(Boolean);
+  const hard = flags.filter(f=>REMEDIOS[f] && REMEDIOS[f].sev==="hard");
+  const soft = flags.filter(f=>REMEDIOS[f] && REMEDIOS[f].sev==="soft");
+  const ordered = [...hard, ...soft];
+
+  const plan = $("plan"); plan.innerHTML="";
+  if(ordered.length===0){
+    const li=document.createElement("li");
+    li.innerHTML='<span class="idx">01</span><div><h4>No tienes pendientes de habilitación</h4>'+
+      '<p>Tu siguiente paso no es un trámite, es un proceso concreto. Filtra en SECOP II por objeto de acueducto o alcantarillado en tu departamento, escoge uno con presupuesto acorde a tu cupo de póliza y arma la oferta completa aunque sea de práctica.</p>'+
+      '<div class="chips"><span class="chip">Esta semana</span></div></div>';
+    plan.appendChild(li);
+  } else {
+    ordered.forEach((f,i)=>{
+      const r = REMEDIOS[f];
+      const li = document.createElement("li");
+      const chips = r.c.map((c,j)=>'<span class="chip'+(j===0 && r.sev==="hard"?" hard":(j===0?" soft":""))+'">'+c+'</span>').join("");
+      li.innerHTML = '<span class="idx">'+String(i+1).padStart(2,"0")+'</span><div>'+
+        '<h4>'+r.h+'</h4><p>'+r.p+'</p><div class="chips">'+chips+'</div></div>';
+      plan.appendChild(li);
+    });
+  }
+
+  $("heroFill").style.height = pct+"%";
+  show("result");
+  requestAnimationFrame(()=>{ document.querySelectorAll(".bar-row .val").forEach(v=>v.style.width=v.style.width); });
+
+  window.__plan = {pct, title, ordered, step};
+}
+
+$("copyBtn").onclick = ()=>{
+  const d = window.__plan;
+  let txt = "DIAGNÓSTICO DE CONTRATACIÓN PÚBLICA — AGUA Y SANEAMIENTO\n";
+  txt += "Nivel de preparación: " + d.pct + "%\n" + d.title + "\n\n";
+  txt += "ESCALÓN RECOMENDADO: " + ["Mínima cuantía","Selección abreviada de menor cuantía","Licitación pública"][d.step] + "\n\nPLAN DE ACCIÓN:\n";
+  if(d.ordered.length===0) txt += "1. Sin pendientes de habilitación. Escoge un proceso abierto y arma la oferta completa.\n";
+  else d.ordered.forEach((f,i)=>{ txt += (i+1)+". "+REMEDIOS[f].h+" — "+REMEDIOS[f].p+"\n"; });
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=$("copyBtn"); const o=b.textContent; b.textContent="Copiado"; setTimeout(()=>b.textContent=o,1800);
+  });
+};
+</script>
+</body>
+</html>
