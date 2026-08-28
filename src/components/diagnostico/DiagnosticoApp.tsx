@@ -33,9 +33,11 @@ interface Props {
   resultadoInicial: ResultadoDiagnostico | null;
   /** Sin sesión: al final se ofrece la cuenta para conservar el plan. */
   anonimo: boolean;
+  /** Con cuenta y sin perfil: al final se piden sector y zona. */
+  tienePerfil: boolean;
 }
 
-export function DiagnosticoApp({ resultadoInicial, anonimo }: Props) {
+export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props) {
   const [etapa, setEtapa] = useState<Etapa>(resultadoInicial ? "resultado" : "portada");
   const [indice, setIndice] = useState(0);
   const [respuestas, setRespuestas] = useState<RespuestasParciales>({});
@@ -219,6 +221,7 @@ export function DiagnosticoApp({ resultadoInicial, anonimo }: Props) {
           resultado={resultado}
           guardado={guardado}
           anonimo={anonimo}
+          tienePerfil={tienePerfil}
           onRepetir={repetir}
         />
       )}

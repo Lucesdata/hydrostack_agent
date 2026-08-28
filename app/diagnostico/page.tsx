@@ -19,6 +19,7 @@ import {
   DIAGNOSTICO_COOKIE,
   esSessionTokenValido,
 } from "@/src/lib/diagnostico/session-token";
+import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
 import { DiagnosticoApp } from "@/src/components/diagnostico/DiagnosticoApp";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";
 
@@ -55,9 +56,11 @@ export default async function DiagnosticoPage() {
   // igual y el POST decidirá si se guarda. Mismo criterio que el
   // `getEnJuegoMes().catch(...)` de /mis-coincidencias.
   let vigente: DiagnosticoGuardado | null = null;
+  let tienePerfil = false;
   try {
     if (user) {
       vigente = await getDiagnosticoVigente(user.id);
+      tienePerfil = (await getPerfilDb(user.id)) !== null;
     } else {
       const token = (await cookies()).get(DIAGNOSTICO_COOKIE)?.value;
       if (esSessionTokenValido(token)) {
@@ -72,6 +75,7 @@ export default async function DiagnosticoPage() {
     <DiagnosticoApp
       resultadoInicial={vigente ? aResultado(vigente) : null}
       anonimo={!user}
+      tienePerfil={tienePerfil}
     />
   );
 }

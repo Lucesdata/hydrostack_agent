@@ -27,7 +27,7 @@ import {
 } from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
 import { estadoArea } from "@/src/lib/diagnostico/calcular";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";
-import { MedidorTanque } from "./MedidorTanque";
+import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
 
 const TAG_AREA = { listo: "Listo", parcial: "Parcial", pendiente: "Pendiente" } as const;
 
@@ -37,10 +37,17 @@ interface Props {
   guardado: boolean;
   /** Sin sesión: se ofrece la cuenta para conservarlo. */
   anonimo: boolean;
+  /**
+   * Con cuenta pero sin perfil: se piden sector y zona, que el cuestionario no
+   * pregunta y son los dos campos que encienden las coincidencias. Solo se
+   * ofrece cuando NO hay perfil, así el prellenado nunca degrada un
+   * OferenteProfile completo a PerfilMinimo (02-cuestionario §6d).
+   */
+  tienePerfil: boolean;
   onRepetir: () => void;
 }
 
-export function Resultado({ resultado, guardado, anonimo, onRepetir }: Props) {
+export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir }: Props) {
   const bloqueado = resultado.bloqueoAbsoluto.length > 0;
   const veredicto = bloqueado ? VEREDICTO_BLOQUEADO : VEREDICTOS[resultado.banda];
   const pasos = resultado.bloqueantes.map((id) => REMEDIOS[id]);
@@ -182,10 +189,22 @@ export function Resultado({ resultado, guardado, anonimo, onRepetir }: Props) {
             </Link>
           </div>
         </section>
+      ) : !tienePerfil ? (
+        <section className="clr-diag-guardar">
+          <span className="clr-diag-esq clr-diag-esq--tl" />
+          <span className="clr-diag-esq clr-diag-esq--tr" />
+          <span className="clr-diag-esq clr-diag-esq--bl" />
+          <span className="clr-diag-esq clr-diag-esq--br" />
+          <h3>Activa tus coincidencias</h3>
+          <p>
+            Ya sabes qué te falta para licitar. Dinos en qué sector y en qué zona trabajas —lo
+            único que este cuestionario no pregunta— y verás los procesos abiertos de agua y
+            saneamiento que te calzan.
+          </p>
+          <SectorZonaSetup />
+        </section>
       ) : (
-        guardado && (
-          <p className="clr-diag-guardado">Guardado en tu cuenta</p>
-        )
+        guardado && <p className="clr-diag-guardado">Guardado en tu cuenta</p>
       )}
 
       <div className="clr-diag-sec">

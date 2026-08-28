@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
+import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -30,6 +31,7 @@ export async function signInWithPasswordAction(formData: FormData): Promise<void
   }
 
   await syncUsuario(data.user);
+  await reclamarDiagnosticoAnonimo(data.user.id);
   redirect(next);
 }
 
@@ -57,6 +59,9 @@ export async function signUpAction(formData: FormData): Promise<void> {
 
   if (data.user) {
     await syncUsuario(data.user);
+    // Solo tiene efecto si el alta abrió sesión de una vez; si hay que
+    // verificar el correo, el reclamo ocurre en /auth/callback.
+    await reclamarDiagnosticoAnonimo(data.user.id);
   }
 
   if (data.session) {

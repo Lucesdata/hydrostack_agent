@@ -676,6 +676,25 @@ export default function LandingPage() {
                 <span>✓ Sin cuenta</span>
                 <span>✓ Resultado en 2 minutos</span>
               </div>
+              {/* Entrada al diagnóstico: para quien todavía no sabe si su
+                  empresa está en condiciones de presentarse. */}
+              <div
+                className="hero-fade-up"
+                style={{
+                  font: "12px/1.6 var(--font-inter)",
+                  color: "#525B5A",
+                  animationDelay: ".97s",
+                  marginBottom: 32,
+                }}
+              >
+                ¿Aún no sabes si tu empresa puede presentarse?{" "}
+                <Link
+                  href="/diagnostico"
+                  style={{ color: "#0369A1", borderBottom: "1px solid rgba(3,105,161,.35)" }}
+                >
+                  Descubre qué te falta
+                </Link>
+              </div>
               <svg
                 viewBox="0 0 520 16"
                 width="520"

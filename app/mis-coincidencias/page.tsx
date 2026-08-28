@@ -22,6 +22,8 @@ import { enviarDigestAhora, type EnvioEstado } from "@/src/lib/alertas/enviar-ah
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import { getEnJuegoMes } from "@/src/lib/secop/landingStats";
 import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
+import { PanelBloqueantes } from "@/src/components/diagnostico/PanelBloqueantes";
+import { getDiagnosticoVigente } from "@/src/lib/diagnostico/diagnostico-store";
 import { PliegoUploadBlock } from "@/src/components/secop/PliegoUploadBlock";
 import { getPliegoStatusForProcesos } from "@/src/lib/secop/pliego-status";
 import {
@@ -110,6 +112,9 @@ const STYLE = `
     border-radius: var(--radius-md);
   }
   .clr-mc-cta:hover{ opacity: 0.9; }
+  .clr-mc-teaser-alt{ font-size: 12.5px; color: var(--ink-600); margin: 16px 0 0; }
+  .clr-mc-teaser-alt a{ color: var(--accent); }
+  .clr-mc-teaser-alt a:hover{ text-decoration: underline; }
   .clr-mc-pliego{ margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
   .clr-mc-pliego-summary{
     cursor: pointer; font-size: 12px; color: var(--ink-600); display: flex;
@@ -182,6 +187,10 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           <Link href="/login?next=/mis-coincidencias" className="clr-mc-cta">
             Regístrate con Google →
           </Link>
+          <p className="clr-mc-teaser-alt">
+            ¿Aún no sabes si tu empresa puede presentarse?{" "}
+            <Link href="/diagnostico">Descubre qué te falta</Link> — 10 preguntas, sin cuenta.
+          </p>
         </div>
       </Shell>
     );
@@ -189,6 +198,9 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
 
   await recordUserSignal(usuarioId, "oferente");
 
+  // Una base caída no puede tumbar la página: sin diagnóstico el panel muestra
+  // la invitación, que es exactamente lo mismo que ve quien no lo ha hecho.
+  const diagnostico = await getDiagnosticoVigente(usuarioId).catch(() => null);
   const perfilGuardado = await getPerfilDb(usuarioId);
 
   if (!perfilGuardado) {
@@ -197,6 +209,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <h1 className="clr-mc-title">Mis coincidencias</h1>
         <p className="clr-mc-sub">Cuéntanos en qué sector y zona trabajas para ver tus coincidencias.</p>
         {perfilError && <div className="clr-mc-banner">{perfilError}</div>}
+        <PanelBloqueantes diagnostico={diagnostico} />
         <SectorZonaSetup />
       </Shell>
     );
@@ -214,6 +227,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver también tu
           semáforo de elegibilidad y recibir alertas por correo.
         </p>
+        <PanelBloqueantes diagnostico={diagnostico} />
         {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
         {matches.length === 0 ? (
           <div className="clr-mc-empty">
@@ -290,6 +304,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
           </button>
         </form>
       </div>
+      <PanelBloqueantes diagnostico={diagnostico} />
       {banner && <div className="clr-mc-banner">{banner}</div>}
       {pliegoResultBanner && <div className="clr-mc-banner">{pliegoResultBanner}</div>}
       {matches.length === 0 ? (
