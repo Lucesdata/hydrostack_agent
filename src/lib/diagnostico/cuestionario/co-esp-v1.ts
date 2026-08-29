@@ -22,6 +22,12 @@
  * lleva `advertencia`: si el cuestionario no pregunta algo decisivo, lo dice en
  * vez de dejar que el puntaje prometa lo que no puede sostener.
  *
+ * Los textos de los remedios de registro salen de fuente primaria: el portal
+ * del Acueducto de Bogotá y el instructivo de registro en Ariba del Grupo EPM.
+ * Ver docs/diagnostico/05-hallazgos-manuales-esp.md, que también deja anotados
+ * dos huecos de este cuestionario — códigos UNSPSC y listas restrictivas — que
+ * NO dependen de la revisión jurídica pendiente.
+ *
  * Sin escalera y sin RUP: la Ley 142 no tiene peldaños (03-variante-ley-142 §2)
  * y estas empresas no exigen registro de proponentes. El resultado lleva
  * `escalon: null` y `estadoRup: null`.
@@ -139,7 +145,7 @@ export const REMEDIOS_ESP: Readonly<Record<RemedioId, Remedio>> = {
     absoluto: false,
     titulo: "Inscríbete en el registro de proveedores",
     detalle:
-      "Busca «registro de proveedores» en el portal de la empresa que te interesa. Suele pedir cámara de comercio, RUT, estados financieros y certificaciones de experiencia. Sin estar dentro, no te llega la invitación.",
+      "Es autogestionado y en línea. El Acueducto de Bogotá tiene el suyo en su portal de proveedores y lo organiza por códigos UNSPSC, así que revisa bajo qué código quedas clasificado. El Grupo EPM se registra en la plataforma Ariba, y con una sola inscripción quedas visible para EPM, EMVARIAS, CHEC, CENS, ESSA y EDEQ. Sin estar dentro, no te llega la invitación.",
     chips: ["Gratis", "1 a 3 semanas"],
   },
   fin_no: {
@@ -166,7 +172,7 @@ export const REMEDIOS_ESP: Readonly<Record<RemedioId, Remedio>> = {
     absoluto: false,
     titulo: "Confirma que tu registro sigue activo",
     detalle:
-      "Los registros caducan y piden actualización anual de documentos. Un registro vencido tiene el mismo efecto que no tenerlo.",
+      "Mantenerlo al día es responsabilidad tuya, no de la empresa. En el Grupo EPM el registro se suspende si apareces en una lista restrictiva —OFAC, ONU, Banco Mundial, BID— y se cancela si detectan que algún documento del registro estaba alterado. Un registro suspendido tiene el mismo efecto que no tenerlo.",
     chips: ["30 minutos"],
   },
   exp_informal: {
