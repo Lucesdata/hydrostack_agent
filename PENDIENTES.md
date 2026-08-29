@@ -122,8 +122,18 @@ restrictivas** OFAC/ONU/BM/BID, por las que EPM suspende el registro. Ninguno
 es interpretación de la ley: son requisitos publicados. Ambos están propuestos
 en 05-hallazgos §7, pendientes de visto bueno.
 
-**Pendiente de mirar a mano:** ACUAVALLE (632 procesos) devolvió 403 a la
-consulta automatizada.
+**ACUAVALLE revisada (2026-08-29):** el 403 era del WAF; con navegador real
+todo es público. Y **corrigió un error de contenido ya publicado**: `co-esp-v1`
+afirmaba que estas empresas no exigen RUP, y ACUAVALLE **sí lo exige** entre sus
+requisitos de capacidad. Generalicé desde EAAB y EPM a todas. Corregido.
+
+También movió §7.1: su instructivo exige no estar incurso en inhabilidades
+*"de conformidad con… Ley 80 de 1993, Ley 142 de 1994, Ley 689 de 2001, Ley 1150
+de 2007, Ley 1474 de 2011…"*. No cierra la pregunta del alcance general, pero
+ya hay una E.S.P. que lo aplica y enumera las normas.
+
+**Hueco nuevo, propuesto:** declaración de conflicto de interés por parentesco
+con el representante legal de la entidad. Entraría en `co-esp-v2`.
 
 **Además, si entra:** `diagnostico.escalon` es `NOT NULL` y un cuestionario sin
 escalón pediría migración `0016`.
