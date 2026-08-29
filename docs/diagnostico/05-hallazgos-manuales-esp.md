@@ -103,12 +103,28 @@ Solo lo respaldado por fuente primaria: los textos de los remedios `registro_no`
 y `registro_dudoso`, que pasan de una descripción genérica a decir cómo se hace
 en las dos empresas que más contratan, y qué hace que un registro se caiga.
 
-## 7. Propuesto, pendiente de tu visto bueno
+## 7. Aplicado el mismo día (aprobado 2026-08-29)
 
-1. **Añadir una pregunta de UNSPSC** adaptada a E.S.P. (§5.2a). Sube el
-   cuestionario a 7 preguntas y rompe la promesa de "6 preguntas · 2 minutos"
-   de la portada.
-2. **Añadir una pregunta de listas restrictivas** (§5.2b), con remedio de
-   consulta gratuita. Podría ser el primer bloqueante `hard` no interpretativo
-   del cuestionario.
-3. **Revisar ACUAVALLE a mano** (§3), que se resistió a la consulta automática.
+1. ✅ **Pregunta de UNSPSC** adaptada a E.S.P. (§5.2a), dentro del área
+   Registro. El cuestionario sube a 8 preguntas y la portada pasa a prometer
+   "8 preguntas · 3 minutos".
+2. ✅ **Pregunta de listas restrictivas** (§5.2b), en un área nueva de
+   Situación jurídica. Es el **primer y único bloqueante absoluto** de
+   `co-esp-v1`, y el primero de todo el módulo que no depende de una
+   interpretación jurídica: EPM publica que suspende el registro por eso.
+3. ⏳ **Revisar ACUAVALLE a mano** (§3), que se resistió a la consulta
+   automática. Sigue pendiente.
+
+### Lo que se rompió al aplicarlo, y cómo se vio
+
+Añadir preguntas a un catálogo ya publicado **contradice la regla de congelar
+versiones** que este mismo módulo escribió. Se vio en pantalla: la fila guardada
+antes del cambio, con 6 respuestas, se leyó con el catálogo de 8 y mostró
+"Situación jurídica: PENDIENTE" junto a un 100/100 — un área que esa persona
+nunca respondió.
+
+Se resolvió editando en sitio y borrando las filas afectadas, porque las únicas
+dos existentes eran de prueba, anónimas y creadas horas antes al verificar en el
+navegador. Es la misma clase de ventana que se usó para renombrar la clave del
+`clientStore`, y como aquella, **ya está cerrada**: el próximo cambio de
+preguntas crea `co-esp-v2`.

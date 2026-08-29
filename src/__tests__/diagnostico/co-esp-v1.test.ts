@@ -7,10 +7,12 @@ const esp = getCuestionario("co-esp-v1") as Cuestionario;
 
 const PERFECTAS: RespuestasDiagnostico = {
   registro: 0,
+  unspsc: 0,
   exp: 0,
   fin: 0,
   flujo: 0,
   tec: 0,
+  listas: 0,
   puerta: 0,
 };
 const resp = (o: Partial<RespuestasDiagnostico> = {}) => ({ ...PERFECTAS, ...o });
@@ -70,13 +72,13 @@ describe("invariantes de TODOS los cuestionarios registrados", () => {
 });
 
 describe("co-esp-v1 — forma del cuestionario", () => {
-  it("son 6 preguntas y el máximo es 60, normalizado a 100", () => {
-    expect(esp.preguntas).toHaveLength(6);
+  it("son 8 preguntas y el máximo es 80, normalizado a 100", () => {
+    expect(esp.preguntas).toHaveLength(8);
     const maximo = esp.preguntas.reduce(
       (s, q) => s + Math.max(...q.opciones.map((o) => o.puntos)),
       0
     );
-    expect(maximo).toBe(60);
+    expect(maximo).toBe(80);
     expect(calcularDiagnostico(PERFECTAS, esp).puntajeTotal).toBe(100);
   });
 
@@ -87,17 +89,37 @@ describe("co-esp-v1 — forma del cuestionario", () => {
     expect(esp.escalera).toBeUndefined();
   });
 
-  it("declara la advertencia de alcance, y no es opcional para esta versión", () => {
-    // Sin las preguntas de inhabilidades y parafiscales, un "listo" sin este
-    // aviso prometería lo que las seis preguntas no pueden sostener.
+  it("sigue advirtiendo de lo que NO cubre, que ya no incluye las listas", () => {
+    // Las listas restrictivas pasaron a preguntarse; inhabilidades y
+    // parafiscales siguen fuera, pendientes de revisión jurídica.
     expect(esp.advertencia).toContain("inhabilidades");
     expect(esp.advertencia).toContain("seguridad social");
   });
 
-  it("no declara ningún bloqueante absoluto, y por eso no trae veredicto bloqueado", () => {
-    expect(Object.values(esp.remedios).some((r) => r.absoluto)).toBe(false);
-    expect(esp.veredictoBloqueado).toBeUndefined();
-    expect(calcularDiagnostico(resp({ registro: 3, fin: 3 }), esp).bloqueoAbsoluto).toEqual([]);
+  it("las listas restrictivas son su único bloqueante absoluto", () => {
+    const absolutos = Object.values(esp.remedios)
+      .filter((r) => r.absoluto)
+      .map((r) => r.id);
+    expect(absolutos).toEqual(["listas_si"]);
+    // Y por tanto ya necesita el titular que anuncia el bloqueo.
+    expect(esp.veredictoBloqueado).toBeDefined();
+  });
+
+  it("un reporte en lista restrictiva no baja el puntaje, pero bloquea", () => {
+    // Mismo criterio que en co-apsb-v1 (02-cuestionario §5.1): el puntaje es
+    // honesto, lo que cambia es lo que se afirma sobre él.
+    const r = calcularDiagnostico(resp({ listas: 2 }), esp);
+    expect(r.puntajeTotal).toBe(88);
+    expect(r.banda).toBe("listo");
+    expect(r.bloqueoAbsoluto).toEqual(["listas_si"]);
+  });
+
+  it("los códigos UNSPSC se preguntan aunque no haya RUP de por medio", () => {
+    // El registro del EAAB clasifica por ellos: estar inscrito bajo el código
+    // equivocado equivale a no estar (05-hallazgos §5.2a).
+    const r = calcularDiagnostico(resp({ unspsc: 1 }), esp);
+    expect(r.bloqueantes).toEqual(["unspsc_esp"]);
+    expect(r.puntajeAreas.registro).toBe(75);
   });
 });
 
@@ -121,7 +143,7 @@ describe("co-esp-v1 — cálculo", () => {
       esp.preguntas.map((q) => [q.key, q.opciones.length - 1])
     ) as RespuestasDiagnostico;
     const r = calcularDiagnostico(peores, esp);
-    // 0 + 0 + 0 + 1 + 1 + 3 = 5 de 60 → 8 %.
+    // 0 + 1 + 0 + 0 + 1 + 1 + 0 + 3 = 6 de 80 → 8 %.
     expect(r.puntajeTotal).toBe(8);
     expect(r.banda).toBe("inicio");
   });
@@ -130,7 +152,9 @@ describe("co-esp-v1 — cálculo", () => {
     // Capacidad financiera agrupa 2 preguntas (máx 20): 10 + 4 = 14 → 70 %.
     const r = calcularDiagnostico(resp({ flujo: 2 }), esp);
     expect(r.puntajeAreas.financiera).toBe(70);
+    // Registro también agrupa 2 (inscripción + códigos UNSPSC).
     expect(r.puntajeAreas.registro).toBe(100);
+    expect(r.puntajeAreas.juridica).toBe(100);
   });
 
   it("las claves de un cuestionario no valen en el otro", () => {

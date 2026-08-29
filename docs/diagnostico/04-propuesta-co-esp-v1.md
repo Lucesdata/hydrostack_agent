@@ -2,23 +2,26 @@
 
 **Fecha:** 2026-08-29 · Camino (A) de [`03-variante-ley-142.md`](03-variante-ley-142.md).
 
-> ## ✅ VERSIÓN RECORTADA IMPLEMENTADA (2026-08-29)
+> ## ✅ IMPLEMENTADO — 8 preguntas (2026-08-29)
 >
-> `co-esp-v1` está en el repo con **6 de las 8 preguntas**: las que no dependen
-> de una interpretación jurídica pendiente. Se accede en
-> `/diagnostico?v=co-esp-v1`.
+> `co-esp-v1` está en `/diagnostico?v=co-esp-v1`. Salió con **6 preguntas** y el
+> mismo día subió a **8**: leer los portales de las empresas
+> ([05-hallazgos](05-hallazgos-manuales-esp.md)) destapó dos requisitos
+> publicados que no son interpretación de la ley — **códigos UNSPSC** y **listas
+> restrictivas** — así que no había por qué esperarlos.
 >
-> **Faltan las dos de §7.1** —inhabilidades y aportes a seguridad social— y con
-> ellas los **dos bloqueantes absolutos**. Consecuencia que hay que mirar de
-> frente: hoy este cuestionario **no puede decirle a nadie "esto te deja
-> fuera"**, y una empresa con una inhabilidad activa sacaría "listo". Es el
-> mismo defecto que se le encontró al prototipo de `co-apsb-v1`
-> ([02-cuestionario §5.1](02-cuestionario-co-apsb-v1.md)), así que el resultado
-> lleva una **advertencia de alcance** junto al veredicto —no en la letra
-> pequeña— diciendo exactamente qué no cubre.
+> Las listas restrictivas son ahora su **único bloqueante absoluto**: EPM
+> suspende el registro de quien figure en OFAC, ONU, Banco Mundial o BID.
 >
-> Cuando §7.1 tenga respuesta, añadir las dos preguntas es editar este catálogo
-> y quitar la advertencia.
+> **Siguen faltando las dos de §7.1**: el régimen de inhabilidades e
+> incompatibilidades y los aportes a seguridad social, cuyo alcance bajo derecho
+> privado sigue sin verificarse. Por eso el resultado conserva la **advertencia
+> de alcance** junto al veredicto —no en la letra pequeña— diciendo exactamente
+> qué no cubre.
+>
+> Cuando §7.1 tenga respuesta, esas dos preguntas **crean `co-esp-v2`**, no se
+> añaden aquí: la ventana para editar `co-esp-v1` en sitio se cerró el mismo
+> 2026-08-29 (ver el docstring del catálogo).
 
 > ## ⚠️ ESTE CONTENIDO NO ESTÁ VALIDADO
 >
