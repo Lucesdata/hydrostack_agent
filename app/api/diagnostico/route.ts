@@ -18,6 +18,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import { calcularDiagnostico, parseRespuestas } from "@/src/lib/diagnostico/calcular";
+import { CUESTIONARIO_VIGENTE, getCuestionario } from "@/src/lib/diagnostico/registro";
 import { guardarDiagnostico } from "@/src/lib/diagnostico/diagnostico-store";
 import {
   escribirSessionToken,
@@ -35,12 +36,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const respuestas = parseRespuestas((body as { respuestas?: unknown } | null)?.respuestas);
+  const cuerpo = body as { respuestas?: unknown; version?: unknown } | null;
+
+  // La versión la manda el cliente, así que se valida contra el registro. Una
+  // desconocida es un 400 y no un fallback silencioso al cuestionario vigente:
+  // guardaríamos las respuestas de un cuestionario bajo la versión de otro, y
+  // esa fila quedaría ilegible para siempre.
+  let cuestionario = CUESTIONARIO_VIGENTE;
+  if (cuerpo?.version !== undefined) {
+    const pedido = typeof cuerpo.version === "string" ? getCuestionario(cuerpo.version) : null;
+    if (!pedido) {
+      return NextResponse.json({ error: "Versión de cuestionario desconocida" }, { status: 400 });
+    }
+    cuestionario = pedido;
+  }
+
+  const respuestas = parseRespuestas(cuerpo?.respuestas, cuestionario);
   if (!respuestas) {
     return NextResponse.json({ error: "Respuestas incompletas o fuera de rango" }, { status: 400 });
   }
 
-  const resultado = calcularDiagnostico(respuestas);
+  const resultado = calcularDiagnostico(respuestas, cuestionario);
 
   const user = await getSessionUser();
   const usuarioId = user?.id ?? null;

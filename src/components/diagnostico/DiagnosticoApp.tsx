@@ -14,17 +14,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { calcularDiagnostico } from "@/src/lib/diagnostico/calcular";
-import { CUESTIONARIO_VIGENTE } from "@/src/lib/diagnostico/registro";
+import { CUESTIONARIO_VIGENTE, getCuestionario } from "@/src/lib/diagnostico/registro";
 
-// Quien entra hoy responde el cuestionario vigente. Cuando exista una variante
-// (co-esp-v1), la elección llegará como prop desde la página y esto pasará a
-// resolverse dentro del componente.
-const {
-  preguntas: PREGUNTAS,
-  categorias: CATEGORIAS,
-  portada: PORTADA,
-  facts: FACTS,
-} = CUESTIONARIO_VIGENTE;
 import type {
   RespuestasDiagnostico,
   RespuestasParciales,
@@ -36,8 +27,6 @@ import { Resultado } from "./Resultado";
 
 type Etapa = "portada" | "cuestionario" | "resultado";
 
-const CATEGORIA_LABEL = new Map(CATEGORIAS.map((c) => [c.id, c.label]));
-
 interface Props {
   /** Diagnóstico ya guardado (cuenta o cookie): se entra directo al resultado. */
   resultadoInicial: ResultadoDiagnostico | null;
@@ -45,9 +34,20 @@ interface Props {
   anonimo: boolean;
   /** Con cuenta y sin perfil: al final se piden sector y zona. */
   tienePerfil: boolean;
+  /** Qué cuestionario se responde. La página lo resuelve del query param. */
+  version?: string;
 }
 
-export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props) {
+export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil, version }: Props) {
+  const cuestionario = (version && getCuestionario(version)) || CUESTIONARIO_VIGENTE;
+  const {
+    preguntas: PREGUNTAS,
+    categorias: CATEGORIAS,
+    portada: PORTADA,
+    facts: FACTS,
+    otraVariante: OTRA,
+  } = cuestionario;
+  const CATEGORIA_LABEL = new Map(CATEGORIAS.map((c) => [c.id, c.label]));
   const [etapa, setEtapa] = useState<Etapa>(resultadoInicial ? "resultado" : "portada");
   const [indice, setIndice] = useState(0);
   const [respuestas, setRespuestas] = useState<RespuestasParciales>({});
@@ -67,14 +67,14 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
   const enviar = useCallback(async (completas: RespuestasDiagnostico) => {
     setEnviando(true);
     // Fallback local: si la red falla, el resultado no se pierde.
-    let calculado = calcularDiagnostico(completas);
+    let calculado = calcularDiagnostico(completas, cuestionario);
     let persistido = false;
 
     try {
       const res = await fetch("/api/diagnostico", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ respuestas: completas }),
+        body: JSON.stringify({ respuestas: completas, version: cuestionario.version }),
       });
       const cuerpo = await res.json();
       if (cuerpo?.resultado) calculado = cuerpo.resultado as ResultadoDiagnostico;
@@ -146,7 +146,7 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
                 <span className="clr-diag-fig-dot" />
                 <span className="clr-diag-fig-label">{PORTADA.antetitulo}</span>
               </div>
-              <h1 className="clr-diag-h1">{tituloConEnfasis()}</h1>
+              <h1 className="clr-diag-h1">{tituloConEnfasis(PORTADA)}</h1>
               <p className="clr-diag-lede">{PORTADA.lede}</p>
               <button
                 type="button"
@@ -155,6 +155,12 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
               >
                 {PORTADA.cta}
               </button>
+              {OTRA && (
+                <p className="clr-diag-otra">
+                  {OTRA.texto}{" "}
+                  <a href={`/diagnostico?v=${OTRA.version}`}>Haz el otro diagnóstico</a>
+                </p>
+              )}
             </div>
             <MedidorTanque porcentaje={resultado?.puntajeTotal ?? 0} conTicks />
           </div>
@@ -238,7 +244,7 @@ export function DiagnosticoApp({ resultadoInicial, anonimo, tienePerfil }: Props
 }
 
 /** El titular lleva una parte en color de acento, como en el prototipo. */
-function tituloConEnfasis() {
+function tituloConEnfasis(PORTADA: { titulo: string; tituloEnfasis: string }) {
   const [antes, despues] = PORTADA.titulo.split(PORTADA.tituloEnfasis);
   return (
     <>

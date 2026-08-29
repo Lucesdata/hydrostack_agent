@@ -47,6 +47,7 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
     remedios,
     veredictos,
     veredictoBloqueado,
+    advertencia,
     planSinPendientes,
     mitos,
     disclaimer,
@@ -54,7 +55,7 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
     rutas,
   } = cuestionario;
   const bloqueado = resultado.bloqueoAbsoluto.length > 0;
-  const veredicto = bloqueado ? veredictoBloqueado : veredictos[resultado.banda];
+  const veredicto = (bloqueado && veredictoBloqueado) || veredictos[resultado.banda];
   const pasos = resultado.bloqueantes.map((id) => remedios[id]);
 
   return (
@@ -74,6 +75,7 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         <h1 className="clr-diag-h2">{veredicto.titulo}</h1>
         <p>{veredicto.texto}</p>
         <p className="clr-diag-puntaje">Nivel de preparación: {resultado.puntajeTotal} / 100</p>
+        {advertencia && <p className="clr-diag-advertencia">{advertencia}</p>}
       </section>
 
       <div className="clr-diag-sec">

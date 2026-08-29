@@ -12,10 +12,12 @@
  */
 
 import { CUESTIONARIO_CO_APSB_V1 } from "./cuestionario/co-apsb-v1";
+import { CUESTIONARIO_CO_ESP_V1 } from "./cuestionario/co-esp-v1";
 import type { Cuestionario } from "./types";
 
 const CUESTIONARIOS: Readonly<Record<string, Cuestionario>> = {
   [CUESTIONARIO_CO_APSB_V1.version]: CUESTIONARIO_CO_APSB_V1,
+  [CUESTIONARIO_CO_ESP_V1.version]: CUESTIONARIO_CO_ESP_V1,
 };
 
 /** El que se ofrece hoy a quien entra a /diagnostico. */

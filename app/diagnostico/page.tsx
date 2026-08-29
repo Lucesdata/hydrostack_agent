@@ -17,6 +17,7 @@ import {
 } from "@/src/lib/diagnostico/diagnostico-store";
 import { DIAGNOSTICO_COOKIE, esSessionTokenValido } from "@/src/lib/diagnostico/session-token";
 import { getPerfilDb } from "@/src/lib/oferente/perfil-store";
+import { getCuestionario } from "@/src/lib/diagnostico/registro";
 import { DiagnosticoApp } from "@/src/components/diagnostico/DiagnosticoApp";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";
 
@@ -46,8 +47,17 @@ function aResultado(d: DiagnosticoGuardado): ResultadoDiagnostico {
   };
 }
 
-export default async function DiagnosticoPage() {
+export default async function DiagnosticoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ v?: string }>;
+}) {
   const user = await getSessionUser();
+  // `?v=` elige la variante. Una versión que no existe cae al cuestionario
+  // vigente en vez de romper la página: es un parámetro que cualquiera puede
+  // escribir a mano.
+  const pedida = (await searchParams).v;
+  const version = pedida && getCuestionario(pedida) ? pedida : undefined;
 
   // Una base caída no puede tumbar la portada: el cuestionario se responde
   // igual y el POST decidirá si se guarda. Mismo criterio que el
@@ -68,11 +78,19 @@ export default async function DiagnosticoPage() {
     vigente = null;
   }
 
+  // Un diagnóstico guardado entra directo al resultado, PERO solo si es del
+  // cuestionario que se está pidiendo. Sin esto, quien ya respondió uno y hace
+  // clic en "haz el otro diagnóstico" aterriza en su resultado viejo y nunca
+  // llega a la variante — visto al probarlo.
+  const mostrarGuardado =
+    vigente !== null && (version === undefined || vigente.version === version);
+
   return (
     <DiagnosticoApp
-      resultadoInicial={vigente ? aResultado(vigente) : null}
+      resultadoInicial={mostrarGuardado ? aResultado(vigente!) : null}
       anonimo={!user}
       tienePerfil={tienePerfil}
+      version={version}
     />
   );
 }
