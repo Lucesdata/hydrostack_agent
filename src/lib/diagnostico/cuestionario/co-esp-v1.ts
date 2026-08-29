@@ -419,6 +419,7 @@ export const CUESTIONARIO_CO_ESP_V1: Cuestionario = {
   preguntas: PREGUNTAS_ESP,
   remedios: REMEDIOS_ESP,
   veredictos: VEREDICTOS_ESP,
+  etiqueta: "Servicios públicos · Ley 142",
   portada: PORTADA_ESP,
   facts: FACTS_ESP,
   planSinPendientes: PLAN_SIN_PENDIENTES_ESP,

@@ -216,6 +216,22 @@ procesos y la consulta local 1.188, porque los filtros difieren. Habría que
 replicar el filtro sectorial y el de apertura primero, y `landingStats` también
 alimenta la landing.
 
+### 17. Vista de historial de diagnósticos — ✅ resuelto 2026-08-29
+
+La tabla `diagnostico` es append-only y guardaba varios por usuario, pero no
+había dónde verlos. `/diagnostico/historial`, con sesión, los lista del más
+reciente al más antiguo con su variación de puntaje y cuántos bloqueantes se
+resolvieron desde el anterior.
+
+**La variación solo se calcula contra el anterior de la MISMA versión.** Restar
+el puntaje de dos cuestionarios distintos daría un número con aspecto de
+progreso y sin significado: son escalas distintas sobre preguntas distintas.
+Cubierto por test, y visible en pantalla — un historial mixto salta por encima
+de la otra variante para encontrar su propio anterior.
+
+De ahí salió `Cuestionario.etiqueta`: donde conviven variantes hay que poder
+distinguirlas, y "8 preguntas · 3 minutos" no dice cuál es cuál.
+
 ---
 
 ## Decisión pendiente del usuario (no es bug)

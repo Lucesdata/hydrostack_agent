@@ -125,9 +125,15 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
             </ul>
             <div className="clr-pb-pie">
               <span className="clr-pb-restantes">{restantesTexto(duros.length, blandos)}</span>
-              <Link href="/diagnostico" className="clr-pb-link">
-                Ver tu plan completo →
-              </Link>
+              <span>
+                <Link href="/diagnostico/historial" className="clr-pb-link">
+                  Historial
+                </Link>
+                {" · "}
+                <Link href="/diagnostico" className="clr-pb-link">
+                  Ver tu plan completo →
+                </Link>
+              </span>
             </div>
           </>
         )}

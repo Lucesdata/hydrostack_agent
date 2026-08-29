@@ -173,6 +173,7 @@ export const DIAGNOSTICO_CSS = `
     max-width: 46ch;
   }
   .clr-diag-otra a{ color: var(--accent); border-bottom: 1px solid rgba(3,105,161,.35); }
+  .clr-diag-guardado a{ color: var(--accent); border-bottom: 1px solid rgba(3,105,161,.35); }
   .clr-diag-advertencia{
     margin-top: 14px; padding: 11px 13px;
     border: 1px solid rgba(217,119,6,.3); border-left: 2px solid var(--warning);

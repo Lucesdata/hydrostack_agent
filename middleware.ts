@@ -16,6 +16,9 @@ import { updateSession } from "@/src/lib/supabase/middleware";
  * dispara el flujo, ver ProcessDetail/OferenteWizard.
  */
 const PROTECTED_PREFIXES = [
+  // Solo este subcamino: /diagnostico a secas es público y debe seguir siéndolo,
+  // porque responder sin cuenta es el flujo principal del módulo.
+  "/diagnostico/historial",
   "/pliego",
   "/api/pliego",
   "/cuenta",
