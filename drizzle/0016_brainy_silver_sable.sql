@@ -1,0 +1,1 @@
+ALTER TABLE "diagnostico" ALTER COLUMN "escalon" DROP NOT NULL;

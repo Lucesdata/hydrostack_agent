@@ -23,7 +23,10 @@
 
 import type {
   Categoria,
+  Cuestionario,
   EscalonContratacion,
+  EstadoRup,
+  RespuestasDiagnostico,
   Fact,
   Mito,
   Peldano,
@@ -466,3 +469,59 @@ export const MITOS: readonly Mito[] = [
 /** Obligatorio en el resultado. Ley 142 y dependencia del presupuesto de cada entidad. */
 export const DISCLAIMER =
   "Este diagnóstico es una guía de preparación, no un concepto jurídico. Los umbrales de mínima y menor cuantía dependen del presupuesto anual de cada entidad, y las empresas de servicios públicos contratan bajo derecho privado (Ley 142 de 1994) con manual propio. Verifica siempre el pliego y la versión vigente de los documentos tipo antes de presentar una oferta.";
+
+// ===========================================================================
+//  Derivaciones propias de este cuestionario
+// ===========================================================================
+
+/**
+ * Escalón al que puede aspirar hoy. No se deriva de la banda: son dos ejes.
+ * Sin RUP vigente cae a mínima cuantía por construcción —que es justo la
+ * modalidad que no exige RUP—, y por eso `rup_no` y `rup_vencido` no necesitan
+ * ser bloqueantes absolutos (02-cuestionario §5.2).
+ *
+ * Vive aquí y no en calcular.ts porque mira dos preguntas por su nombre
+ * (`rup`, `exp`): es conocimiento de ESTE cuestionario, no del motor.
+ */
+export function escalonCoApsbV1(
+  puntosPorPregunta: ReadonlyMap<string, number>,
+  puntajeTotal: number
+): EscalonContratacion {
+  const tieneRup = (puntosPorPregunta.get("rup") ?? 0) >= 10;
+  const tieneExperiencia = (puntosPorPregunta.get("exp") ?? 0) >= 8;
+
+  if (tieneRup && tieneExperiencia && puntajeTotal >= 70) return "licitacion_publica";
+  if (tieneRup && puntajeTotal >= 55) return "menor_cuantia";
+  return "minima_cuantia";
+}
+
+/** Estado del RUP según la opción escogida en la pregunta 1, por posición. */
+const ESTADO_RUP_POR_OPCION: readonly EstadoRup[] = [
+  "vigente",
+  "sin_renovar",
+  "no_inscrito",
+  "desconocido",
+];
+
+export function estadoRupCoApsbV1(respuestas: RespuestasDiagnostico): EstadoRup {
+  return ESTADO_RUP_POR_OPCION[respuestas.rup] ?? "desconocido";
+}
+
+/** El cuestionario como unidad, que es lo que consume el motor. */
+export const CUESTIONARIO_CO_APSB_V1: Cuestionario = {
+  version: VERSION_CUESTIONARIO,
+  categorias: CATEGORIAS,
+  preguntas: PREGUNTAS,
+  remedios: REMEDIOS,
+  veredictos: VEREDICTOS,
+  escalon: escalonCoApsbV1,
+  estadoRup: estadoRupCoApsbV1,
+  portada: PORTADA,
+  facts: FACTS,
+  veredictoBloqueado: VEREDICTO_BLOQUEADO,
+  planSinPendientes: PLAN_SIN_PENDIENTES,
+  mitos: MITOS,
+  disclaimer: DISCLAIMER,
+  escalera: ESCALERA,
+  rutas: RUTAS,
+};

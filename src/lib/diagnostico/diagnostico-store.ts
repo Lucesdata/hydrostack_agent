@@ -22,8 +22,8 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { diagnostico } from "@/src/lib/db/schema/diagnostico";
-import { VERSION_CUESTIONARIO } from "./cuestionario/co-apsb-v1";
-import { bandaDePuntaje, estadoRupDeRespuestas, filtrarBloqueoAbsoluto } from "./calcular";
+import { getCuestionario } from "./registro";
+import { bandaDePuntaje, filtrarBloqueoAbsoluto } from "./calcular";
 import type {
   CategoriaId,
   EscalonContratacion,
@@ -50,7 +50,7 @@ interface FilaDiagnostico {
   respuestas: unknown;
   puntajeTotal: number;
   puntajeAreas: unknown;
-  escalon: string;
+  escalon: string | null;
   bloqueantes: string[];
   creadoEn: Date;
 }
@@ -61,15 +61,16 @@ interface FilaDiagnostico {
  * haber cambiado desde entonces—; `bloqueoAbsoluto` y `estadoRup` se derivan
  * del catálogo porque no son columnas.
  *
- * Esa derivación solo es correcta para la versión vigente del cuestionario:
- * cuando exista `co-apsb-v2`, este mapeo tiene que ramificar por
- * `fila.version` en vez de asumir el catálogo actual. Hasta entonces, una
- * versión desconocida degrada a valores neutros en vez de mentir.
+ * La derivación usa el catálogo de la versión de la fila, resuelto por
+ * `registro.ts`. Una versión que ya no está en el binario degrada a valores
+ * neutros en vez de mentir con un catálogo que no es el suyo.
  */
 export function mapDiagnosticoRow(fila: FilaDiagnostico): DiagnosticoGuardado {
   const bloqueantes = fila.bloqueantes as RemedioId[];
   const respuestas = fila.respuestas as RespuestasDiagnostico;
-  const esVersionVigente = fila.version === VERSION_CUESTIONARIO;
+  // El catálogo de SU versión, no el vigente: los textos y las derivaciones
+  // tienen que corresponder a lo que esa persona respondió.
+  const cuestionario = getCuestionario(fila.version);
 
   return {
     id: fila.id,
@@ -80,10 +81,10 @@ export function mapDiagnosticoRow(fila: FilaDiagnostico): DiagnosticoGuardado {
     // La banda no es columna: es una partición del puntaje, que sí lo es.
     banda: bandaDePuntaje(fila.puntajeTotal),
     puntajeAreas: fila.puntajeAreas as Record<CategoriaId, number>,
-    escalon: fila.escalon as EscalonContratacion,
-    estadoRup: esVersionVigente ? estadoRupDeRespuestas(respuestas) : "desconocido",
+    escalon: (fila.escalon as EscalonContratacion | null) ?? null,
+    estadoRup: cuestionario?.estadoRup?.(respuestas) ?? "desconocido",
     bloqueantes,
-    bloqueoAbsoluto: esVersionVigente ? filtrarBloqueoAbsoluto(bloqueantes) : [],
+    bloqueoAbsoluto: cuestionario ? filtrarBloqueoAbsoluto(bloqueantes, cuestionario.remedios) : [],
     creadoEn: fila.creadoEn,
   };
 }

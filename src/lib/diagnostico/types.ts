@@ -19,39 +19,30 @@
  */
 
 // ===========================================================================
-//  Identificadores del cuestionario co-apsb-v1
+//  Identificadores
 // ===========================================================================
 
-/** Las 10 preguntas, en el orden en que se presentan. */
-export type PreguntaKey =
-  "rup" | "unspsc" | "exp" | "fin" | "secop" | "poliza" | "tec" | "pila" | "antec" | "union";
+/**
+ * Los tres identificadores de abajo son `string` y no uniones cerradas **a
+ * propósito**: cada cuestionario trae su propio vocabulario, y una unión que
+ * enumere las claves de `co-apsb-v1` haría imposible registrar un segundo
+ * catálogo sin editar este archivo — justo lo que el versionado existe para
+ * evitar. Cada cuestionario puede exportar su unión estrecha para sus propios
+ * tests; el motor trabaja con la forma ancha.
+ */
+
+/** Clave de pregunta dentro de su cuestionario. Ej.: "rup", "unspsc". */
+export type PreguntaKey = string;
 
 /**
- * Las 6 categorías. Se usan como clave de `puntajeAreas` (jsonb), por eso son
- * slugs estables y no las etiquetas visibles — renombrar una etiqueta no debe
+ * Slug de categoría. Se usa como clave de `puntajeAreas` (jsonb), por eso es
+ * un slug estable y no la etiqueta visible — renombrar una etiqueta no debe
  * romper los diagnósticos guardados.
  */
-export type CategoriaId =
-  "juridica" | "experiencia" | "financiera" | "tecnica" | "secop" | "estrategia";
+export type CategoriaId = string;
 
-/** Los 17 remedios del catálogo. Un id por bloqueante detectable. */
-export type RemedioId =
-  | "antec_mal"
-  | "pila_mora"
-  | "rup_no"
-  | "rup_vencido"
-  | "fin_no"
-  | "secop_no"
-  | "fin_atraso"
-  | "secop_frio"
-  | "unspsc"
-  | "exp_cero"
-  | "exp_informal"
-  | "poliza"
-  | "tec"
-  | "antec_rev"
-  | "pila_sin"
-  | "solo";
+/** Id de remedio. Un id por bloqueante detectable. */
+export type RemedioId = string;
 
 // ===========================================================================
 //  Escalas derivadas
@@ -165,13 +156,28 @@ export type RespuestasParciales = Partial<RespuestasDiagnostico>;
 export interface ResultadoDiagnostico {
   /** Versión del cuestionario que produjo este resultado. Ej.: "co-apsb-v1". */
   version: string;
-  /** Suma de puntos de las 10 opciones escogidas. Entero 0..100. */
+  /**
+   * Entero 0..100. Es el porcentaje sobre el máximo alcanzable del
+   * cuestionario, no la suma cruda: así dos cuestionarios con distinto número
+   * de preguntas comparten escala, bandas y UI. En `co-apsb-v1` coinciden,
+   * porque su máximo es justo 100.
+   */
   puntajeTotal: number;
   banda: BandaPreparacion;
   /** Por categoría, 0..100 sobre el máximo de esa categoría. */
   puntajeAreas: Record<CategoriaId, number>;
-  escalon: EscalonContratacion;
-  estadoRup: EstadoRup;
+  /**
+   * `null` cuando el cuestionario no tiene escalera. La Ley 142 es el caso:
+   * bajo derecho privado cada empresa fija sus modalidades en su manual, así
+   * que no hay peldaños que asignar. Ver docs/diagnostico/03-variante-ley-142.md.
+   */
+  escalon: EscalonContratacion | null;
+  /**
+   * `null` cuando el cuestionario no pregunta por el RUP. Ojo: distinto de
+   * `"desconocido"`, que significa que sí se preguntó y la respuesta fue que
+   * no saben qué es.
+   */
+  estadoRup: EstadoRup | null;
   /** Remedios disparados: los `hard` primero, luego los `soft`, cada grupo en orden de pregunta. */
   bloqueantes: RemedioId[];
   /**
@@ -180,4 +186,73 @@ export interface ResultadoDiagnostico {
    * la banda NO se alteran. Ver 02-cuestionario §5.1.
    */
   bloqueoAbsoluto: RemedioId[];
+}
+
+// ===========================================================================
+//  El cuestionario como unidad
+// ===========================================================================
+
+/**
+ * Un cuestionario completo: su contenido más las dos derivaciones que le son
+ * propias. Existe para que el motor (`calcular.ts`) no importe ningún catálogo
+ * concreto y baste con registrar el nuevo en `registro.ts`.
+ *
+ * `escalon` y `estadoRup` son opcionales porque no todos los cuestionarios los
+ * tienen: son conceptos de la Ley 80/1150, y un cuestionario para empresas de
+ * servicios públicos (Ley 142) no puede producirlos. Ausentes → el resultado
+ * lleva `null`, que es la respuesta honesta.
+ */
+export interface Cuestionario {
+  version: string;
+  /** Orden de presentación de las barras del resultado. */
+  categorias: readonly Categoria[];
+  preguntas: readonly Pregunta[];
+  remedios: Readonly<Record<RemedioId, Remedio>>;
+  veredictos: Readonly<Record<BandaPreparacion, TextoVeredicto>>;
+  /**
+   * Escalón al que puede aspirar el oferente. Recibe los puntos por pregunta y
+   * el puntaje ya normalizado a 0..100. Omitir si el cuestionario no tiene
+   * escalera.
+   */
+  escalon?: (
+    puntosPorPregunta: ReadonlyMap<string, number>,
+    puntajeTotal: number
+  ) => EscalonContratacion;
+  /** Estado del RUP declarado. Omitir si el cuestionario no lo pregunta. */
+  estadoRup?: (respuestas: RespuestasDiagnostico) => EstadoRup;
+
+  // ── Contenido que pinta la UI ──────────────────────────────────────────
+  // Va aquí y no importado suelto por cada componente: todo lo que se muestra
+  // pertenece al cuestionario que se respondió, y una fila vieja debe seguir
+  // viéndose con los textos de SU versión.
+
+  portada: Portada;
+  /** Las afirmaciones que desmontan la barrera de entrada, en la portada. */
+  facts: readonly Fact[];
+  /** Sobreescribe el titular de la banda cuando hay un bloqueante absoluto. */
+  veredictoBloqueado: TextoVeredicto;
+  /** Qué decir cuando no se disparó ningún remedio. */
+  planSinPendientes: Remedio2;
+  mitos: readonly Mito[];
+  disclaimer: string;
+  /** Los peldaños. Omitir si el cuestionario no tiene escalera (Ley 142). */
+  escalera?: readonly Peldano[];
+  /** Texto de la vía recomendada por escalón. Va con `escalera`. */
+  rutas?: Readonly<Record<EscalonContratacion, TextoRuta>>;
+}
+
+/** Entrada del plan cuando no hay pendientes: mismo shape visible que un remedio. */
+export interface Remedio2 {
+  titulo: string;
+  detalle: string;
+  chips: readonly string[];
+}
+
+export interface Portada {
+  antetitulo: string;
+  titulo: string;
+  /** La parte del titular que va en color de acento. */
+  tituloEnfasis: string;
+  lede: string;
+  cta: string;
 }
