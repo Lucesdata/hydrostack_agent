@@ -168,6 +168,50 @@ sujeto a RLS en Postgres. No es explotable hoy (PostgREST no expone `TRUNCATE`
 y nadie tiene credenciales de Postgres para esos roles). Ojo con Storage, que
 tiene políticas propias en `storage.objects`.
 
+### 16. `/mis-coincidencias` en frío tarda 12 s — medido 2026-08-29
+
+**No es una consulta lenta: es arranque en frío.** Cinco peticiones seguidas a
+producción, sin sesión:
+
+| Ruta | 1.ª | 2.ª a 5.ª |
+|---|---|---|
+| `/mis-coincidencias` | **11,8 s** | 0,26 – 0,43 s |
+| `/licitaciones` | 2,4 s | 0,64 – 0,72 s |
+| `/diagnostico` | 1,0 s | 0,23 – 0,27 s |
+
+En caliente está bien. Lo que llama la atención es que su arranque en frío sea
+**5× el de `/licitaciones` y 12× el de `/diagnostico`**, siendo las tres
+dinámicas.
+
+**Lo que sí está medido.** Sin sesión, la página solo hace el teaser, y el
+teaser es `getEnJuegoMes()`, que **no consulta nuestra base**: llama a Socrata,
+la API pública de SECOP.
+
+- `getEnJuegoMes()` completa: **3.104 ms** la primera, 1.891 y 1.590 después.
+- De eso, `resolveDatasetId` son 624 ms la primera vez y 0 ms cacheado en
+  proceso.
+- La misma cuenta contra nuestro Postgres: 2.851 ms la primera (casi todo
+  handshake del pool) y **293 ms** ya conectado.
+
+**Lo que es inferencia, no medición.** Los ~8 s restantes del arranque en frío
+se reparten entre el init del lambda y la carga de módulos. La página importa
+en el nivel superior matching (×2), alertas, digest de correo, estado de
+pliegos, landingStats, el store del diagnóstico, señales y perfil — todo eso se
+carga aunque el visitante sea anónimo y solo vaya a ver el teaser.
+
+**Tres salidas, por coste creciente:**
+
+1. **No hacer nada.** En caliente responde en 0,3 s; el frío lo paga el primer
+   visitante tras un rato de inactividad.
+2. **Aligerar el grafo de imports** de la rama anónima (import dinámico de lo
+   que solo usa la rama con sesión). Es lo más dirigido: ataca los ~8 s, no los
+   3 s de Socrata.
+3. **Servir el teaser desde nuestro Postgres** en vez de Socrata. Ojo: los
+   números no son intercambiables tal cual —Socrata devolvió 1.551 procesos y
+   la consulta local 1.188, porque los filtros no son los mismos— así que hay
+   que replicar el filtro sectorial y el de apertura antes de cambiarlo. Y
+   `landingStats` también alimenta la landing, así que el cambio no es local.
+
 ---
 
 ## Decisión pendiente del usuario (no es bug)
