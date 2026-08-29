@@ -168,6 +168,54 @@ sujeto a RLS en Postgres. No es explotable hoy (PostgREST no expone `TRUNCATE`
 y nadie tiene credenciales de Postgres para esos roles). Ojo con Storage, que
 tiene políticas propias en `storage.objects`.
 
+### 16. `/mis-coincidencias` NO tiene un problema de rendimiento — medido y descartado 2026-08-29
+
+Se abrió porque una petición tardó 8,6 s, y luego otra 11,8 s. **Medido a
+fondo, la alarma era mía y era falsa.**
+
+**Primera tanda, cinco peticiones seguidas por ruta:**
+
+| Ruta | 1.ª | 2.ª a 5.ª |
+|---|---|---|
+| `/mis-coincidencias` | 11,8 s | 0,26 – 0,43 s |
+| `/licitaciones` | 2,4 s | 0,64 – 0,72 s |
+| `/diagnostico` | 1,0 s | 0,23 – 0,27 s |
+
+De ahí concluí que su arranque en frío era 5× el de `/licitaciones`. **Esa
+comparación no valía**: `/mis-coincidencias` fue la primera ruta que pedí, así
+que pagó el arranque del despliegue entero y las otras dos ya lo encontraron
+caliente. Un test cuyo resultado depende del orden.
+
+**Segunda tanda, rutas nunca tocadas en la primera, con el despliegue ya
+caliente:** `/nosotros` 1,7 s · `/soluciones` 0,24 s · `/licitaciones/descubrir`
+0,27 s. Si el arranque fuera por ruta, `/nosotros` habría tardado sus ~10 s
+también. No los tardó.
+
+**Conclusión: los 11,8 s eran el arranque del despliegue tras inactividad, no
+algo de esta ruta.** En caliente responde en 0,26-0,43 s, que es *más rápido*
+que `/licitaciones`. No hay nada que arreglar.
+
+#### Lo que sí quedó medido, y sigue siendo cierto
+
+- Sin sesión, el teaser sale de `getEnJuegoMes()`, que **no consulta nuestra
+  base**: llama a Socrata, la API pública de SECOP. **3.104 ms** la primera
+  llamada, 1.891 y 1.590 después; de eso, 624 ms son resolver el dataset. La
+  caché de `fetch` de Next lo absorbe, así que solo lo paga el primer visitante
+  tras cada revalidación.
+- Aligerar el grafo de imports de la rama anónima —lo que se iba a hacer—
+  ahorraría **~360 ms**: 222 de `perfil-store` (casi todo el cliente de base,
+  que la rama anónima no necesita), 87 de `alertas`, y migajas del resto.
+  **Se descartó**: 360 ms no justifican reestructurar una página que funciona y
+  cuyas dos ramas con sesión no se pueden verificar sin credenciales.
+
+#### Si algún día se quiere tocar
+
+Servir el teaser desde nuestro Postgres quitaría la dependencia de Socrata.
+Aviso: **los números no son intercambiables tal cual** — Socrata devolvió 1.551
+procesos y la consulta local 1.188, porque los filtros difieren. Habría que
+replicar el filtro sectorial y el de apertura primero, y `landingStats` también
+alimenta la landing.
+
 ---
 
 ## Decisión pendiente del usuario (no es bug)
