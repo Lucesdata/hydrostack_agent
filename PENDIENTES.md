@@ -105,9 +105,25 @@ propio manual, aprobado por su junta, así que "a qué escalón puedes aspirar" 
 tiene respuesta universal. Ver `docs/diagnostico/03-variante-ley-142.md` §2 y
 §3, con los tres caminos y su coste.
 
-**Bloqueado por contenido:** las 10 preguntas de `co-apsb-v1` se copiaron de un
-prototipo validado normativamente; para la Ley 142 no existe ese insumo. Hace
-falta la fuente, o una propuesta redactada y aprobada antes de entrar a código.
+**Ya implementado (2026-08-29):** `co-esp-v1` en versión recortada, 6 de 8
+preguntas, en `/diagnostico?v=co-esp-v1`. Faltan las dos que dependen de
+revisión jurídica, y por eso el resultado lleva una advertencia de alcance: sin
+ellas el cuestionario no tiene bloqueantes absolutos y no puede decirle a nadie
+"esto te deja fuera".
+
+**Bloqueado por criterio jurídico:** el alcance de inhabilidades y de los
+aportes a seguridad social cuando el contrato se rige por derecho privado
+(04-propuesta §7.1). Sin eso no entran las dos preguntas que faltan.
+
+**Dos huecos que NO están bloqueados** (05-hallazgos §5.2), encontrados leyendo
+lo que publican las empresas: los **códigos UNSPSC** —el registro del EAAB está
+organizado por ellos, y los descarté por creerlos cosa del RUP— y las **listas
+restrictivas** OFAC/ONU/BM/BID, por las que EPM suspende el registro. Ninguno
+es interpretación de la ley: son requisitos publicados. Ambos están propuestos
+en 05-hallazgos §7, pendientes de visto bueno.
+
+**Pendiente de mirar a mano:** ACUAVALLE (632 procesos) devolvió 403 a la
+consulta automatizada.
 
 **Además, si entra:** `diagnostico.escalon` es `NOT NULL` y un cuestionario sin
 escalón pediría migración `0016`.
