@@ -272,6 +272,12 @@ de producto; **estas afirmaciones necesitan respaldo jurídico**:
   dependen enteramente de esto. Sé que no desaparece por contratar bajo derecho
   privado, pero **no puedo precisar el alcance ni citar el artículo de memoria**,
   y aquí una imprecisión es cara.
+  **Avance (2026-08-29):** el instructivo de registro de ACUAVALLE exige *"no
+  estar incurso en causal alguna de inhabilidades e incompatibilidades… Ley 80
+  de 1993, Ley 142 de 1994, Ley 689 de 2001, Ley 1150 de 2007, Ley 1474 de
+  2011…"*. Una E.S.P. lo aplica y enumera las normas — ver
+  [05-hallazgos §3](05-hallazgos-manuales-esp.md). No cierra la pregunta del
+  alcance general, pero ya no se parte de cero.
 - **¿La certificación de aportes a seguridad social se exige igual?** Misma
   situación con la pregunta 3 y `pila_mora`.
 - **¿Cambia algo según la composición del capital** (oficial, mixta, privada)?

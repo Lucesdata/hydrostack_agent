@@ -37,7 +37,10 @@
  * de la clave del `clientStore` (src/lib/state/clientStore.ts).
  *
  * Esa ventana está cerrada. De aquí en adelante este archivo se trata como
- * `co-apsb-v1`: congelado. Añadir o quitar preguntas crea `co-esp-v2`, porque
+ * `co-apsb-v1`: congelado en su FORMA — claves de pregunta, opciones, puntajes
+ * e ids de remedio. Corregir la prosa (un hecho equivocado, un texto confuso)
+ * sí se puede y se debe: no cambia el puntaje de nadie ni rompe una fila
+ * guardada. Añadir o quitar preguntas crea `co-esp-v2`, porque
  * una fila guardada con menos respuestas leída con un catálogo más grande
  * muestra áreas en "pendiente" que el usuario nunca respondió — verificado en
  * pantalla, que es como se detectó.
@@ -185,7 +188,7 @@ export const REMEDIOS_ESP: Readonly<Record<RemedioId, Remedio>> = {
     absoluto: false,
     titulo: "Inscríbete en el registro de proveedores",
     detalle:
-      "Es autogestionado y en línea. El Acueducto de Bogotá tiene el suyo en su portal de proveedores y lo organiza por códigos UNSPSC, así que revisa bajo qué código quedas clasificado. El Grupo EPM se registra en la plataforma Ariba, y con una sola inscripción quedas visible para EPM, EMVARIAS, CHEC, CENS, ESSA y EDEQ. Sin estar dentro, no te llega la invitación.",
+      "Es autogestionado y en línea. El Acueducto de Bogotá tiene el suyo en su portal de proveedores y lo organiza por códigos UNSPSC, así que revisa bajo qué código quedas clasificado. El Grupo EPM se registra en la plataforma Ariba, y con una sola inscripción quedas visible para EPM, EMVARIAS, CHEC, CENS, ESSA y EDEQ. ACUAVALLE no usa portal: se envía el formato de inscripción por correo, y además exige RUP y certificado de existencia con menos de 30 días. Sin estar dentro no te llega la invitación — aunque estar dentro tampoco obliga a la empresa a invitarte.",
     chips: ["Gratis", "1 a 3 semanas"],
   },
   fin_no: {
@@ -362,8 +365,8 @@ export const ADVERTENCIA_ESP =
 
 export const FACTS_ESP: readonly Fact[] = [
   {
-    titulo: "Sin RUP",
-    texto: "Estas empresas contratan bajo derecho privado y no exigen registro de proponentes",
+    titulo: "El RUP, depende",
+    texto: "Unas empresas lo exigen y otras no: lo decide el manual de cada una, no la ley",
   },
   {
     titulo: "Sin escalera",
@@ -390,9 +393,9 @@ export const MITOS_ESP: readonly Mito[] = [
       "Contratan con su propio manual, aprobado por su junta directiva y de obligatorio cumplimiento para ellas. Que no sea la Ley 80 no significa que no haya reglas.",
   },
   {
-    afirmacion: "Necesito el RUP para venderles.",
+    afirmacion: "Con estas empresas el RUP no sirve de nada.",
     respuesta:
-      "No lo exigen. Lo que piden es su propio registro de proveedores, que es gratuito y mucho más rápido de tramitar.",
+      "Depende de cuál. ACUAVALLE lo exige en sus requisitos de capacidad; el Acueducto de Bogotá y EPM piden su propio registro de proveedores. Lo que siempre aplica es inscribirse donde esa empresa te pida.",
   },
   {
     afirmacion: "Esos contratos son solo para empresas de Bogotá o Medellín.",

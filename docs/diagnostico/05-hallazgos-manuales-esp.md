@@ -49,11 +49,83 @@ Documento leído completo, no resumido por buscador.
 - **El registro se CANCELA** cuando *"se detecte que existe alteración o
   distorsión en los documentos que dieron lugar al registro"*, entre otras.
 
-## 3. ACUAVALLE — 632 procesos
+## 3. ACUAVALLE — 632 procesos ⭐ el hallazgo que corrige un error
 
-Su sitio devolvió **403** a la consulta automatizada. Publica sus procesos por
-la Ley 1712 de 2014, pero no se pudo verificar si tiene registro de proveedores
-propio ni sus requisitos. **Queda pendiente**, y conviene mirarlo a mano.
+El 403 era del WAF contra peticiones automatizadas; con un navegador real y las
+cabeceras normales, todo es público. Fuente primaria: **AP2-IN-004 Registro de
+Proveedores**, v001, bajo la **Resolución No. 00004 del 19 de enero de 2026**
+(documento de dos páginas, leído completo).
+
+**Se inscribe por correo, no por portal:** se diligencia el formato AP2-FO-033 y
+se remite a `inscripcion_proveedores@acuavalle.gov.co`. Tercer patrón distinto
+de los tres que miramos: portal propio (EAAB), plataforma de terceros (EPM,
+Ariba) y formato por correo (ACUAVALLE).
+
+### 3.1 Requisitos de capacidad (§2.3, textual)
+
+- *"Demostrar experiencia como proveedor de bienes o servicios"*.
+- ⭐ *"**Estar inscrito en el Registro Único de Proponentes** del Registro Único
+  Empresarial de la Cámara de Comercio"*.
+- ⭐ *"**No estar incurso en causal alguna de inhabilidades e
+  incompatibilidades** para contratar de conformidad con lo señalado en la Ley
+  80 de 1993, Ley 142 de 1994, Ley 689 de 2001, Ley 1150 de 2007, Ley 1474 de
+  2011, normas que sobre conflictos de intereses establece el código de
+  comercio, Ley 222 de 1995, y demás normas que rigen la materia"*.
+
+### 3.2 Documentos (§2.4)
+
+Solicitud por la página web, formato AP2-FO-033, copia del RUT, copia de la
+cédula del representante legal y **certificado de existencia y representación
+legal con fecha de expedición no mayor a 30 días**.
+
+### 3.3 Tres cosas más que conviene saber
+
+- **Estar inscrito no da derecho a nada** (§2.6, textual): la inscripción *"no
+  genera derecho adquirido, oferta mercantil, expectativa legítima ni prelación
+  alguna para contratar, no obliga a la empresa a invitar, seleccionar o
+  contratar a los inscritos"*.
+- **Actualizar es obligación del proveedor** (§2.7), igual que en EPM.
+- **Conflicto de interés declarado por escrito** (§2.8): hay que manifestar
+  parentesco hasta 2.º de consanguinidad, 2.º de afinidad o 1.º civil con el
+  representante legal de ACUAVALLE, y *"la omisión o falta de veracidad"* tiene
+  consecuencias.
+- Sus modalidades propias: *"Solicitud Privada de Varias Ofertas y Solicitud
+  Pública de Ofertas"* — confirma que cada empresa define las suyas.
+
+## 3bis. Lo que esto corrige y lo que responde
+
+### ⛔ Un error en contenido ya publicado
+
+`co-esp-v1` afirmaba en su portada: *"Sin RUP — Estas empresas contratan bajo
+derecho privado y no exigen registro de proponentes"*, y en sus mitos: *"No lo
+exigen"*. **Es falso para ACUAVALLE**, la tercera E.S.P. por volumen en nuestros
+datos, que lo pide entre sus requisitos de capacidad.
+
+Generalicé desde dos empresas —EAAB y EPM, que efectivamente no lo piden— a
+todas. Corregido en este cambio: el hecho pasa a *"El RUP, depende"* y el mito
+a explicar que depende de cuál. Es exactamente el tipo de afirmación cómoda que
+le habría costado tiempo a alguien.
+
+### ✅ Responde parte de §7.1, con documento en la mano
+
+La pregunta abierta era si el régimen de inhabilidades e incompatibilidades
+aplica a los contratos de una E.S.P. **ACUAVALLE responde que sí, y dice con
+qué normas**: Ley 80 de 1993, Ley 142 de 1994, Ley 689 de 2001, Ley 1150 de
+2007, Ley 1474 de 2011, Ley 222 de 1995 y las de conflictos de interés del
+código de comercio.
+
+Eso **no cierra §7.1** —lo que dice una empresa en su instructivo no fija el
+alcance general, y sigue faltando la parte de aportes a seguridad social— pero
+lo mueve de "no tengo idea" a "hay una entidad que lo aplica y enumera las
+normas". Cuando se cierre, esas preguntas crean `co-esp-v2`.
+
+### 💡 Un hueco nuevo: conflicto de interés
+
+El parentesco con el representante legal de la entidad (§2.8) no lo pregunta
+ningún cuestionario, y es declarable y verificable por el propio oferente.
+Queda propuesto, no aplicado: entraría en `co-esp-v2`.
+
+---
 
 ## 4. Lo referido pero NO verificado
 
