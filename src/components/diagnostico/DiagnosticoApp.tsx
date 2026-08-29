@@ -14,12 +14,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { calcularDiagnostico } from "@/src/lib/diagnostico/calcular";
-import {
-  PORTADA,
-  FACTS,
-  PREGUNTAS,
-  CATEGORIAS,
-} from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
+import { CUESTIONARIO_VIGENTE } from "@/src/lib/diagnostico/registro";
+
+// Quien entra hoy responde el cuestionario vigente. Cuando exista una variante
+// (co-esp-v1), la elección llegará como prop desde la página y esto pasará a
+// resolverse dentro del componente.
+const {
+  preguntas: PREGUNTAS,
+  categorias: CATEGORIAS,
+  portada: PORTADA,
+  facts: FACTS,
+} = CUESTIONARIO_VIGENTE;
 import type {
   RespuestasDiagnostico,
   RespuestasParciales,

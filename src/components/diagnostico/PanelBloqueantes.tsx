@@ -14,7 +14,7 @@
  */
 
 import Link from "next/link";
-import { ESCALERA, REMEDIOS } from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
+import { CUESTIONARIO_VIGENTE, getCuestionario } from "@/src/lib/diagnostico/registro";
 import type { DiagnosticoGuardado } from "@/src/lib/diagnostico/diagnostico-store";
 import { MAX_LISTADOS, restantesTexto } from "@/src/lib/diagnostico/resumen";
 
@@ -68,10 +68,15 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
     );
   }
 
-  const duros = diagnostico.bloqueantes.filter((id) => REMEDIOS[id].severidad === "hard");
+  // El catálogo de SU versión, no el vigente: los textos tienen que ser los
+  // que esa persona vio al responder.
+  const { remedios, escalera } = getCuestionario(diagnostico.version) ?? CUESTIONARIO_VIGENTE;
+  const duros = diagnostico.bloqueantes.filter((id) => remedios[id]?.severidad === "hard");
   const blandos = diagnostico.bloqueantes.length - duros.length;
-  const absolutos = diagnostico.bloqueoAbsoluto.map((id) => REMEDIOS[id].titulo);
-  const escalon = ESCALERA.find((p) => p.escalon === diagnostico.escalon);
+  const absolutos = diagnostico.bloqueoAbsoluto
+    .map((id) => remedios[id]?.titulo)
+    .filter((titulo): titulo is string => Boolean(titulo));
+  const peldano = escalera?.find((p) => p.escalon === diagnostico.escalon);
 
   return (
     <>
@@ -80,7 +85,8 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
         <div className="clr-pb-top">
           <p className="clr-pb-titulo">Tu plan de habilitación</p>
           <span className="clr-pb-meta">
-            {diagnostico.puntajeTotal}/100 · {escalon?.nombre ?? diagnostico.escalon}
+            {diagnostico.puntajeTotal}/100 ·{" "}
+            {peldano?.nombre ?? diagnostico.escalon ?? "sin escalera"}
           </span>
         </div>
 
@@ -111,8 +117,8 @@ export function PanelBloqueantes({ diagnostico }: { diagnostico: DiagnosticoGuar
                       lista con cifras distintas confunde más de lo que ayuda. */}
                   <span className="clr-pb-punto" aria-hidden="true" />
                   <span>
-                    <span className="clr-pb-item-titulo">{REMEDIOS[id].titulo}</span>
-                    <span className="clr-pb-item-chip">{REMEDIOS[id].chips.at(-1)}</span>
+                    <span className="clr-pb-item-titulo">{remedios[id].titulo}</span>
+                    <span className="clr-pb-item-chip">{remedios[id].chips.at(-1)}</span>
                   </span>
                 </li>
               ))}

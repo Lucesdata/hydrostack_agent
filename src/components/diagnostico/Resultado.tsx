@@ -14,17 +14,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  CATEGORIAS,
-  DISCLAIMER,
-  ESCALERA,
-  MITOS,
-  PLAN_SIN_PENDIENTES,
-  REMEDIOS,
-  RUTAS,
-  VEREDICTOS,
-  VEREDICTO_BLOQUEADO,
-} from "@/src/lib/diagnostico/cuestionario/co-apsb-v1";
+import { CUESTIONARIO_VIGENTE, getCuestionario } from "@/src/lib/diagnostico/registro";
 import { estadoArea } from "@/src/lib/diagnostico/calcular";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";
 import { SectorZonaSetup } from "@/src/components/oferente/SectorZonaSetup";
@@ -48,9 +38,24 @@ interface Props {
 }
 
 export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir }: Props) {
+  // El catálogo de SU versión: una fila vieja debe verse con los textos con los
+  // que se respondió. El fallback es inalcanzable en la práctica — registro.ts
+  // no retira catálogos— pero evita romper la página si alguien lo hiciera.
+  const cuestionario = getCuestionario(resultado.version) ?? CUESTIONARIO_VIGENTE;
+  const {
+    categorias,
+    remedios,
+    veredictos,
+    veredictoBloqueado,
+    planSinPendientes,
+    mitos,
+    disclaimer,
+    escalera,
+    rutas,
+  } = cuestionario;
   const bloqueado = resultado.bloqueoAbsoluto.length > 0;
-  const veredicto = bloqueado ? VEREDICTO_BLOQUEADO : VEREDICTOS[resultado.banda];
-  const pasos = resultado.bloqueantes.map((id) => REMEDIOS[id]);
+  const veredicto = bloqueado ? veredictoBloqueado : veredictos[resultado.banda];
+  const pasos = resultado.bloqueantes.map((id) => remedios[id]);
 
   return (
     <div className="clr-diag-inner clr-diag-inner--angosto">
@@ -76,7 +81,7 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         <h3>Dónde estás por área</h3>
       </div>
       <div className="clr-diag-areas">
-        {CATEGORIAS.map((categoria) => {
+        {categorias.map((categoria) => {
           const valor = resultado.puntajeAreas[categoria.id] ?? 0;
           const estado = estadoArea(valor);
           return (
@@ -94,32 +99,34 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         })}
       </div>
 
-      <section className="clr-diag-ruta">
-        <div className="clr-diag-fig">
-          <span className="clr-diag-fig-dot" />
-          <span className="clr-diag-fig-label">Por dónde empezar</span>
-        </div>
-        <h3>{RUTAS[resultado.escalon].titulo}</h3>
-        <p>{RUTAS[resultado.escalon].texto}</p>
-        <div className="clr-diag-escalera">
-          {ESCALERA.map((peldano) => {
-            const actual = peldano.escalon === resultado.escalon;
-            return (
-              <div
-                key={peldano.escalon}
-                className={`clr-diag-peldano${actual ? " is-actual" : ""}`}
-                aria-current={actual ? "step" : undefined}
-              >
-                <b>
-                  {actual ? "▸ " : ""}
-                  {peldano.nombre}
-                </b>
-                <span>{peldano.descripcion}</span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {escalera && rutas && resultado.escalon && (
+        <section className="clr-diag-ruta">
+          <div className="clr-diag-fig">
+            <span className="clr-diag-fig-dot" />
+            <span className="clr-diag-fig-label">Por dónde empezar</span>
+          </div>
+          <h3>{rutas[resultado.escalon].titulo}</h3>
+          <p>{rutas[resultado.escalon].texto}</p>
+          <div className="clr-diag-escalera">
+            {escalera.map((peldano) => {
+              const actual = peldano.escalon === resultado.escalon;
+              return (
+                <div
+                  key={peldano.escalon}
+                  className={`clr-diag-peldano${actual ? " is-actual" : ""}`}
+                  aria-current={actual ? "step" : undefined}
+                >
+                  <b>
+                    {actual ? "▸ " : ""}
+                    {peldano.nombre}
+                  </b>
+                  <span>{peldano.descripcion}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="clr-diag-sec">
         <span className="clr-diag-fig-label">B</span>
@@ -130,10 +137,10 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
           <li className="clr-diag-paso">
             <span className="clr-diag-paso-idx">01</span>
             <div>
-              <h4>{PLAN_SIN_PENDIENTES.titulo}</h4>
-              <p>{PLAN_SIN_PENDIENTES.detalle}</p>
+              <h4>{planSinPendientes.titulo}</h4>
+              <p>{planSinPendientes.detalle}</p>
               <div className="clr-diag-chips">
-                {PLAN_SIN_PENDIENTES.chips.map((chip) => (
+                {planSinPendientes.chips.map((chip) => (
                   <span key={chip} className="clr-diag-chip">
                     {chip}
                   </span>
@@ -208,7 +215,7 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         <h3>Lo que se dice y lo que es</h3>
       </div>
       <div className="clr-diag-mitos">
-        {MITOS.map((mito) => (
+        {mitos.map((mito) => (
           <div key={mito.afirmacion} className="clr-diag-mito">
             <p className="clr-diag-mito-m">&ldquo;{mito.afirmacion}&rdquo;</p>
             <p className="clr-diag-mito-r">{mito.respuesta}</p>
@@ -230,34 +237,41 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
         </button>
       </div>
 
-      <p className="clr-diag-disclaimer">{DISCLAIMER}</p>
+      <p className="clr-diag-disclaimer">{disclaimer}</p>
     </div>
   );
 }
 
 /** Texto plano del plan, para pegarlo en un correo o pasárselo al contador. */
 export function planComoTexto(resultado: ResultadoDiagnostico): string {
-  const escalon = ESCALERA.find((p) => p.escalon === resultado.escalon);
+  const cuestionario = getCuestionario(resultado.version) ?? CUESTIONARIO_VIGENTE;
+  const { remedios, veredictos, veredictoBloqueado, planSinPendientes, disclaimer } = cuestionario;
+
   const lineas = [
     "DIAGNÓSTICO DE CONTRATACIÓN PÚBLICA — AGUA Y SANEAMIENTO",
     `Nivel de preparación: ${resultado.puntajeTotal} / 100`,
-    (resultado.bloqueoAbsoluto.length > 0 ? VEREDICTO_BLOQUEADO : VEREDICTOS[resultado.banda])
+    (resultado.bloqueoAbsoluto.length > 0 ? veredictoBloqueado : veredictos[resultado.banda])
       .titulo,
     "",
-    `ESCALÓN RECOMENDADO: ${escalon?.nombre ?? resultado.escalon}`,
-    "",
-    "PLAN DE ACCIÓN:",
   ];
 
+  // Sin escalera (Ley 142) no hay escalón que recomendar: la línea se omite en
+  // vez de imprimir un "null" o un valor inventado.
+  if (resultado.escalon) {
+    const peldano = cuestionario.escalera?.find((p) => p.escalon === resultado.escalon);
+    lineas.push(`ESCALÓN RECOMENDADO: ${peldano?.nombre ?? resultado.escalon}`, "");
+  }
+  lineas.push("PLAN DE ACCIÓN:");
+
   if (resultado.bloqueantes.length === 0) {
-    lineas.push(`1. ${PLAN_SIN_PENDIENTES.titulo} — ${PLAN_SIN_PENDIENTES.detalle}`);
+    lineas.push(`1. ${planSinPendientes.titulo} — ${planSinPendientes.detalle}`);
   } else {
     resultado.bloqueantes.forEach((id, i) => {
-      lineas.push(`${i + 1}. ${REMEDIOS[id].titulo} — ${REMEDIOS[id].detalle}`);
+      lineas.push(`${i + 1}. ${remedios[id].titulo} — ${remedios[id].detalle}`);
     });
   }
 
-  lineas.push("", DISCLAIMER);
+  lineas.push("", disclaimer);
   return lineas.join("\n");
 }
 

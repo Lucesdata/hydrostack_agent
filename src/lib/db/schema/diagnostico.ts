@@ -50,8 +50,15 @@ export const diagnostico = pgTable(
     puntajeTotal: integer("puntaje_total").notNull(),
     /** CategoriaId → porcentaje 0..100 sobre el máximo de esa categoría. */
     puntajeAreas: jsonb("puntaje_areas").notNull(),
-    /** 'minima_cuantia' | 'menor_cuantia' | 'licitacion_publica' */
-    escalon: text("escalon").notNull(),
+    /**
+     * 'minima_cuantia' | 'menor_cuantia' | 'licitacion_publica', o NULL cuando
+     * el cuestionario no tiene escalera. La Ley 142 es el caso: bajo derecho
+     * privado cada empresa fija sus modalidades en su manual, así que no hay
+     * peldaños que asignar (docs/diagnostico/03-variante-ley-142.md §2).
+     * Nullable y no un centinela tipo 'no_aplica': un valor inventado se acaba
+     * colando en la UI como si fuera un escalón real.
+     */
+    escalon: text("escalon"),
     /** Ids de remedio: los hard primero, luego los soft. */
     bloqueantes: text("bloqueantes").array().notNull(),
     creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
