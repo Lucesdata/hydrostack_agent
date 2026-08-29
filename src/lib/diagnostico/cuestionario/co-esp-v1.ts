@@ -28,6 +28,20 @@
  * dos huecos de este cuestionario — códigos UNSPSC y listas restrictivas — que
  * NO dependen de la revisión jurídica pendiente.
  *
+ * VENTANA DE EDICIÓN, YA CERRADA. Este catálogo se publicó el 2026-08-29 y ese
+ * mismo día se le añadieron dos preguntas —códigos UNSPSC y listas
+ * restrictivas— editándolo EN SITIO en vez de crear una v2. Se hizo así porque
+ * en ese momento las únicas filas con `version = 'co-esp-v1'` eran de prueba,
+ * anónimas y creadas horas antes al verificarlo en el navegador; se borraron
+ * junto con el cambio. Mismo criterio, y mismo tipo de ventana, que el rename
+ * de la clave del `clientStore` (src/lib/state/clientStore.ts).
+ *
+ * Esa ventana está cerrada. De aquí en adelante este archivo se trata como
+ * `co-apsb-v1`: congelado. Añadir o quitar preguntas crea `co-esp-v2`, porque
+ * una fila guardada con menos respuestas leída con un catálogo más grande
+ * muestra áreas en "pendiente" que el usuario nunca respondió — verificado en
+ * pantalla, que es como se detectó.
+ *
  * Sin escalera y sin RUP: la Ley 142 no tiene peldaños (03-variante-ley-142 §2)
  * y estas empresas no exigen registro de proponentes. El resultado lleva
  * `escalon: null` y `estadoRup: null`.
@@ -49,6 +63,7 @@ export const VERSION_CO_ESP_V1 = "co-esp-v1";
 
 export const CATEGORIAS_ESP: readonly Categoria[] = [
   { id: "registro", label: "Registro ante la empresa" },
+  { id: "juridica", label: "Situación jurídica" },
   { id: "experiencia", label: "Experiencia" },
   { id: "financiera", label: "Capacidad financiera" },
   { id: "tecnica", label: "Capacidad técnica" },
@@ -69,6 +84,18 @@ export const PREGUNTAS_ESP: readonly Pregunta[] = [
       { texto: "Me inscribí pero no sé si sigue activo", puntos: 6, flag: "registro_dudoso" },
       { texto: "No, todavía no", puntos: 1, flag: "registro_no" },
       { texto: "No sabía que existía", puntos: 0, flag: "registro_no" },
+    ],
+  },
+  {
+    key: "unspsc",
+    categoria: "registro",
+    texto: "¿Sabes bajo qué códigos UNSPSC quedaste clasificado en el registro?",
+    ayuda:
+      "El registro del Acueducto de Bogotá organiza a sus proveedores por los códigos estándar de Naciones Unidas. Si tu actividad no está bajo el código que la empresa consulta, no apareces cuando buscan a quién invitar — y eso pasa aunque estés inscrito.",
+    opciones: [
+      { texto: "Sí, los revisé y cubren lo que hacemos", puntos: 10 },
+      { texto: "Estoy inscrito pero no sé cuáles quedaron", puntos: 5, flag: "unspsc_esp" },
+      { texto: "No sé qué son", puntos: 1, flag: "unspsc_esp" },
     ],
   },
   {
@@ -125,6 +152,19 @@ export const PREGUNTAS_ESP: readonly Pregunta[] = [
     ],
   },
   {
+    key: "listas",
+    categoria: "juridica",
+    texto:
+      "¿Han verificado que la empresa y su representante legal no estén en listas restrictivas?",
+    ayuda:
+      "OFAC (la llamada Lista Clinton), Naciones Unidas, Banco Mundial y BID. El Grupo EPM suspende el registro de quien aparezca en ellas. La consulta es gratuita y se hace en línea.",
+    opciones: [
+      { texto: "Sí, verificados y limpios", puntos: 10 },
+      { texto: "Nunca los hemos revisado", puntos: 4, flag: "listas_rev" },
+      { texto: "Sabemos que hay un reporte", puntos: 0, flag: "listas_si" },
+    ],
+  },
+  {
     key: "puerta",
     categoria: "estrategia",
     texto: "¿Has hablado con el área que contrata, o solo esperas la invitación?",
@@ -165,6 +205,33 @@ export const REMEDIOS_ESP: Readonly<Record<RemedioId, Remedio>> = {
     detalle:
       "Ganar un contrato que no puedes financiar es peor que no ganarlo: responde con su patrimonio y su reputación. Consigue cupo de crédito o preséntate en unión con alguien que lo tenga, antes de presentar la oferta.",
     chips: ["Antes de ofertar"],
+  },
+  listas_si: {
+    id: "listas_si",
+    severidad: "hard",
+    absoluto: true,
+    titulo: "Resuelve primero el reporte en la lista restrictiva",
+    detalle:
+      "Mientras la empresa o su representante legal figure en OFAC, ONU, Banco Mundial o BID, el registro queda suspendido y ninguna oferta avanza. Verifica el origen del reporte y gestiona la exclusión; si no se puede levantar, evalúa cambiar la representación legal.",
+    chips: ["Bloqueante", "OFAC · ONU · BM · BID"],
+  },
+  unspsc_esp: {
+    id: "unspsc_esp",
+    severidad: "soft",
+    absoluto: false,
+    titulo: "Revisa bajo qué códigos UNSPSC quedaste clasificado",
+    detalle:
+      "Entra a tu perfil en el registro y compara los códigos inscritos con los del tipo de contrato que te interesa. Estar inscrito bajo el código equivocado equivale a no estar: la empresa filtra por ahí cuando arma la lista de invitados.",
+    chips: ["1 hora"],
+  },
+  listas_rev: {
+    id: "listas_rev",
+    severidad: "soft",
+    absoluto: false,
+    titulo: "Consulta las listas restrictivas antes de cada oferta",
+    detalle:
+      "OFAC, ONU, Banco Mundial y BID publican sus listas en línea y la consulta no cuesta nada. Revisa la empresa y el representante legal: es media hora que evita que te suspendan el registro sin enterarte.",
+    chips: ["Gratis", "30 minutos"],
   },
   registro_dudoso: {
     id: "registro_dudoso",
@@ -247,6 +314,17 @@ export const PLAN_SIN_PENDIENTES_ESP = {
   chips: ["Esta semana"],
 } as const;
 
+/**
+ * Con `listas_si` el cuestionario ya tiene un bloqueante absoluto, así que este
+ * titular deja de ser opcional — hay un test del registro que lo exige.
+ */
+export const VEREDICTO_BLOQUEADO_ESP: TextoVeredicto = {
+  antetitulo: "Bloqueado",
+  titulo: "Hay un reporte que te deja fuera, aunque el resto esté listo.",
+  texto:
+    "Tu puntaje refleja todo lo que ya tienes resuelto y este bloqueo no lo baja. Pero mientras figures en una lista restrictiva, el registro queda suspendido y ninguna oferta avanza. Lo encuentras primero en tu plan de acción.",
+};
+
 export const VEREDICTOS_ESP: Readonly<Record<BandaPreparacion, TextoVeredicto>> = {
   listo: {
     antetitulo: "Listo",
@@ -280,7 +358,7 @@ export const VEREDICTOS_ESP: Readonly<Record<BandaPreparacion, TextoVeredicto>> 
  * no pueden sostener.
  */
 export const ADVERTENCIA_ESP =
-  "Este diagnóstico no cubre inhabilidades e incompatibilidades ni el pago de aportes a seguridad social, que son dos causas frecuentes de rechazo. Verifícalos aparte antes de presentar cualquier oferta, por alto que sea tu puntaje aquí.";
+  "Este diagnóstico no cubre el régimen de inhabilidades e incompatibilidades ni el pago de aportes a seguridad social. Verifícalos aparte antes de presentar cualquier oferta, por alto que sea tu puntaje aquí.";
 
 export const FACTS_ESP: readonly Fact[] = [
   {
@@ -298,7 +376,7 @@ export const FACTS_ESP: readonly Fact[] = [
 ];
 
 export const PORTADA_ESP = {
-  antetitulo: "6 preguntas · 2 minutos",
+  antetitulo: "8 preguntas · 3 minutos",
   titulo: "Averigua si ya puedes venderle a una empresa de servicios públicos.",
   tituloEnfasis: "ya puedes",
   lede: "Los acueductos y las empresas de aseo contratan con reglas propias, no con las de una alcaldía. Esto te dice qué miran, qué te falta y por dónde se entra.",
@@ -343,6 +421,7 @@ export const CUESTIONARIO_CO_ESP_V1: Cuestionario = {
   planSinPendientes: PLAN_SIN_PENDIENTES_ESP,
   mitos: MITOS_ESP,
   disclaimer: DISCLAIMER_ESP,
+  veredictoBloqueado: VEREDICTO_BLOQUEADO_ESP,
   advertencia: ADVERTENCIA_ESP,
   otraVariante: {
     texto: "¿Le vendes a una alcaldía o a una gobernación? Ese diagnóstico es el otro.",

@@ -121,7 +121,16 @@ describe("POST /api/diagnostico", () => {
   });
 
   it("acepta una variante registrada y guarda con SU versión", async () => {
-    const respuestasEsp = { registro: 0, exp: 0, fin: 0, flujo: 0, tec: 0, puerta: 0 };
+    const respuestasEsp = {
+      registro: 0,
+      unspsc: 0,
+      exp: 0,
+      fin: 0,
+      flujo: 0,
+      tec: 0,
+      listas: 0,
+      puerta: 0,
+    };
     const res = await POST(post({ respuestas: respuestasEsp, version: "co-esp-v1" }));
     const body = await res.json();
 
