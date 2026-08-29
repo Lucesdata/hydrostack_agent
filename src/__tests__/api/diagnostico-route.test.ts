@@ -120,6 +120,32 @@ describe("POST /api/diagnostico", () => {
     expect(body.resultado.puntajeTotal).toBe(100);
   });
 
+  it("acepta una variante registrada y guarda con SU versión", async () => {
+    const respuestasEsp = { registro: 0, exp: 0, fin: 0, flujo: 0, tec: 0, puerta: 0 };
+    const res = await POST(post({ respuestas: respuestasEsp, version: "co-esp-v1" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.resultado.version).toBe("co-esp-v1");
+    // Sin escalera: no se inventa un escalón de la Ley 80.
+    expect(body.resultado.escalon).toBeNull();
+    expect(mockGuardar.mock.calls[0][0].resultado.version).toBe("co-esp-v1");
+  });
+
+  it("400 ante una versión desconocida, sin caer al cuestionario vigente", async () => {
+    // Un fallback silencioso guardaría respuestas de un cuestionario bajo la
+    // versión de otro, y el resultado quedaría ilegible para siempre.
+    const res = await POST(post({ respuestas: RESPUESTAS, version: "co-esp-v99" }));
+    expect(res.status).toBe(400);
+    expect(mockGuardar).not.toHaveBeenCalled();
+  });
+
+  it("400 si las respuestas son de otro cuestionario que el declarado", async () => {
+    const res = await POST(post({ respuestas: RESPUESTAS, version: "co-esp-v1" }));
+    expect(res.status).toBe(400);
+    expect(mockGuardar).not.toHaveBeenCalled();
+  });
+
   it("nunca redirige: siempre responde JSON", async () => {
     // Un redirect de middleware rompería este fetch (ver docstring del route).
     mockGuardar.mockResolvedValueOnce({ ok: false, error: "DB_UNAVAILABLE" });

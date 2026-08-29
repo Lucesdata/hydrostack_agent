@@ -2,6 +2,24 @@
 
 **Fecha:** 2026-08-29 · Camino (A) de [`03-variante-ley-142.md`](03-variante-ley-142.md).
 
+> ## ✅ VERSIÓN RECORTADA IMPLEMENTADA (2026-08-29)
+>
+> `co-esp-v1` está en el repo con **6 de las 8 preguntas**: las que no dependen
+> de una interpretación jurídica pendiente. Se accede en
+> `/diagnostico?v=co-esp-v1`.
+>
+> **Faltan las dos de §7.1** —inhabilidades y aportes a seguridad social— y con
+> ellas los **dos bloqueantes absolutos**. Consecuencia que hay que mirar de
+> frente: hoy este cuestionario **no puede decirle a nadie "esto te deja
+> fuera"**, y una empresa con una inhabilidad activa sacaría "listo". Es el
+> mismo defecto que se le encontró al prototipo de `co-apsb-v1`
+> ([02-cuestionario §5.1](02-cuestionario-co-apsb-v1.md)), así que el resultado
+> lleva una **advertencia de alcance** junto al veredicto —no en la letra
+> pequeña— diciendo exactamente qué no cubre.
+>
+> Cuando §7.1 tenga respuesta, añadir las dos preguntas es editar este catálogo
+> y quitar la advertencia.
+
 > ## ⚠️ ESTE CONTENIDO NO ESTÁ VALIDADO
 >
 > `co-apsb-v1` se copió literal de un prototipo **ya validado normativamente**.

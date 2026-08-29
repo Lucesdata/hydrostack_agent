@@ -168,7 +168,18 @@ export const DIAGNOSTICO_CSS = `
 .clr-diag-veredicto--bloqueado{ border-top-color: var(--danger); }
 .clr-diag-veredicto--bloqueado .clr-diag-fig-dot{ background: var(--danger); }
 .clr-diag-veredicto--bloqueado .clr-diag-fig-label{ color: var(--danger); }
-.clr-diag-puntaje{ font: 12px var(--font-mono); color: var(--ink-300); margin-top: 14px; }
+.clr-diag-otra{
+    margin-top: 18px; font-size: 12.5px; line-height: 1.55; color: var(--ink-600);
+    max-width: 46ch;
+  }
+  .clr-diag-otra a{ color: var(--accent); border-bottom: 1px solid rgba(3,105,161,.35); }
+  .clr-diag-advertencia{
+    margin-top: 14px; padding: 11px 13px;
+    border: 1px solid rgba(217,119,6,.3); border-left: 2px solid var(--warning);
+    background: rgba(217,119,6,.05); border-radius: var(--radius-md);
+    font-size: 12.5px; line-height: 1.55; color: var(--ink-900);
+  }
+  .clr-diag-puntaje{ font: 12px var(--font-mono); color: var(--ink-300); margin-top: 14px; }
 
 .clr-diag-sec{
   display: flex; align-items: baseline; gap: 14px;

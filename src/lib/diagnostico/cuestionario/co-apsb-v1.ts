@@ -524,4 +524,9 @@ export const CUESTIONARIO_CO_APSB_V1: Cuestionario = {
   disclaimer: DISCLAIMER,
   escalera: ESCALERA,
   rutas: RUTAS,
+  otraVariante: {
+    texto:
+      "¿Le vendes a un acueducto o a una empresa de servicios públicos? Esas contratan con otras reglas.",
+    version: "co-esp-v1",
+  },
 };

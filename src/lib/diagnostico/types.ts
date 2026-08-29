@@ -229,8 +229,24 @@ export interface Cuestionario {
   portada: Portada;
   /** Las afirmaciones que desmontan la barrera de entrada, en la portada. */
   facts: readonly Fact[];
-  /** Sobreescribe el titular de la banda cuando hay un bloqueante absoluto. */
-  veredictoBloqueado: TextoVeredicto;
+  /**
+   * Sobreescribe el titular de la banda cuando hay un bloqueante absoluto.
+   * Opcional: un cuestionario que no declara ningún remedio `absoluto` no lo
+   * necesita, y exigirlo obligaría a escribir texto muerto. Hay un test que
+   * comprueba lo inverso — si declaras un absoluto, esto es obligatorio.
+   */
+  veredictoBloqueado?: TextoVeredicto;
+  /**
+   * La otra puerta: el cuestionario que le corresponde a quien se equivocó de
+   * variante. Se ofrece en la portada, porque descubrirlo al final ya es tarde.
+   */
+  otraVariante?: { texto: string; version: string };
+  /**
+   * Límite de alcance, mostrado junto al veredicto. Para cuestionarios que a
+   * propósito no preguntan algo decisivo: callarlo convertiría un "listo" en
+   * una promesa que el cuestionario no puede sostener.
+   */
+  advertencia?: string;
   /** Qué decir cuando no se disparó ningún remedio. */
   planSinPendientes: Remedio2;
   mitos: readonly Mito[];
