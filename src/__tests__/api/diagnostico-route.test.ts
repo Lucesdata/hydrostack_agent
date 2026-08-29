@@ -15,11 +15,15 @@ vi.mock("@/src/lib/signals/record-signal", () => ({
 }));
 
 const mockGuardar = vi.fn();
+const mockVigente = vi.fn();
+const mockPorToken = vi.fn();
 vi.mock("@/src/lib/diagnostico/diagnostico-store", () => ({
   guardarDiagnostico: (...args: unknown[]) => mockGuardar(...args),
+  getDiagnosticoVigente: (...args: unknown[]) => mockVigente(...args),
+  getDiagnosticoPorSessionToken: (...args: unknown[]) => mockPorToken(...args),
 }));
 
-import { POST } from "@/app/api/diagnostico/route";
+import { GET, POST } from "@/app/api/diagnostico/route";
 import { DIAGNOSTICO_COOKIE, nuevoSessionToken } from "@/src/lib/diagnostico/session-token";
 import type { RespuestasDiagnostico } from "@/src/lib/diagnostico/types";
 
@@ -50,6 +54,55 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.mockResolvedValue(null);
   mockGuardar.mockResolvedValue({ ok: true, id: "d1" });
+});
+
+describe("GET /api/diagnostico — el escalón para anotar el explorador", () => {
+  const get = (cookie?: string) => {
+    const req = new NextRequest("http://localhost/api/diagnostico");
+    if (cookie) req.cookies.set(DIAGNOSTICO_COOKIE, cookie);
+    return req;
+  };
+
+  it("devuelve el escalón de la cuenta con sesión", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    mockVigente.mockResolvedValue({ escalon: "menor_cuantia", version: "co-apsb-v1" });
+    const body = await (await GET(get())).json();
+
+    expect(body).toEqual({ escalon: "menor_cuantia", version: "co-apsb-v1" });
+    expect(mockVigente).toHaveBeenCalledWith("u1");
+    expect(mockPorToken).not.toHaveBeenCalled();
+  });
+
+  it("sin sesión, lo resuelve por la cookie del anónimo", async () => {
+    const token = nuevoSessionToken();
+    mockPorToken.mockResolvedValue({ escalon: "minima_cuantia", version: "co-apsb-v1" });
+    const body = await (await GET(get(token))).json();
+
+    expect(body.escalon).toBe("minima_cuantia");
+    expect(mockPorToken).toHaveBeenCalledWith(token);
+  });
+
+  it("devuelve nulls —nunca 401— cuando no hay diagnóstico", async () => {
+    // Es un adorno del explorador, no una función que se pueda gatear.
+    const res = await GET(get());
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ escalon: null, version: null });
+  });
+
+  it("un cuestionario sin escalera devuelve escalon null, no un valor inventado", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    mockVigente.mockResolvedValue({ escalon: null, version: "co-esp-v1" });
+    const body = await (await GET(get())).json();
+    expect(body).toEqual({ escalon: null, version: "co-esp-v1" });
+  });
+
+  it("una base caída no tumba el explorador", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    mockVigente.mockRejectedValue(new Error("connection refused"));
+    const res = await GET(get());
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ escalon: null, version: null });
+  });
 });
 
 describe("POST /api/diagnostico", () => {

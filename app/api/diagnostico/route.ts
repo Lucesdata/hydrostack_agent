@@ -19,7 +19,11 @@ import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 import { calcularDiagnostico, parseRespuestas } from "@/src/lib/diagnostico/calcular";
 import { CUESTIONARIO_VIGENTE, getCuestionario } from "@/src/lib/diagnostico/registro";
-import { guardarDiagnostico } from "@/src/lib/diagnostico/diagnostico-store";
+import {
+  getDiagnosticoPorSessionToken,
+  getDiagnosticoVigente,
+  guardarDiagnostico,
+} from "@/src/lib/diagnostico/diagnostico-store";
 import {
   escribirSessionToken,
   leerSessionToken,
@@ -27,6 +31,40 @@ import {
 } from "@/src/lib/diagnostico/session-token";
 
 export const runtime = "nodejs";
+
+/**
+ * GET — el escalón del visitante, y nada más.
+ *
+ * Lo consume `/licitaciones/explorar`, que es una página estática con un
+ * componente cliente: pedirlo por aquí evita volverla dinámica solo para
+ * adornar unas tarjetas. Devuelve exclusivamente el escalón y la versión; el
+ * resto del diagnóstico no tiene por qué viajar para esto.
+ *
+ * Nunca responde 401: sin diagnóstico devuelve nulls, porque es un adorno del
+ * explorador y no una función que se pueda gatear.
+ */
+export async function GET(req: NextRequest) {
+  const vacio = { escalon: null, version: null };
+  try {
+    const user = await getSessionUser();
+    const diagnostico = user ? await getDiagnosticoVigente(user.id) : await porCookie(req);
+
+    if (!diagnostico) return NextResponse.json(vacio);
+    return NextResponse.json({
+      escalon: diagnostico.escalon,
+      version: diagnostico.version,
+    });
+  } catch {
+    // La base caída no puede tumbar el explorador: se comporta como si no
+    // hubiera diagnóstico.
+    return NextResponse.json(vacio);
+  }
+}
+
+async function porCookie(req: NextRequest) {
+  const token = leerSessionToken(req);
+  return token ? getDiagnosticoPorSessionToken(token) : null;
+}
 
 export async function POST(req: NextRequest) {
   let body: unknown;

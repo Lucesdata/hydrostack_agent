@@ -10,6 +10,9 @@
 import { useState } from "react";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { Verdict, GateStatus } from "@/src/lib/secop/verdict";
+import { avisoEscalon } from "@/src/lib/diagnostico/modalidad";
+import { avisoRegimenPrivado } from "@/src/lib/diagnostico/regimen-especial";
+import type { EscalonContratacion } from "@/src/lib/diagnostico/types";
 import { formatCopFull, sentenceCaseTitle, verdictScore } from "./format";
 import type { ProcesoVeredicto } from "./ProcessList";
 
@@ -52,6 +55,13 @@ interface Props {
   verdictLoading?: boolean;
   /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
   hasPerfil: boolean;
+  /**
+   * Escalón del diagnóstico, si lo hay. Solo sirve para anotar la modalidad:
+   * avisar cuando el proceso exige más de lo que el oferente alcanza hoy, o
+   * que la entidad contrata bajo derecho privado y su escalón no aplica ahí.
+   * `null` = sin diagnóstico, y entonces no se anota nada.
+   */
+  escalonOferente: EscalonContratacion | null;
   /** Hay perfil base pero sin experiencia RUP cargada: el CTA abre RupWizard en vez de OferenteWizard. */
   faltaExperiencia: boolean;
   onRequestPerfil: () => void;
@@ -65,10 +75,16 @@ export default function ProcessDetail({
   verdict: v,
   verdictLoading,
   hasPerfil,
+  escalonOferente,
   faltaExperiencia,
   onRequestPerfil,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  // Dos anotaciones excluyentes sobre la modalidad, ambas solo con diagnóstico:
+  // el proceso exige más de lo que alcanzas, o la entidad no está en la
+  // escalera porque contrata bajo derecho privado (Ley 142).
+  const avisoNivel = escalonOferente ? avisoEscalon(escalonOferente, p.modalidad) : null;
+  const avisoPrivado = escalonOferente ? avisoRegimenPrivado(p.modalidad, p.entidad) : null;
   const { pass: passCount, total: gateTotal } = v
     ? verdictScore(v)
     : { pass: 0, total: GATE_LABEL.length };
@@ -86,6 +102,8 @@ export default function ProcessDetail({
           {(p.estadoApertura ?? p.estado ?? "—").toUpperCase()}
         </span>
         {p.modalidad && <span className="clr-badge clr-badge--neutral">{p.modalidad}</span>}
+        {avisoNivel && <span className="clr-badge clr-badge--warning">{avisoNivel}</span>}
+        {avisoPrivado && <span className="clr-badge clr-badge--neutral">{avisoPrivado}</span>}
         {p.tipoContrato && <span className="clr-badge clr-badge--neutral">{p.tipoContrato}</span>}
       </div>
 

@@ -21,6 +21,7 @@ import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
 import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientStore";
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
+import type { EscalonContratacion } from "@/src/lib/diagnostico/types";
 import OferenteWizard from "./OferenteWizard";
 import RupWizard from "./RupWizard";
 import LicitacionesTabs from "./LicitacionesTabs";
@@ -85,6 +86,25 @@ export default function SecopExplorer() {
   // casos (lo determina la respuesta de GET /api/perfil, sin next-auth/react ni
   // SessionProvider — el resto del árbol sigue igual).
   const [hasSession, setHasSession] = useState(false);
+  /**
+   * Escalón del diagnóstico, para avisar cuando un proceso exige más de lo que
+   * el oferente alcanza hoy. Aparte del perfil: son dos cosas distintas y el
+   * explorador funciona igual sin esto.
+   */
+  const [escalonOferente, setEscalonOferente] = useState<EscalonContratacion | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/diagnostico");
+        if (!res.ok) return;
+        const { escalon } = (await res.json()) as { escalon: EscalonContratacion | null };
+        setEscalonOferente(escalon);
+      } catch {
+        /* sin diagnóstico o sin red: el explorador no cambia */
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const local = getOferentePerfil();
@@ -435,6 +455,7 @@ export default function SecopExplorer() {
                 verdict={verdicts[selected.id]}
                 verdictLoading={!!verdictLoading[selected.id]}
                 hasPerfil={!!perfil}
+                escalonOferente={escalonOferente}
                 faltaExperiencia={!!perfil && !perfil.experiencia?.length}
                 onRequestPerfil={() => {
                   if (!hasSession) {
