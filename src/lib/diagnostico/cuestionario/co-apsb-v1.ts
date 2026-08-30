@@ -516,6 +516,7 @@ export const CUESTIONARIO_CO_APSB_V1: Cuestionario = {
   veredictos: VEREDICTOS,
   escalon: escalonCoApsbV1,
   estadoRup: estadoRupCoApsbV1,
+  etiqueta: "Entidades estatales · Ley 80",
   portada: PORTADA,
   facts: FACTS,
   veredictoBloqueado: VEREDICTO_BLOQUEADO,

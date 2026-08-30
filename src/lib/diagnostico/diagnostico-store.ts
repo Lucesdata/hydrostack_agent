@@ -146,6 +146,24 @@ export async function getDiagnosticoVigente(
   return fila ? mapDiagnosticoRow(fila as FilaDiagnostico) : null;
 }
 
+/**
+ * Todos los diagnósticos de una cuenta, del más reciente al más antiguo.
+ * `limite` acota lo que se pinta; el histórico completo sigue en la tabla.
+ */
+export async function getHistorialDiagnosticos(
+  usuarioId: string,
+  limite = 20
+): Promise<DiagnosticoGuardado[]> {
+  const filas = await db
+    .select(COLUMNAS)
+    .from(diagnostico)
+    .where(eq(diagnostico.usuarioId, usuarioId))
+    .orderBy(desc(diagnostico.creadoEn))
+    .limit(limite);
+
+  return filas.map((f) => mapDiagnosticoRow(f as FilaDiagnostico));
+}
+
 /** El más reciente de un visitante anónimo, para que al volver encuentre lo suyo. */
 export async function getDiagnosticoPorSessionToken(
   sessionToken: string

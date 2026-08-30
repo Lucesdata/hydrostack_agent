@@ -226,6 +226,12 @@ export interface Cuestionario {
   // pertenece al cuestionario que se respondió, y una fila vieja debe seguir
   // viéndose con los textos de SU versión.
 
+  /**
+   * Nombre corto de la variante, para distinguirla de un vistazo donde
+   * conviven varias — el historial, por ejemplo. La promesa de la portada
+   * ("8 preguntas · 3 minutos") no sirve: no dice cuál es cuál.
+   */
+  etiqueta: string;
   portada: Portada;
   /** Las afirmaciones que desmontan la barrera de entrada, en la portada. */
   facts: readonly Fact[];

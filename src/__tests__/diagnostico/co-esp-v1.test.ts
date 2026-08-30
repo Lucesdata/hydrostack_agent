@@ -29,6 +29,8 @@ describe("invariantes de TODOS los cuestionarios registrados", () => {
 
     expect(c.version).toBe(version);
     expect(c.preguntas.length).toBeGreaterThan(0);
+    // Sin etiqueta no se distinguen las variantes donde conviven (el historial).
+    expect(c.etiqueta.length).toBeGreaterThan(0);
 
     const categorias = new Set(c.categorias.map((x) => x.id));
     const flagsPorPregunta = new Map<string, Set<string>>();

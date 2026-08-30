@@ -19,6 +19,7 @@ import type { Cuestionario, RespuestasDiagnostico } from "@/src/lib/diagnostico/
  */
 const SIN_ESCALERA: Cuestionario = {
   version: "test-sin-escalera",
+  etiqueta: "Cuestionario de prueba",
   categorias: [
     { id: "a", label: "Área A" },
     { id: "b", label: "Área B" },

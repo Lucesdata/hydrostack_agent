@@ -209,7 +209,12 @@ export function Resultado({ resultado, guardado, anonimo, tienePerfil, onRepetir
           <SectorZonaSetup />
         </section>
       ) : (
-        guardado && <p className="clr-diag-guardado">Guardado en tu cuenta</p>
+        guardado && (
+          <p className="clr-diag-guardado">
+            Guardado en tu cuenta ·{" "}
+            <Link href="/diagnostico/historial">Compáralo con los anteriores</Link>
+          </p>
+        )
       )}
 
       <div className="clr-diag-sec">
