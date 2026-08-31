@@ -34,6 +34,16 @@ export const usuario = pgTable("usuario", {
   email: text("email").notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  /**
+   * Nivel de acceso de la cuenta: 'gratis' | 'pro' — ver
+   * `src/lib/acceso/politica.ts`. `text` y no enum por la misma razón que
+   * `envio_log.tipo`: agregar un valor no debe pedir migración.
+   *
+   * Hoy toda cuenta es 'gratis' y ningún handler la lee: la frontera de `pro`
+   * (pliego_extraer, asistentes) está declarada en la política pero no
+   * aplicada, y esas rutas ya exigen cuenta por `PROTECTED_PREFIXES`.
+   */
+  plan: text("plan").notNull().default("gratis"),
 }).enableRLS();
 
 /**
