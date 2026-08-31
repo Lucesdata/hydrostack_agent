@@ -30,6 +30,7 @@ export type Capacidad =
   | "veredicto_resumen"
   | "veredicto_detalle"
   | "diagnostico"
+  | "diagnostico_historial"
   | "perfil_guardar"
   | "coincidencias"
   | "alertas"
@@ -44,6 +45,12 @@ export type Capacidad =
  * `pliego_extraer` y `asistentes` están en `pro` pero la frontera todavía no se
  * aplica: hoy esas rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso
  * siguen. Activarlas es cambiar sus handlers para consultar `puede()`.
+ *
+ * `diagnostico` es anónimo pero `diagnostico_historial` no: responder no pide
+ * cuenta, comparar tus respuestas en el tiempo sí — no hay historial sin a
+ * quién atribuirlo. La ruta ya está en `PROTECTED_PREFIXES`; esta fila es lo
+ * que evita que la tabla y el middleware vuelvan a contradecirse, que es
+ * exactamente lo que este módulo existe para impedir.
  */
 const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   explorar: "anonimo",
@@ -51,6 +58,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   veredicto_resumen: "anonimo",
   veredicto_detalle: "gratis",
   diagnostico: "anonimo",
+  diagnostico_historial: "gratis",
   perfil_guardar: "gratis",
   coincidencias: "gratis",
   alertas: "gratis",
@@ -58,12 +66,21 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   asistentes: "pro",
 };
 
+/** Todas las capacidades, para iterarlas sin repetir la lista a mano. */
+export const CAPACIDADES = Object.keys(NIVEL_MINIMO) as Capacidad[];
+
 /**
  * El nivel de quien hace la petición. La sesión manda: sin usuario es
  * `anonimo` aunque llegue un plan por parámetro. Un plan desconocido degrada a
  * `gratis` — nunca se otorga `pro` por un valor que no reconocemos.
+ *
+ * `plan` es OBLIGATORIO, aunque acepte `null`. Siendo opcional, quien olvidara
+ * consultarlo obtendría `gratis` en silencio y un cliente de pago se quedaría
+ * sin lo que paga sin que nadie se entere: falla cerrado, que es lo seguro,
+ * pero falla. Exigirlo obliga a decidir en cada llamador — `null` explícito en
+ * las rutas que no necesitan mirar la base, que hoy son todas.
  */
-export function nivelDe(user: SessionUser | null, plan?: string | null): Nivel {
+export function nivelDe(user: SessionUser | null, plan: string | null): Nivel {
   if (!user) return "anonimo";
   return plan === "pro" ? "pro" : "gratis";
 }

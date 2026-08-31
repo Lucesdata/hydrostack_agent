@@ -1,15 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { nivelDe, puede, type Capacidad, type Nivel } from "@/src/lib/acceso/politica";
+import { CAPACIDADES, nivelDe, puede, type Capacidad } from "@/src/lib/acceso/politica";
 
 const USUARIO = { id: "u1", email: "u1@example.com" };
 
 describe("nivelDe", () => {
   it("sin usuario es anonimo", () => {
-    expect(nivelDe(null)).toBe("anonimo");
+    expect(nivelDe(null, null)).toBe("anonimo");
   });
 
-  it("con usuario y sin plan explícito es gratis", () => {
-    expect(nivelDe(USUARIO)).toBe("gratis");
+  it("con usuario y sin plan en la fila es gratis", () => {
+    expect(nivelDe(USUARIO, null)).toBe("gratis");
   });
 
   it("con usuario y plan 'gratis' es gratis", () => {
@@ -22,7 +22,7 @@ describe("nivelDe", () => {
 
   it("un plan desconocido degrada a gratis, no a pro", () => {
     expect(nivelDe(USUARIO, "enterprise")).toBe("gratis");
-    expect(nivelDe(USUARIO, null)).toBe("gratis");
+    expect(nivelDe(USUARIO, "")).toBe("gratis");
   });
 
   it("un plan sin usuario sigue siendo anonimo: la sesión manda", () => {
@@ -31,14 +31,10 @@ describe("nivelDe", () => {
 });
 
 describe("puede", () => {
-  const abiertas: Capacidad[] = [
-    "explorar",
-    "detalle_proceso",
-    "veredicto_resumen",
-    "diagnostico",
-  ];
+  const abiertas: Capacidad[] = ["explorar", "detalle_proceso", "veredicto_resumen", "diagnostico"];
   const conCuenta: Capacidad[] = [
     "veredicto_detalle",
+    "diagnostico_historial",
     "perfil_guardar",
     "coincidencias",
     "alertas",
@@ -61,13 +57,12 @@ describe("puede", () => {
     }
   });
 
-  it("es monótona: lo que puede un nivel lo puede el siguiente", () => {
-    const orden: Nivel[] = ["anonimo", "gratis", "pro"];
-    const todas: Capacidad[] = [...abiertas, ...conCuenta, ...dePago];
-    for (let i = 0; i < orden.length - 1; i++) {
-      for (const cap of todas) {
-        if (puede(orden[i], cap)) expect(puede(orden[i + 1], cap)).toBe(true);
-      }
-    }
+  it("los tres grupos cubren TODAS las capacidades", () => {
+    // Sustituye a un test de monotonía que no podía fallar: `puede` es una
+    // comparación ordinal, así que ninguna tabla la rompe. Esto sí protege —
+    // añadir una capacidad sin clasificarla arriba deja su nivel sin probar, y
+    // fue exactamente lo que pasó con `diagnostico_historial`.
+    const clasificadas = [...abiertas, ...conCuenta, ...dePago].sort();
+    expect(clasificadas).toEqual([...CAPACIDADES].sort());
   });
 });
