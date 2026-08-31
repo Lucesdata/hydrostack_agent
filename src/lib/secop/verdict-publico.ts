@@ -88,12 +88,13 @@ export function redactarVerdict(v: Verdict): VerdictPublico {
 }
 
 /**
- * Type guard nombrado y no `"redactado" in g && g.redactado` en línea: con
- * `razonDe` exportada, TypeScript no reduce la unión tras ese chequeo en línea
- * (dos condiciones encadenadas sobre una intersección) y `g.reason` en el
- * siguiente `return` queda sin resolver — falso `error TS2339` que solo
- * aparece en `tsc`/`next build`, nunca en vitest (no type-checkea). Un
- * predicado con firma `g is X` sí lo reduce.
+ * Type guard nombrado y no `"redactado" in g && g.redactado` en línea: con esa
+ * forma de unión (miembros que son intersecciones), TypeScript no reduce el
+ * tipo a partir de una condición compuesta — un chequeo `in` encadenado con
+ * una igualdad booleana — así que `g.reason` en el siguiente `return` queda
+ * sin resolver: falso `error TS2339` que solo aparece en `tsc`/`next build`,
+ * nunca en vitest (no type-checkea). Un predicado con firma `g is X` sí
+ * reduce la unión.
  */
 function esRedactado(
   g: GateResult | GateResultPublico
