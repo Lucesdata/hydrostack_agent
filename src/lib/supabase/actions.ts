@@ -59,12 +59,16 @@ export async function signUpAction(formData: FormData): Promise<void> {
 
   if (data.user) {
     await syncUsuario(data.user);
-    // Solo tiene efecto si el alta abrió sesión de una vez; si hay que
-    // verificar el correo, el reclamo ocurre en /auth/callback.
-    await reclamarDiagnosticoAnonimo(data.user.id);
   }
 
-  if (data.session) {
+  // El reclamo va DENTRO de la rama con sesión, y no antes, a propósito. Con
+  // la confirmación por correo activa, Supabase devuelve `user` pero
+  // `session: null`: reclamar ahí le asignaría el diagnóstico a una cuenta que
+  // todavía no puede entrar y, peor, borraría la cookie del anónimo — su
+  // resultado desaparecería del navegador hasta que verificara el correo. En
+  // ese caso el reclamo le toca a /auth/callback, que es por donde vuelve.
+  if (data.session && data.user) {
+    await reclamarDiagnosticoAnonimo(data.user.id);
     redirect(next);
   }
 
