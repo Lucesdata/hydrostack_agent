@@ -143,4 +143,33 @@ describe("POST /api/secop/verdict — veredicto Nivel 0 on-demand", () => {
     const body = await res.json();
     expect(body.verdict.gates.habilitacion.status).toBe("UNKNOWN");
   });
+
+  it("sin sesión devuelve el veredicto redactado", async () => {
+    const res = await POST(postReq({ proceso, perfil }));
+    const body = await res.json();
+    expect(body.verdict.redactado).toBe(true);
+  });
+
+  it("con sesión devuelve el veredicto completo", async () => {
+    mockAuth.mockResolvedValue({ id: "u1", email: "u1@example.com" });
+    const res = await POST(postReq({ proceso, perfil }));
+    const body = await res.json();
+    expect(body.verdict.redactado).toBe(false);
+  });
+
+  it("el semáforo y los estados por compuerta sobreviven a la redacción", async () => {
+    const res = await POST(postReq({ proceso, perfil }));
+    const body = await res.json();
+    expect(body.verdict.overall).toBeDefined();
+    for (const clave of ["sectorial", "cuantia", "plazo", "ubicacion", "habilitacion"]) {
+      expect(body.verdict.gates[clave].status).toBeDefined();
+    }
+  });
+
+  it("redactar no cuesta una consulta más: la sesión basta, el plan no se lee", async () => {
+    mockLimit.mockClear();
+    await POST(postReq({ proceso, perfil }));
+    // La única consulta del handler sigue siendo la de requisitos cacheados.
+    expect(mockLimit).toHaveBeenCalledTimes(1);
+  });
 });

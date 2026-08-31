@@ -7,6 +7,8 @@
  * al completar el wizard de perfil de oferente.
  *
  * Body: { proceso: SecopProceso, perfil: OferenteProfile }
+ * Respuesta: { verdict: VerdictRespuesta } — completo con sesión, redactado
+ * sin ella. Ver src/lib/secop/verdict-publico.ts.
  * El veredicto es recomputable y nunca se persiste (invariante de verdict.ts).
  */
 
@@ -17,6 +19,8 @@ import { db } from "@/src/lib/db/client";
 import { requisitosProceso } from "@/src/lib/db/schema/eligibility";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import { nivelDe, puede } from "@/src/lib/acceso/politica";
+import { redactarVerdict } from "@/src/lib/secop/verdict-publico";
 import { parseRequisitosEstructurados } from "@/src/lib/eligibility/schema";
 import { isValidPerfil } from "@/src/lib/oferente/validate";
 import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/schema";
@@ -78,5 +82,14 @@ export async function POST(req: NextRequest) {
     await recordUserSignal(user.id, "oferente");
   }
 
-  return NextResponse.json({ verdict });
+  // `veredicto_detalle` exige `gratis`, no `pro`: basta con saber si hay
+  // sesión, así que no hace falta consultar `usuario.plan` y esta ruta no gana
+  // una query. La redacción se hace aquí y no en el cliente — ocultar los
+  // `reason` en el render los dejaría visibles en la pestaña de red.
+  const nivel = nivelDe(user, null);
+  const respuesta = puede(nivel, "veredicto_detalle")
+    ? { redactado: false as const, ...verdict }
+    : redactarVerdict(verdict);
+
+  return NextResponse.json({ verdict: respuesta });
 }
