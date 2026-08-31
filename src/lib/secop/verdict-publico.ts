@@ -88,10 +88,24 @@ export function redactarVerdict(v: Verdict): VerdictPublico {
 }
 
 /**
+ * Type guard nombrado y no `"redactado" in g && g.redactado` en línea: con
+ * `razonDe` exportada, TypeScript no reduce la unión tras ese chequeo en línea
+ * (dos condiciones encadenadas sobre una intersección) y `g.reason` en el
+ * siguiente `return` queda sin resolver — falso `error TS2339` que solo
+ * aparece en `tsc`/`next build`, nunca en vitest (no type-checkea). Un
+ * predicado con firma `g is X` sí lo reduce.
+ */
+function esRedactado(
+  g: GateResult | GateResultPublico
+): g is { redactado: true } & Omit<GateResult, "reason"> {
+  return "redactado" in g && g.redactado === true;
+}
+
+/**
  * La explicación de una compuerta, o `null` si fue redactada. Existe para que
  * los consumidores de UI no tengan que conocer la forma de la unión.
  */
 export function razonDe(g: GateResult | GateResultPublico): string | null {
-  if ("redactado" in g && g.redactado) return null;
+  if (esRedactado(g)) return null;
   return g.reason;
 }
