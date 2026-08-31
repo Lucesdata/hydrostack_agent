@@ -112,6 +112,20 @@ describe("signUpAction", () => {
     expect(destino).toContain("notice=check_email");
   });
 
+  it("manda el correo de confirmación de vuelta a /auth/callback", async () => {
+    // Sin esto el enlace vuelve al Site URL de Supabase, el callback no corre
+    // y el diagnóstico de ese usuario no se reclama nunca — el camino de
+    // Google sí fijaba su redirect, y esa asimetría era el agujero.
+    mockSignUp.mockResolvedValue({ data: { user: { id: "u4" }, session: null }, error: null });
+    await correr(() =>
+      signUpAction(form({ email: "a@b.com", password: "12345678", next: "/diagnostico" }))
+    );
+
+    const opciones = mockSignUp.mock.calls[0][0].options;
+    expect(opciones.emailRedirectTo).toContain("/auth/callback");
+    expect(opciones.emailRedirectTo).toContain("next=%2Fdiagnostico");
+  });
+
   it("con contraseña corta no llega ni a Supabase", async () => {
     const destino = await correr(() => signUpAction(form({ email: "a@b.com", password: "123" })));
     expect(mockSignUp).not.toHaveBeenCalled();

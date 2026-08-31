@@ -49,7 +49,17 @@ export async function signUpAction(formData: FormData): Promise<void> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      data: { full_name: fullName },
+      // Sin esto, el enlace del correo de confirmación vuelve al Site URL que
+      // tenga configurado Supabase —normalmente `/`— y /auth/callback NUNCA
+      // corre para este camino. Importa porque ahí es donde vive el reclamo del
+      // diagnóstico anónimo cuando el alta no abre sesión de una vez: sin este
+      // redirect, ese usuario no recupera nunca lo que respondió. El camino de
+      // Google ya fijaba su `redirectTo` explícitamente; este no, y esa
+      // asimetría era el agujero.
+      emailRedirectTo: `${appUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
   });
 
   if (error) {
