@@ -20,7 +20,10 @@ function gate(status: GateStatus, reason: string): GateResult {
 }
 
 /** Veredicto con un estado por compuerta y su centinela como `reason`. */
-function verdict(estados: Record<keyof Verdict["gates"], GateStatus>, overall: GateStatus): Verdict {
+function verdict(
+  estados: Record<keyof Verdict["gates"], GateStatus>,
+  overall: GateStatus
+): Verdict {
   return {
     procesoId: "CO1.REQ.42",
     overall,

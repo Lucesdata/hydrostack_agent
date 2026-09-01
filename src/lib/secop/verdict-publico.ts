@@ -46,8 +46,7 @@ type ClaveGate = keyof Verdict["gates"];
  * consumo.
  */
 export type GateResultPublico =
-  | ({ redactado: false } & GateResult)
-  | ({ redactado: true } & Omit<GateResult, "reason">);
+  ({ redactado: false } & GateResult) | ({ redactado: true } & Omit<GateResult, "reason">);
 
 export interface VerdictPublico extends Omit<Verdict, "gates"> {
   /** Pasó por la redacción; qué compuertas se redactaron lo dice cada una. */
