@@ -119,7 +119,11 @@ Entidades y flujos principales:
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
   lee todavía**: `pliego_extraer` y `asistentes` están declaradas como `pro` en
   la política y siguen protegidas solo por `PROTECTED_PREFIXES`. Activar esa
-  frontera es hacer que sus handlers consulten `puede()`.
+  frontera es hacer que sus handlers consulten `puede()`. La migración
+  `drizzle/0017_mushy_expediter.sql` está comiteada pero **sin aplicar** —
+  nadie corrió `npm run db:migrate` — así que la columna existe en el
+  esquema Drizzle y todavía no en la Supabase viva; borrar esta frase cuando
+  se aplique.
 
 ## 5. Estado del roadmap
 

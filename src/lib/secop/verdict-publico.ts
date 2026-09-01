@@ -19,6 +19,20 @@
  *
  * En una frase: si no puedes participar, te decimos por qué sin pedirte nada;
  * si puedes, la explicación pide cuenta.
+ *
+ * En la práctica, para cualquier veredicto que produce `buildVerdict` la
+ * excepción 1 no añade nada sobre "compuerta en FAIL": `aggregateGateStatuses`
+ * (en `verdict.ts`) hace que `overall` sea `FAIL` en cuanto alguna compuerta
+ * resuelta lo es, así que si una compuerta está en `FAIL`, `overall` también
+ * — la conjunción `overall === "FAIL" && g.status === "FAIL"` se reduce a
+ * `g.status === "FAIL"`. Y como `habilitacion` casi siempre es `UNKNOWN` en
+ * Nivel 0, lo que de verdad se redacta hoy son las compuertas en `PASS` o
+ * `WARN`; `FAIL` y `UNKNOWN` siempre conservan su `reason`. El chequeo
+ * compuesto de `conservaExplicacion` se deja así (en vez de simplificarlo a
+ * `g.status === "FAIL"`) porque es la dirección conservadora: sigue siendo
+ * correcto para cualquier veredicto que no venga de `buildVerdict`, y hay un
+ * test que lo fija con un fixture cuyo `overall` es deliberadamente
+ * inconsistente con sus compuertas.
  */
 
 import type { GateResult, Verdict } from "./verdict";
