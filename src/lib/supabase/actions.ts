@@ -63,13 +63,7 @@ export async function signUpAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    // Log detailed error for debugging
-    console.error("[signUpAction] Supabase signup error:", {
-      message: error.message,
-      status: error.status,
-      statusText: error.statusText,
-      cause: error.cause,
-    });
+    console.error("[signUpAction] Supabase signup error:", error.message);
     const code = error.message.includes("already registered") ? "email_exists" : "signup_error";
     redirect(`/registro?next=${encodeURIComponent(next)}&error=${code}`);
   }
