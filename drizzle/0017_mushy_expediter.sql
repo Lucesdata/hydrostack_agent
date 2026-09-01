@@ -1,0 +1,1 @@
+ALTER TABLE "usuario" ADD COLUMN "plan" text DEFAULT 'gratis' NOT NULL;

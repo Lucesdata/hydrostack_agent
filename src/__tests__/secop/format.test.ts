@@ -7,6 +7,7 @@ import {
   verdictScore,
 } from "@/src/components/secop/format";
 import type { Verdict, GateResult, GateStatus } from "@/src/lib/secop/verdict";
+import { redactarVerdict } from "@/src/lib/secop/verdict-publico";
 
 function gate(status: GateStatus, requiredLevel: 0 | 2 = 0): GateResult {
   return { status, reason: "test", resolvedBy: "metadata", requiredLevel };
@@ -112,5 +113,25 @@ describe("verdictScore", () => {
     expect(
       verdictScore(makeVerdict(["UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"])).tone
     ).toBe("neutral");
+  });
+});
+
+describe("verdictScore sobre un veredicto redactado", () => {
+  it("da el mismo marcador que sobre el completo: el teaser sobrevive", () => {
+    const completo: Verdict = {
+      procesoId: "CO1.REQ.7",
+      overall: "WARN",
+      gates: {
+        sectorial: gate("PASS"),
+        cuantia: gate("PASS"),
+        plazo: gate("PASS"),
+        ubicacion: gate("WARN"),
+        habilitacion: gate("PASS"),
+      },
+      level: 0,
+      evaluatedAt: "2026-08-31T00:00:00.000Z",
+    };
+
+    expect(verdictScore(redactarVerdict(completo))).toEqual(verdictScore(completo));
   });
 });

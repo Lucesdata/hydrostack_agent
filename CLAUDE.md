@@ -103,6 +103,27 @@ Entidades y flujos principales:
 - Aparte de eso, la única defensa multi-tenant sigue siendo el `WHERE
   usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
   de cuentas/oferente antes de tocarlas.
+- **Modelo de acceso por niveles** (`src/lib/acceso/politica.ts`): tres niveles
+  ordinales `anonimo < gratis < pro` y una tabla `NIVEL_MINIMO` que mapea
+  capacidad → nivel mínimo. Es la única fuente de verdad de "quién puede qué";
+  antes la respuesta estaba repartida entre `PROTECTED_PREFIXES`, ~20 llamadas
+  sueltas a `getSessionUser()` y gates en componentes, y las tres se
+  contradecían. Cualquier capacidad nueva se declara ahí, no con un `if (user)`
+  suelto.
+- La frontera visible hoy está en el veredicto de elegibilidad: el anónimo ve el
+  semáforo y el estado de cada compuerta, la explicación (`reason`) pide cuenta
+  — `src/lib/secop/verdict-publico.ts`. Dos excepciones se muestran sin cuenta:
+  `overall === "FAIL"` (quien no puede participar merece saber por qué) y las
+  compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
+  hacerla en el render dejaría los `reason` en la pestaña de red.
+- `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
+  lee todavía**: `pliego_extraer` y `asistentes` están declaradas como `pro` en
+  la política y siguen protegidas solo por `PROTECTED_PREFIXES`. Activar esa
+  frontera es hacer que sus handlers consulten `puede()`. La migración
+  `drizzle/0017_mushy_expediter.sql` está comiteada pero **sin aplicar** —
+  nadie corrió `npm run db:migrate` — así que la columna existe en el
+  esquema Drizzle y todavía no en la Supabase viva; borrar esta frase cuando
+  se aplique.
 
 ## 5. Estado del roadmap
 
@@ -119,8 +140,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-08-28 (módulo de diagnóstico de preparación
-para licitar).
+Última actualización: 2026-08-31 (modelo de acceso por niveles).
 
 ## graphify
 

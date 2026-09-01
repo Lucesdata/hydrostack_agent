@@ -11,9 +11,21 @@ import { updateSession } from "@/src/lib/supabase/middleware";
  * 200 con el HTML de /login en vez de dar el 401 que el botón espera — el
  * propio route handler ya hace su gate de sesión (ver
  * app/api/mercado/waitlist/route.ts) y eso es lo único que debe protegerlo.
- * El resto del gating (evaluación de elegibilidad, embebida en
- * /licitaciones) no es una ruta dedicada — se protege en el componente que
- * dispara el flujo, ver ProcessDetail/OferenteWizard.
+ * Este archivo hace UNA sola distinción: anónimo o con sesión, por prefijo de
+ * ruta. No puede hacer más: corre en el runtime Edge y no puede consultar
+ * Postgres, así que no puede leer `usuario.plan` ni decidir nada sobre el
+ * nivel `pro`. Esa decisión le corresponde a los route handlers y Server
+ * Components, no a este archivo. Hoy la única frontera que la política
+ * (`src/lib/acceso/politica.ts`) aplica en runtime es `veredicto_detalle`
+ * (nivel `gratis`), dentro de POST /api/secop/verdict; el nivel `pro` está
+ * declarado en la tabla pero ningún handler lo consulta todavía (ver
+ * CLAUDE.md §4).
+ *
+ * La evaluación de elegibilidad NO se protege aquí ni en un componente: se
+ * redacta en esa misma ruta, en el servidor. Una versión anterior de este
+ * comentario afirmaba que el gate vivía en ProcessDetail/OferenteWizard; era
+ * falso, y esa contradicción es la razón por la que la política ahora vive en
+ * un solo sitio.
  */
 const PROTECTED_PREFIXES = [
   // Solo este subcamino: /diagnostico a secas es público y debe seguir siéndolo,

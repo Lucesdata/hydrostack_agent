@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SecopResult } from "@/src/lib/secop/types";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
-import type { Verdict } from "@/src/lib/secop/verdict";
+import type { VerdictRespuesta } from "@/src/lib/secop/verdict-publico";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
 import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientStore";
@@ -77,7 +77,7 @@ export default function SecopExplorer() {
   const [perfil, setPerfil] = useState<OferenteProfile | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [rupWizardOpen, setRupWizardOpen] = useState(false);
-  const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({});
+  const [verdicts, setVerdicts] = useState<Record<string, VerdictRespuesta>>({});
   const [verdictLoading, setVerdictLoading] = useState<Record<string, boolean>>({});
   const verdictAttempted = useRef<Set<string>>(new Set());
 

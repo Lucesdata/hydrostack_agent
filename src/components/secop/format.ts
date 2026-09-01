@@ -4,6 +4,7 @@
  */
 
 import type { Verdict } from "@/src/lib/secop/verdict";
+import type { VerdictPublico } from "@/src/lib/secop/verdict-publico";
 
 /** Siglas del sector que deben conservarse en mayúsculas al normalizar títulos. */
 const ACRONYMS = ["PTAP", "PTAR", "PTAT", "ESP", "SENA", "INVIAS", "PDA", "SGP"];
@@ -74,8 +75,12 @@ export interface VerdictScore {
   tone: ScoreTone;
 }
 
-/** Resume el veredicto como score n/5 con tono para el indicador de la lista. */
-export function verdictScore(v: Verdict): VerdictScore {
+/**
+ * Marcador "N de M compuertas". Acepta tanto el veredicto completo como el
+ * redactado: solo lee `status`, que la redacción conserva — por eso el
+ * marcador sigue existiendo para quien no tiene cuenta.
+ */
+export function verdictScore(v: Verdict | VerdictPublico): VerdictScore {
   const statuses = Object.values(v.gates).map((g) => g.status);
   const total = statuses.length;
   const pass = statuses.filter((st) => st === "PASS").length;

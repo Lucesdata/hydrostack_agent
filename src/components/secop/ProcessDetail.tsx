@@ -10,6 +10,7 @@
 import { useState } from "react";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { Verdict, GateStatus } from "@/src/lib/secop/verdict";
+import { razonDe, type VerdictRespuesta } from "@/src/lib/secop/verdict-publico";
 import { avisoEscalon } from "@/src/lib/diagnostico/modalidad";
 import { avisoRegimenPrivado } from "@/src/lib/diagnostico/regimen-especial";
 import type { EscalonContratacion } from "@/src/lib/diagnostico/types";
@@ -36,6 +37,14 @@ const STATUS: Record<GateStatus, { cls: string; glyph: string }> = {
   UNKNOWN: { cls: "unknown", glyph: "?" },
 };
 
+/** Lo que se muestra cuando la explicación está redactada. */
+const ESTADO_PALABRA: Record<GateStatus, string> = {
+  PASS: "Cumple",
+  WARN: "Revisar",
+  FAIL: "No cumple",
+  UNKNOWN: "Sin datos",
+};
+
 const GATE_LABEL: Array<[keyof Verdict["gates"], string]> = [
   ["sectorial", "Sector"],
   ["cuantia", "Cuantía"],
@@ -50,8 +59,9 @@ interface Props {
   probing: boolean;
   /** Solo móvil: cierra el overlay. */
   onBack: () => void;
-  /** Veredicto Nivel 0, calculado on-demand (Fase 2) vía POST /api/secop/verdict. */
-  verdict?: Verdict;
+  /** Veredicto Nivel 0, calculado on-demand vía POST /api/secop/verdict.
+   *  Puede venir redactado si no hay sesión — ver verdict-publico.ts. */
+  verdict?: VerdictRespuesta;
   verdictLoading?: boolean;
   /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
   hasPerfil: boolean;
@@ -183,14 +193,15 @@ export default function ProcessDetail({
             {GATE_LABEL.map(([key, label]) => {
               const g = v.gates[key];
               const s = STATUS[g.status];
+              const razon = razonDe(g);
               const esHabilitacion = key === "habilitacion";
-              const partes = esHabilitacion ? g.reason.split(" · ") : [g.reason];
+              const partes = esHabilitacion && razon ? razon.split(" · ") : null;
               return (
                 <li key={key} className="clr-elig-gate">
                   <span className={`clr-elig-glyph clr-elig-glyph--${s.cls}`}>{s.glyph}</span>
                   <span className="clr-elig-name">{label}</span>
                   <span className="clr-elig-reason">
-                    {partes.length > 1 ? (
+                    {partes && partes.length > 1 ? (
                       <ul className="clr-elig-subgates">
                         {partes.map((parte, i) => (
                           <li key={i}>{parte}</li>
@@ -198,8 +209,8 @@ export default function ProcessDetail({
                       </ul>
                     ) : (
                       <>
-                        {g.reason}
-                        {g.requiredLevel === 2 && key !== "habilitacion"
+                        {razon ?? ESTADO_PALABRA[g.status]}
+                        {razon && g.requiredLevel === 2 && key !== "habilitacion"
                           ? " · requiere revisar pliego (nivel 2)"
                           : ""}
                       </>
