@@ -7,10 +7,15 @@ const mockUpdateWhere = vi.fn();
 
 vi.mock("@/src/lib/db/client", () => ({
   db: {
+    // Fase 6: el barrido pasó de `from(oferentePerfil).innerJoin(usuario)` a
+    // `from(usuario).leftJoin(perfil).leftJoin(preferencias).where(...)`, para
+    // incluir cuentas que solo tienen filtros.
     select: () => ({
       from: () => ({
-        innerJoin: () => ({
-          leftJoin: () => mockSelectResult(),
+        leftJoin: () => ({
+          leftJoin: () => ({
+            where: () => mockSelectResult(),
+          }),
         }),
       }),
     }),
@@ -31,8 +36,18 @@ vi.mock("@/src/lib/matching/get-matches-for-perfil", () => ({
 }));
 
 const mockRenderDigest = vi.fn();
-vi.mock("@/src/lib/email/digest", () => ({
-  renderDigest: (...args: unknown[]) => mockRenderDigest(...args),
+vi.mock("@/src/lib/al/notificacion/digest-agregado", () => ({
+  renderDigestAgregado: (...args: unknown[]) => mockRenderDigest(...args),
+}));
+
+const mockNovedades = vi.fn();
+vi.mock("@/src/lib/al/notificacion/recopilar", () => ({
+  recopilarNovedades: (...args: unknown[]) => mockNovedades(...args),
+}));
+
+vi.mock("@/src/lib/al/reportes/generar", () => ({
+  generarReporte: async () => ({ id: "rep-1", slug: "digest-x", url: "http://x/reportes/digest-x" }),
+  slugDigest: () => "digest-x",
 }));
 
 const mockSendDigestEmail = vi.fn();
@@ -62,6 +77,7 @@ describe("runDailyAlertas", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdateWhere.mockResolvedValue(undefined);
+    mockNovedades.mockResolvedValue({ adendas: [], adjudicaciones: [], aperturas: [], total: 0 });
   });
 
   it("sin cuentas con perfil, no hace nada", async () => {
@@ -84,14 +100,35 @@ describe("runDailyAlertas", () => {
     expect(mockGetMatches).not.toHaveBeenCalled();
   });
 
-  it("cuenta activa con perfil mínimo: se salta como saltados, no como error", async () => {
+  it("perfil mínimo sin novedades: sin_coincidencias, no error y sin matching", async () => {
+    // Cambió en la Fase 6: un perfil incompleto ya NO descarta la cuenta, porque
+    // puede tener filtros y las novedades de un filtro no dependen del perfil de
+    // elegibilidad. Sin novedades tampoco se envía correo.
     mockSelectResult.mockResolvedValue([cuenta({ perfil: perfilMinimo })]);
     mockInsertReturning.mockResolvedValue([{ id: "log-1" }]);
     const r = await runDailyAlertas();
-    expect(r.saltados).toBe(1);
+    expect(r.sinCoincidencias).toBe(1);
     expect(r.errores).toBe(0);
     expect(mockGetMatches).not.toHaveBeenCalled();
-    expect(mockUpdateWhere).toHaveBeenCalledTimes(1);
+    expect(mockSendDigestEmail).not.toHaveBeenCalled();
+  });
+
+  it("perfil mínimo PERO con novedades de filtros: sí envía", async () => {
+    // El caso que la Fase 6 desbloquea: una cuenta que solo declaró filtros.
+    mockSelectResult.mockResolvedValue([cuenta({ perfil: perfilMinimo })]);
+    mockInsertReturning.mockResolvedValue([{ id: "log-1" }]);
+    mockNovedades.mockResolvedValue({
+      adendas: [{ secopProcesoId: "p9" }],
+      adjudicaciones: [],
+      aperturas: [],
+      total: 1,
+    });
+    mockRenderDigest.mockReturnValue({ subject: "s", html: "h", text: "t", unsubscribeUrl: "u" });
+    mockSendDigestEmail.mockResolvedValue(undefined);
+
+    const r = await runDailyAlertas();
+    expect(r.enviados).toBe(1);
+    expect(mockGetMatches).not.toHaveBeenCalled();
   });
 
   it("sin fila de preferencias (activo=null) se trata como activa por defecto", async () => {
@@ -111,7 +148,7 @@ describe("runDailyAlertas", () => {
     expect(mockSendDigestEmail).not.toHaveBeenCalled();
   });
 
-  it("reserva ok + sin coincidencias → registra sin_coincidencias, no envía correo", async () => {
+  it("sin coincidencias NI novedades → sin_coincidencias, no envía correo vacío", async () => {
     mockSelectResult.mockResolvedValue([cuenta()]);
     mockInsertReturning.mockResolvedValue([{ id: "log-1" }]);
     mockGetMatches.mockResolvedValue([]);
@@ -131,7 +168,13 @@ describe("runDailyAlertas", () => {
 
     const r = await runDailyAlertas();
 
-    expect(mockRenderDigest).toHaveBeenCalledWith(matches, { id: "u1", email: "a@b.com" });
+    // Un solo correo con todo dentro: novedades + enlace al reporte + perfil.
+    expect(mockRenderDigest).toHaveBeenCalledWith(
+      expect.objectContaining({ total: 0 }),
+      { id: "u1", email: "a@b.com" },
+      "http://x/reportes/digest-x",
+      matches
+    );
     expect(mockSendDigestEmail).toHaveBeenCalledWith("a@b.com", digest);
     expect(r.enviados).toBe(1);
   });

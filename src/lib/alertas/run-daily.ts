@@ -18,14 +18,32 @@
  * baja vía el unsubscribe de Fase 1.3) se saltan. Sin fila en
  * `alerta_preferencias` → `activo` por defecto `true` (nadie se ha dado de
  * baja aún).
+ *
+ * ── Extensión de la Fase 6 (SDD §7.1) ──────────────────────────────────────
+ * El correo pasa a ser AGREGADO: adendas con su diff, adjudicaciones, aperturas
+ * que casaron con los filtros de la cuenta y, al final, las coincidencias del
+ * perfil de siempre. **Un solo correo por cuenta y día, con todo dentro** — tres
+ * filtros con novedad no son tres correos, son tres secciones.
+ *
+ * Y el barrido deja de ser "cuentas con perfil de oferente": ahora es "cuentas
+ * con perfil **o** con al menos un filtro activo". Una cuenta que solo declaró
+ * filtros nunca habría recibido nada.
+ *
+ * Se extiende esta función en vez de escribir un camino paralelo a propósito: dos
+ * escritores compitiendo por el mismo `envio_log` se anularían entre sí — el
+ * primero reserva la fila y el segundo se salta la cuenta creyendo que ya se
+ * envió.
  */
 
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { usuario, oferentePerfil, alertaPreferencias, envioLog } from "@/src/lib/db/schema/cuentas";
+import { alFiltrosUsuario } from "@/src/lib/db/schema/aqualicita";
 import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { recordCoincidencias } from "@/src/lib/matching/record-coincidencias";
-import { renderDigest } from "@/src/lib/email/digest";
+import { renderDigestAgregado } from "@/src/lib/al/notificacion/digest-agregado";
+import { recopilarNovedades } from "@/src/lib/al/notificacion/recopilar";
+import { generarReporte, slugDigest } from "@/src/lib/al/reportes/generar";
 import { sendDigestEmail } from "@/src/lib/email/send";
 import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
 import type { PerfilGuardado } from "@/src/lib/oferente/perfil-minimo";
@@ -52,6 +70,8 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
     errores: 0,
   };
 
+  // Cuentas con perfil de oferente O con al menos un filtro activo. Antes solo
+  // lo primero, y una cuenta que solo declaró filtros nunca recibía nada.
   const cuentas = await db
     .select({
       usuarioId: usuario.id,
@@ -59,9 +79,16 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
       perfil: oferentePerfil.perfil,
       activo: alertaPreferencias.activo,
     })
-    .from(oferentePerfil)
-    .innerJoin(usuario, eq(usuario.id, oferentePerfil.usuarioId))
-    .leftJoin(alertaPreferencias, eq(alertaPreferencias.usuarioId, usuario.id));
+    .from(usuario)
+    .leftJoin(oferentePerfil, eq(oferentePerfil.usuarioId, usuario.id))
+    .leftJoin(alertaPreferencias, eq(alertaPreferencias.usuarioId, usuario.id))
+    .where(
+      or(
+        sql`${oferentePerfil.id} IS NOT NULL`,
+        sql`EXISTS (SELECT 1 FROM ${alFiltrosUsuario} f
+                     WHERE f.usuario_id = ${usuario.id} AND f.activo)`
+      )
+    );
 
   for (const cuenta of cuentas) {
     summary.cuentas++;
@@ -102,20 +129,22 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
     }
 
     const perfilGuardado = cuenta.perfil as PerfilGuardado;
-    if (!isPerfilCompleto(perfilGuardado)) {
-      await db
-        .update(envioLog)
-        .set({ estado: "sin_coincidencias", matches: 0 })
-        .where(eq(envioLog.id, reservado.id));
-      summary.saltados++;
-      continue;
-    }
 
     try {
-      const matches = await getMatchesForPerfil(perfilGuardado);
-      await recordCoincidencias(cuenta.usuarioId, matches);
+      // Un perfil incompleto ya NO descarta la cuenta: puede tener filtros, y
+      // las novedades de un filtro no dependen del perfil de elegibilidad.
+      const matches = isPerfilCompleto(perfilGuardado)
+        ? await getMatchesForPerfil(perfilGuardado)
+        : [];
+      if (matches.length > 0) await recordCoincidencias(cuenta.usuarioId, matches);
 
-      if (matches.length === 0) {
+      // v1: cuenta === usuario (SDD R8). Cuando eso deje de ser cierto, el
+      // account_id sale de `cuentaDe`, no de aquí.
+      const novedades = await recopilarNovedades(cuenta.usuarioId);
+
+      if (matches.length === 0 && novedades.total === 0) {
+        // Sin nada que contar NO se envía correo. Un correo vacío diario es la
+        // vía más rápida a que lo marquen como spam.
         await db
           .update(envioLog)
           .set({ estado: "sin_coincidencias", matches: 0 })
@@ -124,11 +153,43 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
         continue;
       }
 
-      const digest = renderDigest(matches, { id: cuenta.usuarioId, email: cuenta.email });
+      // El reporte se genera ANTES del envío: el correo lo enlaza, y un enlace
+      // a un reporte que no existe es peor que no enlazar nada.
+      const reporte = await generarReporte({
+        slug: slugDigest(fecha),
+        tipo: "digest_diario",
+        titulo: `Novedades del ${fecha}`,
+        visibilidad: "privado",
+        accountId: cuenta.usuarioId,
+        parametros: { fecha },
+        payload: {
+          fecha,
+          novedades,
+          matches: matches.map((m) => ({
+            secopProcesoId: m.proceso.id,
+            nombre: m.proceso.nombre,
+            entidad: m.proceso.entidad,
+            precioBase: m.proceso.precioBase,
+            url: m.proceso.url,
+            veredicto: m.verdict.overall,
+          })),
+        },
+      });
+
+      const digest = renderDigestAgregado(
+        novedades,
+        { id: cuenta.usuarioId, email: cuenta.email },
+        reporte.url,
+        matches
+      );
       await sendDigestEmail(cuenta.email, digest);
       await db
         .update(envioLog)
-        .set({ estado: "enviado", matches: matches.length })
+        .set({
+          estado: "enviado",
+          matches: matches.length + novedades.total,
+          reporteId: reporte.id,
+        })
         .where(eq(envioLog.id, reservado.id));
       summary.enviados++;
     } catch (e) {

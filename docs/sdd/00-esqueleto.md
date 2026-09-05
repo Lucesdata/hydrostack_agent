@@ -4,12 +4,18 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ✅ **Fases 0, 0.5, 1, 2, 3, 4 y 5 completadas 2026-09-05.** Las siete tablas
+> ✅ **Todas las fases (0 a 6) completadas 2026-09-05.** Las siete tablas
 > `al_*` están en la base viva: motor de filtros determinista con auditoría de
 > descartes, histórico con 27.035 filas (13.606 adjudicaciones + 13.429
 > participaciones sin ganar, 2016→2026) e historial sancionatorio con 2.114
-> registros, y la máquina de estados vigilando 50.584 procesos vivos.
-> Siguiente: Fase 6 (notificación agregada + reportes permanentes).
+> registros, la máquina de estados vigilando 50.584 procesos vivos y la capa de
+> notificación con reportes permanentes.
+>
+> ⚠️ **El canal de correo no puede enviar todavía**: `EMAIL_FROM` está vacío en
+> local y ni `EMAIL_FROM` ni `AUTH_RESEND_KEY` existen en Vercel producción. Ver
+> Fase 6, criterios 5 y 6.
+>
+> Tras el `VACUUM FULL` de puente la base está en **389 MB de 500** (77,8 %).
 >
 > ⚠️ La base está en 449 MB. Con el plan Free (500 MB) el margen es del 10 % y el
 > criterio de la Fase 2 exige 40 %: **queda pendiente de que Supabase Pro esté
@@ -1416,23 +1422,64 @@ porque es la que alimenta a todas las demás.
 
 ---
 
-### Fase 6 — Notificación agregada + reportes permanentes (módulo 6)
+### Fase 6 — Notificación agregada + reportes permanentes (módulo 6) · ✅ CONSTRUIDA, ENVÍO BLOQUEADO
 
-Extensión de `runDailyAlertas` a filtros y eventos, webhook de entregabilidad de
-Resend, y `app/reportes/[slug]`.
+**Archivos:**
+
+| Ruta | Papel |
+|---|---|
+| `src/lib/al/notificacion/recopilar.ts` | Novedades del día por cuenta: adendas, adjudicaciones, aperturas |
+| `src/lib/al/notificacion/digest-agregado.ts` | Un correo con las cuatro secciones y el diff renderizado |
+| `src/lib/al/notificacion/svix.ts` | Verificación de la firma de los webhooks de Resend |
+| `src/lib/al/reportes/generar.ts` | Congela el reporte y devuelve su URL |
+| `src/lib/alertas/run-daily.ts` | **Extendido**, no duplicado (ver abajo) |
+| `app/reportes/[slug]/` | Página, render del digest, render de mercado y estilos |
+| `app/api/webhooks/resend/route.ts` | Entregabilidad → `envio_log` |
+
+**Se extendió `runDailyAlertas` en vez de escribir un camino paralelo**, y no es
+una preferencia de estilo: dos escritores compitiendo por el mismo `envio_log` se
+anularían: el primero reserva la fila con el insert-first y el segundo se salta
+la cuenta creyendo que ya se envió. El barrido pasó de "cuentas con perfil de
+oferente" a "cuentas con perfil **o** con al menos un filtro activo" — una cuenta
+que solo declaró filtros no habría recibido nunca nada.
 
 **Aceptación:**
-1. Una cuenta con 3 filtros y eventos en los 3 recibe **un** correo, no tres:
-   `psql -c "SELECT count(*) FROM envio_log WHERE fecha=CURRENT_DATE AND tipo='diario' AND usuario_id='<id>';"` → `1`.
-2. Ejecutar el cron dos veces el mismo día no produce un segundo envío (mismo
-   count `1`) — la idempotencia existente sigue en pie tras el cambio.
-3. Una cuenta sin novedades no recibe correo y su `envio_log.estado` es
-   `'sin_coincidencias'`.
-4. `curl -I https://<host>/reportes/<slug-publico>` → `200` sin cookie de sesión;
-   `curl -I .../reportes/<slug-privado>` sin sesión → `401` o `404`, nunca `200`.
-5. Tras el webhook de Resend, ≥1 fila de `envio_log` tiene `estado_entrega` no nulo.
-6. `dig TXT <dominio>` y `dig TXT resend._domainkey.<dominio>` devuelven SPF y DKIM
-   configurados.
+
+1. Una cuenta con varias fuentes de novedad recibe **un** correo, no uno por
+   filtro: hay un solo `envio_log` por `(usuario, fecha, 'diario')` y el render
+   compone las cuatro secciones. ✅ *(unitario; el envío real está bloqueado)*
+2. Dos corridas el mismo día no producen un segundo envío — la idempotencia
+   insert-first ya existente sigue en pie tras el cambio. ✅ *(unitario)*
+3. Sin novedades **no se envía correo** y `envio_log.estado` queda
+   `'sin_coincidencias'`. Un correo vacío diario es la vía más rápida a que lo
+   marquen como spam. ✅
+4. `curl -I /reportes/<slug-publico>` → **200** sin sesión;
+   `/reportes/<slug-privado>` sin sesión → **404**; slug inexistente → **404**.
+   Los dos últimos son indistinguibles a propósito: decir "existe pero no puedes
+   verlo" ya filtra que existe. ✅
+5. **NO CUMPLIDO — falta configuración, no código.** El webhook está construido y
+   su firma Svix probada de verdad (8 casos: firma correcta, cuerpo alterado,
+   secreto ajeno, replay fuera de ventana, cabeceras ausentes). Pero
+   `RESEND_WEBHOOK_SECRET` no existe, así que el endpoint responde 401
+   fail-closed y ninguna fila de `envio_log` puede llegar a tener
+   `estado_entrega`. ❌
+6. **NO CUMPLIDO — no hay dominio remitente.** `EMAIL_FROM` está **vacío** en
+   `.env.local`, y en Vercel producción no existen ni `EMAIL_FROM` ni
+   `AUTH_RESEND_KEY`. Sin dominio no hay SPF, DKIM ni DMARC que verificar. ❌
+
+**Hallazgo colateral: el envío nunca se ha ejecutado en producción.** Los 12 días
+de `envio_log` son todos `sin_coincidencias`, así que el cron jamás llegó a la
+línea que exige `EMAIL_FROM` y el hueco de configuración nunca dio la cara. **La
+Fase 6 convierte ese fallo latente en activo**: la cuenta existente pasa a tener
+novedades, así que la próxima corrida intentará enviar y registrará `error`.
+
+**Lo que falta para desbloquearlo**, y es configuración, no desarrollo:
+
+1. Verificar un dominio en Resend y poner `EMAIL_FROM` (local y Vercel).
+2. Copiar `AUTH_RESEND_KEY` a Vercel producción.
+3. Crear el webhook en Resend apuntando a `/api/webhooks/resend` y poner su
+   `RESEND_WEBHOOK_SECRET`.
+4. Publicar SPF, DKIM y DMARC del dominio remitente **antes** del primer envío.
 
 ---
 
