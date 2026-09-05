@@ -4,11 +4,11 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ✅ **Fases 0, 0.5, 1, 2 y 3 completadas 2026-09-05.** Las siete tablas `al_*`
-> están en la base viva: motor de filtros, histórico con 27.035 filas
-> (13.606 adjudicaciones + 13.429 participaciones sin ganar, 2016→2026) e
-> historial sancionatorio con 2.114 registros.
-> Siguiente: Fase 4 (motor de filtros determinista + auditoría de descartes).
+> ✅ **Fases 0, 0.5, 1, 2, 3 y 4 completadas 2026-09-05.** Las siete tablas
+> `al_*` están en la base viva: motor de filtros determinista con auditoría de
+> descartes, histórico con 27.035 filas (13.606 adjudicaciones + 13.429
+> participaciones sin ganar, 2016→2026) e historial sancionatorio con 2.114
+> registros. Siguiente: Fase 5 (máquina de estados de procesos).
 >
 > ⚠️ La base está en 449 MB. Con el plan Free (500 MB) el margen es del 10 % y el
 > criterio de la Fase 2 exige 40 %: **queda pendiente de que Supabase Pro esté
@@ -515,10 +515,20 @@ export const alDescartes = pgTable(
 ).enableRLS();
 ```
 
-**Retención:** esta tabla crece más rápido que cualquier otra (un descarte por
-proceso evaluado y por filtro). La spec del módulo 5 debe fijar un borrado por
-antigüedad; el candidato es 90 días, con un conteo agregado que sobreviva. El
-crecimiento sin límite de una tabla append-only ya llenó la cuota una vez.
+**Retención — fijada en 90 días** (`DIAS_RETENCION` en
+`src/lib/al/matching/registrar-descartes.ts`), podados al final de cada corrida.
+Además, **los descartes de un filtro se reemplazan en cada corrida, no se
+acumulan**: interesa el estado actual de qué se está perdiendo, no una copia por
+cada ejecución del cron. El crecimiento sin límite de una append-only ya llenó
+la cuota una vez (`raw_record`, agosto de 2026).
+
+**La capa `ingesta` no se puede registrar desde la base.** Esos procesos nunca
+llegan a `raw_record`: la red se aplica como `$where` en Socrata, así que lo
+descartado se queda en la fuente. Auditarlo es ir a buscarlo —
+`scripts/al-auditar-red.ts` toma una muestra SIN el filtro sectorial y la evalúa
+contra la misma red (`matchesSectorNet`, que ya existía y es la autoridad). Es un
+sondeo a mano, no una etapa del cron: es caro y su valor está en ejecutarlo
+cuando se toca la red o el diccionario.
 
 ### 4.5 `al_reportes` — DDL completo
 
@@ -844,18 +854,17 @@ ORDER BY random() LIMIT 25;
 
 ```ts
 // src/lib/al/matching/evaluar-filtro.ts
-/** Puro. Sin SQL, sin IO. Testeable con fixtures. */
+/** Puro. Sin SQL, sin IO. `motivo: null` es un match. */
 export function evaluarFiltro(
-  filtro: FiltroUsuario,
+  filtro: FiltroValidado,
   proceso: ProcesoEvaluable
-): { match: true } | { match: false; motivo: MotivoDescarte; evidencia: unknown };
+): { motivo: MotivoDescarte | null; evidencia: Record<string, unknown> | null };
 
-// src/lib/al/matching/buscar-por-filtro.ts
-/** Traduce el filtro a un WHERE de Drizzle. Prefiltro en SQL, no en memoria. */
-export async function buscarPorFiltro(
-  filtro: FiltroUsuario,
-  opts?: { desde?: Date; limit?: number }
-): Promise<ProcesoEvaluable[]>;
+// src/lib/al/matching/buscar-candidatos.ts
+/** Acota el UNIVERSO (estado + borrado lógico). NO aplica criterios del filtro. */
+export async function buscarCandidatos(
+  opts?: { estado?: string | null; limit?: number }
+): Promise<{ items: ProcesoEvaluable[]; truncado: boolean }>;
 
 // src/lib/al/matching/registrar-descartes.ts
 export async function registrarDescartes(
@@ -864,8 +873,27 @@ export async function registrarDescartes(
 ): Promise<number>;
 ```
 
+**Corrección sobre el diseño preliminar: el prefiltro NO aplica criterios del
+usuario.** El esqueleto decía "traduce el filtro a un WHERE de Drizzle; prefiltro
+en SQL, no en memoria". Se implementó así y estaba mal por dos razones que solo
+se ven al correrlo:
+
+1. **Un criterio aplicado en SQL es un descarte que `al_descartes` nunca ve.**
+   Con zona y cuantía en el `WHERE`, los motivos `fuera_de_zona`,
+   `fuera_de_cuantia`, `entidad_no_listada` y `modalidad_no_listada` no podían
+   aparecer jamás: cuatro de los siete eran código muerto, y el usuario no podía
+   enterarse de que perdió una licitación por estar fuera de su departamento.
+   Medido: con el prefiltro, 2 motivos distintos en la tabla; sin él, **6**.
+2. **Duplicar la semántica en SQL y en TS es cómo divergen**, y el síntoma de que
+   divergen vuelve a ser silencio.
+
+El coste es despreciable porque la red sectorial ya se aplicó en ingesta: el
+universo abierto son ~550 procesos, no 90.000. `truncado` avisa si alguna vez
+deja de serlo — un truncamiento silencioso es el mismo fallo con otro nombre.
+
 `evaluarFiltro` devuelve el motivo en el caso negativo: es lo que alimenta
-`al_descartes` sin una segunda pasada.
+`al_descartes` sin una segunda pasada. Retorno nullable y no unión discriminada
+porque el repo compila con `strict: false`.
 
 ### 6.4 Relación con el veredicto de elegibilidad — no se mezclan
 
@@ -1259,18 +1287,61 @@ cruzables de 2.114.
 
 ---
 
-### Fase 4 — Motor de filtros + auditoría de descartes (módulo 5)
+### Fase 4 — Motor de filtros + auditoría de descartes (módulo 5) · ✅ COMPLETADA 2026-09-05
 
-`buscarPorFiltro` + `evaluarFiltro` + escritura en `al_descartes` en ambas capas.
+**Archivos:**
 
-**Aceptación:**
-1. Tras dos ejecuciones consecutivas del cron, `coincidencia` gana ≥1 fila y
-   `psql -c "SELECT count(*) FROM (SELECT usuario_id, proceso_id FROM coincidencia GROUP BY 1,2 HAVING count(*)>1) d;"` → `0`.
-2. `al_descartes` tiene filas con al menos tres `motivo` distintos.
-3. `npm test -- evaluar-filtro` pasa, con un caso por cada `MotivoDescarte`.
-4. Un filtro con todos los arrays vacíos devuelve **todos** los procesos abiertos
-   del sector, no cero (§4.2: vacío = sin restricción).
-5. La consulta de muestreo de §6.2 devuelve 25 filas legibles con su motivo.
+| Ruta | Papel |
+|---|---|
+| `src/lib/al/matching/tipos.ts` | `MOTIVOS`, `ProcesoEvaluable`, `VERSION_FILTRO`, `VERSION_RED` |
+| `src/lib/al/matching/evaluar-filtro.ts` | Puro. Toda la semántica del filtro vive aquí |
+| `src/lib/al/matching/buscar-candidatos.ts` | Acota el universo. **No** aplica criterios |
+| `src/lib/al/matching/red-sectorial.ts` | Etiqueta del rechazo de la red, sobre `matchesSectorNet` |
+| `src/lib/al/matching/registrar-descartes.ts` | Escritura, reemplazo por filtro y poda a 90 días |
+| `src/lib/al/matching/correr-filtros.ts` | Orquestación: coincidencias + descartes, simétricos |
+| `scripts/al-correr-filtros.ts` · `al-auditar-red.ts` | `npm run al:filtros` · `al:auditar-red` |
+| `src/__tests__/al/evaluar-filtro.test.ts` | 17 casos, uno por motivo + el guardián de cobertura |
+
+**Dos bugs que solo aparecieron al correr contra datos reales:**
+
+1. **`validarFiltro` rechazaba `"83101"`** por exigir 6–10 dígitos, cuando ése es
+   exactamente el prefijo de familia que usa la red del propio repo
+   (`WATER_EXCLUSIVE_UNSPSC`) y `evaluarFiltro` hace match por prefijo. El
+   validador contradecía a los otros dos. Ahora admite 2–10 dígitos.
+2. **La búsqueda truncaba en silencio** en 500 candidatos con 547 procesos
+   abiertos. En este módulo eso es el fallo que existe para evitar: ahora
+   `buscarCandidatos` devuelve `truncado` y `correrFiltro` lo grita.
+
+**Aceptación — cumplida:**
+
+1. Tras dos corridas consecutivas: `coincidencia` **547 filas, 0 duplicados**. ✅
+2. `al_descartes` con **6 motivos distintos** (todos menos `entidad_no_listada`,
+   que necesita un filtro con NITs). Antes de quitar el prefiltro SQL eran 2. ✅
+3. `npm test` → **711/711**, con un caso por cada motivo de la capa `filtro` y un
+   test que falla si se añade un motivo sin probarlo. ✅
+4. El filtro sin criterios devuelve **547 de 547** procesos abiertos, no cero. ✅
+5. El muestreo de §6.2 devuelve filas legibles con su motivo y su evidencia. ✅
+
+**Lo que la auditoría ya muestra:**
+
+| Capa | Motivo | Filas |
+|---|---|---|
+| ingesta | `segmento_80_excluido` | 841 |
+| ingesta | `sin_unspsc_ni_keyword` | 640 |
+| filtro | `sin_unspsc_ni_keyword` | 1.452 |
+| filtro | `fuera_de_zona` | 95 |
+| filtro | `modalidad_no_listada` | 57 |
+| filtro | `palabra_excluida` | 18 |
+| filtro | `fuera_de_cuantia` | 16 |
+
+El sondeo de la red (muestra de 1.500 procesos de 5 días, sin filtro sectorial)
+confirma la derivación del ADR-0001: **solo el 1,3 % pasa la red**, y el segmento
+80 es el 57 % de lo descartado.
+
+Y la evidencia es accionable, que era el objetivo: una "EJECUCIÓN DE LAS
+ACTIVIDADES DE OPTIMIZACIÓN…" descartada por `fuera_de_cuantia` con
+`{min: 500000000, valor: 25812560}` le dice al usuario exactamente qué se está
+perdiendo y por qué.
 
 ---
 
@@ -1319,7 +1390,6 @@ construido, y **al tomarse se actualiza este documento**:
 - DDL definitivo de `al_oferentes_historico` y `al_sanciones`. La V-F cerró las
   fuentes y los campos de identidad; falta traducirlos a tipos Drizzle exactos.
 - Lista exacta de campos que entran al `delta` de una adenda (módulo 4).
-- Política de retención de `al_descartes` (candidato: 90 días).
 - Esquema del `payload` de cada `tipo` de reporte (módulo 6).
 - Si el PAA aterriza como `IngestSource` propio o como tabla derivada. La V-F-3
   confirmó que `9sue-ezhx` trae `categorias_unspsc`, así que la red sectorial le

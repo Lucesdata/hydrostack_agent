@@ -63,8 +63,14 @@ const rechazo = (error: string): ResultadoValidacion => ({ error, valor: null })
 const SOLO_DIGITOS = /^\d+$/;
 /** DIVIPOLA: 2 dígitos (departamento completo) o 5 (municipio). */
 const DIVIPOLA = /^(\d{2}|\d{5})$/;
-/** UNSPSC sin el prefijo "V1." — se añade al construir el WHERE, no se guarda. */
-const UNSPSC = /^\d{6,8}$/;
+/**
+ * UNSPSC sin el prefijo "V1.". Se admite un código a CUALQUIER nivel de la
+ * jerarquía (segmento 2, familia 4, clase 6, producto 8), porque `evaluarFiltro`
+ * hace match por prefijo y la propia red del repo usa "83101"
+ * (`WATER_EXCLUSIVE_UNSPSC` en `secop/ingest-net.ts`). Exigir 6+ dígitos
+ * rechazaba justo los códigos que el resto del sistema usa.
+ */
+const UNSPSC = /^\d{2,10}$/;
 
 const MAX_ITEMS = 100;
 const MAX_LARGO = 120;

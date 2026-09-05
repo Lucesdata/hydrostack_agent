@@ -55,9 +55,17 @@ describe("validarFiltro", () => {
     expect(validarFiltro({ nombre: "x", divipola: ["050"] }).error).toMatch(/divipola/i);
   });
 
-  it("rechaza un UNSPSC que no sea de 6 a 8 dígitos", () => {
+  it("acepta un UNSPSC a cualquier nivel de la jerarquía", () => {
+    // `evaluarFiltro` hace match por prefijo y la red del repo usa "83101":
+    // exigir 6+ dígitos rechazaba justo los códigos que el sistema ya usa.
+    for (const c of ["83", "8310", "83101", "83101500"]) {
+      expect(validarFiltro({ nombre: "x", unspsc: [c] }).error).toBeNull();
+    }
+  });
+
+  it("rechaza un UNSPSC con el prefijo de versión", () => {
+    // El "V1." es de versión, no del código; se quita al normalizar, no se guarda.
     expect(validarFiltro({ nombre: "x", unspsc: ["V1.83101500"] }).error).toMatch(/unspsc/i);
-    expect(validarFiltro({ nombre: "x", unspsc: ["83101500"] }).error).toBeNull();
   });
 
   it("guarda la cuantía como numeric(20,2) en texto", () => {

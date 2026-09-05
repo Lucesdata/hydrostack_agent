@@ -142,7 +142,7 @@ export function buildSectorWhere(fields: SectorNetFields): string {
 }
 
 /** Normaliza "V1.83101500" → "83101500" (8 dígitos). null si no hay código. */
-function unspscDigits(raw: unknown): string | null {
+export function unspscDigits(raw: unknown): string | null {
   if (raw == null) return null;
   const d = String(raw)
     .replace(/^v\d+\./i, "")
