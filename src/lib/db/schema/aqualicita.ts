@@ -442,3 +442,54 @@ export const alSanciones = pgTable(
     index("al_sanciones_proceso_idx").on(t.procesoId),
   ]
 ).enableRLS();
+
+/**
+ * Último estado conocido de cada proceso VIVO — la línea base del detector de
+ * eventos (SDD Fase 5).
+ *
+ * Existe porque `raw_record` **no guarda historia**: se hace upsert sobre
+ * UNIQUE `(source, source_record_id)`, así que el payload anterior se pierde y
+ * no hay contra qué diffear. Ese diseño no es accidental: el `raw_record`
+ * append-only, y el `contrato_evento` que colgaba de él, se retiraron el
+ * 2026-08-16 (`drizzle/0011`) precisamente porque su crecimiento sin límite
+ * llenó la cuota de Neon. El comentario que dejaron en `hechos.ts` decía qué
+ * hacer si el historial volvía a hacer falta: **reconstruirlo como log acotado**.
+ * Esto es ese log acotado.
+ *
+ * Tres propiedades lo mantienen pequeño:
+ *
+ *  1. **Solo procesos vivos.** Un proceso terminal (`Seleccionado`, `Cancelado`)
+ *     ya no cambia: al detectarse la transición se emite el evento y la fila de
+ *     seguimiento se borra. Hoy son 50.584 vivos de 90.076.
+ *  2. **Solo los campos que se diffean**, no el payload. El objeto y la
+ *     descripción van como hash: detectar que cambiaron cuesta 16 bytes en vez
+ *     de guardar dos textos largos por proceso.
+ *  3. **Una fila por proceso**, no una por observación. Es estado, no log.
+ */
+export const alProcesoEstado = pgTable(
+  "al_proceso_estado",
+  {
+    /** Id nativo como PK: ahorra el uuid y es la llave natural del seguimiento. */
+    secopProcesoId: text("secop_proceso_id").primaryKey(),
+
+    estado: text("estado"),
+    /** 'Abierto' | 'Cerrado'. El dataset NO trae fecha de cierre fiable, así que
+     *  ésta es la señal real de plazo (ver `FIELDS_PROCESOS.estadoApertura`). */
+    estadoApertura: text("estado_apertura"),
+    valorEstimado: money("valor_estimado"),
+    modalidad: text("modalidad"),
+    /** `fecha_de_recepcion_de`. Solo ~2,6% la trae, pero cuando cambia es la
+     *  adenda de más valor: una prórroga del plazo de entrega de ofertas. */
+    fechaRecepcion: date("fecha_recepcion"),
+
+    adjudicado: boolean("adjudicado"),
+    valorAdjudicado: money("valor_adjudicado"),
+    adjudicatarioNit: text("adjudicatario_nit"),
+
+    /** SHA-256 truncado de objeto+descripción: detecta el cambio sin guardar el texto. */
+    objetoHash: text("objeto_hash"),
+
+    actualizadoEn: timestamp("actualizado_en", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("al_proceso_estado_actualizado_idx").on(t.actualizadoEn)]
+).enableRLS();

@@ -23,7 +23,8 @@
     "al:backfill-historico": "tsx scripts/al-backfill-historico.ts",
     "al:sanciones": "tsx scripts/al-recargar-sanciones.ts",
     "al:filtros": "tsx scripts/al-correr-filtros.ts",
-    "al:auditar-red": "tsx scripts/al-auditar-red.ts"
+    "al:auditar-red": "tsx scripts/al-auditar-red.ts",
+    "al:eventos": "tsx scripts/al-detectar-eventos.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.36",

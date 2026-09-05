@@ -4,11 +4,12 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ✅ **Fases 0, 0.5, 1, 2, 3 y 4 completadas 2026-09-05.** Las siete tablas
+> ✅ **Fases 0, 0.5, 1, 2, 3, 4 y 5 completadas 2026-09-05.** Las siete tablas
 > `al_*` están en la base viva: motor de filtros determinista con auditoría de
 > descartes, histórico con 27.035 filas (13.606 adjudicaciones + 13.429
 > participaciones sin ganar, 2016→2026) e historial sancionatorio con 2.114
-> registros. Siguiente: Fase 5 (máquina de estados de procesos).
+> registros, y la máquina de estados vigilando 50.584 procesos vivos.
+> Siguiente: Fase 6 (notificación agregada + reportes permanentes).
 >
 > ⚠️ La base está en 449 MB. Con el plan Free (500 MB) el margen es del 10 % y el
 > criterio de la Fase 2 exige 40 %: **queda pendiente de que Supabase Pro esté
@@ -33,7 +34,7 @@ entrega arrancaría construyendo cosas que ya existen y corriendo.
 | Hay que construir el filtro sectorial de ingesta | **Ya existe y está cableado**: `src/lib/secop/ingest-net.ts`, red `(KEYWORDS ∪ UNSPSC agua-exclusivo) AND NOT segmento-80`, derivada de datos con precision/recall medidos (ADR-0001, `docs/fase-0/0.2.1-*`) | El módulo 5 **reusa** esta red; no la reinventa. Es también el insumo de `al_descartes` |
 | `al_notificaciones` es nueva | `envio_log` ya existe con UNIQUE `(usuario_id, fecha, tipo)` e idempotencia insert-first (`src/lib/alertas/run-daily.ts`) | Se **extiende** con columnas de entregabilidad; no se duplica |
 | `al_matches` es nueva | `coincidencia` ya existe con UNIQUE `(usuario_id, proceso_id)` y `vista_en` | Se **extiende** con `account_id` y `filtro_id`; no se duplica |
-| `al_eventos_estado` es nueva | `contrato_evento` existe desde `drizzle/0000` con `valor_anterior/nuevo`, `estado_anterior/nuevo`, `delta jsonb` — pero **solo para contratos** | Se crea `al_proceso_evento` (misma forma, aplicada a `proceso`). El diff de adendas es de procesos, no de contratos |
+| `al_eventos_estado` es nueva | **Correcta, y por una razón que esta auditoría no vio.** `contrato_evento` aparece en `drizzle/0000` pero **fue eliminada el 2026-08-16** (`drizzle/0011`): nadie la leía y dependía del `raw_record` append-only que llenó la cuota de Neon. No existe en la base ni en el esquema Drizzle | Se crea `al_proceso_evento` **más `al_proceso_estado`**: sin `raw_record` append-only no hay contra qué diffear, así que hace falta una línea base propia y acotada |
 | `al_filtros_usuario` es nueva | **Correcto, es nueva.** `alerta_preferencias` solo tiene `activo` y `hora_envio`. Hoy el criterio de búsqueda es el perfil de oferente, no un filtro del usuario | Tabla nueva con DDL literal en §4 |
 | `secop_procesos` | No existe con ese nombre. El canónico es `proceso` + `contrato` + `raw_record` + `sync_log` | Se documentan como existentes e **intocables** |
 | El canal email es una decisión pendiente | Resend ya cableado (`src/lib/email/send.ts`, `AUTH_RESEND_KEY`) con digest diario y unsubscribe de un clic | El módulo 6 extiende lo existente |
@@ -343,7 +344,7 @@ semanas aunque no se construya nada.**
 | `sync_log` | Control del incremental por fuente; el watermark es `MAX(watermark_to) WHERE source=? AND status IN ('ok','partial')` | No. Los módulos nuevos **reusan** este mecanismo, con `source` propio |
 | `proceso` | Entidad canónica del proceso. `secop_proceso_id` UNIQUE, `portafolio_id`, `estado_actual`, `valor_estimado`, `document_access` | No |
 | `contrato` | Entidad canónica del contrato. `secop_contrato_id` UNIQUE, `proveedor_id`, `valor_inicial/actual` | No |
-| `contrato_evento` | Log append-only de cambios en **contratos**, con `delta jsonb` | No. `al_proceso_evento` es su gemelo para procesos |
+| ~~`contrato_evento`~~ | **NO EXISTE.** Eliminada el 2026-08-16 (`drizzle/0011`) por no tener lectores y depender del `raw_record` append-only que llenó la cuota. CLAUDE.md todavía la lista como entidad canónica: está desactualizado | — |
 | `entidad`, `proveedor`, `geografia` | Catálogos, `nit_canonico` UNIQUE en las dos primeras. **Son la llave de relación de todo lo nuevo** | No |
 | `clasificacion_sectorial` | Clasificación derivada versionada por `clasificador_version` | No |
 | `usuario`, `oferente_perfil` | Cuenta y perfil de elegibilidad | No |
@@ -409,11 +410,26 @@ un proceso hace match si
 `AND valor_estimado BETWEEN COALESCE(valorMin,0) AND COALESCE(valorMax,'infinity')`.
 Un array NULL o vacío significa "sin restricción", nunca "no coincide con nada".
 
-### 4.3 `al_proceso_evento` — DDL completo
+### 4.3 `al_proceso_evento` y `al_proceso_estado` — DDL completo
 
-Máquina de estados de procesos. Gemelo de `contrato_evento`, aplicado a `proceso`.
-Append-only. **La adenda se trata como diff, no como aviso**: es la transición de
-mayor valor.
+Máquina de estados de procesos. Append-only. **La adenda se trata como diff, no
+como aviso**: es la transición de mayor valor.
+
+**Hacen falta DOS tablas, y la segunda no estaba en el plan.** `raw_record` no
+guarda historia — se hace upsert sobre `UNIQUE (source, source_record_id)`, así
+que el payload anterior se pierde y no hay contra qué diffear. Eso no es un
+descuido: el `raw_record` append-only, y el `contrato_evento` que colgaba de él,
+se retiraron el 2026-08-16 porque su crecimiento sin límite llenó la cuota. El
+comentario que dejaron en `hechos.ts` dice qué hacer si el historial vuelve a
+hacer falta — *"reconstruir como log acotado, no antes de que algo lo lea"* — y
+`al_proceso_estado` es ese log acotado:
+
+- **Solo procesos vivos.** Un terminal (`Seleccionado`, `Cancelado`) ya no cambia:
+  al detectar la transición se emite el evento y la fila de seguimiento se borra.
+  Hoy: 50.584 vigilados de 90.076, **10 MB**.
+- **Solo los campos que se diffean**, no el payload. Objeto y descripción van como
+  hash: detectar que cambiaron cuesta 16 bytes en vez de dos textos largos.
+- **Una fila por proceso.** Es estado, no log.
 
 ```ts
 export const alProcesoEvento = pgTable(
@@ -1345,20 +1361,58 @@ perdiendo y por qué.
 
 ---
 
-### Fase 5 — Máquina de estados de procesos (módulo 4)
+### Fase 5 — Máquina de estados de procesos (módulo 4) · ✅ COMPLETADA 2026-09-05
 
-`0020` + etapa `detectarEventos` dentro de `app/api/cron/tick/route.ts` (V-F-5:
-Hobby no admite una ruta de cron propia) que compara el snapshot nuevo contra el
-anterior y escribe apertura, adenda con diff y adjudicación. Cadencia diaria.
+Migración `0022` (`al_proceso_estado`) + detector + **el despachador `tick`**, que
+la V-F-5 había dejado como obligatorio.
 
-**Aceptación:**
-1. Tras dos ejecuciones consecutivas del cron sin cambios en la fuente,
-   `al_proceso_evento` **no gana filas** en la segunda.
-2. `psql -c "SELECT count(*) FROM al_proceso_evento WHERE tipo_evento='adenda' AND delta IS NULL;"` → `0`. Una adenda sin diff es un aviso, y eso es exactamente lo que este módulo no debe producir.
-3. Ningún campo de `volatileFields` (`src/lib/ingest/sources.ts`) aparece como clave
-   dentro de `delta`: `psql -c "SELECT count(*) FROM al_proceso_evento WHERE delta @> '[{\"campo\":\"visualizaciones_del\"}]';"` → `0`.
-4. Los tres `tipo_evento` aparecen al menos una vez tras una semana de operación.
-5. `vercel.json` sigue declarando **exactamente 2** crons: `jq '.crons | length' vercel.json` → `2`.
+**Archivos:**
+
+| Ruta | Papel |
+|---|---|
+| `src/lib/al/eventos/campos.ts` | Qué se vigila, con el invariante de disjunción con `volatileFields` |
+| `src/lib/al/eventos/detectar.ts` | Puro: proyección, diff y tipado del evento |
+| `src/lib/al/eventos/correr.ts` | Corrida: diff contra la línea base, escritura y liberación de terminales |
+| `app/api/cron/tick/route.ts` | Despachador único: ingesta → eventos → filtros → sanciones (lunes) |
+| `scripts/al-detectar-eventos.ts` | `npm run al:eventos` |
+| `src/__tests__/al/detectar-eventos.test.ts` | 14 casos |
+
+**Tres decisiones que impuso el dato:**
+
+1. **La apertura solo se emite dentro de una ventana de 30 días.** Sin esa regla
+   la primera corrida habría emitido **50.584 aperturas** de golpe: todo proceso
+   vivo sin línea base parece nuevo. Y sería falso — uno publicado hace dos años
+   no se está abriendo hoy, simplemente no lo habíamos visto. Con la ventana:
+   1.053 aperturas reales y 49.531 sembrados en silencio.
+2. **Se vigila lo no terminal MÁS lo ya vigilado.** Filtrando solo por no-terminal,
+   la transición *hacia* `Seleccionado` —que es el evento de adjudicación— no se
+   vería nunca. Se detecta en esa corrida y en la siguiente la fila ya está
+   liberada.
+3. **La línea base solo se reescribe cuando algo cambió.** Reescribir las 50.584
+   filas en cada corrida costaba **2m22s**; hacerlo solo ante un cambio lo dejó en
+   **43s**. Importa porque los 300 s de `maxDuration` ahora se reparten entre
+   todas las etapas de `tick`.
+
+**Aceptación — cumplida:**
+
+1. Dos corridas consecutivas sin cambios en la fuente: `al_proceso_evento` se
+   queda en **1.053 → 1.053**, con 0 aperturas y 0 escrituras de línea base. ✅
+2. Adendas con `delta` nulo: **0**. ✅
+3. Ninguno de los seis `volatileFields` aparece como clave en `delta`: **0 en los
+   seis**, y hay un test unitario que falla si alguno entra bajo vigilancia. ✅
+4. Los tres `tipo_evento` funcionan de punta a punta, **verificado por
+   simulación, no por una semana de operación**: se perturbó la línea base de tres
+   procesos, el detector emitió `adenda` (con `{antes: "6000000.00", despues:
+   "12000000.00"}` en el presupuesto) y `adjudicacion` (con `{antes: "No",
+   despues: "Si"}`), y los eventos sintéticos se borraron después. La corrida real
+   de una semana sigue pendiente. ⚠️
+5. `jq '.crons | length' vercel.json` → **2**: `/api/cron/tick` y
+   `/api/cron/alertas`. ✅
+
+**`tick` reemplaza a `/api/cron/ingest` en `vercel.json`.** La ruta antigua se
+conserva como disparador manual de la ingesta sola. Ninguna etapa aborta a las
+siguientes: cada una va en su try/catch y solo un fallo de la ingesta produce 500,
+porque es la que alimenta a todas las demás.
 
 ---
 
