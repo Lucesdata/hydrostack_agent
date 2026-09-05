@@ -1473,13 +1473,36 @@ línea que exige `EMAIL_FROM` y el hueco de configuración nunca dio la cara. **
 Fase 6 convierte ese fallo latente en activo**: la cuenta existente pasa a tener
 novedades, así que la próxima corrida intentará enviar y registrará `error`.
 
-**Lo que falta para desbloquearlo**, y es configuración, no desarrollo:
+**Estado de la configuración, verificado el 2026-09-05:**
 
-1. Verificar un dominio en Resend y poner `EMAIL_FROM` (local y Vercel).
-2. Copiar `AUTH_RESEND_KEY` a Vercel producción.
-3. Crear el webhook en Resend apuntando a `/api/webhooks/resend` y poner su
-   `RESEND_WEBHOOK_SECRET`.
-4. Publicar SPF, DKIM y DMARC del dominio remitente **antes** del primer envío.
+| Variable | Local | Vercel producción |
+|---|---|---|
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | ✅ `https://aqualicita.vercel.app` |
+| `EMAIL_FROM` | ✅ `AquaLicita <onboarding@resend.dev>` | ❌ sin poner (a propósito) |
+| `AUTH_RESEND_KEY` | ❌ **cadena vacía** | ❌ no existe |
+| `RESEND_WEBHOOK_SECRET` | ❌ no existe | ❌ no existe |
+
+`EMAIL_FROM` se puso al remitente de pruebas de Resend, que **no exige dominio
+verificado pero solo entrega al correo dueño de la cuenta de Resend**. Sirve para
+verificar el pipeline; no sirve para usuarios reales. Deliberadamente **no** se
+puso en producción: dejar ahí una identidad de remitente que falla en silencio
+con cualquier destinatario que no seas tú es peor que no tener ninguna.
+
+**El bloqueo restante es la clave**, confirmado ejecutando el envío:
+`sendDigestEmail` ahora falla con `AUTH_RESEND_KEY no definida`, ya no con
+`EMAIL_FROM no definida`.
+
+**Lo que falta, y solo lo puede hacer quien tiene la cuenta:**
+
+1. Crear una API key en Resend y ponerla en `.env.local` y en Vercel.
+2. Con eso ya se puede verificar el envío de punta a punta contra tu propia
+   dirección, sin dominio.
+3. Para usuarios reales: registrar un dominio (la cuenta de Vercel tiene **cero**
+   dominios; `aqualicita.vercel.app` no es verificable porque su DNS no es tuyo),
+   verificarlo en Resend, publicar **SPF, DKIM y DMARC**, y recién entonces poner
+   `EMAIL_FROM` en producción.
+4. Crear el webhook en Resend hacia `/api/webhooks/resend` y guardar su
+   `whsec_...` en `RESEND_WEBHOOK_SECRET`.
 
 ---
 
