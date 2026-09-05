@@ -1,7 +1,11 @@
 # SDD AquaLicita — Esqueleto v1
 
-> **Estado:** esqueleto aprobado. Fuente única de verdad del esquema.
+> **Estado:** esqueleto aprobado · **Fase 0 (V-F) completada 2026-09-05** — ver §3.
+> Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
+>
+> ⛔ **BLOQUEADO en Fase 0.5:** la base está a 484 MB de 500 MB (96,8 %). Ninguna
+> fase que escriba datos puede arrancar hasta resolver la cuota (§11, Fase 0.5).
 >
 > Las specs de módulo (`docs/sdd/01-*.md`, `02-*.md`, …) se escriben una a una al
 > construir cada módulo. **Ninguna spec de módulo define tablas por su cuenta**:
@@ -45,9 +49,11 @@ inhabilitado, qué cambió en un pliego y a quién avisar.
 1. **Nada fuera de Colombia.** Ni España, ni OpenPLACSP, ni TED, ni como sección futura.
 2. **No se construye multi-tenant.** Los códigos de equipo son fase 2. En v1
    `account_id` existe en el esquema y siempre vale `usuario.id`.
-3. **No se listan proponentes vencidos.** Ver §3 V-F-4 y §4.7: si no hay dataset
-   público de ofertas por proceso, el histórico entrega **adjudicatario y precio
-   adjudicado**, no la lista de quienes perdieron. Decisión tomada, no pendiente.
+3. **No se listan los precios de las ofertas perdedoras.** La V-F-4 encontró
+   `hgi6-6wh3` (Proponentes por Proceso SECOP II, 2,3 M filas desde 2015), así que
+   **sí se lista quién se presentó a cada proceso**. Lo que ese dataset no publica
+   es el valor ofertado por cada proponente: solo el del adjudicatario. Ese dato
+   queda fuera y **no se añade scraping para conseguirlo**.
 4. **La base no responde preguntas fuera del sector agua.** El filtro sectorial se
    aplica en ingesta (ADR-0001, Opción C). Una consulta del tipo "¿qué más contrata
    esta empresa?" devolverá solo su actividad en agua y saneamiento. Es una
@@ -86,136 +92,218 @@ y una fila con `account_id` NULL debe seguir funcionando en las rutas viejas.
 
 ---
 
-## 3. Verificación de fuentes (V-F) — BLOQUEANTE
+## 3. Verificación de fuentes (V-F) — EJECUTADA 2026-09-05
 
-**No se escribe código de ningún módulo hasta que las seis casillas estén marcadas
-con el comando ejecutado y su salida pegada en este documento.** No es la "Fase 0"
-del proyecto: aquélla es el test binario del extractor de pliegos (extracción limpia
-de un PDF real, cero campos alucinados, matemáticas consistentes, `NO_ENCONTRADO`
-honesto) y es independiente de esto.
+Las seis se ejecutaron el 2026-09-05. **Cuatro pasan, una revierte una decisión a
+favor y una BLOQUEA la Fase 2.** Salidas literales abajo.
 
-### V-F-1 — Qué usa el cron actual · **RESUELTA**
+No es la "Fase 0" del proyecto: aquélla es el test binario del extractor de pliegos
+(extracción limpia de un PDF real, cero campos alucinados, matemáticas
+consistentes, `NO_ENCONTRADO` honesto) y es independiente de esto.
 
-`src/lib/ingest/sodaFetch.ts` usa `SOCRATA_DOMAIN` de `src/lib/secop/config.ts`
-(`https://www.datos.gov.co`). No hay scraping en el pipeline de ingesta. **No hay
-migración que hacer.**
+### V-F-1 — Qué usa el cron actual · ✅ PASA
 
-Queda una sub-tarea abierta, porque CLAUDE.md declara la ejecución en producción
-como no verificada:
+`src/lib/ingest/sodaFetch.ts` usa `SOCRATA_DOMAIN` (`https://www.datos.gov.co`).
+No hay scraping. **No hay migración que hacer.**
 
-```bash
-# V-F-1b — ¿ha corrido el cron en producción?
-psql "$DATABASE_URL" -c "SELECT source, status, started_at, records_ingested FROM sync_log ORDER BY started_at DESC LIMIT 10;"
+Sub-tarea V-F-1b — la ejecución en producción que CLAUDE.md daba por no verificada:
+
+```
+       source       | status |          started_at           | records_ingested | records_failed
+--------------------+--------+-------------------------------+------------------+----------------
+ secop_ii_contratos | ok     | 2026-09-04 11:43:08.248833+00 |               47 |              0
+ secop_ii_procesos  | ok     | 2026-09-04 11:43:06.658612+00 |              128 |              0
+ secop_ii_contratos | ok     | 2026-09-03 11:43:08.139114+00 |              363 |              0
+ secop_ii_procesos  | ok     | 2026-09-03 11:43:06.318006+00 |              141 |              0
+ secop_ii_contratos | ok     | 2026-09-02 11:43:08.210968+00 |               12 |              0
+ secop_ii_procesos  | ok     | 2026-09-02 11:43:06.885603+00 |               39 |              0
 ```
 
-**Criterio binario:** hay ≥1 fila con `status='ok'` y `started_at` dentro de los
-últimos 7 días, para cada uno de `secop_ii_procesos` y `secop_ii_contratos`.
-Si no la hay, la Fase 1 arranca arreglando el cron, no construyendo módulos.
+**Resultado:** cinco días consecutivos, ambas fuentes, `status='ok'`, cero fallos.
+El cron corre en producción. **Actualizar CLAUDE.md**, que aún dice lo contrario.
 
-- [ ] Ejecutado · salida:
+Estado de la base: 90.076 procesos, 38.258 contratos, 128.334 raw_record.
 
-### V-F-2 — Dataset masivo de sanciones descargable en bloque
+- [x] Ejecutado 2026-09-05
 
-Candidato principal: Boletín de Responsables Fiscales (Contraloría) publicado en
-datos.gov.co. **No dar por supuesto que existe como dataset Socrata.**
+### V-F-2 — Dataset masivo de sanciones · ⚠️ PASA CON FUENTE DISTINTA
 
-```bash
-curl -s "https://api.us.socrata.com/api/catalog/v1?domains=datos.gov.co&q=responsables%20fiscales&limit=20" \
-  | jq -r '.results[] | "\(.resource.id)\t\(.resource.name)\t\(.resource.columns_field_name | length) cols"'
-curl -s "https://api.us.socrata.com/api/catalog/v1?domains=datos.gov.co&q=inhabilidades&limit=20" \
-  | jq -r '.results[] | "\(.resource.id)\t\(.resource.name)"'
+Los dos candidatos que el brief suponía **no sirven**:
+
+| Candidato | Filas | Veredicto |
+|---|---|---|
+| `iaeu-rcn6` Antecedentes de SIRI (Procuraduría) | 42.846 | **Descartado.** `GROUP BY nombre_tipo_identificacion` → 42.842 CÉDULA DE CIUDADANÍA + 4 CÉDULA EXTRANJERÍA. **Cero NITs.** Solo personas naturales: no cruza con `proveedor.nit_canonico` |
+| `jr8e-e8tu` Responsabilidad Fiscal (CGR) | **60** | Descartado por volumen. No es el boletín nacional |
+| `n2rx-k8hk` Procesos de Responsabilidad Fiscal | — | Descartado: es de la Contraloría **Departamental del Cauca** |
+
+El Boletín de Responsables Fiscales **no está publicado como dataset Socrata
+nacional en datos.gov.co**. Las búsquedas por "boletin deudores morosos" y
+"sanciones contratistas" no devuelven nada utilizable.
+
+**Fuentes que sí sirven, ambas de Colombia Compra Eficiente:**
+
+| Id | Nombre | Filas | Campo identidad | Actualizado |
+|---|---|---|---|---|
+| `4n4q-k399` | Multas y Sanciones SECOP I | 1.714 | `documento_contratista` | 2026-09-01 |
+| `it5q-hg94` | SECOPII - Multas y Sanciones | 548 | `as_codigo_proveedor_objeto` | 2026-09-04 |
+
+Campos de `4n4q-k399`: `documento_contratista`, `nombre_contratista`,
+`valor_sancion`, `fecha_de_firmeza`, `numero_de_resolucion`, `nit_entidad`,
+`nombre_entidad`, `numero_de_contrato`, `municipio`.
+Campos de `it5q-hg94`: `id_proceso`, `id_contrato`, `tipo_de_sancion`, `valor`,
+`valor_pagado`, `fecha_evento`, `aplico_garantias`, `nombre_proveedor_objeto_de`.
+
+**Consecuencia para el módulo 3 — cambia lo que promete.** Estas fuentes son
+**multas contractuales de SECOP**, no inhabilidades. Responden "¿a este proveedor
+lo han multado por incumplir?", que es una señal legítima y accionable, pero **no**
+"¿está inhabilitado para contratar?". La segunda pregunta requiere SIRI y RUES por
+NIT bajo demanda, y SIRI solo devuelve personas naturales, así que en la práctica
+depende del representante legal — dato que no tenemos.
+
+**El módulo 3 se renombra a "historial sancionatorio", no "inhabilidades".** La UI
+debe decir exactamente eso. Prometer inhabilidades con estos datos sería falso.
+
+- [x] Ejecutado 2026-09-05 · ids = `4n4q-k399`, `it5q-hg94` · 2.262 filas totales
+
+### V-F-3 — Dataset del PAA · ✅ PASA
+
+`9sue-ezhx` — **SECOPII - Plan Anual De Adquisiciones Detalle**, Colombia Compra
+Eficiente. **11.623.049 filas**, actualizado 2026-09-04.
+
+Los cuatro campos exigidos existen: `categorias_unspsc` ✓, `valor_total_esperado`
+(y `valor_esperado_de_presupuesto`) ✓, `nit_entidad` ✓, `fecha_esperada_de_inicio` ✓.
+Además: `descripcion`, `modalidad`, `annio`, `url_proceso`, `procesos_relacionados`
+(que enlaza el PAA con el proceso real cuando sale), `version_del_paa`.
+
+Complemento `b6m4-qgqv` — **SECOP II - PAA - Encabezado**: aporta `departamento_paa`
+y `municipio_paa`, la geografía que el detalle no trae.
+
+**Consecuencia:** 11,6 M de filas hacen **obligatorio** el filtro sectorial en
+ingesta — el mismo `$where` de `ingest-net.ts` sobre `descripcion` y
+`categorias_unspsc`. Aterrizar el PAA sin filtrar reventaría la base sola.
+
+- [x] Ejecutado 2026-09-05 · id = `9sue-ezhx` (+ `b6m4-qgqv`) · UNSPSC = `categorias_unspsc`
+
+### V-F-4 — Dataset de proponentes · ✅ EXISTE — revierte el no-objetivo §1.3
+
+`hgi6-6wh3` — **Proponentes por Proceso SECOP II**, Colombia Compra Eficiente.
+**2.301.286 filas**, cobertura 2015-02-14 → 2026-09-04, actualizado a diario.
+
+Columnas: `id_procedimiento`, `nit_proveedor`, `proveedor`, `codigo_proveedor`,
+`nit_entidad`, `entidad_compradora`, `nombre_procedimiento`, `fecha_publicaci_n`.
+
+**La llave cruza directo:** `id_procedimiento` tiene el formato `CO1.REQ.*`, el
+mismo de `proceso.secop_proceso_id`. Verificado sobre filas reales.
+
+**Cobertura medida** (12 procesos nuestros al azar, `estado_actual='Seleccionado'`):
+
+| Modalidad de la muestra | Cobertura |
+|---|---|
+| Licitación pública / Selección abreviada / Concurso de méritos | **10/12** (1 a 17 proponentes por proceso) |
+| Contratación directa / Régimen especial | **0/12** |
+
+Los ceros **no son un fallo del dataset**: la contratación directa no tiene
+pluralidad de oferentes por definición. El dataset cubre lo que tiene que cubrir.
+
+En el sector: 6.616 filas solo con `nombre_procedimiento LIKE '%ACUEDUCTO%'`, con
+procesos de hasta **83 proponentes** (`CO1.REQ.1275505`, 83; `CO1.REQ.8603673`, 65;
+`CO1.REQ.8592187`, 62 — los tres ya están en nuestra base).
+
+**Lo que el dataset NO trae: el precio de cada oferta.** Solo quién se presentó.
+
+**Consecuencia — el no-objetivo §1.3 se levanta parcialmente:**
+
+- ✅ **SÍ** se puede responder "**contra quién** compito": la lista de proponentes
+  por proceso, desde 2015.
+- ✅ **SÍ** se puede responder "a qué precio **gana** el adjudicatario"
+  (`valor_adjudicacion` del payload de procesos ya aterrizado).
+- ❌ **NO** se puede responder "a qué precio **ofertó el que perdió**". Eso sigue
+  siendo no-objetivo, y no se añade scraping para conseguirlo.
+
+- [x] Ejecutado 2026-09-05 · id = `hgi6-6wh3` · existe: **sí**
+
+### V-F-5 — Límite de crons de Vercel · ⚠️ PASA CON RESTRICCIÓN DURA
+
+```
+$ vercel api /v2/user | jq -r '.user.billing.plan'
+hobby
 ```
 
-**Criterio binario:** se identifica **un** id 4x4 cuyo dataset contenga un campo de
-documento de identidad/NIT y un campo de vigencia o fecha, y `curl` de una página
-de 5 filas devuelve JSON no vacío. Se pega aquí el id, el nombre del campo NIT y
-una fila de ejemplo.
+**Plan Hobby.** Límites: **2 cron jobs como máximo** y **frecuencia diaria como
+mínimo** (no se admiten cadencias sub-diarias). `vercel.json` ya declara exactamente
+2, ambos diarios: `/api/cron/ingest` (11:00 UTC) y `/api/cron/alertas` (12:00 UTC).
 
-Si no existe: el módulo 3 se degrada a **solo consulta bajo demanda** (SIRI + RUES,
-caché 30 días) y se elimina el cruce masivo del alcance de v1. Esa degradación se
-decide aquí, no a mitad de la implementación.
+**No queda ni un slot libre y la cadencia de 6 h del brief es imposible en Hobby.**
 
-- [ ] Ejecutado · id 4x4 = ______ · campo NIT = ______
+Consecuencias, sin cambiar arquitectura (R4):
 
-### V-F-3 — Dataset del PAA (Plan Anual de Adquisiciones)
+1. **Despachador único obligatorio.** `app/api/cron/tick/route.ts` reemplaza a
+   `/api/cron/ingest` en `vercel.json` y llama por orden: ingesta → detector de
+   eventos → PAA (solo día 1) → sanciones (solo lunes). Las rutas nuevas existen
+   como funciones, no como entradas de cron.
+2. **La detección de cambios pasa de 6 h a diaria.** Y no se pierde nada: el canal
+   de notificación es un correo diario agregado, así que detectar cada 6 h no
+   adelantaría ni un aviso. La cadencia de 6 h del brief era un calco de
+   LicitacionesARG, que notifica por Telegram en tiempo real. Con email diario es
+   trabajo sin destinatario.
+3. El `maxDuration` de 300 s pasa a ser compartido por todas las etapas. El tope de
+   páginas (`CRON_MAX_PAGES`) debe repartirse, y cada etapa cierra su propia fila
+   en `sync_log` para que un truncamiento sea atribuible.
 
-El PAA es la ventaja temporal del producto: anticipa con meses lo que el portal
-publica después.
+- [x] Ejecutado 2026-09-05 · plan = **hobby** · crons = 2/2 usados · mínimo = diario
 
-```bash
-curl -s "https://api.us.socrata.com/api/catalog/v1?domains=datos.gov.co&q=plan%20anual%20de%20adquisiciones&limit=20" \
-  | jq -r '.results[] | "\(.resource.id)\t\(.resource.name)\t\(.resource.updatedAt)"'
+### V-F-6 — Cuota de Supabase · ❌ FALLA — BLOQUEA LA FASE 2
+
+```
+ total
+--------
+ 484 MB
 ```
 
-**Criterio binario:** id 4x4 confirmado + se verifica que existan campos de
-(a) código UNSPSC, (b) valor estimado, (c) entidad/NIT, (d) fecha estimada de
-inicio del proceso. Sin (a) el PAA no cruza con la red sectorial y el módulo pierde
-su razón de ser — decidir entonces si se filtra por texto libre.
+**El plan Free de Supabase tiene 500 MB. Estamos al 96,8 % ANTES de cargar nada.**
 
-- [ ] Ejecutado · id 4x4 = ______ · campo UNSPSC = ______
+El criterio era `tamaño_actual + filas_nuevas × 4 KB < 90 %` de la cuota. Ya se
+incumple sin el backfill. Quedan **≈16 MB** de margen.
 
-### V-F-4 — ¿Existe dataset de proponentes / ofertas por proceso?
+Desglose:
 
-Determina si el módulo 2 puede responder "quién ofertó" o solo "quién ganó".
+| Tabla | Tamaño | Nota |
+|---|---|---|
+| `raw_record` | **319 MB** | 207 MB son payload jsonb puro (125 MB procesos + 82 MB contratos) |
+| `proceso` | 95 MB | 90.076 filas |
+| `contrato` | 49 MB | 38.258 filas |
+| `proveedor` | 7,4 MB | |
+| resto | < 2 MB | |
 
-```bash
-curl -s "https://api.us.socrata.com/api/catalog/v1?domains=datos.gov.co&q=SECOP%20II%20oferentes&limit=20" \
-  | jq -r '.results[] | "\(.resource.id)\t\(.resource.name)"'
-curl -s "https://api.us.socrata.com/api/catalog/v1?domains=datos.gov.co&q=SECOP%20propuestas&limit=20" \
-  | jq -r '.results[] | "\(.resource.id)\t\(.resource.name)"'
-```
+Índices muertos recuperables: `proceso_portafolio_idx` (5,6 MB, **0 scans**),
+`contrato_proveedor_idx` (1,2 MB, **0 scans**), `contrato_pkey` (2,4 MB, 0 scans —
+**no se toca**, es la PK). Total realista a recuperar: **≈7 MB**. No resuelve nada.
 
-**Criterio binario:** sí/no. **Decisión ya tomada para el caso "no":** el módulo 2
-se construye sobre adjudicatario + valor adjudicado y el no-objetivo §1.3 queda
-firme. No se añade scraping bajo ninguna circunstancia.
+Verificaciones colaterales, ambas correctas:
 
-Los campos de adjudicación ya están aterrizados en el payload de procesos y son
-legibles hoy (`src/lib/secop/db-search.ts:197-199`: `adjudicadoRaw`,
-`valorAdjudicacionRaw`, `adjudicatarioRaw`), así que el caso "no" es entregable
-sin fuente nueva.
+- Tablas de `public` sin RLS: **0**. La regla R6 se cumple hoy.
+- `usuario.plan`: **no existe en la base**. La migración `0017` sigue pendiente,
+  como decía CLAUDE.md.
 
-- [ ] Ejecutado · existe: sí / no
+**Ninguna fase que escriba datos puede arrancar hasta resolver esto.** No es solo
+la Fase 2: crear `al_filtros_usuario` cabe, pero la ingesta diaria sigue creciendo
+~50 MB/mes contra un margen de 16 MB. **La base se llena sola en menos de tres
+semanas aunque no se construya nada.**
 
-### V-F-5 — Límite de crons del plan de Vercel
+- [x] Ejecutado 2026-09-05 · 484 MB / 500 MB = **96,8 %** · cabe: **no**
 
-El brief pide cadencias de 6 h y mensual. El plan Hobby de Vercel limita el número
-de cron jobs y su frecuencia mínima; hoy `vercel.json` declara dos, ambos diarios.
+### Resumen y decisión pendiente
 
-```bash
-vercel project ls
-# y en el dashboard: Settings → Crons (o `vercel api /v1/projects/<id>` → plan)
-```
+| V-F | Resultado |
+|---|---|
+| 1 · cron | ✅ Socrata, corriendo en prod, 5 días ok |
+| 2 · sanciones | ⚠️ Sí, pero son multas contractuales, no inhabilidades. SIRI descartado (solo cédulas) |
+| 3 · PAA | ✅ `9sue-ezhx`, 11,6 M filas, con UNSPSC |
+| 4 · proponentes | ✅ Existe. Se levanta parte del no-objetivo §1.3 |
+| 5 · crons | ⚠️ Hobby: 2/2 usados, mínimo diario. Despachador obligatorio |
+| 6 · cuota | ❌ **484/500 MB. Bloquea todo.** |
 
-**Criterio binario:** se confirma el plan y cuántos crons y qué frecuencia mínima
-admite. **Si el plan no admite 6 h**, la arquitectura no cambia (R4): se consolida
-en un único despachador `app/api/cron/tick/route.ts` que decide qué corre según la
-hora, y el resto de rutas de cron pasan a ser funciones invocadas desde ahí. Esa
-consolidación se decide aquí, no durante la Fase 5.
-
-- [ ] Ejecutado · plan = ______ · crons permitidos = ______ · frecuencia mínima = ______
-
-### V-F-6 — Holgura de cuota en Supabase antes del backfill
-
-En agosto de 2026 la cuota del plan Free ya obligó a retirar tres índices muertos.
-El backfill histórico añade volumen.
-
-```bash
-psql "$DATABASE_URL" -c "SELECT pg_size_pretty(pg_database_size(current_database())) AS total;"
-psql "$DATABASE_URL" -c "SELECT relname, pg_size_pretty(pg_total_relation_size(c.oid)) AS size FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r' ORDER BY pg_total_relation_size(c.oid) DESC LIMIT 10;"
-```
-
-Y el conteo real que el backfill traería, **antes** de traerlo:
-
-```bash
-# sustituir <WHERE> por el sectorWhere de SECTOR_NET_CONTRATOS urlencodeado
-curl -s "https://www.datos.gov.co/resource/jbjy-vk9h.json?\$select=count(1)&\$where=<WHERE>%20AND%20fecha_de_firma%20%3E=%20%272015-01-01%27"
-```
-
-**Criterio binario:** `filas_a_cargar × 4 KB estimados + tamaño_actual < 90 %` de la
-cuota del plan. Si no cabe, la Fase 2 arranca desde el año más reciente hacia atrás
-y se detiene al llegar al 90 %, dejando registrado el año alcanzado.
-
-- [ ] Ejecutado · tamaño actual = ______ · filas estimadas = ______ · cabe: sí / no
+**La Fase 1 no puede arrancar hasta decidir sobre la cuota** (§11, Fase 0.5).
 
 ---
 
@@ -494,12 +582,16 @@ entonces se actualiza este esqueleto. Aquí solo se fija lo que no puede cambiar
 
 #### `al_oferentes_historico`
 
-**Entidad:** una adjudicación histórica del sector agua desde 2015. Una fila = un
-proceso adjudicado a un proveedor.
+**Entidad:** la participación de un proveedor en un proceso del sector agua desde
+2015. Una fila = un (proceso, proveedor). El flag `adjudicado` distingue al ganador
+de los demás proponentes.
 
-**Alcance decidido:** solo contratos/procesos **adjudicados** (V-F-6, decisión de
-volumen). No se aterriza el histórico completo de procesos. Y **adjudicatario, no
-proponentes** (V-F-4, no-objetivo §1.3).
+**Alcance decidido, actualizado tras la V-F:** solo procesos **cerrados**
+(`estado_actual='Seleccionado'`) — decisión de volumen de V-F-6. Se aterrizan
+**todos los proponentes** de esos procesos (fuente `hgi6-6wh3`, verificada en
+V-F-4), no solo el adjudicatario. El precio se conoce únicamente para el
+adjudicatario (`valor_adjudicado`); para el resto queda NULL, y eso es un límite de
+la fuente, no un dato pendiente de cargar.
 
 **Campos mínimos, ya fijados:**
 
@@ -512,7 +604,8 @@ proponentes** (V-F-4, no-objetivo §1.3).
 | `geografia_id` | `text` FK → `geografia.codigo_divipola` | Dónde |
 | `unspsc` | `text` | Para agregar por familia de código |
 | `valor_estimado` | `numeric(20,2)` | Precio de referencia de la entidad |
-| `valor_adjudicado` | `numeric(20,2)` | **Precio al que se gana.** Es la razón de existir del módulo |
+| `adjudicado` | `boolean NOT NULL` | `true` = ganó; `false` = se presentó y perdió. Fuente del flag: `adjudicatario` del payload de procesos |
+| `valor_adjudicado` | `numeric(20,2)` | **Precio al que se gana.** NULL cuando `adjudicado=false`: la fuente no publica ofertas perdedoras |
 | `fecha_adjudicacion` | `date` | Serie temporal |
 | `modalidad` | `text` | Cruza con el escalón de contratación del diagnóstico |
 | `raw_record_id` | `uuid` FK → `raw_record.id` | Trazabilidad |
@@ -521,16 +614,25 @@ proponentes** (V-F-4, no-objetivo §1.3).
 idempotencia del backfill; índice en `(proveedor_id, fecha_adjudicacion)` para la
 consulta "historial de este competidor"; índice en `(entidad_id, fecha_adjudicacion)`.
 
-**Fuente de los datos:** derivada de `raw_record` ya aterrizado
-(`adjudicado`, `valor_adjudicacion`, `adjudicatario` del payload de procesos —
-ver `src/lib/secop/db-search.ts:197-199`) más `contrato`. **No requiere fuente
-externa nueva**, lo que hace este módulo entregable aunque V-F-2/3/4 fallen.
+**Fuentes, ambas verificadas:**
+
+1. **Adjudicatario y precio** — derivados de `raw_record` ya aterrizado
+   (`adjudicado`, `valor_adjudicacion`, `adjudicatario` del payload de procesos,
+   ver `src/lib/secop/db-search.ts:197-199`) más `contrato`. Sin fuente externa.
+2. **Proponentes** — `hgi6-6wh3` vía Socrata, cruzando `id_procedimiento` con
+   `proceso.secop_proceso_id`. Se declara como `IngestSource` normal (§5.1) y hereda
+   watermark sobre `fecha_publicaci_n`.
+
+**Filtro sectorial para el proponente:** no se descargan los 2,3 M de filas. Se
+piden solo las de los `id_procedimiento` que ya están en nuestra tabla `proceso`
+(que ya pasó la red sectorial), en lotes con `$where=id_procedimiento in (...)`.
+El sector es un subconjunto pequeño: 6.616 filas solo con la keyword ACUEDUCTO.
 
 #### `al_sanciones`
 
 **Entidad:** un hallazgo de sanción o inhabilidad sobre un NIT.
 
-**Campos mínimos, ya fijados:** `fuente` (`text`: `'boletin_fiscal'|'siri'|'rues'`),
+**Campos mínimos, ya fijados:** `fuente` (`text`: `'secop_i_multas'|'secop_ii_multas'|'rues'`),
 `nit_canonico` (`text`, **llave de relación** con `proveedor.nit_canonico`),
 `tipo` (`text`), `vigente_desde` / `vigente_hasta` (`date`), `payload` (`jsonb`
 crudo de la fuente), `ingested_at`, `raw_record_id`.
@@ -538,15 +640,27 @@ crudo de la fuente), `ingested_at`, `raw_record_id`.
 **Índices obligatorios:** índice en `nit_canonico`; UNIQUE
 `(fuente, nit_canonico, tipo, vigente_desde)` para idempotencia del cruce masivo.
 
-**Lo que la V-F-2 decide y aquí no se puede fijar:** el nombre y tipo real de los
-campos de la fuente masiva, y si `vigente_hasta` existe. Si la fuente no publica
-vigencia, el diseño cambia: una sanción sin fecha de fin no puede caducar sola, y
-la spec del módulo 3 tendrá que decidir entre asumirla permanente o refrescar la
-tabla entera en cada corrida.
+**Resuelto por la V-F-2 (2026-09-05):** las fuentes masivas son `4n4q-k399`
+(Multas y Sanciones SECOP I, 1.714 filas, campo de identidad `documento_contratista`)
+y `it5q-hg94` (SECOPII - Multas y Sanciones, 548 filas, `as_codigo_proveedor_objeto`).
+Ninguna publica `vigente_hasta`: traen `fecha_de_firmeza` / `fecha_evento`. Una multa
+contractual no caduca, así que `vigente_hasta` queda NULL y no se implementa
+caducidad. Son 2.262 filas en total: la corrida completa se recarga entera cada
+semana, sin incremental.
+
+**SIRI queda fuera del cruce masivo.** `iaeu-rcn6` tiene 42.846 filas y **cero NITs**
+(42.842 cédulas de ciudadanía + 4 de extranjería): solo personas naturales. No cruza
+con `proveedor.nit_canonico`. Cruzarlo requeriría el representante legal de cada
+proveedor, dato que no tenemos. RUES queda como única consulta bajo demanda.
+
+**El módulo se llama "historial sancionatorio", no "inhabilidades".** Es la
+consecuencia de producto más importante de la V-F-2: estas fuentes responden "¿a
+este proveedor lo han multado por incumplir un contrato público?", no "¿está
+inhabilitado para contratar?". Prometer lo segundo con estos datos sería falso.
 
 **Advertencia de producto que debe ir en la UI:** un hallazgo es una señal para
 verificar en la fuente oficial, nunca una afirmación de que una empresa está
-inhabilitada. La homonimia de NIT y los desfases de publicación son reales.
+inhabilitada. La homonimia de documento y los desfases de publicación son reales.
 
 ### 4.8 `ALTER TABLE` sobre tablas existentes (aditivos)
 
@@ -593,20 +707,34 @@ arquitectura) sea cumplible.
 
 ### 5.2 Fuentes y cadencias
 
-| Fuente | `source` | Cadencia | Ruta | Estado |
-|---|---|---|---|---|
-| SECOP II procesos | `secop_ii_procesos` | Diaria 06:00 COT | `/api/cron/ingest` | **Existe** |
-| SECOP II contratos | `secop_ii_contratos` | Diaria 06:00 COT | `/api/cron/ingest` | **Existe** |
-| Cambios de estado (detector de eventos) | `secop_ii_procesos` (relee raw) | Cada 6 h | `/api/cron/eventos` | Nuevo — sujeto a V-F-5 |
-| PAA | `secop_paa` | Mensual, día 1 | `/api/cron/paa` | Nuevo — sujeto a V-F-3 |
-| Sanciones masivas | `sanciones_masiva` | Semanal | `/api/cron/sanciones` | Nuevo — sujeto a V-F-2 |
-| Histórico adjudicaciones | — | Carga inicial única + incremental semanal | script `npm run al:backfill` + `/api/cron/historico` | Nuevo |
-| SIRI / RUES | — | Bajo demanda, caché 30 d | `/api/al/sanciones/[nit]` | Nuevo — sin cron |
+**V-F-5 resuelta: plan Hobby, 2 crons como máximo, frecuencia mínima diaria, y los
+2 ya están usados.** El despachador único no es una alternativa, es la única forma.
 
-**Si V-F-5 dice que el plan no admite estas cadencias:** un único
-`app/api/cron/tick/route.ts` diario o cada 6 h que decide internamente qué corre
-según `new Date().getUTCHours()` y el día del mes. Mismo código, misma
-arquitectura, un solo cron declarado.
+`vercel.json` mantiene exactamente dos entradas: `/api/cron/tick` (que reemplaza a
+`/api/cron/ingest`) y `/api/cron/alertas`. Todo lo demás son funciones que `tick`
+invoca por orden, no rutas de cron.
+
+| Etapa dentro de `tick` | `source` | Cuándo corre | Módulo | Estado |
+|---|---|---|---|---|
+| SECOP II procesos | `secop_ii_procesos` | Diaria | — | **Existe** |
+| SECOP II contratos | `secop_ii_contratos` | Diaria | — | **Existe** |
+| Detector de eventos | relee `raw_record` | Diaria | 4 | Nuevo |
+| Proponentes | `secop_ii_proponentes` (`hgi6-6wh3`) | Diaria | 2 | Nuevo |
+| Sanciones (recarga completa) | `secop_multas` (`4n4q-k399`, `it5q-hg94`) | Lunes | 3 | Nuevo |
+| PAA | `secop_paa` (`9sue-ezhx`) | Día 1 del mes | 1 | Nuevo |
+| Histórico adjudicaciones | — | Carga inicial única, fuera del cron | 2 | script `npm run al:backfill` |
+| RUES | — | Bajo demanda, caché 30 d | 3 | `/api/al/sanciones/[nit]` — sin cron |
+
+**La cadencia de 6 h del brief se abandona, y no se pierde nada.** El canal es un
+correo diario agregado: detectar un cambio a las 03:00 en vez de a las 09:00 no
+adelanta ningún aviso. Esa cadencia era un calco de LicitacionesARG, que notifica
+por Telegram en tiempo real. Con email diario es trabajo sin destinatario.
+
+**Reparto del `maxDuration`:** los 300 s pasan a ser compartidos. `CRON_MAX_PAGES`
+se reparte por etapa y **cada etapa abre y cierra su propia fila en `sync_log`**,
+para que un truncamiento sea atribuible a una fuente concreta. Una etapa que falla
+no aborta las siguientes: `tick` las ejecuta en secuencia con `try/catch` por etapa
+y devuelve 500 solo si falla la ingesta base.
 
 ### 5.3 Idempotencia y deduplicación — reglas por tabla
 
@@ -887,13 +1015,37 @@ las 2-3.
 
 ---
 
-### Fase 0 — Verificación de fuentes · BLOQUEANTE
+### Fase 0 — Verificación de fuentes · ✅ COMPLETADA 2026-09-05
 
-Ejecutar V-F-1 … V-F-6 (§3) y pegar las salidas en este documento.
+Las seis V-F ejecutadas y registradas en §3 con sus salidas literales. Resultado:
+cuatro pasan, la V-F-4 levanta parte de un no-objetivo, la V-F-6 bloquea.
 
-**Aceptación:** las seis casillas de §3 marcadas, cada una con el comando y su
-salida literal. `git log --oneline -1 docs/sdd/00-esqueleto.md` muestra el commit
-que las cerró.
+---
+
+### Fase 0.5 — Cuota de base de datos · BLOQUEANTE, NUEVA
+
+Sale de la V-F-6. **484 MB de 500 MB (96,8 %) antes de escribir una sola tabla
+nueva.** La ingesta diaria crece sola: la base se llena en menos de tres semanas
+aunque no se construya nada. No es una fase de este SDD en sentido estricto — es
+una decisión de infraestructura que hay que tomar antes de la Fase 1.
+
+Tres vías, no excluyentes:
+
+| Vía | Recupera | Coste | Qué se pierde |
+|---|---|---|---|
+| **A. Supabase Pro** | 8 GB (16×) | ~25 USD/mes | Nada |
+| **B. Podar el payload de `raw_record` antiguo** | hasta ~200 MB | 0 | La capacidad de re-transformar sin volver a Socrata. Se conserva `payload_hash`, `source_record_id` y `source_updated_at`, así que la deduplicación y el watermark siguen intactos; lo que se pierde es el JSON crudo |
+| **C. Retirar índices muertos** | ~7 MB | 0 | Nada (`proceso_portafolio_idx` y `contrato_proveedor_idx` tienen 0 scans) |
+
+**Recomendación: A.** B compra tiempo pero rompe la propiedad que hace valioso el
+diseño ELT — poder re-derivar entidades sin volver a la fuente — justo cuando el
+histórico va a exigir re-transformar. C es ruido a esta escala.
+
+**Aceptación:**
+1. `psql -c "SELECT pg_size_pretty(pg_database_size(current_database()));"` y el
+   límite del plan vigente dejan **≥60 % de margen libre**.
+2. Si se eligió B: `psql -c "SELECT count(*) FROM raw_record WHERE payload IS NULL;"` > 0
+   y la ingesta del día siguiente cierra `status='ok'` (la poda no rompió el watermark).
 
 ---
 
@@ -915,34 +1067,45 @@ Aplicar `0017`; crear `0018` (`al_filtros_usuario`, `al_reportes`, `al_descartes
 
 ### Fase 2 — Histórico de adjudicaciones (módulo 2)
 
-`0021` + backfill de adjudicaciones 2015→hoy **solo adjudicadas**, derivado de
-`raw_record`/`contrato` ya aterrizados. Script `npm run al:backfill-historico`,
-incremental semanal después.
+`0021` + backfill 2015→hoy de los procesos `Seleccionado` del sector: adjudicatario
+y precio desde `raw_record`/`contrato`, más **todos los proponentes** desde
+`hgi6-6wh3` (V-F-4). Script `npm run al:backfill-historico`; después, etapa diaria
+dentro de `tick`.
 
 **Aceptación:**
 1. `psql -c "SELECT count(*), min(fecha_adjudicacion), max(fecha_adjudicacion) FROM al_oferentes_historico;"` → count > 0 y `min <= '2016-12-31'`.
 2. Ejecutar el backfill **dos veces seguidas**: el `count(*)` de la segunda es
    idéntico al de la primera (idempotencia por UNIQUE).
-3. `psql -c "SELECT count(*) FROM al_oferentes_historico WHERE valor_adjudicado IS NULL;"` → menor al 5 % del total.
-4. `historialCompetidor('<NIT real del sector>')` devuelve ≥1 adjudicación y su
+3. `psql -c "SELECT count(*) FROM al_oferentes_historico WHERE adjudicado AND valor_adjudicado IS NULL;"` → menos del 5 % de los adjudicados. Las filas con `adjudicado=false` **deben** tener `valor_adjudicado` NULL: la fuente no lo publica.
+4. Hay al menos un proceso con ≥2 proponentes:
+   `psql -c "SELECT secop_proceso_id, count(*) n FROM al_oferentes_historico GROUP BY 1 HAVING count(*) > 1 ORDER BY n DESC LIMIT 5;"` → ≥1 fila.
+   Contraste de referencia: `CO1.REQ.8592187` tiene 62 proponentes en la fuente.
+5. Todo proceso con proponentes tiene exactamente uno con `adjudicado=true`:
+   `psql -c "SELECT count(*) FROM (SELECT secop_proceso_id FROM al_oferentes_historico GROUP BY 1 HAVING count(*) FILTER (WHERE adjudicado) > 1) d;"` → `0`.
+6. `historialCompetidor('<NIT real del sector>')` devuelve ≥1 adjudicación y su
    `ratioAdjudicadoSobreEstimado` está entre 0 y 2.
-5. `pg_database_size` tras el backfill sigue por debajo del 90 % de la cuota
-   (mismo comando de V-F-6).
+7. `pg_database_size` tras el backfill deja ≥40 % de margen (criterio de Fase 0.5).
 
 ---
 
 ### Fase 3 — Sanciones e inhabilidades (módulo 3)
 
-`0022` + cruce masivo semanal de la fuente de V-F-2 + `/api/al/sanciones/[nit]`
-para SIRI y RUES bajo demanda con caché de 30 días.
+`0022` + recarga semanal completa de `4n4q-k399` y `it5q-hg94` (V-F-2) +
+`/api/al/sanciones/[nit]` para **RUES** bajo demanda con caché de 30 días. SIRI
+queda fuera: solo tiene cédulas (V-F-2).
 
 **Aceptación:**
-1. Tras la primera corrida del cruce masivo, `al_sanciones` tiene ≥1 fila.
+1. Tras la primera corrida, `psql -c "SELECT fuente, count(*) FROM al_sanciones GROUP BY 1;"` → dos filas, `secop_i_multas` ≈1.714 y `secop_ii_multas` ≈548.
 2. Segunda corrida consecutiva: `count(*)` no aumenta (UNIQUE + `onConflictDoNothing`).
-3. `curl /api/al/sanciones/<nit>` dos veces seguidas: la segunda responde en
+3. Al menos un NIT de `al_sanciones` cruza con un proveedor real:
+   `psql -c "SELECT count(*) FROM al_sanciones s JOIN proveedor p ON p.nit_canonico = s.nit_canonico;"` → > 0.
+   **Si da 0, el módulo no sirve** y hay que revisar la normalización de documento
+   antes de seguir (la fuente trae cédulas y NITs mezclados en el mismo campo).
+4. `curl /api/al/sanciones/<nit>` dos veces seguidas: la segunda responde en
    <100 ms y `al_sanciones_cache.consultado_en` **no** cambia entre ambas.
-4. `psql -c "SELECT count(*) FROM al_sanciones_cache WHERE expira_en <= consultado_en;"` → `0`.
-5. Un NIT sin hallazgos devuelve `estado='no_encontrado'`, no un error.
+5. `psql -c "SELECT count(*) FROM al_sanciones_cache WHERE expira_en <= consultado_en;"` → `0`.
+6. Un NIT sin hallazgos devuelve `estado='no_encontrado'`, no un error.
+7. La UI dice "historial sancionatorio", no "inhabilidades", y `grep -rn "inhabilitad" app/` no aparece en texto mostrado al usuario sin la advertencia de §4.7.
 
 ---
 
@@ -963,8 +1126,9 @@ para SIRI y RUES bajo demanda con caché de 30 días.
 
 ### Fase 5 — Máquina de estados de procesos (módulo 4)
 
-`0020` + `/api/cron/eventos` (o el despachador de V-F-5) que compara el snapshot
-nuevo contra el anterior y escribe apertura, adenda con diff y adjudicación.
+`0020` + etapa `detectarEventos` dentro de `app/api/cron/tick/route.ts` (V-F-5:
+Hobby no admite una ruta de cron propia) que compara el snapshot nuevo contra el
+anterior y escribe apertura, adenda con diff y adjudicación. Cadencia diaria.
 
 **Aceptación:**
 1. Tras dos ejecuciones consecutivas del cron sin cambios en la fuente,
@@ -973,6 +1137,7 @@ nuevo contra el anterior y escribe apertura, adenda con diff y adjudicación.
 3. Ningún campo de `volatileFields` (`src/lib/ingest/sources.ts`) aparece como clave
    dentro de `delta`: `psql -c "SELECT count(*) FROM al_proceso_evento WHERE delta @> '[{\"campo\":\"visualizaciones_del\"}]';"` → `0`.
 4. Los tres `tipo_evento` aparecen al menos una vez tras una semana de operación.
+5. `vercel.json` sigue declarando **exactamente 2** crons: `jq '.crons | length' vercel.json` → `2`.
 
 ---
 
@@ -1001,11 +1166,16 @@ Resend, y `app/reportes/[slug]`.
 Estas decisiones se toman en la spec de su módulo, con el contexto de lo ya
 construido, y **al tomarse se actualiza este documento**:
 
-- DDL definitivo de `al_oferentes_historico` y `al_sanciones` (depende de V-F).
+- DDL definitivo de `al_oferentes_historico` y `al_sanciones`. La V-F cerró las
+  fuentes y los campos de identidad; falta traducirlos a tipos Drizzle exactos.
 - Lista exacta de campos que entran al `delta` de una adenda (módulo 4).
 - Política de retención de `al_descartes` (candidato: 90 días).
 - Esquema del `payload` de cada `tipo` de reporte (módulo 6).
-- Si el PAA aterriza como `IngestSource` propio o como tabla derivada (depende de
-  si trae UNSPSC — V-F-3).
+- Si el PAA aterriza como `IngestSource` propio o como tabla derivada. La V-F-3
+  confirmó que `9sue-ezhx` trae `categorias_unspsc`, así que la red sectorial le
+  aplica; lo que queda por decidir es si sus 11,6 M de filas justifican tabla propia
+  o si basta con enlazar por `procesos_relacionados`.
+- Cómo normalizar el campo de documento de `al_sanciones`: la fuente mezcla cédulas
+  y NITs en `documento_contratista` sin discriminador de tipo.
 - Si `pliego_extraer` y el histórico quedan tras la frontera `pro` de
   `src/lib/acceso/politica.ts`. **Supuesto de v1: todo lo nuevo es nivel `gratis`.**
