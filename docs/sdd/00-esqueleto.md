@@ -4,9 +4,14 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ✅ **Fase 0.5 y Fase 1 completadas 2026-09-05.** La poda bajó la base de 484 a
-> 432 MB (86,4 %) y se decidió subir a Supabase Pro; las tablas `al_*` y el motor
-> de filtros están en la base viva. Siguiente: Fase 2 (histórico de adjudicaciones).
+> ✅ **Fases 0, 0.5, 1 y 2 completadas 2026-09-05.** Las seis tablas `al_*` están
+> en la base viva, el motor de filtros funciona y el histórico tiene 27.035 filas
+> (13.606 adjudicaciones + 13.429 participaciones sin ganar, 2016→2026).
+> Siguiente: Fase 3 (historial sancionatorio).
+>
+> ⚠️ La base está en 449 MB. Con el plan Free (500 MB) el margen es del 10 % y el
+> criterio de la Fase 2 exige 40 %: **queda pendiente de que Supabase Pro esté
+> activo**. Con Pro (8 GB) el margen es del 94,5 %.
 >
 > Las specs de módulo (`docs/sdd/01-*.md`, `02-*.md`, …) se escriben una a una al
 > construir cada módulo. **Ninguna spec de módulo define tablas por su cuenta**:
@@ -581,53 +586,51 @@ export const alSancionesCache = pgTable(
 Su DDL definitivo se cierra en la spec de su módulo, **después** de la V-F, y
 entonces se actualiza este esqueleto. Aquí solo se fija lo que no puede cambiar.
 
-#### `al_oferentes_historico`
+#### `al_oferentes_historico` — ✅ DDL CERRADO 2026-09-05
 
-**Entidad:** la participación de un proveedor en un proceso del sector agua desde
-2015. Una fila = un (proceso, proveedor). El flag `adjudicado` distingue al ganador
-de los demás proponentes.
+Definición viva en `src/lib/db/schema/aqualicita.ts`, migración `0020`.
 
-**Alcance decidido, actualizado tras la V-F:** solo procesos **cerrados**
-(`estado_actual='Seleccionado'`) — decisión de volumen de V-F-6. Se aterrizan
-**todos los proponentes** de esos procesos (fuente `hgi6-6wh3`, verificada en
-V-F-4), no solo el adjudicatario. El precio se conoce únicamente para el
-adjudicatario (`valor_adjudicado`); para el resto queda NULL, y eso es un límite de
-la fuente, no un dato pendiente de cargar.
+**Entidad:** la participación de un proveedor en un proceso del sector. Una fila
+= un (proceso, proveedor); `adjudicado` distingue al ganador del resto.
 
-**Campos mínimos, ya fijados:**
+**Dos decisiones que el DDL preliminar no anticipaba y que la carga real impuso:**
 
-| Campo | Tipo | Origen |
-|---|---|---|
-| `account_id` | — | **No lleva.** Es dato de mercado, común a todas las cuentas |
-| `secop_proceso_id` | `text` | `proceso.secop_proceso_id` / payload |
-| `proveedor_id` | `uuid` FK → `proveedor.id` | **Llave de relación principal.** Cruza con `al_sanciones` por NIT |
-| `entidad_id` | `uuid` FK → `entidad.id` | Contra quién se contrata |
-| `geografia_id` | `text` FK → `geografia.codigo_divipola` | Dónde |
-| `unspsc` | `text` | Para agregar por familia de código |
-| `valor_estimado` | `numeric(20,2)` | Precio de referencia de la entidad |
-| `adjudicado` | `boolean NOT NULL` | `true` = ganó; `false` = se presentó y perdió. Fuente del flag: `adjudicatario` del payload de procesos |
-| `valor_adjudicado` | `numeric(20,2)` | **Precio al que se gana.** NULL cuando `adjudicado=false`: la fuente no publica ofertas perdedoras |
-| `fecha_adjudicacion` | `date` | Serie temporal |
-| `modalidad` | `text` | Cruza con el escalón de contratación del diagnóstico |
-| `raw_record_id` | `uuid` FK → `raw_record.id` | Trazabilidad |
+**1. La llave de deduplicación es `proveedor_key`, no `proveedor_id`.**
+El esqueleto preveía `UNIQUE (secop_proceso_id, proveedor_id)`. Eso no deduplica:
+solo el 49 % de las adjudicaciones trae NIT, y en Postgres los NULL de un índice
+único no colisionan entre sí — el backfill habría insertado duplicados en cada
+corrida para la mitad de las filas. `proveedor_key` es `nit:<canónico>` cuando hay
+NIT creíble y `nom:<nombre normalizado>` cuando no.
 
-**Índices obligatorios:** UNIQUE `(secop_proceso_id, proveedor_id)` para
-idempotencia del backfill; índice en `(proveedor_id, fecha_adjudicacion)` para la
-consulta "historial de este competidor"; índice en `(entidad_id, fecha_adjudicacion)`.
+**2. Hay que rechazar los documentos comodín.** La fuente publica "0", "0000",
+"1", "999999999", "1111111111" en el campo de documento. Aceptarlos fusiona
+empresas sin relación bajo un mismo competidor: medido en la carga real, "0"
+agrupaba 22 razones sociales distintas y los comodines de dígito repetido otras
+19. `nitPlausible()` exige 6–12 dígitos y ningún dígito repetido; lo implausible
+se trata como ausente y la llave cae al nombre — separa de más antes que fusionar
+de menos. Sin esta regla había 13.857 proveedores distintos; con ella, **13.965**.
 
 **Fuentes, ambas verificadas:**
 
-1. **Adjudicatario y precio** — derivados de `raw_record` ya aterrizado
-   (`adjudicado`, `valor_adjudicacion`, `adjudicatario` del payload de procesos,
-   ver `src/lib/secop/db-search.ts:197-199`) más `contrato`. Sin fuente externa.
-2. **Proponentes** — `hgi6-6wh3` vía Socrata, cruzando `id_procedimiento` con
-   `proceso.secop_proceso_id`. Se declara como `IngestSource` normal (§5.1) y hereda
-   watermark sobre `fecha_publicaci_n`.
+| Origen | Qué aporta | Escritura |
+|---|---|---|
+| `raw_record` (procesos ya aterrizados) | El adjudicatario y su precio. Sin red | `onConflictDoUpdate` — una adjudicación puede corregirse en la fuente |
+| `hgi6-6wh3` vía Socrata | Los demás proponentes | `onConflictDoNothing` — **nunca degrada** una fila de adjudicatario |
 
-**Filtro sectorial para el proponente:** no se descargan los 2,3 M de filas. Se
-piden solo las de los `id_procedimiento` que ya están en nuestra tabla `proceso`
-(que ya pasó la red sectorial), en lotes con `$where=id_procedimiento in (...)`.
-El sector es un subconjunto pequeño: 6.616 filas solo con la keyword ACUEDUCTO.
+Las dos pasadas convergen en cualquier orden. De 15.573 filas de proponentes
+descargadas, 2.144 colisionaron con su fila de adjudicatario: es el ganador, que
+no debe contarse dos veces.
+
+**El criterio de carga NO es el estado del proceso.** `estado_del_procedimiento
+= 'Seleccionado'` **no** implica adjudicado: 23.195 de nuestros 36.724
+"Seleccionado" tienen `adjudicado = 'No'`. El criterio es `adjudicado = 'Si'`.
+Usar el estado habría cargado un 63 % de filas sin ganador.
+
+**Índices:** UNIQUE `(secop_proceso_id, proveedor_key)`; `(proveedor_nit,
+fecha_adjudicacion)` para el historial de un competidor; `(entidad_id,
+fecha_adjudicacion)`; `unspsc`; `adjudicado`.
+
+**No lleva `account_id`:** es dato de mercado, común a todas las cuentas.
 
 #### `al_sanciones`
 
@@ -980,7 +983,7 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 | `0017_mushy_expediter` | `usuario.plan` — estaba comiteada sin aplicar desde el 2026-08-29 | ✅ **Aplicada 2026-09-05** |
 | `0018_special_madame_web` | `al_filtros_usuario`, `al_reportes`, `al_descartes`, `al_proceso_evento`, `al_sanciones_cache` (CREATE + ENABLE RLS) | ✅ **Aplicada 2026-09-05** |
 | `0019_secret_changeling` | 9 `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` + 2 FK | ✅ **Aplicada 2026-09-05** |
-| `0020` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | Fase 2 |
+| `0020_huge_ego` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | ✅ **Aplicada 2026-09-05** |
 | `0021` | `al_sanciones` (DDL cerrado tras V-F-2) | Fase 3 |
 
 **Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
@@ -1120,26 +1123,63 @@ filtros en `/api/al/filtros`.
 
 ---
 
-### Fase 2 — Histórico de adjudicaciones (módulo 2)
+### Fase 2 — Histórico de oferentes y precios (módulo 2) · ✅ COMPLETADA 2026-09-05
 
-`0021` + backfill 2015→hoy de los procesos `Seleccionado` del sector: adjudicatario
-y precio desde `raw_record`/`contrato`, más **todos los proponentes** desde
-`hgi6-6wh3` (V-F-4). Script `npm run al:backfill-historico`; después, etapa diaria
-dentro de `tick`.
+Migración `0020` + carga inicial en dos pasadas. **Se levantó el no-objetivo de
+listar proponentes** (V-F-4): el histórico responde contra quién se compite, no
+solo quién ganó.
 
-**Aceptación:**
-1. `psql -c "SELECT count(*), min(fecha_adjudicacion), max(fecha_adjudicacion) FROM al_oferentes_historico;"` → count > 0 y `min <= '2016-12-31'`.
-2. Ejecutar el backfill **dos veces seguidas**: el `count(*)` de la segunda es
-   idéntico al de la primera (idempotencia por UNIQUE).
-3. `psql -c "SELECT count(*) FROM al_oferentes_historico WHERE adjudicado AND valor_adjudicado IS NULL;"` → menos del 5 % de los adjudicados. Las filas con `adjudicado=false` **deben** tener `valor_adjudicado` NULL: la fuente no lo publica.
-4. Hay al menos un proceso con ≥2 proponentes:
-   `psql -c "SELECT secop_proceso_id, count(*) n FROM al_oferentes_historico GROUP BY 1 HAVING count(*) > 1 ORDER BY n DESC LIMIT 5;"` → ≥1 fila.
-   Contraste de referencia: `CO1.REQ.8592187` tiene 62 proponentes en la fuente.
-5. Todo proceso con proponentes tiene exactamente uno con `adjudicado=true`:
-   `psql -c "SELECT count(*) FROM (SELECT secop_proceso_id FROM al_oferentes_historico GROUP BY 1 HAVING count(*) FILTER (WHERE adjudicado) > 1) d;"` → `0`.
-6. `historialCompetidor('<NIT real del sector>')` devuelve ≥1 adjudicación y su
-   `ratioAdjudicadoSobreEstimado` está entre 0 y 2.
-7. `pg_database_size` tras el backfill deja ≥40 % de margen (criterio de Fase 0.5).
+**Archivos:**
+
+| Ruta | Papel |
+|---|---|
+| `src/lib/al/historico/mapear.ts` | Mapeo puro payload → fila. Reusa `cleanText` y `canonicalizeNit` de la ingesta; no duplica la lista de centinelas |
+| `src/lib/al/historico/backfill.ts` | Las dos pasadas, ambas idempotentes |
+| `src/lib/al/consulta/competidor.ts` | `historialCompetidor()` y `precioReferencia()` |
+| `scripts/al-backfill-historico.ts` | `npm run al:backfill-historico` |
+| `src/__tests__/al/historico-mapear.test.ts` | 15 casos |
+
+**Guardia de tamaño en el script.** Mide `pg_database_size` tras cada lote y
+aborta al llegar al umbral (`--max-mb`, 470 por defecto) en vez de llenar la base
+y dejar el proyecto en solo lectura, que tumbaría el login y no solo la ingesta.
+Lo ya escrito queda válido: reanudar es volver a ejecutar.
+
+**Bug de producción encontrado y corregido de paso.** `src/lib/secop/config.ts`
+mapeaba `adjudicatario: "nombre_del_adjudicador"`, que es **la persona de la
+entidad que firma la adjudicación**, no la empresa ganadora. `ProcessDetail.tsx`
+llevaba mostrando el nombre de un funcionario bajo la etiqueta "Adjudicatario".
+El campo correcto es `nombre_del_proveedor`, que además cuadra con
+`nit_del_proveedor_adjudicado`. Hay un test que lo fija.
+
+**Aceptación — cumplida salvo el margen de cuota:**
+
+1. 27.035 filas, `fecha_adjudicacion` de **2016-03-07 a 2026-09-01**. ✅
+   (El SDD hablaba de 2015; la red sectorial no trae nada anterior a marzo de 2016,
+   y el volumen solo es significativo desde 2020. Dato, no defecto.)
+2. Backfill ejecutado **cuatro veces**: el `count(*)` no cambia. ✅
+3. Adjudicados sin `valor_adjudicado`: **21 de 13.606 = 0,15 %** (umbral 5 %). Y
+   no-adjudicados con valor: **0** — la fuente no publica el precio del perdedor
+   y el esquema no finge que sí. ✅
+4. Procesos con ≥2 participantes: el mayor tiene **88**. ✅
+5. Procesos con más de un ganador: **0**. ✅
+6. `historialCompetidor('900393756')` → 240 participaciones, 173 adjudicaciones,
+   72,1 % de éxito, 9.016 M COP, ratio adjudicado/estimado **1,0**, y sus rivales
+   frecuentes con nombre y marcador. ✅
+7. **Margen de cuota: NO cumplido con el plan actual.** 449 MB de 500 MB deja un
+   10 %, y el criterio pide 40 %. Con Supabase Pro (8 GB) el margen es del 94,5 %.
+   Es lo único que queda abierto de esta fase.
+
+**Lo que el módulo ya responde,** con `precioReferencia()`:
+
+| Consulta | n | Mediana ratio | p25 | Mediana adjudicado |
+|---|---|---|---|---|
+| Todo el sector | 13.445 | 0,998 | 0,863 | 45,5 M COP |
+| Antioquia (`divipola: ['05']`) | 1.765 | 1,000 | 0,963 | 92,2 M COP |
+| UNSPSC 77121701 desde 2022 | 149 | **0,830** | 0,636 | 11,5 M COP |
+
+La última fila es el tipo de dato que justifica el módulo: esa familia se gana
+un 17 % por debajo del presupuesto oficial, mientras el sector en conjunto se
+adjudica prácticamente al precio de referencia.
 
 ---
 

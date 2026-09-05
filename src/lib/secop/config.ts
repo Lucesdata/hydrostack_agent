@@ -68,7 +68,24 @@ export const FIELDS_PROCESOS = {
   precioBase: "precio_base",
   adjudicado: "adjudicado",
   valorAdjudicacion: "valor_total_adjudicacion",
-  adjudicatario: "nombre_del_adjudicador",
+  /**
+   * ⚠️ NO es `nombre_del_adjudicador`. Ese campo trae a la persona de la ENTIDAD
+   * que firma la adjudicación ("LUZ JANNET ZULUAGA QUINTERO"), no a la empresa
+   * ganadora. El adjudicatario real es `nombre_del_proveedor`, que además cuadra
+   * con `nit_del_proveedor_adjudicado`. Verificado sobre payloads reales el
+   * 2026-09-05: `ProcessDetail.tsx` llevaba mostrando el nombre del funcionario
+   * bajo la etiqueta "Adjudicatario".
+   *
+   * `nombre_del_proveedor` está poblado en 13.606 de 13.609 procesos adjudicados
+   * de nuestra base; el NIT solo en 6.693 (49%), por eso el nombre es la llave
+   * primaria de atribución y el NIT el refinamiento.
+   */
+  adjudicatario: "nombre_del_proveedor",
+  /** NIT del ganador — solo presente en ~49% de los adjudicados. */
+  nitAdjudicatario: "nit_del_proveedor_adjudicado",
+  /** 'Si' | 'No'. `estado_del_procedimiento='Seleccionado'` NO implica adjudicado. */
+  adjudicadoFlag: "adjudicado",
+  fechaAdjudicacion: "fecha_adjudicacion",
   unspsc: "codigo_principal_de_categoria",
   url: "urlproceso", // objeto { url: "..." }
   estadoApertura: "estado_de_apertura_del_proceso", // Abierto | Cerrado — señal Nivel-0 de Plazo (no hay fecha de cierre en este dataset)

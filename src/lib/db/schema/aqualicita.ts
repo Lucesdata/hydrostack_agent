@@ -32,6 +32,7 @@ import { sql } from "drizzle-orm";
 
 import { usuario } from "./cuentas";
 import { proceso } from "./hechos";
+import { proveedor, entidad, geografia } from "./catalogos";
 import { rawRecord } from "./raw";
 
 /** Mismo helper que `hechos.ts`: dinero como numeric(20,2), nunca float. */
@@ -275,5 +276,87 @@ export const alProcesoEvento = pgTable(
     uniqueIndex("al_proceso_evento_idem_uq").on(t.procesoId, t.tipoEvento, t.payloadHash),
     index("al_proceso_evento_detected_idx").on(t.detectedAt),
     index("al_proceso_evento_proceso_idx").on(t.secopProcesoId),
+  ]
+).enableRLS();
+
+/**
+ * Histórico de participación en procesos del sector (SDD §4.7, módulo 2).
+ *
+ * Una fila = un (proceso, proveedor). Responde las dos preguntas que ningún
+ * competidor del nicho responde: **contra quién compito** y **a qué precio gana
+ * el que gana**.
+ *
+ * Dos orígenes, ambos verificados en la V-F:
+ *  - `proceso`     → el ADJUDICATARIO, derivado de `raw_record` ya aterrizado.
+ *                    Sin red: el dato ya está en casa.
+ *  - `proponentes` → los DEMÁS que se presentaron, del dataset `hgi6-6wh3`
+ *                    (Proponentes por Proceso SECOP II, 2,3 M filas, 2015→hoy).
+ *
+ * **El precio solo se conoce del ganador.** La fuente no publica el valor
+ * ofertado por quien pierde, y no se añade scraping para conseguirlo (no-objetivo
+ * §1.3). `valor_adjudicado` es NULL en toda fila con `adjudicado=false`, y eso es
+ * un límite de la fuente, no un dato pendiente de cargar.
+ *
+ * No lleva `account_id`: es dato de mercado, común a todas las cuentas.
+ */
+export const alOferentesHistorico = pgTable(
+  "al_oferentes_historico",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    secopProcesoId: text("secop_proceso_id").notNull(),
+    /** FK al canónico cuando el proceso está aterrizado; NULL si solo lo trae la fuente de proponentes. */
+    procesoId: uuid("proceso_id").references(() => proceso.id, { onDelete: "cascade" }),
+
+    /**
+     * Llave de deduplicación del proveedor dentro de un proceso: el NIT canónico
+     * cuando existe, y el nombre normalizado cuando no.
+     *
+     * El SDD preveía `UNIQUE (secop_proceso_id, proveedor_id)`, pero eso no
+     * deduplica: solo el 49% de los adjudicados trae NIT, y en Postgres los NULL
+     * de un índice único no colisionan entre sí — el backfill habría insertado
+     * duplicados en cada corrida para la mitad de las filas.
+     */
+    proveedorKey: text("proveedor_key").notNull(),
+    /** Dígitos, sin DV — cruza con `proveedor.nit_canonico` y con `al_sanciones`. */
+    proveedorNit: text("proveedor_nit"),
+    /** Razón social tal como la publica la fuente. Poblada en el 99,98% de los adjudicados. */
+    proveedorNombre: text("proveedor_nombre").notNull(),
+    /** Resuelto por NIT contra el catálogo; NULL si ese proveedor aún no tiene contratos. */
+    proveedorId: uuid("proveedor_id").references(() => proveedor.id),
+
+    /** `true` = ganó. `false` = se presentó y perdió. */
+    adjudicado: boolean("adjudicado").notNull(),
+
+    entidadId: uuid("entidad_id").references(() => entidad.id),
+    entidadNit: text("entidad_nit"),
+    geografiaId: text("geografia_id").references(() => geografia.codigoDivipola),
+    /** UNSPSC sin el prefijo "V1." que trae la fuente. */
+    unspsc: text("unspsc"),
+    modalidad: text("modalidad"),
+
+    /** Precio de referencia de la entidad. Puede ser 0 en la fuente: se guarda NULL. */
+    valorEstimado: money("valor_estimado"),
+    /** Precio al que se gana. NULL cuando `adjudicado=false` — la fuente no lo publica. */
+    valorAdjudicado: money("valor_adjudicado"),
+
+    fechaAdjudicacion: date("fecha_adjudicacion"),
+    fechaPublicacion: date("fecha_publicacion"),
+
+    /** 'proceso' | 'proponentes' — de qué fuente salió la fila. */
+    fuente: text("fuente").notNull(),
+    rawRecordId: uuid("raw_record_id").references(() => rawRecord.id),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    /** Idempotencia del backfill: reejecutarlo no puede duplicar una participación. */
+    uniqueIndex("al_hist_proceso_proveedor_uq").on(t.secopProcesoId, t.proveedorKey),
+    /** "Historial de este competidor" — la consulta principal del módulo. */
+    index("al_hist_proveedor_fecha_idx").on(t.proveedorNit, t.fechaAdjudicacion),
+    index("al_hist_entidad_fecha_idx").on(t.entidadId, t.fechaAdjudicacion),
+    index("al_hist_unspsc_idx").on(t.unspsc),
+    index("al_hist_adjudicado_idx").on(t.adjudicado),
   ]
 ).enableRLS();
