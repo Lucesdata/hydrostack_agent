@@ -1429,7 +1429,8 @@ porque es la que alimenta a todas las demás.
 | Ruta | Papel |
 |---|---|
 | `src/lib/al/notificacion/recopilar.ts` | Novedades del día por cuenta: adendas, adjudicaciones, aperturas |
-| `src/lib/al/notificacion/digest-agregado.ts` | Un correo con las cuatro secciones y el diff renderizado |
+| `src/lib/al/notificacion/digest-agregado.ts` | Un correo con las cuatro secciones, el diff renderizado y el tope por sección |
+| `scripts/al-enviar-diario.ts` | `npm run al:enviar-diario` — `--dry-run`, `--repetir` |
 | `src/lib/al/notificacion/svix.ts` | Verificación de la firma de los webhooks de Resend |
 | `src/lib/al/reportes/generar.ts` | Congela el reporte y devuelve su URL |
 | `src/lib/alertas/run-daily.ts` | **Extendido**, no duplicado (ver abajo) |
@@ -1442,6 +1443,22 @@ anularían: el primero reserva la fila con el insert-first y el segundo se salta
 la cuenta creyendo que ya se envió. El barrido pasó de "cuentas con perfil de
 oferente" a "cuentas con perfil **o** con al menos un filtro activo" — una cuenta
 que solo declaró filtros no habría recibido nunca nada.
+
+**Cada sección va topada en 10 ítems, y no estaba en el plan.** El `--dry-run`
+contra datos reales sacó **547 aperturas en un solo correo**: eso no es un
+digest, es un volcado que nadie lee. Y no es un caso de laboratorio — **el primer
+día de cualquier filtro nuevo todo es nuevo**, así que sin tope el primer correo
+siempre sería una avalancha. El correo muestra 10 y remite al reporte
+permanente, que sí los tiene todos: para eso existe.
+
+**Hacía falta poder ejecutarlo en local, y no se podía.** `runDailyAlertas` no
+tenía entrada por CLI y `CRON_SECRET` no está en `.env.local`, así que no había
+forma de probar el envío sin producción. `scripts/al-enviar-diario.ts` lo
+resuelve con tres modos: `--dry-run` renderiza el correo entero contra datos
+reales **sin tocar `envio_log`, sin generar reporte y sin enviar**; la corrida
+normal hace el envío real; y `--repetir` libera antes la reserva del día —
+necesario porque la idempotencia es justamente lo que impide un segundo envío, y
+sin eso una corrida local se salta la cuenta si el cron de producción ya reservó.
 
 **Aceptación:**
 

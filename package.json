@@ -24,7 +24,8 @@
     "al:sanciones": "tsx scripts/al-recargar-sanciones.ts",
     "al:filtros": "tsx scripts/al-correr-filtros.ts",
     "al:auditar-red": "tsx scripts/al-auditar-red.ts",
-    "al:eventos": "tsx scripts/al-detectar-eventos.ts"
+    "al:eventos": "tsx scripts/al-detectar-eventos.ts",
+    "al:enviar-diario": "tsx scripts/al-enviar-diario.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.36",

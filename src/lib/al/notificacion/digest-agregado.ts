@@ -15,6 +15,13 @@
  *
  * Reusa las utilidades de formato de `/mis-coincidencias` para que el correo y
  * la página digan lo mismo, igual que hace `email/digest.ts`.
+ *
+ * **Cada sección va topada.** Medido con datos reales: un filtro sin criterios
+ * produjo 547 aperturas en un solo correo — eso no es un digest, es un volcado, y
+ * nadie lo lee. Y no es un caso raro: el PRIMER día de cualquier filtro nuevo
+ * todo es nuevo, así que el primer correo siempre sería una avalancha. El correo
+ * muestra lo más relevante y remite al reporte permanente, que sí los tiene
+ * todos: para eso existe.
  */
 
 import { sentenceCaseTitle, formatCopCompact } from "@/src/components/secop/format";
@@ -48,6 +55,12 @@ function esc(s: string | null): string {
   if (!s) return "";
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
+/**
+ * Ítems por sección en el correo. El resto vive en el reporte, cuyo enlace va
+ * al pie. Diez cabe en una pantalla de móvil sin scroll infinito.
+ */
+const TOPE_POR_SECCION = 10;
 
 const CARD =
   "border:1px solid #E5E5E0;border-radius:8px;padding:14px 16px;margin-bottom:10px;";
@@ -106,6 +119,21 @@ function tarjetaMatch(m: Match): string {
     </div>`;
 }
 
+/** "y 537 más" con enlace al reporte, o nada si no se recortó. */
+function resto(total: number, url: string | null): string {
+  const n = total - TOPE_POR_SECCION;
+  if (n <= 0) return "";
+  const texto = `y ${n.toLocaleString("es-CO")} más`;
+  return url
+    ? `<p style="margin:2px 0 0;font-size:12.5px;"><a href="${url}" style="color:#0369A1;">${texto} en el reporte completo</a></p>`
+    : `<p style="margin:2px 0 0;font-size:12.5px;color:#8A938F;">${texto}</p>`;
+}
+
+function restoTexto(total: number): string[] {
+  const n = total - TOPE_POR_SECCION;
+  return n > 0 ? [`  … y ${n.toLocaleString("es-CO")} más en el reporte completo`] : [];
+}
+
 function asunto(n: Novedades, matches: number): string {
   const partes: string[] = [];
   if (n.adendas.length) partes.push(`${n.adendas.length} adenda${n.adendas.length > 1 ? "s" : ""}`);
@@ -134,49 +162,59 @@ export function renderDigestAgregado(
 
   if (novedades.adendas.length) {
     secciones.push(`<h2 style="${H2}">Cambios en procesos que sigues</h2>`);
-    secciones.push(...novedades.adendas.map((n) => tarjetaEvento(n, true)));
+    secciones.push(
+      ...novedades.adendas.slice(0, TOPE_POR_SECCION).map((n) => tarjetaEvento(n, true))
+    );
+    secciones.push(resto(novedades.adendas.length, reporteUrl));
     lineas.push("CAMBIOS EN PROCESOS QUE SIGUES");
-    for (const n of novedades.adendas) {
+    for (const n of novedades.adendas.slice(0, TOPE_POR_SECCION)) {
       lineas.push(`- ${titulo(n)} (${n.entidad ?? "—"})`);
       for (const d of n.delta ?? []) {
         lineas.push(`    ${d.etiqueta}: ${d.antes ?? "—"} → ${d.despues ?? "—"}`);
       }
     }
-    lineas.push("");
+    lineas.push(...restoTexto(novedades.adendas.length), "");
   }
 
   if (novedades.adjudicaciones.length) {
     secciones.push(`<h2 style="${H2}">Adjudicadas</h2>`);
-    secciones.push(...novedades.adjudicaciones.map((n) => tarjetaEvento(n, true)));
+    secciones.push(
+      ...novedades.adjudicaciones.slice(0, TOPE_POR_SECCION).map((n) => tarjetaEvento(n, true))
+    );
+    secciones.push(resto(novedades.adjudicaciones.length, reporteUrl));
     lineas.push("ADJUDICADAS");
     lineas.push(
-      ...novedades.adjudicaciones.map((n) => `- ${titulo(n)} (${n.entidad ?? "—"})`)
+      ...novedades.adjudicaciones
+        .slice(0, TOPE_POR_SECCION)
+        .map((n) => `- ${titulo(n)} (${n.entidad ?? "—"})`)
     );
-    lineas.push("");
+    lineas.push(...restoTexto(novedades.adjudicaciones.length), "");
   }
 
   if (novedades.aperturas.length) {
     secciones.push(`<h2 style="${H2}">Nuevas que casan con tus filtros</h2>`);
-    secciones.push(...novedades.aperturas.map(tarjetaApertura));
+    secciones.push(...novedades.aperturas.slice(0, TOPE_POR_SECCION).map(tarjetaApertura));
+    secciones.push(resto(novedades.aperturas.length, reporteUrl));
     lineas.push("NUEVAS QUE CASAN CON TUS FILTROS");
     lineas.push(
-      ...novedades.aperturas.map(
-        (n) => `- ${sentenceCaseTitle(n.titulo || n.secopProcesoId)} (${n.entidad ?? "—"})`
-      )
+      ...novedades.aperturas
+        .slice(0, TOPE_POR_SECCION)
+        .map((n) => `- ${sentenceCaseTitle(n.titulo || n.secopProcesoId)} (${n.entidad ?? "—"})`)
     );
-    lineas.push("");
+    lineas.push(...restoTexto(novedades.aperturas.length), "");
   }
 
   if (matchesPerfil.length) {
     secciones.push(`<h2 style="${H2}">Coincidencias con tu perfil</h2>`);
-    secciones.push(...matchesPerfil.map(tarjetaMatch));
+    secciones.push(...matchesPerfil.slice(0, TOPE_POR_SECCION).map(tarjetaMatch));
+    secciones.push(resto(matchesPerfil.length, reporteUrl));
     lineas.push("COINCIDENCIAS CON TU PERFIL");
     lineas.push(
-      ...matchesPerfil.map(
-        (m) => `- ${sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)} (${m.proceso.entidad})`
-      )
+      ...matchesPerfil
+        .slice(0, TOPE_POR_SECCION)
+        .map((m) => `- ${sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)} (${m.proceso.entidad})`)
     );
-    lineas.push("");
+    lineas.push(...restoTexto(matchesPerfil.length), "");
   }
 
   const pie = reporteUrl
