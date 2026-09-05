@@ -14,6 +14,7 @@
  * en docs/plan-arquitectura-roadmap.md §3.1).
  */
 
+import { alFiltrosUsuario, alReportes } from "./aqualicita";
 import {
   pgTable,
   text,
@@ -87,6 +88,24 @@ export const envioLog = pgTable(
     /** 'enviado' | 'sin_coincidencias' | 'error' */
     estado: text("estado").notNull(),
     enviadoEn: timestamp("enviado_en", { withTimezone: true }).defaultNow().notNull(),
+
+    /**
+     * ── Aditivos del SDD §4.8 (migración 0019). Nullable y sin default: ninguna
+     * query actual los nombra, así que el runtime no cambia el día de aplicarlos.
+     */
+    /** v1 = usuario_id. Ver R8: el código nuevo filtra por account_id. */
+    accountId: text("account_id"),
+    /** Reporte permanente enlazado desde este correo (SDD §9). */
+    reporteId: uuid("reporte_id").references(() => alReportes.id, { onDelete: "set null" }),
+    /** Id que devuelve Resend al aceptar el envío — llave del webhook. */
+    proveedorMensajeId: text("proveedor_mensaje_id"),
+    /**
+     * 'delivered' | 'bounced' | 'complained' | 'opened'. Sin esto un rebote es
+     * invisible, y dos rebotes duros seguidos deben apagar `alerta_preferencias`
+     * (SDD §7.3): seguir enviando a una dirección muerta quema el dominio.
+     */
+    estadoEntrega: text("estado_entrega"),
+    entregaActualizadaEn: timestamp("entrega_actualizada_en", { withTimezone: true }),
   },
   (t) => [uniqueIndex("envio_log_usuario_fecha_tipo_uq").on(t.usuarioId, t.fecha, t.tipo)]
 ).enableRLS();
@@ -114,6 +133,15 @@ export const coincidencia = pgTable(
     veredictoOverall: text("veredicto_overall").notNull(),
     creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
     vistaEn: timestamp("vista_en", { withTimezone: true }),
+
+    /**
+     * ── Aditivos del SDD §4.8 (migración 0019). Nullable, sin default.
+     * Una coincidencia pasa a poder venir de un filtro explícito del usuario y no
+     * solo del perfil de oferente; `filtro_id` NULL sigue significando "vino del
+     * perfil", que es todo lo que existe hoy.
+     */
+    accountId: text("account_id"),
+    filtroId: uuid("filtro_id").references(() => alFiltrosUsuario.id, { onDelete: "set null" }),
   },
   (t) => [
     uniqueIndex("coincidencia_usuario_proceso_uq").on(t.usuarioId, t.procesoId),
@@ -134,6 +162,11 @@ export const alertaPreferencias = pgTable("alerta_preferencias", {
   horaEnvio: smallint("hora_envio").default(7).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+
+  /** ── Aditivos del SDD §4.8 (migración 0019). Nullable, sin default. */
+  accountId: text("account_id"),
+  /** Qué transiciones quiere recibir la cuenta; NULL = todas (SDD §7.1). */
+  eventosNotificables: text("eventos_notificables").array(),
 }).enableRLS();
 
 /**

@@ -4,8 +4,9 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ⛔ **BLOQUEADO en Fase 0.5:** la base está a 484 MB de 500 MB (96,8 %). Ninguna
-> fase que escriba datos puede arrancar hasta resolver la cuota (§11, Fase 0.5).
+> ✅ **Fase 0.5 y Fase 1 completadas 2026-09-05.** La poda bajó la base de 484 a
+> 432 MB (86,4 %) y se decidió subir a Supabase Pro; las tablas `al_*` y el motor
+> de filtros están en la base viva. Siguiente: Fase 2 (histórico de adjudicaciones).
 >
 > Las specs de módulo (`docs/sdd/01-*.md`, `02-*.md`, …) se escriben una a una al
 > construir cada módulo. **Ninguna spec de módulo define tablas por su cuenta**:
@@ -974,14 +975,24 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 
 ### 10.2 Orden de migraciones
 
-| Migración | Contenido | Riesgo |
+| Migración | Contenido | Estado |
 |---|---|---|
-| `0018` | `al_filtros_usuario`, `al_reportes`, `al_descartes` (CREATE + enableRLS) | Nulo: tablas nuevas |
-| `0019` | `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` | Nulo: nullable, sin default, ninguna query las nombra |
-| `0020` | `al_proceso_evento` | Nulo |
-| `0021` | `al_oferentes_historico` (DDL cerrado tras V-F) | Nulo |
-| `0022` | `al_sanciones`, `al_sanciones_cache` (DDL cerrado tras V-F-2) | Nulo |
-| `0023` | Backfill `account_id = usuario_id` (UPDATE, sin DDL) | Bajo: idempotente, con `WHERE account_id IS NULL` |
+| `0017_mushy_expediter` | `usuario.plan` — estaba comiteada sin aplicar desde el 2026-08-29 | ✅ **Aplicada 2026-09-05** |
+| `0018_special_madame_web` | `al_filtros_usuario`, `al_reportes`, `al_descartes`, `al_proceso_evento`, `al_sanciones_cache` (CREATE + ENABLE RLS) | ✅ **Aplicada 2026-09-05** |
+| `0019_secret_changeling` | 9 `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` + 2 FK | ✅ **Aplicada 2026-09-05** |
+| `0020` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | Fase 2 |
+| `0021` | `al_sanciones` (DDL cerrado tras V-F-2) | Fase 3 |
+
+**Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
+repartidas por fase como preveía el plan original. Razón: el esqueleto es la
+fuente única de verdad del esquema (§4.0), y crear `al_proceso_evento` en la
+Fase 5 obligaría a su spec a redefinir DDL que ya está decidido. Solo quedan
+fuera las dos que dependían de la V-F.
+
+**El backfill de `account_id` no es una migración.** Es un `UPDATE` idempotente
+con `WHERE account_id IS NULL`, ejecutado una vez el 2026-09-05 (12 filas en
+`envio_log`; `coincidencia` y `alerta_preferencias` estaban vacías). No lleva
+número porque no es DDL y re-ejecutarlo es inocuo.
 
 ### 10.3 Impacto sobre el runtime existente: ninguno el día de la migración
 
@@ -1022,7 +1033,7 @@ cuatro pasan, la V-F-4 levanta parte de un no-objetivo, la V-F-6 bloquea.
 
 ---
 
-### Fase 0.5 — Cuota de base de datos · BLOQUEANTE, NUEVA
+### Fase 0.5 — Cuota de base de datos · ✅ COMPLETADA 2026-09-05
 
 Sale de la V-F-6. **484 MB de 500 MB (96,8 %) antes de escribir una sola tabla
 nueva.** La ingesta diaria crece sola: la base se llena en menos de tres semanas
@@ -1037,31 +1048,75 @@ Tres vías, no excluyentes:
 | **B. Podar el payload de `raw_record` antiguo** | hasta ~200 MB | 0 | La capacidad de re-transformar sin volver a Socrata. Se conserva `payload_hash`, `source_record_id` y `source_updated_at`, así que la deduplicación y el watermark siguen intactos; lo que se pierde es el JSON crudo |
 | **C. Retirar índices muertos** | ~7 MB | 0 | Nada (`proceso_portafolio_idx` y `contrato_proveedor_idx` tienen 0 scans) |
 
-**Recomendación: A.** B compra tiempo pero rompe la propiedad que hace valioso el
-diseño ELT — poder re-derivar entidades sin volver a la fuente — justo cuando el
-histórico va a exigir re-transformar. C es ruido a esta escala.
+**Resuelto: se sube a Supabase Pro (vía A), y como puente se ejecutó una poda que
+no estaba en la tabla y que resultó mejor que las tres.**
 
-**Aceptación:**
-1. `psql -c "SELECT pg_size_pretty(pg_database_size(current_database()));"` y el
-   límite del plan vigente dejan **≥60 % de margen libre**.
-2. Si se eligió B: `psql -c "SELECT count(*) FROM raw_record WHERE payload IS NULL;"` > 0
-   y la ingesta del día siguiente cierra `status='ok'` (la poda no rompió el watermark).
+**La poda real fue el bloat, no los índices.** `raw_record` tenía 21.653 tuplas
+muertas (14,4 % de 150k) acumuladas por los upserts desde el 2026-08-16:
+
+```
+$ psql -c "VACUUM (FULL, ANALYZE) raw_record;"     # 37 s
+484 MB → 432 MB   ·   raw_record 319 MB → 267 MB   ·   52 MB recuperados
+```
+
+Filas intactas: 128.334 raw_record, 90.076 procesos, 38.258 contratos.
+
+**Los índices muertos NO se retiraron, y es deliberado:**
+
+| Índice | Tamaño | Scans (43 días) | Decisión |
+|---|---|---|---|
+| `proceso_portafolio_idx` | 5,6 MB | 0 | **Se conserva.** Retirarlo exige editar `hechos.ts` para que `db:generate` no lo recree, y eso rompe R1 y R2 por el 1,1 % de la cuota. El transform construye el índice portafolio→proceso con un `SELECT` de tabla completa a un `Map` de JS (`transform/writers.ts:348`), por eso marca 0 scans |
+| `contrato_proveedor_idx` | 1,2 MB | 0 | **Se conserva.** `historialCompetidor(nit)` de la Fase 2 consulta exactamente por `proveedor_id`: borrarlo para recrearlo en dos fases es churn |
+
+Las estadísticas llevan acumulando desde el 2026-07-24 (43 días), así que los
+"0 scans" son señal real y no un artefacto de un reset reciente.
+
+**Aceptación — cumplida:**
+1. 432 MB / 500 MB = 86,4 %. Con Pro (8 GB) el margen pasa a 94,7 %. ✅
+2. No se eligió B: el `payload` de `raw_record` sigue completo y el pipeline ELT
+   conserva la capacidad de re-derivar sin volver a Socrata. ✅
 
 ---
 
-### Fase 1 — Cimientos: migración pendiente + tablas base
+### Fase 1 — Cimientos: migración pendiente + tablas base · ✅ COMPLETADA 2026-09-05
 
-Aplicar `0017`; crear `0018` (`al_filtros_usuario`, `al_reportes`, `al_descartes`),
-`0019` (ADD COLUMN) y `0023` (backfill `account_id`). CRUD de filtros en
-`/api/al/filtros`.
+Aplicadas `0017`, `0018` y `0019` (§10.2) más el backfill de `account_id`. CRUD de
+filtros en `/api/al/filtros`.
 
-**Aceptación:**
-1. `psql "$DATABASE_URL" -c "\d usuario"` incluye la columna `plan`.
-2. La consulta de RLS de §10.3 devuelve **0 filas**.
-3. `grep -cE "DROP |ALTER COLUMN |RENAME " drizzle/0018*.sql drizzle/0019*.sql` → `0`.
-4. `psql -c "SELECT count(*) FROM coincidencia WHERE account_id IS NULL;"` → `0`.
-5. `curl -X POST .../api/al/filtros` con sesión crea una fila; el mismo POST sin
-   sesión devuelve 401.
+**Archivos:**
+
+| Ruta | Papel |
+|---|---|
+| `src/lib/db/schema/aqualicita.ts` | Las cinco tablas `al_*`, todas con `.enableRLS()` |
+| `src/lib/al/cuenta.ts` | `cuentaDe(user)` — el único sitio que sabe que en v1 cuenta = usuario (R8) |
+| `src/lib/al/filtros/tipos.ts` | Contrato y validación, puro y testeable |
+| `src/lib/al/filtros/store.ts` | CRUD, **siempre filtrado por `account_id`** |
+| `src/lib/al/filtros/guard.ts` | `autorizar(capacidad)` → consulta `acceso/politica.ts` |
+| `app/api/al/filtros/route.ts` · `[id]/route.ts` | GET/POST · PUT/DELETE |
+| `src/__tests__/al/filtros-tipos.test.ts` | 12 casos, incl. la semántica del array vacío |
+
+**Dos decisiones que tomó el código, no el plan:**
+
+1. **`filtros` se declaró como capacidad en `src/lib/acceso/politica.ts`** (nivel
+   `gratis`), no como un `if (user)` en el handler — es lo que manda CLAUDE.md §4.
+   El test `politica.test.ts` falló al añadirla, que es exactamente su propósito:
+   existe para que nadie meta una capacidad sin clasificarla.
+2. **Retorno nullable en vez de unión discriminada.** El repo compila con
+   `strict: false`, así que `{ok: true} | {ok: false}` no estrecha y obligaría a
+   asertar el tipo en cada handler. Se usa el idiom del repo (`getSessionUser`).
+   No se tocó el `tsconfig`: cambiarlo cascadearía errores por todo el árbol.
+
+**Aceptación — cumplida:**
+1. `psql -c "\d usuario"` incluye `plan | text | not null | 'gratis'::text`. ✅
+2. Tablas de `public` sin RLS: **0** de 28. ✅
+3. `grep -cE "DROP |ALTER COLUMN |RENAME " drizzle/0018*.sql drizzle/0019*.sql` → `0` y `0`. ✅
+4. `account_id IS NULL` → `0` en `coincidencia`, `envio_log` y `alerta_preferencias`. ✅
+5. GET, POST y DELETE sin sesión → **HTTP 401** `{"error":"No hay sesión activa"}`. ✅
+6. `npm test` → **669/669**. ✅
+7. **Extra, y es el que importa:** el aislamiento por `account_id` se probó contra
+   la base viva — otra cuenta no ve el filtro en el listado, no puede actualizarlo
+   (devuelve `null` → 404) ni borrarlo. Un filtro ajeno y uno inexistente responden
+   igual a propósito: distinguirlos filtraría la existencia de filtros de otros.
 
 ---
 

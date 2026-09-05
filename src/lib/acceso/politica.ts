@@ -34,6 +34,7 @@ export type Capacidad =
   | "perfil_guardar"
   | "coincidencias"
   | "alertas"
+  | "filtros"
   | "pliego_extraer"
   | "asistentes";
 
@@ -45,6 +46,10 @@ export type Capacidad =
  * `pliego_extraer` y `asistentes` están en `pro` pero la frontera todavía no se
  * aplica: hoy esas rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso
  * siguen. Activarlas es cambiar sus handlers para consultar `puede()`.
+ *
+ * `filtros` (SDD `docs/sdd/00-esqueleto.md` §4.2) es `gratis`: declarar criterios
+ * de búsqueda propios exige cuenta porque las filas cuelgan de una cuenta, pero
+ * no es una frontera de pago. Explorar y ver el semáforo siguen siendo anónimos.
  *
  * `diagnostico` es anónimo pero `diagnostico_historial` no: responder no pide
  * cuenta, comparar tus respuestas en el tiempo sí — no hay historial sin a
@@ -62,6 +67,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   perfil_guardar: "gratis",
   coincidencias: "gratis",
   alertas: "gratis",
+  filtros: "gratis",
   pliego_extraer: "pro",
   asistentes: "pro",
 };

@@ -127,6 +127,20 @@
       "when": 1788216279118,
       "tag": "0017_mushy_expediter",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788597983631,
+      "tag": "0018_special_madame_web",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788598026187,
+      "tag": "0019_secret_changeling",
+      "breakpoints": true
     }
   ]
 }
