@@ -14,6 +14,10 @@
 
 import { sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
+import {
+  sancionesDeProveedor,
+  type HistorialSancionatorio,
+} from "@/src/lib/al/sanciones/consulta";
 
 export interface AgregadoPorEntidad {
   entidad: string | null;
@@ -55,6 +59,8 @@ export interface HistorialCompetidor {
   porAnio: AgregadoPorAnio[];
   /** Con quién se cruza más en los mismos procesos. Es el "contra quién compito". */
   rivalesFrecuentes: Rival[];
+  /** Historial sancionatorio (módulo 3). NO son inhabilidades: son multas. */
+  sanciones: HistorialSancionatorio;
 }
 
 /**
@@ -171,6 +177,8 @@ export async function historialCompetidor(
     LIMIT ${topRivales}
   `);
 
+  const sanciones = await sancionesDeProveedor(b.proveedor_nit ?? b.proveedor_key);
+
   const participaciones = Number(b.participaciones);
   const adjudicaciones = Number(b.adjudicaciones);
 
@@ -204,6 +212,7 @@ export async function historialCompetidor(
       encuentros: Number(r.encuentros),
       ganadosPorElRival: Number(r.ganados_por_el_rival),
     })),
+    sanciones,
   };
 }
 

@@ -360,3 +360,85 @@ export const alOferentesHistorico = pgTable(
     index("al_hist_adjudicado_idx").on(t.adjudicado),
   ]
 ).enableRLS();
+
+/**
+ * Historial sancionatorio (SDD §4.7, módulo 3).
+ *
+ * **Son multas contractuales, no inhabilidades.** Responde "¿a este proveedor lo
+ * han multado por incumplir un contrato público?", no "¿está inhabilitado para
+ * contratar?". La V-F-2 descartó las fuentes de inhabilidad: SIRI solo publica
+ * cédulas (42.842 CC y 0 NITs) y la Responsabilidad Fiscal de la CGR tiene 60
+ * filas. La UI debe decir "historial sancionatorio"; prometer inhabilidades con
+ * estos datos sería falso.
+ *
+ * Dos fuentes, y **cada una cruza por una llave distinta** — medido, no supuesto:
+ *
+ *  - `secop_i_multas` (`4n4q-k399`, 1.714 filas): `documento_contratista` es un
+ *    documento real; 250 de 1.096 tienen forma de NIT de empresa y 31 cruzan con
+ *    nuestro catálogo. **Cruce por proveedor.**
+ *  - `secop_ii_multas` (`it5q-hg94`, 548 filas): `as_codigo_proveedor_objeto`
+ *    son 7–8 dígitos, **cero con forma de NIT de empresa** y 0 de 251 cruzan.
+ *    Pero su `id_proceso` es un `CO1.BDOS.*` que empata con
+ *    `proceso.portafolio_id`: 19 de 481 procesos sancionados son del sector.
+ *    **Cruce por proceso.**
+ *
+ * Por eso la tabla admite las dos vías y ninguna es obligatoria: una fila puede
+ * colgar de un proveedor, de un proceso, o de ambos.
+ */
+export const alSanciones = pgTable(
+  "al_sanciones",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    /** 'secop_i_multas' | 'secop_ii_multas' */
+    fuente: text("fuente").notNull(),
+
+    /**
+     * Llave natural del registro en su fuente, compuesta y determinista.
+     * Igual que `al_oferentes_historico.proveedor_key`: un UNIQUE sobre columnas
+     * que pueden ser NULL no deduplica nada en Postgres, y la recarga semanal
+     * insertaría el mismo registro cada lunes.
+     */
+    registroKey: text("registro_key").notNull(),
+
+    // ── vía A: por proveedor ────────────────────────────────────────────────
+    /** Documento tal como lo publica la fuente, solo dígitos. */
+    documento: text("documento"),
+    /** El documento cuando tiene forma creíble de NIT — cruza con `proveedor`. */
+    nitCanonico: text("nit_canonico"),
+    proveedorNombre: text("proveedor_nombre"),
+    proveedorId: uuid("proveedor_id").references(() => proveedor.id),
+
+    // ── vía B: por proceso ──────────────────────────────────────────────────
+    /** `CO1.BDOS.*` de la fuente — empata con `proceso.portafolio_id`. */
+    portafolioId: text("portafolio_id"),
+    procesoId: uuid("proceso_id").references(() => proceso.id, { onDelete: "set null" }),
+
+    entidadNit: text("entidad_nit"),
+    entidadNombre: text("entidad_nombre"),
+
+    /** 'Clausula Penal' | 'Multa' | 'Otro' | … — text, no enum. */
+    tipo: text("tipo"),
+    valorSancion: money("valor_sancion"),
+    numeroActo: text("numero_acto"),
+    numeroContrato: text("numero_contrato"),
+
+    /**
+     * Fecha en que la sanción quedó en firme. **No hay `vigente_hasta`**: ninguna
+     * de las dos fuentes publica vigencia, y una multa contractual no caduca, así
+     * que no se implementa caducidad (decisión cerrada en la V-F-2).
+     */
+    fechaFirmeza: date("fecha_firmeza"),
+    fechaPublicacion: date("fecha_publicacion"),
+    urlProceso: text("url_proceso"),
+
+    /** Registro crudo, para no perder campos que hoy no se interpretan. */
+    payload: jsonb("payload"),
+    ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("al_sanciones_registro_uq").on(t.fuente, t.registroKey),
+    index("al_sanciones_nit_idx").on(t.nitCanonico),
+    index("al_sanciones_portafolio_idx").on(t.portafolioId),
+    index("al_sanciones_proceso_idx").on(t.procesoId),
+  ]
+).enableRLS();

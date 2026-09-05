@@ -148,6 +148,13 @@
       "when": 1788599175664,
       "tag": "0020_huge_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1788600767582,
+      "tag": "0021_kind_warbird",
+      "breakpoints": true
     }
   ]
 }

@@ -51,7 +51,18 @@ export function nitPlausible(nit: string | null): boolean {
   if (!/^\d{6,12}$/.test(nit)) return false;
   // Comodines: un mismo dígito repetido ("0000", "1111111111", "999999999").
   // Medidos en la carga real, fusionaban 41 razones sociales distintas.
-  return !/^(\d)\1+$/.test(nit);
+  if (/^(\d)\1+$/.test(nit)) return false;
+  // Secuencias de teclado ("123456789", "1234567890"): la fuente de sanciones
+  // trae 6 filas con "123456789" y el nombre "PRUEBA CONTRATISTA".
+  return !esSecuenciaAscendente(nit);
+}
+
+/** "12345678" sí; "12345679" no. */
+function esSecuenciaAscendente(d: string): boolean {
+  for (let i = 1; i < d.length; i++) {
+    if ((Number(d[i - 1]) + 1) % 10 !== Number(d[i])) return false;
+  }
+  return true;
 }
 
 /**

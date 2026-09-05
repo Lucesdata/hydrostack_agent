@@ -20,7 +20,8 @@
     "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
     "analyze-pliego-gemini": "tsx scripts/analyze-pliego-gemini.ts",
     "analyze-pliego-hybrid": "tsx scripts/analyze-pliego-hybrid.ts",
-    "al:backfill-historico": "tsx scripts/al-backfill-historico.ts"
+    "al:backfill-historico": "tsx scripts/al-backfill-historico.ts",
+    "al:sanciones": "tsx scripts/al-recargar-sanciones.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.36",

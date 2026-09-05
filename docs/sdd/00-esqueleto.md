@@ -4,10 +4,11 @@
 > Fuente única de verdad del esquema.
 > **Fecha:** 2026-09-05 · **Consumidor:** Claude Code · **Alcance:** solo Colombia.
 >
-> ✅ **Fases 0, 0.5, 1 y 2 completadas 2026-09-05.** Las seis tablas `al_*` están
-> en la base viva, el motor de filtros funciona y el histórico tiene 27.035 filas
-> (13.606 adjudicaciones + 13.429 participaciones sin ganar, 2016→2026).
-> Siguiente: Fase 3 (historial sancionatorio).
+> ✅ **Fases 0, 0.5, 1, 2 y 3 completadas 2026-09-05.** Las siete tablas `al_*`
+> están en la base viva: motor de filtros, histórico con 27.035 filas
+> (13.606 adjudicaciones + 13.429 participaciones sin ganar, 2016→2026) e
+> historial sancionatorio con 2.114 registros.
+> Siguiente: Fase 4 (motor de filtros determinista + auditoría de descartes).
 >
 > ⚠️ La base está en 449 MB. Con el plan Free (500 MB) el margen es del 10 % y el
 > criterio de la Fase 2 exige 40 %: **queda pendiente de que Supabase Pro esté
@@ -68,8 +69,16 @@ inhabilitado, qué cambió en un pliego y a quién avisar.
 5. **No hay WhatsApp ni Telegram.** Email en fase 1.
 6. **No se construye la ruta agente en lenguaje natural.** Se declara en §8 y se
    deja fuera de v1.
-7. **No se toca autenticación, ni el extractor de pliegos, ni el veredicto Nivel 0.**
-8. **No se construye scraping de ninguna fuente.**
+7. **No se consultan sanciones bajo demanda.** El modelo híbrido del brief
+   preveía SIRI y RUES por NIT con caché de 30 días. Ninguna es accesible: SIRI
+   solo publica cédulas (V-F-2) y la API de RUES responde **403** sin
+   credenciales, sin dataset nacional alternativo en datos.gov.co. El módulo 3
+   es masivo y local; `al_sanciones_cache` existe sin productor, esperando una
+   fuente consultable.
+8. **No se afirma que nadie esté inhabilitado.** Lo que hay son multas
+   contractuales. Ver §4.7.
+9. **No se toca autenticación, ni el extractor de pliegos, ni el veredicto Nivel 0.**
+10. **No se construye scraping de ninguna fuente.**
 
 ---
 
@@ -632,39 +641,53 @@ fecha_adjudicacion)`; `unspsc`; `adjudicado`.
 
 **No lleva `account_id`:** es dato de mercado, común a todas las cuentas.
 
-#### `al_sanciones`
+#### `al_sanciones` — ✅ DDL CERRADO 2026-09-05
 
-**Entidad:** un hallazgo de sanción o inhabilidad sobre un NIT.
+Definición viva en `src/lib/db/schema/aqualicita.ts`, migración `0021`.
 
-**Campos mínimos, ya fijados:** `fuente` (`text`: `'secop_i_multas'|'secop_ii_multas'|'rues'`),
-`nit_canonico` (`text`, **llave de relación** con `proveedor.nit_canonico`),
-`tipo` (`text`), `vigente_desde` / `vigente_hasta` (`date`), `payload` (`jsonb`
-crudo de la fuente), `ingested_at`, `raw_record_id`.
+**Entidad:** una multa contractual impuesta a un contratista del Estado.
+**No es una inhabilidad**, y el módulo se llama "historial sancionatorio"
+precisamente por eso.
 
-**Índices obligatorios:** índice en `nit_canonico`; UNIQUE
-`(fuente, nit_canonico, tipo, vigente_desde)` para idempotencia del cruce masivo.
+**El hallazgo que define la tabla: cada fuente cruza por una llave distinta.**
+No estaba previsto y se midió, no se supuso:
 
-**Resuelto por la V-F-2 (2026-09-05):** las fuentes masivas son `4n4q-k399`
-(Multas y Sanciones SECOP I, 1.714 filas, campo de identidad `documento_contratista`)
-y `it5q-hg94` (SECOPII - Multas y Sanciones, 548 filas, `as_codigo_proveedor_objeto`).
-Ninguna publica `vigente_hasta`: traen `fecha_de_firmeza` / `fecha_evento`. Una multa
-contractual no caduca, así que `vigente_hasta` queda NULL y no se implementa
-caducidad. Son 2.262 filas en total: la corrida completa se recarga entera cada
-semana, sin incremental.
+| Fuente | Filas cargadas | Campo de identidad | Cruce |
+|---|---|---|---|
+| `4n4q-k399` SECOP I | 1.569 | `documento_contratista` | **Por proveedor.** 250 de 1.096 documentos tienen forma de NIT de empresa; 36 sanciones cruzan con 28 proveedores nuestros |
+| `it5q-hg94` SECOP II | 545 | `as_codigo_proveedor_objeto` | **Por proceso.** Sus 251 documentos son de 7–8 dígitos y **ninguno** tiene forma de NIT de empresa: 0 cruzan. Su `id_proceso` (`CO1.BDOS.*`) sí empata con `proceso.portafolio_id` — 16 sanciones enganchadas |
 
-**SIRI queda fuera del cruce masivo.** `iaeu-rcn6` tiene 42.846 filas y **cero NITs**
-(42.842 cédulas de ciudadanía + 4 de extranjería): solo personas naturales. No cruza
-con `proveedor.nit_canonico`. Cruzarlo requeriría el representante legal de cada
-proveedor, dato que no tenemos. RUES queda como única consulta bajo demanda.
+Por eso la tabla admite las dos vías (`nit_canonico` → `proveedor_id`,
+`portafolio_id` → `proceso_id`) y **ninguna es obligatoria**.
 
-**El módulo se llama "historial sancionatorio", no "inhabilidades".** Es la
-consecuencia de producto más importante de la V-F-2: estas fuentes responden "¿a
-este proveedor lo han multado por incumplir un contrato público?", no "¿está
-inhabilitado para contratar?". Prometer lo segundo con estos datos sería falso.
+**Sin `vigente_hasta`.** Ninguna fuente publica vigencia y una multa contractual
+no caduca: se guarda `fecha_firmeza` y no se implementa caducidad.
 
-**Advertencia de producto que debe ir en la UI:** un hallazgo es una señal para
-verificar en la fuente oficial, nunca una afirmación de que una empresa está
-inhabilitada. La homonimia de documento y los desfases de publicación son reales.
+**Llave de deduplicación `registro_key`**, compuesta y determinista — la misma
+lección de `al_oferentes_historico.proveedor_key`: un UNIQUE sobre columnas
+nulables no deduplica y la recarga semanal duplicaría todo cada lunes. De 1.714
+filas de origen en SECOP I quedan 1.569: la fuente publica registros repetidos.
+
+**Tres clases de basura filtradas, todas medidas:**
+
+1. **Autorreferencia** (14 filas): `documento_contratista` es el NIT de la
+   *propia entidad* y `nombre_contratista` un número de resolución. La fila se
+   conserva —la sanción existió— pero no se promueve a NIT: cruzarla diría que
+   un hospital se sancionó a sí mismo.
+2. **Documentos de prueba** (6 filas): `123456789` / "PRUEBA CONTRATISTA".
+   `nitPlausible()` rechaza ahora también las secuencias de teclado.
+3. **Comodines**: heredado del histórico, dígito repetido.
+
+Quedan 2.069 filas cruzables de 2.114.
+
+**La consulta separa evidencia de inferencia.** `sancionesDeProveedor()` devuelve
+`directas` (la sanción nombra su documento) y `porProceso` (la sanción cuelga de
+un proceso que ganó) en campos distintos. La segunda es probable, no cierta: el
+sancionado podría ser otro interviniente. Mezclarlas presentaría una inferencia
+como un hecho.
+
+**`cobertura.cruzablePorDocumento: false` significa "no lo sabemos", no "está
+limpio".** Sin NIT creíble la vía directa no aplica, y la UI debe decirlo así.
 
 ### 4.8 `ALTER TABLE` sobre tablas existentes (aditivos)
 
@@ -984,7 +1007,7 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 | `0018_special_madame_web` | `al_filtros_usuario`, `al_reportes`, `al_descartes`, `al_proceso_evento`, `al_sanciones_cache` (CREATE + ENABLE RLS) | ✅ **Aplicada 2026-09-05** |
 | `0019_secret_changeling` | 9 `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` + 2 FK | ✅ **Aplicada 2026-09-05** |
 | `0020_huge_ego` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | ✅ **Aplicada 2026-09-05** |
-| `0021` | `al_sanciones` (DDL cerrado tras V-F-2) | Fase 3 |
+| `0021_kind_warbird` | `al_sanciones` (DDL cerrado tras V-F-2) | ✅ **Aplicada 2026-09-05** |
 
 **Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
 repartidas por fase como preveía el plan original. Razón: el esqueleto es la
@@ -1183,24 +1206,56 @@ adjudica prácticamente al precio de referencia.
 
 ---
 
-### Fase 3 — Sanciones e inhabilidades (módulo 3)
+### Fase 3 — Historial sancionatorio (módulo 3) · ✅ COMPLETADA 2026-09-05
 
-`0022` + recarga semanal completa de `4n4q-k399` y `it5q-hg94` (V-F-2) +
-`/api/al/sanciones/[nit]` para **RUES** bajo demanda con caché de 30 días. SIRI
-queda fuera: solo tiene cédulas (V-F-2).
+Migración `0021` + recarga completa de las dos fuentes + `/api/al/sanciones/[nit]`
++ integración en `historialCompetidor()`.
 
-**Aceptación:**
-1. Tras la primera corrida, `psql -c "SELECT fuente, count(*) FROM al_sanciones GROUP BY 1;"` → dos filas, `secop_i_multas` ≈1.714 y `secop_ii_multas` ≈548.
-2. Segunda corrida consecutiva: `count(*)` no aumenta (UNIQUE + `onConflictDoNothing`).
-3. Al menos un NIT de `al_sanciones` cruza con un proveedor real:
-   `psql -c "SELECT count(*) FROM al_sanciones s JOIN proveedor p ON p.nit_canonico = s.nit_canonico;"` → > 0.
-   **Si da 0, el módulo no sirve** y hay que revisar la normalización de documento
-   antes de seguir (la fuente trae cédulas y NITs mezclados en el mismo campo).
-4. `curl /api/al/sanciones/<nit>` dos veces seguidas: la segunda responde en
-   <100 ms y `al_sanciones_cache.consultado_en` **no** cambia entre ambas.
-5. `psql -c "SELECT count(*) FROM al_sanciones_cache WHERE expira_en <= consultado_en;"` → `0`.
-6. Un NIT sin hallazgos devuelve `estado='no_encontrado'`, no un error.
-7. La UI dice "historial sancionatorio", no "inhabilidades", y `grep -rn "inhabilitad" app/` no aparece en texto mostrado al usuario sin la advertencia de §4.7.
+**El módulo cambió de nombre y de promesa.** Iba a llamarse "sanciones e
+inhabilidades". Lo que las fuentes accesibles publican son **multas
+contractuales**, así que se llama historial sancionatorio. Prometer
+inhabilidades con estos datos sería falso.
+
+**Archivos:**
+
+| Ruta | Papel |
+|---|---|
+| `src/lib/al/sanciones/mapear.ts` | Mapeo puro de las dos fuentes, con los tres filtros de basura |
+| `src/lib/al/sanciones/ingesta.ts` | Recarga completa semanal + resolución de las dos vías de cruce |
+| `src/lib/al/sanciones/consulta.ts` | `sancionesDeProveedor()` — separa evidencia de inferencia |
+| `app/api/al/sanciones/[nit]/route.ts` | GET, tras `autorizar()` |
+| `scripts/al-recargar-sanciones.ts` | `npm run al:sanciones` |
+| `src/__tests__/al/sanciones-mapear.test.ts` | 9 casos, casi todos sobre basura de la fuente |
+
+**La consulta bajo demanda no se construyó, y es la decisión de la fase.** RUES
+responde **403** sin credenciales y datos.gov.co solo tiene datasets de cámaras
+de comercio regionales sueltas, inútiles a escala nacional. Construir
+`/api/al/sanciones` contra un 403 habría sido un stub que nunca funciona. El
+endpoint sirve lo ya cargado: instantáneo, sin llamada externa y sin caché que
+mantener. `al_sanciones_cache` queda creada y sin productor, documentada como el
+punto de enchufe si aparece una fuente consultable.
+
+**Aceptación — cumplida:**
+
+1. `secop_i_multas` **1.569** · `secop_ii_multas` **545**. ✅
+2. Segunda corrida consecutiva: 2.114 → **2.114**. ✅
+3. Cruce con proveedores reales: **36 sanciones sobre 28 proveedores** de nuestro
+   catálogo, más **16** enganchadas por proceso. El criterio decía que un 0 aquí
+   invalidaría el módulo. ✅
+4. El endpoint no hace llamadas externas: la latencia es la de un `SELECT` sobre
+   índice. El criterio original medía la caché, que ya no existe. ✅
+5. `al_sanciones_cache` con filas expiradas al nacer: **0**. ✅
+6. Un NIT sin hallazgos devuelve listas vacías y `tieneHallazgo: false`, no un
+   error — y `cobertura.cruzablePorDocumento` distingue "está limpio" de "no lo
+   sabemos". ✅
+7. La UI dirá "historial sancionatorio": **pendiente**, no se construyó pantalla
+   en esta fase. El contrato de datos ya lo impone (`HistorialSancionatorio`,
+   con `fuentesNoDisponibles` explícitas).
+
+**Basura filtrada, toda medida:** 14 autorreferencias (la entidad puso su propio
+NIT como contratista), 6 documentos de prueba (`123456789` / "PRUEBA
+CONTRATISTA") y los comodines heredados del histórico. Quedan 2.069 filas
+cruzables de 2.114.
 
 ---
 
