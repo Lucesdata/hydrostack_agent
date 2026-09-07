@@ -1,9 +1,10 @@
 /**
  * Envío diario agregado, ejecutable a mano (SDD Fase 6).
  *
- *   npm run al:enviar-diario -- --dry-run   # muestra el correo, NO escribe ni envía
- *   npm run al:enviar-diario                # corrida real: reserva, envía y registra
- *   npm run al:enviar-diario -- --repetir   # además, libera la reserva de hoy antes
+ *   npm run al:enviar-diario -- --dry-run    # muestra el correo, NO escribe ni envía
+ *   npm run al:enviar-diario                 # corrida real: reserva, envía y registra
+ *   npm run al:enviar-diario -- --repetir    # además, libera la reserva de hoy antes
+ *   npm run al:enviar-diario -- --dias=7     # amplía la ventana de novedades
  *
  * En producción esto lo dispara `/api/cron/alertas`. El script existe porque no
  * había forma de probarlo en local: no hay `CRON_SECRET` en `.env.local` y
@@ -13,6 +14,12 @@
  * renderiza el correo entero contra datos reales, pero **no toca `envio_log`, no
  * genera reporte y no envía nada**. Sirve para ver qué diría el correo sin
  * consumir la reserva del día ni depender de que Resend esté configurado.
+ *
+ * `--dias=N` amplía la ventana de novedades hacia atrás. En producción el digest
+ * reporta SOLO lo de hoy, que es lo correcto: un correo diario que repita lo de
+ * ayer se deja de leer. Pero eso hace imposible probarlo el día en que no ha
+ * pasado nada — la ventana es la única palanca honesta para verlo funcionar sin
+ * inventar datos ni re-fechar los reales.
  *
  * `--repetir` borra la fila de `envio_log` de hoy antes de correr. Hace falta
  * porque la idempotencia es justamente lo que impide un segundo envío el mismo
@@ -25,19 +32,30 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { usuario, envioLog } from "@/src/lib/db/schema/cuentas";
 import { runDailyAlertas } from "@/src/lib/alertas/run-daily";
-import { recopilarNovedades } from "@/src/lib/al/notificacion/recopilar";
+import { recopilarNovedades, inicioDeHoy } from "@/src/lib/al/notificacion/recopilar";
 import { renderDigestAgregado } from "@/src/lib/al/notificacion/digest-agregado";
 
 function hoyIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-async function dryRun(): Promise<void> {
+/** `--dias=N` → fecha de corte. Sin el flag, el inicio de hoy. */
+function desdeDeArgs(args: string[]): Date {
+  const a = args.find((x) => x.startsWith("--dias="));
+  if (!a) return inicioDeHoy();
+  const n = Number(a.split("=")[1]);
+  if (!Number.isFinite(n) || n < 0) return inicioDeHoy();
+  const d = inicioDeHoy();
+  d.setUTCDate(d.getUTCDate() - n);
+  return d;
+}
+
+async function dryRun(desde: Date): Promise<void> {
   const cuentas = await db.select({ id: usuario.id, email: usuario.email }).from(usuario);
   console.log(`Cuentas: ${cuentas.length}\n`);
 
   for (const c of cuentas) {
-    const novedades = await recopilarNovedades(c.id);
+    const novedades = await recopilarNovedades(c.id, desde);
     console.log(`── ${c.email} ──`);
     console.log(
       `   adendas ${novedades.adendas.length} · adjudicaciones ${novedades.adjudicaciones.length} · aperturas ${novedades.aperturas.length}`
@@ -76,14 +94,19 @@ async function liberarReserva(): Promise<void> {
 async function main() {
   const args = process.argv.slice(2);
 
+  const desde = desdeDeArgs(args);
+  if (desde.getTime() !== inicioDeHoy().getTime()) {
+    console.log(`Ventana ampliada: novedades desde ${desde.toISOString().slice(0, 10)}\n`);
+  }
+
   if (args.includes("--dry-run")) {
-    await dryRun();
+    await dryRun(desde);
     process.exit(0);
   }
 
   if (args.includes("--repetir")) await liberarReserva();
 
-  const r = await runDailyAlertas();
+  const r = await runDailyAlertas({ desde });
   console.log("Resumen:", r);
   if (r.errores > 0) {
     console.log(

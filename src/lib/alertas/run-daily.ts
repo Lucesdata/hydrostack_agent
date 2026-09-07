@@ -60,7 +60,15 @@ function hoyIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export async function runDailyAlertas(): Promise<DailyRunSummary> {
+/**
+ * `desde` acota la ventana de novedades. Por defecto el inicio de hoy, que es lo
+ * que debe hacer el cron: un correo diario que repita lo de ayer se deja de leer.
+ * Solo el script de CLI la amplía, para poder probar el envío un día en que no
+ * haya pasado nada sin inventar datos.
+ */
+export async function runDailyAlertas(
+  opts: { desde?: Date } = {}
+): Promise<DailyRunSummary> {
   const fecha = hoyIso();
   const summary: DailyRunSummary = {
     cuentas: 0,
@@ -140,7 +148,7 @@ export async function runDailyAlertas(): Promise<DailyRunSummary> {
 
       // v1: cuenta === usuario (SDD R8). Cuando eso deje de ser cierto, el
       // account_id sale de `cuentaDe`, no de aquí.
-      const novedades = await recopilarNovedades(cuenta.usuarioId);
+      const novedades = await recopilarNovedades(cuenta.usuarioId, opts.desde);
 
       if (matches.length === 0 && novedades.total === 0) {
         // Sin nada que contar NO se envía correo. Un correo vacío diario es la
