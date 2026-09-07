@@ -190,13 +190,16 @@ export async function runDailyAlertas(
         reporte.url,
         matches
       );
-      await sendDigestEmail(cuenta.email, digest);
+      const mensajeId = await sendDigestEmail(cuenta.email, digest);
       await db
         .update(envioLog)
         .set({
           estado: "enviado",
           matches: matches.length + novedades.total,
           reporteId: reporte.id,
+          // Sin esto el webhook empareja por destinatario y última fila, que
+          // atribuye mal en cuanto hay dos envíos al mismo correo.
+          proveedorMensajeId: mensajeId,
         })
         .where(eq(envioLog.id, reservado.id));
       summary.enviados++;

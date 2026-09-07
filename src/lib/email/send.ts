@@ -5,19 +5,24 @@
  *
  * Headers `List-Unsubscribe` + `List-Unsubscribe-Post` (RFC 8058) desde el
  * primer correo: Gmail/Outlook los exigen para no caer en spam a volumen.
+ *
+ * Devuelve el id que asigna Resend. Es lo que permite que el webhook de
+ * entregabilidad empareje un evento con SU envío: sin él, el handler tiene que
+ * caer al destinatario y quedarse con la fila más reciente de esa dirección —
+ * funciona, pero atribuye mal cuando hay más de un envío al mismo correo.
  */
 
 import { Resend } from "resend";
 import type { Digest } from "./digest";
 
-export async function sendDigestEmail(to: string, digest: Digest): Promise<void> {
+export async function sendDigestEmail(to: string, digest: Digest): Promise<string | null> {
   const apiKey = process.env.AUTH_RESEND_KEY;
   const from = process.env.EMAIL_FROM;
   if (!apiKey) throw new Error("AUTH_RESEND_KEY no definida");
   if (!from) throw new Error("EMAIL_FROM no definida");
 
   const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from,
     to,
     subject: digest.subject,
@@ -30,4 +35,5 @@ export async function sendDigestEmail(to: string, digest: Digest): Promise<void>
   });
 
   if (error) throw new Error(error.message);
+  return data?.id ?? null;
 }
