@@ -35,6 +35,7 @@ export type Capacidad =
   | "coincidencias"
   | "alertas"
   | "filtros"
+  | "competidores"
   | "pliego_extraer"
   | "asistentes";
 
@@ -46,6 +47,11 @@ export type Capacidad =
  * `pliego_extraer` y `asistentes` están en `pro` pero la frontera todavía no se
  * aplica: hoy esas rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso
  * siguen. Activarlas es cambiar sus handlers para consultar `puede()`.
+ *
+ * `competidores` (SDD módulo 2) es `gratis`: el histórico es dato de mercado, no
+ * de nadie, pero navegarlo es una función de producto y no una landing. Los
+ * reportes públicos de mercado (`al_reportes` con `visibilidad='publico'`) son
+ * otra cosa y ésos sí van sin cuenta.
  *
  * `filtros` (SDD `docs/sdd/00-esqueleto.md` §4.2) es `gratis`: declarar criterios
  * de búsqueda propios exige cuenta porque las filas cuelgan de una cuenta, pero
@@ -68,6 +74,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   coincidencias: "gratis",
   alertas: "gratis",
   filtros: "gratis",
+  competidores: "gratis",
   pliego_extraer: "pro",
   asistentes: "pro",
 };

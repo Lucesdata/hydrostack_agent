@@ -18,6 +18,7 @@ import {
   sancionesDeProveedor,
   type HistorialSancionatorio,
 } from "@/src/lib/al/sanciones/consulta";
+import { normalizarNombre } from "@/src/lib/al/historico/mapear";
 
 export interface AgregadoPorEntidad {
   entidad: string | null;
@@ -274,4 +275,59 @@ export async function precioReferencia(params: {
     p75: r.p75 === null ? null : Number(r.p75),
     medianaValorAdjudicado: r.mediana_valor,
   };
+}
+
+export interface FilaCompetidor {
+  [k: string]: unknown;
+  proveedorKey: string;
+  nombre: string | null;
+  nitCanonico: string | null;
+  participaciones: number;
+  adjudicaciones: number;
+  valorGanado: string | null;
+  ultimaFecha: string | null;
+}
+
+/**
+ * Listado de competidores del sector, ordenado por adjudicaciones.
+ *
+ * `q` filtra por nombre o NIT. La insensibilidad a acentos NO se resuelve con
+ * `unaccent` —la extensión no está instalada y no vale añadir una a la base por
+ * un buscador— sino reusando lo que ya se guarda: `proveedor_key` contiene el
+ * nombre normalizado por `normalizarNombre` (mayúsculas, sin tildes, sin
+ * puntuación). Buscar contra esa columna da lo mismo, gratis y sin migración.
+ */
+export async function topCompetidores(params: {
+  q?: string | null;
+  limit?: number;
+} = {}): Promise<FilaCompetidor[]> {
+  const limit = Math.min(params.limit ?? 50, 200);
+  const q = params.q?.trim() ?? "";
+  const patron = `%${q}%`;
+  /** El mismo normalizador con el que se construyó `proveedor_key`. */
+  const patronNorm = `%${normalizarNombre(q)}%`;
+
+  const res = await db.execute<FilaCompetidor>(sql`
+    SELECT proveedor_key                                   AS "proveedorKey",
+           max(proveedor_nombre)                           AS nombre,
+           max(proveedor_nit)                              AS "nitCanonico",
+           count(*)::int                                   AS participaciones,
+           count(*) FILTER (WHERE adjudicado)::int         AS adjudicaciones,
+           coalesce(sum(valor_adjudicado) FILTER (WHERE adjudicado), 0)::text AS "valorGanado",
+           max(fecha_adjudicacion)::text                   AS "ultimaFecha"
+      FROM al_oferentes_historico
+     WHERE ${
+       q === ""
+         ? sql`TRUE`
+         : sql`(
+             lower(proveedor_nombre) LIKE lower(${patron})
+             OR proveedor_key LIKE ${patronNorm}
+             OR proveedor_nit LIKE ${patron}
+           )`
+     }
+     GROUP BY proveedor_key
+     ORDER BY count(*) FILTER (WHERE adjudicado) DESC, count(*) DESC
+     LIMIT ${limit}
+  `);
+  return res.rows;
 }

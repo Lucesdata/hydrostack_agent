@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { AuthCard } from "@/src/components/auth/AuthCard";
 import { GoogleButton } from "@/src/components/auth/GoogleButton";
+import { ResendConfirmation } from "@/src/components/auth/ResendConfirmation";
 import { signInWithPasswordAction } from "@/src/lib/supabase/actions";
 import { authErrorMessage, authNoticeMessage } from "@/src/lib/supabase/auth-messages";
+
+/** Situaciones en las que lo que le falta al usuario es el correo, no la clave. */
+const ESPERANDO_VERIFICACION = new Set([
+  "email_not_confirmed",
+  "email_delivery_failed",
+  "rate_limit",
+]);
 
 export default async function LoginPage({
   searchParams,
@@ -13,6 +21,10 @@ export default async function LoginPage({
   const next = params.next && params.next.startsWith("/") ? params.next : "/";
   const error = authErrorMessage(params.error);
   const notice = authNoticeMessage(params.notice);
+  const mostrarReenvio =
+    params.notice === "check_email" ||
+    params.notice === "confirmation_resent" ||
+    (params.error !== undefined && ESPERANDO_VERIFICACION.has(params.error));
 
   return (
     <AuthCard
@@ -60,6 +72,8 @@ export default async function LoginPage({
 
       <div className="clr-auth-divider">o</div>
       <GoogleButton next={next} />
+
+      {mostrarReenvio && <ResendConfirmation next={next} />}
 
       <p className="clr-auth-foot">
         ¿No tienes cuenta?{" "}

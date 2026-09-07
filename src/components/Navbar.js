@@ -165,6 +165,15 @@ function UserMenu({ user, hasNewMatches }) {
           <Link href="/mis-coincidencias" onClick={() => setOpen(false)}>
             Mis coincidencias
           </Link>
+          <Link href="/mis-filtros" onClick={() => setOpen(false)}>
+            Mis filtros
+          </Link>
+          <Link href="/competidores" onClick={() => setOpen(false)}>
+            Competidores
+          </Link>
+          <Link href="/auditoria" onClick={() => setOpen(false)}>
+            Qué se descarta
+          </Link>
           <Link href="/cuenta" onClick={() => setOpen(false)}>
             Preferencias de alerta
           </Link>

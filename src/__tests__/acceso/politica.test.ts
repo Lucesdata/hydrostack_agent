@@ -39,6 +39,7 @@ describe("puede", () => {
     "coincidencias",
     "alertas",
     "filtros",
+    "competidores",
   ];
   const dePago: Capacidad[] = ["pliego_extraer", "asistentes"];
 
