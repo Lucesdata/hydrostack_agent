@@ -94,6 +94,22 @@ const AUTH_CSS = `
   padding: 10px 16px; cursor: pointer;
 }
 .clr-auth-google:hover{ border-color: var(--accent-soft, var(--accent)); }
+.clr-auth-resend{ margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.clr-auth-resend-toggle{
+  font: 12px var(--font-mono); color: var(--accent);
+  cursor: pointer; letter-spacing: .04em; list-style: none;
+}
+.clr-auth-resend-toggle::-webkit-details-marker{ display: none; }
+.clr-auth-resend-toggle::before{ content: "+ "; }
+.clr-auth-resend[open] .clr-auth-resend-toggle::before{ content: "− "; }
+.clr-auth-resend-toggle:hover{ text-decoration: underline; }
+.clr-auth-resend-form{ display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.clr-auth-btn-secondary{
+  width: 100%; background: transparent; color: var(--ink-900);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  font: 500 13px var(--font-sans); padding: 9px 16px; cursor: pointer; margin-top: 4px;
+}
+.clr-auth-btn-secondary:hover{ border-color: var(--accent); color: var(--accent); }
 .clr-auth-foot{ margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-600); text-align: center; }
 .clr-auth-foot a{ color: var(--accent); font-weight: 500; text-decoration: none; }
 .clr-auth-foot a:hover{ text-decoration: underline; }

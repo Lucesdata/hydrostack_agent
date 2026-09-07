@@ -8,6 +8,14 @@ Derivados del diagnóstico del 2026-08-02 (detalle completo con líneas exactas 
 
 ## Crítico
 
+### 0. Correo sin configurar: registro roto y alertas caídas en prod (2026-09-07)
+El registro por correo lleva fallando desde el 2026-08-18 porque el servicio de
+correo integrado de Supabase solo entrega a miembros del equipo del proyecto. La
+misma pieza faltante tumba las alertas diarias en producción (`AUTH_RESEND_KEY`
+no existe en Vercel). El código ya está resuelto; lo que falta es configuración
+en Supabase, Resend y Vercel — pasos exactos en
+[PENDIENTES-CORREO.md](PENDIENTES-CORREO.md).
+
 ### 1. Extractor de pliegos: restaurar contrato validado (bloqueador de Fase 0) — ✅ resuelto 2026-08-02
 El schema actual (`src/lib/pliego/schema.ts`) perdió `lagunas_pendientes` y el campo `codigo` de ítem. Sin ellos no se pueden representar las 6 inconsistencias que certificaron el gate "SALE LIMPIO" del caso UAESP (`docs/secop/uaesp-4182-2026/gate-verdict.md`). La Prueba Binaria de Fase 0 no es reproducible hoy.
 

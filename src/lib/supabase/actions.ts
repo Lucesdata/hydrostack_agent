@@ -3,10 +3,20 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
+import { authErrorCode } from "@/src/lib/supabase/auth-messages";
 import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
+/**
+ * Destino del enlace que Supabase pone en el correo. Lo comparten el alta y el
+ * reenvío: si divergen, el reenviado deja de pasar por /auth/callback y el
+ * usuario pierde el reclamo de su diagnóstico anónimo.
+ */
+function callbackUrl(next: string): string {
+  return `${appUrl()}/auth/callback?next=${encodeURIComponent(next)}`;
 }
 
 /** Evita open-redirect: solo se permite un `next` de ruta interna. */
@@ -24,9 +34,7 @@ export async function signInWithPasswordAction(formData: FormData): Promise<void
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
-    const code = error?.message.includes("Email not confirmed")
-      ? "email_not_confirmed"
-      : "invalid_credentials";
+    const code = authErrorCode(error?.message, "invalid_credentials");
     redirect(`/login?next=${encodeURIComponent(next)}&error=${code}`);
   }
 
@@ -58,13 +66,17 @@ export async function signUpAction(formData: FormData): Promise<void> {
       // redirect, ese usuario no recupera nunca lo que respondió. El camino de
       // Google ya fijaba su `redirectTo` explícitamente; este no, y esa
       // asimetría era el agujero.
-      emailRedirectTo: `${appUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: callbackUrl(next),
     },
   });
 
   if (error) {
     console.error("[signUpAction] Supabase signup error:", error.message);
-    const code = error.message.includes("already registered") ? "email_exists" : "signup_error";
+    const code = authErrorCode(error.message, "signup_error");
+    // Ojo con `email_delivery_failed`: Supabase ya creó la fila en
+    // `auth.users` aunque devuelva error, así que la cuenta existe sin
+    // verificar y un reintento choca contra "ese correo ya está registrado".
+    // El texto de ese código lo dice en vez de invitar a reintentar.
     redirect(`/registro?next=${encodeURIComponent(next)}&error=${code}`);
   }
 
@@ -86,14 +98,48 @@ export async function signUpAction(formData: FormData): Promise<void> {
   redirect(`/login?next=${encodeURIComponent(next)}&notice=check_email`);
 }
 
+/**
+ * Reenvía el correo de verificación. Sin esto, `notice=check_email` era un
+ * callejón sin salida: si el correo no llegaba, el usuario no tenía ninguna
+ * acción disponible salvo reintentar el alta, que ya falla con "ese correo ya
+ * está registrado" porque la cuenta sí se creó.
+ *
+ * Pide el correo en su propio campo en vez de arrastrarlo por la URL: en la
+ * barra de direcciones quedaría registrado en el historial y en los logs del
+ * servidor.
+ */
+export async function resendConfirmationAction(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") ?? "").trim();
+  const next = safeNext(formData.get("next"));
+  const volver = `/login?next=${encodeURIComponent(next)}`;
+
+  if (!email) {
+    redirect(`${volver}&error=invalid_credentials`);
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: callbackUrl(next) },
+  });
+
+  if (error) {
+    console.error("[resendConfirmationAction] Supabase resend error:", error.message);
+    redirect(`${volver}&error=${authErrorCode(error.message, "signup_error")}`);
+  }
+
+  // Supabase responde igual exista o no la cuenta, para no filtrar qué correos
+  // están registrados. Mantenemos ese mismo aviso único.
+  redirect(`${volver}&notice=confirmation_resent`);
+}
+
 export async function signInWithGoogleAction(formData: FormData): Promise<void> {
   const next = safeNext(formData.get("next"));
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: {
-      redirectTo: `${appUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
-    },
+    options: { redirectTo: callbackUrl(next) },
   });
 
   if (error || !data.url) {
