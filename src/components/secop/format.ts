@@ -88,3 +88,8 @@ export function verdictScore(v: Verdict | VerdictPublico): VerdictScore {
   const tone: ScoreTone = pass >= 4 ? "success" : pass >= 2 ? "warn" : "fail";
   return { pass, total, tone };
 }
+
+/** Conteo con separador de miles. `null` → "—", nunca "NaN". */
+export function formatConteo(value: number | null): string {
+  return value == null ? "—" : value.toLocaleString("es-CO");
+}

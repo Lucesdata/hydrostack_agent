@@ -5,6 +5,7 @@ import {
   formatCopFull,
   formatShortDate,
   verdictScore,
+  formatConteo,
 } from "@/src/components/secop/format";
 import type { Verdict, GateResult, GateStatus } from "@/src/lib/secop/verdict";
 import { redactarVerdict } from "@/src/lib/secop/verdict-publico";
@@ -133,5 +134,17 @@ describe("verdictScore sobre un veredicto redactado", () => {
     };
 
     expect(verdictScore(redactarVerdict(completo))).toEqual(verdictScore(completo));
+  });
+});
+
+describe("formatConteo", () => {
+  it("separa miles en es-CO", () => {
+    expect(formatConteo(90076)).toBe("90.076");
+  });
+  it("null es una raya, no un NaN", () => {
+    expect(formatConteo(null)).toBe("—");
+  });
+  it("el cero es un cero, no una raya", () => {
+    expect(formatConteo(0)).toBe("0");
   });
 });

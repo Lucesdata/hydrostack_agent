@@ -14,6 +14,7 @@ import S3EverythingInOne from "@/src/components/landing/S3EverythingInOne";
 import S4Invitation from "@/src/components/landing/S4Invitation";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
+import { formatConteo } from "@/src/components/secop/format";
 
 const PROBLEM_SOLUTION = [
   {
@@ -556,6 +557,31 @@ export default function LandingPage() {
 
   const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | loading | done | error
   const [waitlistError, setWaitlistError] = useState(null);
+
+  // Cifras del sector para el home (procesos vigilados, oferentes históricos,
+  // sanciones). Vienen de /api/landing-stats, que las lee de la base
+  // ingerida, no de Socrata. Se quedan en null si el fetch falla: la UI
+  // muestra "—" y la frase que las acompaña sigue siendo cierta sin la cifra.
+  const [sector, setSector] = useState({
+    procesosVigilados: null,
+    oferentesHistoricos: null,
+    sanciones: null,
+  });
+
+  useEffect(() => {
+    let vivo = true;
+    fetch("/api/landing-stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (vivo && d?.sector) setSector(d.sector);
+      })
+      .catch(() => {
+        /* se queda en null: la UI muestra "—" y la frase sigue siendo cierta */
+      });
+    return () => {
+      vivo = false;
+    };
+  }, []);
 
   async function handleWaitlist() {
     setWaitlistStatus("loading");
