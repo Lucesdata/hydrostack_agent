@@ -299,3 +299,18 @@ orden de secciones, o (b) si las tarjetas ya no encajan en el diseño actual,
 borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
 consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
 endpoint que sirve más de lo que nadie lee.
+
+### 21. Orden de despliegue: el correo antes que el home nuevo
+El home alineado (2026-09-08) promueve la alerta diaria a uno de los cuatro
+pasos del motor (`S3Motor.jsx`, paso 04) y la repite en el cierre. El código de
+alertas está terminado y probado — pero **en producción no entrega**, por la
+misma pieza que bloquea el §0 de este documento: `AUTH_RESEND_KEY` no existe en
+Vercel.
+
+Mientras eso siga así, desplegar el home nuevo convierte una promesa cierta en
+el repositorio en una promesa falsa para quien la lee. No es un bug del home ni
+del motor: es una dependencia de orden.
+
+**Resolver el §0 antes de desplegar el home nuevo**, o bajar el paso 04 de
+pilar a mención mientras tanto. Lo que no es opción es desplegarlo y dejarlo sin
+decidir.
