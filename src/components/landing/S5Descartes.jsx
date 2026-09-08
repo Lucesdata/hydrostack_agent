@@ -1,0 +1,104 @@
+import Link from "next/link";
+import { SECCIONES_HOME } from "./seccionesHome";
+
+const RUTA = SECCIONES_HOME.find((s) => s.id === "auditoria");
+
+/**
+ * Los motivos son los de `EXPLICA` en app/auditoria/page.tsx, literales.
+ *
+ * Esta sección NO lleva cifras a propósito: `descartesPorMotivo()` va por
+ * accountId, así que cualquier total que se pusiera aquí sería el de otra
+ * persona. Es el mismo error que tuvo el ticker con sus montos ficticios.
+ */
+const MOTIVOS = [
+  "Ni el código UNSPSC ni el texto del objeto coincidieron con ningún criterio",
+  "Segmento UNSPSC 80 (gestión y personal): se excluye en la ingesta porque midió ~0 % de relevancia",
+  "Contenía una de tus palabras excluidas",
+  "El presupuesto queda fuera del rango que fijaste",
+  "La entidad no está en las zonas que seleccionaste",
+  "La entidad no está en tu lista",
+  "La modalidad de contratación no está en tu lista",
+];
+
+export default function S5Descartes() {
+  return (
+    <section style={{ padding: "80px 48px" }}>
+      <div style={{ maxWidth: 1440, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+          <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+          <span
+            style={{
+              font: "11px var(--font-jetbrains-mono),monospace",
+              color: "#0369A1",
+              letterSpacing: ".12em",
+              textTransform: "uppercase",
+            }}
+          >
+            Transparencia · {RUTA.etiqueta}
+          </span>
+        </div>
+
+        <h2
+          style={{
+            font: "700 clamp(28px,3.4vw,40px)/1.2 var(--font-ibm-plex-sans-condensed)",
+            color: "#0A1F1C",
+            margin: "0 0 16px",
+            maxWidth: 760,
+          }}
+        >
+          Un filtro demasiado estrecho no da errores. Da silencio
+        </h2>
+
+        <p
+          style={{
+            font: "15px/1.6 var(--font-inter)",
+            color: "#525B5A",
+            maxWidth: 640,
+            margin: "0 0 36px",
+          }}
+        >
+          Y el silencio no se ve. Por eso guardamos cada proceso que tus reglas descartaron, con el
+          motivo exacto, y puedes revisarlos cuando quieras. Si al leerlos aparece algo que sí te
+          interesaba, el filtro está mal — y ya sabes cuál.
+        </p>
+
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            margin: "0 0 36px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
+            gap: 12,
+            maxWidth: 900,
+          }}
+        >
+          {MOTIVOS.map((m) => (
+            <li
+              key={m}
+              style={{
+                font: "13px/1.5 var(--font-inter)",
+                color: "#525B5A",
+                paddingLeft: 16,
+                borderLeft: "1px solid #DADAD2",
+              }}
+            >
+              {m}
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={RUTA.href}
+          style={{
+            font: "600 12px var(--font-jetbrains-mono),monospace",
+            color: "#0369A1",
+            textDecoration: "none",
+          }}
+        >
+          [ VER QUÉ SE DESCARTA → ]
+        </Link>
+      </div>
+    </section>
+  );
+}

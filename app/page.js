@@ -12,6 +12,7 @@ import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
 import S4Competidores from "@/src/components/landing/S4Competidores";
+import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo } from "@/src/components/secop/format";
@@ -881,6 +882,9 @@ export default function LandingPage() {
           oferentesHistoricos={sector.oferentesHistoricos}
           sanciones={sector.sanciones}
         />
+
+        {/* S5 — Qué se descarta: transparencia del motor de filtros */}
+        <S5Descartes />
 
         {/* Rutas de intención — ¿En qué momento estás? */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
