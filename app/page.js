@@ -641,6 +641,54 @@ export default function LandingPage() {
                 por una.
               </p>
 
+              {/* Cifras del sector: vienen de /api/landing-stats vía el estado
+                  `sector`, nunca escritas a mano. En null se ve "—" y la frase
+                  que las acompaña sigue siendo cierta sin la cifra. */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 28,
+                  flexWrap: "wrap",
+                  margin: "28px 0 8px",
+                  paddingTop: 20,
+                  borderTop: "1px solid #DADAD2",
+                }}
+              >
+                {[
+                  {
+                    v: formatConteo(sector.procesosVigilados),
+                    t: "procesos del sector vigilados",
+                  },
+                  {
+                    v: formatConteo(sector.oferentesHistoricos),
+                    t: "registros de quién se presentó",
+                  },
+                  { v: formatConteo(sector.sanciones), t: "sanciones cruzadas" },
+                ].map((x) => (
+                  <div key={x.t}>
+                    <div
+                      style={{
+                        font: "700 22px/1 var(--font-ibm-plex-sans-condensed)",
+                        color: "#0A1F1C",
+                      }}
+                    >
+                      {x.v}
+                    </div>
+                    <div
+                      style={{
+                        font: "10px var(--font-jetbrains-mono),monospace",
+                        color: "#6B746F",
+                        textTransform: "uppercase",
+                        letterSpacing: ".06em",
+                        marginTop: 4,
+                      }}
+                    >
+                      {x.t}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <div
                 style={{
                   display: "flex",
@@ -651,25 +699,35 @@ export default function LandingPage() {
                   marginBottom: 20,
                 }}
               >
+                <div className="hero-fade-up" style={{ animationDelay: ".9s" }}>
+                  <Link
+                    href={ruta("diagnostico").href}
+                    className="bp-cta bp-cta-dark"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: "#0369A1",
+                      color: "#fff",
+                      font: "600 13px var(--font-jetbrains-mono),monospace",
+                      letterSpacing: ".04em",
+                    }}
+                  >
+                    Ver si estás listo →
+                  </Link>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      font: "10px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                    }}
+                  >
+                    sin cuenta · 2 minutos
+                  </div>
+                </div>
                 <Link
-                  href="/licitaciones"
-                  className="bp-cta bp-cta-dark hero-fade-up"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "#0369A1",
-                    color: "#fff",
-                    font: "600 13px var(--font-jetbrains-mono),monospace",
-                    letterSpacing: ".04em",
-                    animationDelay: ".9s",
-                  }}
-                >
-                  [ Prueba un proceso ]
-                </Link>
-                <button
+                  href={ruta("explorar").href}
                   className="hero-fade-up"
-                  onClick={() => {}}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -685,8 +743,8 @@ export default function LandingPage() {
                     animationDelay: ".92s",
                   }}
                 >
-                  [ Ver cómo funciona ]
-                </button>
+                  Explorar procesos
+                </Link>
               </div>
 
               <div

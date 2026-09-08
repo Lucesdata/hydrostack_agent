@@ -4,8 +4,6 @@ export default function S5DarkClosing() {
       style={{ padding: "96px 48px", background: "#0A1F1C", textAlign: "center", color: "white" }}
     >
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
-        <div style={{ fontSize: "48px", marginBottom: 32 }}>💧</div>
-
         <h2
           style={{
             font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)",
@@ -23,11 +21,12 @@ export default function S5DarkClosing() {
             marginBottom: 32,
           }}
         >
-          Clasificación, compuertas, norma — todo desde un solo lugar.
+          Clasificación sectorial, filtros que puedes auditar, competidores con histórico y aviso
+          diario. Todo desde un solo lugar.
         </p>
 
         <a
-          href="/licitaciones"
+          href="/diagnostico"
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -42,11 +41,15 @@ export default function S5DarkClosing() {
             marginBottom: 32,
           }}
         >
-          Acceder →
+          Ver si estás listo →
         </a>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-          {["Sin suscripción", "Datos en vivo", "Respuestas citadas"].map((check) => (
+          {[
+            "Datos SECOP II a diario",
+            "Veredicto explicado, no caja negra",
+            "Empieza sin cuenta",
+          ].map((check) => (
             <div
               key={check}
               style={{
