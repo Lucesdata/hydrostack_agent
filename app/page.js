@@ -10,8 +10,7 @@ import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
-import S2WhyAquaLicita from "@/src/components/landing/S2WhyAquaLicita";
-import S3EverythingInOne from "@/src/components/landing/S3EverythingInOne";
+import S3Motor from "@/src/components/landing/S3Motor";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo } from "@/src/components/secop/format";
@@ -873,11 +872,8 @@ export default function LandingPage() {
         {/* S2 — La puerta: diagnóstico de preparación */}
         <S2Diagnostico />
 
-        {/* S2 — Por qué AquaLicita */}
-        <S2WhyAquaLicita />
-
-        {/* S3 — Todo en un solo lugar */}
-        <S3EverythingInOne />
+        {/* S3 — El motor: cuatro pasos */}
+        <S3Motor procesosVigilados={sector.procesosVigilados} />
 
         {/* Rutas de intención — ¿En qué momento estás? */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
