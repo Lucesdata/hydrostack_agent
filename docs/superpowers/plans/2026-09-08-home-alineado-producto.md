@@ -718,8 +718,22 @@ export default function S2Diagnostico() {
 
 - [ ] **Step 2: Sustituir en `app/page.js`**
 
-Cambiar el import de `S4Invitation` por `S2Diagnostico` y el `<S4Invitation />`
-por `<S2Diagnostico />` en la misma posición.
+Cambiar el import de `S4Invitation` por `S2Diagnostico` y borrar la etiqueta
+`<S4Invitation />`.
+
+**`<S2Diagnostico />` NO va donde estaba `S4Invitation`.** Va como primera
+sección después del hero, es decir donde hoy está `<S2WhyAquaLicita />`,
+inmediatamente ANTES de él. El spec §3.1 pone el diagnóstico en el bloque 2 y
+el motor en el 3: montarlo en el hueco de `S4Invitation` los dejaría al revés,
+porque la Task 5 sustituye `S2WhyAquaLicita`/`S3EverythingInOne` por `S3Motor`
+en su sitio actual, que está más arriba.
+
+Orden resultante tras esta tarea (se comprueba leyendo el JSX):
+
+```
+<ProcesosTicker />  ·  hero  ·  <S2Diagnostico />  ·  <S2WhyAquaLicita />
+<S3EverythingInOne />  ·  rejilla de intención  ·  <S5DarkClosing />  ·  <S6Footer />
+```
 
 - [ ] **Step 3: Borrar el componente muerto**
 
@@ -1099,8 +1113,9 @@ Sin cifras: `al_descartes` va por cuenta, no es un total del sistema.
 
 - [ ] **Step 1: Crear el componente**
 
-Crear `src/components/landing/S5Descartes.jsx`. Los motivos son copia literal
-del mapa `EXPLICA` de `app/auditoria/page.tsx` — si allí cambia la redacción,
+Crear `src/components/landing/S5Descartes.jsx`. Los siete motivos son **copia
+literal, carácter por carácter**, de los valores del mapa `EXPLICA` de
+`app/auditoria/page.tsx` — el Step 3 lo verifica. Si allí cambia la redacción,
 aquí también:
 
 ```jsx
@@ -1118,7 +1133,7 @@ const RUTA = SECCIONES_HOME.find((s) => s.id === "auditoria");
  */
 const MOTIVOS = [
   "Ni el código UNSPSC ni el texto del objeto coincidieron con ningún criterio",
-  "Segmento UNSPSC 80 (gestión y personal), excluido en la ingesta",
+  "Segmento UNSPSC 80 (gestión y personal): se excluye en la ingesta porque midió ~0 % de relevancia",
   "Contenía una de tus palabras excluidas",
   "El presupuesto queda fuera del rango que fijaste",
   "La entidad no está en las zonas que seleccionaste",
@@ -1217,9 +1232,12 @@ Importar y colocar `<S5Descartes />` inmediatamente después de `<S4Competidores
 
 - [ ] **Step 3: Verificar que los motivos siguen coincidiendo con la app**
 
-Run: `grep -c ":" <(sed -n '/const EXPLICA/,/^};/p' app/auditoria/page.tsx)`
-Expected: el bloque `EXPLICA` sigue teniendo 7 motivos. Si son otros, actualiza
-`MOTIVOS` antes de continuar.
+Run: `sed -n '/const EXPLICA/,/^};/p' app/auditoria/page.tsx | grep -cE "^  [a-z0-9_]+:"`
+Expected: `7`. Es el número de claves del mapa; el rango `[a-z0-9_]` incluye el
+dígito de `segmento_80_excluido`, que un `[a-z_]` se dejaría fuera.
+
+Si sale otro número, el mapa `EXPLICA` cambió: actualiza `MOTIVOS` para que
+vuelva a coincidir literalmente antes de continuar.
 
 - [ ] **Step 4: Correr los tests**
 
