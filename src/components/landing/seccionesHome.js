@@ -58,3 +58,20 @@ export const SECCIONES_HOME = [
   { id: "soluciones", href: "/soluciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "nosotros", href: "/nosotros", capacidad: "explorar", etiqueta: "sin cuenta" },
 ];
+
+/**
+ * Busca una sección por id y lanza un error legible si no existe.
+ *
+ * Antes cada componente repetía `SECCIONES_HOME.find((s) => s.id === id)` y
+ * desreferenciaba el resultado sin comprobarlo: un id mal escrito reventaba
+ * en producción con un "Cannot read properties of undefined" que no dice
+ * cuál id faltaba. Con `ruta()` el error nombra el id y el lugar donde
+ * buscar (este archivo), en vez de un componente al azar.
+ */
+export function ruta(id) {
+  const encontrada = SECCIONES_HOME.find((s) => s.id === id);
+  if (!encontrada) {
+    throw new Error(`ruta(): "${id}" no existe en SECCIONES_HOME (seccionesHome.js)`);
+  }
+  return encontrada;
+}

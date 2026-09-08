@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
-import { SECCIONES_HOME } from "./seccionesHome";
+import { ruta } from "./seccionesHome";
 
-const RUTA = SECCIONES_HOME.find((s) => s.id === "competidores");
+const RUTA = ruta("competidores");
 
 export default function S4Competidores({ oferentesHistoricos, sanciones }) {
   const DATOS = [

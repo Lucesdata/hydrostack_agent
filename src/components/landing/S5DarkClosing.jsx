@@ -1,6 +1,6 @@
-import { SECCIONES_HOME } from "./seccionesHome";
+import { ruta } from "./seccionesHome";
 
-const RUTA_DIAGNOSTICO = SECCIONES_HOME.find((s) => s.id === "diagnostico");
+const RUTA_DIAGNOSTICO = ruta("diagnostico");
 
 export default function S5DarkClosing() {
   return (

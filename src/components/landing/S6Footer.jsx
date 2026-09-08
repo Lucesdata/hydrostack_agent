@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SECCIONES_HOME } from "./seccionesHome";
+import { ruta } from "./seccionesHome";
 
 /**
  * El pie enlazaba a /terms y /privacy, que nunca existieron. Ahora las rutas
@@ -23,7 +23,7 @@ const COLUMNAS = [
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "competidores", "auditoria", "alertas"] },
 ];
 
-const href = (id) => SECCIONES_HOME.find((s) => s.id === id).href;
+const href = (id) => ruta(id).href;
 
 const linkStyle = {
   font: "13px var(--font-inter)",

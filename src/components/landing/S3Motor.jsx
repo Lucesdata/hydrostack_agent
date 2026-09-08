@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
-import { SECCIONES_HOME } from "./seccionesHome";
-
-const ruta = (id) => SECCIONES_HOME.find((s) => s.id === id);
+import { ruta } from "./seccionesHome";
 
 export default function S3Motor({ procesosVigilados }) {
   const PASOS = [

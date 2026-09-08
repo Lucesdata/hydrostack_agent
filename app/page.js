@@ -1,13 +1,12 @@
 "use client";
 // Reemplaza app/page.js completo con este archivo.
-// Requiere: src/components/landing/ProcesosTicker.jsx y LandingCards.jsx (sin cambios).
+// Requiere: src/components/landing/ProcesosTicker.jsx (sin cambios).
 // Elimina el uso de ScrollFilmBackground/FILM_CLIPS — el fondo cinemático se
 // sustituye por el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
-import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
@@ -16,53 +15,7 @@ import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
-import { SECCIONES_HOME } from "@/src/components/landing/seccionesHome";
-
-const PROBLEM_SOLUTION = [
-  {
-    n: "01",
-    icon: "doc-x",
-    pain: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
-    label: "Pre-evaluación RUP",
-    answer:
-      "AquaLicita cruza tu RUP con los requisitos habilitantes antes de que escribas una sola página.",
-  },
-  {
-    n: "02",
-    icon: "search-stack",
-    pain: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
-    label: "Decodificación de pliegos",
-    answer:
-      "El asistente extrae requisitos legales, técnicos y financieros y te los muestra como checklist.",
-  },
-  {
-    n: "03",
-    icon: "dimension",
-    pain: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
-    label: "Estructuración",
-    answer: "Te ayudamos a armar el presupuesto con las cotas y validaciones del sector agua.",
-  },
-];
-
-const CREDENTIALS = [
-  {
-    label: "Experiencia",
-    title: "11 años en agua y saneamiento",
-    body: "Un ingeniero especialista con licencia profesional vigente, no una startup de software.",
-  },
-  {
-    label: "Proyecto",
-    title: "3 planes directores en Cali",
-    body: "Alcantarillado de tres corregimientos, con modelado hidráulico y gemelo digital.",
-  },
-  {
-    label: "Resultado",
-    title: "Un pliego de 100 páginas, en minutos",
-    body: "Requisitos legales y técnicos extraídos y citados, listos para verificar.",
-  },
-];
-
-const ruta = (id) => SECCIONES_HOME.find((s) => s.id === id);
+import { ruta } from "@/src/components/landing/seccionesHome";
 
 // Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
 // tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
@@ -234,67 +187,6 @@ const BLUEPRINT_CSS = `
   .bp-footer-wrap { padding: 20px; }
 }
 `;
-
-/* ── Iconos monoline (plano técnico) para la fila dolor→respuesta ── */
-const PAIN_ICON_PATHS = {
-  "doc-x": (
-    <>
-      <path d="M5 2.5h6l3 3v12H5z" />
-      <path d="M11 2.5v3h3" />
-      <path d="M8 10.5l4 4M12 10.5l-4 4" />
-    </>
-  ),
-  "search-stack": (
-    <>
-      <rect x="2.3" y="5.2" width="9" height="10.5" />
-      <rect x="4.7" y="2.5" width="9" height="10.5" />
-      <circle cx="14.6" cy="14.6" r="2.5" />
-      <path d="M16.5 16.5l1.6 1.6" />
-    </>
-  ),
-  dimension: (
-    <>
-      <path d="M2 6.5v7M18 6.5v7" />
-      <path d="M2 10h5.5M12.5 10H18" />
-      <path d="M8 8.3l1.5 3.4M10.5 8.3L9 11.7" />
-    </>
-  ),
-};
-
-function PainIcon({ type }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="#0369A1"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ flexShrink: 0, marginTop: 1 }}
-      aria-hidden="true"
-    >
-      {PAIN_ICON_PATHS[type]}
-    </svg>
-  );
-}
-
-function ConnectorArrow() {
-  return (
-    <svg width="56" height="20" viewBox="0 0 56 20" style={{ display: "block" }} aria-hidden="true">
-      <line x1="4" y1="10" x2="42" y2="10" stroke="#0369A1" strokeWidth="1" strokeDasharray="4 4" />
-      <polyline
-        points="37,5 46,10 37,15"
-        fill="none"
-        stroke="#0369A1"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
 function useBlueprintFX() {

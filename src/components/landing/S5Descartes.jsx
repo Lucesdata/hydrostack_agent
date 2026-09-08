@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { SECCIONES_HOME } from "./seccionesHome";
+import { ruta } from "./seccionesHome";
 
-const RUTA = SECCIONES_HOME.find((s) => s.id === "auditoria");
+const RUTA = ruta("auditoria");
 
 /**
- * Los motivos son los de `EXPLICA` en app/auditoria/page.tsx, literales.
+ * Los motivos son los de `EXPLICA` en app/auditoria/explica.ts, literales —
+ * `src/__tests__/landing/explica.test.ts` compara las dos listas y falla si
+ * divergen, así que exportarla aquí no es opcional.
  *
  * Esta sección NO lleva cifras a propósito: `descartesPorMotivo()` va por
  * accountId, así que cualquier total que se pusiera aquí sería el de otra
  * persona. Es el mismo error que tuvo el ticker con sus montos ficticios.
  */
-const MOTIVOS = [
+export const MOTIVOS = [
   "Ni el código UNSPSC ni el texto del objeto coincidieron con ningún criterio",
   "Segmento UNSPSC 80 (gestión y personal): se excluye en la ingesta porque midió ~0 % de relevancia",
   "Contenía una de tus palabras excluidas",

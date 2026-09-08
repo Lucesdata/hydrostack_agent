@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { SECCIONES_HOME } from "./seccionesHome";
+import { ruta } from "./seccionesHome";
 
-const RUTA = SECCIONES_HOME.find((s) => s.id === "diagnostico");
+const RUTA = ruta("diagnostico");
 
 /** Lo que devuelve `calcularDiagnostico`, en el orden en que lo lee el usuario. */
 const DEVUELVE = [
