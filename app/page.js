@@ -80,14 +80,14 @@ const INTENT_ROUTES = [
   {
     n: "02",
     title: "Gané un contrato, ¿ahora qué?",
-    desc: "Actas, pólizas, informes y liquidación con sus plazos, avisados antes del vencimiento.",
+    desc: "Sube el contrato y te devuelve partes, objeto, valor, plazo y las obligaciones y fechas más críticas. Luego pregúntale por actas, pólizas, informes o liquidación.",
     cta: "EMPEZAR",
     ...ruta("asistente-ejecucion"),
   },
   {
     n: "03",
     title: "Opero un acueducto o una ESP",
-    desc: "RAS, Res. 0330, CRA y SUI. Cada respuesta trae el artículo exacto para sustentarla.",
+    desc: "RAS, Res. 0330, CRA y SUI. Cita el artículo en el que se apoya, y te dice cuándo no está seguro en vez de inventarlo.",
     cta: "CONSULTAR",
     ...ruta("asistente-operacion"),
   },
