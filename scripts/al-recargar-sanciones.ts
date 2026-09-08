@@ -13,7 +13,9 @@ async function main() {
   const r = await recargarSanciones();
   console.log(`✔ SECOP I:  ${r.secopI} registros`);
   console.log(`✔ SECOP II: ${r.secopII} registros`);
-  console.log(`  cruces resueltos → proveedor: ${r.proveedoresResueltos} · proceso: ${r.procesosResueltos}`);
+  console.log(
+    `  cruces resueltos → proveedor: ${r.proveedoresResueltos} · proceso: ${r.procesosResueltos}`
+  );
   process.exit(0);
 }
 

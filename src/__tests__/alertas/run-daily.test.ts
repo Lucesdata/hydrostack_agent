@@ -46,7 +46,11 @@ vi.mock("@/src/lib/al/notificacion/recopilar", () => ({
 }));
 
 vi.mock("@/src/lib/al/reportes/generar", () => ({
-  generarReporte: async () => ({ id: "rep-1", slug: "digest-x", url: "http://x/reportes/digest-x" }),
+  generarReporte: async () => ({
+    id: "rep-1",
+    slug: "digest-x",
+    url: "http://x/reportes/digest-x",
+  }),
   slugDigest: () => "digest-x",
 }));
 

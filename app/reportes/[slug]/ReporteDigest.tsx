@@ -66,12 +66,7 @@ function Tarjeta({
       {entidad ? <p className="clr-rep-card-meta">{entidad}</p> : null}
       {children}
       {url ? (
-        <a
-          href={url}
-          className="clr-rep-link"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={url} className="clr-rep-link" target="_blank" rel="noopener noreferrer">
           Ver en SECOP
         </a>
       ) : null}

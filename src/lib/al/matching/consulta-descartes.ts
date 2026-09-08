@@ -33,10 +33,7 @@ export interface DescarteMuestra {
 }
 
 /** Cuánto se descarta y por qué, en los últimos `dias`. */
-export async function descartesPorMotivo(
-  accountId: string,
-  dias = 7
-): Promise<MotivoAgregado[]> {
+export async function descartesPorMotivo(accountId: string, dias = 7): Promise<MotivoAgregado[]> {
   const res = await db.execute<MotivoAgregado>(sql`
     SELECT capa,
            motivo,

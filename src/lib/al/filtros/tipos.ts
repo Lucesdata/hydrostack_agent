@@ -39,8 +39,7 @@ export interface FiltroUsuario extends Required<Omit<FiltroEntrada, "valorMin" |
   updatedAt: Date;
 }
 
-export interface FiltroValidado
-  extends Required<Omit<FiltroEntrada, "valorMin" | "valorMax">> {
+export interface FiltroValidado extends Required<Omit<FiltroEntrada, "valorMin" | "valorMax">> {
   valorMin: string | null;
   valorMax: string | null;
 }
@@ -130,7 +129,9 @@ export function validarFiltro(body: unknown): ResultadoValidacion {
     return rechazo("activo debe ser booleano");
   }
 
-  const listas: Array<[keyof FiltroEntrada, (s: string) => string, ((s: string) => boolean) | undefined]> = [
+  const listas: Array<
+    [keyof FiltroEntrada, (s: string) => string, ((s: string) => boolean) | undefined]
+  > = [
     ["unspsc", (s) => s, (s) => UNSPSC.test(s)],
     ["palabrasClave", aMayusculas, undefined],
     ["palabrasExcluidas", aMayusculas, undefined],

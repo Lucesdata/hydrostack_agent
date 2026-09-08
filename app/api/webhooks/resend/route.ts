@@ -52,7 +52,9 @@ async function apagarSiRebotaDosVeces(usuarioId: string): Promise<boolean> {
       target: alertaPreferencias.usuarioId,
       set: { activo: false, updatedAt: new Date() },
     });
-  console.warn(`[webhooks/resend] alertas apagadas para ${usuarioId}: ${REBOTES_PARA_APAGAR} rebotes duros`);
+  console.warn(
+    `[webhooks/resend] alertas apagadas para ${usuarioId}: ${REBOTES_PARA_APAGAR} rebotes duros`
+  );
   return true;
 }
 

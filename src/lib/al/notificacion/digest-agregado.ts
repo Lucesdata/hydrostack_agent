@@ -53,7 +53,11 @@ function cop(v: string | null): string {
 
 function esc(s: string | null): string {
   if (!s) return "";
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /**
@@ -62,8 +66,7 @@ function esc(s: string | null): string {
  */
 const TOPE_POR_SECCION = 10;
 
-const CARD =
-  "border:1px solid #E5E5E0;border-radius:8px;padding:14px 16px;margin-bottom:10px;";
+const CARD = "border:1px solid #E5E5E0;border-radius:8px;padding:14px 16px;margin-bottom:10px;";
 const H2 = "margin:24px 0 10px;font-size:15px;font-weight:600;color:#0A1F1C;";
 
 function titulo(n: { titulo: string | null; secopProcesoId: string }): string {
@@ -137,8 +140,10 @@ function restoTexto(total: number): string[] {
 function asunto(n: Novedades, matches: number): string {
   const partes: string[] = [];
   if (n.adendas.length) partes.push(`${n.adendas.length} adenda${n.adendas.length > 1 ? "s" : ""}`);
-  if (n.adjudicaciones.length) partes.push(`${n.adjudicaciones.length} adjudicada${n.adjudicaciones.length > 1 ? "s" : ""}`);
-  if (n.aperturas.length) partes.push(`${n.aperturas.length} nueva${n.aperturas.length > 1 ? "s" : ""}`);
+  if (n.adjudicaciones.length)
+    partes.push(`${n.adjudicaciones.length} adjudicada${n.adjudicaciones.length > 1 ? "s" : ""}`);
+  if (n.aperturas.length)
+    partes.push(`${n.aperturas.length} nueva${n.aperturas.length > 1 ? "s" : ""}`);
   if (partes.length === 0 && matches > 0) {
     return matches === 1
       ? "1 licitación de agua y saneamiento que te conviene"
@@ -212,7 +217,10 @@ export function renderDigestAgregado(
     lineas.push(
       ...matchesPerfil
         .slice(0, TOPE_POR_SECCION)
-        .map((m) => `- ${sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)} (${m.proceso.entidad})`)
+        .map(
+          (m) =>
+            `- ${sentenceCaseTitle(m.proceso.nombre || m.proceso.referencia)} (${m.proceso.entidad})`
+        )
     );
     lineas.push(...restoTexto(matchesPerfil.length), "");
   }

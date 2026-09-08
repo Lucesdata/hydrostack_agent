@@ -14,10 +14,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { nivelDe, puede } from "@/src/lib/acceso/politica";
 import { cuentaDe } from "@/src/lib/al/cuenta";
-import {
-  descartesPorMotivo,
-  muestraDeDescartes,
-} from "@/src/lib/al/matching/consulta-descartes";
+import { descartesPorMotivo, muestraDeDescartes } from "@/src/lib/al/matching/consulta-descartes";
 import { formatCopCompact } from "@/src/components/secop/format";
 import { STYLE } from "./estilos";
 
@@ -120,9 +117,7 @@ export default async function AuditoriaPage({ searchParams }: Props) {
                   <span className="clr-aud-tag">{EXPLICA[d.motivo] ?? d.motivo}</span>
                   {d.filtroNombre ? ` · filtro “${d.filtroNombre}”` : " · red de ingesta"}
                   {d.unspscObservado ? ` · UNSPSC ${d.unspscObservado}` : " · sin UNSPSC"}
-                  {d.valorEstimado
-                    ? ` · ${formatCopCompact(Number(d.valorEstimado))}`
-                    : ""}
+                  {d.valorEstimado ? ` · ${formatCopCompact(Number(d.valorEstimado))}` : ""}
                 </p>
                 <p className="clr-aud-card-id">
                   {d.secopProcesoId} · red {d.redVersion}
