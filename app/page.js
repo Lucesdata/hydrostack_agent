@@ -16,6 +16,7 @@ import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo } from "@/src/components/secop/format";
+import { SECCIONES_HOME } from "@/src/components/landing/seccionesHome";
 
 const PROBLEM_SOLUTION = [
   {
@@ -61,41 +62,41 @@ const CREDENTIALS = [
   },
 ];
 
+const ruta = (id) => SECCIONES_HOME.find((s) => s.id === id);
+
+// Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
+// tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
+// todo este tiempo no capturó a nadie (lista_espera_mercado, 0 filas). El
+// endpoint /api/mercado/waitlist y su tabla se quedan intactos por si se
+// retoma; solo deja de robar atención en la rejilla.
 const INTENT_ROUTES = [
   {
     n: "01",
-    title: "Busco contratos",
-    desc: "Procesos activos de agua y saneamiento, con verificación de si calificas.",
-    href: "/licitaciones",
-    cta: "BUSCAR PROCESOS",
+    title: "Tengo un pliego que descifrar",
+    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist con su cita.",
+    cta: "DECODIFICAR PLIEGO",
+    ...ruta("pliego"),
   },
   {
     n: "02",
-    title: "Tengo un pliego que descifrar",
-    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist.",
-    href: "/pliego",
-    cta: "DECODIFICAR PLIEGO",
+    title: "Gané un contrato, ¿ahora qué?",
+    desc: "Actas, pólizas, informes y liquidación con sus plazos, avisados antes del vencimiento.",
+    cta: "EMPEZAR",
+    ...ruta("asistente-ejecucion"),
   },
   {
     n: "03",
-    title: "Tengo un problema de agua o vertimientos",
-    desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
-    href: "/soluciones",
-    cta: "VER EL CAMINO",
+    title: "Opero un acueducto o una ESP",
+    desc: "RAS, Res. 0330, CRA y SUI. Cada respuesta trae el artículo exacto para sustentarla.",
+    cta: "CONSULTAR",
+    ...ruta("asistente-operacion"),
   },
   {
     n: "04",
-    title: "Gané un contrato, ¿ahora qué?",
-    desc: "Acompañamiento en ejecución: actas, pólizas, informes, liquidación.",
-    href: "/asistente/ejecucion",
-    cta: "EMPEZAR",
-  },
-  {
-    n: "05",
-    title: "Opero un acueducto o una ESP",
-    desc: "Dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
-    href: "/asistente/operacion",
-    cta: "CONSULTAR",
+    title: "Tengo un problema de agua o vertimientos",
+    desc: "Del diagnóstico a la alternativa técnica, y de ahí a cómo contratarla.",
+    cta: "VER EL CAMINO",
+    ...ruta("soluciones"),
   },
 ];
 
@@ -556,9 +557,6 @@ export default function LandingPage() {
   const fx = useBlueprintFX();
   const { heroRef } = fx.refs;
 
-  const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | loading | done | error
-  const [waitlistError, setWaitlistError] = useState(null);
-
   // Cifras del sector para el home (procesos vigilados, oferentes históricos,
   // sanciones). Vienen de /api/landing-stats, que las lee de la base
   // ingerida, no de Socrata. Se quedan en null si el fetch falla: la UI
@@ -583,27 +581,6 @@ export default function LandingPage() {
       vivo = false;
     };
   }, []);
-
-  async function handleWaitlist() {
-    setWaitlistStatus("loading");
-    setWaitlistError(null);
-    try {
-      const res = await fetch("/api/mercado/waitlist", { method: "POST" });
-      if (res.status === 401) {
-        window.location.href = "/login?next=" + encodeURIComponent("/#asistentes-proyecto");
-        return;
-      }
-      if (!res.ok) {
-        setWaitlistStatus("error");
-        setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
-        return;
-      }
-      setWaitlistStatus("done");
-    } catch {
-      setWaitlistStatus("error");
-      setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
-    }
-  }
 
   return (
     <div
@@ -945,6 +922,19 @@ export default function LandingPage() {
                 >
                   [ {c.n} ]
                 </span>
+                <span
+                  style={{
+                    font: "10px var(--font-jetbrains-mono),monospace",
+                    color: "#6B746F",
+                    border: "1px solid #DADAD2",
+                    padding: "2px 8px",
+                    textTransform: "uppercase",
+                    letterSpacing: ".06em",
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  {c.etiqueta}
+                </span>
                 <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
                 <p
                   style={{
@@ -966,67 +956,6 @@ export default function LandingPage() {
                 </span>
               </Link>
             ))}
-
-            <div
-              aria-live="polite"
-              style={{
-                padding: 22,
-                minHeight: 180,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  font: "10px var(--font-jetbrains-mono),monospace",
-                  color: "#6B746F",
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Próximamente
-              </span>
-              <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
-                Vendo o fabrico soluciones
-              </div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
-                Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
-              </p>
-              {waitlistStatus === "done" ? (
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#16A34A",
-                  }}
-                >
-                  [ Te avisaremos ]
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleWaitlist}
-                  disabled={waitlistStatus === "loading"}
-                  style={{
-                    alignSelf: "flex-start",
-                    cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer",
-                    background: "transparent",
-                    border: "1px solid #0369A1",
-                    padding: "6px 12px",
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#0369A1",
-                  }}
-                >
-                  {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
-                </button>
-              )}
-              {waitlistStatus === "error" && waitlistError && (
-                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>
-                  {waitlistError}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
