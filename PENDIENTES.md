@@ -246,3 +246,44 @@ distinguirlas, y "8 preguntas · 3 minutos" no dice cuál es cuál.
 
 ### 11. Alcance de la regla "no perfilar usuarios"
 ¿Aplica a la infraestructura de cuentas/alertas de Fase 1 (`cuentas.ts`: perfil de oferente, email, hora de envío — con opt-in explícito, login y unsubscribe), o solo a tracking encubierto de visitantes anónimos? No tocar `cuentas.ts` ni `app/api/alertas/*` hasta aclarar.
+
+---
+
+## Deudas que dejó la alineación del home (2026-09-08)
+
+Del plan `docs/superpowers/plans/2026-09-08-home-alineado-producto.md`.
+
+### 18. Páginas legales `/terms` y `/privacy`
+El pie del home las enlazaba sin que existieran como rutas — dos enlaces rotos
+en producción, desde siempre. Se quitaron los enlaces al alinear el home. Falta
+escribir las páginas y volver a enlazarlas desde `S6Footer.jsx`, añadiéndolas
+antes a `src/components/landing/seccionesHome.js`: el pie resuelve cada `href`
+por id contra ese catálogo y **lanza en build** si falta, que es justo lo que
+impide que el enlace roto vuelva.
+
+### 19. Pliegos y asistentes: cero uso y acceso sin resolver
+`pliego_proceso`, `conversacion`, `mensaje` y `documento` están a 0 filas: el
+extractor de pliegos y los dos asistentes nunca se han usado en producción. El
+home ya no los vende como pilares — bajaron a la rejilla de intención marcados
+«plan pro» — pero esa frontera todavía no la aplica ningún handler (ver
+CLAUDE.md §4: `pliego_extraer` y `asistentes` están declaradas `pro` en
+`politica.ts` y siguen protegidas solo por `PROTECTED_PREFIXES`).
+
+Decidir el acceso a `GEMINI_API_KEY` por usuario antes de mandar tráfico ahí.
+
+Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
+home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no
+el plan. Dos ejemplos reales, ambos corregidos: se prometía que el asistente de
+ejecución avisa «antes del vencimiento» de cada plazo (no existe cron ni
+notificador; es un chat reactivo), y el hero mostraba `127` procesos nuevos y
+`$4.2B` en juego, inventados, cuando `/api/landing-stats` ya devolvía los reales
+— que resultaron ser 242 y $309.727 M. Antes de escribir una afirmación nueva en
+el home, ábrase el módulo que la sostiene.
+
+### 20. Doble petición a `/api/landing-stats` en el home
+`app/page.js` y `src/components/landing/LandingCards.jsx` piden el mismo
+endpoint por separado en cada carga, y `LandingCards` se renderiza dentro de esa
+misma página. Lo mitiga el `s-maxage=1800`, así que no llega a la base dos
+veces, pero es un round-trip evitable. Consolidarlo exige cambiar el contrato de
+props de `LandingCards`, que hoy no acepta ninguna y gestiona su propio estado
+de carga con skeletons — por eso se aplazó.
