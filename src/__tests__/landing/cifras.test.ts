@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // `contar` vive en un objeto creado con `vi.hoisted` (en vez de un simple
 // `const contar = vi.fn()` a nivel de módulo) y se reasigna a un `vi.fn()`
@@ -21,8 +21,19 @@ vi.mock("@/src/lib/db/client", () => ({
 import { getCifrasSector } from "@/src/lib/landing/cifras";
 
 describe("getCifrasSector", () => {
+  // contar() logea con console.warn cuando degrada por un fallo real (ver
+  // cifras.ts). Los tests de degradación lo disparan a propósito — se
+  // silencia aquí, igual que se silenciaría cualquier log esperado, para que
+  // la salida del test quede limpia.
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     mocks.contar = vi.fn();
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
   });
 
   it("devuelve los tres conteos cuando todas las consultas responden", async () => {

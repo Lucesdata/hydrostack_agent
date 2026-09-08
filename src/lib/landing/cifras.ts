@@ -31,24 +31,31 @@ export interface CifrasSector {
  * `count(*)` sobre una tabla. Nunca lanza: un fallo de red o SQL, o una fila
  * sin número utilizable, degradan igual a `null`. Así cada cifra falla por
  * su cuenta sin tumbar las otras dos.
+ *
+ * `nombre` solo identifica la cifra en el log — igual que las funciones de
+ * `landingStats.ts` (`getNuevos7d`, `getEnJuegoMes`, `getDestacado`) logean
+ * con `console.warn` antes de degradar, para que un fallo real (drift de
+ * esquema, conexión, permisos) deje rastro y no se quede solo como un "—"
+ * silencioso en el home.
  */
-async function contar(tabla: PgTable): Promise<number | null> {
+async function contar(nombre: string, tabla: PgTable): Promise<number | null> {
   try {
     const filas = await db.select({ n: sql<number>`count(*)::int` }).from(tabla);
     const n = filas[0]?.n;
     return typeof n === "number" && Number.isFinite(n) ? n : null;
-  } catch {
-    // Fallo de red o SQL: se degrada a null, igual que una fila sin número
-    // utilizable. El caller no necesita distinguir el motivo.
+  } catch (err) {
+    console.warn(
+      `[cifras.contar:${nombre}] falló (${err instanceof Error ? err.message : String(err)})`
+    );
     return null;
   }
 }
 
 export async function getCifrasSector(): Promise<CifrasSector> {
   const [procesosVigilados, oferentesHistoricos, sanciones] = await Promise.all([
-    contar(proceso),
-    contar(alOferentesHistorico),
-    contar(alSanciones),
+    contar("procesosVigilados", proceso),
+    contar("oferentesHistoricos", alOferentesHistorico),
+    contar("sanciones", alSanciones),
   ]);
 
   return { procesosVigilados, oferentesHistoricos, sanciones };
