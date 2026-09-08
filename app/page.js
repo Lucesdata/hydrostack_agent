@@ -853,13 +853,7 @@ export default function LandingPage() {
         {/* S4 — Banda de invitación */}
         <S4Invitation />
 
-        {/* S5 — Banda oscura de cierre */}
-        <S5DarkClosing />
-
-        {/* S6 — Pie */}
-        <S6Footer />
-
-        {/* EXTRA: Sección de INTENT_ROUTES (¿En qué momento estás?) */}
+        {/* Rutas de intención — ¿En qué momento estás? */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -1002,6 +996,12 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+
+        {/* S5 — Banda oscura de cierre */}
+        <S5DarkClosing />
+
+        {/* S6 — Pie */}
+        <S6Footer />
       </div>
     </div>
   );
