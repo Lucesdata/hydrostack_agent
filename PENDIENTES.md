@@ -280,10 +280,22 @@ notificador; es un chat reactivo), y el hero mostraba `127` procesos nuevos y
 — que resultaron ser 242 y $309.727 M. Antes de escribir una afirmación nueva en
 el home, ábrase el módulo que la sostiene.
 
-### 20. Doble petición a `/api/landing-stats` en el home
-`app/page.js` y `src/components/landing/LandingCards.jsx` piden el mismo
-endpoint por separado en cada carga, y `LandingCards` se renderiza dentro de esa
-misma página. Lo mitiga el `s-maxage=1800`, así que no llega a la base dos
-veces, pero es un round-trip evitable. Consolidarlo exige cambiar el contrato de
-props de `LandingCards`, que hoy no acepta ninguna y gestiona su propio estado
-de carga con skeletons — por eso se aplazó.
+### 20. `LandingCards` se importa en el home y no se renderiza en ningún lado
+`app/page.js` importa `LandingCards` desde
+`src/components/landing/LandingCards.jsx` pero nunca la monta — el import
+sobrevivió a la reescritura del home mientras el JSX que la usaba desapareció.
+Verificado: `grep -rn "LandingCards" app src` solo encuentra el import, nada
+que la renderice.
+
+Eso significa que su `useLandingStats()` nunca corre, y las tres tarjetas que
+sirve — procesos nuevos, valor en juego, proceso destacado, las mismas cifras
+de `/api/landing-stats` que sí se muestran en la fila del hero — no aparecen en
+ningún sitio del producto. No es solo un import muerto: es contenido real,
+construido y con endpoint funcionando, que un usuario nunca ve.
+
+Decidir entre dos caminos, no dejarlo a medias otra vez: (a) volver a montar
+`LandingCards` en el home, en el lugar que le corresponda dentro del nuevo
+orden de secciones, o (b) si las tarjetas ya no encajan en el diseño actual,
+borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
+consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
+endpoint que sirve más de lo que nadie lee.
