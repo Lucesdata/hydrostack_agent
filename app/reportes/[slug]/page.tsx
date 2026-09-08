@@ -67,32 +67,32 @@ export default async function ReportePage({ params }: { params: Promise<{ slug: 
     <main className="clr-rep">
       <style dangerouslySetInnerHTML={{ __html: STYLE }} />
       <div className="clr-rep-inner">
-      <header>
-        <p className="clr-rep-kicker">
-          {reporte.visibilidad === "publico" ? "Reporte público" : "Tu reporte"}
-        </p>
-        <h1 className="clr-rep-title">{reporte.titulo}</h1>
-        <p className="clr-rep-sub">
-          Generado el{" "}
-          {new Date(reporte.generadoEn).toLocaleDateString("es-CO", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-          . Este reporte es permanente: refleja lo que había ese día.
-        </p>
-      </header>
+        <header>
+          <p className="clr-rep-kicker">
+            {reporte.visibilidad === "publico" ? "Reporte público" : "Tu reporte"}
+          </p>
+          <h1 className="clr-rep-title">{reporte.titulo}</h1>
+          <p className="clr-rep-sub">
+            Generado el{" "}
+            {new Date(reporte.generadoEn).toLocaleDateString("es-CO", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            . Este reporte es permanente: refleja lo que había ese día.
+          </p>
+        </header>
 
-      {reporte.tipo === "digest_diario" ? (
-        <ReporteDigest payload={reporte.payload as PayloadDigest} />
-      ) : reporte.tipo === "mercado_departamento" ? (
-        <ReporteMercado payload={reporte.payload as PayloadMercado} />
-      ) : (
-        // `competidor` y `entidad` todavía no tienen render propio. El volcado
-        // es honesto —no inventa una presentación que nadie diseñó— y solo se
-        // alcanza desde un slug que aún no se genera en ningún flujo.
-        <pre className="clr-rep-json">{JSON.stringify(reporte.payload, null, 2)}</pre>
-      )}
+        {reporte.tipo === "digest_diario" ? (
+          <ReporteDigest payload={reporte.payload as PayloadDigest} />
+        ) : reporte.tipo === "mercado_departamento" ? (
+          <ReporteMercado payload={reporte.payload as PayloadMercado} />
+        ) : (
+          // `competidor` y `entidad` todavía no tienen render propio. El volcado
+          // es honesto —no inventa una presentación que nadie diseñó— y solo se
+          // alcanza desde un slug que aún no se genera en ningún flujo.
+          <pre className="clr-rep-json">{JSON.stringify(reporte.payload, null, 2)}</pre>
+        )}
       </div>
     </main>
   );

@@ -36,7 +36,9 @@ async function main() {
   const limite = arg("limite", 2000);
 
   const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  console.log(`Sondeando procesos publicados desde ${desde} (tope ${limite}), SIN filtro sectorial`);
+  console.log(
+    `Sondeando procesos publicados desde ${desde} (tope ${limite}), SIN filtro sectorial`
+  );
 
   const page = await sodaFetchPage(DATASETS.procesos, {
     $order: `${F.fechaPublicacion} DESC`,

@@ -57,9 +57,7 @@ const NO_DISPONIBLES = [
   "Boletín de Responsables Fiscales — no publicado como dataset nacional",
 ];
 
-export async function sancionesDeProveedor(
-  nitOrKey: string
-): Promise<HistorialSancionatorio> {
+export async function sancionesDeProveedor(nitOrKey: string): Promise<HistorialSancionatorio> {
   const nit = /^\d{6,12}$/.test(nitOrKey) ? nitOrKey : null;
   const key = /^\d+$/.test(nitOrKey) ? `nit:${nitOrKey}` : nitOrKey;
 

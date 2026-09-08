@@ -124,10 +124,7 @@ export async function correrFiltro(
 }
 
 export async function correrFiltrosActivos(opts: OpcionesBusqueda = {}): Promise<ResumenCorrida> {
-  const filtros = await db
-    .select()
-    .from(alFiltrosUsuario)
-    .where(eq(alFiltrosUsuario.activo, true));
+  const filtros = await db.select().from(alFiltrosUsuario).where(eq(alFiltrosUsuario.activo, true));
 
   const porFiltro: ResumenFiltro[] = [];
   for (const f of filtros) porFiltro.push(await correrFiltro(f, opts));

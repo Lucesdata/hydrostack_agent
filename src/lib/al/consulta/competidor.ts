@@ -14,10 +14,7 @@
 
 import { sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
-import {
-  sancionesDeProveedor,
-  type HistorialSancionatorio,
-} from "@/src/lib/al/sanciones/consulta";
+import { sancionesDeProveedor, type HistorialSancionatorio } from "@/src/lib/al/sanciones/consulta";
 import { normalizarNombre } from "@/src/lib/al/historico/mapear";
 
 export interface AgregadoPorEntidad {
@@ -230,11 +227,13 @@ export interface PrecioReferencia {
  * ambos valores: `precio_base = 0` es frecuente en la fuente y se guardó como
  * NULL, no como cero, precisamente para que no envenene esta mediana.
  */
-export async function precioReferencia(params: {
-  unspsc?: string[];
-  divipola?: string[];
-  desde?: string;
-} = {}): Promise<PrecioReferencia> {
+export async function precioReferencia(
+  params: {
+    unspsc?: string[];
+    divipola?: string[];
+    desde?: string;
+  } = {}
+): Promise<PrecioReferencia> {
   const unspsc = arrayLiteral(params.unspsc);
   const divipola = arrayLiteral(params.divipola);
 
@@ -297,10 +296,12 @@ export interface FilaCompetidor {
  * nombre normalizado por `normalizarNombre` (mayúsculas, sin tildes, sin
  * puntuación). Buscar contra esa columna da lo mismo, gratis y sin migración.
  */
-export async function topCompetidores(params: {
-  q?: string | null;
-  limit?: number;
-} = {}): Promise<FilaCompetidor[]> {
+export async function topCompetidores(
+  params: {
+    q?: string | null;
+    limit?: number;
+  } = {}
+): Promise<FilaCompetidor[]> {
   const limit = Math.min(params.limit ?? 50, 200);
   const q = params.q?.trim() ?? "";
   const patron = `%${q}%`;

@@ -72,10 +72,7 @@ export default async function CompetidorPage({ params }: Props) {
             v={formatCopCompact(h.valorTotalAdjudicado ? Number(h.valorTotalAdjudicado) : null)}
             l="Valor total adjudicado"
           />
-          <Cifra
-            v={pct(h.ratioAdjudicadoSobreEstimado)}
-            l="Mediana adjudicado / presupuesto"
-          />
+          <Cifra v={pct(h.ratioAdjudicadoSobreEstimado)} l="Mediana adjudicado / presupuesto" />
         </div>
 
         {/* ── Sanciones ─────────────────────────────────────────────────── */}
@@ -84,9 +81,7 @@ export default async function CompetidorPage({ params }: Props) {
         {sanciones.directas.length === 0 && sanciones.porProceso.length === 0 ? (
           <div className="clr-cmp-limpio">
             {sanciones.cobertura.cruzablePorDocumento ? (
-              <>
-                Sin multas registradas a nombre de este NIT en las fuentes consultadas.
-              </>
+              <>Sin multas registradas a nombre de este NIT en las fuentes consultadas.</>
             ) : (
               <>
                 <strong>No se puede verificar.</strong> Este proveedor no tiene NIT publicado en las
@@ -250,8 +245,8 @@ export default async function CompetidorPage({ params }: Props) {
         <p className="clr-cmp-nota">
           La base solo contiene actividad de <strong>agua y saneamiento</strong>: el filtro
           sectorial se aplica en la ingesta, así que esta ficha no dice nada de lo que este
-          proveedor contrate en otros sectores. La mediana adjudicado/presupuesto por debajo del
-          100 % significa que gana bajando el precio de referencia.
+          proveedor contrate en otros sectores. La mediana adjudicado/presupuesto por debajo del 100
+          % significa que gana bajando el precio de referencia.
         </p>
       </div>
     </main>

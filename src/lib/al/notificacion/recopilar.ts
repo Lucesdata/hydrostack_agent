@@ -20,7 +20,12 @@ export interface NovedadEvento {
   entidad: string | null;
   url: string | null;
   valorEstimado: string | null;
-  delta: Array<{ campo: string; etiqueta: string; antes: string | null; despues: string | null }> | null;
+  delta: Array<{
+    campo: string;
+    etiqueta: string;
+    antes: string | null;
+    despues: string | null;
+  }> | null;
   estadoNuevo: string | null;
   valorNuevo: string | null;
 }

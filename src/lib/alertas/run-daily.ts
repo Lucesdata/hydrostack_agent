@@ -66,9 +66,7 @@ function hoyIso(): string {
  * Solo el script de CLI la amplía, para poder probar el envío un día en que no
  * haya pasado nada sin inventar datos.
  */
-export async function runDailyAlertas(
-  opts: { desde?: Date } = {}
-): Promise<DailyRunSummary> {
+export async function runDailyAlertas(opts: { desde?: Date } = {}): Promise<DailyRunSummary> {
   const fecha = hoyIso();
   const summary: DailyRunSummary = {
     cuentas: 0,
