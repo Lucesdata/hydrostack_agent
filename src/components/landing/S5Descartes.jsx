@@ -58,8 +58,11 @@ export default function S5Descartes() {
           }}
         >
           Y el silencio no se ve. Por eso guardamos cada proceso que tus reglas descartaron, con el
-          motivo exacto, y puedes revisarlos cuando quieras. Si al leerlos aparece algo que sí te
-          interesaba, el filtro está mal — y ya sabes cuál.
+          motivo exacto, y puedes revisarlos cuando quieras. Dos de los motivos de abajo son
+          distintos: son la red sectorial que decide qué entra antes de que exista un proceso que
+          guardar, así que esos no quedan uno por uno — se muestran igual, para que el criterio no
+          quede oculto. Si al leerlos aparece algo que sí te interesaba, el filtro está mal — y ya
+          sabes cuál.
         </p>
 
         <ul

@@ -13,7 +13,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
     },
     {
       valor: formatConteo(sanciones),
-      etiqueta: "sanciones cruzadas",
+      etiqueta: "sanciones registradas",
       pie: "Para saber con quién compites antes de competir.",
     },
   ];
@@ -54,9 +54,9 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
             margin: "0 0 40px",
           }}
         >
-          Quién se presenta en tu zona, cuánto gana, a qué precio adjudica y si arrastra sanciones.
-          Es información pública, pero está desperdigada en miles de expedientes: aquí ya está
-          reunida.
+          Quién se presenta en el sector, cuánto gana, a qué precio adjudica y si arrastra
+          sanciones. Es información pública, pero está desperdigada en miles de expedientes: aquí ya
+          está reunida.
         </p>
 
         <div

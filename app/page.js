@@ -647,9 +647,9 @@ export default function LandingPage() {
                   maxWidth: 520,
                 }}
               >
-                Desde una duda de norma hasta un pliego de cien páginas. Incluye los procesos de
-                agua y saneamiento del SECOP II, con las compuertas de elegibilidad revisadas una
-                por una.
+                Vigilamos los procesos de agua y saneamiento que publica el SECOP II, los filtramos
+                con las reglas que tú defines y te decimos si calificas — mostrándote cada compuerta
+                y por qué, no un veredicto a ciegas.
               </p>
 
               {/* Cifras del sector: vienen de /api/landing-stats vía el estado
@@ -674,7 +674,7 @@ export default function LandingPage() {
                     v: formatConteo(sector.oferentesHistoricos),
                     t: "registros de quién se presentó",
                   },
-                  { v: formatConteo(sector.sanciones), t: "sanciones cruzadas" },
+                  { v: formatConteo(sector.sanciones), t: "sanciones registradas" },
                 ].map((x) => (
                   <div key={x.t}>
                     <div
@@ -733,7 +733,7 @@ export default function LandingPage() {
                       color: "#6B746F",
                     }}
                   >
-                    sin cuenta · 2 minutos
+                    sin cuenta · 3 minutos
                   </div>
                 </div>
                 <Link
@@ -758,39 +758,6 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <div
-                className="hero-fade-up"
-                style={{
-                  display: "flex",
-                  gap: 24,
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  color: "#6B746F",
-                  animationDelay: ".95s",
-                  marginBottom: 32,
-                }}
-              >
-                <span>✓ Sin cuenta</span>
-                <span>✓ Resultado en 2 minutos</span>
-              </div>
-              {/* Entrada al diagnóstico: para quien todavía no sabe si su
-                  empresa está en condiciones de presentarse. */}
-              <div
-                className="hero-fade-up"
-                style={{
-                  font: "12px/1.6 var(--font-inter)",
-                  color: "#525B5A",
-                  animationDelay: ".97s",
-                  marginBottom: 32,
-                }}
-              >
-                ¿Aún no sabes si tu empresa puede presentarse?{" "}
-                <Link
-                  href="/diagnostico"
-                  style={{ color: "#0369A1", borderBottom: "1px solid rgba(3,105,161,.35)" }}
-                >
-                  Descubre qué te falta
-                </Link>
-              </div>
               <svg
                 viewBox="0 0 520 16"
                 width="520"
