@@ -1,3 +1,7 @@
+import { SECCIONES_HOME } from "./seccionesHome";
+
+const RUTA_DIAGNOSTICO = SECCIONES_HOME.find((s) => s.id === "diagnostico");
+
 export default function S5DarkClosing() {
   return (
     <section
@@ -26,7 +30,7 @@ export default function S5DarkClosing() {
         </p>
 
         <a
-          href="/diagnostico"
+          href={RUTA_DIAGNOSTICO.href}
           style={{
             display: "inline-flex",
             alignItems: "center",

@@ -15,7 +15,7 @@ import S4Competidores from "@/src/components/landing/S4Competidores";
 import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
-import { formatConteo } from "@/src/components/secop/format";
+import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
 import { SECCIONES_HOME } from "@/src/components/landing/seccionesHome";
 
 const PROBLEM_SOLUTION = [
@@ -558,13 +558,19 @@ export default function LandingPage() {
   const { heroRef } = fx.refs;
 
   // Cifras del sector para el home (procesos vigilados, oferentes históricos,
-  // sanciones). Vienen de /api/landing-stats, que las lee de la base
-  // ingerida, no de Socrata. Se quedan en null si el fetch falla: la UI
-  // muestra "—" y la frase que las acompaña sigue siendo cierta sin la cifra.
+  // sanciones) y las dos cifras vivas de la fila inferior del hero (procesos
+  // nuevos en 7 días, valor en juego este mes). Todas vienen de la misma
+  // respuesta de /api/landing-stats — un solo fetch, no uno por bloque. Se
+  // quedan en null si el fetch falla: la UI muestra "—" y la frase que las
+  // acompaña sigue siendo cierta sin la cifra.
   const [sector, setSector] = useState({
     procesosVigilados: null,
     oferentesHistoricos: null,
     sanciones: null,
+  });
+  const [heroStats, setHeroStats] = useState({
+    nuevos7d: null,
+    enJuegoTotalCop: null,
   });
 
   useEffect(() => {
@@ -572,7 +578,12 @@ export default function LandingPage() {
     fetch("/api/landing-stats")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (vivo && d?.sector) setSector(d.sector);
+        if (!vivo || !d) return;
+        if (d.sector) setSector(d.sector);
+        setHeroStats({
+          nuevos7d: d.nuevos7d ?? null,
+          enJuegoTotalCop: d.enJuego?.totalCop ?? null,
+        });
       })
       .catch(() => {
         /* se queda en null: la UI muestra "—" y la frase sigue siendo cierta */
@@ -823,7 +834,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    127
+                    {formatConteo(heroStats.nuevos7d)}
                   </div>
                   <div
                     style={{
@@ -844,7 +855,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    $4.2B
+                    {formatCopCompact(heroStats.enJuegoTotalCop)}
                   </div>
                   <div
                     style={{
@@ -886,7 +897,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    24/7
+                    Diaria
                   </div>
                   <div
                     style={{

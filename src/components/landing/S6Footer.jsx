@@ -35,7 +35,13 @@ const linkStyle = {
 
 export default function S6Footer() {
   return (
-    <footer style={{ padding: "48px 48px 32px", background: "#070E0C" }}>
+    <footer
+      style={{
+        padding: "48px 48px 32px",
+        background: "#070E0C",
+        borderTop: "1px solid #DADAD2",
+      }}
+    >
       <div
         style={{
           maxWidth: 1440,
@@ -73,7 +79,7 @@ export default function S6Footer() {
           textAlign: "center",
           color: "#6B746F",
           font: "12px var(--font-inter)",
-          borderTop: "1px solid #1A2724",
+          borderTop: "1px solid rgba(255,255,255,0.12)",
           paddingTop: 24,
         }}
       >
