@@ -1023,7 +1023,11 @@ select {
     padding 0.3s ease;
 }
 .clr-mobile-menu.open {
-  max-height: 420px;
+  /* 5 pestañas + hasta 9 enlaces de cuenta no caben en los 420px que había
+     cuando el menú solo llevaba "Cerrar sesión". Se limita a la altura de la
+     ventana menos el navbar y se deja desplazar en vez de recortar. */
+  max-height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
   opacity: 1;
   padding: 10px 28px 20px;
 }

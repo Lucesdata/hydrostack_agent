@@ -3,11 +3,41 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+// Las pestañas del navbar. Se dejaron de renderizar en d0e9cda ("simplifica
+// navbar a minimalista") y el array quedó vivo pero muerto: durante dos semanas
+// la única forma de llegar a cualquier función fue la home, y el bloque de la
+// home que enlaza las cinco rutas de intención estaba montado DEBAJO del pie.
+// El resultado práctico era un producto sin navegación. Vuelven a renderizarse.
+//
+// `route` existe aparte de `href` porque el resaltado activo es por prefijo, no
+// por igualdad: /diagnostico/historial debe pintar "Diagnóstico" como activo.
+// Hoy coincide con `href` en las cinco, y se mantiene separado para no tener
+// que reintroducir el campo cuando alguna gane subrutas con href propio.
+// Los asistentes (/asistente/*) NO están aquí: son dos rutas que exigen cuenta,
+// viven en el menú de usuario junto al resto de lo autenticado.
 const NAV_ITEMS = [
   { href: "/licitaciones", route: "/licitaciones", index: "01", label: "Licitaciones" },
   { href: "/pliego", route: "/pliego", index: "02", label: "Pliegos" },
-  { href: "/nosotros", route: "/nosotros", index: "03", label: "Nosotros" },
+  { href: "/diagnostico", route: "/diagnostico", index: "03", label: "Diagnóstico" },
   { href: "/soluciones", route: "/soluciones", index: "04", label: "Soluciones" },
+  { href: "/nosotros", route: "/nosotros", index: "05", label: "Nosotros" },
+];
+
+// Lo que solo existe con sesión. Vive en dos sitios (el dropdown del avatar en
+// escritorio y el menú hamburguesa en móvil) y por eso se declara una vez: la
+// versión anterior solo lo tenía en el dropdown, que está en display:none por
+// debajo de 1024px — un usuario con sesión en móvil no tenía forma de llegar a
+// su perfil, sus coincidencias ni sus filtros.
+const ACCOUNT_ITEMS = [
+  { href: "/perfil", label: "Mi perfil RUP" },
+  { href: "/mis-coincidencias", label: "Mis coincidencias" },
+  { href: "/mis-filtros", label: "Mis filtros" },
+  { href: "/competidores", label: "Competidores" },
+  { href: "/auditoria", label: "Qué se descarta" },
+  { href: "/diagnostico/historial", label: "Historial de diagnóstico" },
+  { href: "/asistente/ejecucion", label: "Asistente: ejecución" },
+  { href: "/asistente/operacion", label: "Asistente: operación" },
+  { href: "/cuenta", label: "Preferencias de alerta" },
 ];
 
 const AUTH_CSS = `
@@ -159,24 +189,11 @@ function UserMenu({ user, hasNewMatches }) {
               <div className="clr-nav-user-email">{user.email}</div>
             </div>
           </div>
-          <Link href="/perfil" onClick={() => setOpen(false)}>
-            Mi perfil RUP
-          </Link>
-          <Link href="/mis-coincidencias" onClick={() => setOpen(false)}>
-            Mis coincidencias
-          </Link>
-          <Link href="/mis-filtros" onClick={() => setOpen(false)}>
-            Mis filtros
-          </Link>
-          <Link href="/competidores" onClick={() => setOpen(false)}>
-            Competidores
-          </Link>
-          <Link href="/auditoria" onClick={() => setOpen(false)}>
-            Qué se descarta
-          </Link>
-          <Link href="/cuenta" onClick={() => setOpen(false)}>
-            Preferencias de alerta
-          </Link>
+          {ACCOUNT_ITEMS.map((item) => (
+            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+              {item.label}
+            </Link>
+          ))}
           <div className="clr-nav-user-sep" aria-hidden="true" />
           {/* Sin onSubmit: el submit navega fuera de la página (redirect a /),
               cerrar el dropdown acá desmontaría el <form> a mitad del envío
@@ -219,7 +236,29 @@ export default function Navbar({ user, hasNewMatches }) {
           <span className="clr-status-label">En línea</span>
         </span>
 
-        <div style={{ marginLeft: "auto" }} className="clr-nav-auth">
+        <span className="clr-nav-divider" aria-hidden="true" />
+
+        {/* .clr-links ya trae margin-left:auto en globals.css — por eso el
+            bloque de auth no lo lleva inline. */}
+        <div className="clr-links">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="clr-nav-link"
+              onClick={close}
+              {...navAria(isActive(item))}
+            >
+              <span className="clr-nav-index" aria-hidden="true">
+                {item.index}/
+              </span>
+              {item.label}
+              <CoteGlyph />
+            </Link>
+          ))}
+        </div>
+
+        <div className="clr-nav-auth">
           {user ? (
             <UserMenu user={user} hasNewMatches={hasNewMatches} />
           ) : (
@@ -249,6 +288,20 @@ export default function Navbar({ user, hasNewMatches }) {
       </div>
 
       <div id="clr-mobile-menu" className={`clr-mobile-menu${open ? " open" : ""}`}>
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="clr-mobile-link"
+            {...navAria(isActive(item))}
+            onClick={close}
+          >
+            <span className="clr-nav-index" aria-hidden="true">
+              {item.index}/
+            </span>
+            {item.label}
+          </Link>
+        ))}
         <div className="clr-mobile-auth">
           {user ? (
             <>
@@ -259,6 +312,17 @@ export default function Navbar({ user, hasNewMatches }) {
                   <div className="clr-nav-user-email">{user.email}</div>
                 </div>
               </div>
+              {ACCOUNT_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="clr-mobile-link"
+                  {...navAria(isActive({ route: item.href }))}
+                  onClick={close}
+                >
+                  {item.label}
+                </Link>
+              ))}
               <form action="/logout" method="POST" onSubmit={close}>
                 <button type="submit" className="clr-mobile-link" style={{ width: "100%" }}>
                   Cerrar sesión
