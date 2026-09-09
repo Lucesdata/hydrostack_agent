@@ -24,7 +24,7 @@ export const MOTIVOS = [
 
 export default function S5Descartes() {
   return (
-    <section style={{ padding: "80px 48px" }}>
+    <section className="section-pad">
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
           <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -68,15 +68,8 @@ export default function S5Descartes() {
         </p>
 
         <ul
-          style={{
-            listStyle: "none",
-            padding: 0,
-            margin: "0 0 36px",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
-            gap: 12,
-            maxWidth: 900,
-          }}
+          className="grid-cards"
+          style={{ listStyle: "none", padding: 0, margin: "0 0 36px", maxWidth: 900 }}
         >
           {MOTIVOS.map((m) => (
             <li
@@ -95,6 +88,7 @@ export default function S5Descartes() {
 
         <Link
           href={RUTA.href}
+          className="tap-target"
           style={{
             font: "600 12px var(--font-jetbrains-mono),monospace",
             color: "#0369A1",

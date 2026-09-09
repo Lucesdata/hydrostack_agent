@@ -40,7 +40,7 @@ export default function S3Motor({ procesosVigilados }) {
   ];
 
   return (
-    <section style={{ padding: "80px 48px" }}>
+    <section className="section-pad">
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
           <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -113,11 +113,11 @@ export default function S3Motor({ procesosVigilados }) {
               </p>
               <Link
                 href={p.href}
+                className="tap-target"
                 style={{
                   font: "600 12px var(--font-jetbrains-mono),monospace",
                   color: "#0369A1",
                   textDecoration: "none",
-                  marginTop: 4,
                 }}
               >
                 [ {p.cta} → ]

@@ -19,7 +19,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
   ];
 
   return (
-    <section style={{ padding: "80px 48px", background: "#FAFAF7" }}>
+    <section className="section-pad" style={{ background: "#FAFAF7" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
           <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -59,14 +59,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
           está reunida.
         </p>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))",
-            gap: 32,
-            marginBottom: 40,
-          }}
-        >
+        <div className="grid-cards" style={{ marginBottom: 40 }}>
           {DATOS.map((d) => (
             <div key={d.etiqueta} style={{ borderLeft: "2px solid #0369A1", paddingLeft: 16 }}>
               <div
@@ -97,6 +90,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
 
         <Link
           href={RUTA.href}
+          className="tap-target"
           style={{
             font: "600 12px var(--font-jetbrains-mono),monospace",
             color: "#0369A1",

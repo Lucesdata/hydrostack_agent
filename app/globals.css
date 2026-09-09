@@ -123,6 +123,11 @@
   --bp-sm: 640px;
   --bp-md: 768px;
   --bp-lg: 1024px;
+
+  /* Ritmo de la portada. En clamp y nunca en vh: el vh del móvil cambia al
+     recogerse la barra del navegador y el espaciado saltaría al hacer scroll. */
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --section-block: clamp(3rem, 10vw, 8rem);
 }
 
 html {
@@ -135,7 +140,9 @@ body {
   color: var(--white);
   font-family: var(--mono);
   height: 100%;
-  overflow-x: hidden;
+  /* clip y no hidden: hidden convierte al body en contenedor de scroll y
+     rompe cualquier position:sticky que cuelgue de él. */
+  overflow-x: clip;
   overflow-y: auto;
 }
 
@@ -1412,4 +1419,35 @@ select {
 }
 .clr-verdict-gate--unknown .clr-verdict-glyph {
   color: var(--ink-300);
+}
+
+/* ── Portada: rejilla y ritmo ─────────────────────────────────────────────
+   Un único patrón de rejilla para toda tarjeta de la portada, en vez de un
+   minmax distinto por sección. El `min(100%, 280px)` es lo que impide el
+   corte: `minmax(280px, 1fr)` a secas desborda en cuanto el contenedor baja
+   de 280px, que es justo lo que pasa a 360px con gutter de 48px. */
+.grid-cards {
+  display: grid;
+  gap: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+/* Nunca dos columnas por debajo de 640px. La tablet (768–1024) sí las admite,
+   y eso lo resuelve solo el auto-fit de arriba. */
+@media (max-width: 639px) {
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-pad {
+  padding-block: var(--section-block);
+  padding-inline: var(--gutter);
+}
+
+/* Un enlace de texto suelto no llega a 44px de alto por sí mismo. */
+.tap-target {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }

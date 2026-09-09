@@ -29,7 +29,9 @@ const linkStyle = {
   font: "13px var(--font-inter)",
   color: "#6B746F",
   textDecoration: "none",
-  display: "block",
+  display: "flex",
+  alignItems: "center",
+  minHeight: 44,
   padding: "3px 0",
 };
 
@@ -37,7 +39,7 @@ export default function S6Footer() {
   return (
     <footer
       style={{
-        padding: "48px 48px 32px",
+        padding: "48px var(--gutter) 32px",
         background: "#070E0C",
         borderTop: "1px solid #DADAD2",
       }}

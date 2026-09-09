@@ -5,7 +5,8 @@ const RUTA_DIAGNOSTICO = ruta("diagnostico");
 export default function S5DarkClosing() {
   return (
     <section
-      style={{ padding: "96px 48px", background: "#0A1F1C", textAlign: "center", color: "white" }}
+      className="section-pad"
+      style={{ background: "#0A1F1C", textAlign: "center", color: "white" }}
     >
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <h2

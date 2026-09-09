@@ -24,7 +24,7 @@ const DEVUELVE = [
 
 export default function S2Diagnostico() {
   return (
-    <section style={{ padding: "80px 48px", background: "rgba(3, 105, 161, 0.04)" }}>
+    <section className="section-pad" style={{ background: "rgba(3, 105, 161, 0.04)" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
           <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -64,14 +64,7 @@ export default function S2Diagnostico() {
           veredicto.
         </p>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
-            gap: 20,
-            marginBottom: 40,
-          }}
-        >
+        <div className="grid-cards" style={{ marginBottom: 40 }}>
           {DEVUELVE.map((x) => (
             <div key={x.n} style={{ borderTop: "2px solid #0369A1", paddingTop: 16 }}>
               <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>
