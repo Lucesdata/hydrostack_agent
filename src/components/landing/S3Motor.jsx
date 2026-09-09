@@ -48,8 +48,7 @@ export default function S3Motor({ procesosVigilados }) {
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
               color: "#0369A1",
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
+              letterSpacing: ".08em",
             }}
           >
             Cómo funciona
@@ -120,7 +119,7 @@ export default function S3Motor({ procesosVigilados }) {
                   textDecoration: "none",
                 }}
               >
-                [ {p.cta} → ]
+                [ {p.cta} ]
               </Link>
             </div>
           ))}

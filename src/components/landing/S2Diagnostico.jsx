@@ -32,8 +32,7 @@ export default function S2Diagnostico() {
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
               color: "#0369A1",
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
+              letterSpacing: ".08em",
             }}
           >
             Empieza aquí · {RUTA.etiqueta}

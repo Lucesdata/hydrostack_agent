@@ -24,31 +24,27 @@ import { ruta } from "@/src/components/landing/seccionesHome";
 // retoma; solo deja de robar atención en la rejilla.
 const INTENT_ROUTES = [
   {
-    n: "01",
     title: "Tengo un pliego que descifrar",
     desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist con su cita.",
     cta: "DECODIFICAR PLIEGO",
     ...ruta("pliego"),
   },
   {
-    n: "02",
     title: "Gané un contrato, ¿ahora qué?",
     desc: "Sube el contrato y te devuelve partes, objeto, valor, plazo y las obligaciones y fechas más críticas. Luego pregúntale por actas, pólizas, informes o liquidación.",
-    cta: "EMPEZAR",
+    cta: "REVISAR MI CONTRATO",
     ...ruta("asistente-ejecucion"),
   },
   {
-    n: "03",
     title: "Opero un acueducto o una ESP",
     desc: "RAS, Res. 0330, CRA y SUI. Cita el artículo en el que se apoya, y te dice cuándo no está seguro en vez de inventarlo.",
-    cta: "CONSULTAR",
+    cta: "CONSULTAR LA NORMA",
     ...ruta("asistente-operacion"),
   },
   {
-    n: "04",
     title: "Tengo un problema de agua o vertimientos",
     desc: "Del diagnóstico a la alternativa técnica, y de ahí a cómo contratarla.",
-    cta: "VER EL CAMINO",
+    cta: "VER MIS ALTERNATIVAS",
     ...ruta("soluciones"),
   },
 ];
@@ -139,8 +135,14 @@ const BLUEPRINT_CSS = `
 }
 .bp-card-dark .bp-card-seal { border-color: #7DD3FC; color: #7DD3FC; }
 .bp-card:hover .bp-card-seal { transform: scale(1) rotate(-10deg); opacity: 1; }
-.bp-card-arrow { display: inline-block; transition: transform .25s cubic-bezier(.22,1,.36,1); }
-.bp-card:hover .bp-card-arrow { transform: translateX(4px); }
+
+.bp-regla-plano { display: none; }
+.bp-regla-marca { align-items: center; gap: 4px; }
+
+@media (min-width: 768px) {
+  .bp-regla-plano { display: block; }
+  .bp-regla-marca { display: flex; }
+}
 
 .bp-cta {
   cursor: pointer;
@@ -401,6 +403,7 @@ function BlueprintBackground({ fx }) {
       ))}
 
       <div
+        className="bp-regla-plano"
         style={{
           position: "fixed",
           left: 10,
@@ -414,6 +417,7 @@ function BlueprintBackground({ fx }) {
         }}
       />
       <div
+        className="bp-regla-plano bp-regla-marca"
         style={{
           position: "fixed",
           left: 6,
@@ -421,9 +425,6 @@ function BlueprintBackground({ fx }) {
           pointerEvents: "none",
           zIndex: 0,
           transition: "top .08s linear",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
         }}
       >
         <div
@@ -809,7 +810,7 @@ export default function LandingPage() {
           <div className="grid-cards">
             {INTENT_ROUTES.map((c) => (
               <Link
-                key={c.n}
+                key={c.href}
                 href={c.href}
                 className="bp-card"
                 style={{
@@ -846,11 +847,6 @@ export default function LandingPage() {
                   }}
                 />
                 <span
-                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
-                >
-                  [ {c.n} ]
-                </span>
-                <span
                   style={{
                     font: "10px var(--font-jetbrains-mono),monospace",
                     color: "#6B746F",
@@ -880,7 +876,7 @@ export default function LandingPage() {
                     color: "#0369A1",
                   }}
                 >
-                  [ {c.cta} <span className="bp-card-arrow">→</span> ]
+                  [ {c.cta} ]
                 </span>
               </Link>
             ))}

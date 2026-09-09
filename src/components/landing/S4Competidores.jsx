@@ -27,8 +27,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
               color: "#0369A1",
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
+              letterSpacing: ".08em",
             }}
           >
             Inteligencia de mercado · {RUTA.etiqueta}
@@ -97,7 +96,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
             textDecoration: "none",
           }}
         >
-          [ VER COMPETIDORES → ]
+          [ VER COMPETIDORES ]
         </Link>
       </div>
     </section>

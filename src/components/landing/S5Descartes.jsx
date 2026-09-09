@@ -32,8 +32,7 @@ export default function S5Descartes() {
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
               color: "#0369A1",
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
+              letterSpacing: ".08em",
             }}
           >
             Transparencia · {RUTA.etiqueta}
@@ -95,7 +94,7 @@ export default function S5Descartes() {
             textDecoration: "none",
           }}
         >
-          [ VER QUÉ SE DESCARTA → ]
+          [ VER QUÉ SE DESCARTA ]
         </Link>
       </div>
     </section>
