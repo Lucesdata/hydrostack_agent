@@ -868,6 +868,7 @@ select {
     display: flex;
   }
 }
+
 .clr-nav-link {
   position: relative;
   display: flex;
@@ -999,6 +1000,38 @@ select {
   top: 50%;
   transform: translateY(-50%) rotate(-45deg);
   background: var(--accent);
+}
+
+/* Banda estrecha de escritorio (1024–1199px).
+   A 1024px el navbar enciende de golpe los cinco enlaces, el divisor, la
+   etiqueta de estado y el bloque de sesión, y apaga la hamburguesa. Con
+   sesión iniciada eso cabe: el bloque es un avatar y el contenido pide
+   1000px de viewport. Sin sesión el bloque son "Ingresar" y "Crear cuenta",
+   el contenido pide 1134px, y los 110px que faltaban salían por la derecha
+   — "Crear cuenta" quedaba fuera de la pantalla y, con el `overflow-x` del
+   body, era literalmente inalcanzable.
+
+   Se aprieta el cromo en esa banda en vez de subir el quiebre: subirlo
+   habría mandado a la hamburguesa a quien tiene sesión y hoy cabe. Aquí no
+   se quita ninguna navegación; sólo margen, separación y la etiqueta de
+   estado, que el propio diseño ya considera prescindible por debajo de
+   1024px. Las reglas del bloque de sesión viven en AUTH_CSS, dentro de
+   src/components/Navbar.js, porque ese <style> se inyecta después que esta
+   hoja y ganaría el cascade. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .clr-nav {
+    padding: 0 24px;
+  }
+  .clr-nav-inner {
+    gap: 10px;
+  }
+  .clr-nav-link {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .clr-status-label {
+    display: none;
+  }
 }
 
 /* Menú móvil */
