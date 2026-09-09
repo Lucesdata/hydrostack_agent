@@ -27,7 +27,7 @@ const href = (id) => ruta(id).href;
 
 const linkStyle = {
   font: "13px var(--font-inter)",
-  color: "#6B746F",
+  color: "#8A938F",
   textDecoration: "none",
   display: "flex",
   alignItems: "center",
@@ -59,7 +59,7 @@ export default function S6Footer() {
             <div
               style={{
                 font: "10px var(--font-jetbrains-mono),monospace",
-                color: "#0369A1",
+                color: "#7DD3FC",
                 textTransform: "uppercase",
                 letterSpacing: ".12em",
                 marginBottom: 12,
@@ -79,7 +79,7 @@ export default function S6Footer() {
       <div
         style={{
           textAlign: "center",
-          color: "#6B746F",
+          color: "#8A938F",
           font: "12px var(--font-inter)",
           borderTop: "1px solid rgba(255,255,255,0.12)",
           paddingTop: 24,

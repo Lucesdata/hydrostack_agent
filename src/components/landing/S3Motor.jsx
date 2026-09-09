@@ -80,7 +80,7 @@ export default function S3Motor({ procesosVigilados }) {
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 16, flexWrap: "wrap" }}>
                 <span
-                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
+                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#525B5A" }}
                 >
                   [ {p.n} ]
                 </span>

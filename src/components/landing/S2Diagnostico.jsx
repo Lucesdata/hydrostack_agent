@@ -66,7 +66,7 @@ export default function S2Diagnostico() {
         <div className="grid-cards" style={{ marginBottom: 40 }}>
           {DEVUELVE.map((x) => (
             <div key={x.n} style={{ borderTop: "2px solid #0369A1", paddingTop: 16 }}>
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}>
+              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#525B5A" }}>
                 [ {x.n} ]
               </span>
               <div
