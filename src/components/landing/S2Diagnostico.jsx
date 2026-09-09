@@ -42,7 +42,7 @@ export default function S2Diagnostico() {
 
         <h2
           style={{
-            font: "700 clamp(28px,3.4vw,40px)/1.2 var(--font-ibm-plex-sans-condensed)",
+            font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
             color: "#0A1F1C",
             margin: "0 0 16px",
             maxWidth: 720,
@@ -55,7 +55,7 @@ export default function S2Diagnostico() {
           style={{
             font: "15px/1.6 var(--font-inter)",
             color: "#525B5A",
-            maxWidth: 620,
+            maxWidth: "65ch",
             margin: "0 0 40px",
           }}
         >
@@ -88,9 +88,8 @@ export default function S2Diagnostico() {
 
         <Link
           href={RUTA.href}
+          className="tap-target"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
             gap: 8,
             padding: "12px 24px",
             background: "#0369A1",

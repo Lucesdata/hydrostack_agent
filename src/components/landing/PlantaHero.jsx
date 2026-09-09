@@ -61,6 +61,15 @@ const PLANTA_CSS = `
 .pt-img   { display: block; width: 100%; height: auto; filter: drop-shadow(0 22px 28px rgba(19,77,116,.2)); }
 .pt-svg   { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 
+/* Anotaciones (Q, DBO, SST, pH): sólo desde 768px. El SVG escala con el
+   contenedor, así que en móvil su texto de 13px cae a ~4px — ilegible — y las
+   guías desbordan el hero. */
+.pt-anotaciones { display: none; }
+
+@media (min-width: 768px) {
+  .pt-anotaciones { display: block; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pt-wrap, .pt-shade, .pt-float, .pt-svg *, .pt-svg { animation: none !important; opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; }
 }
@@ -208,7 +217,12 @@ export default function PlantaHero() {
             ></path>
           </g>
 
-          <g fontFamily="'JetBrains Mono',monospace" fontWeight="600">
+          <g
+            className="pt-anotaciones"
+            fontFamily="'JetBrains Mono',monospace"
+            fontWeight="600"
+            aria-hidden="true"
+          >
             <g style={{ opacity: "0", animation: "pt-in .6s ease 1.4s forwards" }}>
               <path
                 d="M225 470 L225 120 L152 74"

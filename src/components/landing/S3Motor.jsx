@@ -58,7 +58,7 @@ export default function S3Motor({ procesosVigilados }) {
 
         <h2
           style={{
-            font: "700 clamp(28px,3.4vw,40px)/1.2 var(--font-ibm-plex-sans-condensed)",
+            font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
             color: "#0A1F1C",
             margin: "0 0 48px",
             maxWidth: 720,
@@ -106,7 +106,7 @@ export default function S3Motor({ procesosVigilados }) {
                   font: "14px/1.6 var(--font-inter)",
                   color: "#525B5A",
                   margin: 0,
-                  maxWidth: 680,
+                  maxWidth: "65ch",
                 }}
               >
                 {p.cuerpo}

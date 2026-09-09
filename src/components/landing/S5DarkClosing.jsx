@@ -4,14 +4,11 @@ const RUTA_DIAGNOSTICO = ruta("diagnostico");
 
 export default function S5DarkClosing() {
   return (
-    <section
-      className="section-pad"
-      style={{ background: "#0A1F1C", textAlign: "center", color: "white" }}
-    >
+    <section className="section-pad center-md" style={{ background: "#0A1F1C", color: "white" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <h2
           style={{
-            font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)",
+            font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
             color: "white",
             marginBottom: 20,
           }}
@@ -24,6 +21,8 @@ export default function S5DarkClosing() {
             font: "15px/1.6 var(--font-inter)",
             color: "rgba(255,255,255,0.6)",
             marginBottom: 32,
+            maxWidth: "65ch",
+            marginInline: "0",
           }}
         >
           Clasificación sectorial, filtros que puedes auditar, competidores con histórico y aviso
@@ -32,9 +31,8 @@ export default function S5DarkClosing() {
 
         <a
           href={RUTA_DIAGNOSTICO.href}
+          className="tap-target"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
             gap: 8,
             padding: "12px 24px",
             background: "white",
@@ -49,7 +47,7 @@ export default function S5DarkClosing() {
           Ver si estás listo →
         </a>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+        <div className="checks-cierre" style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
           {[
             "Datos SECOP II a diario",
             "Veredicto explicado, no caja negra",

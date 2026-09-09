@@ -42,7 +42,7 @@ export default function S5Descartes() {
 
         <h2
           style={{
-            font: "700 clamp(28px,3.4vw,40px)/1.2 var(--font-ibm-plex-sans-condensed)",
+            font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
             color: "#0A1F1C",
             margin: "0 0 16px",
             maxWidth: 760,
@@ -55,7 +55,7 @@ export default function S5Descartes() {
           style={{
             font: "15px/1.6 var(--font-inter)",
             color: "#525B5A",
-            maxWidth: 640,
+            maxWidth: "65ch",
             margin: "0 0 36px",
           }}
         >

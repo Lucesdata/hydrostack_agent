@@ -62,13 +62,13 @@ const BLUEPRINT_CSS = `
 
 .bp-h1 {
   font-family: var(--font-ibm-plex-sans-condensed), var(--font-inter), sans-serif;
-  font-size: clamp(32px, 4.2vw, 46px);
-  line-height: 1.15;
+  font-size: var(--step-display);
+  line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #0A1F1C;
   margin: 0 0 20px;
-  max-width: 520px;
+  max-width: min(100%, 22ch);
 }
 
 /* Hero rediseño 2026-08-15: mask reveal por línea + subrayado trazado en la palabra clave */
@@ -146,6 +146,7 @@ const BLUEPRINT_CSS = `
   cursor: pointer;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   padding: 13px 26px 13px 24px;
+  min-height: 44px;
   transition: background .16s ease;
 }
 .bp-cta:hover { background: #0369A1 !important; }
@@ -167,7 +168,6 @@ const BLUEPRINT_CSS = `
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
   gap: clamp(1rem, 3vw, 2rem);
-  text-align: center;
 }
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
@@ -529,7 +529,10 @@ export default function LandingPage() {
               <h1 className="bp-h1">
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    Todo tu trabajo de <span className="hero-draw">agua</span>,
+                    Todo tu trabajo de{" "}
+                    <span style={{ whiteSpace: "nowrap" }}>
+                      <span className="hero-draw">agua</span>,
+                    </span>
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
@@ -542,7 +545,7 @@ export default function LandingPage() {
                   color: "#525B5A",
                   marginTop: 20,
                   marginBottom: 30,
-                  maxWidth: 520,
+                  maxWidth: "65ch",
                 }}
               >
                 Vigilamos los procesos de agua y saneamiento que publica el SECOP II, los filtramos
@@ -636,10 +639,8 @@ export default function LandingPage() {
                 </div>
                 <Link
                   href={ruta("explorar").href}
-                  className="hero-fade-up"
+                  className="hero-fade-up tap-target"
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
                     gap: 8,
                     background: "transparent",
                     color: "#0369A1",
@@ -683,7 +684,7 @@ export default function LandingPage() {
                 <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
               </svg>
 
-              <div className="bp-hero-metrics">
+              <div className="bp-hero-metrics center-md">
                 <div>
                   <div
                     style={{
