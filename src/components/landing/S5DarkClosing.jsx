@@ -25,8 +25,8 @@ export default function S5DarkClosing() {
             marginInline: "0",
           }}
         >
-          Clasificación sectorial, filtros que puedes auditar, competidores con histórico y aviso
-          diario. Todo desde un solo lugar.
+          Clasificación sectorial, filtros que puedes auditar y competidores con histórico. Todo
+          desde un solo lugar.
         </p>
 
         <a

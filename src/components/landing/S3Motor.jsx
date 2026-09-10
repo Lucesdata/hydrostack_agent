@@ -29,14 +29,6 @@ export default function S3Motor({ procesosVigilados }) {
       ...ruta("coincidencias"),
       cta: "VER COINCIDENCIAS",
     },
-    {
-      n: "04",
-      titulo: "Te avisamos, no te toca vigilar",
-      cuerpo:
-        "Correo diario con lo nuevo que encaja, y un enlace permanente que sigue diciendo lo mismo tres semanas después.",
-      ...ruta("alertas"),
-      cta: "CONFIGURAR ALERTAS",
-    },
   ];
 
   return (
@@ -124,6 +116,25 @@ export default function S3Motor({ procesosVigilados }) {
             </div>
           ))}
         </div>
+
+        {/* El aviso por correo era el cuarto paso hasta que se comprobó que en
+            producción no se entrega (AUTH_RESEND_KEY no está en Vercel, ver
+            PENDIENTES §0 y §21). Queda como mención, sin prometer un envío que
+            hoy no ocurre. Cuando el correo esté configurado, vuelve a ser paso
+            04 y esta nota se borra. */}
+        <p
+          style={{
+            font: "13px/1.6 var(--font-inter)",
+            color: "#525B5A",
+            margin: "28px 0 0",
+            maxWidth: "65ch",
+            paddingTop: 20,
+            borderTop: "1px solid #DADAD2",
+          }}
+        >
+          El aviso por correo de lo nuevo que encaja está construido y se activará en cuanto quede
+          configurado el envío. Hasta entonces, las coincidencias se consultan en el panel.
+        </p>
       </div>
     </section>
   );

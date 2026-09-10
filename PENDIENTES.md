@@ -300,17 +300,27 @@ borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
 consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
 endpoint que sirve más de lo que nadie lee.
 
-### 21. Orden de despliegue: el correo antes que el home nuevo
-El home alineado (2026-09-08) promueve la alerta diaria a uno de los cuatro
-pasos del motor (`S3Motor.jsx`, paso 04) y la repite en el cierre. El código de
+### 21. El aviso por correo, bajado a mención en el home — decidido 2026-09-10
+El home alineado (2026-09-08) promovía la alerta diaria a uno de los cuatro
+pasos del motor (`S3Motor.jsx`, paso 04) y la repetía en el cierre. El código de
 alertas está terminado y probado — pero **en producción no entrega**, por la
 misma pieza que bloquea el §0 de este documento: `AUTH_RESEND_KEY` no existe en
-Vercel.
+Vercel. Verificado el 2026-09-10 con `vercel env ls production`: sólo está
+`RESEND_WEBHOOK_SECRET`.
 
-Mientras eso siga así, desplegar el home nuevo convierte una promesa cierta en
-el repositorio en una promesa falsa para quien la lee. No es un bug del home ni
-del motor: es una dependencia de orden.
+No es un bug del home ni del motor: era una dependencia de orden. Se resolvió
+por la segunda salida de las dos que planteaba esta nota — bajar el paso de
+pilar a mención — para poder desplegar el home sin prometer una entrega que hoy
+no ocurre:
 
-**Resolver el §0 antes de desplegar el home nuevo**, o bajar el paso 04 de
-pilar a mención mientras tanto. Lo que no es opción es desplegarlo y dejarlo sin
-decidir.
+- El motor pasa de cuatro pasos a tres. El cuarto sale de `PASOS`.
+- En su lugar queda una frase que dice que el aviso está construido y se
+  activará cuando el envío esté configurado, y que hasta entonces las
+  coincidencias se consultan en el panel.
+- El cierre (`S5DarkClosing.jsx`) deja de decir "y aviso diario".
+
+**Al resolver el §0, revertir esto**: devolver el paso 04 a `PASOS` con su
+`ruta("alertas")` y su CTA, quitar la frase de mención y su comentario, y
+restaurar "aviso diario" en el cierre. La entrada del catálogo (`alertas` en
+`seccionesHome.js`) y el enlace del pie se dejaron intactos justamente para que
+la vuelta sea de un solo commit.
