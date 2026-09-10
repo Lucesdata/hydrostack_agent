@@ -56,6 +56,15 @@ const AUTH_CSS = `
   padding: 7px 12px; white-space: nowrap;
 }
 .clr-nav-auth-cta:hover{ opacity: .9; }
+/* Banda estrecha de escritorio (1024-1199px) — la contraparte de la regla
+   del mismo rango en app/globals.css, donde está explicado el porqué. Vive
+   aquí y no allí porque este <style> se inyecta después de la hoja global y
+   una media query no añade especificidad: allí perdería el cascade. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .clr-nav-auth{ gap: 6px; margin-left: 4px; }
+  .clr-nav-auth-link{ padding: 6px 6px; }
+  .clr-nav-auth-cta{ padding: 7px 10px; }
+}
 .clr-nav-user{ position: relative; }
 .clr-nav-user-btn{
   display: flex; align-items: center; gap: 6px; background: none; border: none;
