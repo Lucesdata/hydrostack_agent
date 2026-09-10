@@ -246,3 +246,81 @@ distinguirlas, y "8 preguntas · 3 minutos" no dice cuál es cuál.
 
 ### 11. Alcance de la regla "no perfilar usuarios"
 ¿Aplica a la infraestructura de cuentas/alertas de Fase 1 (`cuentas.ts`: perfil de oferente, email, hora de envío — con opt-in explícito, login y unsubscribe), o solo a tracking encubierto de visitantes anónimos? No tocar `cuentas.ts` ni `app/api/alertas/*` hasta aclarar.
+
+---
+
+## Deudas que dejó la alineación del home (2026-09-08)
+
+Del plan `docs/superpowers/plans/2026-09-08-home-alineado-producto.md`.
+
+### 18. Páginas legales `/terms` y `/privacy`
+El pie del home las enlazaba sin que existieran como rutas — dos enlaces rotos
+en producción, desde siempre. Se quitaron los enlaces al alinear el home. Falta
+escribir las páginas y volver a enlazarlas desde `S6Footer.jsx`, añadiéndolas
+antes a `src/components/landing/seccionesHome.js`: el pie resuelve cada `href`
+por id contra ese catálogo y **lanza en build** si falta, que es justo lo que
+impide que el enlace roto vuelva.
+
+### 19. Pliegos y asistentes: cero uso y acceso sin resolver
+`pliego_proceso`, `conversacion`, `mensaje` y `documento` están a 0 filas: el
+extractor de pliegos y los dos asistentes nunca se han usado en producción. El
+home ya no los vende como pilares — bajaron a la rejilla de intención marcados
+«plan pro» — pero esa frontera todavía no la aplica ningún handler (ver
+CLAUDE.md §4: `pliego_extraer` y `asistentes` están declaradas `pro` en
+`politica.ts` y siguen protegidas solo por `PROTECTED_PREFIXES`).
+
+Decidir el acceso a `GEMINI_API_KEY` por usuario antes de mandar tráfico ahí.
+
+Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
+home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no
+el plan. Dos ejemplos reales, ambos corregidos: se prometía que el asistente de
+ejecución avisa «antes del vencimiento» de cada plazo (no existe cron ni
+notificador; es un chat reactivo), y el hero mostraba `127` procesos nuevos y
+`$4.2B` en juego, inventados, cuando `/api/landing-stats` ya devolvía los reales
+— que resultaron ser 242 y $309.727 M. Antes de escribir una afirmación nueva en
+el home, ábrase el módulo que la sostiene.
+
+### 20. `LandingCards` se importa en el home y no se renderiza en ningún lado
+`app/page.js` importa `LandingCards` desde
+`src/components/landing/LandingCards.jsx` pero nunca la monta — el import
+sobrevivió a la reescritura del home mientras el JSX que la usaba desapareció.
+Verificado: `grep -rn "LandingCards" app src` solo encuentra el import, nada
+que la renderice.
+
+Eso significa que su `useLandingStats()` nunca corre, y las tres tarjetas que
+sirve — procesos nuevos, valor en juego, proceso destacado, las mismas cifras
+de `/api/landing-stats` que sí se muestran en la fila del hero — no aparecen en
+ningún sitio del producto. No es solo un import muerto: es contenido real,
+construido y con endpoint funcionando, que un usuario nunca ve.
+
+Decidir entre dos caminos, no dejarlo a medias otra vez: (a) volver a montar
+`LandingCards` en el home, en el lugar que le corresponda dentro del nuevo
+orden de secciones, o (b) si las tarjetas ya no encajan en el diseño actual,
+borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
+consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
+endpoint que sirve más de lo que nadie lee.
+
+### 21. El aviso por correo, bajado a mención en el home — decidido 2026-09-10
+El home alineado (2026-09-08) promovía la alerta diaria a uno de los cuatro
+pasos del motor (`S3Motor.jsx`, paso 04) y la repetía en el cierre. El código de
+alertas está terminado y probado — pero **en producción no entrega**, por la
+misma pieza que bloquea el §0 de este documento: `AUTH_RESEND_KEY` no existe en
+Vercel. Verificado el 2026-09-10 con `vercel env ls production`: sólo está
+`RESEND_WEBHOOK_SECRET`.
+
+No es un bug del home ni del motor: era una dependencia de orden. Se resolvió
+por la segunda salida de las dos que planteaba esta nota — bajar el paso de
+pilar a mención — para poder desplegar el home sin prometer una entrega que hoy
+no ocurre:
+
+- El motor pasa de cuatro pasos a tres. El cuarto sale de `PASOS`.
+- En su lugar queda una frase que dice que el aviso está construido y se
+  activará cuando el envío esté configurado, y que hasta entonces las
+  coincidencias se consultan en el panel.
+- El cierre (`S5DarkClosing.jsx`) deja de decir "y aviso diario".
+
+**Al resolver el §0, revertir esto**: devolver el paso 04 a `PASOS` con su
+`ruta("alertas")` y su CTA, quitar la frase de mención y su comentario, y
+restaurar "aviso diario" en el cierre. La entrada del catálogo (`alertas` en
+`seccionesHome.js`) y el enlace del pie se dejaron intactos justamente para que
+la vuelta sea de un solo commit.

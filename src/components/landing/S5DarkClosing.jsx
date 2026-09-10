@@ -1,14 +1,14 @@
+import { ruta } from "./seccionesHome";
+
+const RUTA_DIAGNOSTICO = ruta("diagnostico");
+
 export default function S5DarkClosing() {
   return (
-    <section
-      style={{ padding: "96px 48px", background: "#0A1F1C", textAlign: "center", color: "white" }}
-    >
+    <section className="section-pad center-md" style={{ background: "#0A1F1C", color: "white" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
-        <div style={{ fontSize: "48px", marginBottom: 32 }}>💧</div>
-
         <h2
           style={{
-            font: "700 40px/1.2 var(--font-ibm-plex-sans-condensed)",
+            font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
             color: "white",
             marginBottom: 20,
           }}
@@ -21,16 +21,18 @@ export default function S5DarkClosing() {
             font: "15px/1.6 var(--font-inter)",
             color: "rgba(255,255,255,0.6)",
             marginBottom: 32,
+            maxWidth: "65ch",
+            marginInline: "0",
           }}
         >
-          Clasificación, compuertas, norma — todo desde un solo lugar.
+          Clasificación sectorial, filtros que puedes auditar y competidores con histórico. Todo
+          desde un solo lugar.
         </p>
 
         <a
-          href="/licitaciones"
+          href={RUTA_DIAGNOSTICO.href}
+          className="tap-target"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
             gap: 8,
             padding: "12px 24px",
             background: "white",
@@ -42,11 +44,15 @@ export default function S5DarkClosing() {
             marginBottom: 32,
           }}
         >
-          Acceder →
+          Ver si estás listo →
         </a>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-          {["Sin suscripción", "Datos en vivo", "Respuestas citadas"].map((check) => (
+        <div className="checks-cierre" style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+          {[
+            "Datos SECOP II a diario",
+            "Veredicto explicado, no caja negra",
+            "Empieza sin cuenta",
+          ].map((check) => (
             <div
               key={check}
               style={{

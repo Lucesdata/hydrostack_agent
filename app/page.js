@@ -1,99 +1,51 @@
 "use client";
 // Reemplaza app/page.js completo con este archivo.
-// Requiere: src/components/landing/ProcesosTicker.jsx y LandingCards.jsx (sin cambios).
+// Requiere: src/components/landing/ProcesosTicker.jsx (sin cambios).
 // Elimina el uso de ScrollFilmBackground/FILM_CLIPS — el fondo cinemático se
 // sustituye por el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
-import LandingCards from "@/src/components/landing/LandingCards";
 import PlantaHero from "@/src/components/landing/PlantaHero";
-import S2WhyAquaLicita from "@/src/components/landing/S2WhyAquaLicita";
-import S3EverythingInOne from "@/src/components/landing/S3EverythingInOne";
-import S4Invitation from "@/src/components/landing/S4Invitation";
+import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
+import S3Motor from "@/src/components/landing/S3Motor";
+import S4Competidores from "@/src/components/landing/S4Competidores";
+import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S6Footer from "@/src/components/landing/S6Footer";
+import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
+import { ruta } from "@/src/components/landing/seccionesHome";
 
-const PROBLEM_SOLUTION = [
-  {
-    n: "01",
-    icon: "doc-x",
-    pain: "No sabes si calificas hasta que ya invertiste tiempo en la propuesta.",
-    label: "Pre-evaluación RUP",
-    answer:
-      "AquaLicita cruza tu RUP con los requisitos habilitantes antes de que escribas una sola página.",
-  },
-  {
-    n: "02",
-    icon: "search-stack",
-    pain: "El pliego tiene decenas de páginas y los requisitos habilitantes se pierden entre ellas.",
-    label: "Decodificación de pliegos",
-    answer:
-      "El asistente extrae requisitos legales, técnicos y financieros y te los muestra como checklist.",
-  },
-  {
-    n: "03",
-    icon: "dimension",
-    pain: "Un error en el presupuesto descalifica la oferta, sin importar cuánto sabes del proyecto.",
-    label: "Estructuración",
-    answer: "Te ayudamos a armar el presupuesto con las cotas y validaciones del sector agua.",
-  },
-];
-
-const CREDENTIALS = [
-  {
-    label: "Experiencia",
-    title: "11 años en agua y saneamiento",
-    body: "Un ingeniero especialista con licencia profesional vigente, no una startup de software.",
-  },
-  {
-    label: "Proyecto",
-    title: "3 planes directores en Cali",
-    body: "Alcantarillado de tres corregimientos, con modelado hidráulico y gemelo digital.",
-  },
-  {
-    label: "Resultado",
-    title: "Un pliego de 100 páginas, en minutos",
-    body: "Requisitos legales y técnicos extraídos y citados, listos para verificar.",
-  },
-];
-
+// Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
+// tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
+// todo este tiempo no capturó a nadie (lista_espera_mercado, 0 filas). El
+// endpoint /api/mercado/waitlist y su tabla se quedan intactos por si se
+// retoma; solo deja de robar atención en la rejilla.
 const INTENT_ROUTES = [
   {
-    n: "01",
-    title: "Busco contratos",
-    desc: "Procesos activos de agua y saneamiento, con verificación de si calificas.",
-    href: "/licitaciones",
-    cta: "BUSCAR PROCESOS",
-  },
-  {
-    n: "02",
     title: "Tengo un pliego que descifrar",
-    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist.",
-    href: "/pliego",
+    desc: "Requisitos habilitantes, técnicos y legales, extraídos como checklist con su cita.",
     cta: "DECODIFICAR PLIEGO",
+    ...ruta("pliego"),
   },
   {
-    n: "03",
-    title: "Tengo un problema de agua o vertimientos",
-    desc: "Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
-    href: "/soluciones",
-    cta: "VER EL CAMINO",
-  },
-  {
-    n: "04",
     title: "Gané un contrato, ¿ahora qué?",
-    desc: "Acompañamiento en ejecución: actas, pólizas, informes, liquidación.",
-    href: "/asistente/ejecucion",
-    cta: "EMPEZAR",
+    desc: "Sube el contrato y te devuelve partes, objeto, valor, plazo y las obligaciones y fechas más críticas. Luego pregúntale por actas, pólizas, informes o liquidación.",
+    cta: "REVISAR MI CONTRATO",
+    ...ruta("asistente-ejecucion"),
   },
   {
-    n: "05",
     title: "Opero un acueducto o una ESP",
-    desc: "Dudas de normativa (RAS, Res. 0330, CRA, SUI) con respuestas citadas.",
-    href: "/asistente/operacion",
-    cta: "CONSULTAR",
+    desc: "RAS, Res. 0330, CRA y SUI. Cita el artículo en el que se apoya, y te dice cuándo no está seguro en vez de inventarlo.",
+    cta: "CONSULTAR LA NORMA",
+    ...ruta("asistente-operacion"),
+  },
+  {
+    title: "Tengo un problema de agua o vertimientos",
+    desc: "Del diagnóstico a la alternativa técnica, y de ahí a cómo contratarla.",
+    cta: "VER MIS ALTERNATIVAS",
+    ...ruta("soluciones"),
   },
 ];
 
@@ -106,13 +58,13 @@ const BLUEPRINT_CSS = `
 
 .bp-h1 {
   font-family: var(--font-ibm-plex-sans-condensed), var(--font-inter), sans-serif;
-  font-size: clamp(32px, 4.2vw, 46px);
-  line-height: 1.15;
+  font-size: var(--step-display);
+  line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #0A1F1C;
   margin: 0 0 20px;
-  max-width: 520px;
+  max-width: min(100%, 22ch);
 }
 
 /* Hero rediseño 2026-08-15: mask reveal por línea + subrayado trazado en la palabra clave */
@@ -183,13 +135,20 @@ const BLUEPRINT_CSS = `
 }
 .bp-card-dark .bp-card-seal { border-color: #7DD3FC; color: #7DD3FC; }
 .bp-card:hover .bp-card-seal { transform: scale(1) rotate(-10deg); opacity: 1; }
-.bp-card-arrow { display: inline-block; transition: transform .25s cubic-bezier(.22,1,.36,1); }
-.bp-card:hover .bp-card-arrow { transform: translateX(4px); }
+
+.bp-regla-plano { display: none; }
+.bp-regla-marca { align-items: center; gap: 4px; }
+
+@media (min-width: 768px) {
+  .bp-regla-plano { display: block; }
+  .bp-regla-marca { display: flex; }
+}
 
 .bp-cta {
   cursor: pointer;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   padding: 13px 26px 13px 24px;
+  min-height: 44px;
   transition: background .16s ease;
 }
 .bp-cta:hover { background: #0369A1 !important; }
@@ -197,23 +156,28 @@ const BLUEPRINT_CSS = `
 .bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
 .bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
 
-.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) clamp(24px,4vw,48px) 64px; }
+.bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) var(--gutter) 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
-.bp-probhow-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
+.bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
 .bp-ps-pain { grid-area: pain; display: flex; align-items: flex-start; justify-content: flex-end; gap: 12px; }
 .bp-ps-pain-text { text-align: right; }
 .bp-ps-connector { grid-area: connector; display: flex; align-items: center; justify-content: center; }
 .bp-ps-answer { grid-area: answer; padding-left: 22px; }
-.bp-pillars-wrap { padding: 64px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; }
+.bp-pillars-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
+.bp-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+}
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
   .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
   .bp-credentials-strip > div:first-child { border-top: none; padding-top: 0 !important; }
 }
-.bp-closing-wrap { padding: 56px clamp(24px,4vw,48px); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-.bp-footer-wrap { padding: 20px clamp(24px,4vw,48px); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
+.bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 
 @media (max-width: 900px) {
   .bp-hero-grid { gap: 36px; }
@@ -231,67 +195,6 @@ const BLUEPRINT_CSS = `
   .bp-footer-wrap { padding: 20px; }
 }
 `;
-
-/* ── Iconos monoline (plano técnico) para la fila dolor→respuesta ── */
-const PAIN_ICON_PATHS = {
-  "doc-x": (
-    <>
-      <path d="M5 2.5h6l3 3v12H5z" />
-      <path d="M11 2.5v3h3" />
-      <path d="M8 10.5l4 4M12 10.5l-4 4" />
-    </>
-  ),
-  "search-stack": (
-    <>
-      <rect x="2.3" y="5.2" width="9" height="10.5" />
-      <rect x="4.7" y="2.5" width="9" height="10.5" />
-      <circle cx="14.6" cy="14.6" r="2.5" />
-      <path d="M16.5 16.5l1.6 1.6" />
-    </>
-  ),
-  dimension: (
-    <>
-      <path d="M2 6.5v7M18 6.5v7" />
-      <path d="M2 10h5.5M12.5 10H18" />
-      <path d="M8 8.3l1.5 3.4M10.5 8.3L9 11.7" />
-    </>
-  ),
-};
-
-function PainIcon({ type }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="#0369A1"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ flexShrink: 0, marginTop: 1 }}
-      aria-hidden="true"
-    >
-      {PAIN_ICON_PATHS[type]}
-    </svg>
-  );
-}
-
-function ConnectorArrow() {
-  return (
-    <svg width="56" height="20" viewBox="0 0 56 20" style={{ display: "block" }} aria-hidden="true">
-      <line x1="4" y1="10" x2="42" y2="10" stroke="#0369A1" strokeWidth="1" strokeDasharray="4 4" />
-      <polyline
-        points="37,5 46,10 37,15"
-        fill="none"
-        stroke="#0369A1"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
 function useBlueprintFX() {
@@ -500,6 +403,7 @@ function BlueprintBackground({ fx }) {
       ))}
 
       <div
+        className="bp-regla-plano"
         style={{
           position: "fixed",
           left: 10,
@@ -513,6 +417,7 @@ function BlueprintBackground({ fx }) {
         }}
       />
       <div
+        className="bp-regla-plano bp-regla-marca"
         style={{
           position: "fixed",
           left: 6,
@@ -520,9 +425,6 @@ function BlueprintBackground({ fx }) {
           pointerEvents: "none",
           zIndex: 0,
           transition: "top .08s linear",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
         }}
       >
         <div
@@ -554,29 +456,41 @@ export default function LandingPage() {
   const fx = useBlueprintFX();
   const { heroRef } = fx.refs;
 
-  const [waitlistStatus, setWaitlistStatus] = useState("idle"); // idle | loading | done | error
-  const [waitlistError, setWaitlistError] = useState(null);
+  // Cifras del sector para el home (procesos vigilados, oferentes históricos,
+  // sanciones) y las dos cifras vivas de la fila inferior del hero (procesos
+  // nuevos en 7 días, valor en juego este mes). Todas vienen de la misma
+  // respuesta de /api/landing-stats — un solo fetch, no uno por bloque. Se
+  // quedan en null si el fetch falla: la UI muestra "—" y la frase que las
+  // acompaña sigue siendo cierta sin la cifra.
+  const [sector, setSector] = useState({
+    procesosVigilados: null,
+    oferentesHistoricos: null,
+    sanciones: null,
+  });
+  const [heroStats, setHeroStats] = useState({
+    nuevos7d: null,
+    enJuegoTotalCop: null,
+  });
 
-  async function handleWaitlist() {
-    setWaitlistStatus("loading");
-    setWaitlistError(null);
-    try {
-      const res = await fetch("/api/mercado/waitlist", { method: "POST" });
-      if (res.status === 401) {
-        window.location.href = "/login?next=" + encodeURIComponent("/#asistentes-proyecto");
-        return;
-      }
-      if (!res.ok) {
-        setWaitlistStatus("error");
-        setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
-        return;
-      }
-      setWaitlistStatus("done");
-    } catch {
-      setWaitlistStatus("error");
-      setWaitlistError("No se pudo guardar tu interés. Intenta de nuevo.");
-    }
-  }
+  useEffect(() => {
+    let vivo = true;
+    fetch("/api/landing-stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!vivo || !d) return;
+        if (d.sector) setSector(d.sector);
+        setHeroStats({
+          nuevos7d: d.nuevos7d ?? null,
+          enJuegoTotalCop: d.enJuego?.totalCop ?? null,
+        });
+      })
+      .catch(() => {
+        /* se queda en null: la UI muestra "—" y la frase sigue siendo cierta */
+      });
+    return () => {
+      vivo = false;
+    };
+  }, []);
 
   return (
     <div
@@ -616,7 +530,10 @@ export default function LandingPage() {
               <h1 className="bp-h1">
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    Todo tu trabajo de <span className="hero-draw">agua</span>,
+                    Todo tu trabajo de{" "}
+                    <span style={{ whiteSpace: "nowrap" }}>
+                      <span className="hero-draw">agua</span>,
+                    </span>
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
@@ -629,13 +546,61 @@ export default function LandingPage() {
                   color: "#525B5A",
                   marginTop: 20,
                   marginBottom: 30,
-                  maxWidth: 520,
+                  maxWidth: "65ch",
                 }}
               >
-                Desde una duda de norma hasta un pliego de cien páginas. Incluye los procesos de
-                agua y saneamiento del SECOP II, con las compuertas de elegibilidad revisadas una
-                por una.
+                Vigilamos los procesos de agua y saneamiento que publica el SECOP II, los filtramos
+                con las reglas que tú defines y te decimos si calificas — mostrándote cada compuerta
+                y por qué, no un veredicto a ciegas.
               </p>
+
+              {/* Cifras del sector: vienen de /api/landing-stats vía el estado
+                  `sector`, nunca escritas a mano. En null se ve "—" y la frase
+                  que las acompaña sigue siendo cierta sin la cifra. */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 28,
+                  flexWrap: "wrap",
+                  margin: "28px 0 8px",
+                  paddingTop: 20,
+                  borderTop: "1px solid #DADAD2",
+                }}
+              >
+                {[
+                  {
+                    v: formatConteo(sector.procesosVigilados),
+                    t: "procesos del sector vigilados",
+                  },
+                  {
+                    v: formatConteo(sector.oferentesHistoricos),
+                    t: "registros de quién se presentó",
+                  },
+                  { v: formatConteo(sector.sanciones), t: "sanciones registradas" },
+                ].map((x) => (
+                  <div key={x.t}>
+                    <div
+                      style={{
+                        font: "700 22px/1 var(--font-ibm-plex-sans-condensed)",
+                        color: "#0A1F1C",
+                      }}
+                    >
+                      {x.v}
+                    </div>
+                    <div
+                      style={{
+                        font: "10px var(--font-jetbrains-mono),monospace",
+                        color: "#6B746F",
+                        textTransform: "uppercase",
+                        letterSpacing: ".06em",
+                        marginTop: 4,
+                      }}
+                    >
+                      {x.t}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <div
                 style={{
@@ -647,28 +612,36 @@ export default function LandingPage() {
                   marginBottom: 20,
                 }}
               >
+                <div className="hero-fade-up" style={{ animationDelay: ".9s" }}>
+                  <Link
+                    href={ruta("diagnostico").href}
+                    className="bp-cta bp-cta-dark"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: "#0369A1",
+                      color: "#fff",
+                      font: "600 13px var(--font-jetbrains-mono),monospace",
+                      letterSpacing: ".04em",
+                    }}
+                  >
+                    Ver si estás listo →
+                  </Link>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      font: "10px var(--font-jetbrains-mono),monospace",
+                      color: "#6B746F",
+                    }}
+                  >
+                    sin cuenta · 3 minutos
+                  </div>
+                </div>
                 <Link
-                  href="/licitaciones"
-                  className="bp-cta bp-cta-dark hero-fade-up"
+                  href={ruta("explorar").href}
+                  className="hero-fade-up tap-target"
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "#0369A1",
-                    color: "#fff",
-                    font: "600 13px var(--font-jetbrains-mono),monospace",
-                    letterSpacing: ".04em",
-                    animationDelay: ".9s",
-                  }}
-                >
-                  [ Prueba un proceso ]
-                </Link>
-                <button
-                  className="hero-fade-up"
-                  onClick={() => {}}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
                     gap: 8,
                     background: "transparent",
                     color: "#0369A1",
@@ -681,43 +654,10 @@ export default function LandingPage() {
                     animationDelay: ".92s",
                   }}
                 >
-                  [ Ver cómo funciona ]
-                </button>
-              </div>
-
-              <div
-                className="hero-fade-up"
-                style={{
-                  display: "flex",
-                  gap: 24,
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  color: "#6B746F",
-                  animationDelay: ".95s",
-                  marginBottom: 32,
-                }}
-              >
-                <span>✓ Sin cuenta</span>
-                <span>✓ Resultado en 2 minutos</span>
-              </div>
-              {/* Entrada al diagnóstico: para quien todavía no sabe si su
-                  empresa está en condiciones de presentarse. */}
-              <div
-                className="hero-fade-up"
-                style={{
-                  font: "12px/1.6 var(--font-inter)",
-                  color: "#525B5A",
-                  animationDelay: ".97s",
-                  marginBottom: 32,
-                }}
-              >
-                ¿Aún no sabes si tu empresa puede presentarse?{" "}
-                <Link
-                  href="/diagnostico"
-                  style={{ color: "#0369A1", borderBottom: "1px solid rgba(3,105,161,.35)" }}
-                >
-                  Descubre qué te falta
+                  Explorar procesos
                 </Link>
               </div>
+
               <svg
                 viewBox="0 0 520 16"
                 width="520"
@@ -745,14 +685,7 @@ export default function LandingPage() {
                 <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
               </svg>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: "32px",
-                  textAlign: "center",
-                }}
-              >
+              <div className="bp-hero-metrics center-md">
                 <div>
                   <div
                     style={{
@@ -761,7 +694,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    127
+                    {formatConteo(heroStats.nuevos7d)}
                   </div>
                   <div
                     style={{
@@ -782,7 +715,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    $4.2B
+                    {formatCopCompact(heroStats.enJuegoTotalCop)}
                   </div>
                   <div
                     style={{
@@ -824,7 +757,7 @@ export default function LandingPage() {
                       marginBottom: 8,
                     }}
                   >
-                    24/7
+                    Diaria
                   </div>
                   <div
                     style={{
@@ -844,14 +777,20 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* S2 — Por qué AquaLicita */}
-        <S2WhyAquaLicita />
+        {/* S2 — La puerta: diagnóstico de preparación */}
+        <S2Diagnostico />
 
-        {/* S3 — Todo en un solo lugar */}
-        <S3EverythingInOne />
+        {/* S3 — El motor: cuatro pasos */}
+        <S3Motor procesosVigilados={sector.procesosVigilados} />
 
-        {/* S4 — Banda de invitación */}
-        <S4Invitation />
+        {/* S4 — Quién compite: histórico de oferentes y sanciones */}
+        <S4Competidores
+          oferentesHistoricos={sector.oferentesHistoricos}
+          sanciones={sector.sanciones}
+        />
+
+        {/* S5 — Qué se descarta: transparencia del motor de filtros */}
+        <S5Descartes />
 
         {/* Rutas de intención — ¿En qué momento estás? */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
@@ -868,10 +807,10 @@ export default function LandingPage() {
               ¿En qué momento estás?
             </span>
           </div>
-          <div className="bp-pillars-grid">
+          <div className="grid-cards">
             {INTENT_ROUTES.map((c) => (
               <Link
-                key={c.n}
+                key={c.href}
                 href={c.href}
                 className="bp-card"
                 style={{
@@ -908,9 +847,17 @@ export default function LandingPage() {
                   }}
                 />
                 <span
-                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#6B746F" }}
+                  style={{
+                    font: "10px var(--font-jetbrains-mono),monospace",
+                    color: "#6B746F",
+                    border: "1px solid #DADAD2",
+                    padding: "2px 8px",
+                    textTransform: "uppercase",
+                    letterSpacing: ".06em",
+                    alignSelf: "flex-start",
+                  }}
                 >
-                  [ {c.n} ]
+                  {c.etiqueta}
                 </span>
                 <div style={{ font: "600 16px/1.3 var(--font-inter)" }}>{c.title}</div>
                 <p
@@ -929,71 +876,10 @@ export default function LandingPage() {
                     color: "#0369A1",
                   }}
                 >
-                  [ {c.cta} <span className="bp-card-arrow">→</span> ]
+                  [ {c.cta} ]
                 </span>
               </Link>
             ))}
-
-            <div
-              aria-live="polite"
-              style={{
-                padding: 22,
-                minHeight: 180,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  font: "10px var(--font-jetbrains-mono),monospace",
-                  color: "#6B746F",
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Próximamente
-              </span>
-              <div style={{ font: "500 14px var(--font-inter)", color: "#0A1F1C" }}>
-                Vendo o fabrico soluciones
-              </div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
-                Oportunidades reales de comunidades y ESP que necesitan lo que ofreces.
-              </p>
-              {waitlistStatus === "done" ? (
-                <span
-                  style={{
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#16A34A",
-                  }}
-                >
-                  [ Te avisaremos ]
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleWaitlist}
-                  disabled={waitlistStatus === "loading"}
-                  style={{
-                    alignSelf: "flex-start",
-                    cursor: waitlistStatus === "loading" ? "not-allowed" : "pointer",
-                    background: "transparent",
-                    border: "1px solid #0369A1",
-                    padding: "6px 12px",
-                    font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#0369A1",
-                  }}
-                >
-                  {waitlistStatus === "loading" ? "[ Guardando… ]" : "[ Avísame cuando abra ]"}
-                </button>
-              )}
-              {waitlistStatus === "error" && waitlistError && (
-                <span style={{ font: "11px var(--font-inter)", color: "#DC2626" }}>
-                  {waitlistError}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 

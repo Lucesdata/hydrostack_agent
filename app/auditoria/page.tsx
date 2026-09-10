@@ -17,23 +17,11 @@ import { cuentaDe } from "@/src/lib/al/cuenta";
 import { descartesPorMotivo, muestraDeDescartes } from "@/src/lib/al/matching/consulta-descartes";
 import { formatCopCompact } from "@/src/components/secop/format";
 import { STYLE } from "./estilos";
+import { EXPLICA } from "./explica";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Auditoría de descartes · AquaLicita" };
-
-/** Redacción de cada motivo. El código es para la base; esto es para el usuario. */
-const EXPLICA: Record<string, string> = {
-  sin_unspsc_ni_keyword:
-    "Ni el código UNSPSC ni el texto del objeto coincidieron con ningún criterio",
-  segmento_80_excluido:
-    "Segmento UNSPSC 80 (gestión y personal): se excluye en la ingesta porque midió ~0 % de relevancia",
-  palabra_excluida: "Contenía una de tus palabras excluidas",
-  fuera_de_cuantia: "El presupuesto queda fuera del rango que fijaste",
-  fuera_de_zona: "La entidad no está en las zonas que seleccionaste",
-  entidad_no_listada: "La entidad no está en tu lista",
-  modalidad_no_listada: "La modalidad de contratación no está en tu lista",
-};
 
 type Props = { searchParams: Promise<{ motivo?: string }> };
 

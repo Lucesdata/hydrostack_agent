@@ -123,6 +123,15 @@
   --bp-sm: 640px;
   --bp-md: 768px;
   --bp-lg: 1024px;
+
+  /* Ritmo de la portada. En clamp y nunca en vh: el vh del móvil cambia al
+     recogerse la barra del navegador y el espaciado saltaría al hacer scroll. */
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --section-block: clamp(3rem, 10vw, 8rem);
+
+  /* Escala tipográfica de la portada. */
+  --step-display: clamp(1.9rem, 7vw, 4rem);
+  --step-h2: clamp(1.5rem, 5vw, 2.5rem);
 }
 
 html {
@@ -135,7 +144,9 @@ body {
   color: var(--white);
   font-family: var(--mono);
   height: 100%;
-  overflow-x: hidden;
+  /* clip y no hidden: hidden convierte al body en contenedor de scroll y
+     rompe cualquier position:sticky que cuelgue de él. */
+  overflow-x: clip;
   overflow-y: auto;
 }
 
@@ -1445,4 +1456,77 @@ select {
 }
 .clr-verdict-gate--unknown .clr-verdict-glyph {
   color: var(--ink-300);
+}
+
+/* ── Portada: rejilla y ritmo ─────────────────────────────────────────────
+   Un único patrón de rejilla para toda tarjeta de la portada, en vez de un
+   minmax distinto por sección. El `min(100%, 280px)` es lo que impide el
+   corte: `minmax(280px, 1fr)` a secas desborda en cuanto el contenedor baja
+   de 280px, que es justo lo que pasa a 360px con gutter de 48px. */
+.grid-cards {
+  display: grid;
+  gap: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+/* Nunca dos columnas por debajo de 640px. La tablet (768–1024) sí las admite,
+   y eso lo resuelve solo el auto-fit de arriba. */
+@media (max-width: 639px) {
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-pad {
+  padding-block: var(--section-block);
+  padding-inline: var(--gutter);
+}
+
+/* Un enlace de texto suelto no llega a 44px de alto por sí mismo. */
+.tap-target {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* Titulares de la portada. `balance` reparte las líneas en vez de dejar una
+   palabra suelta al final; `hyphens` hace falta en español, que encadena
+   palabras como "saneamiento" o "habilitantes" más largas que una columna
+   estrecha de móvil. El `lang="es"` que necesita ya está en <html>. */
+.bp-page :is(h1, h2, h3) {
+  text-wrap: balance;
+  hyphens: auto;
+}
+
+.bp-page p {
+  hyphens: auto;
+}
+
+/* Alineación a la izquierda por defecto; el centrado se activa desde 768px.
+   Centrar dentro de una columna estrecha deja títulos de dos palabras
+   flotando sobre un icono alineado a la izquierda. */
+.center-md {
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .center-md {
+    text-align: center;
+  }
+}
+
+/* El bloque de cierre y su fila de checks: en bandera hasta 768px, centrados
+   a partir de ahí — misma regla que .center-md, aplicada al eje del flex. */
+.checks-cierre {
+  justify-content: flex-start;
+}
+
+@media (min-width: 768px) {
+  .checks-cierre {
+    justify-content: center;
+  }
+
+  .bp-page .center-md p {
+    margin-inline: auto;
+  }
 }
