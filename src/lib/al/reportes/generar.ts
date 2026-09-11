@@ -19,6 +19,7 @@ import { randomBytes } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { alReportes } from "@/src/lib/db/schema/aqualicita";
+import { appUrl } from "@/src/lib/app-url";
 
 export type TipoReporte = "digest_diario" | "competidor" | "entidad" | "mercado_departamento";
 
@@ -39,10 +40,6 @@ export interface ReporteGenerado {
   id: string;
   slug: string;
   url: string;
-}
-
-function appUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
 export async function generarReporte(params: {

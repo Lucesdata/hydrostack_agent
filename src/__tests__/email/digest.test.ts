@@ -100,6 +100,10 @@ describe("renderDigest", () => {
 
   it("usa http://localhost:3000 si NEXT_PUBLIC_APP_URL no está definida", () => {
     delete process.env.NEXT_PUBLIC_APP_URL;
+    // También hay que limpiar la de Vercel: desde que `appUrl` la contempla,
+    // este test pasaría a depender del entorno y fallaría al correr en CI
+    // sobre un despliegue de preview.
+    delete process.env.VERCEL_BRANCH_URL;
     const d = renderDigest([match()], { id: "u1", email: "a@b.com" });
     expect(d.unsubscribeUrl.startsWith("http://localhost:3000")).toBe(true);
   });

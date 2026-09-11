@@ -5,10 +5,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
 import { authErrorCode } from "@/src/lib/supabase/auth-messages";
 import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
-
-function appUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
+import { appUrl } from "@/src/lib/app-url";
 
 /**
  * Destino del enlace que Supabase pone en el correo. Lo comparten el alta y el
