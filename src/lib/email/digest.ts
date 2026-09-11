@@ -9,6 +9,7 @@
 import type { Match } from "@/src/lib/matching/match";
 import { sentenceCaseTitle, formatCopCompact, verdictScore } from "@/src/components/secop/format";
 import { signUnsubscribeToken } from "./unsubscribe-token";
+import { appUrl } from "@/src/lib/app-url";
 
 export interface Digest {
   subject: string;
@@ -16,10 +17,6 @@ export interface Digest {
   text: string;
   /** También va en el header `List-Unsubscribe` — send.ts la reusa de aquí. */
   unsubscribeUrl: string;
-}
-
-function appUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
 /** UTM de campaña — el destino real de cada ítem sigue siendo la URL de SECOP. */

@@ -29,10 +29,7 @@ import { signUnsubscribeToken } from "@/src/lib/email/unsubscribe-token";
 import type { Digest } from "@/src/lib/email/digest";
 import type { Match } from "@/src/lib/matching/match";
 import type { Novedades, NovedadEvento, NovedadApertura } from "./recopilar";
-
-function appUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
+import { appUrl } from "@/src/lib/app-url";
 
 function withUtm(url: string): string {
   const sep = url.includes("?") ? "&" : "?";
