@@ -55,6 +55,11 @@ export default async function CuentaPage() {
         .clr-cuenta-btn-secondary:hover{ color: var(--ink-900); border-color: var(--accent-soft); }
         .clr-cuenta-prefs{ margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
         .clr-cuenta-prefs-title{ font-size: 13px; font-weight: 600; color: var(--ink-900); margin: 0 0 4px; }
+        .clr-cuenta-prefs-aviso{
+          font-size: 12px; line-height: 1.5; color: var(--ink-600);
+          background: var(--accent-faint); border-left: 2px solid var(--accent);
+          padding: 8px 10px; margin: 0 0 14px;
+        }
         .clr-cuenta-prefs-row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
         .clr-cuenta-prefs-status{ font-size: 12.5px; color: var(--ink-600); }
         .clr-cuenta-prefs-status b{ color: var(--ink-900); }
@@ -82,6 +87,16 @@ export default async function CuentaPage() {
         {preferencias && (
           <div className="clr-cuenta-prefs">
             <p className="clr-cuenta-prefs-title">Alertas por correo</p>
+            {/* El mismo aviso honesto que estaba al pie del motor en la
+                portada (S3Motor). Se lo leía todo el que pasaba por el home y
+                no lo leía quien venía justo a activar la alerta. Aquí está
+                donde se toma la decisión. Se borra cuando AUTH_RESEND_KEY esté
+                en Vercel y el envío diario se verifique (PENDIENTES §0 y §21). */}
+            <p className="clr-cuenta-prefs-aviso">
+              El aviso por correo de lo nuevo que encaja está construido y se activará en cuanto
+              quede configurado el envío. Hasta entonces, las coincidencias se consultan en el
+              panel.
+            </p>
             <div className="clr-cuenta-prefs-row">
               <span className="clr-cuenta-prefs-status">
                 Estado: <b>{preferencias.activo ? "activas" : "pausadas"}</b>
