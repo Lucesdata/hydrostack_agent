@@ -8,9 +8,10 @@
  * `export const EXPLICA` ahí revienta con "EXPLICA is not a valid Page
  * export field". Aquí no hay esa restricción.
  *
- * Se exporta porque `S5Descartes.jsx` mantiene una copia literal de estos
- * mismos textos en el home (`MOTIVOS`) y `src/__tests__/landing/explica.test.ts`
- * verifica que las dos no diverjan.
+ * Es la fuente única de estos textos. Hubo una copia literal en el home
+ * (`MOTIVOS` en S5Descartes.jsx) vigilada por un test; esa sección se absorbió
+ * en S3Motor como paso 04 el 2026-09-12 y la copia se borró con ella, así que
+ * ya no hay dos listas que puedan divergir.
  */
 export const EXPLICA: Record<string, string> = {
   sin_unspsc_ni_keyword:

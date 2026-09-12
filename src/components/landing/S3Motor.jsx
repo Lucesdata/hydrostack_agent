@@ -29,6 +29,14 @@ export default function S3Motor({ procesosVigilados }) {
       ...ruta("coincidencias"),
       cta: "VER COINCIDENCIAS",
     },
+    {
+      n: "04",
+      titulo: "Un filtro demasiado estrecho no da errores. Da silencio",
+      cuerpo:
+        "Guardamos cada proceso que tus reglas descartaron, con el motivo exacto. Si al revisarlos aparece algo que sí te interesaba, el filtro está mal — y ya sabes cuál.",
+      ...ruta("auditoria"),
+      cta: "VER QUÉ SE DESCARTA",
+    },
   ];
 
   return (
