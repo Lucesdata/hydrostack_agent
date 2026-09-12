@@ -305,7 +305,19 @@ Run:
 ```bash
 grep -rn "S5Descartes" app src --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx"
 ```
-Expected: exactamente cinco líneas — `app/page.js:14`, `app/page.js:793`, el comentario de `app/auditoria/explica.ts`, la definición en `S5Descartes.jsx` y el import de `explica.test.ts`. Si aparece cualquier otra, **parar** y reportarlo: el borrado deja de ser seguro.
+Expected: exactamente estas **siete** líneas, ni una más:
+
+```
+app/page.js:14                          (el import)
+app/page.js:793                         (el montaje <S5Descartes />)
+app/auditoria/explica.ts:11             (un comentario que apunta al componente)
+src/components/landing/S5Descartes.jsx:25   (la definición)
+src/__tests__/landing/explica.test.ts:3     (el import de MOTIVOS)
+src/__tests__/landing/explica.test.ts:6     (comentario)
+src/__tests__/landing/explica.test.ts:12    (nombre del describe)
+```
+
+Los cuatro archivos implicados son exactamente los que esta task borra o edita. Si aparece **cualquier otra ruta**, **parar** y reportarlo: el borrado deja de ser seguro.
 
 - [ ] **Step 2: Añadir el paso 04 a `S3Motor.jsx`**
 
@@ -848,14 +860,16 @@ Añadir después del bloque `.bp-cta-dark:focus-visible` (línea ~152):
 
 - [ ] **Step 7: Reordenar las secciones**
 
-Reemplazar todo lo que hay entre el cierre del `.bp-hero-wrap` y `<S6Footer />` por este orden. El markup del bloque de intención no cambia salvo el badge del Step 8 — se mueve entero, tal cual, desde donde estaba (debajo de `<S5Descartes />`) a aquí:
+Esto es **un movimiento de bloques, no una reescritura**. El `<div className="bp-pillars-wrap" id="asistentes-proyecto">` completo — con su eyebrow, su `.grid-cards`, su `INTENT_ROUTES.map(...)` y todo su JSX interno, unas 90 líneas — se **corta tal cual desde donde está hoy** (después de `<S5Descartes />`, cerca del final del archivo) y se **pega íntegro** justo después del cierre del `.bp-hero-wrap`. No se reescribe ni una línea de su interior en este step; su único cambio es el badge, y ese lo hace el Step 8 una vez ya está en su sitio nuevo.
+
+Hecho el corte y pegado, el tramo entre el cierre de `.bp-hero-wrap` y el cierre del contenedor queda exactamente así:
 
 ```jsx
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y
             estaba enterrada bajo cuatro secciones. */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
-          … (el bloque existente, sin cambios salvo el badge del Step 8) …
+          {/* ↑ el bloque movido, íntegro y sin tocar por dentro */}
         </div>
 
         {/* S3 — El motor: cuatro pasos, el 04 absorbió los descartes */}
