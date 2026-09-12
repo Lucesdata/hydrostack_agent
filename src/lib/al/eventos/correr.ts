@@ -21,12 +21,11 @@
  * se siembra la línea base en silencio, que es la verdad: empezamos a vigilarlo.
  */
 
-import { createHash } from "node:crypto";
 import { and, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { alProcesoEstado, alProcesoEvento } from "@/src/lib/db/schema/aqualicita";
 import { proceso } from "@/src/lib/db/schema/hechos";
-import { detectarEvento, esTerminal, type EstadoProceso } from "./detectar";
+import { detectarEvento, esTerminal, hash, type EstadoProceso } from "./detectar";
 
 /** Días desde la publicación dentro de los que un proceso nuevo cuenta como apertura. */
 export const VENTANA_APERTURA_DIAS = 30;
@@ -63,21 +62,16 @@ export interface FilaProceso {
 }
 
 /**
- * Hash de objeto+descripción — detecta QUE cambió el pliego, no CÓMO. Igual
- * razón que en `detectar.ts`: guardar los dos textos por proceso costaría más
- * que todo el resto de la tabla junto, y el usuario tiene el enlace al pliego.
- */
-function hashObjeto(objeto: string | null, descripcion: string | null): string {
-  return createHash("sha256")
-    .update(`${objeto ?? ""} ${descripcion ?? ""}`)
-    .digest("hex");
-}
-
-/**
  * Proyecta la fila canónica de `proceso` al estado que se guarda en
  * `al_proceso_estado` y se compara. Reemplaza a `estadoDesdePayload`
  * (`detectar.ts`) en esta corrida: las columnas ya llegan tipadas y limpias
  * desde la ingesta, así que no hace falta re-parsear texto/money/fecha.
+ *
+ * `objetoHash` usa `hash()` de `detectar.ts` — la MISMA función que ya
+ * escribió los `al_proceso_estado.objeto_hash` persistidos, no una fórmula
+ * nueva. Reutilizar en vez de reimplementar es el punto: dos funciones
+ * calculando lo mismo es lo que permitió que divergieran la primera vez
+ * (2026-09-12, ver `eventos-columnas.test.ts` para el caso que lo fija).
  */
 export function estadoDesdeProceso(fila: FilaProceso): EstadoProceso {
   return {
@@ -89,7 +83,7 @@ export function estadoDesdeProceso(fila: FilaProceso): EstadoProceso {
     adjudicado: fila.adjudicado,
     valorAdjudicado: fila.valorAdjudicacion,
     adjudicatarioNit: fila.nitAdjudicatario,
-    objetoHash: hashObjeto(fila.objeto, fila.descripcion),
+    objetoHash: hash(fila.objeto, fila.descripcion),
   };
 }
 

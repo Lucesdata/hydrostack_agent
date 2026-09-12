@@ -68,8 +68,15 @@ export interface EventoDetectado {
  * `al_proceso_evento` para eventos existentes — cambiarlo produciría un
  * `payloadHash` distinto para el mismo estado y el `onConflictDoNothing` de
  * `correr.ts` dejaría de reconocer un evento ya emitido como duplicado.
+ *
+ * Exportada porque `correr.ts` la reutiliza para `objetoHash`: ese hash
+ * también quedó persistido en `al_proceso_estado` con esta misma fórmula
+ * (separador NUL, truncado a 32 hex), así que tiene que ser la MISMA función
+ * — no una reimplementación local — o vuelve a divergir de los datos ya
+ * guardados (2026-09-12: eso fue exactamente lo que pasó con `hashObjeto`,
+ * que usaba espacio sin truncar; ver `eventos-columnas.test.ts`).
  */
-function hash(...partes: Array<string | null>): string {
+export function hash(...partes: Array<string | null>): string {
   return createHash("sha256")
     .update(partes.map((p) => p ?? "").join("\0"))
     .digest("hex")
