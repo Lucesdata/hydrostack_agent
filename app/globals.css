@@ -1515,14 +1515,17 @@ select {
   }
 }
 
-/* El bloque de cierre y su fila de checks: en bandera hasta 768px, centrados
-   a partir de ahí — misma regla que .center-md, aplicada al eje del flex. */
-.checks-cierre {
+/* El bloque de cierre, su fila de acciones y su fila de checks: en bandera
+   hasta 768px, centrados a partir de ahí — misma regla que .center-md,
+   aplicada al eje del flex. */
+.checks-cierre,
+.acciones-cierre {
   justify-content: flex-start;
 }
 
 @media (min-width: 768px) {
-  .checks-cierre {
+  .checks-cierre,
+  .acciones-cierre {
     justify-content: center;
   }
 
