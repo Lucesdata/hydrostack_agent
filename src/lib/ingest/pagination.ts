@@ -24,6 +24,8 @@ export interface SodaPageParams {
   $order: string;
   $limit: number;
   $where?: string;
+  /** Campos a pedir (0.6 — antes se traían los 61 del dataset). Ver ingest/campos.ts. */
+  $select?: string;
 }
 
 /** Escapa comillas simples para SoQL. */
