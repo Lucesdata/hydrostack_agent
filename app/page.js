@@ -628,29 +628,38 @@ export default function LandingPage() {
 
               <div className="bp-hero-cta">
                 <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
-                  <Link
-                    href={ruta("explorar").href}
-                    className="bp-cta bp-cta-dark"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      background: "#0369A1",
-                      color: "#fff",
-                      font: "600 13px var(--font-jetbrains-mono),monospace",
-                      letterSpacing: ".04em",
-                    }}
-                  >
-                    Explorar procesos →
-                  </Link>
-                  {/* La cifra sale del mismo fetch que el resto; si viene en
-                      null la frase se acorta en vez de quedar "sin cuenta · —
-                      procesos del sector", que se lee como un error. */}
-                  <div className="bp-hero-cta-nota">
-                    {sector.procesosVigilados == null
-                      ? "sin cuenta"
-                      : `sin cuenta · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
-                  </div>
+                  {(() => {
+                    const explorarRuta = ruta("explorar");
+                    return (
+                      <>
+                        <Link
+                          href={explorarRuta.href}
+                          className="bp-cta bp-cta-dark"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            background: "#0369A1",
+                            color: "#fff",
+                            font: "600 13px var(--font-jetbrains-mono),monospace",
+                            letterSpacing: ".04em",
+                          }}
+                        >
+                          Explorar procesos →
+                        </Link>
+                        {/* La cifra sale del mismo fetch que el resto; si viene en
+                            null la frase se acorta en vez de quedar "<etiqueta> · —
+                            procesos del sector", que se lee como un error. La etiqueta
+                            se deriva de ruta("explorar") para no desincronizarse si
+                            cambia ETIQUETA_POR_NIVEL.anonimo. */}
+                        <div className="bp-hero-cta-nota">
+                          {sector.procesosVigilados == null
+                            ? explorarRuta.etiqueta
+                            : `${explorarRuta.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
                 <Link
                   href={ruta("diagnostico").href}
