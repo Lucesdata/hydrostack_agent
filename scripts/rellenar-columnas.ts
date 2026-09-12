@@ -62,6 +62,15 @@ async function main() {
         join raw_record r on r.id = p.raw_record_id_actual
         where p.descripcion is null and p.url is null and p.unspsc is null
           and r.payload is not null
+          -- Garantiza que la vuelta avance: si ninguna de las tres claves
+          -- fuente existe en el payload, el UPDATE de abajo volvería a
+          -- escribir NULL y la fila se re-seleccionaría en la próxima
+          -- vuelta para siempre (loop infinito con un VACUUM cada vez).
+          -- Esta condición no filtra datos válidos, solo excluye lo que
+          -- el UPDATE no puede cambiar.
+          and (r.payload->>'descripci_n_del_procedimiento' is not null
+               or r.payload->'urlproceso'->>'url' is not null
+               or r.payload->>'codigo_principal_de_categoria' is not null)
         limit ${LOTE}
       )
       update proceso p

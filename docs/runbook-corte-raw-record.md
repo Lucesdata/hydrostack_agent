@@ -78,8 +78,11 @@ Seguir el orden exacto. No paralelizar pasos.
 
 2. **Correr el corte:**
    ```bash
-   npx tsx scripts/corte-raw-record.ts
+   CONFIRM_CORTE=si npx tsx scripts/corte-raw-record.ts
    ```
+   Sin `CONFIRM_CORTE=si` el script se niega a correr (no toca el pool ni la
+   base) e imprime en stderr qué va a destruir y qué verificar antes de
+   reintentar. Ponla solo después de marcar el checklist de pre-vuelo.
    El script imprime el tamaño y el conteo de `raw_record` antes de tocar
    nada, cada constraint que suelta, la confirmación del `TRUNCATE`, cada
    índice que recrea, y el tamaño final. Leer esa salida en vivo, no solo
@@ -110,8 +113,36 @@ Seguir el orden exacto. No paralelizar pasos.
 
 6. **Recrear las 5 constraints** que el script soltó en el paso 2 (no las
    recrea el script — quedan sueltas a propósito hasta confirmar que la
-   re-ingesta funcionó; ver DDL exacto en el docstring de
-   `scripts/corte-raw-record.ts`).
+   re-ingesta funcionó):
+   ```sql
+   alter table proceso
+     add constraint proceso_raw_record_id_actual_raw_record_id_fk
+     foreign key (raw_record_id_actual) references raw_record(id);
+
+   alter table contrato
+     add constraint contrato_raw_record_id_actual_raw_record_id_fk
+     foreign key (raw_record_id_actual) references raw_record(id);
+
+   alter table transform_quarantine
+     add constraint transform_quarantine_raw_record_id_raw_record_id_fk
+     foreign key (raw_record_id) references raw_record(id);
+
+   alter table al_proceso_evento
+     add constraint al_proceso_evento_raw_record_id_raw_record_id_fk
+     foreign key (raw_record_id) references raw_record(id);
+
+   alter table al_oferentes_historico
+     add constraint al_oferentes_historico_raw_record_id_raw_record_id_fk
+     foreign key (raw_record_id) references raw_record(id);
+   ```
+   Si alguna falla por UUIDs huérfanos que quedaron de antes del corte
+   (filas cuya columna apunta a un `raw_record.id` que la re-ingesta nunca
+   volvió a crear), limpiarlos y reintentar esa constraint:
+   ```sql
+   update <tabla> set <columna> = null
+    where <columna> is not null
+      and <columna> not in (select id from raw_record);
+   ```
 
 7. **Reactivar el cron**: revertir el cambio en `vercel.json` y desplegar.
    Confirmar en el panel de Vercel que `/api/cron/tick` vuelve a correr en

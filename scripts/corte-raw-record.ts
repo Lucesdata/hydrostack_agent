@@ -26,10 +26,29 @@
  * No hace rollback automático de lo ya soltado/truncado si un paso posterior
  * falla — ver la sección "Si algo falla" de docs/runbook-corte-raw-record.md.
  *
- *   npx tsx scripts/corte-raw-record.ts
+ *   CONFIRM_CORTE=si npx tsx scripts/corte-raw-record.ts
  */
 import { sql } from "drizzle-orm";
-import { db, pool } from "@/src/lib/db/client";
+
+// Compuerta antes de tocar la base o siquiera abrir el pool: sin esta
+// variable exacta, el script no debe poder truncar 129.511 filas por
+// accidente (doble Enter, copiar el comando equivocado, un cron mal
+// configurado). El operador la agrega a mano después de confirmar el
+// checklist de pre-vuelo del runbook — no es un flag decorativo.
+if (process.env.CONFIRM_CORTE !== "si") {
+  process.stderr.write(
+    "\nrefused: este script suelta 5 foreign keys y hace TRUNCATE sobre " +
+      "`raw_record` (129.511 filas, irreversible).\n" +
+      "Antes de correrlo: el archivo NDJSON gzip de la Tarea 1 debe existir " +
+      "en Storage y estar verificado (conteo exacto + hash de muestra) — " +
+      "ver docs/runbook-corte-raw-record.md, checklist de pre-vuelo.\n" +
+      "Si ya lo verificaste, vuelve a correr:\n" +
+      "  CONFIRM_CORTE=si npx tsx scripts/corte-raw-record.ts\n"
+  );
+  process.exit(1);
+}
+
+const { db, pool } = await import("@/src/lib/db/client");
 
 const CONSTRAINTS = [
   ["proceso", "proceso_raw_record_id_actual_raw_record_id_fk"],
