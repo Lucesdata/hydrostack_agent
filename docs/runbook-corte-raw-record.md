@@ -27,29 +27,65 @@ o no fue verificado, **el corte destruye datos sin copia de respaldo.**
 
 ---
 
+## Orden de despliegue
+
+`0023` (columnas promovidas en `proceso`/`contrato`, `payload` nullable) es
+**aditiva e instantánea** — no reescribe filas existentes, no bloquea, no
+tiene downtime propio. Aun así el orden importa:
+
+1. **`npm run db:migrate` PRIMERO, antes del deploy del branch.** Si el
+   deploy sale antes que la migración, `db-search.ts`, `recientes.ts` y
+   `buscar-candidatos.ts` referencian columnas que todavía no existen en la
+   Supabase viva y **toda consulta de búsqueda falla con `42703`**
+   (`column does not exist`) hasta que la migración corra. `npm run build`
+   no migra solo.
+2. Deploy del branch (con los crons ya pausados, ver checklist debajo).
+3. El resto de este runbook (export → corte → re-ingesta → transform).
+
+---
+
 ## Antes de empezar (checklist de pre-vuelo)
 
 Marcar cada casilla con evidencia real (un comando corrido, un pantallazo, un
 link), no de memoria:
 
-- [ ] **Archivo de la Tarea 1 en Storage.** El bucket `raw-archive` en
-      Supabase (privado, sin políticas para `anon`/`authenticated`) contiene
-      el `.ndjson.gz` subido en el Step 8 de la Tarea 1.
-- [ ] **Verificación de conteo (Tarea 1, Step 6) en verde.**
-      `gunzip -c raw-archive.ndjson.gz | wc -l` coincide **exactamente** con
-      `select count(*) from raw_record`. Si no coincide: NO seguir, el
-      cursor del export saltó filas — investigar el export antes de tocar
-      nada más.
-- [ ] **Verificación por hash de muestra (Tarea 1, Step 7) en verde.** La
-      consulta de 1000 filas al azar contra `raw_record` por
-      `(source_record_id, payload_hash)` devuelve `0` discrepancias.
-- [ ] **Copia local del gzip fuera del repo**, en un disco que no sea el que
-      corre este script (Storage es la copia autoritativa; la local es la
-      segunda red bajo la red).
-- [ ] **Cron pausado.** `/api/cron/tick` está deshabilitado y verificado en el
-      panel de Vercel (no solo comentado en `vercel.json` sin desplegar) —
-      una ingesta o transform corriendo a mitad del corte puede escribir en
-      `raw_record` entre el `DROP CONSTRAINT` y el `TRUNCATE`.
+- [ ] **Export corrido y auto-verificado.** `scripts/export-raw-archive.ts`
+      escribe el `.ndjson.gz` local y, desde este round, **se verifica solo**:
+      relee el gzip, cuenta líneas, compara contra
+      `select count(*) from raw_record`, y sale con código != 0 y un mensaje
+      en mayúsculas si no coinciden. Correrlo así, con la ruta que quede
+      fuera del repo y en un disco que no sea el que corre el script (un
+      reboot entre el export y el corte no debe perder la única copia local):
+      ```bash
+      npx tsx scripts/export-raw-archive.ts /ruta/fuera/del/repo/raw-archive.ndjson.gz
+      ```
+      Si el script sale con código != 0, **NO seguir** — investigar la
+      discrepancia antes de tocar nada más. Un exit limpio (0) con la línea
+      `verificado: N filas en el archivo == N en raw_record` es la única
+      señal válida de que el archivo es un respaldo completo.
+- [ ] **Archivo subido a Supabase Storage.** No hay script para esto — es un
+      paso manual. Con el bucket privado `raw-archive` ya creado (sin
+      políticas para `anon`/`authenticated`):
+      ```bash
+      supabase storage cp /ruta/fuera/del/repo/raw-archive.ndjson.gz \
+        ss:///raw-archive/raw-archive-$(date +%Y%m%d).ndjson.gz \
+        --experimental
+      ```
+      o, sin la CLI de Supabase, subir el archivo a mano desde el panel de
+      Storage del proyecto. Confirmar en el panel que el objeto quedó con el
+      tamaño esperado (~44 MB para el volumen actual) antes de marcar esta
+      casilla.
+- [ ] **Copia local del gzip conservada** en el disco donde se corrió el
+      export (Storage es la copia autoritativa; la local es la segunda red
+      bajo la red) — no borrarla hasta confirmar el corte completo.
+- [ ] **Cron pausado.** `/api/cron/tick` **y** `/api/cron/alertas` están
+      deshabilitados y verificados en el panel de Vercel (no solo comentados
+      en `vercel.json` sin desplegar) — una ingesta o transform corriendo a
+      mitad del corte puede escribir en `raw_record` entre el
+      `DROP CONSTRAINT` y el `TRUNCATE`, y el digest diario de `alertas` lee
+      `proceso.url` sin fallback al payload: entre el deploy de este branch y
+      el backfill (paso 1 más abajo) saldría con todos los links vacíos si
+      quedara corriendo.
 - [ ] **Conteos de referencia anotados**, para comparar después:
       - `select count(*) from raw_record` → ______
       - `select count(*) from proceso` → ______
@@ -100,18 +136,38 @@ Seguir el orden exacto. No paralelizar pasos.
    a los conteos anotados en el pre-vuelo — el corte no debe quitar ni una
    fila de las tablas canónicas.
 
-4. **Re-ingesta** (repuebla `raw_record` con el payload reducido de la
-   Tarea 9, ~27 campos en vez de 61):
+4. **Neutralizar el watermark ANTES de re-ingestar.** `npm run db:ingest`
+   arranca desde `max(sync_log.watermark_to)` con `status in ('ok','partial')`
+   (`src/lib/ingest/dbIngest.ts`) — y el `TRUNCATE` del paso 2 **no toca
+   `sync_log`**. Sin este paso, `db:ingest` no re-descarga el histórico: solo
+   trae el día más reciente, y ~90.000 procesos quedan con `fase`,
+   `adjudicado`, `valor_adjudicacion`, `adjudicatario`, `nit_adjudicatario`,
+   `fecha_adjudicacion`, `estado_apertura` y `fecha_recepcion` en NULL para
+   siempre, con el payload que los tenía ya destruido por el `TRUNCATE`.
+   ```sql
+   update sync_log set status = 'superseded'
+   where source in ('secop_ii_procesos','secop_ii_contratos')
+     and status in ('ok','partial');
+   ```
+   `sync_log.status` es `text` libre, sin `enum` ni `check constraint`
+   (`src/lib/db/schema/control.ts`) — `'superseded'` no choca con nada. Esto
+   preserva el historial de corridas (no se borran filas) y hace que
+   `windowStart(null)` en `src/lib/ingest/watermark.ts` devuelva `null` = sin
+   cota inferior = backfill completo en el próximo `db:ingest`.
+
+5. **Re-ingesta** (repuebla `raw_record` con el payload reducido de la
+   Tarea 9, ~27 campos en vez de 61 — y ahora sí trae el histórico completo,
+   gracias al paso 4):
    ```bash
    npm run db:ingest
    ```
 
-5. **Transform** (procesa lo recién ingerido hacia las tablas canónicas):
+6. **Transform** (procesa lo recién ingerido hacia las tablas canónicas):
    ```bash
    npm run db:transform
    ```
 
-6. **Recrear las 5 constraints** que el script soltó en el paso 2 (no las
+7. **Recrear las 5 constraints** que el script soltó en el paso 2 (no las
    recrea el script — quedan sueltas a propósito hasta confirmar que la
    re-ingesta funcionó):
    ```sql
@@ -144,24 +200,39 @@ Seguir el orden exacto. No paralelizar pasos.
       and <columna> not in (select id from raw_record);
    ```
 
-7. **Reactivar el cron**: revertir el cambio en `vercel.json` y desplegar.
-   Confirmar en el panel de Vercel que `/api/cron/tick` vuelve a correr en
-   su horario.
+8. **Reactivar los dos crons**: revertir el cambio en `vercel.json`
+   (`/api/cron/tick` y `/api/cron/alertas` de vuelta al array) y desplegar.
+   Confirmar en el panel de Vercel que ambos vuelven a correr en su horario.
+   No reactivar `alertas` antes de que el transform (paso 6) haya corrido al
+   menos una vez sobre la re-ingesta — si no, el primer digest después del
+   corte sale con links vacíos otra vez.
 
 ---
 
 ## Si algo falla
 
-- **Entre los pasos 2 y 4** (constraints sueltas o `raw_record` truncada,
+- **Entre los pasos 2 y 5** (constraints sueltas o `raw_record` truncada,
   pero antes de que la re-ingesta termine): la web sigue sirviendo desde
   `proceso`/`contrato`, que el corte no toca. No hay urgencia — diagnosticar
   con calma antes de reintentar. `raw_record` vacía no rompe nada que lea
   las tablas canónicas.
-- **Si la re-ingesta (paso 4) falla o se cuelga**: el archivo de Storage
-  tiene el histórico completo. Restaurar con `scripts/export-raw-archive.ts`
-  invertido (leer el NDJSON, reinsertar por lotes) antes de reintentar la
-  ingesta en vivo.
-- **Si el transform (paso 5) falla a mitad de camino**: es re-corrible sin
+- **Si la re-ingesta (paso 5) falla o se cuelga**: el archivo de Storage
+  tiene el histórico completo, pero **no existe ningún script de restore** —
+  `scripts/export-raw-archive.ts` solo exporta y verifica, no tiene modo
+  inverso. Restaurar es un procedimiento manual:
+  1. Descargar el objeto de Storage al disco local:
+     `supabase storage cp ss:///raw-archive/<archivo>.ndjson.gz ./restaurado.ndjson.gz --experimental`
+     (o desde el panel de Storage).
+  2. Reinsertar por lotes contra `raw_record`, por ejemplo con `psql` y
+     `\copy` sobre un NDJSON convertido, o un script ad-hoc que lea
+     `gunzip -c restaurado.ndjson.gz` línea a línea y haga
+     `insert into raw_record (id, source, source_record_id, payload_hash, ingested_at, payload) values (...) on conflict (id) do nothing`
+     por lotes — este script no existe todavía en el repo; escribirlo en el
+     momento si se llega a este punto, reusando `serializarLote`/`FilaArchivo`
+     de `src/lib/archivo/exportar.ts` como referencia del formato de cada línea.
+  3. Solo después de confirmar el conteo restaurado, reintentar `db:ingest`
+     (con el watermark ya neutralizado en el paso 4).
+- **Si el transform (paso 6) falla a mitad de camino**: es re-corrible sin
   efectos secundarios — vuelve a procesar solo lo pendiente. No requiere
   deshacer nada del corte.
 - **Si algo en el paso 2 sale mal y el script muere a mitad** (por ejemplo,

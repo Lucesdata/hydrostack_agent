@@ -299,9 +299,19 @@ nullable**, así que las constraints se pueden soltar y recrear sin tocar datos.
 
 4.1 Añadir `$select` en `sodaFetch.ts`, con la lista derivada de
     `FIELDS_PROCESOS`/`FIELDS_CONTRATOS` (fuente única, no una lista a mano).
-4.2 Re-ingesta completa con la maquinaria existente: repuebla el linaje de
-    `raw_record` y el transform puebla las columnas nuevas de `proceso` y
-    `contrato`. Duración estimada: 30–60 min para 129.511 registros.
+4.2 Re-ingesta **no es completa "con la maquinaria existente" sin un paso
+    previo**: `db:ingest` arranca desde `max(sync_log.watermark_to)`
+    (`status in ('ok','partial')`), y el `TRUNCATE` de 3.2 no toca
+    `sync_log` — el watermark sobrevive al corte y apunta al día anterior.
+    Sin neutralizarlo, la re-ingesta trae solo la última corrida incremental,
+    no el histórico. Por eso 4.2 es en realidad dos pasos:
+    (a) `update sync_log set status = 'superseded' where source in (...) and
+    status in ('ok','partial')` — preserva el historial de corridas, solo lo
+    saca del cálculo del watermark; y (b) recién entonces `npm run db:ingest`,
+    que ahora sí repuebla el linaje completo de `raw_record` y deja que el
+    transform puebla las columnas nuevas de `proceso` y `contrato`. Duración
+    estimada: 30–60 min para 129.511 registros. Ver
+    `docs/runbook-corte-raw-record.md` paso 4 para el procedimiento exacto.
 4.3 Recrear las 5 constraints.
 4.4 Retirar el `coalesce` al payload de los 8 consumidores.
 4.5 Reactivar el cron. Observar el primer barrido.
@@ -366,9 +376,21 @@ Ver D3. Mitigado por el archivo de D4 y por que SECOP sigue publicando el
 histórico.
 
 **R4 — `proceso.objeto` no es idéntico a `nombre_del_procedimiento` en 4 de
-cada 20.000 filas. `[bajo]`**
-*Mitigación:* la columna `nombre` nueva se puebla desde el payload, no desde
-`objeto`; no se asume la equivalencia.
+cada 20.000 filas. `[bajo, aceptado — decisión revisada en implementación]`**
+La postura original de este documento era no asumir la equivalencia y poblar
+una columna `nombre` nueva desde el payload. **Se cambió durante la
+implementación (whole-branch review, 2026-09-12): no se agregó la columna.**
+Agregar `nombre` habría duplicado `objeto` en 19.996 de 20.000 filas
+(99,98% idénticas) para capturar una divergencia del 0,02% — y `objeto` (que
+ya es `nombre ?? descripcion` calculado en el transform) es el valor que
+todo lector existente usaba antes de este branch. `db-search.ts` sigue
+resolviendo `nombre` con `coalesce(proceso.objeto, payload->>...)`.
+*Mitigación aceptada:* la equivalencia se asume conscientemente; el
+`nombre_del_procedimiento` verdadero de esas 4 filas divergentes solo
+sobrevive en el archivo NDJSON (Fase 1) después del corte — no hay forma de
+recuperarlo de la base viva una vez truncada. Si algún consumidor futuro
+necesita el nombre exacto sin pasar por `objeto`, es una columna nueva a
+agregar entonces, con su propio backfill desde el archivo.
 
 **R5 — El export se corrompe o queda incompleto. `[bajo, cubierto]`**
 Cubierto por la verificación 1.2, que es bloqueante.

@@ -1574,12 +1574,34 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Re-ingesta completa con `$select`**
 
+**Corregido en el whole-branch review final (2026-09-12): esto NO es una
+re-ingesta completa tal cual escrito abajo.** `npm run db:ingest` arranca
+desde `readLastWatermark()` = `max(sync_log.watermark_to)` con
+`status in ('ok','partial')` (`src/lib/ingest/dbIngest.ts`), y el `TRUNCATE`
+de la Tarea 11 no toca `sync_log`. Sin neutralizar el watermark primero, este
+paso trae solo el último día incremental, no el histórico — y ~90.000
+procesos quedan con las columnas de adjudicación en NULL para siempre,
+porque el payload que las tenía ya fue destruido por el `TRUNCATE`. Neutralizar
+antes de correr `db:ingest`:
+
+```sql
+update sync_log set status = 'superseded'
+where source in ('secop_ii_procesos','secop_ii_contratos')
+  and status in ('ok','partial');
+```
+
+(`sync_log.status` es `text` libre sin `enum`/`check constraint` — verificado
+en `src/lib/db/schema/control.ts` — así que `'superseded'` no choca con nada;
+se prefiere sobre borrar las filas porque conserva el historial de corridas.)
+
 ```bash
 npm run db:ingest
 ```
 
-Expected: repuebla `raw_record` con los ~25 campos. Vigilar el tamaño: cada
-lote debe crecer mucho menos que antes.
+Expected: repuebla `raw_record` con los ~25 campos, y esta vez con el
+histórico completo. Vigilar el tamaño: cada lote debe crecer mucho menos que
+antes. Ver `docs/runbook-corte-raw-record.md` paso 4 para el procedimiento
+exacto que sigue el operador.
 
 - [ ] **Step 2: Transform**
 
@@ -1645,9 +1667,14 @@ por `${proceso.x}` a secas. Eliminar el JOIN a `rawRecord` y la constante
 
 Run: `npm run test && npx tsc --noEmit`
 
-- [ ] **Step 7: Reactivar el cron**
+- [ ] **Step 7: Reactivar los dos crons**
 
-Restaurar la entrada de `/api/cron/tick` en `vercel.json` y desplegar.
+Corregido en el whole-branch review final: `/api/cron/alertas` también se
+pausó (finding importante 5 — `recopilarNovedades` lee `p.url` sin fallback
+al payload, así que el digest saldría con links vacíos entre el deploy y el
+backfill). Restaurar **ambas** entradas, `/api/cron/tick` y
+`/api/cron/alertas`, en `vercel.json` y desplegar. No reactivar `alertas`
+antes de que el Step 2 (transform) haya corrido.
 
 - [ ] **Step 8: Actualizar la documentación**
 
