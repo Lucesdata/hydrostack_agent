@@ -67,11 +67,12 @@ const INDICES = [
 ];
 
 async function estadoBase(): Promise<{ size: string; filas: string }> {
-  const [fila] = (await db.execute(
+  const res = (await db.execute(
     sql`select pg_size_pretty(pg_database_size(current_database())) as size,
                (select count(*) from raw_record) as filas`
-  )) as unknown as { size: string; filas: string }[];
-  return fila;
+  )) as any;
+  const rows = Array.isArray(res) ? res : res.rows;
+  return rows[0];
 }
 
 async function main() {
