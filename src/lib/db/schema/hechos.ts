@@ -38,6 +38,22 @@ export const proceso = pgTable(
     documentAccessReason: text("document_access_reason"),
     documentAccessMethod: text("document_access_method"), // metadata | probe
     documentAccessEvaluatedAt: timestamp("document_access_evaluated_at", { withTimezone: true }),
+    // ── Campos promovidos desde raw_record.payload (2026-09-12) ──────────────
+    // Se leían en caliente por db-search, matching, digest y el detector de
+    // adendas vía JOIN a raw_record. Promoverlos a columnas es lo que permite
+    // vaciar el payload: los mismos datos pesan 49% como columnas y 80% como
+    // jsonb, porque jsonb repite los nombres de clave en cada fila.
+    descripcion: text("descripcion"), // descripci_n_del_procedimiento
+    url: text("url"), // urlproceso.url
+    unspsc: text("unspsc"), // codigo_principal_de_categoria, con prefijo "V1."
+    fase: text("fase"),
+    adjudicado: boolean("adjudicado"),
+    valorAdjudicacion: money("valor_adjudicacion"),
+    adjudicatario: text("adjudicatario"), // nombre_del_proveedor (NO nombre_del_adjudicador)
+    nitAdjudicatario: text("nit_adjudicatario"),
+    fechaAdjudicacion: date("fecha_adjudicacion"),
+    estadoApertura: text("estado_apertura"), // Abierto | Cerrado — señal real de plazo
+    fechaRecepcion: date("fecha_recepcion"),
     rawRecordIdActual: uuid("raw_record_id_actual").references(() => rawRecord.id),
     deletedAt: timestamp("deleted_at", { withTimezone: true }), // soft delete (D6)
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -82,6 +98,11 @@ export const contrato = pgTable(
     valorPagado: money("valor_pagado"),
     valorPendientePago: money("valor_pendiente_pago"),
     ultimaModificacionAt: timestamp("ultima_modificacion_at", { withTimezone: true }),
+    // ── Promovidos desde raw_record.payload (2026-09-12) ─────────────────────
+    // El resto de campos de contrato ya estaba en columnas; solo estos dos se
+    // leían del payload.
+    unspsc: text("unspsc"), // codigo_de_categoria_principal
+    url: text("url"), // urlproceso.url
     rawRecordIdActual: uuid("raw_record_id_actual").references(() => rawRecord.id),
     deletedAt: timestamp("deleted_at", { withTimezone: true }), // soft delete (D6)
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
