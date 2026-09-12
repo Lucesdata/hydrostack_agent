@@ -23,7 +23,7 @@ function row(over: Partial<DbProcesoRow> = {}): DbProcesoRow {
     valorAdjudicacionRaw: "0",
     adjudicatarioRaw: "No Adjudicado",
     estadoAperturaRaw: "Abierto",
-    urlRaw: { url: "https://community.secop.gov.co/x" },
+    urlRaw: "https://community.secop.gov.co/x",
     ...over,
   };
 }
@@ -74,11 +74,8 @@ describe("mapDbRowToProceso (fila DB → SecopProceso)", () => {
     expect(mapDbRowToProceso(row({ estadoAperturaRaw: null })).estadoApertura).toBeNull();
   });
 
-  it("url soporta objeto {url} o string; basura → null", () => {
+  it("url llega como string (columna o payload->>'url'); basura → null", () => {
     expect(mapDbRowToProceso(row({ urlRaw: "https://x.test" })).url).toBe("https://x.test");
-    expect(mapDbRowToProceso(row({ urlRaw: { url: "https://y.test" } })).url).toBe(
-      "https://y.test"
-    );
     expect(mapDbRowToProceso(row({ urlRaw: "basura" })).url).toBeNull();
     expect(mapDbRowToProceso(row({ urlRaw: null })).url).toBeNull();
   });
