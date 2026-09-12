@@ -22,6 +22,14 @@
  *
  * El coste es despreciable: la red sectorial ya se aplicó en ingesta, así que el
  * universo abierto son ~550 procesos, no 90.000.
+ *
+ * Política de fallback (adelgazamiento de raw_record): igual que `recientes.ts`
+ * y a diferencia de `db-search.ts`, esta consulta NO hace `coalesce` al
+ * payload — lee directo de las columnas de `proceso`. Hasta que corra el
+ * backfill, los campos promovidos que aún no tienen columna llena vienen
+ * `null` para `evaluarFiltro`. Aceptado porque el cron de matching que corre
+ * esto está pausado durante la ventana del corte (`vercel.json`), así que no
+ * hay usuarios viendo resultados degradados mientras tanto.
  */
 
 import { and, eq, isNull, sql, type SQL } from "drizzle-orm";

@@ -3,6 +3,14 @@
  * 3 reportes: R1.1 razones sociales múltiples, R1.2 NIT basura nueva,
  * R1.3 tipo_documento mal asignado.
  *
+ * NOTA (adelgazamiento de raw_record, 2026-09-12): este script lee
+ * `raw_record.payload`. Es un consumidor solo de operaciones (noveno, no
+ * contado entre los 8 de producción del corte) — tras el corte, mientras el
+ * payload sea un buffer que se vacía al transformar, corre sobre una
+ * auditoría vacía o parcial. No se migró a columnas porque no está en el
+ * camino caliente de ningún usuario; si hace falta volver a correrlo,
+ * adaptarlo primero a leer de `proveedor`/`entidad` o al archivo NDJSON.
+ *
  * Uso: tsx scripts/audit-proveedores.ts
  */
 import { Pool } from "pg";

@@ -16,7 +16,12 @@ import { FIELDS_PROCESOS as F } from "@/src/lib/secop/config";
 import { SOURCE_PROCESOS } from "@/src/lib/ingest/sources";
 
 /**
- * Campos del payload que entran al diff, con la etiqueta que verá el usuario.
+ * Campos que entran al diff, con la etiqueta que verá el usuario. Las claves
+ * son los nombres de `FIELDS_PROCESOS` (Socrata) porque `detectar.ts` los usa
+ * para indexar sus lectores, pero desde el adelgazamiento de `raw_record`
+ * (2026-09-12) el diff ya no lee el payload: lee columnas de `EstadoProceso`
+ * (`al_proceso_estado`), que a su vez vienen de las columnas canónicas de
+ * `proceso`.
  *
  * No está `fecha de cierre`: **este dataset no la trae**. `FIELDS_PROCESOS`
  * lo documenta — la señal real de plazo es `estado_de_apertura_del_proceso`

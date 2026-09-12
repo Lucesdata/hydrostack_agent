@@ -60,7 +60,12 @@ async function main() {
                r.payload->>'codigo_principal_de_categoria' as unspsc
         from proceso p
         join raw_record r on r.id = p.raw_record_id_actual
-        where p.descripcion is null and p.url is null and p.unspsc is null
+        -- OR, no AND: una fila con url ya puesto por un transform posterior
+        -- al deploy no debe salir de la selección para siempre solo porque
+        -- una de las tres columnas ya no es NULL -- si le faltan las otras dos,
+        -- sigue siendo candidata. El coalesce del UPDATE de abajo evita pisar
+        -- lo que ya está lleno.
+        where (p.descripcion is null or p.url is null or p.unspsc is null)
           and r.payload is not null
           -- Garantiza que la vuelta avance: si ninguna de las tres claves
           -- fuente existe en el payload, el UPDATE de abajo volvería a
@@ -74,7 +79,9 @@ async function main() {
         limit ${LOTE}
       )
       update proceso p
-         set descripcion = pe.descripcion, url = pe.url, unspsc = pe.unspsc
+         set descripcion = coalesce(p.descripcion, pe.descripcion),
+             url         = coalesce(p.url, pe.url),
+             unspsc      = coalesce(p.unspsc, pe.unspsc)
         from pendientes pe
        where p.id = pe.id
       returning p.id

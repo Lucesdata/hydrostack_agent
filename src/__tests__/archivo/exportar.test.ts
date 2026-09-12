@@ -19,7 +19,7 @@ describe("serializarLote", () => {
     expect(out.endsWith("\n")).toBe(true);
   });
 
-  it("conserva el payload íntegro y sin reordenar claves del contenido", () => {
+  it("conserva el payload íntegro (mismas claves y valores; toEqual no exige mismo orden)", () => {
     const out = serializarLote([fila("1")]);
     const parsed = JSON.parse(out.trim());
     expect(parsed.payload).toEqual({

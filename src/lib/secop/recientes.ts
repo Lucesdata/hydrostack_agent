@@ -6,6 +6,14 @@
  * con la query por defecto. Sin count, sin verdict, sin probe: eso pertenece al
  * momento 2 (elegibilidad on-demand).
  *
+ * Política de fallback (adelgazamiento de raw_record): a diferencia de
+ * `db-search.ts`, aquí NO hay `coalesce` al payload — `url` sale directo de
+ * `proceso.url`. Entre el deploy de las columnas promovidas y que corra el
+ * backfill (`scripts/rellenar-columnas.ts`), esta vista degrada a `url: null`
+ * en vez de leer el JSON crudo. Decisión deliberada, no un olvido: esta
+ * pantalla no es la superficie de búsqueda principal (esa es `db-search.ts`,
+ * que sí mantiene el fallback) y el costo de degradar unas horas es bajo.
+ *
  * Spec: docs/superpowers/specs/2026-07-15-vista-simple-y-elegibilidad-diferida.md
  */
 
