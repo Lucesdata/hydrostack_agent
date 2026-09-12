@@ -12,9 +12,13 @@
  * muestra trae contratos sin proceso (ventanas BDOS disjuntas, 0.2 §5.1),
  * proceso_id queda NULL — el contrato NO se descarta.
  *
- * Idempotente: corre dos veces sobre el mismo raw_record y deja el mismo
- * estado canónico (UPSERTs por clave natural; reescribe todas las columnas
- * no-PK en UPDATE para no dejar columnas zombi).
+ * Idempotente DENTRO de una corrida: procesar la misma fila dos veces en el
+ * mismo batch deja el mismo estado canónico (UPSERTs por clave natural;
+ * reescribe todas las columnas no-PK en UPDATE para no dejar columnas
+ * zombi). ENTRE corridas ya no es un re-procesamiento sino un no-op: una vez
+ * que `vaciarPayloads()` (0.9) pone el payload en NULL, `latestSnapshots`
+ * filtra esa fila (`payload IS NOT NULL`) y la corrida siguiente no vuelve a
+ * tocarla — por diseño, no porque re-mapear un payload NULL sea seguro.
  *
  * Una sola fila por source_record_id: desde 2026-08-16 raw_record hace upsert
  * (una fila por registro), así que el DISTINCT ON por ingested_at es un no-op
@@ -22,7 +26,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { db } from "@/src/lib/db/client";
 import { rawRecord } from "@/src/lib/db/schema";
@@ -128,7 +132,7 @@ async function latestSnapshots(source: string): Promise<LatestSnapshot[]> {
       payload: rawRecord.payload,
     })
     .from(rawRecord)
-    .where(eq(rawRecord.source, source))
+    .where(and(eq(rawRecord.source, source), isNotNull(rawRecord.payload)))
     .orderBy(rawRecord.sourceRecordId, desc(rawRecord.ingestedAt));
   return rows.map((r) => ({ id: r.id, payload: r.payload as Record<string, unknown> }));
 }
