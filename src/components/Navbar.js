@@ -63,7 +63,7 @@ const AUTH_CSS = `
 }
 .clr-nav-auth-cta:hover{ opacity: .9; }
 .clr-nav-explorar{
-  display: flex; align-items: center; margin-left: auto; margin-right: 10px;
+  display: flex; align-items: center; margin-left: auto;
   font: 600 11px var(--font-mono, monospace); letter-spacing: .1em;
   text-transform: uppercase; white-space: nowrap;
   color: #fff; background: var(--accent, #0369A1); text-decoration: none;
@@ -71,6 +71,16 @@ const AUTH_CSS = `
 }
 .clr-nav-explorar:hover{ opacity: .9; }
 @media (min-width: 1024px) { .clr-nav-explorar{ display: none; } }
+/* .clr-nav-inner es flex con dos hijos con margin-left:auto por debajo de
+   1024px (este enlace y .clr-hamburger, esta última desde app/globals.css):
+   en flexbox varios márgenes auto en la misma línea se reparten el espacio
+   libre entre ellos, no se lo queda el primero. El resultado era un hueco
+   entre los dos en vez de quedar pegados a la derecha. Se anula aquí el de
+   la hamburguesa (no en app/globals.css) porque este <style> se inyecta
+   después de la hoja global y a igual especificidad gana el cascade — mismo
+   razonamiento que la banda 1024-1199px de arriba. Por encima de 1024px la
+   hamburguesa está en display:none, así que no se toca donde importa. */
+@media (max-width: 1023px) { .clr-hamburger{ margin-left: 0; } }
 /* Banda estrecha de escritorio (1024-1199px) — la contraparte de la regla
    del mismo rango en app/globals.css, donde está explicado el porqué. Vive
    aquí y no allí porque este <style> se inyecta después de la hoja global y

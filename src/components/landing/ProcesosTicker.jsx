@@ -127,9 +127,13 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
 @media (max-width: 640px) {
   .ptr-bar { height: 48px; }
   /* El rótulo "EN VIVO" se come un tercio de la barra en un móvil y no dice
-     nada que el diamante pulsante no diga ya. Se va; el diamante se queda
-     como prueba de vida, que es lo único que esta barra tiene que demostrar. */
-  .ptr-cap { display: none; }
+     nada que el diamante pulsante no diga ya. Se va el texto; el diamante se
+     queda como prueba de vida, que es lo único que esta barra tiene que
+     demostrar. El contenedor no puede ocultarse entero: el diamante vive
+     dentro de él. Se encoge al ancho del diamante en vez de reservar el del
+     texto que ya no está. */
+  .ptr-cap { gap: 0; padding: 0 10px; }
+  .ptr-cap-label { display: none; }
   .ptr-item { padding: 0 14px; }
   .ptr-row1 { font-size: 10.5px; }
   /* Sin tope: con el rótulo fuera, la entidad puede usar el ancho que hay. */
@@ -266,7 +270,9 @@ export default function ProcesosTicker() {
       <style dangerouslySetInnerHTML={{ __html: TICKER_CSS }} />
       <div className="ptr-cap">
         <span className="ptr-cap-dot" />
-        {status === "live" ? "SECOP · en vivo" : "Procesos"}
+        <span className="ptr-cap-label">
+          {status === "live" ? "SECOP · en vivo" : "Procesos"}
+        </span>
       </div>
       {status === "live" ? (
         <div className="ptr-clip">
