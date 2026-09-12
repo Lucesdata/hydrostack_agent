@@ -26,29 +26,36 @@ const CTX = {
   fechaPublicacion: "2018-04-09",
 };
 
-/** Payload real, recortado (CO1.REQ.406327). */
+/**
+ * Fila canónica de `proceso`, recortada (CO1.REQ.406327). Hasta 2026-09-12
+ * esto era un payload crudo de `raw_record`; `adjudicado` era el string "Si"
+ * y ahora es el booleano real que ya vive en la columna.
+ */
 const ADJUDICADO = {
-  id_del_proceso: "CO1.REQ.406327",
-  adjudicado: "Si",
-  nombre_del_proveedor: "CONINTEGRAL S.A.S",
-  nit_del_proveedor_adjudicado: "900179755",
-  nombre_del_adjudicador: "LUZ JANNET ZULUAGA QUINTERO",
-  valor_total_adjudicacion: "1168754073",
-  fecha_adjudicacion: "2018-05-18T00:00:00.000",
-  codigo_principal_de_categoria: "V1.77121701",
-  precio_base: "0",
-  nit_entidad: "811000231",
+  secopProcesoId: "CO1.REQ.406327",
+  adjudicado: true,
+  adjudicatario: "CONINTEGRAL S.A.S",
+  nitAdjudicatario: "900179755",
+  valorAdjudicacion: "1168754073.00",
+  fechaAdjudicacion: "2018-05-18",
+  unspsc: "V1.77121701",
+  valorEstimado: "0.00",
+  modalidad: "Licitación pública",
 };
 
 describe("mapearAdjudicatario", () => {
-  it("'Seleccionado' con adjudicado='No' NO produce fila", () => {
+  it("'Seleccionado' con adjudicado=false NO produce fila", () => {
     const r = mapearAdjudicatario(
       {
-        id_del_proceso: "CO1.REQ.10951305",
-        estado_del_procedimiento: "Seleccionado",
-        adjudicado: "No",
-        nombre_del_proveedor: "No Definido",
-        nombre_del_adjudicador: "No Adjudicado",
+        secopProcesoId: "CO1.REQ.10951305",
+        adjudicado: false,
+        adjudicatario: "No Definido",
+        nitAdjudicatario: null,
+        unspsc: null,
+        modalidad: null,
+        valorEstimado: null,
+        valorAdjudicacion: null,
+        fechaAdjudicacion: null,
       },
       CTX,
       null
@@ -56,12 +63,9 @@ describe("mapearAdjudicatario", () => {
     expect(r).toBeNull();
   });
 
-  it("mapea el ganador desde nombre_del_proveedor, no desde nombre_del_adjudicador", () => {
+  it("mapea el ganador desde el adjudicatario canónico", () => {
     const r = mapearAdjudicatario(ADJUDICADO, CTX, null);
-    // `nombre_del_adjudicador` es la funcionaria de la entidad que firma; si
-    // alguna vez vuelve a colarse aquí, este test lo caza.
     expect(r.proveedorNombre).toBe("CONINTEGRAL S.A.S");
-    expect(r.proveedorNombre).not.toBe("LUZ JANNET ZULUAGA QUINTERO");
     expect(r.adjudicado).toBe(true);
   });
 
@@ -69,18 +73,18 @@ describe("mapearAdjudicatario", () => {
     expect(mapearAdjudicatario(ADJUDICADO, CTX, null).unspsc).toBe("77121701");
   });
 
-  it("un precio_base de 0 es 'sin dato', no un precio", () => {
+  it("un valor_estimado de 0 es 'sin dato', no un precio", () => {
     expect(mapearAdjudicatario(ADJUDICADO, CTX, null).valorEstimado).toBeNull();
     expect(mapearAdjudicatario(ADJUDICADO, CTX, null).valorAdjudicado).toBe("1168754073.00");
   });
 
-  it("recorta la fecha a día", () => {
+  it("conserva la fecha de adjudicación", () => {
     expect(mapearAdjudicatario(ADJUDICADO, CTX, null).fechaAdjudicacion).toBe("2018-05-18");
   });
 
-  it("sin ganador atribuible no hay fila, aunque adjudicado sea 'Si'", () => {
+  it("sin ganador atribuible no hay fila, aunque adjudicado sea true", () => {
     expect(
-      mapearAdjudicatario({ ...ADJUDICADO, nombre_del_proveedor: "No Definido" }, CTX, null)
+      mapearAdjudicatario({ ...ADJUDICADO, adjudicatario: "No Definido" }, CTX, null)
     ).toBeNull();
   });
 });

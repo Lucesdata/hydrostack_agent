@@ -1,10 +1,14 @@
 /**
- * Mapeo puro payload → fila de `al_oferentes_historico` (SDD §4.7, módulo 2).
+ * Mapeo puro fila de `proceso` (o de proponentes) → fila de
+ * `al_oferentes_historico` (SDD §4.7, módulo 2).
  *
- * Sin IO y sin base: se prueba con literales. Toda la basura tipada de la fuente
- * (centinelas "No Definido", money como string, booleanos "Si"/"No") se resuelve
- * con los normalizadores que ya existen para la ingesta — `cleanText` y
- * `canonicalizeNit` —, no con una copia local de la lista de centinelas.
+ * Sin IO y sin base: se prueba con literales. `mapearAdjudicatario` leía del
+ * payload crudo hasta 2026-09-12; ahora lee de las columnas canónicas de
+ * `proceso`, que ya llegan tipadas (booleano real, money normalizado) desde la
+ * ingesta. `mapearProponente` sigue leyendo del dataset de proponentes
+ * (`hgi6-6wh3`), que no pasa por `proceso` y sí necesita los normalizadores
+ * que ya existen para la ingesta — `cleanText` y `canonicalizeNit` —, no una
+ * copia local de la lista de centinelas.
  */
 
 import { cleanText, stripAccents } from "@/src/lib/transform/normalize";
@@ -126,30 +130,52 @@ export interface ContextoProceso {
 }
 
 /**
- * Fila del ADJUDICATARIO a partir del payload de un proceso.
+ * Fila de `proceso` con los campos que necesita `mapearAdjudicatario`. Ya
+ * llegan tipados desde la ingesta (`mapProcesoRow`), salvo dos cosas que
+ * siguen necesitando los normalizadores locales: `unspsc` conserva el
+ * prefijo de versión ("V1.") porque `mapProcesoRow` solo le aplica
+ * `cleanText`, y `valorEstimado`/`valorAdjudicacion` conservan un `0` como
+ * número real (`parseMoney("0") === 0`, no `null`) porque esa regla de
+ * "0 no es precio" vive aquí, no en la ingesta.
+ */
+export interface FilaProceso {
+  secopProcesoId: string;
+  adjudicado: boolean | null;
+  adjudicatario: string | null;
+  nitAdjudicatario: string | null;
+  unspsc: string | null;
+  modalidad: string | null;
+  valorEstimado: string | null;
+  valorAdjudicacion: string | null;
+  fechaAdjudicacion: string | null;
+}
+
+/**
+ * Fila del ADJUDICATARIO a partir de la fila canónica de `proceso`.
  *
  * Devuelve `null` cuando el proceso no está adjudicado, y ése es el filtro que
  * importa: `estado_del_procedimiento='Seleccionado'` **no** implica adjudicado —
  * 23.195 de nuestros 36.724 "Seleccionado" tienen `adjudicado='No'`. Usar el
  * estado como criterio habría cargado un 63% de filas sin ganador.
+ *
+ * Hasta 2026-09-12 esto leía el payload crudo de `raw_record`; `adjudicado`
+ * era el string `"Si"`/`"No"` y ahora es un booleano real, así que la
+ * comparación es `=== true`, no `cleanText(...)?.toLowerCase() === "si"`.
  */
 export function mapearAdjudicatario(
-  payload: Record<string, unknown>,
+  fila: FilaProceso,
   ctx: ContextoProceso,
   rawRecordId: string | null
 ): FilaHistorico | null {
-  if (cleanText(payload.adjudicado)?.toLowerCase() !== "si") return null;
+  if (fila.adjudicado !== true) return null;
 
-  const nombre = cleanText(payload.nombre_del_proveedor);
+  const nombre = cleanText(fila.adjudicatario);
   if (nombre === null) return null; // sin ganador atribuible no hay fila que escribir
 
-  const secopProcesoId = cleanText(payload.id_del_proceso);
-  if (secopProcesoId === null) return null;
-
-  const { nitCanonico } = canonicalizeNit(payload.nit_del_proveedor_adjudicado, "NIT");
+  const { nitCanonico } = canonicalizeNit(fila.nitAdjudicatario, "NIT");
 
   return {
-    secopProcesoId,
+    secopProcesoId: fila.secopProcesoId,
     procesoId: ctx.procesoId,
     proveedorKey: proveedorKey(nitCanonico, nombre),
     // Un documento implausible tampoco se guarda: cruzaría mal contra
@@ -158,14 +184,14 @@ export function mapearAdjudicatario(
     proveedorNombre: nombre,
     adjudicado: true,
     entidadId: ctx.entidadId,
-    entidadNit: ctx.entidadNit ?? cleanText(payload.nit_entidad),
+    entidadNit: ctx.entidadNit,
     geografiaId: ctx.geografiaId,
-    unspsc: unspsc(payload.codigo_principal_de_categoria),
-    modalidad: ctx.modalidad ?? cleanText(payload.modalidad_de_contratacion),
-    valorEstimado: ctx.valorEstimado ?? money(payload.precio_base),
-    valorAdjudicado: money(payload.valor_total_adjudicacion),
-    fechaAdjudicacion: fecha(payload.fecha_adjudicacion),
-    fechaPublicacion: ctx.fechaPublicacion ?? fecha(payload.fecha_de_publicacion_del),
+    unspsc: unspsc(fila.unspsc),
+    modalidad: ctx.modalidad ?? fila.modalidad,
+    valorEstimado: ctx.valorEstimado ?? money(fila.valorEstimado),
+    valorAdjudicado: money(fila.valorAdjudicacion),
+    fechaAdjudicacion: fecha(fila.fechaAdjudicacion),
+    fechaPublicacion: ctx.fechaPublicacion,
     fuente: "proceso",
     rawRecordId,
   };
