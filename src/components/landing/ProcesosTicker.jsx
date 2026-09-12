@@ -126,10 +126,14 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
 }
 @media (max-width: 640px) {
   .ptr-bar { height: 48px; }
-  .ptr-cap { padding: 0 10px; font-size: 9px; }
+  /* El rótulo "EN VIVO" se come un tercio de la barra en un móvil y no dice
+     nada que el diamante pulsante no diga ya. Se va; el diamante se queda
+     como prueba de vida, que es lo único que esta barra tiene que demostrar. */
+  .ptr-cap { display: none; }
   .ptr-item { padding: 0 14px; }
   .ptr-row1 { font-size: 10.5px; }
-  .ptr-entidad { max-width: 170px; }
+  /* Sin tope: con el rótulo fuera, la entidad puede usar el ancho que hay. */
+  .ptr-entidad { max-width: none; }
   .ptr-row2 { font-size: 9px; }
 }
 `;

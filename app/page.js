@@ -215,6 +215,16 @@ const BLUEPRINT_CSS = `
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
+  /* Las tres cifras del sector se repiten más abajo, en S3Motor (procesos
+     vigilados) y S4Competidores (oferentes y sanciones), que es donde
+     significan algo. En un móvil, aquí solo empujan el CTA fuera de pantalla.
+     Quedan las dos cifras vivas y la credencial de .bp-hero-metrics. */
+  .bp-hero-sector { display: none; }
+  .bp-hero-cta { flex-direction: column; align-items: stretch; gap: 12px; }
+  .bp-hero-cta-main { width: 100%; }
+  .bp-hero-cta-main .bp-cta { display: flex; width: 100%; justify-content: center; }
+  .bp-hero-cta-nota { text-align: center; }
+  .bp-page a.bp-hero-cta-alt { justify-content: center; text-align: center; }
 }
 `;
 

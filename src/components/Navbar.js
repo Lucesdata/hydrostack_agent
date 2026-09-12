@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ruta } from "./landing/seccionesHome";
 
 // Las pestañas del navbar. Se dejaron de renderizar en d0e9cda ("simplifica
 // navbar a minimalista") y el array quedó vivo pero muerto: durante dos semanas
@@ -40,6 +41,11 @@ const ACCOUNT_ITEMS = [
   { href: "/cuenta", label: "Preferencias de alerta" },
 ];
 
+// El único destino que la portada persigue. Por debajo de 1024px el navbar
+// esconde toda la navegación en la hamburguesa; dejar "Licitaciones" fuera
+// del menú es la diferencia entre un destino y un destino que hay que buscar.
+const RUTA_EXPLORAR = ruta("explorar");
+
 const AUTH_CSS = `
 .clr-nav-auth{ display: none; align-items: center; gap: 10px; margin-left: 8px; }
 @media (min-width: 1024px) {
@@ -56,6 +62,15 @@ const AUTH_CSS = `
   padding: 7px 12px; white-space: nowrap;
 }
 .clr-nav-auth-cta:hover{ opacity: .9; }
+.clr-nav-explorar{
+  display: flex; align-items: center; margin-left: auto; margin-right: 10px;
+  font: 600 11px var(--font-mono, monospace); letter-spacing: .1em;
+  text-transform: uppercase; white-space: nowrap;
+  color: #fff; background: var(--accent, #0369A1); text-decoration: none;
+  padding: 0 12px; min-height: 34px;
+}
+.clr-nav-explorar:hover{ opacity: .9; }
+@media (min-width: 1024px) { .clr-nav-explorar{ display: none; } }
 /* Banda estrecha de escritorio (1024-1199px) — la contraparte de la regla
    del mismo rango en app/globals.css, donde está explicado el porqué. Vive
    aquí y no allí porque este <style> se inyecta después de la hoja global y
@@ -281,6 +296,10 @@ export default function Navbar({ user, hasNewMatches }) {
             </>
           )}
         </div>
+
+        <Link href={RUTA_EXPLORAR.href} className="clr-nav-explorar" onClick={close}>
+          Licitaciones
+        </Link>
 
         <button
           className="clr-hamburger"
