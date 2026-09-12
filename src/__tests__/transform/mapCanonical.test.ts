@@ -125,3 +125,51 @@ describe("mapContratoRow", () => {
     expect((c.proveedor as unknown as Record<string, unknown> | null)?.nitValidDv).toBeUndefined();
   });
 });
+
+describe("mapProcesoRow — campos promovidos", () => {
+  it("extrae la url de dentro del objeto urlproceso", () => {
+    const p = mapProcesoRow({
+      id_del_proceso: "CO1.REQ.1",
+      urlproceso: { url: "https://community.secop.gov.co/x" },
+    });
+    expect(p.url).toBe("https://community.secop.gov.co/x");
+  });
+
+  it("url es null cuando urlproceso no trae objeto", () => {
+    expect(mapProcesoRow({ id_del_proceso: "CO1.REQ.1" }).url).toBeNull();
+    expect(mapProcesoRow({ id_del_proceso: "CO1.REQ.1", urlproceso: "x" }).url).toBeNull();
+  });
+
+  it("adjudicado convierte 'Si'/'No' a boolean", () => {
+    expect(mapProcesoRow({ id_del_proceso: "a", adjudicado: "Si" }).adjudicado).toBe(true);
+    expect(mapProcesoRow({ id_del_proceso: "a", adjudicado: "No" }).adjudicado).toBe(false);
+    expect(mapProcesoRow({ id_del_proceso: "a" }).adjudicado).toBeNull();
+  });
+
+  it("conserva el unspsc crudo con su prefijo de versión", () => {
+    const p = mapProcesoRow({ id_del_proceso: "a", codigo_principal_de_categoria: "V1.83101500" });
+    expect(p.unspsc).toBe("V1.83101500");
+  });
+
+  it("descripcion es independiente de objeto", () => {
+    const p = mapProcesoRow({
+      id_del_proceso: "a",
+      nombre_del_procedimiento: "Acueducto",
+      descripci_n_del_procedimiento: "Construcción de red de acueducto veredal",
+    });
+    expect(p.objeto).toBe("Acueducto");
+    expect(p.descripcion).toBe("Construcción de red de acueducto veredal");
+  });
+});
+
+describe("mapContratoRow — campos promovidos", () => {
+  it("extrae unspsc y url", () => {
+    const c = mapContratoRow({
+      id_contrato: "CO1.PCCNTR.1",
+      codigo_de_categoria_principal: "V1.83101500",
+      urlproceso: { url: "https://community.secop.gov.co/y" },
+    });
+    expect(c.unspsc).toBe("V1.83101500");
+    expect(c.url).toBe("https://community.secop.gov.co/y");
+  });
+});

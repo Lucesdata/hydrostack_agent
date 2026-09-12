@@ -63,6 +63,17 @@ export interface ProcesoProjection {
   fechaPublicacion: string | null;
   estadoActual: string | null;
   estadoCodigo: string | null;
+  descripcion: string | null;
+  url: string | null;
+  unspsc: string | null;
+  fase: string | null;
+  adjudicado: boolean | null;
+  valorAdjudicacion: number | null;
+  adjudicatario: string | null;
+  nitAdjudicatario: string | null;
+  fechaAdjudicacion: string | null;
+  estadoApertura: string | null;
+  fechaRecepcion: string | null;
   entidad: EntidadProjection | null;
   geo: GeoHints;
 }
@@ -83,6 +94,8 @@ export interface ContratoProjection {
   valorFacturado: number | null;
   valorPagado: number | null;
   valorPendientePago: number | null;
+  unspsc: string | null;
+  url: string | null;
   entidad: EntidadProjection | null;
   proveedor: ProveedorProjection | null;
   proveedorRaw: string | null; // texto crudo cuando proveedor no canóniza (D3)
@@ -124,6 +137,17 @@ export function mapProcesoRow(row: SodaRow): ProcesoProjection {
     fechaPublicacion: parseDate(row["fecha_de_publicacion_del"]),
     estadoActual: cleanText(row["estado_del_procedimiento"]),
     estadoCodigo: cleanText(row["id_estado_del_procedimiento"]),
+    descripcion: cleanText(row["descripci_n_del_procedimiento"]),
+    url: urlDe(row["urlproceso"]),
+    unspsc: cleanText(row["codigo_principal_de_categoria"]),
+    fase: cleanText(row["fase"]),
+    adjudicado: parseBool(row["adjudicado"]),
+    valorAdjudicacion: parseMoney(row["valor_total_adjudicacion"]),
+    adjudicatario: cleanText(row["nombre_del_proveedor"]),
+    nitAdjudicatario: cleanText(row["nit_del_proveedor_adjudicado"]),
+    fechaAdjudicacion: parseDate(row["fecha_adjudicacion"]),
+    estadoApertura: cleanText(row["estado_de_apertura_del_proceso"]),
+    fechaRecepcion: parseDate(row["fecha_de_recepcion_de"]),
     entidad: buildEntidad(row["nit_entidad"], row["entidad"], row["ordenentidad"], null, null),
     geo: {
       departamento: normalizeGeoText(row["departamento_entidad"]),
@@ -165,6 +189,8 @@ export function mapContratoRow(row: SodaRow): ContratoProjection {
     valorFacturado: parseMoney(row["valor_facturado"]),
     valorPagado: parseMoney(row["valor_pagado"]),
     valorPendientePago: parseMoney(row["valor_pendiente_de_pago"]),
+    unspsc: cleanText(row["codigo_de_categoria_principal"]),
+    url: urlDe(row["urlproceso"]),
     entidad: buildEntidad(
       row["nit_entidad"],
       row["nombre_entidad"],
@@ -217,4 +243,13 @@ function parseLocalizacion(value: unknown): GeoHints {
     return { departamento: null, municipio: segments[0] };
   }
   return { departamento: null, municipio: null };
+}
+
+/**
+ * `urlproceso` llega como objeto `{ url: "..." }`, no como string. Verificado
+ * sobre payloads reales: 100% de las filas que lo traen usan esa forma.
+ */
+function urlDe(value: unknown): string | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  return cleanText((value as Record<string, unknown>)["url"]);
 }
