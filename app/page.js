@@ -71,9 +71,11 @@ const BLUEPRINT_CSS = `
   letter-spacing: -0.01em;
   color: #0A1F1C;
   margin: 0 0 20px;
-  /* 30ch y no 22ch: la primera línea tiene 34 caracteres y con 22ch se partía,
-     rompiendo el diseño de dos líneas. white-space:nowrap no es opción: a
-     360px reventaría el ancho de la página. */
+  /* 30ch (1036px a 64px de cuerpo) es holgura, no restricción: quien manda de
+     verdad es la columna del grid del hero, que a 1440px mide 645px. Se midió.
+     El reparto en líneas del titular NO se resuelve aquí, sino partiéndolo en
+     tres .hero-mask en el JSX; este tope solo evita que en un contenedor futuro
+     más ancho el titular se estire hasta ser ilegible. */
   max-width: min(100%, 30ch);
 }
 
@@ -86,6 +88,7 @@ const BLUEPRINT_CSS = `
 }
 .hero-mask-1 > span { animation-delay: .2s; }
 .hero-mask-2 > span { animation-delay: .32s; }
+.hero-mask-3 > span { animation-delay: .44s; }
 @keyframes hero-riseLine { to { transform: translateY(0); } }
 
 .hero-draw {
@@ -200,6 +203,8 @@ const BLUEPRINT_CSS = `
 }
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
+.bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
+
 
 @media (max-width: 900px) {
   .bp-hero-grid { gap: 36px; }
@@ -560,16 +565,27 @@ export default function LandingPage() {
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
+                {/* Tres máscaras, no dos. Cada .hero-mask lleva overflow:hidden y
+                    revela su contenido deslizándolo: si dentro se parten dos
+                    líneas, el efecto deja de ser "una línea tras otra" y pasa a
+                    ser un bloque que sube entero. Con el titular a 64px en una
+                    columna de 645px caben ~20 caracteres por línea, así que
+                    "Los procesos de agua del SECOP II," se partía sola y "agua"
+                    caía a la segunda línea. Se reparte a mano en tres tramos que
+                    sí caben (577px, 350px y 633px medidos): el reveal vuelve a
+                    ser por línea y la palabra clave se queda arriba, subrayada. */}
                 <span className="hero-mask hero-mask-1">
                   <span>
                     Los procesos de{" "}
                     <span style={{ whiteSpace: "nowrap" }}>
                       <span className="hero-draw">agua</span>
-                    </span>{" "}
-                    del SECOP II,
+                    </span>
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
+                  <span>del SECOP II,</span>
+                </span>
+                <span className="hero-mask hero-mask-3">
                   <span>filtrados por tus reglas.</span>
                 </span>
               </h1>
@@ -592,11 +608,7 @@ export default function LandingPage() {
                   que las acompaña sigue siendo cierta sin la cifra. */}
               <div
                 className="bp-hero-sector"
-                style={{
-                  display: "flex",
-                  gap: 28,
-                  flexWrap: "wrap",
-                  margin: "28px 0 8px",
+                style={{margin: "28px 0 8px",
                   paddingTop: 20,
                   borderTop: "1px solid #DADAD2",
                 }}
