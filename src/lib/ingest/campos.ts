@@ -32,12 +32,14 @@ const EXTRA_CONTRATOS = [
   "tipodocproveedor", // → canonicalizeNit + proveedor.tipo_documento
   "nombre_representante_legal", // → proveedor.raw_attrs.representante_legal
   "descripcion_del_proceso", // → fallback de contrato.objeto
+  "modalidad_de_contratacion", // → contrato.modalidad
+  "tipo_de_contrato", // → contrato.tipoContrato
   "el_contrato_puede_ser_prorrogado", // → contrato.prorrogable
-  "fecha_de_inicio_del_contrato",
-  "fecha_de_fin_del_contrato",
-  "valor_facturado",
-  "valor_pagado",
-  "valor_pendiente_de_pago",
+  "fecha_de_inicio_del_contrato", // → contrato.fechaInicio
+  "fecha_de_fin_del_contrato", // → contrato.fechaFin
+  "valor_facturado", // → contrato.valorFacturado
+  "valor_pagado", // → contrato.valorPagado
+  "valor_pendiente_de_pago", // → contrato.valorPendientePago
 ] as const;
 
 export function camposDe(source: IngestSourceKey): string[] {
