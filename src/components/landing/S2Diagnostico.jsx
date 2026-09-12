@@ -35,7 +35,7 @@ export default function S2Diagnostico() {
               letterSpacing: ".08em",
             }}
           >
-            Empieza aquí · {RUTA.etiqueta}
+            Paso previo · opcional · {RUTA.etiqueta}
           </span>
         </div>
 
@@ -58,9 +58,8 @@ export default function S2Diagnostico() {
             margin: "0 0 40px",
           }}
         >
-          Diez preguntas sobre tu empresa. Sin cuenta, sin correo y sin IA: el resultado se calcula
-          con reglas fijas, así que dos veces las mismas respuestas dan dos veces el mismo
-          veredicto.
+          Diez preguntas, sin cuenta y sin IA: reglas fijas, así que las mismas respuestas dan
+          siempre el mismo veredicto.
         </p>
 
         <div className="grid-cards" style={{ marginBottom: 40 }}>
