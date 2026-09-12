@@ -99,7 +99,7 @@ async function fromDb(): Promise<ProcesoResumen[]> {
     import("@/src/lib/db/schema"),
     import("drizzle-orm"),
   ]);
-  const { proceso, entidad, geografia, rawRecord } = schema;
+  const { proceso, entidad, geografia } = schema;
 
   const rows = await db
     .select({
@@ -113,12 +113,11 @@ async function fromDb(): Promise<ProcesoResumen[]> {
       entidadNombre: entidad.nombre,
       departamento: geografia.departamentoNombre,
       municipio: geografia.municipioNombre,
-      urlRaw: sql<unknown>`${rawRecord.payload}->'urlproceso'`,
+      urlRaw: proceso.url,
     })
     .from(proceso)
     .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
     .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
-    .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
     .where(isNull(proceso.deletedAt))
     .orderBy(sql`${proceso.fechaPublicacion} DESC NULLS LAST`)
     .limit(RECIENTES_LIMIT);
