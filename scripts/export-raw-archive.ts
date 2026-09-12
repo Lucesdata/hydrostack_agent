@@ -11,7 +11,7 @@ import { createWriteStream } from "fs";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import { asc, gt } from "drizzle-orm";
-import { db } from "@/src/lib/db/client";
+import { db, pool } from "@/src/lib/db/client";
 import { rawRecord } from "@/src/lib/db/schema";
 import { serializarLote, type FilaArchivo } from "@/src/lib/archivo/exportar";
 
@@ -55,5 +55,15 @@ async function* lotes(): AsyncGenerator<string> {
   process.stderr.write(`\ntotal: ${total}\n`);
 }
 
-await pipeline(Readable.from(lotes()), createGzip({ level: 9 }), createWriteStream(DESTINO));
-console.log(`escrito ${DESTINO}`);
+try {
+  await pipeline(Readable.from(lotes()), createGzip({ level: 9 }), createWriteStream(DESTINO));
+  console.log(`escrito ${DESTINO}`);
+} catch (err) {
+  process.stderr.write(`\nexport fallido: ${err instanceof Error ? err.message : String(err)}\n`);
+  process.exitCode = 1;
+} finally {
+  // Sin esto el pool (`keepAlive: true`) deja el event loop vivo y el
+  // script nunca termina: es la red de seguridad de un TRUNCATE, así que
+  // tiene que salir solo, sin que alguien lo mate a mano.
+  await pool.end();
+}
