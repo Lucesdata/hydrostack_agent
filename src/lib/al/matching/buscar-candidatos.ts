@@ -22,14 +22,20 @@
  *
  * El coste es despreciable: la red sectorial ya se aplicó en ingesta, así que el
  * universo abierto son ~550 procesos, no 90.000.
+ *
+ * Política de fallback (adelgazamiento de raw_record): igual que `recientes.ts`
+ * y a diferencia de `db-search.ts`, esta consulta NO hace `coalesce` al
+ * payload — lee directo de las columnas de `proceso`. Hasta que corra el
+ * backfill, los campos promovidos que aún no tienen columna llena vienen
+ * `null` para `evaluarFiltro`. Aceptado porque el cron de matching que corre
+ * esto está pausado durante la ventana del corte (`vercel.json`), así que no
+ * hay usuarios viendo resultados degradados mientras tanto.
  */
 
 import { and, eq, isNull, sql, type SQL } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { proceso } from "@/src/lib/db/schema/hechos";
 import { entidad } from "@/src/lib/db/schema/catalogos";
-import { rawRecord } from "@/src/lib/db/schema/raw";
-import { FIELDS_PROCESOS as F } from "@/src/lib/secop/config";
 import { UNSPSC_PREFIX } from "@/src/lib/secop/ingest-net";
 import type { ProcesoEvaluable } from "./tipos";
 
@@ -58,8 +64,6 @@ export async function buscarCandidatos(opts: OpcionesBusqueda = {}): Promise<Res
   const condiciones: SQL[] = [isNull(proceso.deletedAt)];
   if (estado !== null) condiciones.push(eq(proceso.estadoActual, estado));
 
-  const payload = sql`${rawRecord.payload}`;
-
   const rows = await db
     .select({
       secopProcesoId: proceso.secopProcesoId,
@@ -68,13 +72,12 @@ export async function buscarCandidatos(opts: OpcionesBusqueda = {}): Promise<Res
       divipola: proceso.geografiaId,
       entidadNit: entidad.nitCanonico,
       valorEstimado: sql<string | null>`${proceso.valorEstimado}::text`,
-      nombre: sql<string | null>`(${payload}->>${F.nombre})`,
-      descripcion: sql<string | null>`(${payload}->>${F.descripcion})`,
-      unspscRaw: sql<string | null>`(${payload}->>${F.unspsc})`,
+      nombre: proceso.objeto,
+      descripcion: proceso.descripcion,
+      unspscRaw: proceso.unspsc,
     })
     .from(proceso)
     .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
-    .leftJoin(rawRecord, eq(rawRecord.id, proceso.rawRecordIdActual))
     .where(and(...condiciones))
     .limit(limite);
 

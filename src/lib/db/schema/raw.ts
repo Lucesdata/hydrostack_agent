@@ -31,8 +31,11 @@ export const rawRecord = pgTable(
     source: text("source").notNull(),
     // Id nativo del registro en la fuente (id_del_proceso / id_contrato)
     sourceRecordId: text("source_record_id").notNull(),
-    // Registro original tal cual llegó, sin recortar ni renombrar
-    payload: jsonb("payload").notNull(),
+    // Registro original tal cual llegó. NULLABLE desde 2026-09-12: el payload
+    // es un BUFFER, no un almacén — el transform lo consume y lo vacía en el
+    // mismo ciclo (ver transform/orchestrator.ts). En régimen solo tiene
+    // contenido lo pendiente de transformar.
+    payload: jsonb("payload"),
     // SHA-256 del JSON canónico EXCLUYENDO campos volátiles (D10)
     payloadHash: text("payload_hash").notNull(),
     ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),

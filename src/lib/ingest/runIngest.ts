@@ -13,10 +13,11 @@
  */
 
 import { randomUUID } from "crypto";
-import type { IngestSource } from "./sources";
+import type { IngestSource, IngestSourceKey } from "./sources";
 import { windowStart, maxWatermark } from "./watermark";
 import { buildKeysetPage, buildSweepPage, cursorFromRow, type SodaPageParams } from "./pagination";
 import { toRawRecord, type RawRecordInsert } from "./mapRecord";
+import { selectDe } from "./campos";
 
 export type SodaFetcher = (
   dataset: string,
@@ -72,14 +73,17 @@ export async function runIngest(
   let reachedMaxPages = false;
 
   while (pages < maxPages) {
-    const params = buildKeysetPage({
-      watermarkField: source.watermarkField,
-      idField: source.idField,
-      sinceExclusive: start,
-      cursor,
-      sectorWhere: source.sectorWhere,
-      limit: pageSize,
-    });
+    const params = {
+      ...buildKeysetPage({
+        watermarkField: source.watermarkField,
+        idField: source.idField,
+        sinceExclusive: start,
+        cursor,
+        sectorWhere: source.sectorWhere,
+        limit: pageSize,
+      }),
+      $select: selectDe(source.source as IngestSourceKey),
+    };
 
     const rows = await deps.fetchPage(source.dataset, params);
     if (rows.length === 0) break;
@@ -161,13 +165,16 @@ export async function runSweep(
   let reachedMaxPages = false;
 
   while (pages < maxPages) {
-    const params = buildSweepPage({
-      idField: source.idField,
-      watermarkField: source.watermarkField,
-      sinceIdExclusive: cursor,
-      sectorWhere: source.sectorWhere,
-      limit: pageSize,
-    });
+    const params = {
+      ...buildSweepPage({
+        idField: source.idField,
+        watermarkField: source.watermarkField,
+        sinceIdExclusive: cursor,
+        sectorWhere: source.sectorWhere,
+        limit: pageSize,
+      }),
+      $select: selectDe(source.source as IngestSourceKey),
+    };
 
     const rows = await deps.fetchPage(source.dataset, params);
     if (rows.length === 0) break;

@@ -1,11 +1,12 @@
 /**
  * Corrida del detector de eventos (SDD Fase 5).
  *
- * Lee el payload vigente de cada proceso vigilado, lo compara con
- * `al_proceso_estado` y escribe en `al_proceso_evento` lo que cambió. Después
- * actualiza la línea base y suelta del seguimiento los procesos que llegaron a
- * un estado terminal — es lo que mantiene la tabla acotada, y es la lección que
- * dejó `contrato_evento` al retirarse en `drizzle/0011`.
+ * Lee el estado vigente de cada proceso vigilado (columnas de `proceso`, no
+ * `raw_record.payload` — 2026-09-12, ver ADR de adelgazamiento), lo compara
+ * con `al_proceso_estado` y escribe en `al_proceso_evento` lo que cambió.
+ * Después actualiza la línea base y suelta del seguimiento los procesos que
+ * llegaron a un estado terminal — es lo que mantiene la tabla acotada, y es la
+ * lección que dejó `contrato_evento` al retirarse en `drizzle/0011`.
  *
  * **Qué se vigila:** los procesos no terminales, MÁS los que ya tienen línea
  * base aunque ahora sean terminales. Ese "más" no es un detalle: la transición
@@ -24,8 +25,7 @@ import { and, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { alProcesoEstado, alProcesoEvento } from "@/src/lib/db/schema/aqualicita";
 import { proceso } from "@/src/lib/db/schema/hechos";
-import { rawRecord } from "@/src/lib/db/schema/raw";
-import { detectarEvento, estadoDesdePayload, esTerminal, type EstadoProceso } from "./detectar";
+import { detectarEvento, esTerminal, hash, type EstadoProceso } from "./detectar";
 
 /** Días desde la publicación dentro de los que un proceso nuevo cuenta como apertura. */
 export const VENTANA_APERTURA_DIAS = 30;
@@ -44,6 +44,47 @@ export interface ResumenEventos {
 function dentroDeVentana(fechaPublicacion: string | null, dias: number): boolean {
   if (!fechaPublicacion) return false;
   return new Date(fechaPublicacion).getTime() >= Date.now() - dias * 24 * 60 * 60 * 1000;
+}
+
+/** La fila canónica de `proceso` que necesita el detector — el select de abajo. */
+export interface FilaProceso {
+  secopProcesoId: string;
+  estadoActual: string | null;
+  estadoApertura: string | null;
+  valorEstimado: string | null;
+  modalidad: string | null;
+  fechaRecepcion: string | null;
+  adjudicado: boolean | null;
+  valorAdjudicacion: string | null;
+  nitAdjudicatario: string | null;
+  objeto: string | null;
+  descripcion: string | null;
+}
+
+/**
+ * Proyecta la fila canónica de `proceso` al estado que se guarda en
+ * `al_proceso_estado` y se compara. Reemplaza a `estadoDesdePayload`
+ * (`detectar.ts`) en esta corrida: las columnas ya llegan tipadas y limpias
+ * desde la ingesta, así que no hace falta re-parsear texto/money/fecha.
+ *
+ * `objetoHash` usa `hash()` de `detectar.ts` — la MISMA función que ya
+ * escribió los `al_proceso_estado.objeto_hash` persistidos, no una fórmula
+ * nueva. Reutilizar en vez de reimplementar es el punto: dos funciones
+ * calculando lo mismo es lo que permitió que divergieran la primera vez
+ * (2026-09-12, ver `eventos-columnas.test.ts` para el caso que lo fija).
+ */
+export function estadoDesdeProceso(fila: FilaProceso): EstadoProceso {
+  return {
+    estado: fila.estadoActual,
+    estadoApertura: fila.estadoApertura,
+    valorEstimado: fila.valorEstimado,
+    modalidad: fila.modalidad,
+    fechaRecepcion: fila.fechaRecepcion,
+    adjudicado: fila.adjudicado,
+    valorAdjudicado: fila.valorAdjudicacion,
+    adjudicatarioNit: fila.nitAdjudicatario,
+    objetoHash: hash(fila.objeto, fila.descripcion),
+  };
 }
 
 export async function correrDeteccionEventos(
@@ -67,14 +108,21 @@ export async function correrDeteccionEventos(
       .select({
         secopProcesoId: proceso.secopProcesoId,
         procesoId: proceso.id,
-        rawRecordId: rawRecord.id,
-        payload: rawRecord.payload,
+        rawRecordId: proceso.rawRecordIdActual,
         fechaPublicacion: sql<string | null>`${proceso.fechaPublicacion}::text`,
-        sourceUpdatedAt: rawRecord.sourceUpdatedAt,
+        estadoActual: proceso.estadoActual,
+        estadoApertura: proceso.estadoApertura,
+        valorEstimado: sql<string | null>`${proceso.valorEstimado}::text`,
+        modalidad: proceso.modalidad,
+        fechaRecepcion: sql<string | null>`${proceso.fechaRecepcion}::text`,
+        adjudicado: proceso.adjudicado,
+        valorAdjudicacion: sql<string | null>`${proceso.valorAdjudicacion}::text`,
+        nitAdjudicatario: proceso.nitAdjudicatario,
+        objeto: proceso.objeto,
+        descripcion: proceso.descripcion,
         base: alProcesoEstado,
       })
       .from(proceso)
-      .leftJoin(rawRecord, eq(rawRecord.id, proceso.rawRecordIdActual))
       .leftJoin(alProcesoEstado, eq(alProcesoEstado.secopProcesoId, proceso.secopProcesoId))
       .where(
         and(
@@ -99,8 +147,6 @@ export async function correrDeteccionEventos(
     const aLiberar: string[] = [];
 
     for (const f of filas) {
-      const payload = f.payload as Record<string, unknown> | null;
-      if (!payload) continue;
       r.evaluados++;
 
       const previo = f.base;
@@ -119,8 +165,8 @@ export async function correrDeteccionEventos(
             }
           : null;
 
-      const nuevo = estadoDesdePayload(payload);
-      const evento = detectarEvento(anterior, payload);
+      const nuevo = estadoDesdeProceso(f);
+      const evento = detectarEvento(anterior, nuevo);
       const terminal = esTerminal(nuevo.estado);
 
       if (terminal) {
@@ -147,7 +193,11 @@ export async function correrDeteccionEventos(
         procesoId: f.procesoId,
         secopProcesoId: f.secopProcesoId,
         tipoEvento: evento.tipoEvento,
-        sourceObservedAt: f.sourceUpdatedAt,
+        // Antes venía de `rawRecord.sourceUpdatedAt` (el JOIN que se quitó). La
+        // columna es metadata sin lector hoy (grep sobre `sourceObservedAt` en
+        // src/ solo devuelve esta escritura y la definición del esquema), así
+        // que se deja `null` en vez de inventar un proxy que nadie pidió.
+        sourceObservedAt: null,
         estadoAnterior: evento.estadoAnterior,
         estadoNuevo: evento.estadoNuevo,
         valorAnterior: evento.valorAnterior,

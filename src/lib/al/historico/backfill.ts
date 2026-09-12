@@ -5,8 +5,9 @@
  * `UNIQUE (secop_proceso_id, proveedor_key)`:
  *
  *   1. `backfillAdjudicatarios` — local, sin red. El ganador y su precio salen
- *      de `raw_record`, que ya está en casa. Escribe con `onConflictDoUpdate`:
- *      una adjudicación puede corregirse en la fuente.
+ *      de las columnas canónicas de `proceso` (hasta 2026-09-12 salían de
+ *      `raw_record.payload`), que ya está en casa. Escribe con
+ *      `onConflictDoUpdate`: una adjudicación puede corregirse en la fuente.
  *   2. `backfillProponentes` — red, dataset `hgi6-6wh3`. Escribe con
  *      `onConflictDoNothing` para **no degradar** una fila de adjudicatario si
  *      el ganador aparece también como proponente. Las dos pasadas convergen en
@@ -22,7 +23,6 @@ import { and, eq, isNotNull, or, ilike, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { alOferentesHistorico } from "@/src/lib/db/schema/aqualicita";
 import { proceso } from "@/src/lib/db/schema/hechos";
-import { rawRecord } from "@/src/lib/db/schema/raw";
 import { entidad } from "@/src/lib/db/schema/catalogos";
 import { sodaFetchPage } from "@/src/lib/ingest/sodaFetch";
 import {
@@ -103,8 +103,14 @@ export async function backfillAdjudicatarios(
   for (;;) {
     const rows = await db
       .select({
-        rawId: rawRecord.id,
-        payload: rawRecord.payload,
+        rawId: proceso.rawRecordIdActual,
+        secopProcesoId: proceso.secopProcesoId,
+        adjudicado: proceso.adjudicado,
+        adjudicatario: proceso.adjudicatario,
+        nitAdjudicatario: proceso.nitAdjudicatario,
+        unspsc: proceso.unspsc,
+        valorAdjudicacion: sql<string | null>`${proceso.valorAdjudicacion}::text`,
+        fechaAdjudicacion: sql<string | null>`${proceso.fechaAdjudicacion}::text`,
         procesoId: proceso.id,
         entidadId: proceso.entidadId,
         entidadNit: entidad.nitCanonico,
@@ -113,16 +119,10 @@ export async function backfillAdjudicatarios(
         valorEstimado: sql<string | null>`${proceso.valorEstimado}::text`,
         fechaPublicacion: sql<string | null>`${proceso.fechaPublicacion}::text`,
       })
-      .from(rawRecord)
-      .leftJoin(proceso, eq(proceso.secopProcesoId, rawRecord.sourceRecordId))
+      .from(proceso)
       .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
-      .where(
-        and(
-          eq(rawRecord.source, "secop_ii_procesos"),
-          sql`${rawRecord.payload}->>'adjudicado' = 'Si'`
-        )
-      )
-      .orderBy(rawRecord.id)
+      .where(eq(proceso.adjudicado, true))
+      .orderBy(proceso.id)
       .limit(lote)
       .offset(offset);
 
@@ -131,11 +131,7 @@ export async function backfillAdjudicatarios(
     const filas: FilaHistorico[] = [];
     for (const r of rows) {
       resumen.procesados++;
-      const fila = mapearAdjudicatario(
-        r.payload as Record<string, unknown>,
-        contextoDe(r),
-        r.rawId
-      );
+      const fila = mapearAdjudicatario(r, contextoDe(r), r.rawId);
       if (fila) filas.push(fila);
       else resumen.omitidos++;
     }

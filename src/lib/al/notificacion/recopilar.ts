@@ -47,11 +47,15 @@ export interface Novedades {
   total: number;
 }
 
-/** Campos de display que solo viven en el payload crudo. */
+/**
+ * Campos de display: ya viven en columnas propias, no en el payload crudo.
+ * El alias de la entidad es `ent`, no `e` — en `eventosDe` la `e` ya nombra
+ * `al_proceso_evento`.
+ */
 const DISPLAY = sql`
-  (r.payload->>'nombre_del_procedimiento')      AS titulo,
-  (r.payload->>'entidad')                       AS entidad,
-  (r.payload->'urlproceso'->>'url')             AS url,
+  p.objeto                                      AS titulo,
+  ent.nombre                                    AS entidad,
+  p.url                                         AS url,
   p.valor_estimado::text                        AS valor_estimado
 `;
 
@@ -72,7 +76,7 @@ async function eventosDe(
         ON c.proceso_id = e.secop_proceso_id
        AND COALESCE(c.account_id, c.usuario_id) = ${accountId}
       JOIN proceso p ON p.secop_proceso_id = e.secop_proceso_id
-      LEFT JOIN raw_record r ON r.id = p.raw_record_id_actual
+      LEFT JOIN entidad ent ON ent.id = p.entidad_id
      WHERE e.tipo_evento = ${tipo}
        AND e.detected_at >= ${desde}
      ORDER BY e.secop_proceso_id, e.detected_at DESC
@@ -93,7 +97,7 @@ async function aperturasDe(accountId: string, desde: Date): Promise<NovedadApert
       FROM coincidencia c
       JOIN al_filtros_usuario f ON f.id = c.filtro_id
       JOIN proceso p ON p.secop_proceso_id = c.proceso_id
-      LEFT JOIN raw_record r ON r.id = p.raw_record_id_actual
+      LEFT JOIN entidad ent ON ent.id = p.entidad_id
      WHERE COALESCE(c.account_id, c.usuario_id) = ${accountId}
        AND c.filtro_id IS NOT NULL
        AND c.creado_en >= ${desde}

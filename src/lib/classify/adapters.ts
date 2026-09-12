@@ -1,8 +1,13 @@
 /**
  * Adaptadores fila cruda SODA → `ClassifierInput` (0.2.1: recomputable sobre
- * `raw_record`). El clasificador necesita el UNSPSC, que la proyección canónica
- * lean (mapCanonical) no persiste; por eso se arma desde la fila cruda, que sí lo
- * trae (`codigo_de_categoria_principal` / `codigo_principal_de_categoria`).
+ * `raw_record`). Se arma desde la fila cruda, que trae el UNSPSC
+ * (`codigo_de_categoria_principal` / `codigo_principal_de_categoria`).
+ * Corrección (adelgazamiento de raw_record, 2026-09-12): este docstring decía
+ * que `mapCanonical` no persistía el UNSPSC — eso ya no es cierto, desde este
+ * branch `mapCanonical` sí proyecta `unspsc` a columna propia en
+ * `proceso`/`contrato`. La razón real de leer la fila cruda aquí es que estos
+ * adaptadores están pensados para re-clasificar sobre `raw_record` sin pasar
+ * por el transform, no una limitación de `mapCanonical`.
  */
 
 import { cleanText } from "../transform/normalize";

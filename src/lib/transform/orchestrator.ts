@@ -12,9 +12,13 @@
  * muestra trae contratos sin proceso (ventanas BDOS disjuntas, 0.2 §5.1),
  * proceso_id queda NULL — el contrato NO se descarta.
  *
- * Idempotente: corre dos veces sobre el mismo raw_record y deja el mismo
- * estado canónico (UPSERTs por clave natural; reescribe todas las columnas
- * no-PK en UPDATE para no dejar columnas zombi).
+ * Idempotente DENTRO de una corrida: procesar la misma fila dos veces en el
+ * mismo batch deja el mismo estado canónico (UPSERTs por clave natural;
+ * reescribe todas las columnas no-PK en UPDATE para no dejar columnas
+ * zombi). ENTRE corridas ya no es un re-procesamiento sino un no-op: una vez
+ * que `vaciarPayloads()` (0.9) pone el payload en NULL, `latestSnapshots`
+ * filtra esa fila (`payload IS NOT NULL`) y la corrida siguiente no vuelve a
+ * tocarla — por diseño, no porque re-mapear un payload NULL sea seguro.
  *
  * Una sola fila por source_record_id: desde 2026-08-16 raw_record hace upsert
  * (una fila por registro), así que el DISTINCT ON por ingested_at es un no-op
@@ -22,9 +26,11 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { db } from "@/src/lib/db/client";
 import { rawRecord } from "@/src/lib/db/schema";
+import type * as schema from "@/src/lib/db/schema";
 import {
   mapContratoRow,
   mapProcesoRow,
@@ -47,6 +53,8 @@ import {
 } from "./writers";
 import { preclassify } from "@/src/lib/secop/document-access";
 
+type Db = NeonDatabase<typeof schema>;
+
 export interface SourceMetrics {
   totalSnapshots: number; // filas en raw_record para la source
   uniqueRecords: number; // source_record_ids distintos (filas que entran al transform)
@@ -59,6 +67,7 @@ export interface SourceMetrics {
   proveedorCentinela: number; // documento basura → proveedor NULL + proveedor_raw
   procesoNoEncontrado: number; // contrato sin proceso (ventana BDOS disjunta)
   cuarentena: number; // errores estructurales
+  payloadsVaciados: number; // filas cuyo payload se soltó tras transformar sin error
 }
 
 export interface TransformSummary {
@@ -80,7 +89,28 @@ function emptyMetrics(): SourceMetrics {
     proveedorCentinela: 0,
     procesoNoEncontrado: 0,
     cuarentena: 0,
+    payloadsVaciados: 0,
   };
+}
+
+/**
+ * Vacía el payload de las filas ya transformadas (spec §D3 / §2.4).
+ *
+ * El payload es un BUFFER: la ingesta lo escribe, el transform lo consume y
+ * aquí se suelta. Correr esto al final y solo con las filas que se
+ * transformaron SIN error es lo que da la garantía de reintento — si el
+ * transform falló, el payload sigue ahí para la próxima corrida.
+ *
+ * Idempotente: vaciar una fila ya vacía es un no-op en Postgres.
+ */
+export async function vaciarPayloads(db: Db, ids: string[]): Promise<number> {
+  if (ids.length === 0) return 0;
+  const filas = await db
+    .update(rawRecord)
+    .set({ payload: null })
+    .where(inArray(rawRecord.id, ids))
+    .returning({ id: rawRecord.id });
+  return filas.length;
 }
 
 interface LatestSnapshot {
@@ -102,7 +132,7 @@ async function latestSnapshots(source: string): Promise<LatestSnapshot[]> {
       payload: rawRecord.payload,
     })
     .from(rawRecord)
-    .where(eq(rawRecord.source, source))
+    .where(and(eq(rawRecord.source, source), isNotNull(rawRecord.payload)))
     .orderBy(rawRecord.sourceRecordId, desc(rawRecord.ingestedAt));
   return rows.map((r) => ({ id: r.id, payload: r.payload as Record<string, unknown> }));
 }
@@ -182,6 +212,14 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
     docAccess: preclassify(snap.payload),
   }));
   m.procesosUpsert = await batchUpsertProcesos(db, procesoItems);
+
+  // El payload es un buffer: las filas que llegaron hasta aquí ya están
+  // proyectadas a columnas, así que se suelta. Las de cuarentena no pasan por
+  // `pending` y conservan el suyo — son justo las que hay que poder reprocesar.
+  m.payloadsVaciados = await vaciarPayloads(
+    db,
+    pending.map(({ snap }) => snap.id)
+  );
 
   return m;
 }
@@ -269,6 +307,14 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
     };
   });
   m.contratosUpsert = await batchUpsertContratos(db, contratoItems);
+
+  // El payload es un buffer: las filas que llegaron hasta aquí ya están
+  // proyectadas a columnas, así que se suelta. Las de cuarentena no pasan por
+  // `pending` y conservan el suyo — son justo las que hay que poder reprocesar.
+  m.payloadsVaciados = await vaciarPayloads(
+    db,
+    pending.map(({ snap }) => snap.id)
+  );
 
   return m;
 }

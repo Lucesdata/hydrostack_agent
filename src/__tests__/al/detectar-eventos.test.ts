@@ -8,36 +8,48 @@
  *  2. **Ningún campo volátil entra al diff.** Si uno se cuela, el detector emite
  *     una adenda cada día por campos que la fuente reescribe sola, y el correo
  *     diario se vuelve ruido que la gente aprende a ignorar.
+ *
+ * Hasta 2026-09-12 los fixtures de este archivo eran payloads crudos de
+ * `raw_record` y se proyectaban con `estadoDesdePayload` (`detectar.ts`).
+ * `correr.ts` dejó de leer `raw_record` ese día, `estadoDesdePayload` quedó
+ * sin llamador en producción y se retiró para no dejar dos caminos que
+ * construyen `EstadoProceso` y puedan divergir — así que estos fixtures ahora
+ * son filas canónicas de `proceso` y se proyectan con `estadoDesdeProceso`
+ * (`correr.ts`). El invariante 2 se vuelve más fuerte con el cambio, no más
+ * débil: `FilaProceso` no tiene campos para "visualizaciones_del" ni
+ * "respuestas_al_procedimiento" — un campo volátil ya no puede colarse en el
+ * diff porque no hay dónde ponerlo, no porque el código lo filtre en runtime.
+ * El caso que antes probaba eso perturbando un payload no tiene equivalente
+ * literal aquí; lo que queda vigilando la misma propiedad es
+ * `describe("campos vigilados")` más abajo (contra `CAMPOS_VIGILADOS`) y el
+ * tipo `FilaProceso` en sí.
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  detectarEvento,
-  estadoDesdePayload,
-  diffEstados,
-  esTerminal,
-} from "@/src/lib/al/eventos/detectar";
+import { detectarEvento, diffEstados, esTerminal } from "@/src/lib/al/eventos/detectar";
+import { estadoDesdeProceso, type FilaProceso } from "@/src/lib/al/eventos/correr";
 import { CAMPOS_VIGILADOS, CAMPOS_VOLATILES_EN_VIGILANCIA } from "@/src/lib/al/eventos/campos";
 import { SOURCE_PROCESOS } from "@/src/lib/ingest/sources";
 
-/** Payload real recortado (CO1.REQ.406327). */
-const BASE = {
-  id_del_proceso: "CO1.REQ.406327",
-  estado_del_procedimiento: "Publicado",
-  estado_de_apertura_del_proceso: "Abierto",
-  precio_base: "1200000000",
-  modalidad_de_contratacion: "Licitación pública",
-  fecha_de_recepcion_de: "2026-04-20T00:00:00.000",
-  adjudicado: "No",
-  valor_total_adjudicacion: "0",
-  nit_del_proveedor_adjudicado: "No Definido",
-  nombre_del_proveedor: "No Definido",
-  nombre_del_procedimiento: "OPTIMIZACIÓN DE REDES DE ACUEDUCTO",
-  descripci_n_del_procedimiento: "Obras de optimización",
-  // Volátiles: la fuente los reescribe sola en cada republicación.
-  visualizaciones_del: "36",
-  respuestas_al_procedimiento: "3",
-  fecha_de_ultima_publicaci: "2026-04-09T00:00:00.000",
+/**
+ * Fila canónica de `proceso`, recortada (CO1.REQ.406327) — equivalente ya
+ * proyectado del payload real que usaba esta suite antes de 2026-09-12.
+ * `valorAdjudicacion` y `nitAdjudicatario` van en `null` porque el proceso no
+ * está adjudicado (`adjudicado: false`), igual que reportaba
+ * `estadoDesdePayload` para "0" y "No Definido" (money-cero y centinela).
+ */
+const BASE: FilaProceso = {
+  secopProcesoId: "CO1.REQ.406327",
+  estadoActual: "Publicado",
+  estadoApertura: "Abierto",
+  valorEstimado: "1200000000.00",
+  modalidad: "Licitación pública",
+  fechaRecepcion: "2026-04-20",
+  adjudicado: false,
+  valorAdjudicacion: null,
+  nitAdjudicatario: null,
+  objeto: "OPTIMIZACIÓN DE REDES DE ACUEDUCTO",
+  descripcion: "Obras de optimización",
 };
 
 describe("campos vigilados", () => {
@@ -56,29 +68,18 @@ describe("campos vigilados", () => {
 
 describe("detectarEvento", () => {
   it("sin línea base es una apertura", () => {
-    const e = detectarEvento(null, BASE);
+    const e = detectarEvento(null, estadoDesdeProceso(BASE));
     expect(e.tipoEvento).toBe("apertura");
     expect(e.estadoNuevo).toBe("Publicado");
   });
 
   it("sin cambios no emite nada", () => {
-    expect(detectarEvento(estadoDesdePayload(BASE), BASE)).toBeNull();
-  });
-
-  it("un cambio en un campo VOLÁTIL no emite nada", () => {
-    // Es el caso que justifica toda la lista de campos vigilados.
-    const republicado = {
-      ...BASE,
-      visualizaciones_del: "412",
-      respuestas_al_procedimiento: "9",
-      fecha_de_ultima_publicaci: "2026-05-01T00:00:00.000",
-    };
-    expect(detectarEvento(estadoDesdePayload(BASE), republicado)).toBeNull();
+    expect(detectarEvento(estadoDesdeProceso(BASE), estadoDesdeProceso(BASE))).toBeNull();
   });
 
   it("una prórroga del plazo es una adenda CON diff", () => {
-    const prorrogado = { ...BASE, fecha_de_recepcion_de: "2026-05-10T00:00:00.000" };
-    const e = detectarEvento(estadoDesdePayload(BASE), prorrogado);
+    const prorrogado: FilaProceso = { ...BASE, fechaRecepcion: "2026-05-10" };
+    const e = detectarEvento(estadoDesdeProceso(BASE), estadoDesdeProceso(prorrogado));
     expect(e.tipoEvento).toBe("adenda");
     expect(e.delta).not.toBeNull();
     expect(e.delta).toHaveLength(1);
@@ -90,7 +91,10 @@ describe("detectarEvento", () => {
   });
 
   it("un cambio de presupuesto trae el antes y el después", () => {
-    const e = detectarEvento(estadoDesdePayload(BASE), { ...BASE, precio_base: "1450000000" });
+    const e = detectarEvento(
+      estadoDesdeProceso(BASE),
+      estadoDesdeProceso({ ...BASE, valorEstimado: "1450000000.00" })
+    );
     expect(e.tipoEvento).toBe("adenda");
     expect(e.delta[0]).toMatchObject({
       etiqueta: "Presupuesto oficial",
@@ -100,30 +104,29 @@ describe("detectarEvento", () => {
   });
 
   it("NINGUNA adenda sale con delta nulo o vacío", () => {
-    const cambios = [
-      { precio_base: "999" },
-      { estado_del_procedimiento: "Evaluación" },
-      { estado_de_apertura_del_proceso: "Cerrado" },
-      { modalidad_de_contratacion: "Selección abreviada" },
-      { nombre_del_procedimiento: "OTRO OBJETO" },
+    const cambios: Array<Partial<FilaProceso>> = [
+      { valorEstimado: "999.00" },
+      { estadoActual: "Evaluación" },
+      { estadoApertura: "Cerrado" },
+      { modalidad: "Selección abreviada" },
+      { objeto: "OTRO OBJETO" },
     ];
     for (const c of cambios) {
-      const e = detectarEvento(estadoDesdePayload(BASE), { ...BASE, ...c });
+      const e = detectarEvento(estadoDesdeProceso(BASE), estadoDesdeProceso({ ...BASE, ...c }));
       expect(e.tipoEvento).toBe("adenda");
       expect(e.delta.length).toBeGreaterThan(0);
     }
   });
 
   it("adjudicar gana sobre adenda aunque cambien otras cosas a la vez", () => {
-    const adjudicado = {
+    const adjudicado: FilaProceso = {
       ...BASE,
-      adjudicado: "Si",
-      estado_del_procedimiento: "Seleccionado",
-      valor_total_adjudicacion: "1168754073",
-      nit_del_proveedor_adjudicado: "900179755",
-      nombre_del_proveedor: "CONINTEGRAL S.A.S",
+      adjudicado: true,
+      estadoActual: "Seleccionado",
+      valorAdjudicacion: "1168754073.00",
+      nitAdjudicatario: "900179755",
     };
-    const e = detectarEvento(estadoDesdePayload(BASE), adjudicado);
+    const e = detectarEvento(estadoDesdeProceso(BASE), estadoDesdeProceso(adjudicado));
     expect(e.tipoEvento).toBe("adjudicacion");
     // El resto del cambio viaja igual dentro del delta.
     expect(e.delta.map((d) => d.etiqueta)).toContain("Estado del procedimiento");
@@ -132,27 +135,31 @@ describe("detectarEvento", () => {
 
   it("el objeto se vigila por hash: se detecta QUE cambió, no CÓMO", () => {
     // Guardar los dos textos por cada proceso costaría más que toda la tabla.
-    const e = detectarEvento(estadoDesdePayload(BASE), {
-      ...BASE,
-      descripci_n_del_procedimiento: "Otra cosa completamente distinta",
-    });
+    const e = detectarEvento(
+      estadoDesdeProceso(BASE),
+      estadoDesdeProceso({ ...BASE, descripcion: "Otra cosa completamente distinta" })
+    );
     const cambio = e.delta.find((d) => d.etiqueta === "Objeto o descripción");
     expect(cambio).toBeDefined();
     expect(cambio.antes).toBeNull();
     expect(cambio.despues).toBeNull();
   });
 
-  it("el hash de idempotencia solo depende del estado nuevo", () => {
-    const a = detectarEvento(null, BASE);
-    const b = detectarEvento(null, { ...BASE, visualizaciones_del: "999" });
+  it("el hash de idempotencia es determinista para el mismo estado", () => {
+    // Antes esto perturbaba un campo volátil del payload ("visualizaciones_del")
+    // para probar que el hash no depende de él. `FilaProceso` no tiene ese
+    // campo — no hay forma de perturbarlo — así que lo que queda por probar
+    // aquí es que el hash no varía entre dos proyecciones del mismo estado.
+    const a = detectarEvento(null, estadoDesdeProceso(BASE));
+    const b = detectarEvento(null, estadoDesdeProceso({ ...BASE }));
     expect(a.payloadHash).toBe(b.payloadHash);
   });
 });
 
 describe("diffEstados", () => {
   it("no reporta campos que no cambiaron", () => {
-    const antes = estadoDesdePayload(BASE);
-    const despues = estadoDesdePayload({ ...BASE, precio_base: "1" });
+    const antes = estadoDesdeProceso(BASE);
+    const despues = estadoDesdeProceso({ ...BASE, valorEstimado: "1.00" });
     expect(diffEstados(antes, despues).map((d) => d.campo)).toEqual(["precio_base"]);
   });
 

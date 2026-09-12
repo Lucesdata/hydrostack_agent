@@ -3,18 +3,18 @@
  * workbench pasa a leer de aquí primero; Socrata live queda como fallback si
  * la base falla (ver `app/api/secop/route.ts`) y como fuente de `probe`.
  *
- * `proceso` (tabla hechos) solo normaliza un subconjunto de columnas
- * (secopProcesoId, referencia, objeto, modalidad, tipoContrato,
- * fechaPublicacion, valorEstimado, estadoActual, documentAccess…). Varios
- * campos que el veredicto Nivel 0 y la UI necesitan (unspsc, estado de
- * apertura, valor de adjudicación, adjudicatario, fase, descripción separada
- * del nombre) NO tienen columna propia — viven en el JSON crudo de Socrata
- * (`raw_record.payload`, mismas llaves que `FIELDS_PROCESOS` en config.ts) y
- * se extraen ahí vía jsonb (igual que `urlproceso` en recientes.ts).
+ * `proceso` (tabla hechos) ya tiene columna propia para descripción, fase,
+ * unspsc, adjudicado, valor de adjudicación, adjudicatario, url y estado de
+ * apertura (ver ADR de adelgazamiento de `raw_record`). Esas columnas están
+ * vacías hasta que la Tarea 10 las rellene, así que cada lectura hace
+ * `coalesce(columna, payload->>...)`: funciona hoy contra el JSON crudo de
+ * Socrata (`raw_record.payload`, mismas llaves que `FIELDS_PROCESOS` en
+ * config.ts) y sigue funcionando sin cambios de código una vez pobladas las
+ * columnas. La Tarea 12 retira el fallback al payload.
  *
  * `clasificacion_sectorial` (el clasificador UNSPSC) está vacía hoy — el
  * filtro "solo sector agua" reproduce el mismo OR de keywords que usa
- * Socrata live, pero contra los campos extraídos del JSON crudo.
+ * Socrata live, pero contra nombre/descripción (columna con fallback a JSON).
  *
  * Spec: docs/superpowers/specs/2026-07-15-vista-simple-y-elegibilidad-diferida.md
  */
@@ -31,14 +31,14 @@ function toNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** `urlproceso` llega como `{ url }`, string, o basura (igual que en client.ts). */
-function extractUrl(v: unknown): string | null {
-  if (typeof v === "string" && v.startsWith("http")) return v;
-  if (typeof v === "object" && v !== null && "url" in v) {
-    const u = (v as { url?: unknown }).url;
-    return typeof u === "string" && u.startsWith("http") ? u : null;
-  }
-  return null;
+/**
+ * `urlRaw` ya llega como string (columna `proceso.url`, o el `->>'url'` del
+ * JSON crudo como fallback) — a diferencia de `recientes.ts`/`client.ts`, que
+ * todavía leen `urlproceso` entero y pueden recibir el objeto `{ url }`.
+ * Queda la validación de forma por si la fuente trae basura.
+ */
+function extractUrl(v: string | null): string | null {
+  return typeof v === "string" && v.startsWith("http") ? v : null;
 }
 
 const DOCUMENT_ACCESS_VALUES: DocumentAccess[] = [
@@ -53,13 +53,14 @@ function isDocumentAccess(v: unknown): v is DocumentAccess {
 
 /**
  * Fila cruda del select: columnas normalizadas de `proceso`/`entidad`/`geografia`
- * MÁS los campos extraídos de `raw_record.payload` (sufijo `Raw`) que no tienen
- * columna propia. `numeric` de Postgres llega como string.
+ * MÁS los campos con sufijo `Raw`, que leen `coalesce(columna, payload->>...)`
+ * mientras las columnas nuevas siguen vacías (ver docstring del módulo).
+ * `numeric` de Postgres llega como string.
  */
 export interface DbProcesoRow {
   secopProcesoId: string;
   referencia: string | null;
-  objeto: string | null; // proceso.objeto — fallback si el JSON crudo no trae nombre
+  objeto: string | null; // proceso.objeto — fallback si nombreRaw no trae nombre
   modalidad: string | null;
   tipoContrato: string | null;
   fechaPublicacion: string | null;
@@ -69,7 +70,7 @@ export interface DbProcesoRow {
   entidadNombre: string | null;
   departamento: string | null;
   ciudad: string | null;
-  // extraídos de raw_record.payload (jsonb ->>)
+  // coalesce(columna propia, raw_record.payload->>...) — ver docstring del módulo
   nombreRaw: string | null;
   descripcionRaw: string | null;
   faseRaw: string | null;
@@ -78,7 +79,7 @@ export interface DbProcesoRow {
   valorAdjudicacionRaw: string | null;
   adjudicatarioRaw: string | null;
   estadoAperturaRaw: string | null;
-  urlRaw: unknown;
+  urlRaw: string | null;
 }
 
 export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
@@ -126,9 +127,17 @@ async function prepare(query: SecopQuery) {
   const { proceso, entidad, geografia, rawRecord } = schema;
   const payload = rawRecord.payload;
 
-  const nombreRaw = sql<string | null>`(${payload}->>${F.nombre})`;
-  const descripcionRaw = sql<string | null>`(${payload}->>${F.descripcion})`;
-  const aperturaRaw = sql<string | null>`(${payload}->>${F.estadoApertura})`;
+  /**
+   * Fallback temporal a `raw_record.payload` para un campo que ya tiene
+   * columna propia en `proceso`. Vive hasta que la Tarea 10 rellene las
+   * columnas y la Tarea 12 lo retire — mientras tanto, cualquiera de las dos
+   * fuentes sirve, que es lo que permite desplegar esto sin ventana.
+   */
+  const fromPayload = (field: string) => sql<string | null>`${payload}->>${field}`;
+
+  const nombreRaw = sql<string | null>`coalesce(${proceso.objeto}, ${fromPayload(F.nombre)})`;
+  const descripcionRaw = sql<string | null>`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`;
+  const aperturaRaw = sql<string | null>`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`;
 
   const aguaClauses =
     query.soloAgua !== false
@@ -161,6 +170,7 @@ async function prepare(query: SecopQuery) {
     geografia,
     rawRecord,
     payload,
+    fromPayload,
   };
 }
 
@@ -171,7 +181,7 @@ async function prepare(query: SecopQuery) {
 export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopResult<SecopProceso>> {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
-  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord, payload } =
+  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord, payload, fromPayload } =
     await prepare(query);
 
   const orderCol = query.orden === "valor" ? proceso.valorEstimado : proceso.fechaPublicacion;
@@ -190,15 +200,19 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
       entidadNombre: entidad.nombre,
       departamento: geografia.departamentoNombre,
       ciudad: geografia.municipioNombre,
-      nombreRaw: sql<string | null>`(${payload}->>${F.nombre})`,
-      descripcionRaw: sql<string | null>`(${payload}->>${F.descripcion})`,
-      faseRaw: sql<string | null>`(${payload}->>${F.fase})`,
-      unspscRaw: sql<string | null>`(${payload}->>${F.unspsc})`,
-      adjudicadoRaw: sql<string | null>`(${payload}->>${F.adjudicado})`,
-      valorAdjudicacionRaw: sql<string | null>`(${payload}->>${F.valorAdjudicacion})`,
-      adjudicatarioRaw: sql<string | null>`(${payload}->>${F.adjudicatario})`,
-      estadoAperturaRaw: sql<string | null>`(${payload}->>${F.estadoApertura})`,
-      urlRaw: sql<unknown>`(${payload}->${F.url})`,
+      // El coalesce es temporal: vive hasta que la Tarea 10 rellene las
+      // columnas y la Tarea 12 lo retire. Mientras tanto la web funciona con
+      // cualquiera de las dos fuentes, que es lo que permite desplegar esto
+      // sin ventana.
+      nombreRaw: sql<string | null>`coalesce(${proceso.objeto}, ${fromPayload(F.nombre)})`,
+      descripcionRaw: sql<string | null>`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`,
+      faseRaw: sql<string | null>`coalesce(${proceso.fase}, ${fromPayload(F.fase)})`,
+      unspscRaw: sql<string | null>`coalesce(${proceso.unspsc}, ${fromPayload(F.unspsc)})`,
+      adjudicadoRaw: sql<string | null>`coalesce(case when ${proceso.adjudicado} then 'Si' when ${proceso.adjudicado} is false then 'No' end, ${fromPayload(F.adjudicado)})`,
+      valorAdjudicacionRaw: sql<string | null>`coalesce(${proceso.valorAdjudicacion}::text, ${fromPayload(F.valorAdjudicacion)})`,
+      adjudicatarioRaw: sql<string | null>`coalesce(${proceso.adjudicatario}, ${fromPayload(F.adjudicatario)})`,
+      estadoAperturaRaw: sql<string | null>`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`,
+      urlRaw: sql<string | null>`coalesce(${proceso.url}, ${payload}->${F.url}->>'url')`,
     })
     .from(proceso)
     .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
