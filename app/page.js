@@ -608,7 +608,8 @@ export default function LandingPage() {
                   que las acompaña sigue siendo cierta sin la cifra. */}
               <div
                 className="bp-hero-sector"
-                style={{margin: "28px 0 8px",
+                style={{
+                  margin: "28px 0 8px",
                   paddingTop: 20,
                   borderTop: "1px solid #DADAD2",
                 }}
