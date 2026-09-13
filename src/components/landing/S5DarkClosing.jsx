@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { ruta } from "./seccionesHome";
 
-const RUTA_DIAGNOSTICO = ruta("diagnostico");
+const RUTA_EXPLORAR = ruta("explorar");
+const RUTA_NOSOTROS = ruta("nosotros");
 
 export default function S5DarkClosing() {
   return (
@@ -29,23 +31,42 @@ export default function S5DarkClosing() {
           desde un solo lugar.
         </p>
 
-        <a
-          href={RUTA_DIAGNOSTICO.href}
-          className="tap-target"
-          style={{
-            gap: 8,
-            padding: "12px 24px",
-            background: "white",
-            color: "#0369A1",
-            font: "600 14px var(--font-inter)",
-            borderRadius: 4,
-            textDecoration: "none",
-            cursor: "pointer",
-            marginBottom: 32,
-          }}
+        <div
+          className="acciones-cierre"
+          style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", marginBottom: 32 }}
         >
-          Ver si estás listo →
-        </a>
+          <Link
+            href={RUTA_EXPLORAR.href}
+            className="tap-target"
+            style={{
+              gap: 8,
+              padding: "12px 24px",
+              background: "white",
+              color: "#0369A1",
+              font: "600 14px var(--font-inter)",
+              borderRadius: 4,
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            Explorar procesos →
+          </Link>
+          {/* El único camino a Nosotros para quien llegó hasta abajo: el navbar
+              lo mete en la hamburguesa por debajo de 1024px. --accent-river
+              (#7dd3fc) sobre #0A1F1C da ~9:1, muy por encima del 4.5 exigido. */}
+          <Link
+            href={RUTA_NOSOTROS.href}
+            className="tap-target"
+            style={{
+              color: "var(--accent-river)",
+              font: "14px var(--font-inter)",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            Quién está detrás
+          </Link>
+        </div>
 
         <div className="checks-cierre" style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
           {[

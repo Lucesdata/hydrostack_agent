@@ -11,11 +11,11 @@ import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
 import S4Competidores from "@/src/components/landing/S4Competidores";
-import S5Descartes from "@/src/components/landing/S5Descartes";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
+import S7Acceso from "@/src/components/landing/S7Acceso";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
-import { ruta } from "@/src/components/landing/seccionesHome";
+import { ETIQUETA_POR_NIVEL, ruta } from "@/src/components/landing/seccionesHome";
 
 // Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
 // tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
@@ -49,6 +49,13 @@ const INTENT_ROUTES = [
   },
 ];
 
+/**
+ * ¿Esta tarjeta se puede usar sin cuenta? Se pregunta por la etiqueta contra
+ * ETIQUETA_POR_NIVEL y no comparando con el string "sin cuenta" a mano: si
+ * mañana la redacción del nivel cambia en seccionesHome.js, esto la sigue.
+ */
+const esLibre = (etiqueta) => etiqueta === ETIQUETA_POR_NIVEL.anonimo;
+
 /* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
 const BLUEPRINT_CSS = `
 @keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
@@ -64,7 +71,28 @@ const BLUEPRINT_CSS = `
   letter-spacing: -0.01em;
   color: #0A1F1C;
   margin: 0 0 20px;
-  max-width: min(100%, 22ch);
+  /* 30ch (1036px a 64px de cuerpo) es holgura, no restricción: quien manda de
+     verdad es la columna del grid del hero, que a 1440px mide 645px. Se midió.
+     El reparto en líneas lo hace text-wrap: balance, no este tope, que solo
+     evita que en un contenedor futuro más ancho el titular se estire hasta ser
+     ilegible. */
+  max-width: min(100%, 30ch);
+}
+
+/* El peor caso del titular no es el móvil, es el portátil. --step-display topa
+   en 4rem (64px) a partir de ~915px de ancho, y la rejilla del hero parte en
+   dos columnas en cuanto caben dos de 420px: o sea que el titular alcanza su
+   cuerpo máximo justo cuando su columna es MÁS estrecha. Medido a 1024x900:
+   columna de 444px, cinco líneas, 352px de alto y el CTA —la única acción que
+   esta portada persigue— cayendo a y=891, fuera del pliegue. A 1366x768 eran
+   cuatro líneas y el CTA en y=746, también fuera. El titular de esta rama pasó
+   de 41 a 60 caracteres, así que este techo no se notaba antes.
+
+   El cuerpo se ata al ancho hasta 1440px, que es donde la columna llega a
+   645px y 64px ya caben en tres líneas. El tope de 4rem hace la unión continua:
+   4.4vw da 63.3px a 1439px, así que no hay salto al cruzar a la regla base. */
+@media (min-width: 900px) and (max-width: 1439px) {
+  .bp-h1 { font-size: clamp(2.4rem, 4.4vw, 4rem); }
 }
 
 /* Hero rediseño 2026-08-15: mask reveal por línea + subrayado trazado en la palabra clave */
@@ -156,6 +184,18 @@ const BLUEPRINT_CSS = `
 .bp-cta:focus-visible { outline: 2px solid #0369A1; outline-offset: 3px; background: #0369A1; }
 .bp-cta-dark:focus-visible { outline: 2px solid #0A1F1C; outline-offset: 3px; background: #0A1F1C; }
 
+.bp-hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 30px 0 20px; }
+.bp-hero-cta-nota { margin-top: 6px; font: 10px var(--font-jetbrains-mono),monospace; color: #6B746F; }
+/* El subrayado necesita ganarle a \`.bp-page a { text-decoration: none }\` de
+   arriba, y una clase sola no basta: hace falta el mismo peso de selector. */
+.bp-page a.bp-hero-cta-alt {
+  font: 500 13px var(--font-inter);
+  color: #525B5A;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bp-page a.bp-hero-cta-alt:hover { color: #0369A1; }
+
 .bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) var(--gutter) 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
 .bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
@@ -178,6 +218,8 @@ const BLUEPRINT_CSS = `
 }
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
+.bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
+
 
 @media (max-width: 900px) {
   .bp-hero-grid { gap: 36px; }
@@ -193,6 +235,16 @@ const BLUEPRINT_CSS = `
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
+  /* Las tres cifras del sector se repiten más abajo, en S3Motor (procesos
+     vigilados) y S4Competidores (oferentes y sanciones), que es donde
+     significan algo. En un móvil, aquí solo empujan el CTA fuera de pantalla.
+     Quedan las dos cifras vivas y la credencial de .bp-hero-metrics. */
+  .bp-hero-sector { display: none; }
+  .bp-hero-cta { flex-direction: column; align-items: stretch; gap: 12px; }
+  .bp-hero-cta-main { width: 100%; }
+  .bp-hero-cta-main .bp-cta { display: flex; width: 100%; justify-content: center; }
+  .bp-hero-cta-nota { text-align: center; }
+  .bp-page a.bp-hero-cta-alt { justify-content: center; text-align: center; }
 }
 `;
 
@@ -528,16 +580,27 @@ export default function LandingPage() {
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
+                {/* Dos máscaras, y el reparto de líneas se deja al navegador.
+                    Se probó partirlo a mano en tres tramos medidos para que
+                    "agua" quedase siempre en la primera línea: cuadra a 1440px
+                    y sale deforme en todo lo demás — a 354px daba "larga /
+                    corta / larga", porque un corte fijo medido a un ancho es
+                    arbitrario en los otros. `text-wrap: balance` reparte bien a
+                    cualquier ancho, así que la posición de "agua" varía y el
+                    subrayado viaja con ella. Dos líneas con la palabra clave
+                    arriba, como pedía la spec, es imposible aquí: esa primera
+                    línea mide 959px y la columna del hero da 645px. */}
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    Todo tu trabajo de{" "}
+                    Los procesos de{" "}
                     <span style={{ whiteSpace: "nowrap" }}>
-                      <span className="hero-draw">agua</span>,
-                    </span>
+                      <span className="hero-draw">agua</span>
+                    </span>{" "}
+                    del SECOP II,
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>en un solo lugar.</span>
+                  <span>filtrados por tus reglas.</span>
                 </span>
               </h1>
               <p
@@ -558,10 +621,8 @@ export default function LandingPage() {
                   `sector`, nunca escritas a mano. En null se ve "—" y la frase
                   que las acompaña sigue siendo cierta sin la cifra. */}
               <div
+                className="bp-hero-sector"
                 style={{
-                  display: "flex",
-                  gap: 28,
-                  flexWrap: "wrap",
                   margin: "28px 0 8px",
                   paddingTop: 20,
                   borderTop: "1px solid #DADAD2",
@@ -602,59 +663,47 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  flexWrap: "wrap",
-                  marginTop: 30,
-                  marginBottom: 20,
-                }}
-              >
-                <div className="hero-fade-up" style={{ animationDelay: ".9s" }}>
-                  <Link
-                    href={ruta("diagnostico").href}
-                    className="bp-cta bp-cta-dark"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      background: "#0369A1",
-                      color: "#fff",
-                      font: "600 13px var(--font-jetbrains-mono),monospace",
-                      letterSpacing: ".04em",
-                    }}
-                  >
-                    Ver si estás listo →
-                  </Link>
-                  <div
-                    style={{
-                      marginTop: 6,
-                      font: "10px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                    }}
-                  >
-                    sin cuenta · 3 minutos
-                  </div>
+              <div className="bp-hero-cta">
+                <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
+                  {(() => {
+                    const explorarRuta = ruta("explorar");
+                    return (
+                      <>
+                        <Link
+                          href={explorarRuta.href}
+                          className="bp-cta bp-cta-dark"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            background: "#0369A1",
+                            color: "#fff",
+                            font: "600 13px var(--font-jetbrains-mono),monospace",
+                            letterSpacing: ".04em",
+                          }}
+                        >
+                          Explorar procesos →
+                        </Link>
+                        {/* La cifra sale del mismo fetch que el resto; si viene en
+                            null la frase se acorta en vez de quedar "<etiqueta> · —
+                            procesos del sector", que se lee como un error. La etiqueta
+                            se deriva de ruta("explorar") para no desincronizarse si
+                            cambia ETIQUETA_POR_NIVEL.anonimo. */}
+                        <div className="bp-hero-cta-nota">
+                          {sector.procesosVigilados == null
+                            ? explorarRuta.etiqueta
+                            : `${explorarRuta.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
                 <Link
-                  href={ruta("explorar").href}
-                  className="hero-fade-up tap-target"
-                  style={{
-                    gap: 8,
-                    background: "transparent",
-                    color: "#0369A1",
-                    border: "1px solid #0369A1",
-                    padding: "11px 20px",
-                    borderRadius: 2,
-                    font: "600 13px var(--font-jetbrains-mono),monospace",
-                    letterSpacing: ".04em",
-                    cursor: "pointer",
-                    animationDelay: ".92s",
-                  }}
+                  href={ruta("diagnostico").href}
+                  className="hero-fade-up tap-target bp-hero-cta-alt"
+                  style={{ animationDelay: ".92s" }}
                 >
-                  Explorar procesos
+                  o mira antes si estás listo · 3 min
                 </Link>
               </div>
 
@@ -777,22 +826,9 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* S2 — La puerta: diagnóstico de preparación */}
-        <S2Diagnostico />
-
-        {/* S3 — El motor: cuatro pasos */}
-        <S3Motor procesosVigilados={sector.procesosVigilados} />
-
-        {/* S4 — Quién compite: histórico de oferentes y sanciones */}
-        <S4Competidores
-          oferentesHistoricos={sector.oferentesHistoricos}
-          sanciones={sector.sanciones}
-        />
-
-        {/* S5 — Qué se descarta: transparencia del motor de filtros */}
-        <S5Descartes />
-
-        {/* Rutas de intención — ¿En qué momento estás? */}
+        {/* Rutas de intención — ¿En qué momento estás?
+            Sube justo debajo del hero: es la bifurcación real del visitante y
+            estaba enterrada bajo cuatro secciones. */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <span style={{ width: 8, height: 8, background: "#0369A1" }} />
@@ -849,8 +885,9 @@ export default function LandingPage() {
                 <span
                   style={{
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: "#6B746F",
-                    border: "1px solid #DADAD2",
+                    color: esLibre(c.etiqueta) ? "var(--accent)" : "#6B746F",
+                    background: esLibre(c.etiqueta) ? "var(--accent-faint)" : "transparent",
+                    border: `1px solid ${esLibre(c.etiqueta) ? "var(--accent)" : "#DADAD2"}`,
                     padding: "2px 8px",
                     textTransform: "uppercase",
                     letterSpacing: ".06em",
@@ -883,10 +920,26 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* S5 — Banda oscura de cierre */}
+        {/* S3 — El motor: cuatro pasos, el 04 absorbió los descartes */}
+        <S3Motor procesosVigilados={sector.procesosVigilados} />
+
+        {/* S4 — Quién compite: histórico de oferentes y sanciones */}
+        <S4Competidores
+          oferentesHistoricos={sector.oferentesHistoricos}
+          sanciones={sector.sanciones}
+        />
+
+        {/* S2 — Paso previo opcional: diagnóstico de preparación. Baja hasta
+            aquí: dejó de ser la puerta de entrada. */}
+        <S2Diagnostico />
+
+        {/* S7 — Qué te llevas sin pagar: el modelo de acceso, dicho una vez */}
+        <S7Acceso />
+
+        {/* Banda oscura de cierre */}
         <S5DarkClosing />
 
-        {/* S6 — Pie */}
+        {/* Pie */}
         <S6Footer />
       </div>
     </div>

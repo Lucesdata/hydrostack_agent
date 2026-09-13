@@ -75,3 +75,60 @@ export function ruta(id) {
   }
   return encontrada;
 }
+
+/**
+ * El nombre legible de cada sección.
+ *
+ * Vivía como `ETIQUETAS` dentro de `S6Footer.jsx`, donde solo el pie podía
+ * leerlo. `S7Acceso.jsx` necesita exactamente los mismos strings, y copiarlos
+ * habría dejado dos listas que se desincronizan en el primer renombrado.
+ *
+ * Los tres nombres de `plan pro` no son invención de esta sección: son
+ * literalmente los que ya usa la navegación en `src/components/Navbar.js`
+ * — "Pliegos" en `NAV_ITEMS`, "Asistente: ejecución" y "Asistente: operación"
+ * en `ACCOUNT_ITEMS`.
+ *
+ * Una sección sin entrada aquí no se lista en ningún índice. Hoy la única es
+ * `veredicto`, que no es una página aparte sino una parte de /licitaciones.
+ */
+export const NOMBRE_POR_ID = {
+  diagnostico: "Diagnóstico",
+  explorar: "Licitaciones",
+  soluciones: "Soluciones",
+  coincidencias: "Mis coincidencias",
+  filtros: "Mis filtros",
+  competidores: "Competidores",
+  auditoria: "Qué se descarta",
+  // `alertas` NO lleva nombre a propósito, y por eso no aparece ni en el pie ni
+  // en S7Acceso: sin nombre aquí, `seccionesPorNivel()` la omite. El envío
+  // diario por correo no se entrega hoy (falta AUTH_RESEND_KEY en Vercel,
+  // PENDIENTES §0 y §21), así que anunciarla en la portada promete algo que no
+  // ocurre. La ruta sigue existiendo y se llega a ella desde el menú de usuario
+  // del navbar; lo que se retira es la promesa, no la página. Devuélvele el
+  // nombre en cuanto el envío esté verificado en producción.
+  nosotros: "Nosotros",
+  pliego: "Pliegos",
+  "asistente-ejecucion": "Asistente: ejecución",
+  "asistente-operacion": "Asistente: operación",
+};
+
+/**
+ * Las secciones nombrables agrupadas por nivel de acceso, en el orden de
+ * `ETIQUETA_POR_NIVEL` (anónimo → gratis → pro).
+ *
+ * Es una función pura exportada y no un `.filter()` dentro del render de
+ * `S7Acceso.jsx` a propósito: el entorno de vitest de este repo es "node",
+ * sin jsdom, así que un componente montado no se puede testear pero esto sí.
+ * El criterio de aceptación de la sección ("añadir una ruta con nombre la
+ * hace aparecer en su columna sin tocar el componente") deja de ser una
+ * promesa y pasa a estar en `src/__tests__/landing/nombres.test.ts`.
+ */
+export function seccionesPorNivel() {
+  return Object.entries(ETIQUETA_POR_NIVEL).map(([nivel, etiqueta]) => ({
+    nivel,
+    etiqueta,
+    secciones: SECCIONES_HOME.filter((s) => s.etiqueta === etiqueta && NOMBRE_POR_ID[s.id]).map(
+      (s) => ({ ...s, nombre: NOMBRE_POR_ID[s.id] })
+    ),
+  }));
+}

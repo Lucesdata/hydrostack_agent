@@ -1,26 +1,20 @@
 import Link from "next/link";
-import { ruta } from "./seccionesHome";
+import { NOMBRE_POR_ID, ruta } from "./seccionesHome";
 
 /**
  * El pie enlazaba a /terms y /privacy, que nunca existieron. Ahora las rutas
  * salen de SECCIONES_HOME, que `enlaces.test.ts` verifica contra `app/`: un
  * enlace roto en el pie deja de ser algo que se descubre haciendo clic.
+ *
+ * Los nombres visibles ya no viven aquí: están en `NOMBRE_POR_ID`
+ * (seccionesHome.js), que este pie comparte con `S7Acceso.jsx`.
  */
-const ETIQUETAS = {
-  diagnostico: "Diagnóstico",
-  explorar: "Licitaciones",
-  soluciones: "Soluciones",
-  coincidencias: "Mis coincidencias",
-  filtros: "Mis filtros",
-  competidores: "Competidores",
-  auditoria: "Qué se descarta",
-  alertas: "Alertas",
-  nosotros: "Nosotros",
-};
-
 const COLUMNAS = [
   { grupo: "Explorar", ids: ["diagnostico", "explorar", "soluciones", "nosotros"] },
-  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "competidores", "auditoria", "alertas"] },
+  // `alertas` no está en esta columna a propósito. El porqué —y el momento en
+  // que vuelve— vive junto a su entrada en NOMBRE_POR_ID (seccionesHome.js),
+  // que es lo que también la mantiene fuera de S7Acceso. Un solo sitio.
+  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "competidores", "auditoria"] },
 ];
 
 const href = (id) => ruta(id).href;
@@ -69,7 +63,7 @@ export default function S6Footer() {
             </div>
             {col.ids.map((id) => (
               <Link key={id} href={href(id)} style={linkStyle}>
-                {ETIQUETAS[id]}
+                {NOMBRE_POR_ID[id]}
               </Link>
             ))}
           </div>
