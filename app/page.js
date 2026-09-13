@@ -73,10 +73,26 @@ const BLUEPRINT_CSS = `
   margin: 0 0 20px;
   /* 30ch (1036px a 64px de cuerpo) es holgura, no restricción: quien manda de
      verdad es la columna del grid del hero, que a 1440px mide 645px. Se midió.
-     El reparto en líneas del titular NO se resuelve aquí, sino partiéndolo en
-     tres .hero-mask en el JSX; este tope solo evita que en un contenedor futuro
-     más ancho el titular se estire hasta ser ilegible. */
+     El reparto en líneas lo hace text-wrap: balance, no este tope, que solo
+     evita que en un contenedor futuro más ancho el titular se estire hasta ser
+     ilegible. */
   max-width: min(100%, 30ch);
+}
+
+/* El peor caso del titular no es el móvil, es el portátil. --step-display topa
+   en 4rem (64px) a partir de ~915px de ancho, y la rejilla del hero parte en
+   dos columnas en cuanto caben dos de 420px: o sea que el titular alcanza su
+   cuerpo máximo justo cuando su columna es MÁS estrecha. Medido a 1024x900:
+   columna de 444px, cinco líneas, 352px de alto y el CTA —la única acción que
+   esta portada persigue— cayendo a y=891, fuera del pliegue. A 1366x768 eran
+   cuatro líneas y el CTA en y=746, también fuera. El titular de esta rama pasó
+   de 41 a 60 caracteres, así que este techo no se notaba antes.
+
+   El cuerpo se ata al ancho hasta 1440px, que es donde la columna llega a
+   645px y 64px ya caben en tres líneas. El tope de 4rem hace la unión continua:
+   4.4vw da 63.3px a 1439px, así que no hay salto al cruzar a la regla base. */
+@media (min-width: 900px) and (max-width: 1439px) {
+  .bp-h1 { font-size: clamp(2.4rem, 4.4vw, 4rem); }
 }
 
 /* Hero rediseño 2026-08-15: mask reveal por línea + subrayado trazado en la palabra clave */
@@ -88,7 +104,6 @@ const BLUEPRINT_CSS = `
 }
 .hero-mask-1 > span { animation-delay: .2s; }
 .hero-mask-2 > span { animation-delay: .32s; }
-.hero-mask-3 > span { animation-delay: .44s; }
 @keyframes hero-riseLine { to { transform: translateY(0); } }
 
 .hero-draw {
@@ -565,27 +580,26 @@ export default function LandingPage() {
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
-                {/* Tres máscaras, no dos. Cada .hero-mask lleva overflow:hidden y
-                    revela su contenido deslizándolo: si dentro se parten dos
-                    líneas, el efecto deja de ser "una línea tras otra" y pasa a
-                    ser un bloque que sube entero. Con el titular a 64px en una
-                    columna de 645px caben ~20 caracteres por línea, así que
-                    "Los procesos de agua del SECOP II," se partía sola y "agua"
-                    caía a la segunda línea. Se reparte a mano en tres tramos que
-                    sí caben (577px, 350px y 633px medidos): el reveal vuelve a
-                    ser por línea y la palabra clave se queda arriba, subrayada. */}
+                {/* Dos máscaras, y el reparto de líneas se deja al navegador.
+                    Se probó partirlo a mano en tres tramos medidos para que
+                    "agua" quedase siempre en la primera línea: cuadra a 1440px
+                    y sale deforme en todo lo demás — a 354px daba "larga /
+                    corta / larga", porque un corte fijo medido a un ancho es
+                    arbitrario en los otros. `text-wrap: balance` reparte bien a
+                    cualquier ancho, así que la posición de "agua" varía y el
+                    subrayado viaja con ella. Dos líneas con la palabra clave
+                    arriba, como pedía la spec, es imposible aquí: esa primera
+                    línea mide 959px y la columna del hero da 645px. */}
                 <span className="hero-mask hero-mask-1">
                   <span>
                     Los procesos de{" "}
                     <span style={{ whiteSpace: "nowrap" }}>
                       <span className="hero-draw">agua</span>
-                    </span>
+                    </span>{" "}
+                    del SECOP II,
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>del SECOP II,</span>
-                </span>
-                <span className="hero-mask hero-mask-3">
                   <span>filtrados por tus reglas.</span>
                 </span>
               </h1>
