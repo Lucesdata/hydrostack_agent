@@ -18,6 +18,7 @@
  *
  *   npx tsx scripts/export-raw-archive.ts [ruta-destino.ndjson.gz]
  */
+import "./_env";
 import { createGzip, createGunzip } from "zlib";
 import { createWriteStream, createReadStream } from "fs";
 import { pipeline } from "stream/promises";
@@ -85,34 +86,41 @@ async function contarRawRecord(): Promise<number> {
   return row?.total ?? 0;
 }
 
-try {
-  await pipeline(Readable.from(lotes()), createGzip({ level: 9 }), createWriteStream(DESTINO));
-  console.log(`escrito ${DESTINO}`);
+async function main() {
+  try {
+    await pipeline(Readable.from(lotes()), createGzip({ level: 9 }), createWriteStream(DESTINO));
+    console.log(`escrito ${DESTINO}`);
 
-  const [lineasArchivo, filasTabla] = await Promise.all([
-    contarLineasGzip(DESTINO),
-    contarRawRecord(),
-  ]);
+    const [lineasArchivo, filasTabla] = await Promise.all([
+      contarLineasGzip(DESTINO),
+      contarRawRecord(),
+    ]);
 
-  if (lineasArchivo !== filasTabla) {
-    process.stderr.write(
-      `\nEXPORT INCOMPLETO — NO USAR ESTE ARCHIVO COMO RESPALDO.\n` +
-        `  líneas en ${DESTINO}: ${lineasArchivo}\n` +
-        `  filas en raw_record:  ${filasTabla}\n` +
-        `El export se saltó filas o la tabla cambió a mitad de la corrida. ` +
-        `No subir este archivo a Storage ni continuar con el corte hasta ` +
-        `investigar la discrepancia.\n`
-    );
+    if (lineasArchivo !== filasTabla) {
+      process.stderr.write(
+        `\nEXPORT INCOMPLETO — NO USAR ESTE ARCHIVO COMO RESPALDO.\n` +
+          `  líneas en ${DESTINO}: ${lineasArchivo}\n` +
+          `  filas en raw_record:  ${filasTabla}\n` +
+          `El export se saltó filas o la tabla cambió a mitad de la corrida. ` +
+          `No subir este archivo a Storage ni continuar con el corte hasta ` +
+          `investigar la discrepancia.\n`
+      );
+      process.exitCode = 1;
+    } else {
+      console.log(`verificado: ${lineasArchivo} filas en el archivo == ${filasTabla} en raw_record`);
+    }
+  } catch (err) {
+    process.stderr.write(`\nexport fallido: ${err instanceof Error ? err.message : String(err)}\n`);
     process.exitCode = 1;
-  } else {
-    console.log(`verificado: ${lineasArchivo} filas en el archivo == ${filasTabla} en raw_record`);
+  } finally {
+    // Sin esto el pool (`keepAlive: true`) deja el event loop vivo y el
+    // script nunca termina: es la red de seguridad de un TRUNCATE, así que
+    // tiene que salir solo, sin que alguien lo mate a mano.
+    await pool.end();
   }
-} catch (err) {
-  process.stderr.write(`\nexport fallido: ${err instanceof Error ? err.message : String(err)}\n`);
-  process.exitCode = 1;
-} finally {
-  // Sin esto el pool (`keepAlive: true`) deja el event loop vivo y el
-  // script nunca termina: es la red de seguridad de un TRUNCATE, así que
-  // tiene que salir solo, sin que alguien lo mate a mano.
-  await pool.end();
 }
+
+main().catch((err) => {
+  process.stderr.write(`\nerror no capturado: ${err instanceof Error ? err.message : String(err)}\n`);
+  process.exit(1);
+});

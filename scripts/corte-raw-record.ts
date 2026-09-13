@@ -28,7 +28,9 @@
  *
  *   CONFIRM_CORTE=si npx tsx scripts/corte-raw-record.ts
  */
+import "./_env";
 import { sql } from "drizzle-orm";
+import { db, pool } from "@/src/lib/db/client";
 
 // Compuerta antes de tocar la base o siquiera abrir el pool: sin esta
 // variable exacta, el script no debe poder truncar 129.511 filas por
@@ -48,8 +50,6 @@ if (process.env.CONFIRM_CORTE !== "si") {
   process.exit(1);
 }
 
-const { db, pool } = await import("@/src/lib/db/client");
-
 const CONSTRAINTS = [
   ["proceso", "proceso_raw_record_id_actual_raw_record_id_fk"],
   ["contrato", "contrato_raw_record_id_actual_raw_record_id_fk"],
@@ -67,11 +67,12 @@ const INDICES = [
 ];
 
 async function estadoBase(): Promise<{ size: string; filas: string }> {
-  const [fila] = (await db.execute(
+  const res = (await db.execute(
     sql`select pg_size_pretty(pg_database_size(current_database())) as size,
                (select count(*) from raw_record) as filas`
-  )) as unknown as { size: string; filas: string }[];
-  return fila;
+  )) as any;
+  const rows = Array.isArray(res) ? res : res.rows;
+  return rows[0];
 }
 
 async function main() {
@@ -95,17 +96,15 @@ async function main() {
   console.log("después:", despues);
 }
 
-try {
-  await main();
-} catch (err) {
-  process.stderr.write(
-    `\ncorte fallido a mitad de camino: ${err instanceof Error ? err.message : String(err)}\n` +
-      "revisar manualmente qué constraints/índices quedaron sueltos antes de reintentar " +
-      "(ver docs/runbook-corte-raw-record.md, sección \"Si algo falla\").\n"
-  );
-  process.exitCode = 1;
-} finally {
-  // Sin esto el pool (`keepAlive: true`) deja el event loop vivo y el
-  // script nunca termina — igual que en export-raw-archive.ts.
-  await pool.end();
-}
+main()
+  .catch((err) => {
+    process.stderr.write(
+      `\ncorte fallido a mitad de camino: ${err instanceof Error ? err.message : String(err)}\n` +
+        "revisar manualmente qué constraints/índices quedaron sueltos antes de reintentar " +
+        '(ver docs/runbook-corte-raw-record.md, sección "Si algo falla").\n'
+    );
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await pool.end();
+  });
