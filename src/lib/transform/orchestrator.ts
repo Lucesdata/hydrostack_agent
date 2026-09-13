@@ -31,6 +31,7 @@ import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { db } from "@/src/lib/db/client";
 import { rawRecord } from "@/src/lib/db/schema";
 import type * as schema from "@/src/lib/db/schema";
+import { chunk } from "@/src/lib/db/batch";
 import {
   mapContratoRow,
   mapProcesoRow,
@@ -105,12 +106,16 @@ function emptyMetrics(): SourceMetrics {
  */
 export async function vaciarPayloads(db: Db, ids: string[]): Promise<number> {
   if (ids.length === 0) return 0;
-  const filas = await db
-    .update(rawRecord)
-    .set({ payload: null })
-    .where(inArray(rawRecord.id, ids))
-    .returning({ id: rawRecord.id });
-  return filas.length;
+  let total = 0;
+  for (const lote of chunk(ids, 1000)) {
+    const filas = await db
+      .update(rawRecord)
+      .set({ payload: null })
+      .where(inArray(rawRecord.id, lote))
+      .returning({ id: rawRecord.id });
+    total += filas.length;
+  }
+  return total;
 }
 
 interface LatestSnapshot {
