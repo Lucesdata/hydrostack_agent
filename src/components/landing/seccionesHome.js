@@ -99,7 +99,13 @@ export const NOMBRE_POR_ID = {
   filtros: "Mis filtros",
   competidores: "Competidores",
   auditoria: "Qué se descarta",
-  alertas: "Alertas",
+  // `alertas` NO lleva nombre a propósito, y por eso no aparece ni en el pie ni
+  // en S7Acceso: sin nombre aquí, `seccionesPorNivel()` la omite. El envío
+  // diario por correo no se entrega hoy (falta AUTH_RESEND_KEY en Vercel,
+  // PENDIENTES §0 y §21), así que anunciarla en la portada promete algo que no
+  // ocurre. La ruta sigue existiendo y se llega a ella desde el menú de usuario
+  // del navbar; lo que se retira es la promesa, no la página. Devuélvele el
+  // nombre en cuanto el envío esté verificado en producción.
   nosotros: "Nosotros",
   pliego: "Pliegos",
   "asistente-ejecucion": "Asistente: ejecución",

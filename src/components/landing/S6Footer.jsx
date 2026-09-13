@@ -11,12 +11,9 @@ import { NOMBRE_POR_ID, ruta } from "./seccionesHome";
  */
 const COLUMNAS = [
   { grupo: "Explorar", ids: ["diagnostico", "explorar", "soluciones", "nosotros"] },
-  // `alertas` (→ /cuenta) sale de esta columna mientras el envío por correo no
-  // esté configurado: AUTH_RESEND_KEY no existe en Vercel y el diario no se
-  // entrega (PENDIENTES §0 y §21). No es que la página no exista — se llega a
-  // ella desde el menú de usuario del navbar; es que anunciarla como "Alertas"
-  // en el pie promete un envío que hoy no ocurre. Vuelve a la lista en cuanto
-  // esa env var esté puesta y el envío se verifique en producción.
+  // `alertas` no está en esta columna a propósito. El porqué —y el momento en
+  // que vuelve— vive junto a su entrada en NOMBRE_POR_ID (seccionesHome.js),
+  // que es lo que también la mantiene fuera de S7Acceso. Un solo sitio.
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "competidores", "auditoria"] },
 ];
 
