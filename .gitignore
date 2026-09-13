@@ -20,3 +20,6 @@ coverage/
 # Superpowers brainstorm artifacts (mockups del visual companion)
 .superpowers/
 .env*
+
+# Config local de agentes (igual que .claude/)
+.codex/
