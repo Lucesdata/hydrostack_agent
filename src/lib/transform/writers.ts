@@ -24,6 +24,7 @@
  */
 
 import { isNotNull, sql } from "drizzle-orm";
+import { clasificarTipoProyecto } from "../classify/tipo-proyecto";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import {
   contrato,
@@ -185,6 +186,40 @@ export interface ProcesoItem {
   docAccess: DocumentAccessResult;
 }
 
+/**
+ * Columnas del tipo de proyecto (taxonomía de cinco) para una proyección.
+ *
+ * Se calcula aquí, en la escritura, y no en un proceso aparte: si no, cada
+ * corrida del cron insertaría filas con `tipo_proyecto` en NULL y la vitrina
+ * mostraría procesos sin etiqueta al día siguiente de cada backfill.
+ *
+ * El clasificador es una función pura sobre texto —sin red ni base—, así que
+ * cuesta microsegundos por fila y no añade round-trips al lote.
+ *
+ * `proj.entidad?.nombre` es imprescindible: el clasificador lo usa para PODAR la
+ * razón social del texto antes de puntuar. Sin él, "suministro de formatos de
+ * factura para la Empresa de Acueducto, Alcantarillado y Aseo de X" puntúa como
+ * acueducto. Se pasa el nombre de la proyección y no el de la tabla `entidad`
+ * porque aquí solo tenemos el `entidadId` ya resuelto, y volver a leerlo sería
+ * un SELECT por lote para un dato que la proyección ya trae.
+ *
+ * Exportada para poder probarla sin base de datos.
+ */
+export function columnasTipoProyecto(proj: ProcesoProjection) {
+  const r = clasificarTipoProyecto({
+    objeto: proj.objeto,
+    descripcion: proj.descripcion,
+    unspsc: proj.unspsc,
+    entidadNombre: proj.entidad?.nombre ?? null,
+  });
+  return {
+    tipoProyecto: r.tipo,
+    tipoProyectoConfianza: r.confianza,
+    tipoProyectoSegundo: r.segundo,
+    tipoProyectoVersion: r.version,
+  };
+}
+
 /** Upsert por lotes de procesos (secop_proceso_id UNIQUE). → filas escritas. */
 export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise<number> {
   let written = 0;
@@ -226,6 +261,11 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             documentAccessMethod: docAccess.method,
             documentAccessEvaluatedAt: sql`now()`,
             rawRecordIdActual: rawRecordId,
+            // Derivado en cada corrida, no solo al insertar: el objeto y la
+            // descripción cambian con la fase del proceso, y subir
+            // CLASIFICADOR_TIPO_VERSION tiene que poder reclasificar sin un
+            // backfill aparte.
+            ...columnasTipoProyecto(proj),
           }))
         )
         .onConflictDoUpdate({
@@ -260,6 +300,11 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             documentAccessMethod: sql`excluded.document_access_method`,
             documentAccessEvaluatedAt: sql`excluded.document_access_evaluated_at`,
             rawRecordIdActual: sql`excluded.raw_record_id_actual`,
+            // Se reescribe como todo lo demás: gana lo recién clasificado.
+            tipoProyecto: sql`excluded.tipo_proyecto`,
+            tipoProyectoConfianza: sql`excluded.tipo_proyecto_confianza`,
+            tipoProyectoSegundo: sql`excluded.tipo_proyecto_segundo`,
+            tipoProyectoVersion: sql`excluded.tipo_proyecto_version`,
             updatedAt: sql`now()`,
           },
         })
