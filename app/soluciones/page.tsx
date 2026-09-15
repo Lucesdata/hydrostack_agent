@@ -14,7 +14,7 @@ import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
 
 export const metadata = {
-  title: "Soluciones — AquaLicita",
+  title: "Soluciones",
   description:
     "¿Un problema de agua potable o vertimientos? Te orientamos paso a paso hacia una solución técnica y cómo contratarla.",
 };
@@ -96,7 +96,7 @@ export default async function SolucionesPage() {
             contactamos.
           </p>
           <Link href="#contacto" className="clr-sol-cta">
-            [ Cuéntanos tu caso ]
+            Cuéntanos tu caso
           </Link>
         </div>
       </div>

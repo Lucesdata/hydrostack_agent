@@ -110,9 +110,7 @@ async function main() {
 try {
   await main();
 } catch (err) {
-  process.stderr.write(
-    `\nrelleno fallido: ${err instanceof Error ? err.message : String(err)}\n`
-  );
+  process.stderr.write(`\nrelleno fallido: ${err instanceof Error ? err.message : String(err)}\n`);
   process.exitCode = 1;
 } finally {
   // Sin esto el pool (`keepAlive: true`) deja el event loop vivo y el

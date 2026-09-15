@@ -66,7 +66,7 @@ export default async function LoginPage({
           />
         </div>
         <button type="submit" className="clr-auth-btn">
-          [ Entrar ]
+          Entrar
         </button>
       </form>
 

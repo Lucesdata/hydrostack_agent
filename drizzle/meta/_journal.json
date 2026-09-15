@@ -169,6 +169,13 @@
       "when": 1789191121606,
       "tag": "0023_public_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789444140705,
+      "tag": "0024_long_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

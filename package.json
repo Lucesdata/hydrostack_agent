@@ -16,6 +16,7 @@
     "db:load-sample": "tsx scripts/load-sample-raw.ts",
     "db:seed-geografia": "tsx scripts/seed-geografia.ts",
     "db:transform": "tsx scripts/run-transform.ts",
+    "db:tipo-proyecto": "tsx scripts/backfill-tipo-proyecto.ts",
     "db:ingest": "tsx scripts/run-ingest.ts",
     "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
     "analyze-pliego-gemini": "tsx scripts/analyze-pliego-gemini.ts",

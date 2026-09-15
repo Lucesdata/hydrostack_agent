@@ -32,7 +32,7 @@ export const STYLE = `
     background: var(--accent-faint); border: 1px solid var(--accent-soft); border-radius: var(--radius-md);
     padding: 10px 12px; font-size: 12px; color: var(--ink-900); margin: 0; line-height: 1.55;
   }
-  .clr-flt-error{ color: #dc2626; font-size: 12.5px; margin: 0; }
+  .clr-flt-error{ color: var(--danger); font-size: 12.5px; margin: 0; }
 
   .clr-flt-list{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .clr-flt-card{
@@ -52,7 +52,7 @@ export const STYLE = `
     font-size: 11.5px; padding: 4px 10px; color: var(--ink-600); cursor: pointer;
   }
   .clr-flt-mini:hover{ border-color: var(--accent); color: var(--accent); }
-  .clr-flt-mini--danger:hover{ border-color: #dc2626; color: #dc2626; }
+  .clr-flt-mini--danger:hover{ border-color: var(--danger); color: var(--danger); }
   .clr-flt-card-crit{ font-size: 12.5px; color: var(--ink-600); margin: 6px 0 0; line-height: 1.5; }
   .clr-flt-card-ev{ font-size: 11.5px; font-family: var(--font-mono); color: var(--ink-600); margin: 4px 0 0; }
 

@@ -79,9 +79,9 @@ const STYLE = `
   .clr-mc-val{ font-family: var(--font-mono); font-size: 13px; color: var(--ink-900); }
   .clr-mc-score{ display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-family: var(--font-mono); }
   .clr-mc-dot{ width: 7px; height: 7px; border-radius: 999px; }
-  .clr-mc-score--success .clr-mc-dot{ background: #16a34a; }
-  .clr-mc-score--warn .clr-mc-dot{ background: #d97706; }
-  .clr-mc-score--fail .clr-mc-dot{ background: #dc2626; }
+  .clr-mc-score--success .clr-mc-dot{ background: var(--success); }
+  .clr-mc-score--warn .clr-mc-dot{ background: var(--warning); }
+  .clr-mc-score--fail .clr-mc-dot{ background: var(--danger); }
   .clr-mc-score--neutral .clr-mc-dot{ background: var(--ink-600); }
   .clr-mc-badge{
     font-size: 11.5px; font-family: var(--font-mono); color: var(--accent);
@@ -143,8 +143,8 @@ const STYLE = `
     display: inline-flex; align-items: center; justify-content: center;
     width: 14px; height: 14px; border-radius: 999px; font-size: 10px; font-weight: 700;
   }
-  .clr-mc-pliego-glyph--pass{ background: #dcfce7; color: #16a34a; }
-  .clr-mc-pliego-glyph--fail{ background: #fee2e2; color: #dc2626; }
+  .clr-mc-pliego-glyph--pass{ background: #dcfce7; color: var(--success); }
+  .clr-mc-pliego-glyph--fail{ background: #fee2e2; color: var(--danger); }
   .clr-mc-pliego-body{ margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
   .clr-mc-pliego-fields{ font-size: 12px; color: var(--ink-900); margin: 0; }
   .clr-mc-pliego-hint{ font-size: 11.5px; color: var(--ink-600); margin: 0; }

@@ -16,7 +16,7 @@ import { STYLE } from "./estilos";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Mis filtros · AquaLicita" };
+export const metadata = { title: "Mis filtros" };
 
 export default async function MisFiltrosPage() {
   const user = await getSessionUser();

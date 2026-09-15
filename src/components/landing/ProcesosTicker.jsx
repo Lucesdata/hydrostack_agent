@@ -270,9 +270,7 @@ export default function ProcesosTicker() {
       <style dangerouslySetInnerHTML={{ __html: TICKER_CSS }} />
       <div className="ptr-cap">
         <span className="ptr-cap-dot" />
-        <span className="ptr-cap-label">
-          {status === "live" ? "SECOP · en vivo" : "Procesos"}
-        </span>
+        <span className="ptr-cap-label">{status === "live" ? "SECOP · en vivo" : "Procesos"}</span>
       </div>
       {status === "live" ? (
         <div className="ptr-clip">

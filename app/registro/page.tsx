@@ -67,7 +67,7 @@ export default async function RegistroPage({
           />
         </div>
         <button type="submit" className="clr-auth-btn">
-          [ Crear cuenta ]
+          Crear cuenta
         </button>
       </form>
 

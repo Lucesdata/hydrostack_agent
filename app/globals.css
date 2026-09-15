@@ -39,7 +39,9 @@
   --muted: #4a7a8a;
   --deep1: #020c10;
   --deep2: #041820;
-  --border: rgba(0, 245, 255, 0.12);
+  /* --border vivía aquí como rgba(0,245,255,.12) del tema oscuro. Se midió: cero
+     consumidores en app/ y src/. El nombre se reclama para el tema claro (abajo),
+     que es el que pide el sistema de diseño vigente. */
   --mono: var(--font-ibm-plex-mono), "Courier New", monospace;
   --sans: var(--font-inter), system-ui, sans-serif;
   --orb: var(--font-orbitron), sans-serif;
@@ -66,13 +68,54 @@
   --accent-river: #7dd3fc;
   --accent-ocean: #0c4a6e;
 
-  /* Semánticos */
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger: #dc2626;
+  /* Semánticos — el semáforo de elegibilidad y los avisos.
+
+     Medido 2026-09-15: los tres valores previos eran el escalón -600 de su
+     escala y ninguno aguantaba como texto. Las compuertas se pintan a 11,5px,
+     que es texto normal y exige 4,5:1, y daban 3,30 (verde #16A34A) y 3,19
+     (ámbar #D97706) sobre tarjeta blanca. Es decir: quien tuviera la vista algo
+     reducida leía bien "no puedes" y "no se sabe", y leía mal "sí puedes" y
+     "ojo con esto" — justo al revés de lo que conviene.
+
+     El rojo #DC2626 sí cumplía sobre blanco (4,83) y por eso casi se deja
+     quieto; al medirlo sobre su propio tinte se cayó — 4,13 sobre el 10% y 3,95
+     sobre el #fee2e2 de /mis-coincidencias, que es donde de verdad se pinta.
+
+     La regla es bajar los tres al escalón -700 de la misma escala, no elegir
+     tres hexadecimales sueltos: así el criterio se puede repetir. Los tres
+     cumplen ahora sobre blanco, sobre --bg y sobre --surface-alt.
+
+     Lo vigila src/__tests__/design/contraste.test.ts, que lee estos tokens y
+     falla si el contraste baja. Cualquier valor nuevo aquí se mide antes. */
+  --success: #15803d; /* -700. Antes #16A34A (-600), 3,30:1 */
+  --warning: #b45309; /* -700. Antes #D97706 (-600), 3,19:1 */
+  --danger: #b91c1c; /* -700. Antes #DC2626 (-600): 4,83 sobre blanco pero 3,95 sobre su tinte */
 
   /* Foco */
   --focus-ring: #0369a1;
+
+  /* ── Alias semánticos ────────────────────────────────────────────────────
+     El vocabulario que usa el spec de rediseño (superficie / texto / borde) en
+     vez de los nombres históricos, que describen el color y no su papel. Son
+     ALIAS, no reemplazos: cada uno apunta al token que ya existe, así que
+     ningún píxel cambia al introducirlos y los ~350 usos de los nombres viejos
+     siguen siendo válidos. El código nuevo usa estos; lo viejo se migra cuando
+     se toca, no en un barrido.
+
+     `--surface` NO se reutiliza con el significado del spec. Ahí significa
+     blanco en 18 sitios; redefinirlo como el crema de fondo no daría error de
+     compilación ni rompería un test — solo pintaría 18 superficies del color
+     equivocado, semanas después y lejos de aquí. El crema ya tiene nombre: --bg.
+
+     `--card` no estaba definido: 24 sitios lo usaban como `var(--card, #fff)` y
+     siempre caían al fallback. Definirlo como el blanco que ya resolvían deja
+     el mismo resultado y quita la mina de que alguien lo defina distinto. */
+  --surface-elevated: var(--surface); /* el blanco que se eleva sobre --bg */
+  --card: var(--surface); /* mata el token fantasma de los 24 var(--card,#fff) */
+  --text-primary: var(--ink-900);
+  --text-muted: var(--ink-600);
+  --accent-deep: var(--accent-ocean);
+  --border: var(--line);
 
   /* Tipografía */
   --font-sans: var(--font-inter), -apple-system, system-ui, sans-serif;
@@ -884,11 +927,15 @@ select {
   position: relative;
   display: flex;
   align-items: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-600);
+  /* Inter y caja normal. El mono en mayúsculas vivía aquí, en el eyebrow del
+     hero y en las etiquetas de métricas a la vez; se queda solo en las
+     etiquetas, que es donde un rótulo callado acompaña a una cifra. Un menú se
+     lee mejor en la tipografía del texto. */
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
   text-decoration: none;
   padding: 7px 11px;
   border-radius: var(--radius-sm);
@@ -896,12 +943,6 @@ select {
   transition:
     color 0.18s,
     background 0.18s;
-}
-.clr-nav-index {
-  color: var(--ink-300);
-  font-size: 9px;
-  margin-right: 7px;
-  transition: color 0.18s;
 }
 .clr-nav-link:hover {
   color: var(--ink-900);
@@ -931,9 +972,6 @@ select {
 .clr-nav-link[aria-current="page"] {
   color: var(--accent);
   background: var(--accent-faint);
-}
-.clr-nav-link[aria-current="page"] .clr-nav-index {
-  color: var(--accent);
 }
 
 .clr-lang-btn {
@@ -1076,11 +1114,11 @@ select {
   padding: 10px 28px 20px;
 }
 .clr-mobile-link {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-600);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
   text-decoration: none;
   padding: 14px 0;
   min-height: 48px;
@@ -1091,9 +1129,6 @@ select {
 }
 .clr-mobile-link:hover,
 .clr-mobile-link[aria-current="page"] {
-  color: var(--accent);
-}
-.clr-mobile-link[aria-current="page"] .clr-nav-index {
   color: var(--accent);
 }
 .clr-mobile-lang {
@@ -1374,7 +1409,8 @@ select {
   border: 1px solid var(--accent-soft);
 }
 .clr-badge--success {
-  background: rgba(22, 163, 74, 0.1);
+  /* 8% y no 10%: al 10% el verde -700 encima daba 4,499:1 y AA pide 4,5. */
+  background: rgba(22, 163, 74, 0.08);
   color: var(--success);
   border: 1px solid rgba(22, 163, 74, 0.3);
 }
@@ -1402,7 +1438,7 @@ select {
   font-weight: 600;
 }
 .clr-verdict-overall--pass {
-  background: rgba(22, 163, 74, 0.1);
+  background: rgba(22, 163, 74, 0.08); /* ver .clr-badge--success */
   border: 1px solid rgba(22, 163, 74, 0.3);
   color: var(--success);
 }

@@ -18,7 +18,7 @@ import { construirHistorial, type EntradaHistorial } from "@/src/lib/diagnostico
 import { getCuestionario } from "@/src/lib/diagnostico/registro";
 
 export const metadata = {
-  title: "Tu historial de diagnósticos — AquaLicita",
+  title: "Tu historial de diagnósticos",
 };
 
 export const dynamic = "force-dynamic";

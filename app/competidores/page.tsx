@@ -12,17 +12,18 @@
  */
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { nivelDe, puede } from "@/src/lib/acceso/politica";
 import { topCompetidores } from "@/src/lib/al/consulta/competidor";
+import { getCifrasSector } from "@/src/lib/landing/cifras";
+import S4Competidores from "@/src/components/landing/S4Competidores";
 import { formatCopCompact, formatShortDate } from "@/src/components/secop/format";
 import { STYLE } from "./estilos";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Competidores · AquaLicita",
+  title: "Competidores",
   description: "Quién compite en agua y saneamiento, cuánto gana y a qué precio.",
 };
 
@@ -30,10 +31,52 @@ type Props = { searchParams: Promise<{ q?: string }> };
 
 export default async function CompetidoresPage({ searchParams }: Props) {
   const user = await getSessionUser();
-  if (!puede(nivelDe(user, null), "competidores")) redirect("/login?next=/competidores");
+  const autorizado = puede(nivelDe(user, null), "competidores");
 
+  /**
+   * Sin sesión ya NO se redirige a /login: se muestra el argumento y la puerta.
+   *
+   * La sección "Inteligencia de mercado" bajó aquí desde la portada, y este
+   * redirect la habría dejado invisible para cualquier visitante anónimo — lo
+   * contrario de lo que se busca al sacarla de la portada, que era darle una
+   * página propia y no enterrarla.
+   *
+   * Los DATOS siguen pidiendo cuenta: lo que se abre es el argumento de por qué
+   * existen, no el listado. Es el mismo criterio que ya usa el veredicto, donde
+   * el anónimo ve el semáforo y la explicación pide cuenta.
+   */
   const { q } = await searchParams;
-  const filas = await topCompetidores({ q, limit: 60 });
+  const [filas, cifras] = await Promise.all([
+    autorizado ? topCompetidores({ q, limit: 60 }) : Promise.resolve([]),
+    getCifrasSector(),
+  ]);
+
+  if (!autorizado) {
+    return (
+      <main className="clr-cmp">
+        <style dangerouslySetInnerHTML={{ __html: STYLE }} />
+        <S4Competidores
+          oferentesHistoricos={cifras.oferentesHistoricos}
+          sanciones={cifras.sanciones}
+          mostrarCta={false}
+        />
+        <div className="clr-cmp-inner">
+          <p className="clr-cmp-sub">
+            El listado de competidores —quién se presenta, cuántas gana y por cuánto— pide una
+            cuenta gratuita.
+          </p>
+          <p>
+            <Link className="clr-cmp-btn" href="/registro?next=/competidores">
+              Crear cuenta gratuita
+            </Link>{" "}
+            <Link className="clr-cmp-btn" href="/login?next=/competidores">
+              Ya tengo cuenta
+            </Link>
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="clr-cmp">

@@ -54,6 +54,22 @@ export const proceso = pgTable(
     fechaAdjudicacion: date("fecha_adjudicacion"),
     estadoApertura: text("estado_apertura"), // Abierto | Cerrado — señal real de plazo
     fechaRecepcion: date("fecha_recepcion"),
+    // ── Tipo de proyecto (taxonomía de cinco) ────────────────────────────────
+    // Derivado y recomputable, igual que `clasificacion_sectorial`, pero vive
+    // aquí y no allí porque el camino de lectura lo exige: la faceta, el mapa,
+    // la vitrina y /licitaciones/tipo/[slug] filtran y CUENTAN por este campo, y
+    // la regla vive en TypeScript — la base no puede derivarla en un WHERE. Un
+    // JOIN a una tabla derivada se pagaría en cada página de la vitrina.
+    // text y no enum: añadir un tipo no debería exigir migración de tipo.
+    // Lo produce src/lib/classify/tipo-proyecto.ts; ver `_version` para saber
+    // qué corrida escribió la fila.
+    tipoProyecto: text("tipo_proyecto"), // acueducto|alcantarillado|ptap|ptar|otros
+    tipoProyectoConfianza: text("tipo_proyecto_confianza"), // alta|media|baja
+    // El tipo descartado cuando hubo dos con evidencia. En 15.697 filas de
+    // 90.622 forzar un único valor pierde información real ("acueducto y
+    // alcantarillado"): esto la conserva para que la ficha pueda decirlo.
+    tipoProyectoSegundo: text("tipo_proyecto_segundo"),
+    tipoProyectoVersion: text("tipo_proyecto_version"),
     rawRecordIdActual: uuid("raw_record_id_actual").references(() => rawRecord.id),
     deletedAt: timestamp("deleted_at", { withTimezone: true }), // soft delete (D6)
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -63,6 +79,7 @@ export const proceso = pgTable(
     uniqueIndex("proceso_secop_id_uq").on(t.secopProcesoId),
     index("proceso_portafolio_idx").on(t.portafolioId),
     index("proceso_doc_access_idx").on(t.documentAccess),
+    index("proceso_tipo_proyecto_idx").on(t.tipoProyecto),
   ]
 ).enableRLS();
 

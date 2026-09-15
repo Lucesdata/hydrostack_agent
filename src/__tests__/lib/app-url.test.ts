@@ -29,19 +29,15 @@ describe("appUrl", () => {
   });
 
   it("en un preview usa VERCEL_BRANCH_URL con https", () => {
-    process.env.VERCEL_BRANCH_URL =
-      "aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app";
-    expect(appUrl()).toBe(
-      "https://aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app"
-    );
+    process.env.VERCEL_BRANCH_URL = "aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app";
+    expect(appUrl()).toBe("https://aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app");
   });
 
   it("NEXT_PUBLIC_APP_URL gana sobre VERCEL_BRANCH_URL", () => {
     // Producción define las dos. Si ganara la de Vercel, los enlaces de
     // producción apuntarían al host interno en vez de al dominio propio.
     process.env.NEXT_PUBLIC_APP_URL = "https://aqualicita.com";
-    process.env.VERCEL_BRANCH_URL =
-      "aqualicita-git-main-giovannys-projects-a5ffd460.vercel.app";
+    process.env.VERCEL_BRANCH_URL = "aqualicita-git-main-giovannys-projects-a5ffd460.vercel.app";
     expect(appUrl()).toBe("https://aqualicita.com");
   });
 
@@ -54,10 +50,7 @@ describe("appUrl", () => {
     // con `??` pasaría el filtro y devolvería cadena vacía: todos los enlaces
     // quedarían como "/auth/callback", relativos y rotos en los correos.
     process.env.NEXT_PUBLIC_APP_URL = "";
-    process.env.VERCEL_BRANCH_URL =
-      "aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app";
-    expect(appUrl()).toBe(
-      "https://aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app"
-    );
+    process.env.VERCEL_BRANCH_URL = "aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app";
+    expect(appUrl()).toBe("https://aqualicita-git-mi-rama-giovannys-projects-a5ffd460.vercel.app");
   });
 });
