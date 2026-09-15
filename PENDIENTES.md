@@ -564,3 +564,20 @@ El estado completo del rediseño —qué falta, qué lo bloquea, qué decisiones
 que deshacer y qué trampas tiene el entorno— está en
 [docs/rediseno-2026-09/TRASPASO.md](docs/rediseno-2026-09/TRASPASO.md). Ese
 documento es el punto de entrada para retomar el trabajo desde cero.
+
+### 37. El PNG de la planta pesa 994 kB — el 57% de la portada actual
+Medido en producción el 2026-09-15: `public/planta-tratamiento.png` son 994 kB de
+los 1.753 kB que pesa la portada en móvil. El rediseño ya lo sacó de ahí —la
+ilustración se movió a `/nosotros`— así que la portada nueva parte con casi un
+mega menos, pero **el archivo sigue pesando lo mismo, solo que en otra página**.
+
+Optimizarlo (WebP/AVIF, o `next/image` con `sizes`) es trabajo pendiente, y ahora
+cuesta menos decidirlo porque afecta a una página secundaria y no a la puerta de
+entrada.
+
+De la misma medición: once archivos de fuente, 181 kB, de las cinco familias que
+carga `layout.js`. Con la portada nueva conviene comprobar si se usan las cinco;
+cada familia que sobre son 30-45 kB en la ruta crítica.
+
+Lo demás de la portada en producción está bien: TTFB 36 ms, FCP y LCP 384 ms,
+CLS 0. El margen está en el peso, no en el tiempo.

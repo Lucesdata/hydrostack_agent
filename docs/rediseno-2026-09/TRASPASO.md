@@ -347,11 +347,45 @@ Dos lecturas que importan:
    elegir el renderizado del mapa con esta cifra delante — un SVG dibujado desde
    el TopoJSON sin librería cuesta 0 kB de dependencia.
 
-Para una línea base de Lighthouse de verdad hacen falta dos cosas que no se
-hicieron por no decidir por el usuario: instalar la CLI (`npm i -D lighthouse`) o
-correrla contra el sitio desplegado. Medirla contra el servidor de desarrollo
-sería engañoso — sin minificar y con el overhead de dev, no se parece a
-producción.
+### La medición de producción (2026-09-15, viewport móvil 375×812)
+
+No hizo falta instalar Lighthouse: la "versión actual" que el criterio toma como
+referencia es la que está desplegada en `aqualicita.com` desde `main`, así que se
+midió ahí directamente con la Performance API del navegador. Es la línea base
+real, no una aproximación local.
+
+| Métrica | Portada en producción |
+|---|---:|
+| TTFB | 36 ms |
+| FCP | 384 ms |
+| LCP | 384 ms |
+| CLS | **0** |
+| HTML | 91 kB |
+| JS | 420 kB en 10 archivos |
+| CSS | 41 kB |
+| Fuentes | 181 kB en **11 archivos** |
+| **Imágenes** | **994 kB** |
+| **Total** | **1.753 kB** |
+
+**El 57% del peso de la portada es un solo archivo: `planta-tratamiento.png`,
+994 kB.** Es la ilustración isométrica — y el rediseño ya la movió a `/nosotros`,
+así que esa ganancia está guardada sin que nadie la buscara. La portada nueva
+parte con casi un mega menos que la actual.
+
+Dos avisos que salen de la misma medición:
+
+1. **El PNG sigue pesando 994 kB, solo que ahora en `/nosotros`.** No es una
+   mejora, es una mudanza. Optimizarlo —WebP/AVIF o `next/image`— es trabajo
+   pendiente, y ahora es más fácil porque afecta a una página secundaria y no a
+   la puerta de entrada.
+2. **Once archivos de fuente, 181 kB.** Son las cinco familias que carga
+   `layout.js` vía next/font. Con la portada nueva conviene revisar si se usan
+   las cinco; cada familia que sobre son unos 30-45 kB en la ruta crítica.
+
+Con LCP en 384 ms y CLS en 0, el margen está en el peso, no en el tiempo. La
+conclusión para el mapa se sostiene: **dibujar el SVG desde el TopoJSON sin
+librería cuesta 0 kB de dependencia**, y con coropleta sin marcadores es
+perfectamente viable.
 
 ---
 
@@ -369,9 +403,10 @@ producción.
    sector a todo el mundo, y son los DATOS —el listado— los que piden cuenta.
    Mismo criterio que el veredicto: el anónimo ve el semáforo, la explicación
    pide cuenta.
-4. **Lighthouse en móvil**: hay línea base de peso (§6 ter) pero no de
-   Lighthouse. Decidir si se instala la CLI o se mide contra el sitio desplegado;
-   medirla contra el servidor de desarrollo sería engañoso.
+4. ~~Línea base de rendimiento~~ — **hecha el 2026-09-15** midiendo producción
+   directamente (§6 ter). Lo que queda de aquí: optimizar el PNG de 994 kB, que
+   ahora vive en `/nosotros`, y revisar si hacen falta las cinco familias de
+   fuente (181 kB en 11 archivos).
 5. ~~El semáforo **relativo** (con perfil) en la ficha~~ — **hecho el
    2026-09-15**, como isla de cliente (`SemaforoConPerfil.tsx`). El servidor
    sirve siempre la lectura absoluta —la que se cachea y la que indexa un
