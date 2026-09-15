@@ -318,6 +318,48 @@ acuerde de correrlo.
 
 ---
 
+## 6 ter. Línea base de peso — 2026-09-15
+
+El criterio de aceptación dice que Lighthouse en móvil **no puede bajar respecto
+de la versión actual**, y nadie había medido esa "versión actual": sin línea base,
+el criterio no se puede comprobar ni antes ni después.
+
+Lighthouse no está instalado en el proyecto y añadir la dependencia es decisión
+del usuario, así que se deja la métrica que **sí** es comparable y que más pesa en
+la puntuación móvil: el JS de primera carga de la build de producción.
+
+| Ruta | First Load JS |
+|---|---:|
+| **`/` (portada)** | **113 kB** ← la que el rediseño va a tocar |
+| `/diagnostico` | 112 kB |
+| `/licitaciones/explorar` | 106 kB |
+| `/licitaciones/descubrir` | 99,7 kB |
+| `/licitaciones` | 95,1 kB |
+| `/licitaciones/[slug]` (ficha) | 94,1 kB |
+| `/licitaciones/{tipo,departamento,entidad}/[slug]` | 94,1 kB |
+| `/nosotros` | 93,8 kB |
+| base compartida | 87,1 kB |
+| `/asistente/*` | 140 kB (las más pesadas del sitio) |
+
+Dos lecturas que importan:
+
+1. **Las rutas nuevas no añaden JS**: 226 B sobre la base compartida. Son
+   componentes de servidor y el semáforo y la fila densa no llevan cliente. Sea
+   cual sea el resultado de Lighthouse, no lo empeoran ellas.
+2. **La portada está en 113 kB** y es la que el rediseño va a tocar. Ahí es donde
+   está el riesgo: una librería de mapas se lleva fácil 40–150 kB. Si el número
+   sube mucho por encima de 113, el criterio de aceptación se incumple. Conviene
+   elegir el renderizado del mapa con esta cifra delante — un SVG dibujado desde
+   el TopoJSON sin librería cuesta 0 kB de dependencia.
+
+Para una línea base de Lighthouse de verdad hacen falta dos cosas que no se
+hicieron por no decidir por el usuario: instalar la CLI (`npm i -D lighthouse`) o
+correrla contra el sitio desplegado. Medirla contra el servidor de desarrollo
+sería engañoso — sin minificar y con el overhead de dev, no se parece a
+producción.
+
+---
+
 ## 7. Próximos pasos, en orden
 
 **Sin bloqueo — se puede hacer ya:**
@@ -326,8 +368,9 @@ acuerde de correrlo.
 2. ~~Título global del sitio~~ y ~~coste de invocaciones~~ — **hechos el
    2026-09-15**, ver §6 bis.
 3. Mover "Inteligencia de mercado" a `/competidores`, que no depende del mapa.
-4. **Lighthouse en móvil**: el criterio de aceptación dice que no puede bajar y
-   **nunca se ha medido**, ni antes ni después. Hace falta la medición base.
+4. **Lighthouse en móvil**: hay línea base de peso (§6 ter) pero no de
+   Lighthouse. Decidir si se instala la CLI o se mide contra el sitio desplegado;
+   medirla contra el servidor de desarrollo sería engañoso.
 5. El semáforo **relativo** (con perfil) en la ficha. `buildVerdict` ya existe;
    falta traer el perfil del usuario y llamar a `compuertasDesdeVeredicto()`, que
    ya está escrita y probada.
