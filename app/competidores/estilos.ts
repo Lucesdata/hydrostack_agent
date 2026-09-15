@@ -59,10 +59,10 @@ export const STYLE = `
   /* Sanciones: la evidencia y la inferencia NO se pintan igual. */
   .clr-cmp-sancion{
     background: var(--card, #fff); border: 1px solid var(--line);
-    border-left: 3px solid #dc2626; border-radius: var(--radius-lg);
+    border-left: 3px solid var(--danger); border-radius: var(--radius-lg);
     padding: 12px 14px; margin-bottom: 8px;
   }
-  .clr-cmp-sancion--inferida{ border-left-color: #d97706; }
+  .clr-cmp-sancion--inferida{ border-left-color: var(--warning); }
   .clr-cmp-sancion-top{ font-size: 13px; font-weight: 600; color: var(--ink-900); margin: 0 0 3px; }
   .clr-cmp-sancion-meta{ font-size: 12px; color: var(--ink-600); margin: 0; }
   .clr-cmp-aviso{

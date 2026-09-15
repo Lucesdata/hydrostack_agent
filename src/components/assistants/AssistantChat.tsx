@@ -101,7 +101,7 @@ export default function AssistantChat({
   return (
     <div className="asc-wrap">
       <header className="asc-header">
-        <span className="asc-tag">[ {titulo} ]</span>
+        <span className="asc-tag">{titulo}</span>
         {documentoConfig && (
           <label className="asc-upload">
             <input
@@ -119,7 +119,7 @@ export default function AssistantChat({
                 ? "Subiendo…"
                 : documentName
                   ? `Documento: ${documentName}`
-                  : `[ Subir ${documentoConfig.label} ]`}
+                  : `Subir ${documentoConfig.label}`}
             </span>
           </label>
         )}
@@ -154,7 +154,7 @@ export default function AssistantChat({
           disabled={isBusy}
         />
         <button className="asc-send" type="submit" disabled={isBusy || !input.trim()}>
-          [ Enviar ]
+          Enviar
         </button>
       </form>
 
@@ -238,8 +238,8 @@ export default function AssistantChat({
         .asc-error {
           margin: 0 16px;
           padding: 10px 12px;
-          border: 1px solid var(--danger, #dc2626);
-          color: var(--danger, #dc2626);
+          border: 1px solid var(--danger);
+          color: var(--danger);
           font-size: 12.5px;
           border-radius: 6px;
         }

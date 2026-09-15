@@ -563,7 +563,7 @@ const CSS = `
 .clr-prow-score{ display: flex; align-items: center; gap: 4px; font-size: 11px; }
 .clr-prow-score--success{ color: var(--success); }
 .clr-prow-score--warn{ color: var(--warning); }
-.clr-prow-score--fail{ color: #DC2626; }
+.clr-prow-score--fail{ color: var(--danger); }
 .clr-prow-score--pass{ color: var(--success); }
 .clr-prow-score--neutral{ color: var(--ink-600); }
 .clr-prow-dot{ width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
@@ -603,7 +603,7 @@ const CSS = `
 .clr-elig-seg{ flex: 1; height: 5px; border-radius: 2px; }
 .clr-elig-seg--pass{ background: var(--success); }
 .clr-elig-seg--warn{ background: var(--warning); }
-.clr-elig-seg--fail{ background: #DC2626; }
+.clr-elig-seg--fail{ background: var(--danger); }
 .clr-elig-seg--unknown{ background: var(--line); }
 .clr-elig-gates{ list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .clr-elig-gate{
@@ -613,7 +613,7 @@ const CSS = `
 .clr-elig-glyph{ font-weight: 600; }
 .clr-elig-glyph--pass{ color: var(--success); }
 .clr-elig-glyph--warn{ color: var(--warning); }
-.clr-elig-glyph--fail{ color: #DC2626; }
+.clr-elig-glyph--fail{ color: var(--danger); }
 .clr-elig-glyph--unknown{ color: var(--ink-600); }
 .clr-elig-name{ color: var(--ink-900); }
 .clr-elig-reason{ color: var(--ink-600); line-height: 1.4; }

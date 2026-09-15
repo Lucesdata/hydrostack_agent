@@ -220,8 +220,8 @@ export default function PliegoPage() {
           padding: 14px 16px;
           border-radius: 10px;
           background: rgba(220, 38, 38, 0.08);
-          border: 1px solid var(--danger, #dc2626);
-          color: var(--danger, #dc2626);
+          border: 1px solid var(--danger);
+          color: var(--danger);
           font-size: 13px;
           line-height: 1.5;
         }
@@ -238,10 +238,10 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
   const { extraction: x, validation: v, origen } = data;
   const confianzaColor =
     x.verificacion.confianza_general === "alta"
-      ? "#16A34A"
+      ? "var(--success)"
       : x.verificacion.confianza_general === "media"
-        ? "#D97706"
-        : "#DC2626";
+        ? "var(--warning)"
+        : "var(--danger)";
 
   return (
     <div className="clr-pl-result">
@@ -456,8 +456,8 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           border: 1px solid;
         }
         .clr-pl-origen-reglas {
-          color: #16a34a;
-          border-color: #16a34a;
+          color: var(--success);
+          border-color: var(--success);
           background: rgba(22, 163, 74, 0.08);
         }
         .clr-pl-origen-llm {
@@ -500,12 +500,12 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
           border-radius: 999px;
         }
         .clr-pl-ok {
-          color: #16a34a;
+          color: var(--success);
           font-size: 12px;
           font-weight: 600;
         }
         .clr-pl-warn {
-          color: #dc2626;
+          color: var(--danger);
           font-size: 12px;
           font-weight: 600;
         }
@@ -564,15 +564,15 @@ function PliegoResult({ data }: { data: ExtractResponse }) {
         }
         .clr-pl-sev[data-sev="alta"] {
           background: rgba(220, 38, 38, 0.1);
-          color: #dc2626;
+          color: var(--danger);
         }
         .clr-pl-sev[data-sev="media"] {
           background: rgba(217, 119, 6, 0.1);
-          color: #d97706;
+          color: var(--warning);
         }
         .clr-pl-sev[data-sev="baja"] {
           background: rgba(22, 163, 74, 0.1);
-          color: #16a34a;
+          color: var(--success);
         }
       `}</style>
     </div>
