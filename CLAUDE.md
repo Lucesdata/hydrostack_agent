@@ -30,7 +30,24 @@ Entidades y flujos principales:
   transform → entidades canónicas (`proceso`, `contrato`,
   `contrato_evento`, `entidad`, `proveedor`, `geografia`).
 - **Clasificación sectorial**: derivada, versionada por
-  `clasificadorVersion` (`src/lib/classify/classifier.ts`).
+  `clasificadorVersion` (`src/lib/classify/classifier.ts`). Responde "¿esto es de
+  agua?" — binaria. `clasificacion_sectorial` sigue con 0 filas: nadie la escribe.
+- **Tipo de proyecto** (`src/lib/classify/tipo-proyecto.ts`): cinco valores y solo
+  cinco — `acueducto | alcantarillado | ptap | ptar | otros`. Responde una pregunta
+  distinta de la anterior ("¿de qué subsistema?") y por eso es un módulo aparte.
+  `TIPOS_PROYECTO` y `TIPO_PROYECTO` son la **única fuente** de esos valores para
+  el mapa, la leyenda, la faceta, la fila de la vitrina, la ficha y las rutas
+  `/licitaciones/tipo/[slug]`; no se vuelve a escribir "ptar" a mano en ningún
+  sitio. Persistido en `proceso.tipo_proyecto` (+ `_confianza`, `_segundo`,
+  `_version`, `drizzle/0024`), backfill hecho el 2026-09-15 sobre las 90.622
+  filas. Se recomputa con `npm run db:tipo-proyecto --todas` al subir
+  `CLASIFICADOR_TIPO_VERSION`.
+  Es **textual, no por UNSPSC**: se midió que la clase 831015 concentra 16.444
+  procesos y contiene los cuatro tipos a la vez, así que el código dice que es de
+  agua —lo que ya usa la ingesta— pero no de qué subsistema. El UNSPSC solo
+  desempata. Y antes de puntuar se **poda** del texto la razón social de la
+  entidad: sin eso, un contrato de imprimir facturas de una "Empresa de Acueducto,
+  Alcantarillado y Aseo" puntúa como acueducto.
 - **Pliegos**: extracción híbrida (reglas + fallback Gemini) —
   `src/lib/pliego/extractPliegoHybrid.ts`, único extractor cableado a
   `/api/pliego/extract`.
@@ -62,7 +79,29 @@ Entidades y flujos principales:
 - **Auth**: Supabase Auth (`@supabase/ssr` + `@supabase/supabase-js`) — email/password y Google OAuth
 - **LLM**: Gemini (extractor de pliegos, `GEMINI_API_KEY`)
 - **Diseño**: tokens en `app/globals.css` — `--bg:#FAFAF7`,
-  `--accent:#0369A1`
+  `--accent:#0369A1`. Esos dos valores **se conservan por decisión medida del
+  2026-09-15**, no por inercia: el spec de rediseño pedía una paleta crema
+  (`#F7F5EF` / `#1D6FA5`), y al medirla resultó ser un 2,3% de diferencia en el
+  fondo y un 6,1% en el acento —el mismo azul, un crema apenas más cálido— a
+  cambio de bajar `--ink-300` por debajo de AA, colapsar `--surface-alt` contra
+  el fondo (quedaban en 1,01:1, o sea el mismo color) y encadenar tres tokens más
+  de compensación. Sobre un CSS repartido en **27 hojas** (`globals.css` más 26
+  bloques `<style>` inyectados en componentes) y con un 69% de cobertura de
+  tokens, no compensaba. Del spec sí se adoptó el **vocabulario**: `--text-primary`,
+  `--text-muted`, `--surface-elevated`, `--accent-deep`, `--border` y `--card`
+  existen como **alias** sobre los tokens de siempre — el código nuevo usa esos
+  nombres, el viejo sigue siendo válido y ningún píxel cambió al introducirlos.
+  `--surface` NO se redefinió como el crema del spec: significa blanco en 18
+  sitios y redefinirlo no daría error, solo pintaría mal. El crema es `--bg`.
+- **Color semántico**: `--success`, `--warning` y `--danger` son el escalón -700
+  de su escala (`#15803D`, `#B45309`, `#B91C1C`). Estaban en el -600 y ninguno
+  llegaba a AA como texto de 11,5px, que es el tamaño al que se pintan las
+  compuertas del semáforo: el usuario leía bien "no puedes" y mal "sí puedes".
+  Cualquier color nuevo de estado **se mide antes**:
+  `src/__tests__/design/contraste.test.ts` lee los tokens reales de `globals.css`
+  y falla si el contraste baja, incluso sobre los tintes `rgba()`. Era la única
+  categoría del suite sin pruebas. Lo que sigue roto y por qué, en `PENDIENTES.md`
+  §22-§26 — sobre todo el segmento UNKNOWN de la barra, que hoy es invisible.
 
 ## 4. Seguridad
 
@@ -119,16 +158,18 @@ Entidades y flujos principales:
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
   lee todavía**: `pliego_extraer` y `asistentes` están declaradas como `pro` en
   la política y siguen protegidas solo por `PROTECTED_PREFIXES`. Activar esa
-  frontera es hacer que sus handlers consulten `puede()`. La migración
-  `drizzle/0017_mushy_expediter.sql` está comiteada pero **sin aplicar** —
-  nadie corrió `npm run db:migrate` — así que la columna existe en el
-  esquema Drizzle y todavía no en la Supabase viva; borrar esta frase cuando
-  se aplique.
+  frontera es hacer que sus handlers consulten `puede()`. La columna ya existe en
+  la Supabase viva: verificado el 2026-09-15, las 24 migraciones del repo
+  (`0000`–`0023`) están aplicadas.
 
 ## 5. Estado del roadmap
 
 Ver `PENDIENTES.md` para pendientes activos y `docs/fase-*/` para el
-historial de decisiones de diseño por fase. `docs/diagnostico/` documenta el
+historial de decisiones de diseño por fase. **El rediseño de portada y vitrina
+(2026-09) tiene su propio traspaso en
+`docs/rediseno-2026-09/TRASPASO.md`**: estado por tarea, el bloqueo del mapa,
+las decisiones que no hay que deshacer y las trampas del entorno. Empezar por
+ahí antes de tocar la portada, las rutas facetadas o la ficha. `docs/diagnostico/` documenta el
 módulo de diagnóstico de principio a fin: reconocimiento, spec, contrato del
 cuestionario y lecciones. `AUDIT_REPORT.md` (2026-08-02)
 y `AUDITORIA_TECH_DEBT.md` (2026-07-18) son las auditorías más recientes
@@ -140,7 +181,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-08-31 (modelo de acceso por niveles).
+Última actualización: 2026-09-15 (paleta y color accesible; taxonomía de cinco tipos).
 
 ## graphify
 

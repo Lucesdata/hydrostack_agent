@@ -324,3 +324,243 @@ no ocurre:
 restaurar "aviso diario" en el cierre. La entrada del catálogo (`alertas` en
 `seccionesHome.js`) y el enlace del pie se dejaron intactos justamente para que
 la vuelta sea de un solo commit.
+
+---
+
+## Legibilidad del color (auditado el 2026-09-15)
+
+Contexto: al decidir si se adoptaba la paleta crema del spec de rediseño se midió
+el color de todo el producto. La decisión fue **conservar los valores actuales**
+(`--bg:#FAFAF7`, `--accent:#0369A1`) y gastar el esfuerzo en lo que sí impedía
+que la información llegara — ver `CLAUDE.md` §3. Lo que ya se hizo:
+
+- Los tres semánticos bajaron al escalón -700 (`#15803D`, `#B45309`, `#B91C1C`).
+  Los tres anteriores eran del escalón -600 y ninguno llegaba a AA como texto de
+  11,5px, que es el tamaño al que se pintan las compuertas.
+- Los 30 literales de esos colores repartidos por siete archivos se sustituyeron
+  por sus tokens, así que ahora hay una sola fuente.
+- Se añadieron los alias semánticos del spec (`--text-primary`, `--text-muted`,
+  `--surface-elevated`, `--accent-deep`, `--border`) y se definió `--card`, que
+  24 sitios usaban como `var(--card, #fff)` sin que existiera.
+- `src/__tests__/design/contraste.test.ts` lee los tokens reales de
+  `globals.css` y falla si el contraste baja. Antes no había ninguna prueba de
+  color en las 23 carpetas del suite.
+
+Lo que quedó abierto, en orden de impacto:
+
+### 22. El segmento UNKNOWN de la barra de elegibilidad es invisible
+`.clr-elig-seg--unknown` se pinta con `var(--line)` (`#E5E5E0`), que contra la
+tarjeta blanca da **1,26:1** cuando un elemento no textual exige 3,0. En la barra
+de cinco segmentos, UNKNOWN no se lee como un estado: se lee como pista vacía. Y
+según los comentarios de `verdict.ts`, `habilitacion` es UNKNOWN casi siempre en
+Nivel 0 — o sea que el estado más frecuente de la compuerta más importante se
+dibuja como nada. Verificado a ojo en el navegador, no solo calculado.
+
+No se arregla oscureciendo el token: se midió toda la familia de grises claros y
+ninguno llega a 3,0 (`#A9AFA8` se queda en 2,24). Necesita contorno, trama o un
+gris medio — es un rediseño del componente. **Va con la vitrina (Tarea 3 del
+spec de rediseño), que es donde el semáforo se rehace de todos modos.**
+
+### 23. La barra de cinco segmentos es solo color, sin texto
+La lista de compuertas sí lleva glifo (`✓ ! ✕ ?`) junto al nombre, así que ahí el
+color nunca viaja solo. La barra no. Y las luminancias del verde y el ámbar
+difieren un 4%, así que para alguien con deuteranopia o protanopia PASS y WARN
+son el mismo segmento. Incumple la regla 4 del spec de rediseño ("nunca un color
+sin texto que lo explique"). Mismo destino que el §22.
+
+### 24. `body` se pinta casi negro con el tema muerto
+`app/globals.css` §body declara `background: var(--deep1)` (`#020C10`), `color:
+var(--white)` y `font-family: var(--mono)` — los tres del tema oscuro
+"cyberpunk" que se retiró con el dominio séptico. Cada página clara lo tapa con
+su propio contenedor, así que hoy no se ve; verificado en `/`, `/cuenta` y
+`/licitaciones/explorar`. Pero es una pantalla negra esperando a la primera
+página que no cubra el viewport entero.
+
+Arreglo probable: `background: var(--bg); color: var(--ink-900); font-family:
+var(--font-sans)`. No se hizo aquí porque cambia el punto de partida visual de
+todo el producto y merece su propia pasada de verificación, no ir de polizón en
+un cambio de tokens.
+
+### 25. `--ink-300` sobre `--surface-alt` está en 4,37:1
+Por debajo de AA, y lo estaba antes de esta auditoría. Fijado como excepción
+conocida en `contraste.test.ts` con su valor de hoy: no se puede empeorar sin
+que el test lo diga. Se arregla oscureciendo `--ink-300` un paso (`#69726D` da
+4,56 incluso sobre el crema del spec) cuando alguien toque esa superficie.
+
+### 26. Restos del sistema de color, sin impacto visible
+- **`LandingCards.jsx` es código muerto**: 11 KB que nadie importa, y es el único
+  portador del marcado `clr-verdict-*`. Borrarlo con la Tarea 2.
+- **`#DADAD2` aparece 20 veces sin ser token**, conviviendo con `--line`
+  (`#E5E5E0`): hay dos grises de borde y ninguno lo sabe. Consolidar en
+  `--border`, que ya existe y apunta a `--line`.
+- **`PlantaHero.jsx` tiene 4 verdes `#16A34A` fuera del sistema** y cero tokens
+  en todo el archivo. Es ilustración, no estado, así que se dejó; el spec lo
+  mueve a `/nosotros` de todas formas.
+- **Los tintes `rgba()` siguen derivados del escalón -600.** Al 10% la diferencia
+  con el -700 es de 4 puntos RGB sobre 255 — imperceptible — y re-derivarlos
+  tocaría 25 sitios en seis archivos sin que se note. El test comprueba que el
+  texto se lee sobre ellos, que es lo que importa.
+
+---
+
+## Taxonomía de tipo de proyecto (Tarea 1, cerrada el 2026-09-15)
+
+Hecho: `src/lib/classify/tipo-proyecto.ts` con los cinco valores como constante
+compartida, 18 tests, columnas `proceso.tipo_proyecto{,_confianza,_segundo,_version}`
+(`drizzle/0024`) y backfill de las 90.622 filas. Reparto: acueducto 31.498,
+alcantarillado 12.225, ptar 7.712, ptap 5.577, otros 33.610.
+
+### 27. Clasificador cableado en la ingesta — ✅ resuelto 2026-09-15
+`batchUpsertProcesos` calcula el tipo en cada corrida vía `columnasTipoProyecto()`
+(`writers.ts`), tanto al INSERT como en el `ON CONFLICT DO UPDATE`. Se reclasifica
+siempre y no solo al insertar, porque el objeto y la descripción cambian con la
+fase del proceso y subir `CLASIFICADOR_TIPO_VERSION` tiene que poder reclasificar
+sin un backfill aparte. Verificado de punta a punta contra la base con una fila
+sintética: el INSERT clasifica, el upsert reclasifica al cambiar el objeto, y la
+fila se borró después.
+
+Lo cubre `src/__tests__/transform/writers-upsert-completo.test.ts`, que además fija
+el invariante que la cabecera de `writers.ts` declaraba sin comprobar: **toda
+columna no-PK se reescribe en el UPDATE**, salvo seis excepciones documentadas.
+Sin eso, una columna nueva podía quedarse fuera del upsert y congelarse con el
+valor de la primera corrida para siempre.
+
+Detalle que vale para futuros guardias de este tipo: la primera versión de esa
+prueba buscaba `excluded.<columna>` con `includes()` y no detectaba nada, porque
+`excluded.tipo_proyecto` es subcadena de `excluded.tipo_proyecto_confianza`. Es
+el mismo fallo que tenía el clasificador con «colector» dentro de «recolector».
+Se comprueba por palabra completa, y se verificó que la prueba falla al quitar
+una columna del UPDATE.
+
+### 28. 7.496 filas llevan una etiqueta elegida, no leída
+Son los "acueducto y alcantarillado" genuinos —planes maestros, reposición
+conjunta de redes— donde ambos tipos tienen la misma evidencia genérica. Forzar
+cinco valores obliga a elegir, y hoy gana `acueducto` por orden de lista: es
+determinista y está documentado, pero es una convención, no una lectura. El tipo
+descartado se guarda en `tipo_proyecto_segundo` (15.697 filas en total lo tienen),
+así que la ficha puede decir "también alcantarillado" sin perder el dato.
+
+Cambiar la regla es barato: invertir el orden en `PRECEDENCIA`, subir
+`CLASIFICADOR_TIPO_VERSION` y correr `npm run db:tipo-proyecto --todas`.
+
+### 29. `otros` es el 35% de los procesos abiertos
+12.332 de 35.222. La faceta "Por tipo de proyecto" de la Tarea 2 mostraría "Otros"
+como la barra más larga. Es honesto —son procesos del sector sin subsistema
+identificable en el objeto— pero hay que decidir cómo se presenta antes de
+construir esa tarjeta: ordenar por conteo pondría el cajón primero.
+
+### 30. El clasificador etiqueta el SUBSISTEMA, no la naturaleza del contrato
+Un "suministro de tablero de baja tensión" para una PTAR sale como `ptar`, y es
+defendible: el contrato es de esa planta. Pero el usuario que filtra por PTAR
+espera obra de PTAR, no el tablero eléctrico. Hoy no existe un eje que separe
+obra / suministro / servicio / interventoría, y añadirlo es una decisión de
+producto, no un arreglo. Si la vitrina lo necesita, es un segundo campo derivado
+con el mismo patrón que este.
+
+### 31. `raw_record` ocupa 247 MB con los payloads ya vacíos — ~200 MB recuperables
+Medido el 2026-09-15: 129.007 filas y **0 con payload**, porque `vaciarPayloads`
+ya los borró. El espacio nunca se devolvió al disco: un `DELETE`/`UPDATE` en
+Postgres marca la tupla muerta pero no encoge el archivo. La base está en 505 MB
+contra el techo de 500 MB del plan Free de Supabase, así que esto no es cosmético.
+
+Recuperarlo pide `VACUUM FULL raw_record`, que toma un lock exclusivo y bloquea la
+ingesta mientras dura — por eso no se hizo sin decidirlo. Es la palanca más grande
+que queda para la cuota, muy por encima de retirar índices.
+
+**Aviso para cualquier backfill futuro:** un `UPDATE` masivo de `proceso` (138 MB
+de datos) puede añadir otros 138 MB de tuplas muertas y tumbar la base. El
+backfill de esta tarea creció **1 MB** en vez de 138 porque va en lotes de 2.000
+con `VACUUM` cada 5 — el vacuum no devuelve espacio al disco, pero deja que el
+lote siguiente reescriba encima. Copiar ese patrón, no inventar otro.
+
+---
+
+## Rediseño de la portada (Tarea 2, en curso desde el 2026-09-15)
+
+Hecho hasta ahora: la capa de agregados (`src/lib/secop/agregados.ts`), la clase
+de entidad (`clase-entidad.ts`), las rutas facetadas (`facetas.ts` + tres
+familias de rutas), la fila densa compartida (`src/components/secop/lista/`),
+`/precios`, la ilustración movida a `/nosotros` y la limpieza de navegación.
+
+### 32. La portada sigue sin reconstruirse — bloqueada por el TopoJSON
+`app/page.js` conserva sus diez secciones. El hero del rediseño es 5/12 de
+mensaje y 7/12 de mapa departamental, y **no hay geometría en el repo**:
+`data/dane/divipola.ts` es un crosswalk de nombres y códigos, `public/` solo
+tiene un PNG. Decidido con el usuario el 2026-09-15: él aporta el TopoJSON, y
+el mapa será **coropleta sin marcadores** — `geografia` no tiene coordenadas y
+solo cubre 62 de los ~1.122 municipios, así que los puntos por municipio que
+pedía el spec no se pueden pintar con datos reales.
+
+Montar un hero provisional sin mapa significaría diseñarlo dos veces; por eso
+está parado y no a medias.
+
+### 33. El semáforo en la fila de la lista — ✅ resuelto 2026-09-15
+`src/lib/secop/semaforo.ts` (modelo de vista puro) y
+`src/components/secop/semaforo/` (pintura). Las rutas facetadas lo muestran en
+las 25 filas de cada página.
+
+**El quinto estado.** `verdict.ts` tiene cuatro —PASS, WARN, FAIL, UNKNOWN— y los
+cuatro presuponen un perfil contra el que comparar. Sin perfil, que es como llega
+cualquiera desde un buscador, pintar verde sería mentir: el verde dice "calificas",
+no "el proceso es de acueducto". Se añadió `DATO`, la lectura ABSOLUTA que enuncia
+lo que el proceso exige en cada eje sin juzgar a nadie. Ninguna compuerta sale en
+PASS ni FAIL sin perfil, y hay un test que lo fija.
+
+**Arregla de raíz el §22 en el componente nuevo:** el punto de "sin datos" usa
+`--text-muted` (6,99:1 contra la tarjeta) y no `--border` (1,26:1). El componente
+viejo —`clr-elig-seg--unknown` en `SecopExplorer`— sigue con el gris invisible; se
+retira cuando la vitrina sustituya esa superficie.
+
+**Dos diseños que probé y descarté por verlos en pantalla:**
+
+1. La primera versión mostraba la palabra del estado en la fila densa, y salían
+   cinco "EXIGE" seguidos: una columna entera para no decir nada. Ahora muestra el
+   VALOR ("PTAR", "$50 M", "CESAR"), que es lo que distingue un proceso de otro.
+2. Con el valor dentro, la fila decía **"$350 M" dos veces** —en la compuerta de
+   cuantía y en su columna— y repetía zona y tipo. Se quitaron las columnas
+   duplicadas y no el semáforo: el semáforo es lo que distingue al producto de un
+   agregador, la columna era una cifra suelta. Eso desvía la fila del spec, que
+   dibujaba cinco columnas; el motivo está escrito en la cabecera de
+   `FilaProceso.tsx`, y cuando haya perfil la compuerta dirá el veredicto y la
+   cifra podrá volver sin repetirse.
+
+La fila mide 100px y no los 84 del spec: las cinco compuertas envuelven en tres
+líneas dentro de sus 300px. Se deja así por legibilidad.
+
+### 34. Ficha pública `/licitaciones/[slug]` — ✅ resuelta 2026-09-15
+Existe, es pública e indexable, y las filas de las listas ya enlazan a ella. Con
+`generateMetadata` (objeto + municipio + tipo), Schema.org `GovernmentService`,
+canónica, `app/sitemap.ts` y `app/robots.ts` — el producto no tenía ninguno de
+los dos.
+
+Tres de sus nueve bloques salen con estado vacío honesto porque **no hay datos**:
+requisitos del pliego, cronograma y documentos. Las cifras muestran 2 de 5. El
+bloque de competidores sí tiene datos reales (27.035 registros históricos).
+
+Queda de la Tarea 4: la versión **relativa** del semáforo (con perfil), el
+**título global del sitio** y el **coste estimado de invocaciones** del ISR — las
+tres las pedía el spec y no se hicieron.
+
+### 35. La consulta por clase de entidad tarda 1,4 s
+`procesosDeFaceta` sobre `entidad/esp` recorre 21.262 filas evaluando el `CASE`
+de expresiones regulares por fila. Con ISR de 30 minutos se paga una vez por
+ventana, así que hoy no duele. Si llega a doler, la salida es persistir la clase
+en `entidad` como se hizo con `tipo_proyecto` — pero entonces la regla vuelve a
+vivir en dos sitios y hay que mantener el test que los compara.
+
+### 36. Formato del repo — ✅ resuelto 2026-09-15
+Cinco archivos ajenos a este trabajo no pasaban Prettier y el CI lo exige, así
+que cualquier PR habría fallado antes de que nadie mirara el contenido. Se
+formatearon: `db-search.ts`, `ProcesosTicker.jsx`, `S5DarkClosing.jsx`,
+`app-url.test.ts`, `writers-campos.test.ts`. Son cambios solo de formato.
+
+Ahora `npx prettier --check "src/**/*" "app/**/*"` pasa en todo el repo.
+
+---
+
+## Traspaso
+
+El estado completo del rediseño —qué falta, qué lo bloquea, qué decisiones no hay
+que deshacer y qué trampas tiene el entorno— está en
+[docs/rediseno-2026-09/TRASPASO.md](docs/rediseno-2026-09/TRASPASO.md). Ese
+documento es el punto de entrada para retomar el trabajo desde cero.
