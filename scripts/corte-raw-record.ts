@@ -101,7 +101,7 @@ try {
   process.stderr.write(
     `\ncorte fallido a mitad de camino: ${err instanceof Error ? err.message : String(err)}\n` +
       "revisar manualmente qué constraints/índices quedaron sueltos antes de reintentar " +
-      "(ver docs/runbook-corte-raw-record.md, sección \"Si algo falla\").\n"
+      '(ver docs/runbook-corte-raw-record.md, sección "Si algo falla").\n'
   );
   process.exitCode = 1;
 } finally {

@@ -553,12 +553,16 @@ probó, 884 ms contra 783, peor— porque hacen falta todas las clases de todos
 modos y no hay nada que podar. Con ISR de 6 horas se paga una vez por ventana.
 
 ### 36. Formato del repo — ✅ resuelto 2026-09-15
-Cinco archivos ajenos a este trabajo no pasaban Prettier y el CI lo exige, así
+Siete archivos ajenos a este trabajo no pasaban Prettier y el CI lo exige, así
 que cualquier PR habría fallado antes de que nadie mirara el contenido. Se
 formatearon: `db-search.ts`, `ProcesosTicker.jsx`, `S5DarkClosing.jsx`,
-`app-url.test.ts`, `writers-campos.test.ts`. Son cambios solo de formato.
+`app-url.test.ts`, `writers-campos.test.ts`, `corte-raw-record.ts` y
+`rellenar-columnas.ts`. Son cambios solo de formato.
 
-Ahora `npx prettier --check "src/**/*" "app/**/*"` pasa en todo el repo.
+**El CI corre `npx prettier --check .` — el repo ENTERO, no solo `src/` y
+`app/`.** Comprobarlo con un glob más estrecho da un falso verde: así se colaron
+los dos de `scripts/`, que solo aparecieron cuando el PR ya estaba abierto.
+Verificar con el mismo comando que el CI, no con uno parecido.
 
 ---
 
