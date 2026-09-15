@@ -33,7 +33,13 @@ export default function S5DarkClosing() {
 
         <div
           className="acciones-cierre"
-          style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", marginBottom: 32 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 20,
+            flexWrap: "wrap",
+            marginBottom: 32,
+          }}
         >
           <Link
             href={RUTA_EXPLORAR.href}

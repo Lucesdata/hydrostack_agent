@@ -136,8 +136,12 @@ async function prepare(query: SecopQuery) {
   const fromPayload = (field: string) => sql<string | null>`${payload}->>${field}`;
 
   const nombreRaw = sql<string | null>`coalesce(${proceso.objeto}, ${fromPayload(F.nombre)})`;
-  const descripcionRaw = sql<string | null>`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`;
-  const aperturaRaw = sql<string | null>`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`;
+  const descripcionRaw = sql<
+    string | null
+  >`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`;
+  const aperturaRaw = sql<
+    string | null
+  >`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`;
 
   const aguaClauses =
     query.soloAgua !== false
@@ -205,13 +209,23 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
       // cualquiera de las dos fuentes, que es lo que permite desplegar esto
       // sin ventana.
       nombreRaw: sql<string | null>`coalesce(${proceso.objeto}, ${fromPayload(F.nombre)})`,
-      descripcionRaw: sql<string | null>`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`,
+      descripcionRaw: sql<
+        string | null
+      >`coalesce(${proceso.descripcion}, ${fromPayload(F.descripcion)})`,
       faseRaw: sql<string | null>`coalesce(${proceso.fase}, ${fromPayload(F.fase)})`,
       unspscRaw: sql<string | null>`coalesce(${proceso.unspsc}, ${fromPayload(F.unspsc)})`,
-      adjudicadoRaw: sql<string | null>`coalesce(case when ${proceso.adjudicado} then 'Si' when ${proceso.adjudicado} is false then 'No' end, ${fromPayload(F.adjudicado)})`,
-      valorAdjudicacionRaw: sql<string | null>`coalesce(${proceso.valorAdjudicacion}::text, ${fromPayload(F.valorAdjudicacion)})`,
-      adjudicatarioRaw: sql<string | null>`coalesce(${proceso.adjudicatario}, ${fromPayload(F.adjudicatario)})`,
-      estadoAperturaRaw: sql<string | null>`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`,
+      adjudicadoRaw: sql<
+        string | null
+      >`coalesce(case when ${proceso.adjudicado} then 'Si' when ${proceso.adjudicado} is false then 'No' end, ${fromPayload(F.adjudicado)})`,
+      valorAdjudicacionRaw: sql<
+        string | null
+      >`coalesce(${proceso.valorAdjudicacion}::text, ${fromPayload(F.valorAdjudicacion)})`,
+      adjudicatarioRaw: sql<
+        string | null
+      >`coalesce(${proceso.adjudicatario}, ${fromPayload(F.adjudicatario)})`,
+      estadoAperturaRaw: sql<
+        string | null
+      >`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`,
       urlRaw: sql<string | null>`coalesce(${proceso.url}, ${payload}->${F.url}->>'url')`,
     })
     .from(proceso)

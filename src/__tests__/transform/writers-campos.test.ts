@@ -8,8 +8,16 @@ import { mapProcesoRow, mapContratoRow } from "@/src/lib/transform/mapCanonical"
  * NULL en silencio y el fallback al payload lo tapa hasta que el payload se va.
  */
 const PROMOVIDOS_PROCESO = [
-  "descripcion", "url", "unspsc", "fase", "adjudicado", "valorAdjudicacion",
-  "adjudicatario", "nitAdjudicatario", "fechaAdjudicacion", "estadoApertura",
+  "descripcion",
+  "url",
+  "unspsc",
+  "fase",
+  "adjudicado",
+  "valorAdjudicacion",
+  "adjudicatario",
+  "nitAdjudicatario",
+  "fechaAdjudicacion",
+  "estadoApertura",
   "fechaRecepcion",
 ] as const;
 
