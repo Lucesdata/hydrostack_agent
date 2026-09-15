@@ -541,12 +541,16 @@ Queda de la Tarea 4: la versión **relativa** del semáforo (con perfil), el
 **título global del sitio** y el **coste estimado de invocaciones** del ISR — las
 tres las pedía el spec y no se hicieron.
 
-### 35. La consulta por clase de entidad tarda 1,4 s
-`procesosDeFaceta` sobre `entidad/esp` recorre 21.262 filas evaluando el `CASE`
-de expresiones regulares por fila. Con ISR de 30 minutos se paga una vez por
-ventana, así que hoy no duele. Si llega a doler, la salida es persistir la clase
-en `entidad` como se hizo con `tipo_proyecto` — pero entonces la regla vuelve a
-vivir en dos sitios y hay que mantener el test que los compara.
+### 35. La consulta por clase de entidad — ✅ resuelta 2026-09-15
+Tardaba 2.612 ms: el `CASE` de expresiones regulares se evaluaba en el JOIN, una
+vez por proceso (21.262 veces para ESP), cuando la clase depende solo de la
+entidad. Pasado a subconsulta sobre `entidad` (4.223 filas): **363 ms**, con
+totales idénticos.
+
+Queda un resto medido y aceptado: el AGREGADO de la portada
+(`procesosPorClaseEntidad`) sigue en ~800 ms. Ahí el mismo truco no sirve —se
+probó, 884 ms contra 783, peor— porque hacen falta todas las clases de todos
+modos y no hay nada que podar. Con ISR de 6 horas se paga una vez por ventana.
 
 ### 36. Formato del repo — ✅ resuelto 2026-09-15
 Cinco archivos ajenos a este trabajo no pasaban Prettier y el CI lo exige, así
