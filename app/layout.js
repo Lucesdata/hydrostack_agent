@@ -10,8 +10,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
 import S6Footer from "@/src/components/landing/S6Footer";
 import { appUrl } from "@/src/lib/app-url";
-import { getSessionDisplayUser } from "@/src/lib/supabase/get-session-user";
-import { hasCoincidenciasNoVistas } from "@/src/lib/matching/record-coincidencias";
 import "./globals.css";
 
 // Las 4 familias reales de la landing + calculadoras + Hydro_Agent, self-hosted
@@ -89,17 +87,28 @@ export const metadata = {
     "licitaciones agua, licitaciones acueducto, licitaciones alcantarillado, PTAR, PTAP, SECOP II, contratación pública Colombia, saneamiento básico",
 };
 
-export default async function RootLayout({ children }) {
-  const user = await getSessionDisplayUser();
-  const hasNewMatches = user ? await hasCoincidenciasNoVistas(user.id) : false;
+/*
+  Este layout NO lee la sesión, y es deliberado.
 
+  Envuelve todas las páginas, así que cualquier `cookies()` que haga aquí
+  arrastra a dinámicas también a las rutas facetadas (`/licitaciones/tipo/…`,
+  `/departamento/…`, `/entidad/…` y la ficha), que se declaran estáticas a
+  propósito y con razón medida. El 2026-09-15 eso tumbó las 43 en producción con
+  500: "Page changed from static to dynamic at runtime ... reason: cookies".
+
+  Y aunque Next lo permitiera, seguiría estando mal: el HTML de una página
+  cacheada se sirve tal cual al siguiente visitante, de modo que hornear en él el
+  avatar y el correo de alguien sería filtrarlos. El Navbar pide su sesión a
+  /api/sesion desde el navegador, que es quien tiene la cookie.
+*/
+export default function RootLayout({ children }) {
   return (
     <html
       lang="es"
       className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
     >
       <body>
-        <Navbar user={user} hasNewMatches={hasNewMatches} />
+        <Navbar />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         {/*
           El pie vivía dentro de `app/page.js`, así que SOLO existía en la

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MENU_CUENTA, NAV_PRINCIPAL, NOMBRE_POR_ID, ruta } from "./landing/seccionesHome";
 
 // Las pestañas del navbar ya NO se declaran aquí: salen de `NAV_PRINCIPAL`
@@ -235,7 +235,43 @@ function UserMenu({ user, hasNewMatches }) {
   );
 }
 
-export default function Navbar({ user, hasNewMatches }) {
+/**
+ * La sesión se pide desde el navegador, no llega por props.
+ *
+ * Antes la resolvía `app/layout.js` en el servidor, lo que obligaba al layout a
+ * usar `cookies()` y volvía dinámica cada página que envuelve — incluidas las
+ * rutas facetadas, que son estáticas a propósito. El 2026-09-15 eso las tumbó en
+ * producción con 500. El porqué largo está en `app/api/sesion/route.ts`.
+ *
+ * Arranca en `null`, que es exactamente lo que debe renderizarse en el HTML
+ * cacheado y compartido: la barra de un visitante anónimo. Cuando la respuesta
+ * llega, el avatar aparece. El layout persiste entre navegaciones del App
+ * Router, así que esto se pide una vez por carga, no en cada página.
+ */
+function useSesion() {
+  const [sesion, setSesion] = useState({ user: null, hasNewMatches: false });
+
+  useEffect(() => {
+    let vigente = true;
+    fetch("/api/sesion")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (vigente && d) setSesion(d);
+      })
+      .catch(() => {
+        // Sin sesión legible se sigue mostrando la barra de anónimo, que es el
+        // estado inicial: no hay nada que deshacer ni que avisar.
+      });
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  return sesion;
+}
+
+export default function Navbar() {
+  const { user, hasNewMatches } = useSesion();
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
