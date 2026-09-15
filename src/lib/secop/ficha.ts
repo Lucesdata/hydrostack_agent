@@ -22,6 +22,7 @@ import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import { slugificar } from "./agregados";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
+import type { SecopProceso } from "./types";
 
 /**
  * El slug de una ficha: texto legible + el id nativo, separados por `--`.
@@ -106,6 +107,45 @@ export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null>
     .limit(1);
 
   return fila ?? null;
+}
+
+/**
+ * `ProcesoFicha` → `SecopProceso`, la forma que espera POST /api/secop/verdict.
+ *
+ * La ficha lee de Postgres y el endpoint del veredicto habla el vocabulario del
+ * explorador, que nació contra Socrata. En vez de relajar la validación del
+ * endpoint —que es lo que protege de que le manden cualquier cosa— se traduce
+ * aquí, en el servidor, y el objeto viaja ya formado al componente de cliente.
+ * Así el cliente no reconstruye nada ni necesita saber de la forma de la base.
+ *
+ * Los campos que la ficha no tiene se rellenan con el vacío que la compuerta
+ * correspondiente entiende, nunca con un valor inventado: `fase` y `ciudad` en
+ * blanco, `adjudicado` en false. Ninguna compuerta de Nivel 0 los lee.
+ */
+export function aSecopProceso(p: ProcesoFicha): SecopProceso {
+  return {
+    id: p.secopProcesoId,
+    referencia: p.referencia ?? p.secopProcesoId,
+    nombre: p.objeto ?? "",
+    descripcion: p.descripcion ?? "",
+    entidad: p.entidadNombre ?? "",
+    departamento: p.departamento ?? "",
+    ciudad: p.municipio ?? "",
+    estado: p.estadoActual ?? "",
+    fase: "",
+    modalidad: p.modalidad ?? "",
+    tipoContrato: p.tipoContrato ?? "",
+    fechaPublicacion: p.fechaPublicacion,
+    precioBase: p.valorEstimado === null ? null : Number(p.valorEstimado),
+    adjudicado: false,
+    valorAdjudicacion: null,
+    unspsc: p.unspsc,
+    adjudicatario: null,
+    url: p.url,
+    estadoApertura: (p.estadoApertura as SecopProceso["estadoApertura"]) ?? null,
+    documentAccess: (p.documentAccess as SecopProceso["documentAccess"]) ?? "UNKNOWN",
+    accessMessage: "",
+  };
 }
 
 export interface Competidor {

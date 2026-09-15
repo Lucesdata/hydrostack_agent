@@ -77,7 +77,7 @@ propia.
 paginación. Vive en la portada, así que hereda el bloqueo — salvo la fila de
 perfil, que además necesita persistencia sin cuenta (ver §5).
 
-### 🟢 Tarea 4 — Ficha pública
+### ✅ Tarea 4 — Ficha pública
 
 Construida y verificada en el navegador: `app/licitaciones/[slug]/page.tsx`.
 
@@ -88,14 +88,9 @@ Construida y verificada en el navegador: `app/licitaciones/[slug]/page.tsx`.
   `app/robots.ts`. No existía ninguno de los dos.
 - Las filas de las listas ya enlazan aquí y no al SECOP II.
 
-**Pendientes de la Tarea 4:**
-1. La versión **relativa** del semáforo (con perfil). Hoy solo la absoluta.
-2. El **título global del sitio** — el spec pide proponer alternativa y no se
-   hizo.
-3. El **coste estimado de invocaciones** del ISR, que el spec pide
-   explícitamente antes de fijar el intervalo. Hoy: fichas `revalidate = 3600`,
-   facetas `1800`, sitemap `21600`. Nadie ha echado la cuenta contra el plan
-   Hobby.
+Las tres cosas que quedaban de esta tarea están hechas: la versión relativa del
+semáforo (§7.5), el título global y el coste del ISR (§6 bis). Lo único que sigue
+sin datos son los bloques que dependen del pliego — ver §3.
 
 ### 🟢 Tarea 5 — Limpieza
 
@@ -377,9 +372,13 @@ producción.
 4. **Lighthouse en móvil**: hay línea base de peso (§6 ter) pero no de
    Lighthouse. Decidir si se instala la CLI o se mide contra el sitio desplegado;
    medirla contra el servidor de desarrollo sería engañoso.
-5. El semáforo **relativo** (con perfil) en la ficha. `buildVerdict` ya existe;
-   falta traer el perfil del usuario y llamar a `compuertasDesdeVeredicto()`, que
-   ya está escrita y probada.
+5. ~~El semáforo **relativo** (con perfil) en la ficha~~ — **hecho el
+   2026-09-15**, como isla de cliente (`SemaforoConPerfil.tsx`). El servidor
+   sirve siempre la lectura absoluta —la que se cachea y la que indexa un
+   buscador— y la isla la sustituye por la relativa si encuentra perfil.
+   Calcularlo en el servidor habría vuelto la ficha dinámica, una invocación por
+   visita, y el HTML dejaría de ser cacheable por ser distinto para cada usuario.
+   Cuesta 2,3 kB de cliente y la ruta sigue siendo `●` estática.
 
 **Bloqueado hasta el TopoJSON:**
 

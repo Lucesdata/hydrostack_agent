@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Semaforo from "@/src/components/secop/semaforo/Semaforo";
+import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
 import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
-import { competidoresComparables, procesoPorSlug, slugDeProceso } from "@/src/lib/secop/ficha";
+import {
+  aSecopProceso,
+  competidoresComparables,
+  procesoPorSlug,
+  slugDeProceso,
+} from "@/src/lib/secop/ficha";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { formatCopFull } from "@/src/components/secop/format";
 
@@ -129,16 +134,18 @@ export default async function FichaPage({ params }: Props) {
         <section className="fi-sec">
           <h2 className="fi-h2">Cómo te queda a ti</h2>
           <div className="fi-panel">
-            <Semaforo
-              compuertas={compuertasAbsolutas(p)}
-              disposicion="bloque"
+            {/*
+              El servidor pinta la lectura ABSOLUTA —lo que el proceso exige—, que
+              es la que se cachea, la que indexa un buscador y la que ve quien
+              llega sin nada. La isla de cliente la sustituye por la relativa si
+              encuentra perfil. Ver SemaforoConPerfil para el porqué de que no se
+              calcule aquí.
+            */}
+            <SemaforoConPerfil
+              proceso={aSecopProceso(p)}
+              absolutas={compuertasAbsolutas(p)}
               nota="Estas cinco son lecturas del proceso, no un dictamen de elegibilidad: quien decide si calificas es el pliego. Con un perfil definido, cada compuerta pasa de decir qué exige el proceso a decir cómo te queda a ti."
             />
-            <p style={{ marginTop: 14 }}>
-              <Link className="fi-btn" href="/perfil">
-                Define tu perfil y compara
-              </Link>
-            </p>
           </div>
         </section>
 
