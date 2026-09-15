@@ -20,7 +20,14 @@ import { formatCopFull } from "@/src/components/secop/format";
  * genera y la deja cacheada; el coste es una invocación por ficha y por hora,
  * no una por visitante.
  */
-export const revalidate = 3600;
+/**
+ * Revalidación cada 12 horas: el doble que las facetas porque una ficha cambia
+ * menos. Su objeto, su presupuesto y su entidad no se mueven una vez publicado
+ * el proceso; lo único que cambia es el estado, y lo cambia la ingesta, que no
+ * corre a diario (`vercel.json` tiene `"crons": []` — ver la nota de las rutas
+ * facetadas).
+ */
+export const revalidate = 43200;
 
 export async function generateStaticParams() {
   return [];
@@ -36,7 +43,7 @@ const fecha = (iso: string | null) =>
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const p = await procesoPorSlug(slug);
-  if (!p) return { title: "Proceso no encontrado · AquaLicita" };
+  if (!p) return { title: "Proceso no encontrado" };
 
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const tipo = p.tipoProyecto ? TIPO_PROYECTO[p.tipoProyecto].label : "Agua y saneamiento";
@@ -46,7 +53,7 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     // Objeto + municipio + tipo, como pide el spec: es lo que alguien teclea.
-    title: `${objeto}${lugar ? ` · ${lugar}` : ""} · ${tipo} · AquaLicita`,
+    title: `${objeto}${lugar ? ` · ${lugar}` : ""} · ${tipo}`,
     description: [
       `${p.entidadNombre ?? "Entidad estatal"} abrió este proceso de ${tipo.toLowerCase()}${lugar ? ` en ${lugar}` : ""}.`,
       valor ? `Presupuesto oficial ${valor}.` : null,

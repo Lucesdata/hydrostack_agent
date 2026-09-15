@@ -10,16 +10,17 @@ import { procesosDeFaceta, resolverFaceta } from "@/src/lib/secop/facetas";
  * que un buscador puede seguir. Estas no se prerrenderizan en build: se generan
  * a demanda la primera vez y se cachean.
  */
-export const revalidate = 1800;
+/** Misma ventana que la página 1 de su faceta. */
+export const revalidate = 21600;
 
 type Props = { params: Promise<{ slug: string; n: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { slug, n } = await params;
   const faceta = await resolverFaceta("departamento", slug);
-  if (!faceta) return { title: "No encontrado · AquaLicita" };
+  if (!faceta) return { title: "No encontrado" };
   return {
-    title: `${faceta.label} · página ${n} · AquaLicita`,
+    title: `${faceta.label} · página ${n}`,
     description: faceta.descripcion,
     // La canónica apunta a la página 1: las páginas profundas no deben competir
     // con ella en el índice.

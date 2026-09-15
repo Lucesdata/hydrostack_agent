@@ -115,7 +115,13 @@ function condicionDeFaceta(faceta: Faceta) {
   }
   if (faceta.familia === "entidad") {
     const clase = CLASE_ENTIDAD_POR_SLUG[faceta.slug];
-    return sql`${sql.raw(sqlClaseEntidad("entidad.nombre", "entidad.nivel_gobierno"))} = ${clase}`;
+    // Subconsulta y no un CASE sobre la fila unida: la clase depende SOLO de la
+    // entidad, así que evaluarla en el join la calcula una vez por proceso —
+    // 21.262 veces para la faceta de ESP— en lugar de una vez por entidad, que
+    // son 4.223. Medido: 2.612 ms con el CASE en el join.
+    return sql`${proceso.entidadId} in (
+      select id from entidad where ${sql.raw(sqlClaseEntidad("nombre", "nivel_gobierno"))} = ${clase}
+    )`;
   }
   // El slug no se guarda en ninguna columna: se compara contra el nombre
   // slugificado. Son 33 departamentos, así que el coste es irrelevante frente a

@@ -115,6 +115,12 @@ export async function procesosPorTipo(): Promise<FilaAgregado[]> {
  * SQL por `sqlClaseEntidad()` — ver ahí por qué la duplicación es segura.
  */
 export async function procesosPorClaseEntidad(): Promise<FilaAgregado[]> {
+  // Cuesta ~800 ms y se dejó así. Se probó calcular la clase en una subconsulta
+  // sobre `entidad` —4.223 filas en vez de 35.222— pensando que el CASE de
+  // expresiones regulares era el cuello; medido, salió IGUAL o peor (884 ms
+  // contra 783). Ese truco sí funciona cuando la faceta FILTRA por una clase,
+  // porque poda las entidades antes del join (ver `condicionDeFaceta`: 2.612 ms
+  // → 363), pero aquí hacen falta todas las clases de todos modos.
   const claseExpr = sql.raw(sqlClaseEntidad("e.nombre", "e.nivel_gobierno"));
   const filas = await db
     .select({ clase: sql<string>`${claseExpr}`, n: conteo })

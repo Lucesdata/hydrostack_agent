@@ -267,13 +267,64 @@ Las cuatro me mordieron a mí. Están aquí para que no muerdan dos veces.
 
 ---
 
+## 6 bis. Coste del ISR — medido el 2026-09-15
+
+El spec pedía estimar las invocaciones antes de fijar los intervalos. Aquí está.
+
+**Tiempo de generación por página** (solo consultas a la base, medias de 3
+corridas en caliente):
+
+| Página | ms |
+|---|---:|
+| faceta `/tipo/ptar` | 68 |
+| faceta `/departamento/antioquia` | 306 |
+| faceta `/entidad/esp` | **363** (era 2.612 — ver abajo) |
+| ficha (proceso + competidores) | 109 |
+| agregados de portada (4 consultas) | 836 |
+| sitemap (43 facetas + 2.000 fichas) | 260 |
+
+**La faceta de entidad se optimizó 7×.** El `CASE` de expresiones regulares que
+deriva la clase se evaluaba en el JOIN, o sea una vez por proceso —21.262 veces
+para ESP— cuando la clase depende solo de la entidad. Pasado a subconsulta sobre
+`entidad` (4.223 filas), 2.612 ms → 363, con totales idénticos.
+
+Se probó el mismo truco en el agregado de la portada y **no sirvió**: 884 ms
+frente a 783, o sea peor. Ahí hacen falta todas las clases de todos modos, así
+que no hay nada que podar. Está revertido y anotado en el código para que nadie
+lo reintente pensando que es una mejora obvia.
+
+**Lo que decide el intervalo no es el coste: es la cadencia de la ingesta.**
+`vercel.json` tiene `"crons": []` — nada dispara `/api/cron/ingest`, y alguien la
+ejecuta a mano. Las altas llegan a saltos: 12, 11, 10, 9 y 3 de septiembre.
+Revalidar cada 30 minutos regeneraba 48 veces al día un dato que cambia cada dos
+o tres.
+
+| | antes | ahora | techo de regeneraciones/día |
+|---|---|---|---|
+| facetas (43) | 30 min | **6 h** | 2.064 → 172 |
+| fichas (2.000 en sitemap) | 1 h | **12 h** | 48.000 → 4.000 |
+| sitemap | 6 h | **12 h** | 4 → 2 |
+| **total** | | | **50.068 → 4.174** |
+
+Ese techo asume que CADA página se pide en CADA ventana, cosa que con el tráfico
+actual no pasa ni de lejos: ISR solo regenera cuando alguien pide la página
+después de que expire, así que el coste real lo marca el tráfico, no el
+intervalo. El techo sirve para saber que no hay sorpresa aunque el tráfico
+llegue.
+
+**Consecuencia que no es de ISR pero sale de aquí:** el cron de ingesta no está
+programado. Mientras siga así, la frescura del producto depende de que alguien se
+acuerde de correrlo.
+
+---
+
 ## 7. Próximos pasos, en orden
 
 **Sin bloqueo — se puede hacer ya:**
 
 1. Los seis archivos de Prettier (§36). Un comando, desbloquea el CI.
-2. El **título global del sitio** y el **coste de invocaciones** del ISR: las dos
-   cosas que el spec pide de la Tarea 4 y no se hicieron.
+2. ~~Título global del sitio~~ y ~~coste de invocaciones~~ — **hechos el
+   2026-09-15**, ver §6 bis.
 3. Mover "Inteligencia de mercado" a `/competidores`, que no depende del mapa.
 4. **Lighthouse en móvil**: el criterio de aceptación dice que no puede bajar y
    **nunca se ha medido**, ni antes ni después. Hace falta la medición base.

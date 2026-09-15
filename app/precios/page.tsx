@@ -14,7 +14,7 @@ import S7Acceso from "@/src/components/landing/S7Acceso";
  * plan de pago, la columna «plan pro» ya está en su sitio.
  */
 export const metadata = {
-  title: "Precios y acceso · AquaLicita",
+  title: "Precios y acceso",
   description:
     "Qué puedes usar en AquaLicita sin cuenta, qué abre una cuenta gratuita y qué queda para el plan pro.",
 };

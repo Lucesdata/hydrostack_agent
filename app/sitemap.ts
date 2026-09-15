@@ -18,10 +18,12 @@ import { slugsRecientes } from "@/src/lib/secop/ficha";
  * posibilidad real de recibir una visita, y el archivo se queda en un tamaño
  * que Google acepta de una pieza (el límite son 50.000 URL / 50 MB).
  *
- * Revalida cada 6 horas. Con la ingesta diaria, un proceso nuevo entra al
- * sitemap el mismo día.
+ * Revalida cada 12 horas, la misma ventana que las fichas que lista: no tiene
+ * sentido anunciar una ficha antes de que la ficha se regenere. Y la ingesta no
+ * corre a diario (`vercel.json` tiene `"crons": []`), así que un proceso nuevo
+ * entra al sitemap dentro de las 12 horas siguientes a que alguien la ejecute.
  */
-export const revalidate = 21600;
+export const revalidate = 43200;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = appUrl().replace(/\/$/, "");
