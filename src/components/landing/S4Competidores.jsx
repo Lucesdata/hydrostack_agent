@@ -96,7 +96,7 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
             textDecoration: "none",
           }}
         >
-          [ VER COMPETIDORES ]
+          Ver competidores
         </Link>
       </div>
     </section>

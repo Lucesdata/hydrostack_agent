@@ -27,7 +27,14 @@ export const SECCIONES_HOME = [
     capacidad: "veredicto_resumen",
     etiqueta: "sin cuenta",
   },
+  { id: "perfil", href: "/perfil", capacidad: "perfil_guardar", etiqueta: "cuenta gratuita" },
   { id: "filtros", href: "/mis-filtros", capacidad: "filtros", etiqueta: "cuenta gratuita" },
+  {
+    id: "diagnostico-historial",
+    href: "/diagnostico/historial",
+    capacidad: "diagnostico_historial",
+    etiqueta: "cuenta gratuita",
+  },
   {
     id: "coincidencias",
     href: "/mis-coincidencias",
@@ -57,6 +64,7 @@ export const SECCIONES_HOME = [
   },
   { id: "soluciones", href: "/soluciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "nosotros", href: "/nosotros", capacidad: "explorar", etiqueta: "sin cuenta" },
+  { id: "precios", href: "/precios", capacidad: "explorar", etiqueta: "sin cuenta" },
 ];
 
 /**
@@ -99,18 +107,70 @@ export const NOMBRE_POR_ID = {
   filtros: "Mis filtros",
   competidores: "Competidores",
   auditoria: "Qué se descarta",
-  // `alertas` NO lleva nombre a propósito, y por eso no aparece ni en el pie ni
-  // en S7Acceso: sin nombre aquí, `seccionesPorNivel()` la omite. El envío
-  // diario por correo no se entrega hoy (falta AUTH_RESEND_KEY en Vercel,
-  // PENDIENTES §0 y §21), así que anunciarla en la portada promete algo que no
-  // ocurre. La ruta sigue existiendo y se llega a ella desde el menú de usuario
-  // del navbar; lo que se retira es la promesa, no la página. Devuélvele el
-  // nombre en cuanto el envío esté verificado en producción.
+  // `alertas` estuvo sin nombre desde 2026-09-10 para que no apareciera en
+  // ningún índice: el envío diario no se entrega (falta AUTH_RESEND_KEY en
+  // Vercel, PENDIENTES §0 y §21) y anunciarlo prometía algo que no ocurre.
+  //
+  // Recupera el nombre el 2026-09-15 porque el rediseño lleva /cuenta al nav y
+  // al pie, y porque la promesa ya no queda sin matizar: la propia página dice,
+  // arriba del formulario, que el aviso está construido y se activará cuando el
+  // envío quede configurado. El matiz está donde alguien va a actuar, que es
+  // mejor sitio que la ausencia del enlace. Lo que no se puede es volver a
+  // prometerlo como pilar de la portada; eso sigue vetado hasta el §0.
+  alertas: "Alertas",
   nosotros: "Nosotros",
+  precios: "Precios y acceso",
+  perfil: "Mi perfil RUP",
+  "diagnostico-historial": "Historial de diagnóstico",
   pliego: "Pliegos",
   "asistente-ejecucion": "Asistente: ejecución",
   "asistente-operacion": "Asistente: operación",
 };
+
+/**
+ * El nav principal. Cuatro destinos, no cinco, y sin numerar.
+ *
+ * Antes el navbar declaraba sus cinco pestañas en `Navbar.js` y el pie otras
+ * cuatro distintas en `S6Footer.jsx`: dos listas, ningún criterio común y un
+ * usuario que veía una navegación arriba y otra abajo. Ahora las dos salen de
+ * aquí, que es el mismo catálogo que `enlaces.test.ts` verifica contra `app/`.
+ *
+ * `Diagnóstico` y `Soluciones` bajan al pie: son puertas de entrada de campaña,
+ * no destinos a los que se vuelve. `Alertas` (/cuenta) sube, porque hasta ahora
+ * solo se llegaba a ella desde el propio correo de alertas — o sea, solo si ya
+ * la tenías.
+ */
+export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas", "nosotros"];
+
+/**
+ * Las columnas del pie. Incluye todo lo que el nav deja fuera, para que ninguna
+ * ruta con nombre quede sin una puerta visible.
+ */
+export const COLUMNAS_PIE = [
+  { grupo: "Explorar", ids: ["explorar", "diagnostico", "soluciones"] },
+  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores", "auditoria"] },
+  { grupo: "AquaLicita", ids: ["nosotros", "precios", "pliego"] },
+];
+
+/**
+ * El menú de usuario: lo que solo existe con sesión.
+ *
+ * Era la TERCERA lista de navegación declarada a mano, en `Navbar.js`, y la
+ * única que enlazaba /perfil y /diagnostico/historial — dos rutas que ni
+ * siquiera estaban en este catálogo, así que `enlaces.test.ts` nunca comprobó
+ * que existieran. Ahora salen de aquí como las demás.
+ */
+export const MENU_CUENTA = [
+  "perfil",
+  "coincidencias",
+  "filtros",
+  "competidores",
+  "auditoria",
+  "diagnostico-historial",
+  "asistente-ejecucion",
+  "asistente-operacion",
+  "alertas",
+];
 
 /**
  * Las secciones nombrables agrupadas por nivel de acceso, en el orden de

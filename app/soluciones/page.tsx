@@ -96,7 +96,7 @@ export default async function SolucionesPage() {
             contactamos.
           </p>
           <Link href="#contacto" className="clr-sol-cta">
-            [ Cuéntanos tu caso ]
+            Cuéntanos tu caso
           </Link>
         </div>
       </div>

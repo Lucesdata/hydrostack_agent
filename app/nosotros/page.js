@@ -1,3 +1,5 @@
+import PlantaHero from "@/src/components/landing/PlantaHero";
+
 export const metadata = {
   title: "Nosotros · AquaLicita",
 };
@@ -14,6 +16,15 @@ export default function NosotrosPage() {
             vigente — el método detrás de cada indicador que ves en AquaLicita.
           </p>
         </header>
+
+        {/*
+          La ilustración isométrica de la planta baja aquí desde la portada.
+          Allí competía con el mapa por el primer pliegue sin aportar un dato:
+          sus anotaciones técnicas —caudales, cotas, unidades de tratamiento—
+          solo trabajan donde se habla del criterio de ingeniería, que es esta
+          página. En la portada era decoración; aquí es el argumento.
+        */}
+        <PlantaHero />
       </div>
     </div>
   );

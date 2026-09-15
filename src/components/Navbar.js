@@ -2,44 +2,38 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ruta } from "./landing/seccionesHome";
+import { MENU_CUENTA, NAV_PRINCIPAL, NOMBRE_POR_ID, ruta } from "./landing/seccionesHome";
 
-// Las pestañas del navbar. Se dejaron de renderizar en d0e9cda ("simplifica
-// navbar a minimalista") y el array quedó vivo pero muerto: durante dos semanas
-// la única forma de llegar a cualquier función fue la home, y el bloque de la
-// home que enlaza las cinco rutas de intención estaba montado DEBAJO del pie.
-// El resultado práctico era un producto sin navegación. Vuelven a renderizarse.
+// Las pestañas del navbar ya NO se declaran aquí: salen de `NAV_PRINCIPAL`
+// (seccionesHome.js), el mismo catálogo del que come el pie. Antes eran dos
+// listas independientes —cinco destinos arriba, cuatro distintos abajo— y nadie
+// podía decir cuál era la navegación del producto.
 //
-// `route` existe aparte de `href` porque el resaltado activo es por prefijo, no
-// por igualdad: /diagnostico/historial debe pintar "Diagnóstico" como activo.
-// Hoy coincide con `href` en las cinco, y se mantiene separado para no tener
-// que reintroducir el campo cuando alguna gane subrutas con href propio.
-// Los asistentes (/asistente/*) NO están aquí: son dos rutas que exigen cuenta,
-// viven en el menú de usuario junto al resto de lo autenticado.
-const NAV_ITEMS = [
-  { href: "/licitaciones", route: "/licitaciones", index: "01", label: "Licitaciones" },
-  { href: "/pliego", route: "/pliego", index: "02", label: "Pliegos" },
-  { href: "/diagnostico", route: "/diagnostico", index: "03", label: "Diagnóstico" },
-  { href: "/soluciones", route: "/soluciones", index: "04", label: "Soluciones" },
-  { href: "/nosotros", route: "/nosotros", index: "05", label: "Nosotros" },
-];
+// Se cayó también la numeración `01/ 02/`: sugería una secuencia que no existe,
+// como si hubiera que pasar por Licitaciones antes que por Pliegos.
+//
+// `route` existe aparte de `href` porque el resaltado activo es por prefijo y no
+// por igualdad: /diagnostico/historial debe pintar su sección como activa.
+// Los asistentes (/asistente/*) NO están aquí: exigen cuenta y viven en el menú
+// de usuario junto al resto de lo autenticado.
+const NAV_ITEMS = NAV_PRINCIPAL.map((id) => {
+  const seccion = ruta(id);
+  return { href: seccion.href, route: seccion.href, label: NOMBRE_POR_ID[id] };
+});
 
-// Lo que solo existe con sesión. Vive en dos sitios (el dropdown del avatar en
-// escritorio y el menú hamburguesa en móvil) y por eso se declara una vez: la
-// versión anterior solo lo tenía en el dropdown, que está en display:none por
-// debajo de 1024px — un usuario con sesión en móvil no tenía forma de llegar a
-// su perfil, sus coincidencias ni sus filtros.
-const ACCOUNT_ITEMS = [
-  { href: "/perfil", label: "Mi perfil RUP" },
-  { href: "/mis-coincidencias", label: "Mis coincidencias" },
-  { href: "/mis-filtros", label: "Mis filtros" },
-  { href: "/competidores", label: "Competidores" },
-  { href: "/auditoria", label: "Qué se descarta" },
-  { href: "/diagnostico/historial", label: "Historial de diagnóstico" },
-  { href: "/asistente/ejecucion", label: "Asistente: ejecución" },
-  { href: "/asistente/operacion", label: "Asistente: operación" },
-  { href: "/cuenta", label: "Preferencias de alerta" },
-];
+// Lo que solo existe con sesión. Se renderiza en dos sitios (el dropdown del
+// avatar en escritorio y el menú hamburguesa en móvil) y por eso se construye
+// una vez: una versión anterior solo lo tenía en el dropdown, que está en
+// display:none por debajo de 1024px — un usuario con sesión en móvil no tenía
+// forma de llegar a su perfil, sus coincidencias ni sus filtros.
+//
+// Los ids salen de MENU_CUENTA (seccionesHome.js): era la tercera lista de
+// navegación escrita a mano en este archivo, y la única que enlazaba rutas que
+// el catálogo no conocía.
+const ACCOUNT_ITEMS = MENU_CUENTA.map((id) => ({
+  href: ruta(id).href,
+  label: NOMBRE_POR_ID[id],
+}));
 
 // El único destino que la portada persigue. Por debajo de 1024px el navbar
 // esconde toda la navegación en la hamburguesa; dejar "Licitaciones" fuera
@@ -110,7 +104,7 @@ const AUTH_CSS = `
 }
 .clr-avatar-dot{
   position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px;
-  border-radius: 50%; background: #16a34a; border: 1.5px solid #fff;
+  border-radius: 50%; background: var(--success); border: 1.5px solid #fff;
 }
 .clr-avatar-badge{
   position: absolute; top: -1px; right: -1px; width: 9px; height: 9px;
@@ -283,9 +277,6 @@ export default function Navbar({ user, hasNewMatches }) {
               onClick={close}
               {...navAria(isActive(item))}
             >
-              <span className="clr-nav-index" aria-hidden="true">
-                {item.index}/
-              </span>
               {item.label}
               <CoteGlyph />
             </Link>
@@ -334,9 +325,6 @@ export default function Navbar({ user, hasNewMatches }) {
             {...navAria(isActive(item))}
             onClick={close}
           >
-            <span className="clr-nav-index" aria-hidden="true">
-              {item.index}/
-            </span>
             {item.label}
           </Link>
         ))}

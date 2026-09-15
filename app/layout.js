@@ -8,6 +8,7 @@ import {
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
+import S6Footer from "@/src/components/landing/S6Footer";
 import { getSessionDisplayUser } from "@/src/lib/supabase/get-session-user";
 import { hasCoincidenciasNoVistas } from "@/src/lib/matching/record-coincidencias";
 import "./globals.css";
@@ -74,6 +75,14 @@ export default async function RootLayout({ children }) {
       <body>
         <Navbar user={user} hasNewMatches={hasNewMatches} />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+        {/*
+          El pie vivía dentro de `app/page.js`, así que SOLO existía en la
+          portada: desde cualquier otra página —una faceta, /precios, /pliego—
+          no había forma de llegar a nada salvo por el nav. Sube aquí, que es
+          donde un pie tiene sentido, y con él suben sus enlaces a /cuenta y
+          /mis-coincidencias, que hasta ahora solo se alcanzaban desde el correo.
+        */}
+        <S6Footer />
         <Analytics />
         <SpeedInsights />
       </body>

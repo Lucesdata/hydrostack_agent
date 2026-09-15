@@ -145,7 +145,7 @@ export default function S7Acceso() {
                       textDecoration: "none",
                     }}
                   >
-                    [ EXPLORAR PROCESOS ]
+                    Explorar procesos
                   </Link>
                 )}
               </div>

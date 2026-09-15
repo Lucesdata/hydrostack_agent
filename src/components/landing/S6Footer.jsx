@@ -1,21 +1,17 @@
 import Link from "next/link";
-import { NOMBRE_POR_ID, ruta } from "./seccionesHome";
+import { COLUMNAS_PIE, NOMBRE_POR_ID, ruta } from "./seccionesHome";
 
 /**
  * El pie enlazaba a /terms y /privacy, que nunca existieron. Ahora las rutas
  * salen de SECCIONES_HOME, que `enlaces.test.ts` verifica contra `app/`: un
  * enlace roto en el pie deja de ser algo que se descubre haciendo clic.
  *
- * Los nombres visibles ya no viven aquí: están en `NOMBRE_POR_ID`
- * (seccionesHome.js), que este pie comparte con `S7Acceso.jsx`.
+ * Desde 2026-09-15 tampoco decide sus propias columnas: las declara
+ * `COLUMNAS_PIE` en seccionesHome.js, junto al nav. Eran dos listas sueltas
+ * —cinco destinos arriba, cuatro distintos abajo— y ninguna de las dos era "la
+ * navegación del producto". Ahora si una ruta no aparece en ninguna de las dos,
+ * se ve de un vistazo en un solo archivo.
  */
-const COLUMNAS = [
-  { grupo: "Explorar", ids: ["diagnostico", "explorar", "soluciones", "nosotros"] },
-  // `alertas` no está en esta columna a propósito. El porqué —y el momento en
-  // que vuelve— vive junto a su entrada en NOMBRE_POR_ID (seccionesHome.js),
-  // que es lo que también la mantiene fuera de S7Acceso. Un solo sitio.
-  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "competidores", "auditoria"] },
-];
 
 const href = (id) => ruta(id).href;
 
@@ -48,7 +44,7 @@ export default function S6Footer() {
           marginBottom: 40,
         }}
       >
-        {COLUMNAS.map((col) => (
+        {COLUMNAS_PIE.map((col) => (
           <div key={col.grupo}>
             <div
               style={{
@@ -88,7 +84,9 @@ export default function S6Footer() {
             marginBottom: 12,
           }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16A34A" }} />
+          <span
+            style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)" }}
+          />
           <span>Datos SECOP II · actualización diaria</span>
         </div>
         <p style={{ margin: 0 }}>© 2026 AquaLicita. Todos los derechos reservados.</p>

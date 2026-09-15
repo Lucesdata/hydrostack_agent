@@ -13,7 +13,6 @@ import S3Motor from "@/src/components/landing/S3Motor";
 import S4Competidores from "@/src/components/landing/S4Competidores";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S7Acceso from "@/src/components/landing/S7Acceso";
-import S6Footer from "@/src/components/landing/S6Footer";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
 import { ETIQUETA_POR_NIVEL, ruta } from "@/src/components/landing/seccionesHome";
 
@@ -938,9 +937,6 @@ export default function LandingPage() {
 
         {/* Banda oscura de cierre */}
         <S5DarkClosing />
-
-        {/* Pie */}
-        <S6Footer />
       </div>
     </div>
   );
