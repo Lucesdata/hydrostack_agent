@@ -1,7 +1,7 @@
 import PlantaHero from "@/src/components/landing/PlantaHero";
 
 export const metadata = {
-  title: "Nosotros · AquaLicita",
+  title: "Nosotros",
 };
 
 export default function NosotrosPage() {

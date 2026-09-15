@@ -10,7 +10,6 @@ import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
-import S4Competidores from "@/src/components/landing/S4Competidores";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S7Acceso from "@/src/components/landing/S7Acceso";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
@@ -921,12 +920,6 @@ export default function LandingPage() {
 
         {/* S3 — El motor: cuatro pasos, el 04 absorbió los descartes */}
         <S3Motor procesosVigilados={sector.procesosVigilados} />
-
-        {/* S4 — Quién compite: histórico de oferentes y sanciones */}
-        <S4Competidores
-          oferentesHistoricos={sector.oferentesHistoricos}
-          sanciones={sector.sanciones}
-        />
 
         {/* S2 — Paso previo opcional: diagnóstico de preparación. Baja hasta
             aquí: dejó de ser la puerta de entrada. */}

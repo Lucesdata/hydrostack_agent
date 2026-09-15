@@ -22,7 +22,7 @@ import { DiagnosticoApp } from "@/src/components/diagnostico/DiagnosticoApp";
 import type { ResultadoDiagnostico } from "@/src/lib/diagnostico/types";
 
 export const metadata = {
-  title: "¿Tu empresa puede licitar? Diagnóstico — AquaLicita",
+  title: "¿Tu empresa puede licitar? Diagnóstico",
   description:
     "10 preguntas, 3 minutos. Descubre qué te falta para presentarte a un proceso público de agua y saneamiento en Colombia: tu nivel de preparación, tu escalón de contratación y el plan para cerrarlo.",
 };

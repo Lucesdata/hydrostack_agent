@@ -4,7 +4,17 @@ import { ruta } from "./seccionesHome";
 
 const RUTA = ruta("competidores");
 
-export default function S4Competidores({ oferentesHistoricos, sanciones }) {
+/**
+ * "Inteligencia de mercado": el argumento de por qué saber contra quién compites.
+ *
+ * Vivía en la portada, donde ocupaba un bloque entero para explicar en vez de
+ * mostrar. El rediseño de 2026-09 la baja a `/competidores`, que es la página de
+ * la capacidad que anuncia.
+ *
+ * `mostrarCta` existe porque dentro de `/competidores` el enlace "Ver
+ * competidores" apuntaría a la propia página.
+ */
+export default function S4Competidores({ oferentesHistoricos, sanciones, mostrarCta = true }) {
   const DATOS = [
     {
       valor: formatConteo(oferentesHistoricos),
@@ -87,17 +97,19 @@ export default function S4Competidores({ oferentesHistoricos, sanciones }) {
           ))}
         </div>
 
-        <Link
-          href={RUTA.href}
-          className="tap-target"
-          style={{
-            font: "600 12px var(--font-jetbrains-mono),monospace",
-            color: "#0369A1",
-            textDecoration: "none",
-          }}
-        >
-          Ver competidores
-        </Link>
+        {mostrarCta && (
+          <Link
+            href={RUTA.href}
+            className="tap-target"
+            style={{
+              font: "600 12px var(--font-jetbrains-mono),monospace",
+              color: "#0369A1",
+              textDecoration: "none",
+            }}
+          >
+            Ver competidores
+          </Link>
+        )}
       </div>
     </section>
   );

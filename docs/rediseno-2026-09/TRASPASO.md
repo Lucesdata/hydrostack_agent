@@ -367,7 +367,13 @@ producción.
 1. Los seis archivos de Prettier (§36). Un comando, desbloquea el CI.
 2. ~~Título global del sitio~~ y ~~coste de invocaciones~~ — **hechos el
    2026-09-15**, ver §6 bis.
-3. Mover "Inteligencia de mercado" a `/competidores`, que no depende del mapa.
+3. ~~Mover "Inteligencia de mercado" a `/competidores`~~ — **hecho el
+   2026-09-15**. Ojo con la decisión que arrastró: `/competidores` redirigía a
+   login sin sesión, así que mover ahí la sección la habría dejado invisible para
+   cualquier anónimo. Ahora la página muestra el argumento y las cifras del
+   sector a todo el mundo, y son los DATOS —el listado— los que piden cuenta.
+   Mismo criterio que el veredicto: el anónimo ve el semáforo, la explicación
+   pide cuenta.
 4. **Lighthouse en móvil**: hay línea base de peso (§6 ter) pero no de
    Lighthouse. Decidir si se instala la CLI o se mide contra el sitio desplegado;
    medirla contra el servidor de desarrollo sería engañoso.

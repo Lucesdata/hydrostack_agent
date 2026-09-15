@@ -17,7 +17,7 @@ import DocumentoLegal from "@/src/components/legal/DocumentoLegal";
 import { RESPONSABLE, VIGENCIA } from "@/src/lib/legal/responsable";
 
 export const metadata = {
-  title: "Política de tratamiento de datos · AquaLicita",
+  title: "Política de tratamiento de datos",
   description:
     "Qué datos personales trata AquaLicita, con qué finalidad, quién los recibe y cómo ejercer los derechos de habeas data.",
 };

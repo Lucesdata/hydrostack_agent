@@ -16,7 +16,7 @@ import DocumentoLegal from "@/src/components/legal/DocumentoLegal";
 import { RESPONSABLE, VIGENCIA } from "@/src/lib/legal/responsable";
 
 export const metadata = {
-  title: "Términos de servicio · AquaLicita",
+  title: "Términos de servicio",
   description:
     "Condiciones de uso de AquaLicita: qué hace el servicio, qué no garantiza, y las reglas de la cuenta.",
 };

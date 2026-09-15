@@ -12,7 +12,7 @@ import { getOrCreateConversation, loadMessages } from "@/src/lib/assistants/conv
 import AssistantChat from "@/src/components/assistants/AssistantChat";
 
 export const metadata = {
-  title: "Ejecución de contrato — AquaLicita",
+  title: "Ejecución de contrato",
   description:
     "Sube tu contrato y te acompañamos en la ejecución: actas, pólizas, informes, liquidación.",
 };

@@ -21,7 +21,7 @@ import { EXPLICA } from "./explica";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Auditoría de descartes · AquaLicita" };
+export const metadata = { title: "Auditoría de descartes" };
 
 type Props = { searchParams: Promise<{ motivo?: string }> };
 

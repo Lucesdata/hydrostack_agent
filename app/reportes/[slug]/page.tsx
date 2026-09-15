@@ -50,7 +50,7 @@ export async function generateMetadata({
 
   if (!row) return { title: "Reporte no encontrado" };
   return {
-    title: `${row.titulo} · AquaLicita`,
+    title: `${row.titulo}`,
     // Un reporte de cuenta no se indexa aunque alguien publique el enlace.
     robots: row.visibilidad === "publico" ? undefined : { index: false, follow: false },
   };
