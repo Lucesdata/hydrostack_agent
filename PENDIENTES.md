@@ -617,20 +617,24 @@ tras el transform) y la procedencia no se va a exigir por integridad referencial
 Hasta decidirlo, un `drizzle-kit push` intentaría crearlas y fallaría por las
 huérfanas.
 
-### 39. Borrar una cuenta en Auth no borra sus datos hasta que el correo vuelve (2026-09-19)
+### 39. Borrar una cuenta en Auth y sus datos (2026-09-19)
 `syncUsuario` ya no revienta cuando un correo se registra otra vez tras borrar su
 cuenta en el dashboard de Supabase: borra el espejo huérfano de `usuario` y, por
-las FK en cascada, sus datos (ver CLAUDE.md §4). Pero eso solo ocurre **si el
-correo vuelve a registrarse**. Mientras tanto la fila y todo lo que cuelga de ella
-se quedan en la base sin dueño que pueda entrar. El 2026-09-19 no había ninguna
-(`usuario` 2, `auth.users` 4, huérfanas 0).
+las FK en cascada, sus datos (ver CLAUDE.md §4). Eso solo ocurría **si el correo
+volvía a registrarse**; mientras tanto la fila y todo lo que cuelga de ella se
+quedaban sin dueño que pudiera entrar. El 2026-09-19 no había ninguna (`usuario`
+2, `auth.users` 4, huérfanas 0).
+
+- ✅ **Trigger `on_auth_user_deleted`** (`drizzle/0025`, 2026-09-19): borra la fila
+  de `usuario` en el momento en que la cuenta se borra en Auth. Probado en PGlite
+  borrando como `supabase_auth_admin`. **Aplicarlo a la base viva es un paso
+  manual** (`npm run db:migrate`, como `postgres`): el deploy no corre
+  migraciones. Verificado antes, solo lectura: `postgres` tiene privilegio
+  `TRIGGER` sobre `auth.users` y no había triggers en esa tabla. `syncUsuario`
+  sigue haciendo falta con el trigger: cubre las huérfanas anteriores y el
+  borrado suave de la API admin, que no dispara el trigger.
 
 Queda abierto:
-- Un trigger `AFTER DELETE ON auth.users` que borre la fila de `usuario` en el
-  momento del borrado. Es la corrección de raíz, pero es una migración que toca el
-  esquema `auth` de Supabase y hay que probarla en una rama antes de la base viva.
-  El arreglo de `syncUsuario` sigue haciendo falta con o sin trigger: cubre las
-  huérfanas que ya existan.
 - Los archivos que la cuenta subió a Supabase Storage (`documento.ruta_storage`,
   bucket `contracts`) no se borran con la fila: la cascada solo alcanza a esta
   base.

@@ -143,13 +143,17 @@ Entidades y flujos principales:
   usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
   de cuentas/oferente antes de tocarlas.
 - **Una cuenta borrada en Auth no le hereda nada a un alta nueva con el mismo
-  correo** (`src/lib/supabase/sync-usuario.ts`, 2026-09-19). Borrarla en el
-  dashboard de Supabase deja su fila en `usuario`; cuando el correo vuelve a
-  registrarse con otro id, `syncUsuario` borra esa fila —y por cascada sus
-  datos— solo si el id viejo ya no está en `auth.users`, y falla con
-  `ColisionEmailUsuarioError` si sigue vivo. **No reapuntar la fila al id
-  nuevo**: el alta sincroniza antes de confirmar el correo, así que le
-  entregaría perfil y documentos a quien escribiera esa dirección.
+  correo** (2026-09-19). Dos piezas: el trigger `on_auth_user_deleted`
+  (`drizzle/0025`) borra la fila de `usuario` —y por cascada sus datos— en el
+  momento en que la cuenta se borra en Auth; y `syncUsuario`
+  (`src/lib/supabase/sync-usuario.ts`) cubre las huérfanas que el trigger no
+  vio: si el correo vuelve a registrarse con otro id, borra la fila vieja solo
+  si su id ya no está en `auth.users`, y falla con `ColisionEmailUsuarioError`
+  si sigue vivo. **No reapuntar la fila al id nuevo**: el alta sincroniza antes
+  de confirmar el correo, así que le entregaría perfil y documentos a quien
+  escribiera esa dirección. La función del trigger es `SECURITY DEFINER` porque
+  GoTrue borra como `supabase_auth_admin`, que no tiene permisos sobre `public`:
+  sin eso, el dashboard no podría borrar ninguna cuenta.
 - **Modelo de acceso por niveles** (`src/lib/acceso/politica.ts`): tres niveles
   ordinales `anonimo < gratis < pro` y una tabla `NIVEL_MINIMO` que mapea
   capacidad → nivel mínimo. Es la única fuente de verdad de "quién puede qué";
@@ -189,7 +193,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-19 (colisión de correo en el espejo `usuario`).
+Última actualización: 2026-09-19 (colisión de correo en el espejo `usuario`; trigger de borrado en `auth.users`).
 
 ## graphify
 
