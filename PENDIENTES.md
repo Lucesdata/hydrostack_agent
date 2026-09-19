@@ -594,3 +594,25 @@ cada familia que sobre son 30-45 kB en la ruta crítica.
 
 Lo demás de la portada en producción está bien: TTFB 36 ms, FCP y LCP 384 ms,
 CLS 0. El margen está en el peso, no en el tiempo.
+
+### 38. Las 5 FK hacia `raw_record` están en el esquema pero no en la base (2026-09-19)
+Encontrado al marcar como abandonado el corte de `raw_record`
+([runbook](docs/runbook-corte-raw-record.md)). El esquema Drizzle declara cinco
+foreign keys hacia `raw_record.id` (`quarantine.ts`, dos en `hechos.ts`, dos en
+`aqualicita.ts`) y **la base viva no tiene ninguna**. No hay constancia de cuándo
+ni de quién las soltó: el `TRUNCATE` del corte nunca se ejecutó (129.007 filas),
+pero el script suelta las FK antes, en sentencias separadas.
+
+Sin ellas, nada impide referencias rotas, y ya las hay: 55 en `proceso`, 1 en
+`contrato`, **las 1.431** de `al_proceso_evento` y **13.606** de
+`al_oferentes_historico`. Las 55 huérfanas de `proceso` son **exactamente** las 55
+filas sin `url` (verificado fila a fila). Sin su `raw_record` no hay de dónde sacar
+la URL: el transform y el relleno de columnas la leen del payload.
+
+Decidir entre dos caminos, no recrearlas a ciegas:
+(a) recrearlas, decidiendo antes qué hacer con las huérfanas. El `set null` que
+propone el runbook borra la procedencia de todos los eventos de proceso;
+(b) quitarlas del esquema, si `raw_record` ya es un buffer (el payload se vacía
+tras el transform) y la procedencia no se va a exigir por integridad referencial.
+Hasta decidirlo, un `drizzle-kit push` intentaría crearlas y fallaría por las
+huérfanas.
