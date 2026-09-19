@@ -142,6 +142,14 @@ Entidades y flujos principales:
 - Aparte de eso, la única defensa multi-tenant sigue siendo el `WHERE
   usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
   de cuentas/oferente antes de tocarlas.
+- **Una cuenta borrada en Auth no le hereda nada a un alta nueva con el mismo
+  correo** (`src/lib/supabase/sync-usuario.ts`, 2026-09-19). Borrarla en el
+  dashboard de Supabase deja su fila en `usuario`; cuando el correo vuelve a
+  registrarse con otro id, `syncUsuario` borra esa fila —y por cascada sus
+  datos— solo si el id viejo ya no está en `auth.users`, y falla con
+  `ColisionEmailUsuarioError` si sigue vivo. **No reapuntar la fila al id
+  nuevo**: el alta sincroniza antes de confirmar el correo, así que le
+  entregaría perfil y documentos a quien escribiera esa dirección.
 - **Modelo de acceso por niveles** (`src/lib/acceso/politica.ts`): tres niveles
   ordinales `anonimo < gratis < pro` y una tabla `NIVEL_MINIMO` que mapea
   capacidad → nivel mínimo. Es la única fuente de verdad de "quién puede qué";
@@ -181,7 +189,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-15 (paleta y color accesible; taxonomía de cinco tipos).
+Última actualización: 2026-09-19 (colisión de correo en el espejo `usuario`).
 
 ## graphify
 
