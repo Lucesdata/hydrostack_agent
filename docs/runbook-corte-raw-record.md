@@ -1,5 +1,56 @@
 # Runbook — corte de `raw_record` (2026-09-12)
 
+> ## ⛔ ABANDONADO el 2026-09-19 — no ejecutar
+>
+> Lo decidió el dueño del proyecto. El corte perseguía una cosa: devolver la
+> base por debajo de la cuota de 500 MB de Supabase Free. Eso se consiguió de
+> otra forma, así que el `TRUNCATE` ya no tiene nada que ganar y sí un dato que
+> destruir:
+>
+> - `vaciarPayloads` (PR #31) dejó el `payload` de `raw_record` en `NULL` y
+>   solo se conserva mientras el transform lo necesita (`src/lib/transform/orchestrator.ts`).
+> - Un `VACUUM FULL` el 2026-09-15 (`scripts/compactar-tablas.ts`) devolvió
+>   al disco el espacio de las tuplas muertas: de 505 a 201 MB.
+>
+> **No correr `scripts/corte-raw-record.ts`.** Sigue en el repo y se niega a
+> arrancar sin `CONFIRM_CORTE=si`, pero ya no hay ningún escenario en el que
+> ponerla.
+>
+> **Qué llegó a pasar de verdad**, paso por paso. Verificado el 2026-09-19 con
+> consultas de solo lectura a la base viva:
+>
+> | Paso | Estado |
+> |---|---|
+> | Pre-vuelo (export a Storage) | Sin constancia en el repo |
+> | 2 · `TRUNCATE` | **No se ejecutó**: `raw_record` tiene 129.007 filas, 0 con `payload` |
+> | 2 · Soltar las 5 FK | **Las 5 FK no existen en la base viva**, y no hay constancia de cuándo ni de quién las soltó. El script las suelta en sentencias separadas antes del `TRUNCATE`, así que un fallo a mitad de camino dejaría este estado. Pero es una hipótesis, no un dato |
+> | Índices recreables (paso previo del relleno) | Los 5 existen |
+> | 4 · Neutralizar el watermark | Hecho: filas `superseded` en `sync_log` hasta el 2026-09-12 11:12 UTC |
+> | 5 · Re-ingesta | Hecha el 2026-09-12, de 20:38 a 20:46 UTC, en `ok` |
+> | 6 · Transform | Hecho: `vaciarPayloads` solo vacía filas ya transformadas sin error |
+> | 7 · Recrear las 5 FK | **No hecho**, y hoy no se puede tal cual (ver abajo) |
+> | 8 · Crons | `tick` reactivado el 2026-09-19 (PR #35). `alertas` espera a `docs/runbook-correo-y-alertas.md` |
+>
+> **Queda una deriva abierta: el esquema Drizzle declara 5 FK que la base no
+> tiene.** Están en `quarantine.ts`, dos en `hechos.ts` y dos en `aqualicita.ts`.
+> Recrearlas con el SQL del paso 7 falla hoy, porque hay referencias a filas de
+> `raw_record` que ya no existen:
+>
+> | Tabla | Columna | Con referencia | Huérfanas |
+> |---|---|---|---|
+> | `proceso` | `raw_record_id_actual` | 90.622 | 55 |
+> | `contrato` | `raw_record_id_actual` | 38.441 | 1 |
+> | `transform_quarantine` | `raw_record_id` | 0 | 0 |
+> | `al_proceso_evento` | `raw_record_id` | 1.431 | **1.431** |
+> | `al_oferentes_historico` | `raw_record_id` | 13.606 | **13.606** |
+>
+> La limpieza que propone el paso 7 (`set <columna> = null`) borraría la
+> procedencia de todos los eventos de proceso y de 13.606 filas del histórico de
+> oferentes. Recrear las FK, o quitarlas del esquema, es una decisión aparte:
+> `PENDIENTES.md` §38.
+>
+> Lo que sigue se conserva como historia del plan, sin tocar.
+
 Punto de no retorno del plan de adelgazamiento (`.superpowers/sdd/2026-09-12-adelgazamiento-raw-record/`).
 Este documento es lo que sigue el operador mientras ejecuta `scripts/corte-raw-record.ts`
 contra la base viva de Supabase. **No improvisar sobre la marcha** — si algo
