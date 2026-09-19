@@ -15,6 +15,11 @@ misma pieza faltante tumba las alertas diarias en producción (`AUTH_RESEND_KEY`
 no existe en Vercel). El código ya está resuelto; lo que falta es configuración
 en Supabase, Resend y Vercel — pasos exactos en
 [PENDIENTES-CORREO.md](PENDIENTES-CORREO.md).
+**Actualizado 2026-09-19:** el orden verificado de ejecución está en
+[docs/runbook-correo-y-alertas.md](docs/runbook-correo-y-alertas.md). Los crons
+se vaciaron a propósito el 2026-09-12 por el corte de `raw_record`; ese corte
+quedó **abandonado** (decisión del 2026-09-19). `tick` vuelve a `vercel.json`;
+`alertas` sigue fuera hasta que el paso 9 del runbook salga bien.
 
 ### 1. Extractor de pliegos: restaurar contrato validado (bloqueador de Fase 0) — ✅ resuelto 2026-08-02
 El schema actual (`src/lib/pliego/schema.ts`) perdió `lagunas_pendientes` y el campo `codigo` de ítem. Sin ellos no se pueden representar las 6 inconsistencias que certificaron el gate "SALE LIMPIO" del caso UAESP (`docs/secop/uaesp-4182-2026/gate-verdict.md`). La Prueba Binaria de Fase 0 no es reproducible hoy.

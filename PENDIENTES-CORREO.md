@@ -1,5 +1,11 @@
 # Pendientes de correo — configuración que solo puede hacer el dueño del proyecto
 
+> **2026-09-19: para ejecutar, seguir
+> [docs/runbook-correo-y-alertas.md](docs/runbook-correo-y-alertas.md)**, que
+> verifica cada paso contra el código y el estado real y dice qué de este
+> documento ya no aplica (§5, parte de §4, el rate limit y la nota sobre `0017`).
+> Este archivo queda como historia del diagnóstico.
+
 **Abierto el 2026-09-07.** Todo lo de aquí es configuración en paneles externos
 (Supabase, Resend, Vercel) con credenciales del dueño. No hay nada que arreglar
 en el código para esto — la parte de código ya está hecha, ver "Qué ya está
