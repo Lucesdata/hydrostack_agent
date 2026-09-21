@@ -25,6 +25,7 @@
  */
 
 import { sentenceCaseTitle, formatCopCompact } from "@/src/components/secop/format";
+import { montoConDato } from "@/src/lib/secop/monto";
 import { signUnsubscribeToken } from "@/src/lib/email/unsubscribe-token";
 import type { Digest } from "@/src/lib/email/digest";
 import type { Match } from "@/src/lib/matching/match";
@@ -40,12 +41,16 @@ function withUtm(url: string): string {
  * Las cuantías llegan de Postgres como texto (`numeric::text`), pero
  * `formatCopCompact` espera número — el mismo contrato que ya usa
  * `/mis-coincidencias`. Un valor no numérico se trata como ausente, no como 0:
- * "$0 M" afirmaría un precio que nadie publicó.
+ * "$0 M" afirmaría un precio que nadie publicó. Y un "0.00" literal tampoco es
+ * un precio: SECOP guarda 0 donde no hubo cuantía (ver `lib/secop/monto.ts`),
+ * así que la línea de la tarjeta dice "—".
+ *
+ * Esto vale para la línea que resume el proceso, NO para `tablaDelta`: ahí el
+ * 0 es el dato —"de 0.00 a 2000.00" es lo que cambió en el pliego— y se
+ * imprime tal cual lo publicó SECOP.
  */
 function cop(v: string | null): string {
-  if (v === null) return formatCopCompact(null);
-  const n = Number(v);
-  return formatCopCompact(Number.isFinite(n) ? n : null);
+  return formatCopCompact(montoConDato(v));
 }
 
 function esc(s: string | null): string {

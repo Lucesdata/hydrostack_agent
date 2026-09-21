@@ -12,6 +12,7 @@ import {
 } from "@/src/lib/secop/ficha";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { formatCopFull } from "@/src/components/secop/format";
+import { montoConDato } from "@/src/lib/secop/monto";
 
 /**
  * Ficha pública de un proceso — PÚBLICA E INDEXABLE.
@@ -53,15 +54,14 @@ export async function generateMetadata({ params }: Props) {
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const tipo = p.tipoProyecto ? TIPO_PROYECTO[p.tipoProyecto].label : "Agua y saneamiento";
   const objeto = (p.objeto ?? "Proceso de contratación").slice(0, 90);
-  const valor =
-    p.valorEstimado && Number(p.valorEstimado) > 0 ? formatCopFull(Number(p.valorEstimado)) : null;
+  const valor = montoConDato(p.valorEstimado);
 
   return {
     // Objeto + municipio + tipo, como pide el spec: es lo que alguien teclea.
     title: `${objeto}${lugar ? ` · ${lugar}` : ""} · ${tipo}`,
     description: [
       `${p.entidadNombre ?? "Entidad estatal"} abrió este proceso de ${tipo.toLowerCase()}${lugar ? ` en ${lugar}` : ""}.`,
-      valor ? `Presupuesto oficial ${valor}.` : null,
+      valor !== null ? `Presupuesto oficial ${formatCopFull(valor)}.` : null,
       p.estadoActual ? `Estado: ${p.estadoActual}.` : null,
     ]
       .filter(Boolean)
@@ -81,7 +81,7 @@ export default async function FichaPage({ params }: Props) {
   const canonico = slugDeProceso(p.objeto, p.secopProcesoId);
   const competidores = await competidoresComparables(p);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
-  const valor = p.valorEstimado === null ? null : Number(p.valorEstimado);
+  const valor = montoConDato(p.valorEstimado);
 
   const schema = {
     "@context": "https://schema.org",
@@ -154,7 +154,7 @@ export default async function FichaPage({ params }: Props) {
           <h2 className="fi-h2">Cifras</h2>
           <div className="fi-panel fi-cifras">
             <div>
-              <div className="fi-cifra-v">{valor && valor > 0 ? formatCopFull(valor) : "—"}</div>
+              <div className="fi-cifra-v">{formatCopFull(valor)}</div>
               <div className="fi-cifra-l">Presupuesto oficial</div>
             </div>
             <div>
