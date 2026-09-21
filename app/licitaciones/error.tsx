@@ -1,8 +1,10 @@
 "use client";
 
 /**
- * Frontera de error del listado. Sin ella, un fallo de la base cae en la
- * pantalla genérica de Next, que no ofrece salida.
+ * Frontera de error de todo el segmento `/licitaciones`: cubre la vitrina, la
+ * ficha `[slug]`, las 43 rutas facetadas y `/explorar`, no solo un listado. Sin
+ * ella, un fallo de la base cae en la pantalla genérica de Next, que no ofrece
+ * salida.
  *
  * `reset()` reintenta el render en el cliente; si el fallo era de la consulta y
  * ya pasó, la página vuelve sin recargar.
@@ -12,10 +14,10 @@ export default function ErrorLicitaciones({ reset }: { error: Error; reset: () =
     <div className="clr-page">
       <div className="clr-container" style={{ padding: "64px 0" }}>
         <h1 style={{ font: "700 24px var(--sans)", margin: "0 0 10px" }}>
-          No pudimos cargar las fichas.
+          No pudimos cargar esta página.
         </h1>
         <p style={{ font: "14px var(--sans)", color: "var(--text-muted)", margin: "0 0 18px" }}>
-          El listado no respondió. Puede volver a intentarlo.
+          Hubo un problema al obtener los datos. Puede volver a intentarlo.
         </p>
         <button
           onClick={reset}
