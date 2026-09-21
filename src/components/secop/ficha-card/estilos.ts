@@ -19,7 +19,7 @@ export const ESTILOS_FICHA_CARD = `
 .fc:hover {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
   transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(10, 31, 28, 0.08);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--text-primary) 8%, transparent);
 }
 .fc:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -52,7 +52,7 @@ export const ESTILOS_FICHA_CARD = `
 .fc-ver { font: 600 12px var(--mono); color: var(--accent); }
 
 /* destacada: sobre el mapa del hero, más aire y sombra propia */
-.fc--destacada { padding: 24px 26px; box-shadow: 0 16px 40px rgba(10, 31, 28, 0.12); }
+.fc--destacada { padding: 24px 26px; box-shadow: 0 16px 40px color-mix(in srgb, var(--text-primary) 12%, transparent); }
 .fc--destacada .fc-objeto { font-size: 17px; -webkit-line-clamp: 3; }
 
 /* compacta: listas y correo. Sin semáforo, así que aquí SÍ va la cuantía. */
