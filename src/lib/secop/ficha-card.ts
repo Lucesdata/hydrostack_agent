@@ -80,8 +80,13 @@ export interface FichaCardVista {
  * Mediodía UTC y `timeZone: "UTC"`: la columna es `date` y sin fijar la hora,
  * un navegador al oeste de Greenwich resta horas y pinta el día anterior.
  */
-function fechaCorta(iso: string): string {
-  return new Date(`${iso}T12:00:00Z`)
+/** `null` si `iso` no es una fecha real: mismo criterio que `formatShortDate` y
+ * `FilaProceso.fecha`, que guardan contra un ISO corrupto en vez de dejar pasar
+ * "Invalid Date". */
+function fechaCorta(iso: string): string | null {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return null;
+  return d
     .toLocaleDateString("es-CO", {
       day: "2-digit",
       month: "short",
@@ -92,10 +97,13 @@ function fechaCorta(iso: string): string {
     .replace(/\./g, "");
 }
 
-/** Días naturales entre dos fechas, ignorando la hora. */
-function diasHasta(iso: string, hoy: Date): number {
+/** Días naturales entre dos fechas, ignorando la hora. `null` si `iso` no es una
+ * fecha real: sin la guarda, un ISO corrupto no da NaN al parsear sino que
+ * arrastra el NaN hasta el texto de la tarjeta ("faltan NaN días"). */
+function diasHasta(iso: string, hoy: Date): number | null {
   const dia = 24 * 60 * 60 * 1000;
   const a = Date.parse(`${iso}T12:00:00Z`);
+  if (Number.isNaN(a)) return null;
   const b = Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate(), 12);
   return Math.round((a - b) / dia);
 }
@@ -117,28 +125,47 @@ function plazoDe(p: ProcesoParaCard, hoy: Date): string {
   if (p.fechaRecepcion) {
     const dias = diasHasta(p.fechaRecepcion, hoy);
     const cuando = fechaCorta(p.fechaRecepcion);
-    if (dias < 0) return `Recepción cerrada el ${cuando}`;
-    if (dias === 0) return `Recepción hasta el ${cuando} · último día`;
-    return `Recepción hasta el ${cuando} · faltan ${dias} días`;
+    // Un ISO corrupto cae aquí como si no hubiera fecha: es el mismo texto que
+    // ya se usa cuando `fecha_recepcion` es null, así que no hace falta un
+    // tercer mensaje para "hay valor pero no es una fecha real".
+    if (dias !== null && cuando !== null) {
+      if (dias < 0) return `Recepción cerrada el ${cuando}`;
+      if (dias === 0) return `Recepción hasta el ${cuando} · último día`;
+      return `Recepción hasta el ${cuando} · faltan ${dias} días`;
+    }
   }
   return p.estadoApertura === "Abierto" ? "Abierto a ofertas" : "Cerrado a ofertas";
 }
 
+/** Adjudicado a X **por** $1.980 M: la preposición evita leer la cifra como si
+ * fuera un dato aparte. Sin adjudicatario publicado no hay a quién atribuirle
+ * el "por", así que el separador se queda como estaba. */
 function adjudicacionDe(p: ProcesoParaCard): string | null {
   if (!p.fechaAdjudicacion) return null;
-  const quien = p.adjudicatario ?? "Adjudicatario no publicado";
   const cuanto = numero(p.valorAdjudicacion);
-  const texto = p.adjudicatario ? `Adjudicado a ${quien}` : quien;
-  return cuanto === null ? texto : `${texto} · ${formatCopCompact(cuanto)}`;
+  if (!p.adjudicatario) {
+    const quien = "Adjudicatario no publicado";
+    return cuanto === null ? quien : `${quien} · ${formatCopCompact(cuanto)}`;
+  }
+  const texto = `Adjudicado a ${p.adjudicatario}`;
+  return cuanto === null ? texto : `${texto} por ${formatCopCompact(cuanto)}`;
 }
 
 export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
   const valor = numero(p.valorEstimado);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
+  // Si hay adjudicación, la etapa es ADJUDICADO mande lo que mande
+  // `estado_actual`: medido en la base, 5 de los 191 procesos adjudicados
+  // recientes llevan un estado_actual que no es "Seleccionado" (4 "Abierto", 1
+  // "Evaluación"), y la tarjeta no puede decir "Adjudicado a X" bajo una
+  // pastilla que dice ABIERTO.
+  const etapa: EtapaVista = p.fechaAdjudicacion
+    ? ETAPA_POR_ESTADO["Seleccionado"]
+    : (p.estadoActual && ETAPA_POR_ESTADO[p.estadoActual]) || ETAPA_DESCONOCIDA;
 
   return {
     id: p.secopProcesoId,
-    etapa: (p.estadoActual && ETAPA_POR_ESTADO[p.estadoActual]) || ETAPA_DESCONOCIDA,
+    etapa,
     entidad: p.entidadNombre ?? "Entidad no informada",
     objeto: p.objeto ?? "Objeto no publicado",
     cuantia: valor === null ? "Cuantía no publicada" : formatCopCompact(valor),

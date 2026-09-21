@@ -100,7 +100,7 @@ describe("los campos ausentes tienen texto, nunca hueco", () => {
 });
 
 describe("la adjudicación sustituye al plazo cuando existe", () => {
-  it("con proveedor y valor", () => {
+  it("con proveedor y valor, rotulado con «por» para no leer la cifra como un dato aparte", () => {
     const v = vistaFichaCard(
       {
         ...base,
@@ -110,10 +110,10 @@ describe("la adjudicación sustituye al plazo cuando existe", () => {
       },
       HOY
     );
-    expect(v.adjudicacion).toBe("Adjudicado a Constructora del Pacífico S.A.S. · $1.980 M");
+    expect(v.adjudicacion).toBe("Adjudicado a Constructora del Pacífico S.A.S. por $1.980 M");
   });
 
-  it("adjudicado sin proveedor publicado", () => {
+  it("adjudicado sin proveedor publicado: sin «por», no hay a quién atribuírselo", () => {
     const v = vistaFichaCard(
       { ...base, fechaAdjudicacion: "2026-09-17", valorAdjudicacion: "1980000000" },
       HOY
@@ -123,6 +123,47 @@ describe("la adjudicación sustituye al plazo cuando existe", () => {
 
   it("sin adjudicación es null, y entonces manda el plazo", () => {
     expect(vistaFichaCard(base, HOY).adjudicacion).toBeNull();
+  });
+});
+
+describe("con adjudicación, la etapa es ADJUDICADO mande lo que mande estado_actual", () => {
+  // Medido en la base el 2026-09-21: de los 191 procesos adjudicados en los
+  // últimos 30 días, 4 llevan estado_actual «Abierto» y 1 «Evaluación» — la
+  // tarjeta no puede decir «Adjudicado a X» bajo una pastilla que dice ABIERTO.
+  it("estado_actual «Abierto» con fecha de adjudicación pasa a ADJUDICADO", () => {
+    const v = vistaFichaCard(
+      { ...base, estadoActual: "Abierto", fechaAdjudicacion: "2026-09-17" },
+      HOY
+    );
+    expect(v.etapa.label).toBe("ADJUDICADO");
+  });
+
+  it("estado_actual «Evaluación» con fecha de adjudicación pasa a ADJUDICADO", () => {
+    const v = vistaFichaCard(
+      { ...base, estadoActual: "Evaluación", fechaAdjudicacion: "2026-09-17" },
+      HOY
+    );
+    expect(v.etapa.label).toBe("ADJUDICADO");
+  });
+
+  it("sin fecha de adjudicación, la etapa sigue el estado_actual normal", () => {
+    expect(vistaFichaCard({ ...base, estadoActual: "Abierto" }, HOY).etapa.label).toBe("ABIERTO");
+  });
+});
+
+describe("una fecha inválida no revienta el plazo", () => {
+  it("un ISO corrupto en fecha_recepcion cae al texto binario, no a «Invalid Date» ni «NaN días»", () => {
+    const v = vistaFichaCard({ ...base, fechaRecepcion: "no-es-una-fecha" }, HOY);
+    expect(v.plazo).toBe("Abierto a ofertas");
+    expect(v.plazo).not.toMatch(/Invalid Date|NaN/);
+  });
+
+  it("igual si el proceso está cerrado", () => {
+    const v = vistaFichaCard(
+      { ...base, estadoApertura: "Cerrado", fechaRecepcion: "no-es-una-fecha" },
+      HOY
+    );
+    expect(v.plazo).toBe("Cerrado a ofertas");
   });
 });
 
