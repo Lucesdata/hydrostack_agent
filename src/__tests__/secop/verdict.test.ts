@@ -128,6 +128,55 @@ describe("cuantiaGate (L0 — 3 bandas, D5)", () => {
       ).status
     ).toBe("UNKNOWN");
   });
+
+  // El SECOP no deja `valor_estimado` en NULL: escribe 0 cuando no hay dato
+  // (9.436 de 90.622 filas medidas el 2026-09-19, 9.163 de ellas abiertas).
+  // Un 0 calificado contra el rango objetivo daba FAIL, y `getMatchesForPerfil`
+  // descarta todo FAIL — el proceso desaparecía de /mis-coincidencias y de las
+  // alertas con una razón falsa ("valor fuera de tu rango objetivo").
+  it("precioBase 0 y valorAdjudicacion 0 → UNKNOWN, no FAIL", () => {
+    const r = cuantiaGate(
+      profile,
+      proc({ precioBase: 0, valorAdjudicacion: 0 }),
+      DEFAULT_CUANTIA_BANDS
+    );
+    expect(r.status).toBe("UNKNOWN");
+    expect(r.reason).toBe("proceso sin valor en metadata");
+  });
+
+  it("precioBase 0 y valorAdjudicacion null → UNKNOWN, no FAIL", () => {
+    expect(
+      cuantiaGate(profile, proc({ precioBase: 0, valorAdjudicacion: null }), DEFAULT_CUANTIA_BANDS)
+        .status
+    ).toBe("UNKNOWN");
+  });
+
+  // El 0 no gana al dato: cae al siguiente valor, igual que caía el null.
+  it("precioBase 0 y valorAdjudicacion con dato → califica sobre la adjudicación", () => {
+    expect(
+      cuantiaGate(
+        profile,
+        proc({ precioBase: 0, valorAdjudicacion: 500_000_000 }),
+        DEFAULT_CUANTIA_BANDS
+      ).status
+    ).toBe("PASS");
+    expect(
+      cuantiaGate(
+        profile,
+        proc({ precioBase: 0, valorAdjudicacion: 5_000_000_000 }),
+        DEFAULT_CUANTIA_BANDS
+      ).status
+    ).toBe("FAIL");
+  });
+
+  // Un negativo tampoco es un precio. No se ha visto en la base, pero el
+  // contrato del primitivo es "hay dato", no "no es cero".
+  it("precioBase negativo → UNKNOWN", () => {
+    expect(
+      cuantiaGate(profile, proc({ precioBase: -1, valorAdjudicacion: null }), DEFAULT_CUANTIA_BANDS)
+        .status
+    ).toBe("UNKNOWN");
+  });
 });
 
 describe("plazoGate (L0 parcial, D1)", () => {

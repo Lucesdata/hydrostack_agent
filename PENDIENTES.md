@@ -634,3 +634,27 @@ Queda abierto:
 - Los archivos que la cuenta subió a Supabase Storage (`documento.ruta_storage`,
   bucket `contracts`) no se borran con la fila: la cascada solo alcanza a esta
   base.
+
+### 40. El prefiltro SQL sigue descartando los procesos sin valor (2026-09-21)
+`cuantiaGate` ya no da FAIL cuando el valor es 0 —el "sin dato" del SECOP— sino
+UNKNOWN (`src/lib/secop/monto.ts`). Eso arregla el veredicto de un proceso
+concreto (`/api/secop/verdict`, la ficha, el semáforo público), pero **no hace
+que esos procesos aparezcan en `/mis-coincidencias` ni en las alertas**: hay un
+segundo filtro, antes del veredicto, en `getMatchesForPerfil`
+(`src/lib/matching/get-matches-for-perfil.ts:22`), que pasa
+`valorMin: perfil.cuantiaObjetivo.minCop` a `searchProcesosDb` y se traduce en
+`valor_estimado >= minCop` (`db-search.ts:159`). Con cualquier `minCop > 0` —el
+caso normal— las 9.163 filas abiertas con `valor_estimado = 0` no llegan nunca al
+motor de matching.
+
+Decidir, que es producto y no solo código:
+(a) que el prefiltro incluya el "sin dato" (`valor_estimado >= minCop OR
+    valor_estimado <= 0`) y que el usuario los vea con la cuantía en UNKNOWN,
+    ordenados detrás de los PASS/WARN — es coherente con el arreglo de la
+    compuerta y con "no afirmar lo que no se sabe";
+(b) dejarlos fuera a propósito, y entonces decir en la UI que el filtro de
+    cuantía excluye los procesos sin presupuesto publicado. Hoy no se dice.
+
+El volumen no es marginal: son 9.163 de los procesos abiertos. Con `minCop = 0`
+sí llegaban, y hasta el 2026-09-21 entraban con un **PASS falso** ("valor dentro
+de tu rango objetivo", porque `0 >= 0`); ahora entran como UNKNOWN.

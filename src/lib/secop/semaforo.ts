@@ -22,6 +22,7 @@ import type { GateStatus, Verdict } from "./verdict";
 import type { VerdictRespuesta } from "./verdict-publico";
 import { formatCopCompact } from "@/src/components/secop/format";
 import { TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
+import { montoConDato } from "./monto";
 
 export type EstadoCompuerta = GateStatus | "DATO";
 
@@ -119,7 +120,9 @@ export interface ProcesoParaSemaforo {
  * que el producto dice no dar.
  */
 export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
-  const valor = p.valorEstimado === null ? null : Number(p.valorEstimado);
+  // El 0 del SECOP es "sin dato", no un presupuesto de cero pesos: el criterio
+  // es el mismo que usa el veredicto, y vive en un solo sitio ([./monto]).
+  const valor = montoConDato(p.valorEstimado);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
 
   const dato = (
@@ -148,9 +151,9 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
     ),
     dato(
       "cuantia",
-      valor !== null && valor > 0 ? formatCopCompact(valor) : null,
+      valor !== null ? formatCopCompact(valor) : null,
       // Sin presupuesto publicado no hay exigencia que enunciar.
-      valor !== null && valor > 0 ? `Presupuesto oficial de ${formatCopCompact(valor)}.` : null
+      valor !== null ? `Presupuesto oficial de ${formatCopCompact(valor)}.` : null
     ),
     dato(
       "plazo",

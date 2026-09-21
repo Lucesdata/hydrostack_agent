@@ -28,6 +28,7 @@ import type { RequisitosHabilitantesEstructurados } from "@/src/lib/eligibility/
 import type { SecopProceso } from "./types";
 import { DEPARTAMENTOS, MUNICIPIOS } from "@/data/dane/divipola";
 import { normalizeGeoText } from "@/src/lib/transform/geo";
+import { montoConDato } from "./monto";
 
 // ===========================================================================
 //  Insumo: metadata del proceso que leen las compuertas
@@ -273,9 +274,18 @@ export const sectorialGate: SectorialGate = (p, proc) => {
 /**
  * Cuantía: valor del proceso vs rango objetivo, 3 bandas (D5). Dentro → PASS;
  * dentro del margen ±`cfg.margenAmarillo` del borde → WARN; fuera → FAIL.
+ *
+ * El orden es el de siempre —presupuesto oficial primero, adjudicación
+ * después—, pero la caída NO puede ser `??`: el SECOP escribe 0 donde no tiene
+ * dato, no NULL, y un 0 comparado contra el rango objetivo daba FAIL con la
+ * razón falsa "valor fuera de tu rango objetivo". Como `aggregateGateStatuses`
+ * convierte cualquier FAIL en el veredicto global y `getMatchesForPerfil`
+ * descarta los FAIL, esos procesos —9.163 abiertos, medidos el 2026-09-19—
+ * desaparecían de /mis-coincidencias y de las alertas. `montoConDato` es el
+ * criterio compartido ([./monto]).
  */
 export const cuantiaGate: CuantiaGate = (p, proc, cfg) => {
-  const value = proc.precioBase ?? proc.valorAdjudicacion;
+  const value = montoConDato(proc.precioBase) ?? montoConDato(proc.valorAdjudicacion);
   if (value == null) {
     return {
       status: "UNKNOWN",
