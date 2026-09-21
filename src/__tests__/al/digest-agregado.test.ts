@@ -129,3 +129,50 @@ describe("renderDigestAgregado — contenido", () => {
     expect(d.text).toContain(d.unsubscribeUrl);
   });
 });
+
+describe("renderDigestAgregado — el 0 de SECOP no es un precio", () => {
+  // `$ 0` es la salida literal de Intl para el cero en es-CO (el espacio
+  // es duro): se escribe así para que el `not.toContain` no dé un falso verde.
+  const CERO_PINTADO = "$ 0";
+
+  it("una apertura con valorEstimado '0.00' dice '—', no '$ 0'", () => {
+    const n = novedades({ aperturas: [{ ...apertura(1), valorEstimado: "0.00" }] });
+    const d = renderDigestAgregado(n, USUARIO, REPORTE);
+    expect(d.html).not.toContain(CERO_PINTADO);
+    expect(d.html).toContain("ENTIDAD · —");
+  });
+
+  it("un evento cuyo valor nuevo es 0 tampoco afirma cuantía", () => {
+    const n = novedades({
+      adjudicaciones: [{ ...adenda(1), valorNuevo: "0.00", delta: [] }],
+    });
+    const d = renderDigestAgregado(n, USUARIO, REPORTE);
+    expect(d.html).not.toContain(CERO_PINTADO);
+    expect(d.html).toContain("ENTIDAD · —");
+  });
+
+  it("el diff de la adenda conserva los valores literales que publicó SECOP", () => {
+    // Guarda de regresión, no caso nuevo: en el delta "de 0.00 a 2000.00" es el
+    // registro de lo que cambió —el 0 ahí es el dato—, no una cuantía que el
+    // correo esté presentando. La regla del 0 aplica a la línea de la tarjeta,
+    // nunca a `tablaDelta`.
+    const n = novedades({
+      adendas: [
+        {
+          ...adenda(1),
+          delta: [
+            {
+              campo: "precio_base",
+              etiqueta: "Presupuesto oficial",
+              antes: "0.00",
+              despues: "2000.00",
+            },
+          ],
+        },
+      ],
+    });
+    const d = renderDigestAgregado(n, USUARIO, REPORTE);
+    expect(d.text).toContain("Presupuesto oficial: 0.00 → 2000.00");
+    expect(d.html).toContain("2000.00");
+  });
+});
