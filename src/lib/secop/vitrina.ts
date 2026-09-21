@@ -12,7 +12,7 @@
  * mismo hecho.
  */
 
-import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import { condicionAbierto } from "./agregados";
@@ -53,15 +53,23 @@ export interface PaginaDeVitrina {
 }
 
 /**
+ * Tope de página. Sin él, `/licitaciones/pagina/2000000000000000000` pasa la
+ * regex, el `OFFSET` calculado desborda el `bigint` de Postgres y la consulta
+ * revienta con un 500 (vía `error.tsx`) donde tocaba un 404. Ninguna pestaña
+ * llega ni de lejos a este número de páginas.
+ */
+const PAGINA_MAXIMA = 1_000_000;
+
+/**
  * Valida el segmento `[n]` de la ruta. Devuelve `null` —y la ruta responde 404—
- * para cualquier cosa que no sea un entero mayor que 1, incluido el "1": su
- * ruta canónica es la base, y servir el mismo listado en dos URLs parte la
- * señal de SEO en dos.
+ * para cualquier cosa que no sea un entero mayor que 1 y hasta `PAGINA_MAXIMA`,
+ * incluido el "1": su ruta canónica es la base, y servir el mismo listado en
+ * dos URLs parte la señal de SEO en dos.
  */
 export function paginaValida(raw: string): number | null {
   if (!/^[1-9][0-9]*$/.test(raw)) return null;
   const n = Number(raw);
-  return n > 1 ? n : null;
+  return n > 1 && n <= PAGINA_MAXIMA ? n : null;
 }
 
 export function rutaVitrina(pestana: PestanaVitrina, pagina: number): string {
@@ -80,7 +88,11 @@ const CAMPOS = {
   estadoActual: proceso.estadoActual,
   estadoApertura: proceso.estadoApertura,
   fechaRecepcion: proceso.fechaRecepcion,
-  tipoProyecto: proceso.tipoProyecto,
+  // `proceso.tipo_proyecto` es `text` en el esquema: sin este tipado explícito
+  // Drizzle infiere `string | null` y el `as ProcesoDeVitrina[]` de más abajo
+  // tapaba el único TypeError real —`TIPO_PROYECTO[p.tipoProyecto]` en
+  // `compuertasAbsolutas` no tiene guarda para un valor fuera de los cinco.
+  tipoProyecto: sql<TipoProyecto | null>`${proceso.tipoProyecto}`,
   adjudicatario: proceso.adjudicatario,
   valorAdjudicacion: proceso.valorAdjudicacion,
   fechaAdjudicacion: proceso.fechaAdjudicacion,
@@ -103,8 +115,15 @@ export async function procesosDeVitrina(
   pagina = 1
 ): Promise<PaginaDeVitrina> {
   const where = condicionDe(pestana);
+  // `proceso.id` como segunda clave: Postgres no garantiza orden estable entre
+  // empates de `fecha_publicacion`/`fecha_adjudicacion` (columna `date`, con
+  // empates masivos), y cada página es una entrada ISR generada en momentos
+  // distintos — sin desempate, dos páginas contiguas pueden repetir un proceso
+  // o saltárselo.
   const orden =
-    pestana === "abiertos" ? desc(proceso.fechaPublicacion) : desc(proceso.fechaAdjudicacion);
+    pestana === "abiertos"
+      ? [desc(proceso.fechaPublicacion), asc(proceso.id)]
+      : [desc(proceso.fechaAdjudicacion), asc(proceso.id)];
 
   const [filas, [{ total }]] = await Promise.all([
     db
@@ -113,7 +132,7 @@ export async function procesosDeVitrina(
       .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
       .leftJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
       .where(where)
-      .orderBy(orden)
+      .orderBy(...orden)
       .limit(POR_PAGINA_VITRINA)
       .offset((pagina - 1) * POR_PAGINA_VITRINA),
     db
@@ -123,7 +142,7 @@ export async function procesosDeVitrina(
   ]);
 
   return {
-    items: filas as ProcesoDeVitrina[],
+    items: filas,
     total,
     pagina,
     porPagina: POR_PAGINA_VITRINA,

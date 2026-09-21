@@ -34,6 +34,18 @@ describe("la página viene del camino, no de un query string", () => {
     expect(paginaValida("")).toBeNull();
     expect(paginaValida("02")).toBeNull();
   });
+
+  it("rechaza números que desbordarían el OFFSET de Postgres", () => {
+    // Sin tope, esto pasaba la regex, el OFFSET reventaba el bigint y el
+    // usuario veía error.tsx («No pudimos cargar las fichas») donde tocaba 404.
+    expect(paginaValida("2000000000000000000")).toBeNull();
+    expect(paginaValida("1000001")).toBeNull();
+  });
+
+  it("acepta el tope y lo que queda justo por debajo", () => {
+    expect(paginaValida("1000000")).toBe(1000000);
+    expect(paginaValida("999999")).toBe(999999);
+  });
 });
 
 describe("las rutas", () => {
