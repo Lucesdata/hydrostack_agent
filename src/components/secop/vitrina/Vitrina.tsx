@@ -4,6 +4,7 @@ import { ESTILOS_FICHA_CARD } from "../ficha-card/estilos";
 import { ESTILOS_SEMAFORO } from "../semaforo/estilos";
 import { ESTILOS_VITRINA } from "./estilos";
 import { hrefDeProceso } from "../lista/PaginaFaceta";
+import LicitacionesTabs from "../LicitacionesTabs";
 import { rutaVitrina, type PaginaDeVitrina, type PestanaVitrina } from "@/src/lib/secop/vitrina";
 
 /**
@@ -24,12 +25,12 @@ const VACIO: Record<PestanaVitrina, { texto: string; accion: string; href: strin
   abiertos: {
     texto: "No hay procesos abiertos ahora mismo.",
     accion: "Ver adjudicados recientes",
-    href: "/licitaciones/adjudicados",
+    href: rutaVitrina("adjudicados", 1),
   },
   adjudicados: {
     texto: "No hay adjudicaciones en los últimos 30 días.",
     accion: "Ver procesos abiertos",
-    href: "/licitaciones",
+    href: rutaVitrina("abiertos", 1),
   },
 };
 
@@ -45,6 +46,7 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
         }}
       />
       <div className="clr-container">
+        <LicitacionesTabs />
         <header className="vt-cab">
           <h1 className="vt-h1">Fichas de procesos</h1>
           <p className="vt-apoyo">Abra cualquier ficha para ver requisitos, fechas y documentos.</p>
@@ -55,8 +57,8 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
                 ? "proceso abierto"
                 : "procesos abiertos"
               : pagina.total === 1
-                ? "adjudicación en 30 días"
-                : "adjudicaciones en 30 días"}
+                ? "adjudicación en los últimos 30 días"
+                : "adjudicaciones en los últimos 30 días"}
           </p>
         </header>
 
