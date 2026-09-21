@@ -7,7 +7,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
-import PlantaHero from "@/src/components/landing/PlantaHero";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
@@ -560,7 +559,11 @@ export default function LandingPage() {
         <div ref={heroRef} className="bp-hero-wrap">
           <HeroCove />
           <div className="bp-hero-grid" style={{ position: "relative" }}>
-            <div style={{ position: "relative" }}>
+            {/* La columna de texto conserva su medida de 645px aunque ahora sea
+                hija única del grid: sin el tope, el titular se estira a 1338px
+                y el reparto en dos líneas de las máscaras se deshace. El hueco
+                de la derecha es el que ocupará el mapa departamental. */}
+            <div style={{ position: "relative", maxWidth: 645 }}>
               <div
                 style={{
                   display: "inline-block",
@@ -819,8 +822,6 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-
-            <PlantaHero />
           </div>
         </div>
 
