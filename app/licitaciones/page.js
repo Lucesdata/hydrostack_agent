@@ -1,16 +1,19 @@
-import ProcesosRecientes from "@/src/components/secop/ProcesosRecientes";
-import { getProcesosRecientes } from "@/src/lib/secop/recientes";
+import Vitrina from "@/src/components/secop/vitrina/Vitrina";
+import { procesosDeVitrina } from "@/src/lib/secop/vitrina";
 
 export const metadata = {
-  title: "Licitaciones",
+  title: "Fichas de procesos · agua y saneamiento en SECOP II",
   description:
-    "Últimas licitaciones públicas del sector agua y saneamiento básico en Colombia (SECOP II).",
+    "Fichas claras de los procesos de agua y saneamiento publicados en SECOP II: cuantía, zona, plazo y quién puede participar.",
 };
 
-// ISR: HTML pre-renderizado, revalidado cada 5 min. Carga instantánea.
-export const revalidate = 300;
+/**
+ * 6 h, la misma cadencia que las facetas. No es el coste lo que manda sino la
+ * ingesta: corre una vez al día y las altas llegan a saltos, así que revalidar
+ * más a menudo regenera un dato que no ha cambiado.
+ */
+export const revalidate = 21600;
 
 export default async function LicitacionesPage() {
-  const { items } = await getProcesosRecientes();
-  return <ProcesosRecientes items={items} />;
+  return <Vitrina pagina={await procesosDeVitrina("abiertos", 1)} />;
 }
