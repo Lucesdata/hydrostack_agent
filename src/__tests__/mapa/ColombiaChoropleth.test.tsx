@@ -24,6 +24,13 @@ describe("ColombiaChoropleth", () => {
     expect(html.match(/<path/g)).toHaveLength(33);
   });
 
+  it("sigue dibujando los 33 departamentos cuando no llegan filas", () => {
+    const html = renderToStaticMarkup(<ColombiaChoropleth filas={[]} />);
+
+    expect(html.match(/class="clr-mapa__dpto/g)).toHaveLength(33);
+    expect(html).not.toContain("sin ubicación resuelta");
+  });
+
   it("hace clicable el departamento con procesos, hacia su faceta", () => {
     expect(html).toContain('href="/licitaciones/departamento/antioquia"');
   });
