@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { AA, componer, contraste, leerTokensHex } from "@/src/lib/design/contraste";
+import { AA, componer, contraste, leerTokensHex, parseHex } from "@/src/lib/design/contraste";
 
 /**
  * El guardia de legibilidad del tema claro.
@@ -135,6 +135,43 @@ describe("texto sobre sus propios tintes", () => {
   for (const [nombre, token, fondo] of SOLIDOS) {
     it(`${nombre}: --${token} se lee sobre ${fondo}`, () => {
       expect(contraste(t[token], fondo)).toBeGreaterThanOrEqual(AA.texto);
+    });
+  }
+});
+
+describe("pastillas de etapa del FichaCard (revisión final 2026-09-21, arreglo 2)", () => {
+  /**
+   * `.fc-etapa--*` pinta a `600 10px` sobre `--card`: texto normal, exige
+   * 4,5:1. Medido al tinte original del 12%: --success daba 4,27:1 y --warning
+   * 4,25:1 — ambos por debajo de AA (--danger 5,29:1 y --accent-deep 7,94:1 sí
+   * pasaban). El 8% que se probó como corrección tampoco basta: --warning sobre
+   * su tinte redondeado a 8 bits da 4,498:1, todavía por debajo del listón. Al
+   * 7% las cuatro pasan con margen (mínimo 4,567:1).
+   *
+   * El rgb de cada tinte sale del propio token (`parseHex(t[...])`), no de un
+   * literal congelado: en producción el fondo de la pastilla es
+   * `color-mix(in srgb, var(--token) 7%, transparent)` sobre `--card`, así que
+   * si el token cambia de valor, este test debe recalcular sobre el valor
+   * nuevo — igual que se movería el fondo real.
+   */
+  const PASTILLAS_ETAPA: Array<[string, string, [number, number, number], number]> = [
+    ["etapa ABIERTO", "success", parseHex(t["success"]), 0.07],
+    ["etapa EN EVALUACIÓN / SUSPENDIDO", "warning", parseHex(t["warning"]), 0.07],
+    ["etapa CANCELADO", "danger", parseHex(t["danger"]), 0.07],
+    // El fondo de «adjudicado» mezcla --accent, no --accent-deep: así lo
+    // escribe `ficha-card/estilos.ts`. El texto sí pinta con --accent-deep, que
+    // es un alias de --accent-ocean (el único de los dos con valor hex propio).
+    ["etapa ADJUDICADO", "accent-ocean", parseHex(t["accent"]), 0.07],
+  ];
+
+  for (const [nombre, token, rgb, alfa] of PASTILLAS_ETAPA) {
+    it(`${nombre}: se lee sobre su propio tinte al ${Math.round(alfa * 100)}%`, () => {
+      const fondo = componer(rgb, alfa, t["surface"]);
+      const ratio = contraste(t[token], fondo);
+      expect(
+        ratio,
+        `--${token} (${t[token]}) sobre ${fondo} da ${ratio.toFixed(3)}:1`
+      ).toBeGreaterThanOrEqual(AA.texto);
     });
   }
 });
