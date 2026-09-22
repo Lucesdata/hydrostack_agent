@@ -707,3 +707,35 @@ por `node-postgres` mientras producción usa el driver serverless de Neon sobre
 WebSocket. En este incidente no fue la causa —las consultas funcionan con los
 dos—, pero es un punto ciego real: ninguna verificación local ejerce el camino
 que produce el fallo.
+
+### 42. El build depende de que Google Fonts responda (2026-09-22)
+
+El job `lint` del PR #45 —un cambio de **solo documentación**— falló así:
+
+```
+app/layout.js
+An error occurred in `next/font`.
+TypeError: Cannot read properties of null (reading '1')
+    at @next/font/dist/google/loader.js:112:78
+```
+
+Relanzado sin tocar nada, pasó. No fue el cambio: fue que Google Fonts no
+respondió como esperaba el cargador en ese momento.
+
+**Por qué importa.** `app/layout.js` carga **cinco familias** con
+`next/font/google` —Orbitron, IBM Plex Mono, Inter, JetBrains Mono e IBM Plex
+Sans Condensed, once archivos de peso en total— y no hay ni un `.woff2` en el
+repositorio. Cada build, en CI y en Vercel, sale a la red a buscarlas. Cuando
+esa petición falla, el build falla entero: en CI bloquea el merge, y en Vercel
+bloquea el despliegue. Un cambio que no toca nada se queda en rojo por algo
+que no controlamos.
+
+**Salida.** Versionar las fuentes y pasar a `next/font/local`. Quita la
+dependencia de red del build y además toca un punto que el traspaso del
+rediseño ya tenía anotado (`docs/rediseno-2026-09/TRASPASO.md` §6 ter): esas
+cinco familias son **181 kB en once archivos** en la ruta crítica, y conviene
+revisar si de verdad hacen falta las cinco. Las cinco son SIL Open Font
+License, así que incluirlas en el repositorio no tiene problema de licencia.
+
+**Mientras tanto**, si un build falla con ese error, relanzar el job resuelve.
+Pero relanzar no es un arreglo: es saber que esto vuelve.
