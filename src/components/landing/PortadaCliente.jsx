@@ -1,8 +1,15 @@
 "use client";
-// Reemplaza app/page.js completo con este archivo.
+// La portada, como isla de cliente.
+//
+// Vivía en `app/page.js` hasta el 2026-09-22. Se movió aquí sin tocar su
+// contenido para que `app/page.js` pueda ser un componente de SERVIDOR: el mapa
+// departamental importa 62 kB de geometría y calcula 33 caminos, y dentro de un
+// árbol `"use client"` todo eso viajaría al navegador. Ahora el servidor lo
+// dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
+// hueco `semaforo` en `FilaProceso`.
+//
 // Requiere: src/components/landing/ProcesosTicker.jsx (sin cambios).
-// Elimina el uso de ScrollFilmBackground/FILM_CLIPS — el fondo cinemático se
-// sustituye por el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
+// El fondo es el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -195,6 +202,9 @@ const BLUEPRINT_CSS = `
 
 .bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) var(--gutter) 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
+.bp-hero-mapa { min-width: 0; align-self: center; }
+.bp-hero-mapa:empty { display: none; }
+@media (max-width: 900px) { .bp-hero-mapa { margin-top: 32px; } }
 .bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
@@ -216,6 +226,11 @@ const BLUEPRINT_CSS = `
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 .bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
+/* Mapa: dos columnas en escritorio, apiladas en móvil. El mapa manda el ancho
+   —tiene proporción fija— y el texto ocupa lo que quede. */
+.bp-mapa-cols { display: grid; grid-template-columns: minmax(280px, 420px) minmax(0, 1fr); gap: 40px; align-items: start; }
+.bp-mapa-texto { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+@media (max-width: 820px) { .bp-mapa-cols { grid-template-columns: 1fr; gap: 24px; } }
 
 
 @media (max-width: 900px) {
@@ -501,7 +516,12 @@ function BlueprintBackground({ fx }) {
   );
 }
 
-export default function LandingPage() {
+/**
+ * @param {{ mapa?: import("react").ReactNode }} props — `mapa` llega ya
+ * renderizado desde el servidor. Es un hueco y no un import: importarlo aquí
+ * arrastraría la geometría al bundle del navegador.
+ */
+export default function LandingPage({ mapa = null }) {
   const fx = useBlueprintFX();
   const { heroRef } = fx.refs;
 
@@ -560,9 +580,8 @@ export default function LandingPage() {
           <HeroCove />
           <div className="bp-hero-grid" style={{ position: "relative" }}>
             {/* La columna de texto conserva su medida de 645px aunque ahora sea
-                hija única del grid: sin el tope, el titular se estira a 1338px
-                y el reparto en dos líneas de las máscaras se deshace. El hueco
-                de la derecha es el que ocupará el mapa departamental. */}
+                hija del grid: sin el tope, el titular se estira a 1338px y el
+                reparto en dos líneas de las máscaras se deshace. */}
             <div style={{ position: "relative", maxWidth: 645 }}>
               <div
                 style={{
@@ -822,6 +841,11 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+            {mapa && (
+              <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
+                {mapa}
+              </div>
+            )}
           </div>
         </div>
 
