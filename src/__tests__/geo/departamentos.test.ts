@@ -96,16 +96,25 @@ describe("geometría departamental", () => {
   });
 
   /**
-   * El presupuesto de peso. No es el tamaño del archivo lo que se paga —el SVG
-   * se dibuja en servidor y el JSON nunca viaja— sino los `d` de 33 `path`
-   * dentro del HTML de la portada, que hoy son 91 kB. 4.000 coordenadas son
-   * unos 48 kB de `d`, ~15 kB con gzip. El doble no cabe.
+   * El presupuesto de peso, corregido el 2026-09-22 con la medida real.
+   *
+   * No es el tamaño del archivo lo que se paga —el SVG se dibuja en servidor y
+   * el JSON nunca viaja al navegador— sino los `d` de 33 `path` dentro del HTML
+   * de la portada. Y se pagan **dos veces**: una en el HTML servido y otra en el
+   * payload RSC que Next inyecta para hidratar (`self.__next_f`). Es el peaje
+   * del App Router, que `/nosotros` y `/precios` también pagan.
+   *
+   * Medido sobre el build de producción: con 3.740 coordenadas el HTML de la
+   * portada pasaba de 14,4 kB gzip a 50,2 — 3,5× la puerta de entrada. Con
+   * 1.973 baja a 35,1 kB, y a 300 px las dos geometrías son indistinguibles.
+   * De ahí este tope: no es un número redondo, es el punto donde el detalle
+   * deja de verse y solo pesa.
    */
-  it("cabe en el presupuesto: ≤ 4.000 coordenadas y ≤ 150 kB", () => {
+  it("cabe en el presupuesto: ≤ 2.500 coordenadas y ≤ 150 kB", () => {
     const total = geo.features
       .flatMap((f) => anillos(f.geometry))
       .reduce((n, r) => n + r.length, 0);
-    expect(total).toBeLessThanOrEqual(4000);
+    expect(total).toBeLessThanOrEqual(2500);
     expect(statSync(join(process.cwd(), RUTA)).size).toBeLessThanOrEqual(150 * 1024);
   });
 });
