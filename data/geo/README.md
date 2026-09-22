@@ -13,7 +13,7 @@ lo vigila `src/__tests__/geo/departamentos.test.ts`.
 | Servicio | `portalgis.dane.gov.co/mparcgis/rest/services/MGN2025/Serv_CapasMGN_2025/FeatureServer/319` |
 | Descargado | 2026-09-22 |
 | Original | 33 polígonos, 1.079.402 coordenadas, 21,6 MB |
-| Publicado aquí | 33 polígonos, 3.740 coordenadas, 62 kB |
+| Publicado aquí | 33 polígonos, **1.973 coordenadas, 33 kB** |
 
 Dato abierto del DANE. Al pintarlo, la página atribuye: **DANE — Marco
 Geoestadístico Nacional 2025**.
@@ -35,13 +35,32 @@ npx -y mapshaper@0.6.102 dpto_full.json \
   -filter-islands min-area=3km2 \
   -rename-fields dpto=DPTO_CCDGO,nombre=DPTO_CNMBRE \
   -filter-fields dpto,nombre \
-  -simplify 0.32% keep-shapes \
+  -simplify 0.16% keep-shapes \
   -clean \
-  -o precision=0.001 format=geojson departamentos.geo.json
+  -o precision=0.005 format=geojson departamentos.geo.json
 ```
 
 Después se ordenan las features por `dpto` y se serializa compacto, para que un
 cambio de versión del MGN produzca un diff legible.
+
+## Por qué tan simplificado
+
+Porque los caminos se pagan **dos veces**. El SVG se dibuja en servidor, así que
+este archivo nunca viaja al navegador; lo que viaja son los `d` de 33 `path`
+dentro del HTML — y Next los repite en el payload RSC que inyecta para hidratar
+(`self.__next_f`). Es el peaje del App Router: `/nosotros` y `/precios` también
+lo pagan.
+
+Medido sobre el build de producción, con el mapa en el hero de la portada:
+
+| Geometría | HTML de la portada (gzip) |
+|---|---:|
+| sin mapa (producción hoy) | 14,4 kB |
+| 3.740 coordenadas | 50,2 kB — 3,5× |
+| **1.973 coordenadas** | **35,1 kB** — 2,4× |
+
+A 300 px de ancho, que es como se pinta en el hero, las dos geometrías son
+**indistinguibles**. El detalle de más se paga entero y no se ve.
 
 ## Tres trampas, por si hay que repetirlo
 

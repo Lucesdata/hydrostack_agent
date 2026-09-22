@@ -38,7 +38,7 @@ está la sede de quien contrata.
 | Propiedad obligatoria | `properties.dpto` — **string** de 2 caracteres, con cero a la izquierda |
 | Propiedad informativa | `properties.nombre` — nombre DANE, solo para depurar |
 | Precisión | coordenadas redondeadas a **3 decimales** (~110 m) |
-| Peso | **≤ 4.000 coordenadas en total** y **≤ 150 kB** el archivo crudo |
+| Peso | **≤ 2.500 coordenadas en total** y **≤ 150 kB** el archivo crudo (ver §5) |
 | Topología | sin huecos ni solapes entre departamentos vecinos |
 
 ### 2.1 GeoJSON o TopoJSON, y por qué da igual ahora
@@ -159,8 +159,20 @@ aceptación del rediseño es no empeorarla. Como el SVG se dibuja en el servidor
 - **Lo que sí viaja son los atributos `d` de 33 `path` dentro del HTML.** Ese es
   el presupuesto real.
 
-A ~12 caracteres por punto, 4.000 coordenadas son unos **48 kB de `d`** en el
-HTML, que gzipean a ~15 kB. Sobre 91 kB de HTML es asumible; el doble no lo es.
+Y se pagan **dos veces**: una en el HTML servido y otra en el payload RSC que
+Next inyecta para hidratar (`self.__next_f`). Es el peaje del App Router, no
+algo que introduzca el mapa: `/nosotros` y `/precios` también lo pagan.
+
+Medido sobre el build de producción, con el mapa ya en el hero:
+
+| Geometría | HTML de la portada (gzip) |
+|---|---:|
+| sin mapa (producción hoy) | 14,4 kB |
+| 3.740 coordenadas | 50,2 kB — 3,5× |
+| **1.973 coordenadas** | **35,1 kB** — 2,4× |
+
+A 300 px de ancho las dos geometrías son indistinguibles, así que el detalle de
+más se paga entero y no se ve. Sobre 91 kB de HTML es asumible; el doble no lo es.
 De ahí el tope del §2. Un hero de ~520 px de ancho cubre los ~12,2° de longitud
 del continente, o sea **1 px ≈ 2,6 km** (y ~3 km si manda el alto, que son 16,7°
 de latitud): por debajo de ~1 km de detalle no se ve nada y solo pesa.
@@ -304,8 +316,8 @@ el contrato del §2 y los ocho criterios del §7, que pasan como test.
 | | Original del DANE | Publicado |
 |---|---:|---:|
 | Geometrías | 33 | **33** |
-| Coordenadas | 1.079.402 | **3.740** (tope: 4.000) |
-| Tamaño | 21,6 MB | **62 kB** (tope: 150 kB) |
+| Coordenadas | 1.079.402 | **1.973** (tope: 2.500) |
+| Tamaño | 21,6 MB | **33 kB** (tope: 150 kB) |
 | Partes (polígonos sueltos) | 118 | 55 |
 
 **Los 33 códigos coinciden exactamente** con `DEPARTAMENTOS` de
@@ -319,10 +331,11 @@ Se dibujó el SVG con una proyección Mercator de doce líneas y se abrió la
 imagen. Tres cosas que solo se ven mirando:
 
 1. **El país se reconoce** a 420×520: la península de La Guajira, el trapecio
-   amazónico y la costa pacífica siguen ahí después de tirar el 99,7 % de los
+   amazónico y la costa pacífica siguen ahí después de tirar el 99,8 % de los
    vértices. No hay rendijas entre departamentos.
-2. **Los `d` de los 33 `path` pesan 48 kB** a ese tamaño, que es exactamente lo
-   que estimaba el §5. Sobre los 91 kB de HTML de la portada, entra.
+2. **La primera estimación de peso se quedó corta y hubo que rehacerla.** Contaba
+   una sola copia de los caminos, y el App Router los manda dos veces. Con la
+   medida real delante, la geometría bajó de 3.740 coordenadas a 1.973 — ver §5.
 3. **El recuadro de San Andrés necesita su propia escala.** Con las dos islas
    dentro de una caja de 58×68 px salen dos puntos de un píxel: están a 90 km
    una de otra y el mar se come el recuadro. O se dibuja solo San Andrés, o el
