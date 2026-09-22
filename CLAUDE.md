@@ -182,6 +182,11 @@ módulo de diagnóstico de principio a fin: reconocimiento, spec, contrato del
 cuestionario y lecciones. `AUDIT_REPORT.md` (2026-08-02)
 y `AUDITORIA_TECH_DEBT.md` (2026-07-18) son las auditorías más recientes
 que existen en el repo.
+**Reglas de conducta del agente para el trabajo nuevo: `docs/CONDUCTA.md`**
+(aditivas, no derogan nada de este archivo). Las once decisiones cerradas el
+2026-09-21 sobre los specs de landing y mapa —plazo, cuantía, ruta, filtro
+territorial, paleta, perfil anónimo— están en
+`docs/rediseno-2026-09/AUDITORIA-SPECS-LANDING-MAPA.md` §9.
 
 ---
 
