@@ -1,6 +1,18 @@
 # Runbook: pasar el pooler a modo transacción
 
-**Fecha:** 2026-09-22 · **Motivo:** el incidente de `PENDIENTES.md` §40 · **Estado:** preparado, pendiente de aplicar
+**Fecha:** 2026-09-22 · **Motivo:** el incidente de `PENDIENTES.md` §40 · **Estado: APLICADO el 2026-09-22**
+
+> **Aplicado.** `DATABASE_URL` está en el puerto 6543 en Production y en Preview,
+> `.env.local` también, y `DATABASE_URL_SESSION` (5432) quedó declarada para
+> drizzle-kit. Se aprovechó para **rotar la contraseña de la base**, que se había
+> expuesto en una conversación, así que la credencial antigua ya no sirve.
+>
+> Verificado después del redespliegue: las siete rutas comprobadas a 200 y, la
+> prueba que importa, **24 peticiones simultáneas a rutas que consultan la base,
+> 24 respuestas 200**. Antes, con quince bastaba para tumbarlo todo.
+>
+> El resto del documento se conserva como está: describe por qué se hizo y cómo
+> deshacerlo.
 
 Este cambio se aplica **en el panel de Vercel y en tu `.env.local`**, no en el
 código. El repo solo aporta la salvaguarda para las migraciones y este
