@@ -639,7 +639,17 @@ Queda abierto:
 
 ## Incidente: el pooler agotado tumbó producción (2026-09-22)
 
-### 40. El pooler está en modo sesión con 15 conexiones, y eso limita la arquitectura
+### 40. El pooler está en modo sesión con 15 conexiones — ✅ resuelto el 2026-09-22
+
+**Resuelto el mismo día.** `DATABASE_URL` pasó al puerto 6543 (modo transacción)
+en Production, en Preview y en local, con `DATABASE_URL_SESSION` (5432) reservada
+para drizzle-kit. Se aprovechó para rotar la contraseña de la base, que se había
+expuesto en una conversación. Verificado tras el redespliegue: siete rutas a 200
+y **24 peticiones simultáneas contra rutas que consultan la base, 24 en 200** —
+donde quince bastaban para tumbarlo todo. El procedimiento y cómo deshacerlo, en
+`docs/runbook-pooler-modo-transaccion.md`.
+
+Queda en pie la lección de abajo, que es lo que importa de este apartado.
 
 **Qué pasó.** Al desplegar la vitrina (PR #43), todas las rutas que consultan la
 base empezaron a dar 500 — incluidas las 43 facetadas, que aquel cambio no
