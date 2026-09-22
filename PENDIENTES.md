@@ -634,3 +634,66 @@ Queda abierto:
 - Los archivos que la cuenta subió a Supabase Storage (`documento.ruta_storage`,
   bucket `contracts`) no se borran con la fila: la cascada solo alcanza a esta
   base.
+
+---
+
+## Incidente: el pooler agotado tumbó producción (2026-09-22)
+
+### 40. El pooler está en modo sesión con 15 conexiones, y eso limita la arquitectura
+
+**Qué pasó.** Al desplegar la vitrina (PR #43), todas las rutas que consultan la
+base empezaron a dar 500 — incluidas las 43 facetadas, que aquel cambio no
+tocaba. Las páginas sin base (`/`, `/nosotros`, `/diagnostico`) siguieron a 200.
+El error, leído desde la propia base:
+
+```
+(EMAXCONNSESSION) max clients reached in session mode
+max clients are limited to pool_size: 15
+```
+
+No era un fallo del código: la consulta se ejecutó a mano contra la base viva con
+el driver de producción y devolvió sus 35.518 filas. Lo que faltaban eran
+conexiones, y faltaban también para un portátil conectándose desde fuera.
+
+**Qué lo disparó.** El PR #43 convirtió `/licitaciones` y
+`/licitaciones/adjudicados` en rutas renderizadas **en cada visita**
+(`dynamic = "force-dynamic"`), porque sin segmento dinámico Next las
+prerenderiza en el build y el build no puede leer `DATABASE_URL`, que en Vercel
+está marcada como secreta y solo llega al runtime. Con un pooler de 15 plazas en
+modo sesión, cada instancia caliente de Vercel se queda con la suya y no la
+suelta: basta muy poca concurrencia para agotarlo.
+
+**Cómo se resolvió.** Revirtiendo el merge. El despliegue nuevo tumba las
+instancias calientes, que es lo que de verdad libera las plazas, y el código
+vuelve a no abrir conexión por visita. Producción recuperó las ocho rutas
+comprobadas en el primer intento tras el despliegue.
+
+**La lección, que es más ancha que este incidente.** La decisión de que ninguna
+ruta pública lea `searchParams` —§4.7 del traspaso— estaba escrita como una
+cuestión de coste: cada visita, una invocación facturable. Resulta que también
+protegía el pooler. Mientras siga en modo sesión con 15 plazas, **ninguna ruta
+con tráfico puede ser dinámica**, y el margen para funciones concurrentes es
+mucho menor de lo que parece.
+
+**Lo que hay que decidir antes de volver a montar la vitrina:**
+
+1. **Pasar `DATABASE_URL` al modo transacción de Supabase** (puerto 6543 en vez
+   de 5432). Es el modo pensado para serverless: no reserva una conexión por
+   instancia. Es la corrección de raíz, y es tocar la configuración de la base
+   viva, así que se prueba antes.
+2. Si el pooler se queda como está, la vitrina tiene que volver a ser estática, y
+   entonces hay que resolver el prerender sin base: o exponer `DATABASE_URL` al
+   build —con su coste de seguridad, porque está marcada como secreta por algo—
+   o tolerar el fallo en el build, que deja la página vacía hasta la primera
+   revalidación.
+
+El trabajo del PR #43 no se perdió: la rama `vitrina/fichacard-y-listado` sigue
+entera, con sus 976 tests, y vuelve a entrar en cuanto esto se decida.
+
+### 41. La verificación local corre contra otro driver que producción
+
+`.env.local` tiene `DB_DRIVER=node`, así que todo lo que se prueba en local va
+por `node-postgres` mientras producción usa el driver serverless de Neon sobre
+WebSocket. En este incidente no fue la causa —las consultas funcionan con los
+dos—, pero es un punto ciego real: ninguna verificación local ejerce el camino
+que produce el fallo.
