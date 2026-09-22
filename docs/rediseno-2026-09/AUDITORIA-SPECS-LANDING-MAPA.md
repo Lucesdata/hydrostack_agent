@@ -418,4 +418,4 @@ llega el archivo, ahí es donde hay trabajo real.
 
 | # | Pregunta | Estado |
 |---|---|---|
-| E | TopoJSON de los 33 departamentos | No es decisión: es el archivo que falta. **Es lo único que bloquea el mapa** |
+| E | ~~TopoJSON de los 33 departamentos~~ | **Cerrada el 2026-09-22.** El archivo existe: `data/geo/departamentos.geo.json`, desde el MGN 2025 del DANE. GeoJSON en vez de TopoJSON, por lo que se explica en `SPEC-GEOMETRIA-MAPA.md` §2.1. Ya no bloquea el paso 7 del §8 |

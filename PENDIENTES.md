@@ -487,7 +487,7 @@ de entidad (`clase-entidad.ts`), las rutas facetadas (`facetas.ts` + tres
 familias de rutas), la fila densa compartida (`src/components/secop/lista/`),
 `/precios`, la ilustración movida a `/nosotros` y la limpieza de navegación.
 
-### 32. La portada sigue sin reconstruirse — bloqueada por el TopoJSON
+### 32. La portada sigue sin reconstruirse — **desbloqueada el 2026-09-22**
 `app/page.js` conserva sus diez secciones. El hero del rediseño es 5/12 de
 mensaje y 7/12 de mapa departamental, y **no hay geometría en el repo**:
 `data/dane/divipola.ts` es un crosswalk de nombres y códigos, `public/` solo
@@ -498,6 +498,12 @@ pedía el spec no se pueden pintar con datos reales.
 
 Montar un hero provisional sin mapa significaría diseñarlo dos veces; por eso
 está parado y no a medias.
+
+**La geometría ya está** (2026-09-22): `data/geo/departamentos.geo.json`, los 33
+departamentos sacados del MGN 2025 del DANE —3.740 coordenadas, 62 kB, el código
+DIVIPOLA como texto— con `src/__tests__/geo/departamentos.test.ts` vigilando el
+contrato y `docs/rediseno-2026-09/SPEC-GEOMETRIA-MAPA.md` explicándolo. Lo que
+queda es construir el hero, que ya es trabajo de portada y no de datos.
 
 ### 33. El semáforo en la fila de la lista — ✅ resuelto 2026-09-15
 `src/lib/secop/semaforo.ts` (modelo de vista puro) y

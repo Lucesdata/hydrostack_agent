@@ -44,7 +44,7 @@ spec y está parado — ver §2 de este documento.
 | Sub-bloque | Estado |
 |---|---|
 | 2.1 Ticker | sin tocar; el spec dice "se queda tal cual" pero vive dentro de la página vieja |
-| 2.2 Hero + mapa | ❌ **bloqueado por el TopoJSON** |
+| 2.2 Hero + mapa | ❌ sin construir — **desbloqueado el 2026-09-22**, ya hay geometría |
 | 2.3 Banda de métricas | ❌ |
 | 2.4 Navega por los datos | ❌ las tres tarjetas; su capa de datos y sus rutas destino **sí existen** |
 | 2.5 Vitrina | ❌ (es la Tarea 3) |
@@ -109,7 +109,7 @@ dos rutas que ni siquiera estaban en el catálogo. Ahora las tres salen de
 
 ---
 
-## 2. El bloqueo: geometría del mapa
+## 2. El bloqueo: geometría del mapa — ✅ resuelto el 2026-09-22
 
 El hero del spec es 5/12 de mensaje y 7/12 de mapa departamental. **No hay
 geometría en el repo:** `data/dane/divipola.ts` es un crosswalk de nombres y
@@ -131,6 +131,14 @@ slugificarlos y cruzarlos con `slugificar()` — funciona, pero es más frágil.
 
 No se montó un hero provisional a propósito: diseñarlo sin mapa significa
 diseñarlo dos veces.
+
+**Resuelto el 2026-09-22 sin esperar al archivo de fuera:** se sacó del propio
+servicio ArcGIS del DANE (MGN 2025, nivel Departamento). Es GeoJSON y no
+TopoJSON, y da igual —el SVG se dibuja en servidor, así que el ahorro de red de
+TopoJSON no compra nada aquí y su decodificador sí costaría código. Cumple el
+contrato de arriba: `properties.dpto` con el código de dos dígitos **como
+texto**, que es lo que impide que `"05"` se convierta en `5` y Antioquia se
+quede sin pintar. Todo el detalle en `SPEC-GEOMETRIA-MAPA.md`.
 
 ---
 
@@ -415,10 +423,14 @@ perfectamente viable.
    visita, y el HTML dejaría de ser cacheable por ser distinto para cada usuario.
    Cuesta 2,3 kB de cliente y la ruta sigue siendo `●` estática.
 
-**Bloqueado hasta el TopoJSON:**
+**Ya no está bloqueado (2026-09-22):**
 
 6. El hero con el mapa, la banda de métricas, "Navega por los datos" y la
-   vitrina — o sea, `app/page.js` entero.
+   vitrina — o sea, `app/page.js` entero. La geometría llegó:
+   `data/geo/departamentos.geo.json`, 33 departamentos con el código DIVIPOLA
+   como texto, 3.740 coordenadas y 62 kB, generada desde el MGN 2025 del DANE.
+   Contrato y trampas en `SPEC-GEOMETRIA-MAPA.md`, procedencia en
+   `data/geo/README.md`, guardia en `src/__tests__/geo/departamentos.test.ts`.
 
 **Necesita una decisión antes de tocar código:**
 
