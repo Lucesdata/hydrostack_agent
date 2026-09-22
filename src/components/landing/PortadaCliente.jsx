@@ -204,6 +204,13 @@ const BLUEPRINT_CSS = `
 .bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
 .bp-hero-mapa { min-width: 0; align-self: center; }
 .bp-hero-mapa:empty { display: none; }
+/* El mapa tiene proporción fija (420x520), así que sin tope crece con la columna:
+   medido a 1440x900, la columna daba 645px y el SVG se iba a 799px de alto, con la
+   leyenda y la nota "Según ubicación…" fuera de pantalla. Esa nota no es un pie:
+   es la definición de lo que se está viendo. Se limita por ALTO —no por ancho— para
+   que el tope valga igual en un portátil de 768 que en un monitor. */
+.bp-hero-mapa .clr-mapa { max-width: 460px; margin-inline: auto; }
+.bp-hero-mapa .clr-mapa__svg { max-height: min(48vh, 470px); width: auto; margin-inline: auto; }
 @media (max-width: 900px) { .bp-hero-mapa { margin-top: 32px; } }
 .bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
@@ -226,11 +233,6 @@ const BLUEPRINT_CSS = `
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
 .bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
-/* Mapa: dos columnas en escritorio, apiladas en móvil. El mapa manda el ancho
-   —tiene proporción fija— y el texto ocupa lo que quede. */
-.bp-mapa-cols { display: grid; grid-template-columns: minmax(280px, 420px) minmax(0, 1fr); gap: 40px; align-items: start; }
-.bp-mapa-texto { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
-@media (max-width: 820px) { .bp-mapa-cols { grid-template-columns: 1fr; gap: 24px; } }
 
 
 @media (max-width: 900px) {
