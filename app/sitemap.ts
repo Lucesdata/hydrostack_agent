@@ -32,7 +32,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fijas = [
     "",
     "/licitaciones",
-    "/licitaciones/adjudicados",
     "/diagnostico",
     "/pliego",
     "/soluciones",
