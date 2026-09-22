@@ -129,17 +129,17 @@ describe("el plazo dice lo que hay, no lo que se deduce", () => {
 
   it("con fecha futura añade la cuenta atrás", () => {
     const v = vistaFichaCard({ ...base, fechaRecepcion: "2026-09-29" }, HOY);
-    expect(v.plazo).toBe("Recepción hasta el 29 sep 2026 · faltan 8 días");
+    expect(v.plazo).toBe("Recepción hasta el 29 sept 2026 · faltan 8 días");
   });
 
   it("con fecha de hoy no dice «faltan 0 días»", () => {
     const v = vistaFichaCard({ ...base, fechaRecepcion: "2026-09-21" }, HOY);
-    expect(v.plazo).toBe("Recepción hasta el 21 sep 2026 · último día");
+    expect(v.plazo).toBe("Recepción hasta el 21 sept 2026 · último día");
   });
 
   it("con fecha pasada no cuenta hacia atrás", () => {
     const v = vistaFichaCard({ ...base, fechaRecepcion: "2026-09-01" }, HOY);
-    expect(v.plazo).toBe("Recepción cerrada el 01 sep 2026");
+    expect(v.plazo).toBe("Recepción cerrada el 01 sept 2026");
   });
 });
 
@@ -292,14 +292,28 @@ export interface FichaCardVista {
   adjudicacion: string | null;
 }
 
-/** 24 sep 2026. Sin año no se puede comparar un proceso de 2025 con uno de 2026. */
+/**
+ * "29 sept 2026". Con año, porque sin él no se distingue un proceso de 2025 de
+ * uno de 2026.
+ *
+ * Los dos `replace` son los mismos que usa `formatShortDate` en `format.ts`: la
+ * salida cruda de ICU para es-CO es "29 de sept de 2026", con las preposiciones
+ * dentro. Medido en Node 24. El mes abreviado se queda como lo da ICU —"sept",
+ * no "sep"—, que es lo que ya se ve en la fila densa.
+ *
+ * Mediodía UTC y `timeZone: "UTC"`: la columna es `date` y sin fijar la hora,
+ * un navegador al oeste de Greenwich resta horas y pinta el día anterior.
+ */
 function fechaCorta(iso: string): string {
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("es-CO", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  return new Date(`${iso}T12:00:00Z`)
+    .toLocaleDateString("es-CO", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+    .replace(/\bde\s+/g, "")
+    .replace(/\./g, "");
 }
 
 /** Días naturales entre dos fechas, ignorando la hora. */
