@@ -11,7 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/licitaciones", label: "Recientes" },
+  { href: "/licitaciones", label: "Fichas de procesos" },
   { href: "/licitaciones/explorar", label: "Explorar" },
   { href: "/licitaciones/como-participar", label: "Cómo participar" },
   { href: "/licitaciones/descubrir", label: "Descubrir" },
