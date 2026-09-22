@@ -74,6 +74,20 @@ archivos:
 
 Un arreglo pequeño y verificable no necesita ceremonia.
 
+**Todo entra por Pull Request. También la documentación.** Nada de
+`git push origin main`, ni siquiera para una nota en `PENDIENTES.md`. En este
+repositorio `main` despliega a producción con cada push, así que un cambio
+"inofensivo" dispara igualmente un build — y un build puede fallar por algo que
+no controlamos: el 2026-09-22 se cayó por `next/font` contra Google Fonts
+(`PENDIENTES.md` §42) en un PR que solo tocaba documentación. El PR además pone
+delante la CI y el preview de Vercel, que es lo que atrapó el fallo de prerender
+que un merge local habría publicado.
+
+Rama con nombre descriptivo → commits → PR contra `main` → los cinco checks en
+verde (`Vercel`, `Vercel Preview Comments`, `lint`, `test (20.x)`,
+`test (22.x)`) → merge. La única excepción es la vía rápida de abajo, y aun así
+se avisa antes de tocar nada.
+
 **Vía rápida.** Un fallo en producción se arregla primero: corregir, añadir el
 test de regresión y documentar después. Se deja constancia de que se usó esta
 vía. El precedente es el layout con cookies que tumbó 43 rutas con 500 y se
