@@ -10,7 +10,8 @@ export const metadata = {
   alternates: { canonical: "/licitaciones/adjudicados" },
 };
 
-export const revalidate = 21600;
+/** Misma razón que en `/licitaciones`: el build no tiene base de datos. */
+export const dynamic = "force-dynamic";
 
 export default async function AdjudicadosPage() {
   return <Vitrina pagina={await procesosDeVitrina("adjudicados", 1)} />;
