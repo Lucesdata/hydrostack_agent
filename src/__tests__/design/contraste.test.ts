@@ -210,3 +210,68 @@ describe("excepciones conocidas (no deben empeorar)", () => {
     });
   }
 });
+
+/** Resuelve los tokens del Hero desde el CSS real, incluidos sus alias. */
+function tokensAtlas(oscuro: boolean) {
+  const leer = (bloque: string) =>
+    Object.fromEntries(
+      [...bloque.matchAll(/--([a-z0-9-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()])
+    );
+  const root = css.match(/:root\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
+  const claro = css.match(/\.atlas-hero\s*\{([\s\S]*?)\}/)?.[1] ?? "";
+  const noche = css.match(/\.atlas-hero\[data-theme="dark"\]\s*\{([\s\S]*?)\}/)?.[1] ?? "";
+  const valores = { ...leer(root), ...leer(claro), ...(oscuro ? leer(noche) : {}) };
+  const resolver = (nombre: string, vistos = new Set<string>()): string => {
+    if (vistos.has(nombre)) throw new Error(`Alias circular: ${nombre}`);
+    const valor = valores[nombre];
+    if (!valor) throw new Error(`Falta el token ${nombre}`);
+    const alias = valor.match(/^var\(--([a-z0-9-]+)\)$/);
+    return alias ? resolver(alias[1], new Set([...vistos, nombre])) : valor;
+  };
+  return resolver;
+}
+
+for (const oscuro of [false, true]) {
+  describe(`Hero territorial: tema ${oscuro ? "oscuro" : "claro"}`, () => {
+    for (const fondo of ["atlas-bg", "atlas-panel", "atlas-hover"]) {
+      for (const texto of ["atlas-text", "atlas-muted", "atlas-cyan"]) {
+        it(`${texto} sobre ${fondo} cumple AA`, () => {
+          const token = tokensAtlas(oscuro);
+          expect(contraste(token(texto), token(fondo))).toBeGreaterThanOrEqual(AA.texto);
+        });
+      }
+      it(`foco y borde del buscador se distinguen sobre ${fondo}`, () => {
+        const token = tokensAtlas(oscuro);
+        expect(contraste(token("atlas-control-border"), token(fondo))).toBeGreaterThanOrEqual(
+          AA.noTextual
+        );
+      });
+    }
+    it("el texto del CTA se lee en reposo y hover", () => {
+      const token = tokensAtlas(oscuro);
+      for (const fondo of ["atlas-cyan", "atlas-cta-hover"]) {
+        expect(contraste(token("atlas-on-accent"), token(fondo))).toBeGreaterThanOrEqual(AA.texto);
+      }
+    });
+    it("rótulos opacos: texto AA y borde visible", () => {
+      const token = tokensAtlas(oscuro);
+      expect(contraste(token("atlas-label-text"), token("atlas-label-bg"))).toBeGreaterThanOrEqual(
+        AA.texto
+      );
+      expect(
+        contraste(token("atlas-label-border"), token("atlas-label-bg"))
+      ).toBeGreaterThanOrEqual(AA.noTextual);
+    });
+    it("los contornos y la selección distinguen los departamentos", () => {
+      const token = tokensAtlas(oscuro);
+      for (let i = 0; i <= 4; i++) {
+        expect(
+          contraste(token(`atlas-map-e${i}`), token(`atlas-map-stroke-${i < 2 ? "low" : "high"}`))
+        ).toBeGreaterThanOrEqual(AA.noTextual);
+      }
+      expect(
+        contraste(token("atlas-selected"), token("atlas-selected-stroke"))
+      ).toBeGreaterThanOrEqual(AA.noTextual);
+    });
+  });
+}
