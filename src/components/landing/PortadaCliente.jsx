@@ -639,8 +639,15 @@ function SeccionTerritorial({ mapa, departamentos, totalAbiertos, tipos }) {
 
   return (
     <section className="terr-wrap" aria-labelledby="terr-titulo">
+      {/* Por __html y no como hijo de texto: en SSR React escapa las comillas
+          del hijo, el selector llega inválido y la hidratación falla (#418).
+          Es seguro porque el código ya pasó por /^\d{2}$/. */}
       {codigoSeleccionado && (
-        <style>{`.terr-mapa .clr-mapa__link[data-departamento="${codigoSeleccionado}"] .clr-mapa__dpto { stroke: var(--ink-900); stroke-width: 2; }`}</style>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `.terr-mapa .clr-mapa__link[data-departamento="${codigoSeleccionado}"] .clr-mapa__dpto { stroke: var(--ink-900); stroke-width: 2; }`,
+          }}
+        />
       )}
       <div className="terr-head">
         <div>

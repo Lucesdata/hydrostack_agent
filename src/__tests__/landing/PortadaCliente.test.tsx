@@ -35,6 +35,19 @@ describe("PortadaCliente", () => {
     expect(html).toContain('aria-pressed="true"');
   });
 
+  // En SSR, un <style> con el CSS como hijo de texto sale con las comillas
+  // escapadas: selector inválido y error de hidratación (#418) en el cliente.
+  it("el resaltado del departamento elegido sale del servidor como CSS válido", () => {
+    const html = renderToStaticMarkup(
+      <PortadaCliente
+        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
+        totalAbiertos={6000}
+      />
+    );
+    expect(html).toContain('.clr-mapa__link[data-departamento="05"]');
+    expect(html).not.toContain("data-departamento=&quot;");
+  });
+
   it("distingue agregados no disponibles de un conteo real en cero", () => {
     const sinDatos = renderToStaticMarkup(<PortadaCliente />);
     const cero = renderToStaticMarkup(<PortadaCliente totalAbiertos={0} />);
