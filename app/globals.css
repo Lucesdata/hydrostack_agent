@@ -117,25 +117,6 @@
   --accent-deep: var(--accent-ocean);
   --border: var(--line);
 
-  /* Hero territorial: paleta local medida en contraste.test.ts.
-     Los tonos del mapa codifican conteos; no son colores de estado de negocio. */
-  --atlas-night-bg: #031d30;
-  --atlas-night-panel: #052a43;
-  --atlas-night-hover: #123c55;
-  --atlas-night-text: #eef8ff;
-  --atlas-night-muted: #a6c4d8;
-  --atlas-night-border: #739db5;
-  --atlas-night-accent: #4bd5ff;
-  --atlas-night-accent-hover: #a3ebff;
-  --atlas-day-hover: #edf6fb;
-  --atlas-day-border: #537890;
-  --atlas-selection: #23c7a5;
-  --atlas-count-0: #16405a;
-  --atlas-count-1: #17648d;
-  --atlas-count-2: #168db4;
-  --atlas-count-3: #26b2d1;
-  --atlas-count-4: #69dce4;
-
   /* Tipografía */
   --font-sans: var(--font-inter), -apple-system, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "Menlo", monospace;
@@ -1587,46 +1568,4 @@ select {
   .bp-page .center-md p {
     margin-inline: auto;
   }
-}
-
-/* Solo el Hero consume estos alias. La navegación y el producto mantienen su tema. */
-.atlas-hero {
-  --atlas-bg: var(--bg);
-  --atlas-panel: var(--surface);
-  --atlas-hover: var(--atlas-day-hover);
-  --atlas-text: var(--text-primary);
-  --atlas-muted: var(--text-muted);
-  --atlas-cyan: var(--accent);
-  --atlas-on-accent: var(--surface);
-  --atlas-cta-hover: var(--accent-deep);
-  --atlas-control-border: var(--atlas-day-border);
-  --atlas-line: var(--border);
-  --atlas-label-bg: var(--surface);
-  --atlas-label-text: var(--accent-deep);
-  --atlas-label-border: var(--atlas-day-border);
-  --atlas-selected: var(--atlas-selection);
-  --atlas-selected-stroke: var(--atlas-night-bg);
-  --atlas-map-e0: var(--atlas-count-0);
-  --atlas-map-e1: var(--atlas-count-1);
-  --atlas-map-e2: var(--atlas-count-2);
-  --atlas-map-e3: var(--atlas-count-3);
-  --atlas-map-e4: var(--atlas-count-4);
-  --atlas-map-stroke-low: var(--atlas-night-muted);
-  --atlas-map-stroke-high: var(--atlas-night-bg);
-}
-
-.atlas-hero[data-theme="dark"] {
-  --atlas-bg: var(--atlas-night-bg);
-  --atlas-panel: var(--atlas-night-panel);
-  --atlas-hover: var(--atlas-night-hover);
-  --atlas-text: var(--atlas-night-text);
-  --atlas-muted: var(--atlas-night-muted);
-  --atlas-cyan: var(--atlas-night-accent);
-  --atlas-on-accent: var(--atlas-night-bg);
-  --atlas-cta-hover: var(--atlas-night-accent-hover);
-  --atlas-control-border: var(--atlas-night-border);
-  --atlas-line: var(--atlas-night-hover);
-  --atlas-label-bg: var(--atlas-night-panel);
-  --atlas-label-text: var(--atlas-night-text);
-  --atlas-label-border: var(--atlas-night-border);
 }

@@ -57,15 +57,25 @@ describe("PortadaCliente", () => {
     expect(html).toContain("150");
   });
 
-  it("renderiza el mapa del servidor dentro del hero", () => {
+  it("renderiza el mapa del servidor en la sección territorial, no en el hero", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente mapa={<div data-testid="mapa-departamental">Mapa departamental</div>} />
     );
 
     const hero = contentOfDivWithClass(html, "bp-hero-grid");
+    const territorio = contentOfDivWithClass(html, "terr-grid");
 
-    expect(hero).toContain('class="bp-hero-mapa"');
-    expect(hero).toContain('data-testid="mapa-departamental"');
+    expect(hero).not.toContain('data-testid="mapa-departamental"');
+    expect(territorio).toContain('data-testid="mapa-departamental"');
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
+  });
+
+  it("conserva el hero de la etapa 1: titular, diagnóstico y los tres KPIs", () => {
+    const html = renderToStaticMarkup(<PortadaCliente />);
+    expect(html).toContain("Entiende cada proceso.");
+    expect(html).toContain("o mira antes si estás listo");
+    expect(html).toContain("Procesos del sector vigilados");
+    expect(html).toContain("Nuevos abiertos · 7 días");
+    expect(html).toContain("En juego · este mes · COP");
   });
 });
