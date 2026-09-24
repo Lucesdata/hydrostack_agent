@@ -51,6 +51,16 @@ describe("ColombiaChoropleth", () => {
     expect(html.match(/<path/g)).toHaveLength(33);
   });
 
+  // Cero real: la base respondió y no hay procesos abiertos. Con el total en 0
+  // el cálculo de "sin ubicación" sí se ejecuta, y no debe pintar "0 procesos".
+  it("sigue dibujando los 33 departamentos cuando la base responde con cero", () => {
+    const html = renderToStaticMarkup(<ColombiaChoropleth filas={[]} totalAbiertos={0} />);
+
+    expect(html.match(/class="clr-mapa__dpto/g)).toHaveLength(33);
+    expect(html).not.toContain("sin ubicación resuelta");
+    expect(html).not.toContain('class="clr-mapa__link"');
+  });
+
   it("hace clicable el departamento con procesos, hacia su faceta", () => {
     expect(html).toContain('href="/licitaciones/departamento/antioquia"');
   });
