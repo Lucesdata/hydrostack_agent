@@ -297,6 +297,128 @@ const BLUEPRINT_CSS = `
   .bp-hero-cta-nota { text-align: center; }
   .bp-page a.bp-hero-cta-alt { justify-content: center; text-align: center; }
 }
+/* Hero territorial: tema local. No cambia los tokens ni otras rutas. */
+.atlas-hero {
+  color: var(--atlas-text);
+  background: radial-gradient(ellipse at 58% 42%, var(--atlas-hover), transparent 65%), var(--atlas-bg);
+  padding: 48px 36px 28px;
+  border-bottom: 1px solid var(--atlas-line);
+}
+.atlas-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; opacity: .12; pointer-events: none;
+  background-image: linear-gradient(color-mix(in srgb, var(--atlas-cyan) 20%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--atlas-cyan) 20%, transparent) 1px, transparent 1px);
+  background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black, transparent 75%);
+}
+.atlas-hero .bp-hero-grid { grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.5fr) minmax(250px, .9fr); gap: 28px; align-items: start; }
+.atlas-intro, .atlas-territory { min-width: 0; }
+.atlas-eyebrow { color: var(--atlas-cyan); font: 600 10px/1.6 var(--font-jetbrains-mono), monospace; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; }
+.atlas-hero h1 { font: 700 clamp(1.8rem, 2.65vw, 2.55rem)/1.12 var(--font-inter), sans-serif; letter-spacing: -.04em; color: var(--atlas-text); margin: 0; text-wrap: balance; }
+.atlas-hero h1 span { color: var(--atlas-cyan); }
+.atlas-description { font-size: 14px; line-height: 1.7; margin: 20px 0 24px; color: var(--atlas-text); }
+.atlas-primary { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 23px; min-height: 48px; border-radius: 30px; background: var(--atlas-cyan); color: var(--atlas-on-accent); font-size: 13px; font-weight: 700; transition: background .15s; }
+.atlas-primary:hover { background: var(--atlas-cta-hover); }
+.atlas-primary span { font-size: 22px; line-height: 1; }
+.atlas-source { margin: 14px 0 28px; font-size: 11px; color: var(--atlas-muted); }
+.atlas-directory { border: 1px solid var(--atlas-line); border-radius: 12px; padding: 16px 12px 0; background: var(--atlas-panel); }
+.atlas-directory-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 6px 14px; }
+.atlas-directory-heading h2 { color: var(--atlas-cyan); font-size: 13px; font-weight: 600; }
+.atlas-directory-heading > span { font: 11px var(--font-jetbrains-mono), monospace; color: var(--atlas-muted); }
+.atlas-search { display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--atlas-control-border); border-radius: 7px; margin: 0 0 10px; color: var(--atlas-cyan); }
+.atlas-search input { width: 100%; min-width: 0; min-height: 42px; background: transparent; border: 0; color: var(--atlas-text); font: 12px var(--font-inter), sans-serif; }
+.atlas-search input::placeholder { color: var(--atlas-muted); opacity: 1; }
+.atlas-departments { list-style: none; margin: 0; padding: 0 4px 0 0; max-height: 294px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--atlas-control-border) transparent; }
+.atlas-departments button { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto 8px; align-items: center; gap: 10px; width: 100%; text-align: left; color: var(--atlas-text); background: transparent; border: 1px solid transparent; border-bottom-color: var(--atlas-line); border-radius: 5px; padding: 11px 8px; min-height: 44px; font: 12px/1.4 var(--font-inter), sans-serif; cursor: pointer; }
+.atlas-departments button[aria-pressed='true'] { background: var(--atlas-hover); border-color: var(--atlas-control-border); color: var(--atlas-text); }
+.atlas-departments button[aria-pressed='true'] .atlas-dot { background: var(--atlas-selected); box-shadow: 0 0 0 3px color-mix(in srgb, var(--atlas-selected) 20%, transparent); }
+.atlas-departments button:hover { background: var(--atlas-hover); }
+.atlas-departments strong { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--atlas-cyan); }
+.atlas-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--atlas-cyan); }
+.atlas-directory-link { display: flex; justify-content: space-between; min-height: 48px; align-items: center; font-size: 11px; color: var(--atlas-cyan); padding: 10px 6px; }
+.atlas-hero .bp-hero-mapa { align-self: center; margin-top: 0; min-width: 0; }
+.atlas-map-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--atlas-muted); font: 10px/1.5 var(--font-jetbrains-mono), monospace; margin-bottom: 20px; }
+.atlas-map-key { color: var(--atlas-cyan); }
+.atlas-hero .clr-mapa { --mapa-e0: var(--atlas-map-e0); --mapa-e1: var(--atlas-map-e1); --mapa-e2: var(--atlas-map-e2); --mapa-e3: var(--atlas-map-e3); --mapa-e4: var(--atlas-map-e4); max-width: none; gap: 16px; }
+.atlas-hero .clr-mapa__svg { width: 100%; max-height: none; height: auto; filter: drop-shadow(0 12px 28px color-mix(in srgb, var(--atlas-night-bg) 35%, transparent)); }
+.atlas-hero .clr-mapa__dpto { stroke: var(--atlas-map-stroke-low); stroke-width: .7; }
+.atlas-hero .clr-mapa__link:hover .clr-mapa__dpto, .atlas-hero .clr-mapa__link:focus-visible .clr-mapa__dpto { stroke: var(--atlas-cyan); stroke-width: 2; }
+.atlas-hero .clr-mapa__leyenda { gap: 8px 12px; }
+.atlas-hero .clr-mapa__leyenda li, .atlas-hero .clr-mapa__sin { color: var(--atlas-muted); font-size: 10px; }
+.atlas-hero .clr-mapa__nota { color: var(--atlas-text); font-size: 11px; }
+.atlas-hero .clr-mapa__recuadro { stroke: var(--atlas-control-border); }
+.atlas-hero .clr-mapa__recuadro-txt { fill: var(--atlas-muted); }
+.atlas-hero .clr-mapa__swatch { border-color: var(--atlas-map-stroke-low); }
+.atlas-map-label line { stroke: var(--atlas-label-border); stroke-width: .8; }
+.atlas-map-label circle { fill: var(--atlas-label-text); stroke: var(--atlas-label-bg); stroke-width: 1; }
+.atlas-map-label rect { fill: var(--atlas-label-bg); stroke: var(--atlas-label-border); stroke-width: .6; }
+.atlas-map-label text { fill: var(--atlas-label-text); font: 8px var(--font-inter), sans-serif; }
+.atlas-map-label .atlas-map-label-count { font-size: 11px; font-weight: 700; }
+.atlas-map-unavailable, .atlas-empty { color: var(--atlas-muted); font-size: 12px; line-height: 1.6; padding: 12px 4px; }
+.atlas-territory { margin-top: 32px; border-radius: 12px; overflow: hidden; background: var(--surface); color: var(--text-primary); box-shadow: 0 20px 60px color-mix(in srgb, var(--atlas-night-bg) 25%, transparent); border: 1px solid var(--border); }
+.atlas-territory-banner { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: 110px; padding: 24px; background: var(--accent-deep); color: var(--surface); font: 600 10px/1.8 var(--font-jetbrains-mono), monospace; letter-spacing: .14em; }
+.atlas-territory-banner i { position: absolute; width: 220px; height: 220px; border: 1px solid color-mix(in srgb, var(--surface) 30%, transparent); border-radius: 45%; right: -55px; top: -85px; transform: rotate(25deg); }
+.atlas-territory-banner i:nth-of-type(2) { right: -80px; top: -60px; }
+.atlas-territory-banner i:nth-of-type(3) { right: -105px; top: -35px; }
+.atlas-territory-body { padding: 22px; }
+.atlas-card-eyebrow { color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.atlas-territory h2 { font: 700 25px/1.15 var(--font-inter), sans-serif; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.atlas-territory-count { font-size: 12px; color: var(--accent); margin: 12px 0 6px; }
+.atlas-territory-count strong { font-size: 22px; margin-right: 4px; font-variant-numeric: tabular-nums; }
+.atlas-territory-caption { font-size: 11px; line-height: 1.6; color: var(--text-muted); }
+.atlas-territory-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--surface); background: var(--accent-deep); border-radius: 7px; padding: 14px; min-height: 48px; margin-top: 20px; font-size: 12px; line-height: 1.5; }
+.atlas-territory-cta:hover { background: var(--accent); }
+.atlas-types { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 20px; }
+.atlas-types h3 { font-size: 12px; }
+.atlas-types > p { font-size: 10px; color: var(--text-muted); line-height: 1.6; margin-top: 5px; }
+.atlas-type { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 11px; color: var(--text-primary); padding: 12px 0 4px; min-height: 44px; }
+.atlas-type strong { font-weight: 500; color: var(--accent); }
+.atlas-type-track { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--surface-alt); overflow: hidden; }
+.atlas-type-track > span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.atlas-card-foot { margin-top: 22px; border-top: 1px solid var(--border); padding-top: 16px; font-size: 11px; line-height: 1.7; color: var(--text-muted); }
+.atlas-empty-light { color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-top: 16px; }
+.atlas-market { display: grid; grid-template-columns: .8fr 2fr; gap: 18px 36px; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--atlas-line); }
+.atlas-market h2 { color: var(--atlas-cyan); font: 500 11px/1.6 var(--font-jetbrains-mono), monospace; letter-spacing: .08em; text-transform: uppercase; }
+.atlas-market > div p { margin-top: 6px; color: var(--atlas-muted); font-size: 11px; }
+.atlas-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; }
+.atlas-kpis > div { display: flex; flex-direction: column; padding-left: 24px; border-left: 1px solid var(--atlas-line); min-width: 0; }
+.atlas-kpis dt { order: 1; font-size: 11px; line-height: 1.6; color: var(--atlas-muted); margin-top: 4px; }
+.atlas-kpis dd { margin: 0; font: 600 clamp(1.5rem, 2vw, 2rem)/1.2 var(--font-ibm-plex-sans-condensed), sans-serif; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.atlas-market-note { grid-column: 1 / -1; color: var(--atlas-muted); font-size: 10px; line-height: 1.7; }
+.atlas-hero a:focus-visible, .atlas-hero button:focus-visible, .atlas-hero input:focus-visible { outline: 2px solid var(--atlas-cyan); outline-offset: 3px; }
+.atlas-territory a:focus-visible { outline-color: var(--accent); }
+@media (max-width: 1150px) {
+  .atlas-hero { padding: 36px 28px 28px; }
+  .atlas-hero .bp-hero-grid { grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.4fr); }
+  .atlas-territory { grid-column: 1 / -1; margin: 0; display: grid; grid-template-columns: 180px 1fr; }
+  .atlas-territory-body { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .atlas-types { grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 0 0 0 24px; border-top: 0; border-left: 1px solid var(--border); }
+  .atlas-territory-cta, .atlas-card-foot { margin: 0; }
+}
+@media (max-width: 700px) {
+  .atlas-hero { padding: 32px 20px 24px; }
+  .atlas-hero .bp-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .atlas-hero h1 { max-width: 540px; font-size: clamp(2rem, 7vw, 2.7rem); }
+  .atlas-description { max-width: 48ch; }
+  .atlas-departments { max-height: 176px; }
+  .atlas-hero .bp-hero-mapa { width: 100%; max-width: 480px; justify-self: center; }
+  .atlas-territory { display: block; }
+  .atlas-territory-banner { min-height: 80px; }
+  .atlas-territory-body { display: block; }
+  .atlas-territory-cta { margin-top: 18px; }
+  .atlas-types { border-left: 0; border-top: 1px solid var(--border); padding: 20px 0 0; margin-top: 24px; }
+  .atlas-card-foot { margin-top: 20px; }
+  .atlas-market { grid-template-columns: 1fr; gap: 20px; }
+  .atlas-kpis { gap: 12px; }
+  .atlas-kpis > div { padding-left: 12px; }
+  .atlas-kpis > div:first-child { border: 0; padding: 0; }
+  .atlas-kpis dt { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-hero *, .atlas-hero *::before, .atlas-hero *::after { animation: none !important; transition: none !important; }
+}
+
+.atlas-hero .clr-mapa__dpto--e2, .atlas-hero .clr-mapa__dpto--e3, .atlas-hero .clr-mapa__dpto--e4 { stroke: var(--atlas-map-stroke-high); }
+.atlas-theme { min-height: 44px; padding: 8px 12px; border: 1px solid var(--atlas-control-border); border-radius: 6px; background: var(--atlas-panel); color: var(--atlas-text); font: 11px var(--font-inter), sans-serif; cursor: pointer; }
+.atlas-theme:hover { background: var(--atlas-hover); }
 `;
 
 /* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
@@ -354,84 +476,6 @@ function useBlueprintFX() {
     waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
     depthLabel: (p * 6).toFixed(1) + "m",
   };
-}
-
-/* ── Fondo del hero: "infinity cove" — foco de luz cálido con profundidad
-   fotográfica de estudio. Solo dentro de .bp-hero-wrap (position:relative +
-   isolation:isolate), capas en z-index negativo de atrás hacia adelante. ── */
-function HeroCove() {
-  return (
-    <>
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -3,
-          background:
-            "radial-gradient(circle at 56% 40%, #ffffff 0%, #FBFAF5 24%, #F0F3F2 44%, #dfe9ee 62%, #c3d8e4 82%, #a9c8db 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 180,
-          zIndex: -3,
-          background: "linear-gradient(to bottom, rgba(252,252,249,0), #FCFCF9)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "-8%",
-          right: "-8%",
-          top: "40%",
-          bottom: 0,
-          zIndex: -2,
-          background:
-            "radial-gradient(ellipse 70% 100% at 50% 0%, rgba(0,0,0,.16) 0%, rgba(0,0,0,.08) 35%, transparent 70%)",
-          filter: "blur(50px)",
-          opacity: 0.35,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -2,
-          backgroundImage:
-            "linear-gradient(rgba(19,77,116,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(19,77,116,.05) 1px,transparent 1px)",
-          backgroundSize: "32px 32px",
-          maskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
-          WebkitMaskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -1,
-          opacity: 0.03,
-          mixBlendMode: "multiply",
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "180px 180px",
-          pointerEvents: "none",
-        }}
-      />
-    </>
-  );
 }
 
 function BlueprintBackground({ fx }) {
@@ -556,20 +600,43 @@ function BlueprintBackground({ fx }) {
 }
 
 /**
- * @param {{ mapa?: import("react").ReactNode }} props — `mapa` llega ya
+ * @param {{ mapa?: import("react").ReactNode, departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[], totalAbiertos?: number | null, tipos?: import("@/src/lib/secop/agregados").FilaAgregado[] }} props — `mapa` llega ya
  * renderizado desde el servidor. Es un hueco y no un import: importarlo aquí
  * arrastraría la geometría al bundle del navegador.
  */
-export default function LandingPage({ mapa = null }) {
+export default function LandingPage({
+  mapa = null,
+  departamentos = [],
+  totalAbiertos = null,
+  tipos = [],
+}) {
   const fx = useBlueprintFX();
   const { heroRef } = fx.refs;
+  const [busqueda, setBusqueda] = useState("");
+  const [tema, setTema] = useState("dark");
+  const [departamentoElegido, setDepartamentoElegido] = useState(null);
+  const departamento =
+    departamentos.find((d) => d.clave === departamentoElegido) ?? departamentos[0] ?? null;
+  const normalizar = (texto) =>
+    texto
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("es");
+  const visibles = departamentos.filter((d) =>
+    normalizar(d.label).includes(normalizar(busqueda.trim()))
+  );
+  const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
+  const codigoSeleccionado = /^\d{2}$/.test(departamento?.clave ?? "") ? departamento.clave : "";
 
-  // Cifras del sector para el home (procesos vigilados, oferentes históricos,
-  // sanciones) y las dos cifras vivas de la fila inferior del hero (procesos
-  // nuevos en 7 días, valor en juego este mes). Todas vienen de la misma
-  // respuesta de /api/landing-stats — un solo fetch, no uno por bloque. Se
-  // quedan en null si el fetch falla: la UI muestra "—" y la frase que las
-  // acompaña sigue siendo cierta sin la cifra.
+  function mostrarDepartamento(event) {
+    const enlace = event.target.closest?.("a[data-departamento]");
+    if (enlace) setDepartamentoElegido(enlace.dataset.departamento);
+  }
+
+  // El mapa y el conteo de abiertos llegan de los agregados del servidor.
+  // El fetch existente aporta a los KPIs nuevos7d y enJuegoTotalCop; sector
+  // conserva procesosVigilados para S3Motor. Las métricas ausentes quedan en
+  // null y se presentan como «—», sin sustituirlas por ceros o datos de demo.
   const [sector, setSector] = useState({
     procesosVigilados: null,
     oferentesHistoricos: null,
@@ -615,131 +682,193 @@ export default function LandingPage({ mapa = null }) {
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
         <ProcesosTicker />
 
-        <div ref={heroRef} className="bp-hero-wrap">
-          <HeroCove />
-          <div className="bp-hero-grid" style={{ position: "relative" }}>
-            {/* La columna de texto conserva su medida de 645px aunque ahora sea
-                hija del grid: sin el tope, el titular se estira a 1338px y el
-                reparto en dos líneas de las máscaras se deshace. */}
-            <div style={{ position: "relative", maxWidth: 645 }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  padding: "8px 14px",
-                  background: "rgba(3, 105, 161, 0.08)",
-                  color: "#0369A1",
-                  borderRadius: 4,
-                  marginBottom: 24,
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  fontWeight: 600,
-                  letterSpacing: ".05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                AGUA Y SANEAMIENTO · COLOMBIA
-              </div>
-              <h1 className="bp-h1">
-                <span className="hero-mask hero-mask-1">
-                  <span>
-                    Explora el mercado de <span className="hero-draw">agua</span>.
-                  </span>
-                </span>
-                <span className="hero-mask hero-mask-2">
-                  <span>Entiende cada proceso.</span>
-                </span>
+        <section
+          ref={heroRef}
+          className="bp-hero-wrap atlas-hero"
+          data-theme={tema}
+          aria-labelledby="atlas-title"
+        >
+          {codigoSeleccionado && (
+            <style>{`.atlas-hero .clr-mapa__link[data-departamento="${codigoSeleccionado}"] .clr-mapa__dpto { fill: var(--atlas-selected); stroke: var(--atlas-selected-stroke); stroke-width: 1.6; }`}</style>
+          )}
+          <div className="bp-hero-grid">
+            <div className="atlas-intro">
+              <p className="atlas-eyebrow">Inteligencia de contratación pública</p>
+              <h1 id="atlas-title">
+                Explora el mercado de agua y saneamiento de <span>Colombia.</span>
               </h1>
-              <p
-                style={{
-                  font: "15px/1.6 var(--font-inter)",
-                  color: "#525B5A",
-                  marginTop: 20,
-                  marginBottom: 30,
-                  maxWidth: "65ch",
-                }}
-              >
-                Explora los procesos de agua y saneamiento del SECOP II en Colombia. Encuentra
-                oportunidades, consulta su ficha y sigue lo que te importa.
+              <p className="atlas-description">
+                Descubre dónde están los procesos, qué se está contratando y encuentra oportunidades
+                en tu territorio.
               </p>
+              <Link href={ruta("explorar").href} className="atlas-primary">
+                Explorar procesos <span aria-hidden="true">→</span>
+              </Link>
+              <p className="atlas-source">Datos SECOP II · {ruta("explorar").etiqueta}</p>
 
-              <div className="bp-hero-cta">
-                <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
-                  {(() => {
-                    const explorarRuta = ruta("explorar");
-                    return (
-                      <>
-                        <Link
-                          href={explorarRuta.href}
-                          className="bp-cta bp-cta-dark"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 8,
-                            background: "#0369A1",
-                            color: "#fff",
-                            font: "600 13px var(--font-jetbrains-mono),monospace",
-                            letterSpacing: ".04em",
-                          }}
-                        >
-                          Explorar procesos →
-                        </Link>
-                        {/* La cifra sale del mismo fetch que el resto; si viene en
-                            null la frase se acorta en vez de quedar "<etiqueta> · —
-                            procesos del sector", que se lee como un error. La etiqueta
-                            se deriva de ruta("explorar") para no desincronizarse si
-                            cambia ETIQUETA_POR_NIVEL.anonimo. */}
-                        <div className="bp-hero-cta-nota">
-                          {sector.procesosVigilados == null
-                            ? explorarRuta.etiqueta
-                            : `${explorarRuta.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
-                        </div>
-                      </>
-                    );
-                  })()}
+              <div className="atlas-directory">
+                <div className="atlas-directory-heading">
+                  <h2>Departamentos</h2>
+                  <span>{totalAbiertos == null ? "—" : departamentos.length}</span>
                 </div>
-                <Link
-                  href={ruta("diagnostico").href}
-                  className="hero-fade-up tap-target bp-hero-cta-alt"
-                  style={{ animationDelay: ".92s" }}
-                >
-                  o mira antes si estás listo · 3 min
+                <label className="atlas-search">
+                  <span aria-hidden="true">⌕</span>
+                  <input
+                    type="search"
+                    aria-label="Buscar departamento"
+                    placeholder="Buscar departamento…"
+                    value={busqueda}
+                    onChange={(event) => setBusqueda(event.target.value)}
+                  />
+                </label>
+                <ul className="atlas-departments" aria-label="Departamentos con procesos abiertos">
+                  {visibles.map((d) => (
+                    <li key={d.clave}>
+                      <button
+                        type="button"
+                        aria-pressed={departamento?.clave === d.clave}
+                        onClick={() => setDepartamentoElegido(d.clave)}
+                        aria-controls="atlas-territory"
+                      >
+                        <span className="atlas-dot" aria-hidden="true" />
+                        <span>{d.label}</span>
+                        <strong>{formatConteo(d.n)}</strong>
+                        <span aria-hidden="true">›</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {visibles.length === 0 && (
+                  <p className="atlas-empty" role="status">
+                    {departamentos.length > 0
+                      ? "No encontramos ese departamento."
+                      : totalAbiertos == null
+                        ? "Datos territoriales no disponibles"
+                        : "No hay procesos abiertos por departamento"}
+                  </p>
+                )}
+                <Link href={ruta("explorar").href} className="atlas-directory-link">
+                  Ver todos los procesos <span aria-hidden="true">→</span>
                 </Link>
               </div>
-
-              <section className="bp-hero-market" aria-labelledby="hero-market-title">
-                <h2 id="hero-market-title" className="bp-hero-market-title">
-                  El mercado está en movimiento
-                </h2>
-                {/* Mismo fetch y formatos. No son tres cortes del mismo universo:
-                    vigilados incluye el histórico; nuevos y valor son abiertos.
-                    Sin dato se conserva la raya, nunca cifras de demostración. */}
-                <dl className="bp-hero-metrics">
-                  <div className="bp-hero-metric">
-                    <dt>Procesos del sector vigilados</dt>
-                    <dd>{formatConteo(sector.procesosVigilados)}</dd>
-                  </div>
-                  <div className="bp-hero-metric">
-                    <dt>Nuevos abiertos · 7 días</dt>
-                    <dd>{formatConteo(heroStats.nuevos7d)}</dd>
-                  </div>
-                  <div className="bp-hero-metric">
-                    <dt>En juego · este mes · COP</dt>
-                    <dd>{formatCopCompact(heroStats.enJuegoTotalCop)}</dd>
-                  </div>
-                </dl>
-                <p className="bp-hero-market-note">
-                  Fuente: SECOP II. Vigilados incluye el histórico; nuevos cuenta abiertos en
-                  presentación de oferta; en juego suma el precio base de abiertos publicados este
-                  mes. — indica un dato no disponible.
-                </p>
-              </section>
             </div>
-            {mapa && (
-              <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
-                {mapa}
+
+            <div
+              className="bp-hero-mapa"
+              aria-label="Procesos abiertos por departamento"
+              onMouseOver={mostrarDepartamento}
+              onFocus={mostrarDepartamento}
+            >
+              <div className="atlas-map-heading">
+                <span>Colombia · por departamento</span>
+                <button
+                  type="button"
+                  className="atlas-theme"
+                  onClick={() => setTema(tema === "dark" ? "light" : "dark")}
+                  aria-label={tema === "dark" ? "Usar tema claro" : "Usar tema oscuro"}
+                >
+                  {tema === "dark" ? "Tema claro" : "Tema oscuro"}
+                </button>
               </div>
-            )}
+              {mapa}
+              {totalAbiertos == null && (
+                <p className="atlas-map-unavailable">
+                  El mapa no tiene datos disponibles en este momento.
+                </p>
+              )}
+            </div>
+
+            <aside
+              className="atlas-territory"
+              id="atlas-territory"
+              aria-label="Resumen territorial"
+            >
+              <div className="atlas-territory-banner" aria-hidden="true">
+                <span>AGUA</span>
+                <span>Y TERRITORIO</span>
+                <i />
+                <i />
+                <i />
+              </div>
+              <div className="atlas-territory-body">
+                <div aria-live="polite" aria-atomic="true">
+                  <p className="atlas-card-eyebrow">Territorio seleccionado</p>
+                  <h2>{departamento?.label ?? "Explora Colombia"}</h2>
+                  <p className="atlas-territory-count">
+                    <strong>{formatConteo(departamento?.n ?? null)}</strong> procesos abiertos
+                  </p>
+                  <p className="atlas-territory-caption">
+                    Según ubicación de la entidad contratante.
+                  </p>
+                </div>
+                {departamento && departamento.n > 0 ? (
+                  <Link
+                    className="atlas-territory-cta"
+                    href={`/licitaciones/departamento/${departamento.slug}`}
+                  >
+                    Ver procesos de {departamento.label} <span aria-hidden="true">→</span>
+                  </Link>
+                ) : (
+                  <p className="atlas-empty-light">
+                    {totalAbiertos == null
+                      ? "Los conteos se mostrarán cuando estén disponibles."
+                      : "No hay procesos abiertos para este territorio."}
+                  </p>
+                )}
+                <div className="atlas-types">
+                  <h3>Tipos de proyecto · Colombia</h3>
+                  <p>Distribución nacional de procesos abiertos</p>
+                  {tipos.map((tipo) => (
+                    <Link
+                      href={`/licitaciones/tipo/${tipo.slug}`}
+                      className="atlas-type"
+                      key={tipo.clave}
+                    >
+                      <span>{tipo.label}</span>
+                      <strong>{formatConteo(tipo.n)}</strong>
+                      <span className="atlas-type-track" aria-hidden="true">
+                        <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
+                      </span>
+                    </Link>
+                  ))}
+                  {tipos.length === 0 && (
+                    <p className="atlas-empty-light">Distribución no disponible.</p>
+                  )}
+                </div>
+                <p className="atlas-card-foot">
+                  De un territorio a una oportunidad.
+                  <br />
+                  Abre un proceso y consulta su ficha.
+                </p>
+              </div>
+            </aside>
           </div>
-        </div>
+
+          <section className="atlas-market" aria-labelledby="hero-market-title">
+            <div>
+              <h2 id="hero-market-title">El mercado ahora</h2>
+              <p>Agua y saneamiento en Colombia</p>
+            </div>
+            <dl className="atlas-kpis">
+              <div>
+                <dt>Procesos abiertos</dt>
+                <dd>{formatConteo(totalAbiertos)}</dd>
+              </div>
+              <div>
+                <dt>Nuevos abiertos · 7 días</dt>
+                <dd>{formatConteo(heroStats.nuevos7d)}</dd>
+              </div>
+              <div>
+                <dt>En juego · este mes · COP</dt>
+                <dd>{formatCopCompact(heroStats.enJuegoTotalCop)}</dd>
+              </div>
+            </dl>
+            <p className="atlas-market-note">
+              Nuevos: en presentación de oferta. En juego: precio base de abiertos publicados este
+              mes. — indica un dato no disponible.
+            </p>
+          </section>
+        </section>
 
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y
