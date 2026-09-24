@@ -18,7 +18,6 @@ import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S7Acceso from "@/src/components/landing/S7Acceso";
-import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
 import { ETIQUETA_POR_NIVEL, ruta } from "@/src/components/landing/seccionesHome";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 
@@ -415,84 +414,6 @@ function useBlueprintFX() {
   };
 }
 
-/* ── Fondo del hero: "infinity cove" — foco de luz cálido con profundidad
-   fotográfica de estudio. Solo dentro de .bp-hero-wrap (position:relative +
-   isolation:isolate), capas en z-index negativo de atrás hacia adelante. ── */
-function HeroCove() {
-  return (
-    <>
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -3,
-          background:
-            "radial-gradient(circle at 56% 40%, #ffffff 0%, #FBFAF5 24%, #F0F3F2 44%, #dfe9ee 62%, #c3d8e4 82%, #a9c8db 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 180,
-          zIndex: -3,
-          background: "linear-gradient(to bottom, rgba(252,252,249,0), #FCFCF9)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "-8%",
-          right: "-8%",
-          top: "40%",
-          bottom: 0,
-          zIndex: -2,
-          background:
-            "radial-gradient(ellipse 70% 100% at 50% 0%, rgba(0,0,0,.16) 0%, rgba(0,0,0,.08) 35%, transparent 70%)",
-          filter: "blur(50px)",
-          opacity: 0.35,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -2,
-          backgroundImage:
-            "linear-gradient(rgba(19,77,116,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(19,77,116,.05) 1px,transparent 1px)",
-          backgroundSize: "32px 32px",
-          maskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
-          WebkitMaskImage: "radial-gradient(circle at 55% 45%, #000 0%, transparent 78%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: -1,
-          opacity: 0.03,
-          mixBlendMode: "multiply",
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "180px 180px",
-          pointerEvents: "none",
-        }}
-      />
-    </>
-  );
-}
-
 function BlueprintBackground({ fx }) {
   return (
     <>
@@ -614,138 +535,6 @@ function BlueprintBackground({ fx }) {
   );
 }
 
-const normalizar = (texto) =>
-  texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("es");
-
-/**
- * Listado y ficha del territorio, bajo el hero; el mapa se queda en el hero.
- * Todo sale de los agregados del servidor: `totalAbiertos` en undefined/null
- * significa que la base no respondió, y se dice así en vez de pintar ceros.
- */
-function SeccionTerritorial({ departamentos, totalAbiertos, tipos }) {
-  const [busqueda, setBusqueda] = useState("");
-  const [elegido, setElegido] = useState(null);
-  const hayDatos = totalAbiertos != null;
-  const departamento = departamentos.find((d) => d.clave === elegido) ?? departamentos[0] ?? null;
-  const visibles = departamentos.filter((d) =>
-    normalizar(d.label).includes(normalizar(busqueda.trim()))
-  );
-  const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
-
-  return (
-    <section className="terr-wrap" aria-labelledby="terr-titulo">
-      <div className="terr-head">
-        <div>
-          <p className="terr-kicker">Por territorio</p>
-          <h2 id="terr-titulo">¿Dónde se está contratando?</h2>
-        </div>
-        <p className="terr-total">
-          {hayDatos ? (
-            <>
-              <strong>{formatConteo(totalAbiertos)}</strong> procesos abiertos en Colombia
-            </>
-          ) : (
-            "Datos territoriales no disponibles"
-          )}
-        </p>
-      </div>
-
-      <div className="terr-grid">
-        <div className="terr-list">
-          <div className="terr-list-head">
-            <h3>Departamentos</h3>
-            <span>{hayDatos ? departamentos.length : "—"}</span>
-          </div>
-          <label className="terr-search">
-            <span aria-hidden="true">⌕</span>
-            <input
-              type="search"
-              aria-label="Buscar departamento"
-              placeholder="Buscar departamento…"
-              value={busqueda}
-              onChange={(event) => setBusqueda(event.target.value)}
-            />
-          </label>
-          <ul className="terr-deptos" aria-label="Departamentos con procesos abiertos">
-            {visibles.map((d) => (
-              <li key={d.clave}>
-                <button
-                  type="button"
-                  aria-pressed={departamento?.clave === d.clave}
-                  aria-controls="terr-ficha"
-                  onClick={() => setElegido(d.clave)}
-                >
-                  <span>{d.label}</span>
-                  <strong>{formatConteo(d.n)}</strong>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {visibles.length === 0 && (
-            <p className="terr-vacio" role="status">
-              {departamentos.length > 0
-                ? "No encontramos ese departamento."
-                : hayDatos
-                  ? "No hay procesos abiertos por departamento."
-                  : "Los conteos se mostrarán cuando estén disponibles."}
-            </p>
-          )}
-          <Link href={ruta("explorar").href} className="terr-todos">
-            Ver todos los procesos <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-
-        <aside className="terr-ficha" id="terr-ficha" aria-label="Resumen del territorio">
-          <div className="terr-ficha-banda" aria-hidden="true">
-            Agua y territorio
-          </div>
-          <div className="terr-ficha-cuerpo">
-            <div aria-live="polite" aria-atomic="true">
-              <p className="terr-ficha-kicker">Territorio seleccionado</p>
-              <h3>{departamento?.label ?? "Colombia"}</h3>
-              <p className="terr-ficha-n">
-                <strong>{formatConteo(departamento?.n ?? null)}</strong> procesos abiertos
-              </p>
-              <p className="terr-ficha-nota">Según ubicación de la entidad contratante.</p>
-            </div>
-            {departamento && departamento.n > 0 && (
-              <Link
-                className="terr-ficha-cta"
-                href={`/licitaciones/departamento/${departamento.slug}`}
-              >
-                Ver procesos de {departamento.label} <span aria-hidden="true">→</span>
-              </Link>
-            )}
-            <div className="terr-tipos">
-              {/* Los agregados no cruzan tipo con departamento: el desglose es
-                  nacional y lo dice, aunque la ficha muestre un territorio. */}
-              <h4>Tipos de proyecto · Colombia</h4>
-              <p>Distribución nacional de procesos abiertos</p>
-              {tipos.map((tipo) => (
-                <Link
-                  href={`/licitaciones/tipo/${tipo.slug}`}
-                  className="terr-tipo"
-                  key={tipo.clave}
-                >
-                  <span>{tipo.label}</span>
-                  <strong>{formatConteo(tipo.n)}</strong>
-                  <span className="terr-tipo-barra" aria-hidden="true">
-                    <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
-                  </span>
-                </Link>
-              ))}
-              {tipos.length === 0 && <p>Distribución no disponible.</p>}
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
-  );
-}
-
 /**
  * @param {{
  *   mapa?: import("react").ReactNode,
@@ -762,7 +551,6 @@ export default function LandingPage({
   tipos = [],
 }) {
   const fx = useBlueprintFX();
-  const { heroRef } = fx.refs;
 
   // Cifras del sector (procesos vigilados, para el CTA, los KPIs y S3Motor) y
   // las dos cifras vivas de los KPIs del hero (nuevos en 7 días, valor en juego
