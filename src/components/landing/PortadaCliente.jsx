@@ -202,16 +202,32 @@ const BLUEPRINT_CSS = `
 
 .bp-hero-wrap { position: relative; isolation: isolate; overflow: hidden; padding: clamp(56px,7vw,88px) var(--gutter) 64px; }
 .bp-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: start; }
+.bp-hero-mapa { min-width: 0; align-self: center; }
+.bp-hero-mapa:empty { display: none; }
+/* El mapa tiene proporción fija (420x520), así que sin tope crece con la columna:
+   medido a 1440x900, la columna daba 645px y el SVG se iba a 799px de alto, con la
+   leyenda y la nota "Según ubicación…" fuera de pantalla. Esa nota no es un pie:
+   es la definición de lo que se está viendo. Se limita por ALTO —no por ancho— para
+   que el tope valga igual en un portátil de 768 que en un monitor. */
+.bp-hero-mapa .clr-mapa { max-width: 460px; margin-inline: auto; }
+.bp-hero-mapa .clr-mapa__svg { max-height: min(48vh, 470px); width: auto; margin-inline: auto; }
+@media (max-width: 900px) { .bp-hero-mapa { margin-top: 32px; } }
+.bp-hero-sin-datos { margin: 12px 0 0; font: 13px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); text-align: center; }
+.atlas-map-label line { stroke: var(--ink-600); stroke-width: .8; }
+.atlas-map-label circle { fill: var(--accent-deep); stroke: var(--surface); stroke-width: 1; }
+.atlas-map-label rect { fill: var(--surface); stroke: var(--ink-300); stroke-width: .6; }
+.atlas-map-label text { fill: var(--accent-deep); font: 9px var(--font-inter), sans-serif; }
+.atlas-map-label .atlas-map-label-count { font-size: 11px; font-weight: 700; }
 
-/* ── Sección territorial: listado, mapa y ficha. Solo tokens existentes; el
-   mapa conserva sus tintes de estilos.ts. ── */
+/* ── Sección territorial: listado y ficha, bajo el hero. Solo tokens
+   existentes. ── */
 .terr-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .terr-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; margin-bottom: 28px; }
 .terr-kicker { margin: 0 0 8px; font: 600 11px/1.5 var(--font-jetbrains-mono), monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .terr-head h2 { margin: 0; font: 700 clamp(1.5rem, 2.4vw, 2rem)/1.2 var(--font-inter), sans-serif; letter-spacing: -.02em; color: var(--text-primary); }
 .terr-total { margin: 0; font: 13px/1.5 var(--font-inter), sans-serif; color: var(--text-muted); }
 .terr-total strong { color: var(--accent); font-variant-numeric: tabular-nums; }
-.terr-grid { display: grid; grid-template-columns: minmax(230px, .85fr) minmax(300px, 1.3fr) minmax(250px, 1fr); gap: 28px; align-items: start; }
+.terr-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.2fr); gap: 28px; align-items: start; max-width: 1040px; }
 .terr-grid > * { min-width: 0; }
 .terr-list { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 14px 10px 0; }
 .terr-list-head { display: flex; justify-content: space-between; align-items: center; margin: 0 6px 12px; }
@@ -230,16 +246,6 @@ const BLUEPRINT_CSS = `
 .terr-deptos strong { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--accent); }
 .terr-vacio { margin: 0; padding: 12px 6px; font: 13px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); }
 .terr-todos { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 10px 6px; font: 600 12px var(--font-jetbrains-mono), monospace; color: var(--accent); }
-.terr-mapa .clr-mapa { max-width: 460px; margin-inline: auto; }
-/* Proporción fija 420x520: se limita por alto para que la leyenda y la nota
-   "Según ubicación…", que define lo que se ve, queden a la vista. */
-.terr-mapa .clr-mapa__svg { max-height: min(62vh, 540px); width: auto; margin-inline: auto; }
-.terr-sin-datos { margin: 12px 0 0; font: 13px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); text-align: center; }
-.atlas-map-label line { stroke: var(--ink-600); stroke-width: .8; }
-.atlas-map-label circle { fill: var(--accent-deep); stroke: var(--surface); stroke-width: 1; }
-.atlas-map-label rect { fill: var(--surface); stroke: var(--ink-300); stroke-width: .6; }
-.atlas-map-label text { fill: var(--accent-deep); font: 9px var(--font-inter), sans-serif; }
-.atlas-map-label .atlas-map-label-count { font-size: 11px; font-weight: 700; }
 .terr-ficha { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
 .terr-ficha-banda { padding: 14px 20px; background: var(--accent-deep); color: var(--surface); font: 600 10px/1.6 var(--font-jetbrains-mono), monospace; letter-spacing: .14em; text-transform: uppercase; }
 .terr-ficha-cuerpo { padding: 20px; }
@@ -259,14 +265,9 @@ const BLUEPRINT_CSS = `
 .terr-tipo:hover span:first-child { text-decoration: underline; }
 .terr-tipo-barra { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--surface-alt); overflow: hidden; }
 .terr-tipo-barra > span { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
-@media (max-width: 1150px) {
-  .terr-grid { grid-template-columns: minmax(230px, 1fr) minmax(300px, 1.4fr); }
-  .terr-ficha { grid-column: 1 / -1; }
-}
 @media (max-width: 760px) {
   .terr-wrap { padding: 48px var(--gutter); }
   .terr-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .terr-mapa { order: -1; }
   .terr-deptos { max-height: 220px; }
 }
 .bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
@@ -612,14 +613,18 @@ function BlueprintBackground({ fx }) {
   );
 }
 
-const normalizar = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("es");
+const normalizar = (texto) =>
+  texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es");
 
 /**
- * Listado, mapa y ficha del territorio. Todo sale de los agregados del
- * servidor: `totalAbiertos` en undefined/null significa que la base no
- * respondió, y se dice así en vez de pintar ceros.
+ * Listado y ficha del territorio, bajo el hero; el mapa se queda en el hero.
+ * Todo sale de los agregados del servidor: `totalAbiertos` en undefined/null
+ * significa que la base no respondió, y se dice así en vez de pintar ceros.
  */
-function SeccionTerritorial({ mapa, departamentos, totalAbiertos, tipos }) {
+function SeccionTerritorial({ departamentos, totalAbiertos, tipos }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
   const hayDatos = totalAbiertos != null;
@@ -628,27 +633,9 @@ function SeccionTerritorial({ mapa, departamentos, totalAbiertos, tipos }) {
     normalizar(d.label).includes(normalizar(busqueda.trim()))
   );
   const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
-  // El código entra en un selector CSS: solo se acepta la forma DIVIPOLA.
-  const codigoSeleccionado = /^\d{2}$/.test(departamento?.clave ?? "") ? departamento.clave : "";
-
-  // El mapa llega del servidor como HTML ya pintado; se escucha por delegación.
-  function alPasarPorMapa(event) {
-    const enlace = event.target.closest?.("a[data-departamento]");
-    if (enlace) setElegido(enlace.dataset.departamento);
-  }
 
   return (
     <section className="terr-wrap" aria-labelledby="terr-titulo">
-      {/* Por __html y no como hijo de texto: en SSR React escapa las comillas
-          del hijo, el selector llega inválido y la hidratación falla (#418).
-          Es seguro porque el código ya pasó por /^\d{2}$/. */}
-      {codigoSeleccionado && (
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `.terr-mapa .clr-mapa__link[data-departamento="${codigoSeleccionado}"] .clr-mapa__dpto { stroke: var(--ink-900); stroke-width: 2; }`,
-          }}
-        />
-      )}
       <div className="terr-head">
         <div>
           <p className="terr-kicker">Por territorio</p>
@@ -708,18 +695,6 @@ function SeccionTerritorial({ mapa, departamentos, totalAbiertos, tipos }) {
           <Link href={ruta("explorar").href} className="terr-todos">
             Ver todos los procesos <span aria-hidden="true">→</span>
           </Link>
-        </div>
-
-        <div
-          className="terr-mapa"
-          aria-label="Procesos abiertos por departamento"
-          onMouseOver={alPasarPorMapa}
-          onFocus={alPasarPorMapa}
-        >
-          {mapa}
-          {!hayDatos && (
-            <p className="terr-sin-datos">El mapa no tiene datos disponibles en este momento.</p>
-          )}
         </div>
 
         <aside className="terr-ficha" id="terr-ficha" aria-label="Resumen del territorio">
@@ -956,11 +931,20 @@ export default function LandingPage({
                 </p>
               </section>
             </div>
+            {mapa && (
+              <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
+                {mapa}
+                {totalAbiertos == null && (
+                  <p className="bp-hero-sin-datos">
+                    El mapa no tiene datos disponibles en este momento.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         <SeccionTerritorial
-          mapa={mapa}
           departamentos={departamentos}
           totalAbiertos={totalAbiertos}
           tipos={tipos}

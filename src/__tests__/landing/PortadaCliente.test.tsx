@@ -35,19 +35,6 @@ describe("PortadaCliente", () => {
     expect(html).toContain('aria-pressed="true"');
   });
 
-  // En SSR, un <style> con el CSS como hijo de texto sale con las comillas
-  // escapadas: selector inválido y error de hidratación (#418) en el cliente.
-  it("el resaltado del departamento elegido sale del servidor como CSS válido", () => {
-    const html = renderToStaticMarkup(
-      <PortadaCliente
-        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
-        totalAbiertos={6000}
-      />
-    );
-    expect(html).toContain('.clr-mapa__link[data-departamento="05"]');
-    expect(html).not.toContain("data-departamento=&quot;");
-  });
-
   it("distingue agregados no disponibles de un conteo real en cero", () => {
     const sinDatos = renderToStaticMarkup(<PortadaCliente />);
     const cero = renderToStaticMarkup(<PortadaCliente totalAbiertos={0} />);
@@ -70,17 +57,32 @@ describe("PortadaCliente", () => {
     expect(html).toContain("150");
   });
 
-  it("renderiza el mapa del servidor en la sección territorial, no en el hero", () => {
+  it("renderiza el mapa del servidor dentro del hero, y el listado debajo", () => {
     const html = renderToStaticMarkup(
-      <PortadaCliente mapa={<div data-testid="mapa-departamental">Mapa departamental</div>} />
+      <PortadaCliente
+        mapa={<div data-testid="mapa-departamental">Mapa departamental</div>}
+        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
+        totalAbiertos={6000}
+      />
     );
 
     const hero = contentOfDivWithClass(html, "bp-hero-grid");
     const territorio = contentOfDivWithClass(html, "terr-grid");
 
-    expect(hero).not.toContain('data-testid="mapa-departamental"');
-    expect(territorio).toContain('data-testid="mapa-departamental"');
+    expect(hero).toContain('class="bp-hero-mapa"');
+    expect(hero).toContain('data-testid="mapa-departamental"');
+    expect(territorio).not.toContain('data-testid="mapa-departamental"');
+    expect(territorio).toContain("Buscar departamento");
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
+  });
+
+  it("sin agregados, el hero avisa que el mapa no tiene datos", () => {
+    const html = renderToStaticMarkup(<PortadaCliente mapa={<div>Mapa</div>} />);
+    expect(html).toContain("El mapa no tiene datos disponibles en este momento.");
+    const conDatos = renderToStaticMarkup(
+      <PortadaCliente mapa={<div>Mapa</div>} totalAbiertos={0} />
+    );
+    expect(conDatos).not.toContain("El mapa no tiene datos disponibles");
   });
 
   it("conserva el hero de la etapa 1: titular, diagnóstico y los tres KPIs", () => {

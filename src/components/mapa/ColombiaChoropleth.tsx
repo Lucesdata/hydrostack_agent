@@ -64,12 +64,7 @@ function Departamento({
   if (!disponible || !entrada.href) return path;
 
   return (
-    <a
-      href={entrada.href}
-      className="clr-mapa__link"
-      data-departamento={entrada.dpto}
-      aria-label={etiquetaDe(entrada)}
-    >
+    <a href={entrada.href} className="clr-mapa__link" aria-label={etiquetaDe(entrada)}>
       {path}
     </a>
   );
