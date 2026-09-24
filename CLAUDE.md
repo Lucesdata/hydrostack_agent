@@ -205,3 +205,13 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+
+## Landing — primera etapa 2026-09-24
+
+Hero/KPIs actualizado únicamente en `src/components/landing/PortadaCliente.jsx`.
+Se conservan fuentes de datos, rutas, paleta y mapa de servidor. Los tres KPIs
+no comparten universo: vigilados incluye histórico; nuevos son abiertos en
+presentación de oferta en siete días; en juego suma precio base de abiertos
+publicados este mes. No sustituirlos por cifras ni tendencias de un mockup.
+Inventario, verificación y reversión: [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

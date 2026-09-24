@@ -222,8 +222,51 @@ const BLUEPRINT_CSS = `
 .bp-pillars-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-hero-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.bp-hero-market { margin-top: 32px; }
+.bp-hero-market-title {
+  margin: 0 0 12px;
+  font: 600 11px/1.5 var(--font-jetbrains-mono), monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.bp-hero-metric {
+  min-width: 0;
+  padding: 18px 14px;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface-elevated);
+  display: flex;
+  flex-direction: column;
+}
+.bp-hero-metric dt {
+  order: 1;
+  margin-top: 10px;
+  font: 500 12px/1.5 var(--font-inter), sans-serif;
+  color: var(--text-primary);
+}
+.bp-hero-metric dd {
+  margin: 0;
+  font: 700 clamp(1.4rem, 2.2vw, 2rem)/1.2 var(--font-ibm-plex-sans-condensed), sans-serif;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+}
+.bp-hero-market-note {
+  margin: 12px 0 0;
+  font: 12px/1.6 var(--font-inter), sans-serif;
+  color: var(--text-muted);
+}
+@media (max-width: 640px) {
+  .bp-hero-metrics { grid-template-columns: 1fr; gap: 8px; }
+  .bp-hero-metric { padding: 14px 16px; flex-direction: row; align-items: center; gap: 16px; }
+  .bp-hero-metric dt { flex: 1; margin-top: 0; }
+  .bp-hero-metric dd { flex: 1; font-size: 1.75rem; }
 }
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
@@ -232,7 +275,6 @@ const BLUEPRINT_CSS = `
 }
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
-.bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
 
 
 @media (max-width: 900px) {
@@ -249,11 +291,6 @@ const BLUEPRINT_CSS = `
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
-  /* Las tres cifras del sector se repiten más abajo, en S3Motor (procesos
-     vigilados) y S4Competidores (oferentes y sanciones), que es donde
-     significan algo. En un móvil, aquí solo empujan el CTA fuera de pantalla.
-     Quedan las dos cifras vivas y la credencial de .bp-hero-metrics. */
-  .bp-hero-sector { display: none; }
   .bp-hero-cta { flex-direction: column; align-items: stretch; gap: 12px; }
   .bp-hero-cta-main { width: 100%; }
   .bp-hero-cta-main .bp-cta { display: flex; width: 100%; justify-content: center; }
@@ -602,27 +639,13 @@ export default function LandingPage({ mapa = null }) {
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
-                {/* Dos máscaras, y el reparto de líneas se deja al navegador.
-                    Se probó partirlo a mano en tres tramos medidos para que
-                    "agua" quedase siempre en la primera línea: cuadra a 1440px
-                    y sale deforme en todo lo demás — a 354px daba "larga /
-                    corta / larga", porque un corte fijo medido a un ancho es
-                    arbitrario en los otros. `text-wrap: balance` reparte bien a
-                    cualquier ancho, así que la posición de "agua" varía y el
-                    subrayado viaja con ella. Dos líneas con la palabra clave
-                    arriba, como pedía la spec, es imposible aquí: esa primera
-                    línea mide 959px y la columna del hero da 645px. */}
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    Los procesos de{" "}
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      <span className="hero-draw">agua</span>
-                    </span>{" "}
-                    del SECOP II,
+                    Explora el mercado de <span className="hero-draw">agua</span>.
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>filtrados por tus reglas.</span>
+                  <span>Entiende cada proceso.</span>
                 </span>
               </h1>
               <p
@@ -634,56 +657,9 @@ export default function LandingPage({ mapa = null }) {
                   maxWidth: "65ch",
                 }}
               >
-                Vigilamos los procesos de agua y saneamiento que publica el SECOP II, los filtramos
-                con las reglas que tú defines y te decimos si calificas — mostrándote cada compuerta
-                y por qué, no un veredicto a ciegas.
+                Explora los procesos de agua y saneamiento del SECOP II en Colombia. Encuentra
+                oportunidades, consulta su ficha y sigue lo que te importa.
               </p>
-
-              {/* Cifras del sector: vienen de /api/landing-stats vía el estado
-                  `sector`, nunca escritas a mano. En null se ve "—" y la frase
-                  que las acompaña sigue siendo cierta sin la cifra. */}
-              <div
-                className="bp-hero-sector"
-                style={{
-                  margin: "28px 0 8px",
-                  paddingTop: 20,
-                  borderTop: "1px solid #DADAD2",
-                }}
-              >
-                {[
-                  {
-                    v: formatConteo(sector.procesosVigilados),
-                    t: "procesos del sector vigilados",
-                  },
-                  {
-                    v: formatConteo(sector.oferentesHistoricos),
-                    t: "registros de quién se presentó",
-                  },
-                  { v: formatConteo(sector.sanciones), t: "sanciones registradas" },
-                ].map((x) => (
-                  <div key={x.t}>
-                    <div
-                      style={{
-                        font: "700 22px/1 var(--font-ibm-plex-sans-condensed)",
-                        color: "#0A1F1C",
-                      }}
-                    >
-                      {x.v}
-                    </div>
-                    <div
-                      style={{
-                        font: "10px var(--font-jetbrains-mono),monospace",
-                        color: "#6B746F",
-                        textTransform: "uppercase",
-                        letterSpacing: ".06em",
-                        marginTop: 4,
-                      }}
-                    >
-                      {x.t}
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               <div className="bp-hero-cta">
                 <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
@@ -729,119 +705,33 @@ export default function LandingPage({ mapa = null }) {
                 </Link>
               </div>
 
-              <svg
-                viewBox="0 0 520 16"
-                width="520"
-                height="16"
-                style={{
-                  display: "block",
-                  marginTop: 20,
-                  overflow: "visible",
-                  maxWidth: "100%",
-                  marginBottom: 48,
-                }}
-              >
-                <line
-                  x1="0"
-                  y1="8"
-                  x2="520"
-                  y2="8"
-                  stroke="#0369A1"
-                  strokeWidth="1"
-                  strokeDasharray="560"
-                  strokeDashoffset={fx.lineADashoffset}
-                  style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
-                />
-                <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
-                <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
-              </svg>
-
-              <div className="bp-hero-metrics center-md">
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    {formatConteo(heroStats.nuevos7d)}
+              <section className="bp-hero-market" aria-labelledby="hero-market-title">
+                <h2 id="hero-market-title" className="bp-hero-market-title">
+                  El mercado está en movimiento
+                </h2>
+                {/* Mismo fetch y formatos. No son tres cortes del mismo universo:
+                    vigilados incluye el histórico; nuevos y valor son abiertos.
+                    Sin dato se conserva la raya, nunca cifras de demostración. */}
+                <dl className="bp-hero-metrics">
+                  <div className="bp-hero-metric">
+                    <dt>Procesos del sector vigilados</dt>
+                    <dd>{formatConteo(sector.procesosVigilados)}</dd>
                   </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Procesos nuevos · 7 días
+                  <div className="bp-hero-metric">
+                    <dt>Nuevos abiertos · 7 días</dt>
+                    <dd>{formatConteo(heroStats.nuevos7d)}</dd>
                   </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    {formatCopCompact(heroStats.enJuegoTotalCop)}
+                  <div className="bp-hero-metric">
+                    <dt>En juego · este mes · COP</dt>
+                    <dd>{formatCopCompact(heroStats.enJuegoTotalCop)}</dd>
                   </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    En juego · este mes
-                  </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    11
-                  </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Años en agua y saneamiento
-                  </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    Diaria
-                  </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Actualización SECOP II
-                  </div>
-                </div>
-              </div>
+                </dl>
+                <p className="bp-hero-market-note">
+                  Fuente: SECOP II. Vigilados incluye el histórico; nuevos cuenta abiertos en
+                  presentación de oferta; en juego suma el precio base de abiertos publicados este
+                  mes. — indica un dato no disponible.
+                </p>
+              </section>
             </div>
             {mapa && (
               <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
