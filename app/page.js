@@ -29,20 +29,30 @@ export default async function Page() {
   // que degrada a "—" sin inventar cifras.
   let departamentos = [];
   let totalAbiertos;
+  let tipos = [];
   try {
     const agregados = await agregadosPortada();
     departamentos = agregados.departamentos;
     totalAbiertos = agregados.totalAbiertos;
+    tipos = agregados.tipos;
   } catch (error) {
     console.error("[portada] agregados no disponibles, el mapa sale vacío:", error);
   }
 
   return (
     <PortadaCliente
+      departamentos={departamentos}
+      totalAbiertos={totalAbiertos}
+      tipos={tipos}
       mapa={
         <>
           <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
-          <ColombiaChoropleth filas={departamentos} totalAbiertos={totalAbiertos} />
+          <ColombiaChoropleth
+            filas={departamentos}
+            totalAbiertos={totalAbiertos}
+            etiquetas
+            datosDisponibles={totalAbiertos != null}
+          />
         </>
       }
     />

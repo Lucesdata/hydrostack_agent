@@ -212,6 +212,64 @@ const BLUEPRINT_CSS = `
 .bp-hero-mapa .clr-mapa { max-width: 460px; margin-inline: auto; }
 .bp-hero-mapa .clr-mapa__svg { max-height: min(48vh, 470px); width: auto; margin-inline: auto; }
 @media (max-width: 900px) { .bp-hero-mapa { margin-top: 32px; } }
+.bp-hero-sin-datos { margin: 12px 0 0; font: 13px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); text-align: center; }
+.atlas-map-label line { stroke: var(--ink-600); stroke-width: .8; }
+.atlas-map-label circle { fill: var(--accent-deep); stroke: var(--surface); stroke-width: 1; }
+.atlas-map-label rect { fill: var(--surface); stroke: var(--ink-300); stroke-width: .6; }
+.atlas-map-label text { fill: var(--accent-deep); font: 9px var(--font-inter), sans-serif; }
+.atlas-map-label .atlas-map-label-count { font-size: 11px; font-weight: 700; }
+
+/* ── Sección territorial: listado y ficha, bajo el hero. Solo tokens
+   existentes. ── */
+.terr-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
+.terr-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; margin-bottom: 28px; }
+.terr-kicker { margin: 0 0 8px; font: 600 11px/1.5 var(--font-jetbrains-mono), monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.terr-head h2 { margin: 0; font: 700 clamp(1.5rem, 2.4vw, 2rem)/1.2 var(--font-inter), sans-serif; letter-spacing: -.02em; color: var(--text-primary); }
+.terr-total { margin: 0; font: 13px/1.5 var(--font-inter), sans-serif; color: var(--text-muted); }
+.terr-total strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+.terr-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.2fr); gap: 28px; align-items: start; max-width: 1040px; }
+.terr-grid > * { min-width: 0; }
+.terr-list { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 14px 10px 0; }
+.terr-list-head { display: flex; justify-content: space-between; align-items: center; margin: 0 6px 12px; }
+.terr-list-head h3 { margin: 0; font: 600 13px var(--font-inter), sans-serif; color: var(--text-primary); }
+.terr-list-head span { font: 11px var(--font-jetbrains-mono), monospace; color: var(--text-muted); }
+.terr-search { display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--ink-300); border-radius: 6px; margin-bottom: 8px; color: var(--text-muted); }
+.terr-search input { width: 100%; min-width: 0; min-height: 42px; border: 0; background: transparent; color: var(--text-primary); font: 13px var(--font-inter), sans-serif; }
+.terr-search input::placeholder { color: var(--ink-300); opacity: 1; }
+.terr-search input:focus { outline: none; }
+.terr-search:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.terr-deptos { list-style: none; margin: 0; padding: 0 2px 0 0; max-height: 360px; overflow: auto; scrollbar-width: thin; }
+.terr-deptos button { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px 8px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line-soft); border-radius: 4px; color: var(--text-primary); font: 13px/1.4 var(--font-inter), sans-serif; cursor: pointer; }
+.terr-deptos button:hover { background: var(--accent-faint); }
+.terr-deptos button[aria-pressed='true'] { background: var(--accent-soft); font-weight: 600; }
+.terr-deptos button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.terr-deptos strong { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--accent); }
+.terr-vacio { margin: 0; padding: 12px 6px; font: 13px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); }
+.terr-todos { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 10px 6px; font: 600 12px var(--font-jetbrains-mono), monospace; color: var(--accent); }
+.terr-ficha { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.terr-ficha-banda { padding: 14px 20px; background: var(--accent-deep); color: var(--surface); font: 600 10px/1.6 var(--font-jetbrains-mono), monospace; letter-spacing: .14em; text-transform: uppercase; }
+.terr-ficha-cuerpo { padding: 20px; }
+.terr-ficha-kicker { margin: 0 0 6px; font: 600 10px var(--font-jetbrains-mono), monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.terr-ficha h3 { margin: 0; font: 700 24px/1.15 var(--font-inter), sans-serif; letter-spacing: -.02em; color: var(--text-primary); overflow-wrap: anywhere; }
+.terr-ficha-n { margin: 10px 0 4px; font: 13px var(--font-inter), sans-serif; color: var(--text-primary); }
+.terr-ficha-n strong { margin-right: 4px; font: 700 24px var(--font-ibm-plex-sans-condensed), sans-serif; color: var(--accent); font-variant-numeric: tabular-nums; }
+.terr-ficha-nota { margin: 0; font: 12px/1.6 var(--font-inter), sans-serif; color: var(--text-muted); }
+.terr-ficha-cta { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; margin-top: 18px; padding: 12px 14px; border-radius: 6px; background: var(--accent); color: var(--surface); font: 600 13px var(--font-inter), sans-serif; }
+.terr-ficha-cta:hover { background: var(--accent-deep); }
+.terr-ficha-cta:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.terr-tipos { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+.terr-tipos h4 { margin: 0; font: 600 13px var(--font-inter), sans-serif; color: var(--text-primary); }
+.terr-tipos > p { margin: 4px 0 6px; font: 12px/1.5 var(--font-inter), sans-serif; color: var(--text-muted); }
+.terr-tipo { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; min-height: 44px; padding: 10px 0 4px; font: 13px var(--font-inter), sans-serif; color: var(--text-primary); }
+.terr-tipo strong { font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.terr-tipo:hover span:first-child { text-decoration: underline; }
+.terr-tipo-barra { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--surface-alt); overflow: hidden; }
+.terr-tipo-barra > span { display: block; height: 100%; border-radius: 4px; background: var(--accent); }
+@media (max-width: 760px) {
+  .terr-wrap { padding: 48px var(--gutter); }
+  .terr-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .terr-deptos { max-height: 220px; }
+}
 .bp-probhow-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-ps-row { display: grid; grid-template-columns: 1fr 56px 1fr; grid-template-areas: "pain connector answer"; align-items: center; padding: 24px 0; }
 .bp-ps-row + .bp-ps-row { border-top: 1px dashed #DADAD2; }
@@ -222,8 +280,51 @@ const BLUEPRINT_CSS = `
 .bp-pillars-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
 .bp-hero-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.bp-hero-market { margin-top: 32px; }
+.bp-hero-market-title {
+  margin: 0 0 12px;
+  font: 600 11px/1.5 var(--font-jetbrains-mono), monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.bp-hero-metric {
+  min-width: 0;
+  padding: 18px 14px;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface-elevated);
+  display: flex;
+  flex-direction: column;
+}
+.bp-hero-metric dt {
+  order: 1;
+  margin-top: 10px;
+  font: 500 12px/1.5 var(--font-inter), sans-serif;
+  color: var(--text-primary);
+}
+.bp-hero-metric dd {
+  margin: 0;
+  font: 700 clamp(1.4rem, 2.2vw, 2rem)/1.2 var(--font-ibm-plex-sans-condensed), sans-serif;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+}
+.bp-hero-market-note {
+  margin: 12px 0 0;
+  font: 12px/1.6 var(--font-inter), sans-serif;
+  color: var(--text-muted);
+}
+@media (max-width: 640px) {
+  .bp-hero-metrics { grid-template-columns: 1fr; gap: 8px; }
+  .bp-hero-metric { padding: 14px 16px; flex-direction: row; align-items: center; gap: 16px; }
+  .bp-hero-metric dt { flex: 1; margin-top: 0; }
+  .bp-hero-metric dd { flex: 1; font-size: 1.75rem; }
 }
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
@@ -232,7 +333,6 @@ const BLUEPRINT_CSS = `
 }
 .bp-closing-wrap { padding: 56px var(--gutter); border-top: 1px dashed #DADAD2; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .bp-footer-wrap { padding: 20px var(--gutter); border-top: 1px solid #DADAD2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font: 11px var(--font-jetbrains-mono),monospace; color: #525B5A; }
-.bp-hero-sector { display: flex; gap: 28px; flex-wrap: wrap; }
 
 
 @media (max-width: 900px) {
@@ -249,11 +349,6 @@ const BLUEPRINT_CSS = `
   .bp-pillars-wrap { padding-top: 48px; padding-bottom: 48px; }
   .bp-closing-wrap { padding-top: 40px; padding-bottom: 40px; }
   .bp-footer-wrap { padding: 20px; }
-  /* Las tres cifras del sector se repiten más abajo, en S3Motor (procesos
-     vigilados) y S4Competidores (oferentes y sanciones), que es donde
-     significan algo. En un móvil, aquí solo empujan el CTA fuera de pantalla.
-     Quedan las dos cifras vivas y la credencial de .bp-hero-metrics. */
-  .bp-hero-sector { display: none; }
   .bp-hero-cta { flex-direction: column; align-items: stretch; gap: 12px; }
   .bp-hero-cta-main { width: 100%; }
   .bp-hero-cta-main .bp-cta { display: flex; width: 100%; justify-content: center; }
@@ -518,21 +613,161 @@ function BlueprintBackground({ fx }) {
   );
 }
 
+const normalizar = (texto) =>
+  texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es");
+
 /**
- * @param {{ mapa?: import("react").ReactNode }} props — `mapa` llega ya
- * renderizado desde el servidor. Es un hueco y no un import: importarlo aquí
- * arrastraría la geometría al bundle del navegador.
+ * Listado y ficha del territorio, bajo el hero; el mapa se queda en el hero.
+ * Todo sale de los agregados del servidor: `totalAbiertos` en undefined/null
+ * significa que la base no respondió, y se dice así en vez de pintar ceros.
  */
-export default function LandingPage({ mapa = null }) {
+function SeccionTerritorial({ departamentos, totalAbiertos, tipos }) {
+  const [busqueda, setBusqueda] = useState("");
+  const [elegido, setElegido] = useState(null);
+  const hayDatos = totalAbiertos != null;
+  const departamento = departamentos.find((d) => d.clave === elegido) ?? departamentos[0] ?? null;
+  const visibles = departamentos.filter((d) =>
+    normalizar(d.label).includes(normalizar(busqueda.trim()))
+  );
+  const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
+
+  return (
+    <section className="terr-wrap" aria-labelledby="terr-titulo">
+      <div className="terr-head">
+        <div>
+          <p className="terr-kicker">Por territorio</p>
+          <h2 id="terr-titulo">¿Dónde se está contratando?</h2>
+        </div>
+        <p className="terr-total">
+          {hayDatos ? (
+            <>
+              <strong>{formatConteo(totalAbiertos)}</strong> procesos abiertos en Colombia
+            </>
+          ) : (
+            "Datos territoriales no disponibles"
+          )}
+        </p>
+      </div>
+
+      <div className="terr-grid">
+        <div className="terr-list">
+          <div className="terr-list-head">
+            <h3>Departamentos</h3>
+            <span>{hayDatos ? departamentos.length : "—"}</span>
+          </div>
+          <label className="terr-search">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              aria-label="Buscar departamento"
+              placeholder="Buscar departamento…"
+              value={busqueda}
+              onChange={(event) => setBusqueda(event.target.value)}
+            />
+          </label>
+          <ul className="terr-deptos" aria-label="Departamentos con procesos abiertos">
+            {visibles.map((d) => (
+              <li key={d.clave}>
+                <button
+                  type="button"
+                  aria-pressed={departamento?.clave === d.clave}
+                  aria-controls="terr-ficha"
+                  onClick={() => setElegido(d.clave)}
+                >
+                  <span>{d.label}</span>
+                  <strong>{formatConteo(d.n)}</strong>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {visibles.length === 0 && (
+            <p className="terr-vacio" role="status">
+              {departamentos.length > 0
+                ? "No encontramos ese departamento."
+                : hayDatos
+                  ? "No hay procesos abiertos por departamento."
+                  : "Los conteos se mostrarán cuando estén disponibles."}
+            </p>
+          )}
+          <Link href={ruta("explorar").href} className="terr-todos">
+            Ver todos los procesos <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+
+        <aside className="terr-ficha" id="terr-ficha" aria-label="Resumen del territorio">
+          <div className="terr-ficha-banda" aria-hidden="true">
+            Agua y territorio
+          </div>
+          <div className="terr-ficha-cuerpo">
+            <div aria-live="polite" aria-atomic="true">
+              <p className="terr-ficha-kicker">Territorio seleccionado</p>
+              <h3>{departamento?.label ?? "Colombia"}</h3>
+              <p className="terr-ficha-n">
+                <strong>{formatConteo(departamento?.n ?? null)}</strong> procesos abiertos
+              </p>
+              <p className="terr-ficha-nota">Según ubicación de la entidad contratante.</p>
+            </div>
+            {departamento && departamento.n > 0 && (
+              <Link
+                className="terr-ficha-cta"
+                href={`/licitaciones/departamento/${departamento.slug}`}
+              >
+                Ver procesos de {departamento.label} <span aria-hidden="true">→</span>
+              </Link>
+            )}
+            <div className="terr-tipos">
+              {/* Los agregados no cruzan tipo con departamento: el desglose es
+                  nacional y lo dice, aunque la ficha muestre un territorio. */}
+              <h4>Tipos de proyecto · Colombia</h4>
+              <p>Distribución nacional de procesos abiertos</p>
+              {tipos.map((tipo) => (
+                <Link
+                  href={`/licitaciones/tipo/${tipo.slug}`}
+                  className="terr-tipo"
+                  key={tipo.clave}
+                >
+                  <span>{tipo.label}</span>
+                  <strong>{formatConteo(tipo.n)}</strong>
+                  <span className="terr-tipo-barra" aria-hidden="true">
+                    <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
+                  </span>
+                </Link>
+              ))}
+              {tipos.length === 0 && <p>Distribución no disponible.</p>}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * @param {{
+ *   mapa?: import("react").ReactNode,
+ *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
+ *   totalAbiertos?: number | null,
+ *   tipos?: import("@/src/lib/secop/agregados").FilaAgregado[],
+ * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
+ * import: importarlo aquí arrastraría la geometría al bundle del navegador.
+ */
+export default function LandingPage({
+  mapa = null,
+  departamentos = [],
+  totalAbiertos = null,
+  tipos = [],
+}) {
   const fx = useBlueprintFX();
   const { heroRef } = fx.refs;
 
-  // Cifras del sector para el home (procesos vigilados, oferentes históricos,
-  // sanciones) y las dos cifras vivas de la fila inferior del hero (procesos
-  // nuevos en 7 días, valor en juego este mes). Todas vienen de la misma
-  // respuesta de /api/landing-stats — un solo fetch, no uno por bloque. Se
-  // quedan en null si el fetch falla: la UI muestra "—" y la frase que las
-  // acompaña sigue siendo cierta sin la cifra.
+  // Cifras del sector (procesos vigilados, para el CTA, los KPIs y S3Motor) y
+  // las dos cifras vivas de los KPIs del hero (nuevos en 7 días, valor en juego
+  // este mes). Todas vienen de la misma respuesta de /api/landing-stats — un
+  // solo fetch, no uno por bloque. Se quedan en null si el fetch falla: la UI
+  // muestra "—" y la frase que las acompaña sigue siendo cierta sin la cifra.
   const [sector, setSector] = useState({
     procesosVigilados: null,
     oferentesHistoricos: null,
@@ -602,27 +837,13 @@ export default function LandingPage({ mapa = null }) {
                 AGUA Y SANEAMIENTO · COLOMBIA
               </div>
               <h1 className="bp-h1">
-                {/* Dos máscaras, y el reparto de líneas se deja al navegador.
-                    Se probó partirlo a mano en tres tramos medidos para que
-                    "agua" quedase siempre en la primera línea: cuadra a 1440px
-                    y sale deforme en todo lo demás — a 354px daba "larga /
-                    corta / larga", porque un corte fijo medido a un ancho es
-                    arbitrario en los otros. `text-wrap: balance` reparte bien a
-                    cualquier ancho, así que la posición de "agua" varía y el
-                    subrayado viaja con ella. Dos líneas con la palabra clave
-                    arriba, como pedía la spec, es imposible aquí: esa primera
-                    línea mide 959px y la columna del hero da 645px. */}
                 <span className="hero-mask hero-mask-1">
                   <span>
-                    Los procesos de{" "}
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      <span className="hero-draw">agua</span>
-                    </span>{" "}
-                    del SECOP II,
+                    Explora el mercado de <span className="hero-draw">agua</span>.
                   </span>
                 </span>
                 <span className="hero-mask hero-mask-2">
-                  <span>filtrados por tus reglas.</span>
+                  <span>Entiende cada proceso.</span>
                 </span>
               </h1>
               <p
@@ -634,56 +855,9 @@ export default function LandingPage({ mapa = null }) {
                   maxWidth: "65ch",
                 }}
               >
-                Vigilamos los procesos de agua y saneamiento que publica el SECOP II, los filtramos
-                con las reglas que tú defines y te decimos si calificas — mostrándote cada compuerta
-                y por qué, no un veredicto a ciegas.
+                Explora los procesos de agua y saneamiento del SECOP II en Colombia. Encuentra
+                oportunidades, consulta su ficha y sigue lo que te importa.
               </p>
-
-              {/* Cifras del sector: vienen de /api/landing-stats vía el estado
-                  `sector`, nunca escritas a mano. En null se ve "—" y la frase
-                  que las acompaña sigue siendo cierta sin la cifra. */}
-              <div
-                className="bp-hero-sector"
-                style={{
-                  margin: "28px 0 8px",
-                  paddingTop: 20,
-                  borderTop: "1px solid #DADAD2",
-                }}
-              >
-                {[
-                  {
-                    v: formatConteo(sector.procesosVigilados),
-                    t: "procesos del sector vigilados",
-                  },
-                  {
-                    v: formatConteo(sector.oferentesHistoricos),
-                    t: "registros de quién se presentó",
-                  },
-                  { v: formatConteo(sector.sanciones), t: "sanciones registradas" },
-                ].map((x) => (
-                  <div key={x.t}>
-                    <div
-                      style={{
-                        font: "700 22px/1 var(--font-ibm-plex-sans-condensed)",
-                        color: "#0A1F1C",
-                      }}
-                    >
-                      {x.v}
-                    </div>
-                    <div
-                      style={{
-                        font: "10px var(--font-jetbrains-mono),monospace",
-                        color: "#6B746F",
-                        textTransform: "uppercase",
-                        letterSpacing: ".06em",
-                        marginTop: 4,
-                      }}
-                    >
-                      {x.t}
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               <div className="bp-hero-cta">
                 <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
@@ -729,127 +903,52 @@ export default function LandingPage({ mapa = null }) {
                 </Link>
               </div>
 
-              <svg
-                viewBox="0 0 520 16"
-                width="520"
-                height="16"
-                style={{
-                  display: "block",
-                  marginTop: 20,
-                  overflow: "visible",
-                  maxWidth: "100%",
-                  marginBottom: 48,
-                }}
-              >
-                <line
-                  x1="0"
-                  y1="8"
-                  x2="520"
-                  y2="8"
-                  stroke="#0369A1"
-                  strokeWidth="1"
-                  strokeDasharray="560"
-                  strokeDashoffset={fx.lineADashoffset}
-                  style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(0.22,1,0.36,1)" }}
-                />
-                <line x1="0" y1="2" x2="0" y2="14" stroke="#0369A1" strokeWidth="1" />
-                <line x1="520" y1="2" x2="520" y2="14" stroke="#0369A1" strokeWidth="1" />
-              </svg>
-
-              <div className="bp-hero-metrics center-md">
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    {formatConteo(heroStats.nuevos7d)}
+              <section className="bp-hero-market" aria-labelledby="hero-market-title">
+                <h2 id="hero-market-title" className="bp-hero-market-title">
+                  El mercado está en movimiento
+                </h2>
+                {/* Mismo fetch y formatos. No son tres cortes del mismo universo:
+                    vigilados incluye el histórico; nuevos y valor son abiertos.
+                    Sin dato se conserva la raya, nunca cifras de demostración. */}
+                <dl className="bp-hero-metrics">
+                  <div className="bp-hero-metric">
+                    <dt>Procesos del sector vigilados</dt>
+                    <dd>{formatConteo(sector.procesosVigilados)}</dd>
                   </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Procesos nuevos · 7 días
+                  <div className="bp-hero-metric">
+                    <dt>Nuevos abiertos · 7 días</dt>
+                    <dd>{formatConteo(heroStats.nuevos7d)}</dd>
                   </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    {formatCopCompact(heroStats.enJuegoTotalCop)}
+                  <div className="bp-hero-metric">
+                    <dt>En juego · este mes · COP</dt>
+                    <dd>{formatCopCompact(heroStats.enJuegoTotalCop)}</dd>
                   </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    En juego · este mes
-                  </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    11
-                  </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Años en agua y saneamiento
-                  </div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      font: "600 28px var(--font-jetbrains-mono),monospace",
-                      color: "#0369A1",
-                      marginBottom: 8,
-                    }}
-                  >
-                    Diaria
-                  </div>
-                  <div
-                    style={{
-                      font: "11px var(--font-jetbrains-mono),monospace",
-                      color: "#6B746F",
-                      textTransform: "uppercase",
-                      letterSpacing: ".05em",
-                    }}
-                  >
-                    Actualización SECOP II
-                  </div>
-                </div>
-              </div>
+                </dl>
+                <p className="bp-hero-market-note">
+                  Fuente: SECOP II. Vigilados incluye el histórico; nuevos cuenta abiertos en
+                  presentación de oferta; en juego suma el precio base de abiertos publicados este
+                  mes. — indica un dato no disponible.
+                </p>
+              </section>
             </div>
             {mapa && (
               <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
                 {mapa}
+                {totalAbiertos == null && (
+                  <p className="bp-hero-sin-datos">
+                    El mapa no tiene datos disponibles en este momento.
+                  </p>
+                )}
               </div>
             )}
           </div>
         </div>
+
+        <SeccionTerritorial
+          departamentos={departamentos}
+          totalAbiertos={totalAbiertos}
+          tipos={tipos}
+        />
 
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y
