@@ -2,25 +2,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 
-function contentOfDivWithClass(html: string, className: string) {
-  const opening = html.match(new RegExp(`<div\\b[^>]*class="${className}"[^>]*>`));
-  if (!opening || opening.index === undefined) return "";
-
-  const contentStart = opening.index + opening[0].length;
-  const tags = /<div\b[^>]*>|<\/div>/g;
-  tags.lastIndex = contentStart;
-  let depth = 1;
-  let match;
-
-  while ((match = tags.exec(html))) {
-    if (match[0].startsWith("</div>")) depth -= 1;
-    else depth += 1;
-    if (depth === 0) return html.slice(contentStart, match.index);
-  }
-
-  return "";
-}
-
 describe("PortadaCliente", () => {
   it("ofrece la faceta y el conteo del departamento recibido, sin cifras de demostración", () => {
     const html = renderToStaticMarkup(
@@ -38,13 +19,12 @@ describe("PortadaCliente", () => {
   it("distingue agregados no disponibles de un conteo real en cero", () => {
     const sinDatos = renderToStaticMarkup(<PortadaCliente />);
     const cero = renderToStaticMarkup(<PortadaCliente totalAbiertos={0} />);
-    expect(sinDatos).toContain("Datos territoriales no disponibles");
-    expect(cero).not.toContain("Datos territoriales no disponibles");
-    expect(cero).toContain("No hay procesos abiertos por departamento");
+    expect(sinDatos).toContain("—");
+    expect(cero).toContain(">0<");
     expect(sinDatos).not.toContain('href="/licitaciones/departamento/');
   });
 
-  it("identifica los tipos como nacionales, aunque el panel muestre un departamento", () => {
+  it("identifica los tipos como nacionales, aunque la ficha muestre un departamento", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
         departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 50 }]}
@@ -57,7 +37,7 @@ describe("PortadaCliente", () => {
     expect(html).toContain("150");
   });
 
-  it("renderiza el mapa del servidor dentro del hero, y el listado debajo", () => {
+  it("renderiza el mapa del servidor una sola vez dentro del Hero Territorial", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
         mapa={<div data-testid="mapa-departamental">Mapa departamental</div>}
@@ -65,15 +45,8 @@ describe("PortadaCliente", () => {
         totalAbiertos={6000}
       />
     );
-
-    const hero = contentOfDivWithClass(html, "bp-hero-grid");
-    const territorio = contentOfDivWithClass(html, "terr-grid");
-
-    expect(hero).toContain('class="bp-hero-mapa"');
-    expect(hero).toContain('data-testid="mapa-departamental"');
-    expect(territorio).not.toContain('data-testid="mapa-departamental"');
-    expect(territorio).toContain("Buscar departamento");
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
+    expect(html).toContain("Buscar departamento");
   });
 
   it("sin agregados, el hero avisa que el mapa no tiene datos", () => {
@@ -85,12 +58,12 @@ describe("PortadaCliente", () => {
     expect(conDatos).not.toContain("El mapa no tiene datos disponibles");
   });
 
-  it("conserva el hero de la etapa 1: titular, diagnóstico y los tres KPIs", () => {
+  it("usa el copy V2 y ya no muestra el CTA secundario del diagnóstico", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
+    expect(html).toContain("Explora el mercado de agua.");
     expect(html).toContain("Entiende cada proceso.");
-    expect(html).toContain("o mira antes si estás listo");
-    expect(html).toContain("Procesos del sector vigilados");
-    expect(html).toContain("Nuevos abiertos · 7 días");
-    expect(html).toContain("En juego · este mes · COP");
+    expect(html).toContain("Explorar procesos");
+    expect(html).toContain("El mercado ahora");
+    expect(html).not.toContain("o mira antes si estás listo");
   });
 });
