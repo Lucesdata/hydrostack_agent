@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import ColombiaChoropleth from "@/src/components/mapa/ColombiaChoropleth";
+import ColombiaChoropleth, { ROTULOS } from "@/src/components/mapa/ColombiaChoropleth";
+import geo from "@/data/geo/departamentos.geo.json";
+import { ANCHO_MAPA, ALTO_MAPA } from "@/src/lib/mapa/modelo";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
 
 /**
@@ -20,6 +22,31 @@ const filas: FilaAgregado[] = [
 const html = renderToStaticMarkup(<ColombiaChoropleth filas={filas} totalAbiertos={35518} />);
 
 describe("ColombiaChoropleth", () => {
+  it("cada rótulo pertenece a la geometría y su caja cabe en el viewBox", () => {
+    const codigos = new Set(geo.features.map((f) => f.properties.dpto));
+    for (const [codigo, [x, y, anclaX, anclaY]] of Object.entries(ROTULOS)) {
+      expect(codigos.has(codigo), `código ${codigo} ausente en geometría`).toBe(true);
+      expect(x - 44).toBeGreaterThanOrEqual(0);
+      expect(x + 44).toBeLessThanOrEqual(ANCHO_MAPA);
+      expect(y - 17).toBeGreaterThanOrEqual(0);
+      expect(y + 19).toBeLessThanOrEqual(ALTO_MAPA);
+      expect(anclaX).toBeGreaterThanOrEqual(0);
+      expect(anclaX).toBeLessThanOrEqual(ANCHO_MAPA);
+      expect(anclaY).toBeGreaterThanOrEqual(0);
+      expect(anclaY).toBeLessThanOrEqual(ALTO_MAPA);
+    }
+  });
+
+  it("la falta de datos no se anuncia como ausencia de procesos", () => {
+    const vacio = renderToStaticMarkup(
+      <ColombiaChoropleth filas={[]} datosDisponibles={false} etiquetas />
+    );
+    expect(vacio).toContain("Antioquia, datos no disponibles");
+    expect(vacio).not.toContain("sin procesos abiertos");
+    expect(vacio).not.toContain("Sin procesos</li>");
+    expect(vacio).not.toContain('class="atlas-map-label"');
+  });
+
   it("dibuja los 33 departamentos: 32 en el mapa y San Andrés en su recuadro", () => {
     expect(html.match(/<path/g)).toHaveLength(33);
   });
