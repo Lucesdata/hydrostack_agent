@@ -48,17 +48,28 @@ function etiquetaDe(e: EntradaMapa): string {
   return `${e.nombre}, ${numero.format(e.n)} procesos abiertos`;
 }
 
-function Departamento({ entrada }: { entrada: EntradaMapa }) {
+function Departamento({
+  entrada,
+  disponible = true,
+}: {
+  entrada: EntradaMapa;
+  disponible?: boolean;
+}) {
   const path = (
     <path d={entrada.d} className={`clr-mapa__dpto clr-mapa__dpto--e${entrada.escalon.indice}`}>
-      <title>{etiquetaDe(entrada)}</title>
+      <title>{disponible ? etiquetaDe(entrada) : `${entrada.nombre}, datos no disponibles`}</title>
     </path>
   );
 
-  if (!entrada.href) return path;
+  if (!disponible || !entrada.href) return path;
 
   return (
-    <a href={entrada.href} className="clr-mapa__link" aria-label={etiquetaDe(entrada)}>
+    <a
+      href={entrada.href}
+      className="clr-mapa__link"
+      data-departamento={entrada.dpto}
+      aria-label={etiquetaDe(entrada)}
+    >
       {path}
     </a>
   );
@@ -72,9 +83,28 @@ export interface ColombiaChoroplethProps {
    * creer que están donde no están.
    */
   totalAbiertos?: number;
+  /** Etiquetas visuales de referencia; no incorporan datos ni geometría al cliente. */
+  etiquetas?: boolean;
+  datosDisponibles?: boolean;
 }
 
-export default function ColombiaChoropleth({ filas, totalAbiertos }: ColombiaChoroplethProps) {
+// Posiciones de rótulos en el viewBox existente, separadas para evitar solapes.
+export const ROTULOS: Record<string, [number, number, number, number]> = {
+  // Caja x/y y ancla x/y (centroide del polígono principal en esta proyección).
+  // Las cajas se separan de la zona andina para no tapar departamentos pequeños.
+  "44": [335, 35, 225, 31],
+  "05": [44, 172, 128, 174],
+  "68": [340, 155, 193, 181],
+  "76": [44, 315, 99, 269],
+  "91": [44, 430, 254, 437],
+};
+
+export default function ColombiaChoropleth({
+  filas,
+  totalAbiertos,
+  etiquetas = false,
+  datosDisponibles = true,
+}: ColombiaChoroplethProps) {
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
 
@@ -88,7 +118,7 @@ export default function ColombiaChoropleth({ filas, totalAbiertos }: ColombiaCho
       >
         <title id="clr-mapa-titulo">Procesos abiertos de agua y saneamiento por departamento</title>
         {continente.map((e) => (
-          <Departamento key={e.dpto} entrada={e} />
+          <Departamento key={e.dpto} entrada={e} disponible={datosDisponibles} />
         ))}
         {sanAndres && (
           <g transform={`translate(${RECUADRO_X} ${RECUADRO_Y})`}>
@@ -99,26 +129,56 @@ export default function ColombiaChoropleth({ filas, totalAbiertos }: ColombiaCho
               width={LADO_RECUADRO + 8}
               height={LADO_RECUADRO + 8}
             />
-            <Departamento entrada={sanAndres} />
+            <Departamento entrada={sanAndres} disponible={datosDisponibles} />
             <text className="clr-mapa__recuadro-txt" x={-4} y={LADO_RECUADRO + 16}>
               San Andrés
             </text>
           </g>
         )}
+        {etiquetas &&
+          datosDisponibles &&
+          continente
+            .filter((e) => ROTULOS[e.dpto] && e.n > 0)
+            .map((e) => {
+              const [x, y, anclaX, anclaY] = ROTULOS[e.dpto];
+              return (
+                <g
+                  key={e.dpto}
+                  className="atlas-map-label"
+                  transform={`translate(${x} ${y})`}
+                  aria-hidden="true"
+                  pointerEvents="none"
+                >
+                  <line x1={anclaX > x ? 44 : -44} y1={0} x2={anclaX - x} y2={anclaY - y} />
+                  <circle cx={anclaX - x} cy={anclaY - y} r={2} />
+                  <rect x={-44} y={-17} width={88} height={36} rx={6} />
+                  <text textAnchor="middle" y={-3}>
+                    {e.nombre}
+                  </text>
+                  <text textAnchor="middle" y={11} className="atlas-map-label-count">
+                    {numero.format(e.n)}
+                  </text>
+                </g>
+              );
+            })}
       </svg>
 
-      <ul className="clr-mapa__leyenda">
-        {ESCALONES.map((e) => (
-          <li key={e.indice}>
-            <span
-              className="clr-mapa__swatch"
-              style={{ background: `var(--mapa-e${e.indice})` }}
-              aria-hidden="true"
-            />
-            {e.etiqueta}
-          </li>
-        ))}
-      </ul>
+      {datosDisponibles ? (
+        <ul className="clr-mapa__leyenda">
+          {ESCALONES.map((e) => (
+            <li key={e.indice}>
+              <span
+                className="clr-mapa__swatch"
+                style={{ background: `var(--mapa-e${e.indice})` }}
+                aria-hidden="true"
+              />
+              {e.etiqueta}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="clr-mapa__sin">Datos territoriales no disponibles · —</p>
+      )}
 
       <figcaption className="clr-mapa__nota">Según ubicación de la entidad contratante</figcaption>
 
