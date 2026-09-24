@@ -20,6 +20,7 @@ import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S7Acceso from "@/src/components/landing/S7Acceso";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
 import { ETIQUETA_POR_NIVEL, ruta } from "@/src/components/landing/seccionesHome";
+import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 
 // Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
 // tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
@@ -813,142 +814,15 @@ export default function LandingPage({
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
         <ProcesosTicker />
 
-        <div ref={heroRef} className="bp-hero-wrap">
-          <HeroCove />
-          <div className="bp-hero-grid" style={{ position: "relative" }}>
-            {/* La columna de texto conserva su medida de 645px aunque ahora sea
-                hija del grid: sin el tope, el titular se estira a 1338px y el
-                reparto en dos líneas de las máscaras se deshace. */}
-            <div style={{ position: "relative", maxWidth: 645 }}>
-              <div
-                style={{
-                  display: "inline-block",
-                  padding: "8px 14px",
-                  background: "rgba(3, 105, 161, 0.08)",
-                  color: "#0369A1",
-                  borderRadius: 4,
-                  marginBottom: 24,
-                  font: "11px var(--font-jetbrains-mono),monospace",
-                  fontWeight: 600,
-                  letterSpacing: ".05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                AGUA Y SANEAMIENTO · COLOMBIA
-              </div>
-              <h1 className="bp-h1">
-                <span className="hero-mask hero-mask-1">
-                  <span>
-                    Explora el mercado de <span className="hero-draw">agua</span>.
-                  </span>
-                </span>
-                <span className="hero-mask hero-mask-2">
-                  <span>Entiende cada proceso.</span>
-                </span>
-              </h1>
-              <p
-                style={{
-                  font: "15px/1.6 var(--font-inter)",
-                  color: "#525B5A",
-                  marginTop: 20,
-                  marginBottom: 30,
-                  maxWidth: "65ch",
-                }}
-              >
-                Explora los procesos de agua y saneamiento del SECOP II en Colombia. Encuentra
-                oportunidades, consulta su ficha y sigue lo que te importa.
-              </p>
-
-              <div className="bp-hero-cta">
-                <div className="hero-fade-up bp-hero-cta-main" style={{ animationDelay: ".9s" }}>
-                  {(() => {
-                    const explorarRuta = ruta("explorar");
-                    return (
-                      <>
-                        <Link
-                          href={explorarRuta.href}
-                          className="bp-cta bp-cta-dark"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 8,
-                            background: "#0369A1",
-                            color: "#fff",
-                            font: "600 13px var(--font-jetbrains-mono),monospace",
-                            letterSpacing: ".04em",
-                          }}
-                        >
-                          Explorar procesos →
-                        </Link>
-                        {/* La cifra sale del mismo fetch que el resto; si viene en
-                            null la frase se acorta en vez de quedar "<etiqueta> · —
-                            procesos del sector", que se lee como un error. La etiqueta
-                            se deriva de ruta("explorar") para no desincronizarse si
-                            cambia ETIQUETA_POR_NIVEL.anonimo. */}
-                        <div className="bp-hero-cta-nota">
-                          {sector.procesosVigilados == null
-                            ? explorarRuta.etiqueta
-                            : `${explorarRuta.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-                <Link
-                  href={ruta("diagnostico").href}
-                  className="hero-fade-up tap-target bp-hero-cta-alt"
-                  style={{ animationDelay: ".92s" }}
-                >
-                  o mira antes si estás listo · 3 min
-                </Link>
-              </div>
-
-              <section className="bp-hero-market" aria-labelledby="hero-market-title">
-                <h2 id="hero-market-title" className="bp-hero-market-title">
-                  El mercado está en movimiento
-                </h2>
-                {/* Mismo fetch y formatos. No son tres cortes del mismo universo:
-                    vigilados incluye el histórico; nuevos y valor son abiertos.
-                    Sin dato se conserva la raya, nunca cifras de demostración. */}
-                <dl className="bp-hero-metrics">
-                  <div className="bp-hero-metric">
-                    <dt>Procesos del sector vigilados</dt>
-                    <dd>{formatConteo(sector.procesosVigilados)}</dd>
-                  </div>
-                  <div className="bp-hero-metric">
-                    <dt>Nuevos abiertos · 7 días</dt>
-                    <dd>{formatConteo(heroStats.nuevos7d)}</dd>
-                  </div>
-                  <div className="bp-hero-metric">
-                    <dt>En juego · este mes · COP</dt>
-                    <dd>{formatCopCompact(heroStats.enJuegoTotalCop)}</dd>
-                  </div>
-                </dl>
-                <p className="bp-hero-market-note">
-                  Fuente: SECOP II. Vigilados incluye el histórico; nuevos cuenta abiertos en
-                  presentación de oferta; en juego suma el precio base de abiertos publicados este
-                  mes. — indica un dato no disponible.
-                </p>
-              </section>
-            </div>
-            {mapa && (
-              <div className="bp-hero-mapa" aria-label="Procesos abiertos por departamento">
-                {mapa}
-                {totalAbiertos == null && (
-                  <p className="bp-hero-sin-datos">
-                    El mapa no tiene datos disponibles en este momento.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <SeccionTerritorial
+        <HeroTerritorial
+          mapa={mapa}
           departamentos={departamentos}
           totalAbiertos={totalAbiertos}
           tipos={tipos}
+          sector={sector}
+          heroStats={heroStats}
         />
+
 
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y
