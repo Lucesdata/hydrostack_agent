@@ -4,9 +4,7 @@ import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerri
 import FichaDepartamento, {
   porcentajeNacional,
 } from "@/src/components/landing/hero-territorial/FichaDepartamento";
-import {
-  filtrarTerritorios,
-} from "@/src/components/landing/hero-territorial/ListaTerritorios";
+import { filtrarTerritorios } from "@/src/components/landing/hero-territorial/ListaTerritorios";
 
 const departamentos = [
   { clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 },

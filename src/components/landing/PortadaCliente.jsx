@@ -385,7 +385,6 @@ export default function LandingPage({
           heroStats={heroStats}
         />
 
-
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y
             estaba enterrada bajo cuatro secciones. */}

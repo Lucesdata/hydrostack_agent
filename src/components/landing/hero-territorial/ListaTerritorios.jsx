@@ -3,7 +3,10 @@
 import { formatConteo } from "@/src/components/secop/format";
 
 export const normalizarTerritorio = (texto = "") =>
-  texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
+  texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es");
 
 export function filtrarTerritorios(departamentos = [], busqueda = "") {
   const termino = normalizarTerritorio(busqueda.trim());
