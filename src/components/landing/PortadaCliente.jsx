@@ -13,7 +13,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
+import ProcesosTicker, { useRecientes } from "@/src/components/landing/ProcesosTicker";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
 import S3Motor from "@/src/components/landing/S3Motor";
 import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
@@ -342,6 +342,9 @@ export default function LandingPage({
     enJuegoTotalCop: null,
   });
 
+  // Fichas recientes: una sola petición para el ticker y la banda del hero.
+  const recientes = useRecientes();
+
   useEffect(() => {
     let vivo = true;
     fetch("/api/landing-stats")
@@ -375,7 +378,7 @@ export default function LandingPage({
       <BlueprintBackground fx={fx} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <ProcesosTicker />
+        <ProcesosTicker recientes={recientes} />
 
         <HeroTerritorial
           mapa={mapa}
@@ -384,6 +387,7 @@ export default function LandingPage({
           tipos={tipos}
           sector={sector}
           heroStats={heroStats}
+          recientes={recientes}
         />
 
         {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo

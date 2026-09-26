@@ -107,6 +107,7 @@ export default function HeroTerritorial({
   tipos = [],
   sector = null,
   heroStats = null,
+  recientes = null,
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
@@ -401,7 +402,7 @@ export default function HeroTerritorial({
         </div>
       </div>
 
-      <BandaMercado sector={sector} heroStats={heroStats} />
+      <BandaMercado sector={sector} heroStats={heroStats} recientes={recientes} />
     </section>
   );
 }
