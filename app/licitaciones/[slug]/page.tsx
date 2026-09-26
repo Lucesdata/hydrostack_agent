@@ -59,10 +59,10 @@ export async function generateMetadata({ params }: Props) {
   const valor = montoConDato(p.valorEstimado);
 
   return {
-    // Objeto + municipio + tipo, como pide el spec: es lo que alguien teclea.
-    title: `${objeto}${lugar ? ` · ${lugar}` : ""} · ${tipo}`,
+    // La geografía disponible es de la entidad, no del sitio de la obra.
+    title: `${objeto}${lugar ? ` · Entidad en ${lugar}` : ""} · ${tipo}`,
     description: [
-      `${p.entidadNombre ?? "Entidad estatal"} abrió este proceso de ${tipo.toLowerCase()}${lugar ? ` en ${lugar}` : ""}.`,
+      `${p.entidadNombre ?? "Entidad estatal"} abrió este proceso de ${tipo.toLowerCase()}.${lugar ? ` Entidad ubicada en ${lugar}; lugar de ejecución sin confirmar.` : ""}`,
       valor !== null ? `Presupuesto oficial ${formatCopFull(valor)}.` : null,
       p.estadoActual ? `Estado: ${p.estadoActual}.` : null,
     ]
@@ -93,7 +93,7 @@ export default async function FichaPage({ params }: Props) {
     provider: p.entidadNombre
       ? { "@type": "GovernmentOrganization", name: p.entidadNombre }
       : undefined,
-    areaServed: lugar || undefined,
+    // La geografía disponible ubica a la entidad, no demuestra el área de la obra.
     serviceOperator: { "@type": "Organization", name: "SECOP II" },
     url: `https://aqualicita.com/licitaciones/${canonico}`,
   };
@@ -140,7 +140,7 @@ export default async function FichaPage({ params }: Props) {
           {p.tipoContrato && <span className="fi-chip">{p.tipoContrato}</span>}
           {p.unspsc && <span className="fi-chip">UNSPSC {p.unspsc.replace(/^V\d+\./i, "")}</span>}
           <span className="fi-chip">{p.secopProcesoId}</span>
-          {lugar && <span className="fi-chip">{lugar}</span>}
+          {lugar && <span className="fi-chip">Entidad en {lugar}</span>}
         </div>
 
         {/* 2 — Cómo te queda a ti */}
@@ -197,7 +197,8 @@ export default async function FichaPage({ params }: Props) {
             <strong>Todavía no hay requisitos extraídos para este proceso.</strong> Los requisitos
             habilitantes —y si cada uno es subsanable o no— están en el pliego, no en los datos
             abiertos del SECOP. El extractor existe y funciona; lo que falta es que el pliego de
-            este proceso se haya publicado y procesado.
+            este proceso se haya procesado aquí. Consulta el expediente original para comprobar si
+            el pliego está disponible y qué exige.
           </p>
         </section>
 
@@ -225,11 +226,17 @@ export default async function FichaPage({ params }: Props) {
         <section className="fi-sec">
           <h2 className="fi-h2">Documentos</h2>
           <p className="fi-vacio">
-            Estado de acceso: <strong>{p.documentAccess ?? "sin evaluar"}</strong>.{" "}
+            Acceso a documentos:{" "}
+            <strong>
+              {p.documentAccess === "UNKNOWN" || !p.documentAccess
+                ? "no verificado"
+                : p.documentAccess}
+            </strong>
+            .{" "}
             {p.url ? (
               <>
-                Los documentos se consultan en el expediente del SECOP II; todavía no se replican
-                aquí.
+                Comprueba en el expediente del SECOP II qué documentos están disponibles; todavía no
+                se replican aquí.
               </>
             ) : (
               <>Este proceso no publicó una URL de expediente.</>
