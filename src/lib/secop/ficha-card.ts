@@ -13,7 +13,13 @@
 import { formatCopCompact } from "@/src/components/secop/format";
 
 export type ClaveEtapa =
-  "abierto" | "evaluacion" | "adjudicado" | "cancelado" | "suspendido" | "borrador" | "desconocido";
+  | "abierto"
+  | "evaluacion"
+  | "adjudicado"
+  | "cancelado"
+  | "suspendido"
+  | "borrador"
+  | "desconocido";
 
 export interface EtapaVista {
   clave: ClaveEtapa;

@@ -24,7 +24,8 @@ export interface UploadPliegoParams {
 }
 
 export type UploadPliegoResult =
-  { ok: true; gateMatematicoPasado: boolean } | { ok: false; error: string };
+  | { ok: true; gateMatematicoPasado: boolean }
+  | { ok: false; error: string };
 
 export async function uploadPliego(params: UploadPliegoParams): Promise<UploadPliegoResult> {
   if (!isPdfBuffer(params.buffer)) {

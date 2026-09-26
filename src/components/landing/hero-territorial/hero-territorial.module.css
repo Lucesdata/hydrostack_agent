@@ -103,6 +103,125 @@
   color: #c3d3e0;
   hyphens: manual;
 }
+/* Buscador del hero (BuscadorFichas.jsx). */
+.hero :global(.aqBuscadorHero) {
+  position: relative;
+  z-index: 5;
+  margin: 0 0 18px;
+}
+.hero :global(.aqBuscadorHeroCampo) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 12px;
+  background: rgba(4, 16, 28, 0.75);
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroCampo:focus-within) {
+  border-color: var(--aq-cyan);
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.hero :global(.aqBuscadorHeroCampo input) {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--aq-text);
+  font:
+    15px var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroCampo input::placeholder) {
+  color: #7d93a6;
+}
+.hero :global(.aqBuscadorHeroPanel) {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  padding: 8px;
+  border: 1px solid rgba(76, 201, 255, 0.35);
+  border-radius: 12px;
+  background: #0a1d30;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+}
+.hero :global(.aqBuscadorHeroPanel[hidden]) {
+  display: none;
+}
+.hero :global(.aqBuscadorHeroEstado) {
+  margin: 4px 8px 6px;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroEstado:empty) {
+  display: none;
+}
+.hero :global(.aqBuscadorHeroPanel ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqBuscadorHeroPanel li a) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--aq-text);
+  text-decoration: none;
+}
+.hero :global(.aqBuscadorHeroPanel li a:hover),
+.hero :global(.aqBuscadorHeroPanel li a:focus-visible) {
+  background: rgba(76, 201, 255, 0.12);
+  outline: none;
+}
+.hero :global(.aqBuscadorHeroObjeto) {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font:
+    600 13.5px/1.35 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroDetalle) {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroDetalle b) {
+  flex: none;
+  color: var(--aq-cyan);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.hero :global(.aqBuscadorHeroTodos) {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 10px 10px 6px;
+  border-top: 1px solid var(--aq-line);
+  color: var(--aq-cyan);
+  text-decoration: none;
+  font:
+    600 13px var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroTodos:focus-visible) {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
 .primaryCta {
   display: inline-flex;
   align-items: center;

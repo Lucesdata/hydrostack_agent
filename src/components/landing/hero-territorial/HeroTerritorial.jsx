@@ -9,6 +9,7 @@ import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto"
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento, { formatPorcentaje } from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
+import BuscadorFichas from "./BuscadorFichas";
 import {
   contenidoTooltip,
   dptoDesdeObjetivo,
@@ -188,6 +189,7 @@ export default function HeroTerritorial({
               Cada proceso del SECOP II tiene aquí su ficha: qué se contrata, si puedes participar y
               qué te falta. Empieza por tu territorio.
             </p>
+            <BuscadorFichas />
             <Link className={styles.primaryCta} href={explorar.href}>
               Ver fichas de procesos <span aria-hidden="true">→</span>
             </Link>

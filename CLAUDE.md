@@ -284,6 +284,15 @@ elige los 10 departamentos con más procesos y los coloca sin solaparse en un
 viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
 estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
 entidades ni municipios, que la portada no calcula.
+**Buscador y métrica del mapa (2026-09-26).** El hero lleva un buscador
+(`hero-territorial/BuscadorFichas.jsx`) sobre `/api/secop`: busca en **objeto y
+entidad, no en municipio**, y muestra 5 abiertos enlazados a su ficha; Enter (o
+sin JS) va a `/licitaciones/explorar?q=`, que ahora lee `q` de la URL. El mapa
+se colorea por procesos o por **monto en juego** (`ESCALONES_MONTO` en
+`escala.ts`, cortes fijos por décadas). `slugificar`, `slugDeProceso` e
+`idDesdeSlug` viven en `src/lib/secop/slug.ts` (puro, sin base) y
+`agregados.ts`/`ficha.ts` las reexportan.
+
 **Imagen para compartir (2026-09-26).** `app/opengraph-image.js` genera con
 `next/og` la vista previa de 1200×630: el mapa real con la rampa del hero y el
 total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
