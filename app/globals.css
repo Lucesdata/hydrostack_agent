@@ -20,10 +20,12 @@
    ninguna variable — cambiar nombres tocaría cada sitio que las consume y
    arriesgaría la apariencia visual actual.
 
-   Las 4 familias reales (Orbitron, IBM Plex Mono, Inter, JetBrains Mono) se
-   cargan vía next/font en app/layout.js (self-hosted, ya no por <link> a
-   Google Fonts) y quedan disponibles como --font-orbitron,
-   --font-ibm-plex-mono, --font-inter y --font-jetbrains-mono en el <html>.
+   Las familias reales (Inter, JetBrains Mono e IBM Plex Sans Condensed) se
+   cargan con next/font/local desde app/fonts/ (versionadas: el build ya no
+   sale a Google Fonts, PENDIENTES §42) y quedan disponibles como
+   --font-inter, --font-jetbrains-mono y --font-ibm-plex-sans-condensed en el
+   <html>. Orbitron e IBM Plex Mono se retiraron el 2026-09-26: la primera no
+   la usaba nadie y la segunda duplicaba a JetBrains Mono.
    --mono/--sans/--orb y --font-mono/--font-sans son alias sobre esas
    variables — todo el código (incl. los ~30 sitios que antes hardcodeaban
    el nombre literal de la fuente) ahora referencia una de estas dos capas de
@@ -42,9 +44,10 @@
   /* --border vivía aquí como rgba(0,245,255,.12) del tema oscuro. Se midió: cero
      consumidores en app/ y src/. El nombre se reclama para el tema claro (abajo),
      que es el que pide el sistema de diseño vigente. */
-  --mono: var(--font-ibm-plex-mono), "Courier New", monospace;
+  --mono: var(--font-jetbrains-mono), "Courier New", monospace;
   --sans: var(--font-inter), system-ui, sans-serif;
-  --orb: var(--font-orbitron), sans-serif;
+  /* Sin consumidores; queda como alias por si algo externo lo nombra. */
+  --orb: var(--font-inter), sans-serif;
 
   /* Tema claro "clear" — landing, navbar, hubs */
   /* Superficie */

@@ -721,7 +721,7 @@ WebSocket. En este incidente no fue la causa —las consultas funcionan con los
 dos—, pero es un punto ciego real: ninguna verificación local ejerce el camino
 que produce el fallo.
 
-### 42. El build depende de que Google Fonts responda (2026-09-22)
+### 42. El build depende de que Google Fonts responda (2026-09-22) — ✅ resuelto 2026-09-26
 
 El job `lint` del PR #45 —un cambio de **solo documentación**— falló así:
 
@@ -752,6 +752,15 @@ License, así que incluirlas en el repositorio no tiene problema de licencia.
 
 **Mientras tanto**, si un build falla con ese error, relanzar el job resuelve.
 Pero relanzar no es un arreglo: es saber que esto vuelve.
+
+**Resuelto el 2026-09-26** (volvió a pasar en el PR #61). Las fuentes están
+versionadas en `app/fonts/` y se cargan con `next/font/local`: el build ya no
+sale a la red (verificado con `next build` en un entorno sin acceso a Google
+Fonts). Se quedaron las tres familias que se usan —Inter (variable), JetBrains
+Mono 400/500 e IBM Plex Sans Condensed 600/700—: Orbitron no tenía
+consumidores y IBM Plex Mono duplicaba a JetBrains Mono (`--mono` apunta ahora
+a esta). De **once archivos y 181 kB a cinco y 130 kB**. Los woff2 son el
+subconjunto latin de `@fontsource` (SIL OFL, licencias en `app/fonts/OFL-*.txt`).
 
 ### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21)
 `cuantiaGate` ya no da FAIL cuando el valor es 0 —el "sin dato" del SECOP— sino
