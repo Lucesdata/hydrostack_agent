@@ -578,6 +578,28 @@
     sans-serif;
 }
 /* Selector de métrica del mapa y su leyenda (solo con "monto"). */
+.controlesMapa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.controlesMapa .metrica {
+  margin-bottom: 0;
+}
+.metricaPunto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--tipo);
+  vertical-align: 1px;
+}
+.metrica button[data-familia="otros"] .metricaPunto {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
 .metrica {
   display: flex;
   flex-wrap: wrap;
@@ -612,6 +634,7 @@
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
 }
+.map[data-metrica="tipo"] :global(.atlas-map-label),
 .map[data-metrica="monto"] :global(.clr-mapa__leyenda),
 .map[data-metrica="monto"] :global(.atlas-map-label) {
   /* La leyenda y los rótulos del servidor hablan de procesos. */
