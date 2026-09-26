@@ -248,6 +248,12 @@ punteado `otros`), siempre con su nombre y nunca como estado. No prometer
 alertas por correo ni seguimiento de cambios mientras no existan: la sección
 los marca como tales. Spec: `docs/superpowers/specs/2026-09-26-landing-ficha-viva.md`.
 
+**Prueba de visitante (2026-09-26).** La lectura absoluta de la compuerta
+`ubicacion` ya no afirma que la obra «se ejecuta» en la ubicación de la entidad
+contratante: la fuente no publica lugar de ejecución. La observación, el árbol
+de decisiones y las siguientes correcciones están en
+`docs/superpowers/specs/2026-09-26-ficha-viva-prueba-y-correcciones.md`.
+
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
 
