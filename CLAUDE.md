@@ -325,4 +325,14 @@ modelo de acceso o las alertas, se cambia ahí. La portada lleva además un JSON
 cifras, sin `license` ni `distribution` (no hay licencia decidida ni descarga),
 con `isBasedOn` a los conjuntos de datos.gov.co.
 
+**Quién compra y comparador (2026-09-26).** Dos rutas públicas nuevas,
+estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
+`/licitaciones/entidades` (las entidades con más procesos abiertos,
+`src/lib/secop/compradores.ts`, una consulta con `count(*) over ()`; es la otra
+mitad de `/competidores`) y `/licitaciones/comparar` (hasta tres departamentos
+con las filas de `detallePorDepartamento()`; la selección va en el **hash** de
+la URL, que no llega al servidor, `src/lib/secop/comparador.ts`). Los estilos de
+un componente `"use client"` no se exportan desde él: una página de servidor
+recibiría una referencia y no el texto (`comparador/estilos.ts`).
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

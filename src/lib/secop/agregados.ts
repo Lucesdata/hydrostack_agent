@@ -228,13 +228,19 @@ export interface AgregadosPortada {
   clasesEntidad: FilaAgregado[];
 }
 
+/** Total nacional de abiertos, con o sin geografía resuelta. */
+export async function totalAbiertos(): Promise<number> {
+  const filas = await db.select({ n: conteo }).from(proceso).where(condicionAbierto());
+  return filas[0]?.n ?? 0;
+}
+
 /** Las tres facetas y el total, en una sola ida a la base. */
 export async function agregadosPortada(): Promise<AgregadosPortada> {
   const [total, departamentos, tipos, clasesEntidad] = await Promise.all([
-    db.select({ n: conteo }).from(proceso).where(condicionAbierto()),
+    totalAbiertos(),
     detallePorDepartamento(),
     procesosPorTipo(),
     procesosPorClaseEntidad(),
   ]);
-  return { totalAbiertos: total[0]?.n ?? 0, departamentos, tipos, clasesEntidad };
+  return { totalAbiertos: total, departamentos, tipos, clasesEntidad };
 }

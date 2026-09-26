@@ -1090,6 +1090,23 @@ a.typeFila:hover .typeNombre {
     sans-serif;
   text-align: center;
 }
+.comparar {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  color: #0369a1;
+  font:
+    600 12.5px var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.comparar:hover {
+  text-decoration: underline;
+}
+.comparar:focus-visible {
+  outline: 2px solid #0369a1;
+  outline-offset: 2px;
+}
 .fichaCta:hover {
   background: #0369a1;
 }
