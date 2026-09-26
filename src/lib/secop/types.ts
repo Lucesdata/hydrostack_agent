@@ -64,6 +64,13 @@ export interface SecopQuery {
   estado?: string;
   /** Valor mínimo en COP. */
   valorMin?: number;
+  /**
+   * Solo Postgres, y solo con `valorMin`: deja pasar también los procesos sin
+   * presupuesto publicado (0 o nulo, el "sin dato" del SECOP) y los ordena
+   * **detrás** de los que sí cumplen el mínimo. Así ocupan las plazas que
+   * sobren sin desplazar a nadie (PENDIENTES §43).
+   */
+  incluirSinValor?: boolean;
   /** Solo procesos publicados desde esta fecha ISO (YYYY-MM-DD). */
   desde?: string;
   /** Filtra por apertura del proceso (Abierto = aún recibe ofertas). */

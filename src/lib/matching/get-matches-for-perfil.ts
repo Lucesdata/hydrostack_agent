@@ -20,6 +20,8 @@ export async function getMatchesForPerfil(
     apertura: "Abierto",
     soloAgua: true,
     valorMin: perfil.cuantiaObjetivo.minCop,
+    // Los sin presupuesto entran con la cuantía en UNKNOWN, detrás (§43).
+    incluirSinValor: true,
     orden: "fecha",
     page: 1,
     pageSize: 25,

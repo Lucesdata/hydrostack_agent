@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   sentenceCaseTitle,
   formatCopCompact,
+  formatValorProceso,
   formatCopEscala,
   formatCopFull,
   formatShortDate,
@@ -161,5 +162,26 @@ describe("formatCopEscala", () => {
   it("por debajo de mil millones se comporta como formatCopCompact", () => {
     expect(formatCopEscala(450_000_000)).toBe(formatCopCompact(450_000_000));
     expect(formatCopEscala(null)).toBe("—");
+  });
+});
+
+describe("formatValorProceso", () => {
+  it("el adjudicado manda sobre el presupuesto", () => {
+    expect(formatValorProceso({ valorAdjudicacion: 300_000_000, precioBase: 200_000_000 })).toBe(
+      "$300 M"
+    );
+  });
+
+  it("un adjudicado en 0 no tapa el presupuesto", () => {
+    expect(formatValorProceso({ valorAdjudicacion: 0, precioBase: 200_000_000 })).toBe("$200 M");
+  });
+
+  it('el 0 del SECOP es "sin dato": nunca "$0" (§43)', () => {
+    expect(formatValorProceso({ valorAdjudicacion: null, precioBase: 0 })).toBe(
+      "Sin presupuesto publicado"
+    );
+    expect(formatValorProceso({ valorAdjudicacion: null, precioBase: null })).toBe(
+      "Sin presupuesto publicado"
+    );
   });
 });

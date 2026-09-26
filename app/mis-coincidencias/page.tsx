@@ -30,7 +30,7 @@ import { PliegoUploadBlock } from "@/src/components/secop/PliegoUploadBlock";
 import { getPliegoStatusForProcesos } from "@/src/lib/secop/pliego-status";
 import {
   sentenceCaseTitle,
-  formatCopCompact,
+  formatValorProceso,
   formatShortDate,
   verdictScore,
 } from "@/src/components/secop/format";
@@ -300,9 +300,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                       : ""}
                   </span>
                   <div className="clr-mc-card-foot">
-                    <span className="clr-mc-val">
-                      {formatCopCompact(m.proceso.valorAdjudicacion ?? m.proceso.precioBase)}
-                    </span>
+                    <span className="clr-mc-val">{formatValorProceso(m.proceso)}</span>
                     {m.proceso.url && (
                       <a
                         href={m.proceso.url}
@@ -401,9 +399,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
                   {fecha ? ` · ${fecha}` : ""}
                 </span>
                 <div className="clr-mc-card-foot">
-                  <span className="clr-mc-val">
-                    {formatCopCompact(proceso.valorAdjudicacion ?? proceso.precioBase)}
-                  </span>
+                  <span className="clr-mc-val">{formatValorProceso(proceso)}</span>
                   {proceso.url && (
                     <a href={proceso.url} target="_blank" rel="noreferrer" className="clr-mc-link">
                       Ver en SECOP ↗
