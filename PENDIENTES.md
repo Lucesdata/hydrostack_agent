@@ -807,6 +807,17 @@ CTA secundario del hero lleva al diagnóstico sin cuenta
 (`HeroTerritorial.jsx`), y un test comprueba que el hero no dice "alerta". Al
 resolver el §0: cambiar ese CTA, montar la tarjeta y quitar esa aserción.
 
+**"Cómo funciona" (`S3Motor.jsx`) tiene tres pasos desde el 2026-09-26**, todos
+sin cuenta: llegar a un proceso, leer su ficha y medir tu preparación. El
+runbook de correo (`docs/runbook-correo-y-alertas.md`) dice que al resolver el
+§0 se vuelva a poner "el paso 04 «aviso diario»" en ese archivo: ahora sería un
+cuarto paso nuevo, no la vuelta de uno que se quitó.
+
+**Prueba social (punto 26 de la lista de mejoras): fuera, por falta de datos.**
+No hay testimonios, logos ni cifras de usuarios verificables. Si algún día se
+cuenta "N empresas usan AquaLicita", que sea de la base y con un mínimo por
+debajo del cual no se pinta.
+
 ### 45. Rendimiento de la portada: medido y con presupuesto en CI (2026-09-26)
 Lighthouse 12, móvil simulado (4G lenta + CPU ×4), build de producción local
 **sin base de datos** —así que sin ticker ni mapa con datos: con datos reales el
