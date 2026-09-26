@@ -12,7 +12,7 @@
 // El fondo es el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
 import { useEffect, useState } from "react";
-import ProcesosTicker, { useRecientes } from "@/src/components/landing/ProcesosTicker";
+import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
@@ -142,40 +142,20 @@ export default function LandingPage({
   totalAbiertos = null,
   tipos = [],
 }) {
-  // Cifras del sector (procesos vigilados, para el CTA y la banda del hero) y
-  // las dos cifras vivas de los KPIs del hero (nuevos en 7 días, valor en juego
-  // este mes). Todas vienen de la misma respuesta de /api/landing-stats — un
-  // solo fetch, no uno por bloque. Se quedan en null si el fetch falla: la UI
-  // muestra "—" y la frase que las acompaña sigue siendo cierta sin la cifra.
-  const [sector, setSector] = useState({
-    procesosVigilados: null,
-    oferentesHistoricos: null,
-    sanciones: null,
-  });
-  const [heroStats, setHeroStats] = useState({
-    nuevos7d: null,
-    enJuegoTotalCop: null,
-    ultimaConsulta: null,
-  });
-
-  // Fichas recientes: una sola petición para el ticker y la banda del hero.
-  const recientes = useRecientes();
+  // Procesos del sector vigilados, para la línea bajo el CTA del hero. Se
+  // queda en null si el fetch falla: la UI dice "datos desde SECOP II" sin la
+  // cifra.
+  const [sector, setSector] = useState(null);
 
   useEffect(() => {
     let vivo = true;
     fetch("/api/landing-stats")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (!vivo || !d) return;
-        if (d.sector) setSector(d.sector);
-        setHeroStats({
-          nuevos7d: d.nuevos7d ?? null,
-          enJuegoTotalCop: d.enJuego?.totalCop ?? null,
-          ultimaConsulta: d.ultimaConsulta ?? null,
-        });
+        if (vivo && d?.sector) setSector(d.sector);
       })
       .catch(() => {
-        /* se queda en null: la UI muestra "—" y la frase sigue siendo cierta */
+        /* se queda en null: la frase sigue siendo cierta sin la cifra */
       });
     return () => {
       vivo = false;
@@ -197,7 +177,7 @@ export default function LandingPage({
       <BlueprintBackground />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <ProcesosTicker recientes={recientes} />
+        <ProcesosTicker />
 
         <HeroTerritorial
           mapa={mapa}
@@ -205,8 +185,6 @@ export default function LandingPage({
           totalAbiertos={totalAbiertos}
           tipos={tipos}
           sector={sector}
-          heroStats={heroStats}
-          recientes={recientes}
         />
 
         {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo

@@ -69,7 +69,6 @@ describe("texto sobre el fondo oscuro", () => {
   it("colores escritos a mano en el hero llegan a AA", () => {
     for (const [color, sobre] of [
       ["#c3d3e0", fondo()], // párrafo del hero
-      ["#8499ab", panel()], // nota de fuente de la banda
       ["#7d93a6", panel()], // placeholder del buscador
     ] as const) {
       pinta(css, color);
@@ -140,7 +139,7 @@ describe("barra, ticker y árbol de la Ficha Viva", () => {
   });
 });
 
-describe('últimos procesos de la banda "El mercado ahora"', () => {
+describe("tipos de la ficha del departamento", () => {
   it("el nombre del tipo, en su color, se lee sobre el panel", () => {
     for (const f of FAMILIAS) {
       expect(contraste(f.oscuro, panel()), f.label).toBeGreaterThanOrEqual(AA.texto);

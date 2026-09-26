@@ -63,7 +63,8 @@ describe("PortadaCliente", () => {
     expect(html).toContain("Explora el mercado de agua y saneamiento de");
     expect(html).toContain("Colombia.");
     expect(html).toContain("Ver fichas de procesos");
-    expect(html).toContain("El mercado ahora");
+    // La banda "El mercado ahora" salió de la portada (2026-09-26).
+    expect(html).not.toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");
   });
 

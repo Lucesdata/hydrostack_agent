@@ -213,9 +213,8 @@ export function mapApiItem(p) {
 }
 
 /**
- * Los procesos recientes, pedidos una vez. La portada lo llama arriba y reparte
- * el resultado al ticker y a la banda "El mercado ahora": un solo fetch para
- * los dos. Con `activo = false` no pide nada (el ticker ya recibió los datos).
+ * Los procesos recientes, pedidos una vez. Con `activo = false` no pide nada
+ * (el ticker ya recibió los datos por prop).
  * "loading" | "live" | "empty" — nunca hay un cuarto estado con datos ficticios.
  */
 export function useRecientes(activo = true) {

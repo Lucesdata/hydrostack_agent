@@ -8,7 +8,6 @@ import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento, { formatPorcentaje } from "./FichaDepartamento";
-import BandaMercado from "./BandaMercado";
 import ResumenDepartamento from "./ResumenDepartamento";
 import BuscadorFichas from "./BuscadorFichas";
 import {
@@ -107,8 +106,6 @@ export default function HeroTerritorial({
   totalAbiertos = null,
   tipos = [],
   sector = null,
-  heroStats = null,
-  recientes = null,
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
@@ -427,8 +424,6 @@ export default function HeroTerritorial({
           ) : null}
         </div>
       </div>
-
-      <BandaMercado sector={sector} heroStats={heroStats} recientes={recientes} />
     </section>
   );
 }

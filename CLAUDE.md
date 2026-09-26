@@ -236,14 +236,10 @@ mezclan y no se sustituyen por cifras ni tendencias de un mockup.
     lista.
   - Si la base no responde, `totalAbiertos` queda `undefined` y todo muestra
     "—" con el mapa en gris.
-- **Banda "El mercado ahora"** (`BandaMercado`). Son los tres KPIs que antes
-  estaban en el hero. Vienen de un único fetch en cliente a `/api/landing-stats`
-  y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
-  abiertos en presentación de oferta en siete días; *en juego · este mes* suma
-  el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
-  en "—". Cada cifra lleva debajo una nota visible con lo que cuenta, y el pie
-  dice cuándo consultó la ingesta SECOP II (`ultimaConsulta`, de `sync_log`:
-  "consultó", no "actualizó", porque `sync_log` se cierra antes del transform).
+- **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
+  `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
+  ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker
+  pide sus fichas recientes por su cuenta.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -321,10 +317,10 @@ total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
 sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
 porque Satori no lee `woff2`.
 **Portada = mapa + Ficha Viva (2026-09-26).** La portada solo lleva el ticker,
-el hero territorial (mapa, lista, ficha del departamento, buscador y banda "El
-mercado ahora") y la Ficha Viva. Salieron las rutas de intención ("¿En qué
+el hero territorial (mapa, lista, ficha del departamento y buscador) y la Ficha
+Viva. Salieron las rutas de intención ("¿En qué
 momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
-frecuentes (con su JSON-LD `FAQPage`) y `S5DarkClosing`: repetían lo que ya dicen
+frecuentes (con su JSON-LD `FAQPage`) `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
 el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y
 `/cuenta`; los demás componentes se borraron (su estado previo está en git). No
 volver a apilar secciones debajo de la Ficha Viva sin una razón medida. La
