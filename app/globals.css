@@ -1101,11 +1101,17 @@ select {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
+  /* Cerrado no se ve, así que tampoco puede recibir el foco: con solo
+     max-height y opacity, sus enlaces seguían en el orden de tabulación y el
+     teclado pasaba por seis enlaces invisibles antes del contenido. La
+     visibilidad cambia al terminar la animación de cierre, no al empezarla. */
+  visibility: hidden;
   z-index: 99;
   transition:
     max-height 0.3s ease,
     opacity 0.22s ease,
-    padding 0.3s ease;
+    padding 0.3s ease,
+    visibility 0s linear 0.3s;
 }
 .clr-mobile-menu.open {
   /* 5 pestañas + hasta 9 enlaces de cuenta no caben en los 420px que había
@@ -1114,6 +1120,8 @@ select {
   max-height: calc(100vh - var(--nav-h));
   overflow-y: auto;
   opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
   padding: 10px 28px 20px;
 }
 .clr-mobile-link {
@@ -1535,6 +1543,27 @@ select {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* "Saltar al contenido": lo primero que alcanza el teclado en cada página, y
+   solo se ve cuando tiene el foco. */
+.saltar-contenido {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 14px var(--font-sans);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.saltar-contenido:focus {
+  transform: none;
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
 }
 
 /* Un enlace de texto suelto no llega a 44px de alto por sí mismo. */

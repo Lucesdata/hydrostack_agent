@@ -555,10 +555,17 @@
   stroke: rgba(6, 20, 35, 0.85);
   stroke-width: 0.7;
 }
-.map :global(.clr-mapa__link:hover .clr-mapa__dpto),
-.map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
+.map :global(.clr-mapa__link:hover .clr-mapa__dpto) {
   stroke: #eaf8ff;
   stroke-width: 1.6;
+}
+/* Con teclado, un anillo de dos tonos: trazo oscuro y halo claro. El trazo
+   claro de hover no se distinguía sobre los escalones altos de la rampa
+   (--aq-e4, --aq-e5), y el foco tiene que verse sobre cualquiera. */
+.map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
+  stroke: var(--aq-bg);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 1.5px #f3f8fc) drop-shadow(0 0 3px var(--aq-cyan));
 }
 /* Sincronía con la lista y la ficha (sincronia.js). Mientras algo está
    señalado, el resto del mapa se atenúa para que se vea dónde está. */
