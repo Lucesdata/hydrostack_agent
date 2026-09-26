@@ -12,7 +12,10 @@ describe("PortadaCliente", () => {
     );
     expect(html).toContain('href="/licitaciones/departamento/antioquia"');
     expect(html).toContain("5.155");
-    expect(html).toContain("6.000");
+    // El total nacional ya no se pinta como KPI (2026-09-26): sigue siendo la
+    // base del porcentaje de la ficha, 5.155 / 6.000.
+    expect(html).toContain("85,9");
+    expect(html).not.toContain("Procesos abiertos · Colombia");
     expect(html).toContain('aria-pressed="true"');
   });
 
@@ -63,7 +66,8 @@ describe("PortadaCliente", () => {
     expect(html).toContain("Explora el mercado de agua y saneamiento de");
     expect(html).toContain("Colombia.");
     expect(html).toContain("Ver fichas de procesos");
-    expect(html).toContain("El mercado ahora");
+    // La banda "El mercado ahora" salió de la portada (2026-09-26).
+    expect(html).not.toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");
   });
 

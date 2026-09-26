@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import ProcesosTicker, { frase, mapApiItem, titulo } from "@/src/components/landing/ProcesosTicker";
 
 const base = {
@@ -53,5 +53,19 @@ describe("titulo", () => {
       "Empresa de Acueducto de Bogotá E.S.P."
     );
     expect(titulo("EAAB")).toBe("EAAB");
+  });
+});
+
+describe("ticker con datos recibidos", () => {
+  it("los pinta y no pide nada", () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    const html = renderToStaticMarkup(
+      <ProcesosTicker recientes={{ status: "live", items: [mapApiItem(base)] }} />
+    );
+    vi.unstubAllGlobals();
+    expect(html).toContain("Fichas recientes");
+    expect(html).toContain('class="ptr-item"');
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

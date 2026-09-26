@@ -199,7 +199,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-26 (La Ficha Viva en la portada).
+Última actualización: 2026-09-26 (portada reducida a mapa + Ficha Viva).
 
 ## graphify
 
@@ -215,35 +215,27 @@ Rules:
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
-`ListaTerritorios`, `FichaDepartamento`, `BandaMercado`) y se monta desde
+`ListaTerritorios`, `FichaDepartamento`) y se monta desde
 `PortadaCliente.jsx`. Se conservan fuentes de datos, rutas, paleta y mapa de
-servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
-mezclan y no se sustituyen por cifras ni tendencias de un mockup.
+servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 
-- **KPIs del hero** (franja sobre el mapa, columna central). Vienen de `agregadosPortada()`
-  (`src/lib/secop/agregados.ts`), calculados en el servidor en `app/page.js`
-  con `revalidate` de 6 h. Todos cuentan "abierto" con `condicionAbierto()`:
-  - *Procesos abiertos · Colombia*: `totalAbiertos`, que es el total real e
-    incluye los procesos sin geografía resuelta.
-  - *Departamentos con procesos*: `departamentos.length`, es decir, los
-    departamentos con al menos un proceso abierto y geografía resuelta.
-  - *Tipos de proyecto · Colombia*: `tipos.length`. `procesosPorTipo()`
-    devuelve siempre los cinco de `TIPOS_PROYECTO`, así que con datos siempre
-    muestra 5. Es la taxonomía, no un conteo que varíe.
-  - La suma de la lista por departamento **no cuadra** con `totalAbiertos`,
-    porque los abiertos sin geografía quedan fuera del reparto. Es correcto. El
-    % de la ficha se calcula sobre `totalAbiertos`. No "arreglarlo" sumando la
-    lista.
-  - Si la base no responde, `totalAbiertos` queda `undefined` y todo muestra
-    "—" con el mapa en gris.
-- **Banda "El mercado ahora"** (`BandaMercado`). Son los tres KPIs que antes
-  estaban en el hero. Vienen de un único fetch en cliente a `/api/landing-stats`
-  y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
-  abiertos en presentación de oferta en siete días; *en juego · este mes* suma
-  el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
-  en "—". Cada cifra lleva debajo una nota visible con lo que cuenta, y el pie
-  dice cuándo consultó la ingesta SECOP II (`ultimaConsulta`, de `sync_log`:
-  "consultó", no "actualizó", porque `sync_log` se cierra antes del transform).
+- **Franja de KPIs del hero**: retirada el 2026-09-26 (*Procesos abiertos ·
+  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*). El
+  mapa ocupa ese sitio: sus controles (colorear por, tipo) van centrados como
+  cabecera de la columna, y en tres columnas mapa y ficha son `sticky` mientras
+  se recorre la lista, cada uno solo si cabe en la ventana. Por eso `.hero` usa
+  `overflow: clip` y no `hidden`, que anularía el sticky.
+- `agregadosPortada()` (`src/lib/secop/agregados.ts`) sigue alimentando el mapa,
+  la lista y la ficha, calculado en el servidor en `app/page.js` con
+  `revalidate` de 6 h y "abierto" según `condicionAbierto()`. `totalAbiertos`
+  ya no se pinta, pero es la base del % de la ficha e incluye los procesos sin
+  geografía resuelta: la suma de la lista **no cuadra** con él y es correcto.
+  No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
+  queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
+- **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
+  `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
+  ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker
+  pide sus fichas recientes por su cuenta.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -333,15 +325,17 @@ color no puede ser lo único que lo diga.
 total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
 sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
 porque Satori no lee `woff2`.
-**Preguntas frecuentes (2026-09-26).** Antes del cierre de la portada va un FAQ
-(`src/components/landing/preguntas/`), componente de servidor con `<details>`
-nativo que llega a `PortadaCliente` por prop, como el mapa: no suma JS. El texto
-y el JSON-LD `FAQPage` salen de la misma lista (`src/lib/landing/preguntas-frecuentes.ts`)
-y cada respuesta dice lo que el producto hace hoy. Si cambia la ingesta, el
-modelo de acceso o las alertas, se cambia ahí. La portada lleva además un JSON-LD
-`Dataset` (`src/lib/landing/dataset-jsonld.ts`) para Google Dataset Search: sin
-cifras, sin `license` ni `distribution` (no hay licencia decidida ni descarga),
-con `isBasedOn` a los conjuntos de datos.gov.co.
+**Portada = mapa + Ficha Viva (2026-09-26).** La portada solo lleva el ticker,
+el hero territorial (mapa, lista, ficha del departamento y buscador) y la Ficha
+Viva. Salieron las rutas de intención ("¿En qué
+momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
+frecuentes (con su JSON-LD `FAQPage`), `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
+el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y
+`/cuenta`; los demás componentes se borraron (su estado previo está en git). No
+volver a apilar secciones debajo de la Ficha Viva sin una razón medida. La
+portada conserva el JSON-LD `Dataset` (`src/lib/landing/dataset-jsonld.ts`, que
+ahora también exporta `jsonLdSeguro`) para Google Dataset Search: sin cifras,
+sin `license` ni `distribution`, con `isBasedOn` a los conjuntos de datos.gov.co.
 
 **Quién compra y comparador (2026-09-26).** Dos rutas públicas nuevas,
 estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
@@ -357,8 +351,8 @@ recibiría una referencia y no el texto (`comparador/estilos.ts`).
 secciones claras: el contenedor de la portada lleva `.tema-oscuro`
 (`globals.css`), que **redefine los tokens** en su ámbito, alias incluidos
 (`--text-primary`, `--border`…, que en `:root` ya se resolvieron contra el
-claro). Así Ficha Viva, rutas, cómo funciona, diagnóstico, accesos y preguntas
-cambian sin tocar su CSS, y `S7Acceso` sigue claro en `/precios` y `/cuenta`.
+claro). Así la Ficha Viva cambia sin tocar su CSS, y `S7Acceso` sigue claro en
+`/precios` y `/cuenta`.
 En oscuro `--accent` es cian (texto y enlaces): los botones con texto blanco
 usan `--accent-fill`, que existe en los dos temas. Lo que imita la ficha real
 (el esquema de la Ficha Viva) lleva `.tema-claro`, como la tarjeta blanca del

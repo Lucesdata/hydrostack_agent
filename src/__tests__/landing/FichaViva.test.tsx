@@ -59,13 +59,13 @@ describe("FichaViva", () => {
     expect(html).toContain("El estado va aparte");
   });
 
-  it("va en la portada justo después del hero", () => {
+  it("va en la portada justo después del hero, y la cierra", () => {
     const portada = renderToStaticMarkup(<PortadaCliente />);
     const hero = portada.indexOf('id="aq-hero-title"');
     const ficha = portada.indexOf('id="ficha-viva"');
-    const momento = portada.indexOf('id="asistentes-proyecto"');
     expect(hero).toBeGreaterThan(-1);
     expect(ficha).toBeGreaterThan(hero);
-    expect(ficha).toBeLessThan(momento);
+    // La portada es mapa + Ficha Viva: nada de las secciones que salieron.
+    expect(portada).not.toContain('id="asistentes-proyecto"');
   });
 });

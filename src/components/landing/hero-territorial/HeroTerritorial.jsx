@@ -8,7 +8,6 @@ import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento, { formatPorcentaje } from "./FichaDepartamento";
-import BandaMercado from "./BandaMercado";
 import ResumenDepartamento from "./ResumenDepartamento";
 import BuscadorFichas from "./BuscadorFichas";
 import {
@@ -107,8 +106,6 @@ export default function HeroTerritorial({
   totalAbiertos = null,
   tipos = [],
   sector = null,
-  heroStats = null,
-  recientes = null,
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
@@ -263,22 +260,6 @@ export default function HeroTerritorial({
           className={styles.mapPanel}
           aria-label="Procesos abiertos por departamento"
         >
-          <div className={styles.kpis} aria-label="Indicadores nacionales">
-            <div className={styles.kpiTotal}>
-              <span className={styles.kpiTitulo}>Procesos abiertos · Colombia</span>
-              <strong>{formatConteo(totalAbiertos)}</strong>
-            </div>
-            <dl>
-              <div>
-                <dt>Departamentos con procesos</dt>
-                <dd>{datosDisponibles ? formatConteo(departamentos.length) : "—"}</dd>
-              </div>
-              <div>
-                <dt>Tipos de proyecto · Colombia</dt>
-                <dd>{tipos.length || datosDisponibles ? formatConteo(tipos.length) : "—"}</dd>
-              </div>
-            </dl>
-          </div>
           {hayDetalle && datosDisponibles ? (
             <div className={styles.controlesMapa}>
               <div className={styles.metrica} role="group" aria-label="Colorear el mapa por">
@@ -427,8 +408,6 @@ export default function HeroTerritorial({
           ) : null}
         </div>
       </div>
-
-      <BandaMercado sector={sector} heroStats={heroStats} recientes={recientes} />
     </section>
   );
 }

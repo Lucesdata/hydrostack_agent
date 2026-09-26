@@ -1,10 +1,8 @@
 import ColombiaChoropleth from "@/src/components/mapa/ColombiaChoropleth";
 import { ESTILOS_MAPA } from "@/src/components/mapa/estilos";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
-import PreguntasFrecuentes from "@/src/components/landing/preguntas/PreguntasFrecuentes";
 import { appUrl } from "@/src/lib/app-url";
-import { datasetJsonLd } from "@/src/lib/landing/dataset-jsonld";
-import { jsonLdSeguro } from "@/src/lib/landing/preguntas-frecuentes";
+import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { agregadosPortada } from "@/src/lib/secop/agregados";
 
 /**
@@ -54,7 +52,6 @@ export default async function Page() {
         departamentos={departamentos}
         totalAbiertos={totalAbiertos}
         tipos={tipos}
-        preguntas={<PreguntasFrecuentes />}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
