@@ -215,7 +215,7 @@ Rules:
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
-`ListaTerritorios`, `FichaDepartamento`, `BandaMercado`) y se monta desde
+`ListaTerritorios`, `FichaDepartamento`) y se monta desde
 `PortadaCliente.jsx`. Se conservan fuentes de datos, rutas, paleta y mapa de
 servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
 mezclan y no se sustituyen por cifras ni tendencias de un mockup.
@@ -320,7 +320,7 @@ porque Satori no lee `woff2`.
 el hero territorial (mapa, lista, ficha del departamento y buscador) y la Ficha
 Viva. Salieron las rutas de intención ("¿En qué
 momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
-frecuentes (con su JSON-LD `FAQPage`) `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
+frecuentes (con su JSON-LD `FAQPage`), `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
 el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y
 `/cuenta`; los demás componentes se borraron (su estado previo está en git). No
 volver a apilar secciones debajo de la Ficha Viva sin una razón medida. La
