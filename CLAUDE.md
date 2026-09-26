@@ -320,6 +320,9 @@ porque Satori no lee `woff2`.
 nativo que llega a `PortadaCliente` por prop, como el mapa: no suma JS. El texto
 y el JSON-LD `FAQPage` salen de la misma lista (`src/lib/landing/preguntas-frecuentes.ts`)
 y cada respuesta dice lo que el producto hace hoy. Si cambia la ingesta, el
-modelo de acceso o las alertas, se cambia ahí.
+modelo de acceso o las alertas, se cambia ahí. La portada lleva además un JSON-LD
+`Dataset` (`src/lib/landing/dataset-jsonld.ts`) para Google Dataset Search: sin
+cifras, sin `license` ni `distribution` (no hay licencia decidida ni descarga),
+con `isBasedOn` a los conjuntos de datos.gov.co.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
