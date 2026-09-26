@@ -79,8 +79,15 @@ describe("ColombiaChoropleth", () => {
     expect(html).not.toContain("/licitaciones/departamento/vichada");
   });
 
-  it("pinta la leyenda con los cinco escalones", () => {
-    for (const etiqueta of ["Sin procesos", "1–99", "100–499", "500–1.499", "1.500+"]) {
+  it("pinta la leyenda con todos los escalones", () => {
+    for (const etiqueta of [
+      "Sin procesos",
+      "1–99",
+      "100–499",
+      "500–1.499",
+      "1.500–2.999",
+      "3.000+",
+    ]) {
       expect(html).toContain(etiqueta);
     }
   });

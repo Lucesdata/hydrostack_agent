@@ -2,7 +2,7 @@
  * Estilos del mapa departamental. Se inyectan una vez por página, con el mismo
  * patrón que `lista/estilos.ts` y el resto del producto.
  *
- * Los cinco tintes del color viven aquí y no en `globals.css` a propósito: son
+ * Los tintes del color viven aquí y no en `globals.css` a propósito: son
  * datos, no estado. No llevan texto encima —lo que se lee es la leyenda, sobre
  * `--bg`— así que no entran en el contrato de contraste del semáforo, que es
  * donde el color sí informa de si puedes participar.
@@ -17,6 +17,7 @@ export const ESTILOS_MAPA = `
   --mapa-e2: rgba(3,105,161,.36);
   --mapa-e3: rgba(3,105,161,.62);
   --mapa-e4: var(--accent);
+  --mapa-e5: var(--accent-ocean);
   margin: 0; display: flex; flex-direction: column; gap: 14px;
 }
 .clr-mapa__svg{ width: 100%; height: auto; display: block; overflow: visible; }
@@ -33,6 +34,7 @@ export const ESTILOS_MAPA = `
 .clr-mapa__dpto--e2{ fill: var(--mapa-e2); }
 .clr-mapa__dpto--e3{ fill: var(--mapa-e3); }
 .clr-mapa__dpto--e4{ fill: var(--mapa-e4); }
+.clr-mapa__dpto--e5{ fill: var(--mapa-e5); }
 .clr-mapa__link:hover .clr-mapa__dpto{ stroke: var(--accent-deep); stroke-width: 1.4; }
 /* El foco se pinta en el path y no con outline: un outline rectangular sobre una
    forma irregular señala el bounding box, no el departamento. */

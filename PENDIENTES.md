@@ -828,3 +828,13 @@ lo resolvería, pero es una dependencia nueva y esa decisión es del usuario
 **Queda:** LCP 2,7 s sigue por encima de los 2,5 s de "bueno". Lo siguiente
 con más efecto sería medir con datos reales en el preview de Vercel.
 
+
+### 46. Vista por municipios — planificada, sin ejecutar (2026-09-26)
+Sigue bloqueada por datos: `geografia` cubre unos 60 de los ~1.122 municipios y
+no hay geometría municipal. El plan, con los pasos y lo que necesita del dueño
+de la base, está en `docs/rediseno-2026-09/PLAN-VISTA-MUNICIPAL.md`. Dos cosas
+que no estaban anotadas: `geografia_alias` se indexa solo por nombre, así que
+cargar el DIVIPOLA completo haría que los municipios homónimos se pisen (La
+Unión, San Pedro, Villanueva…), y la ubicación es la **sede de la entidad**, que
+a nivel municipal concentra en la capital lo que contrata una gobernación. Hay
+que medir eso antes de dibujar nada.

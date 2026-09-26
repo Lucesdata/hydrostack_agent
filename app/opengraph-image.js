@@ -24,8 +24,8 @@ export const alt = "Mapa de procesos abiertos de agua y saneamiento por departam
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** La rampa del hero (--aq-e0..4 en hero-territorial.module.css). */
-const RAMPA = ["#13304a", "#1a5687", "#1f7cc0", "#2aa7e3", "#35d3c0"];
+/** La rampa del hero (--aq-e0..5 en hero-territorial.module.css). */
+const RAMPA = ["#13304a", "#1a5687", "#1f7cc0", "#2aa7e3", "#35d3c0", "#b4f5e4"];
 
 const numero = new Intl.NumberFormat("es-CO");
 

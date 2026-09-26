@@ -1,5 +1,5 @@
 /**
- * Los cinco escalones de color del mapa departamental.
+ * Los escalones de color del mapa departamental: "sin procesos" y cinco tramos.
  *
  * Son **rangos fijos y no cuantiles**, decidido el 2026-09-22 con la
  * distribución real delante: 5.155 procesos abiertos en Antioquia y 1 en
@@ -13,10 +13,15 @@
  * 3. **La leyenda dice "353–708"**, que no significa nada para quien la lee.
  *
  * Estos cortes se leen en cifras redondas y sobreviven a que cambien los datos.
+ *
+ * **El tramo de arriba se partió el 2026-09-26** (1.500–2.999 y 3.000+): con un
+ * solo "1.500+", Antioquia con 5.155 se pintaba igual que un departamento con
+ * 1.500, más de tres veces menos. Se añadió un escalón en vez de pasar a
+ * cuantiles, así que los tres motivos de arriba siguen en pie.
  */
 
 export interface Escalon {
-  /** 0 es "sin procesos"; 4 es el más intenso. */
+  /** 0 es "sin procesos"; el último es el más intenso (5 en procesos, 4 en monto). */
   indice: number;
   min: number;
   /** `null` en el último: no tiene techo. */
@@ -29,7 +34,8 @@ export const ESCALONES: readonly Escalon[] = [
   { indice: 1, min: 1, max: 99, etiqueta: "1–99" },
   { indice: 2, min: 100, max: 499, etiqueta: "100–499" },
   { indice: 3, min: 500, max: 1499, etiqueta: "500–1.499" },
-  { indice: 4, min: 1500, max: null, etiqueta: "1.500+" },
+  { indice: 4, min: 1500, max: 2999, etiqueta: "1.500–2.999" },
+  { indice: 5, min: 3000, max: null, etiqueta: "3.000+" },
 ] as const;
 
 /**
