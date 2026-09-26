@@ -174,7 +174,12 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
           ? "Abierto a ofertas. El SECOP no publica la fecha de cierre en este dataset."
           : null
     ),
-    dato("ubicacion", p.departamento ?? p.municipio, lugar ? `Se ejecuta en ${lugar}.` : null),
+    // La fuente publica la sede de la entidad contratante, no el lugar de la obra.
+    dato(
+      "ubicacion",
+      p.departamento ?? p.municipio,
+      lugar ? `Entidad contratante ubicada en ${lugar}. Lugar de ejecución no confirmado.` : null
+    ),
     dato(
       "habilitacion",
       null,

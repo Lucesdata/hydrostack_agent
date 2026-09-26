@@ -255,6 +255,19 @@ punteado `otros`), siempre con su nombre y nunca como estado. No prometer
 alertas por correo ni seguimiento de cambios mientras no existan: la sección
 los marca como tales. Spec: `docs/superpowers/specs/2026-09-26-landing-ficha-viva.md`.
 
+**Prueba de visitante (2026-09-26).** La lectura absoluta de la compuerta
+`ubicacion` ya no afirma que la obra «se ejecuta» en la ubicación de la entidad
+contratante: la fuente no publica lugar de ejecución. La observación, el árbol
+de decisiones y las siguientes correcciones están en
+`docs/superpowers/specs/2026-09-26-ficha-viva-prueba-y-correcciones.md`.
+La ficha también etiqueta la ubicación de la entidad en los metadatos y la vista,
+omite `areaServed` sin lugar de ejecución verificado, y dirige al expediente
+original antes de ofrecer el diagnóstico general: este no comprueba el pliego
+particular ni decide la elegibilidad individual.
+El cierre de la ficha distingue `Abierto`, `Cerrado` y estado de apertura ausente;
+el cerrado invita a explorar otros procesos y el estado ausente exige comprobar
+en el expediente si todavía se reciben ofertas.
+
 **Cabecera, ticker y sincronía (2026-09-26).** En `/` la barra de navegación
 va en oscuro (`.clr-nav--oscuro`, en `Navbar.js`) y el ticker también; en el
 resto del sitio la barra sigue clara. El ticker son tarjetas con botón de pausa

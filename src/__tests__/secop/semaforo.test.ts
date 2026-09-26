@@ -74,7 +74,9 @@ describe("lectura absoluta (sin perfil)", () => {
     // La sigla va en mayúscula: "Proyecto de ptap" parecía una errata.
     expect(por("sectorial").explicacion).toContain("PTAP");
     expect(por("cuantia").estado).toBe("DATO");
-    expect(por("ubicacion").explicacion).toContain("Manizales");
+    expect(por("ubicacion").explicacion).toBe(
+      "Entidad contratante ubicada en Manizales, Caldas. Lugar de ejecución no confirmado."
+    );
   });
 
   it("un presupuesto en cero no es una exigencia: queda sin datos", () => {
