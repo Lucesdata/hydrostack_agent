@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import PaginaFaceta from "@/src/components/secop/lista/PaginaFaceta";
 import { procesosDeFaceta, resolverFaceta } from "@/src/lib/secop/facetas";
+import { metadataDeFaceta } from "@/src/lib/secop/faceta-metadata";
 
 /**
  * Ruta facetada por departamento — pública e indexable.
@@ -48,11 +49,8 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const faceta = await resolverFaceta("departamento", slug);
   if (!faceta) return { title: "No encontrado" };
-  return {
-    title: `${faceta.label} · Licitaciones de agua y saneamiento`,
-    description: faceta.descripcion,
-    alternates: { canonical: `/licitaciones/departamento/${faceta.slug}` },
-  };
+  // El departamento trae su cifra de abiertos al resolverse: sin consulta extra.
+  return metadataDeFaceta(faceta);
 }
 
 export default async function Page({ params }: Props) {
