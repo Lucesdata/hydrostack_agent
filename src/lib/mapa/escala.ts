@@ -1,5 +1,5 @@
 /**
- * Los cinco escalones de color del mapa departamental.
+ * Los escalones de color del mapa departamental: "sin procesos" y cinco tramos.
  *
  * Son **rangos fijos y no cuantiles**, decidido el 2026-09-22 con la
  * distribución real delante: 5.155 procesos abiertos en Antioquia y 1 en
@@ -13,10 +13,15 @@
  * 3. **La leyenda dice "353–708"**, que no significa nada para quien la lee.
  *
  * Estos cortes se leen en cifras redondas y sobreviven a que cambien los datos.
+ *
+ * **El tramo de arriba se partió el 2026-09-26** (1.500–2.999 y 3.000+): con un
+ * solo "1.500+", Antioquia con 5.155 se pintaba igual que un departamento con
+ * 1.500, más de tres veces menos. Se añadió un escalón en vez de pasar a
+ * cuantiles, así que los tres motivos de arriba siguen en pie.
  */
 
 export interface Escalon {
-  /** 0 es "sin procesos"; 4 es el más intenso. */
+  /** 0 es "sin procesos"; el último es el más intenso (5 en procesos, 4 en monto). */
   indice: number;
   min: number;
   /** `null` en el último: no tiene techo. */
@@ -29,7 +34,8 @@ export const ESCALONES: readonly Escalon[] = [
   { indice: 1, min: 1, max: 99, etiqueta: "1–99" },
   { indice: 2, min: 100, max: 499, etiqueta: "100–499" },
   { indice: 3, min: 500, max: 1499, etiqueta: "500–1.499" },
-  { indice: 4, min: 1500, max: null, etiqueta: "1.500+" },
+  { indice: 4, min: 1500, max: 2999, etiqueta: "1.500–2.999" },
+  { indice: 5, min: 3000, max: null, etiqueta: "3.000+" },
 ] as const;
 
 /**
@@ -40,4 +46,28 @@ export const ESCALONES: readonly Escalon[] = [
 export function escalonDe(n: number): Escalon {
   if (!Number.isFinite(n) || n <= 0) return ESCALONES[0];
   return ESCALONES.find((e) => e.max === null || n <= e.max) ?? ESCALONES[0];
+}
+
+/**
+ * Escalones del mapa por **monto en juego**: la suma del presupuesto de los
+ * abiertos que lo publican (`montoAbierto` de `detallePorDepartamento`).
+ *
+ * Mismo criterio que los de procesos: cortes fijos y redondos, no cuantiles,
+ * para que el mapa de hoy y el de mañana se comparen. Van por décadas en la
+ * escala que se dice en Colombia (mil millones, billón), porque el monto de un
+ * departamento puede ser mil veces el de otro y una escala lineal dejaría todo
+ * el país en el primer tono. El índice 0 es "sin presupuesto publicado", que no
+ * es lo mismo que "sin procesos": se dice así en la leyenda.
+ */
+export const ESCALONES_MONTO: readonly Escalon[] = [
+  { indice: 0, min: 0, max: 0, etiqueta: "Sin presupuesto publicado" },
+  { indice: 1, min: 1, max: 1e10 - 1, etiqueta: "< $10 mil M" },
+  { indice: 2, min: 1e10, max: 1e11 - 1, etiqueta: "$10–100 mil M" },
+  { indice: 3, min: 1e11, max: 1e12 - 1, etiqueta: "$100 mil M–1 billón" },
+  { indice: 4, min: 1e12, max: null, etiqueta: "$1 billón o más" },
+] as const;
+
+export function escalonMontoDe(monto: number): Escalon {
+  if (!Number.isFinite(monto) || monto <= 0) return ESCALONES_MONTO[0];
+  return ESCALONES_MONTO.find((e) => e.max === null || monto <= e.max) ?? ESCALONES_MONTO[0];
 }

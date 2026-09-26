@@ -79,8 +79,15 @@ describe("ColombiaChoropleth", () => {
     expect(html).not.toContain("/licitaciones/departamento/vichada");
   });
 
-  it("pinta la leyenda con los cinco escalones", () => {
-    for (const etiqueta of ["Sin procesos", "1–99", "100–499", "500–1.499", "1.500+"]) {
+  it("pinta la leyenda con todos los escalones", () => {
+    for (const etiqueta of [
+      "Sin procesos",
+      "1–99",
+      "100–499",
+      "500–1.499",
+      "1.500–2.999",
+      "3.000+",
+    ]) {
       expect(html).toContain(etiqueta);
     }
   });
@@ -97,5 +104,16 @@ describe("ColombiaChoropleth", () => {
   it("omite la línea de sin ubicación cuando no se le da el total", () => {
     const solo = renderToStaticMarkup(<ColombiaChoropleth filas={filas} />);
     expect(solo).not.toContain("sin ubicación");
+  });
+});
+
+describe("«sin procesos» no depende solo del color (WCAG 1.4.1)", () => {
+  it("el SVG define el rayado y el escalón 0 lo usa en el mapa y en la leyenda", async () => {
+    const { ESTILOS_MAPA } = await import("@/src/components/mapa/estilos");
+    expect(html).toContain('id="clr-mapa-sin"');
+    expect(ESTILOS_MAPA).toMatch(/\.clr-mapa__dpto--e0\{\s*fill:\s*url\(#clr-mapa-sin\)/);
+    expect(ESTILOS_MAPA).toMatch(
+      /li:first-child \.clr-mapa__swatch\{[^}]*repeating-linear-gradient/
+    );
   });
 });

@@ -64,6 +64,11 @@ Entidades y flujos principales:
   escalón ↔ `proceso.modalidad`. **No alimenta `habilitacionGate`**: es
   cualitativo y no produce indicadores RUP ni contratos en SMMLV. Diseño y
   decisiones en `docs/diagnostico/`.
+- **Coincidencias sin presupuesto publicado** (2026-09-26, PENDIENTES §43):
+  `getMatchesForPerfil` pasa `incluirSinValor`, así que los procesos con valor 0
+  o nulo entran con la cuantía en UNKNOWN pero **ordenados detrás** de los que
+  cumplen el mínimo, sin quitarles plaza. El valor de una tarjeta se pinta con
+  `formatValorProceso`: el 0 del SECOP nunca sale como "$0".
 - **Alertas**: envío diario idempotente (`src/lib/alertas/`,
   `envio_log` UNIQUE).
 
@@ -236,7 +241,9 @@ mezclan y no se sustituyen por cifras ni tendencias de un mockup.
   y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
   abiertos en presentación de oferta en siete días; *en juego · este mes* suma
   el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
-  en "—".
+  en "—". Cada cifra lleva debajo una nota visible con lo que cuenta, y el pie
+  dice cuándo consultó la ingesta SECOP II (`ultimaConsulta`, de `sync_log`:
+  "consultó", no "actualizó", porque `sync_log` se cierra antes del transform).
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -261,8 +268,41 @@ El cierre de la ficha distingue `Abierto`, `Cerrado` y estado de apertura ausent
 el cerrado invita a explorar otros procesos y el estado ausente exige comprobar
 en el expediente si todavía se reciben ofertas.
 
+**Cabecera, ticker y sincronía (2026-09-26).** En `/` la barra de navegación
+va en oscuro (`.clr-nav--oscuro`, en `Navbar.js`) y el ticker también; en el
+resto del sitio la barra sigue clara. El ticker son tarjetas con botón de pausa
+(WCAG 2.2.2). Mapa, lista y ficha del hero están sincronizados al pasar el
+puntero o el foco (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de
+servidor, cada camino lleva `data-dpto` y el hero escucha por delegación. El
+clic del mapa **sigue navegando** a la faceta (decisión D).
+
+**Ficha del departamento y tooltip (2026-09-26).** La portada ya no usa
+`procesosPorDepartamento()` sino `detallePorDepartamento()` (misma consulta,
+con conteos `FILTER`: sigue siendo **una** consulta, no una quinta en paralelo —
+PENDIENTES §40). Cada fila trae además `nuevos7d` (abiertos con
+`fecha_publicacion` en los últimos 7 días; **no** es el mismo universo que
+*nuevos · 7 días* de la banda), `montoAbierto` + `nConMonto` (suma del
+presupuesto de los abiertos que lo publican; el 0 no cuenta), `nEntidades`
+(entidades contratantes distintas entre los abiertos, `count(distinct)`) y
+`tipos` por departamento. La ficha del hero muestra los tipos **del departamento** (sin
+enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si la
+fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
+**sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
+
+**Destacados y tendencia del departamento (2026-09-26).** Debajo de los tipos, la
+ficha muestra los tres abiertos de mayor presupuesto y una sparkline de
+**publicados por semana** en las últimas 12. No van en `detallePorDepartamento()`:
+salen de `/api/departamento/[dpto]/resumen` (`src/lib/secop/resumen-departamento.ts`),
+cacheado 6 h en el CDN, y se piden al **elegir** un departamento, no al pasar el
+puntero. La serie cuenta **todos** los publicados, no solo los abiertos: los
+abiertos se concentran en las semanas recientes y la curva subiría siempre. Sus
+consultas se prueban contra PGlite con las migraciones reales.
+
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
-los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
+`contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra,
+el ticker y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
+`--aq-cta` (`#0272b0`/`#0b7cbd`): el `#1a9be0` de antes daba 3,08:1.
 
 **Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
 en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de
@@ -274,4 +314,63 @@ elige los 10 departamentos con más procesos y los coloca sin solaparse en un
 viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
 estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
 entidades ni municipios, que la portada no calcula.
+**Buscador y métrica del mapa (2026-09-26).** El hero lleva un buscador
+(`hero-territorial/BuscadorFichas.jsx`) sobre `/api/secop`: busca en **objeto y
+entidad, no en municipio**, y muestra 5 abiertos enlazados a su ficha; Enter (o
+sin JS) va a `/licitaciones/explorar?q=`, que ahora lee `q` de la URL. El mapa
+se colorea por procesos o por **monto en juego** (`ESCALONES_MONTO` en
+`escala.ts`, cortes fijos por décadas). `slugificar`, `slugDeProceso` e
+`idDesdeSlug` viven en `src/lib/secop/slug.ts` (puro, sin base) y
+`agregados.ts`/`ficha.ts` las reexportan.
+El mapa también se **filtra por tipo** (`indicesDeModo` en `sincronia.js`): el
+hero cambia la clase de escalón de cada camino (`usePinturaEnMapa`), nunca un
+color en línea, así que el CSS del mapa manda en todos los modos. **"Sin
+procesos" va rayado** (patrón `#clr-mapa-sin` en el SVG) además de su tono: el
+color no puede ser lo único que lo diga.
+
+**Imagen para compartir (2026-09-26).** `app/opengraph-image.js` genera con
+`next/og` la vista previa de 1200×630: el mapa real con la rampa del hero y el
+total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
+sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
+porque Satori no lee `woff2`.
+**Preguntas frecuentes (2026-09-26).** Antes del cierre de la portada va un FAQ
+(`src/components/landing/preguntas/`), componente de servidor con `<details>`
+nativo que llega a `PortadaCliente` por prop, como el mapa: no suma JS. El texto
+y el JSON-LD `FAQPage` salen de la misma lista (`src/lib/landing/preguntas-frecuentes.ts`)
+y cada respuesta dice lo que el producto hace hoy. Si cambia la ingesta, el
+modelo de acceso o las alertas, se cambia ahí. La portada lleva además un JSON-LD
+`Dataset` (`src/lib/landing/dataset-jsonld.ts`) para Google Dataset Search: sin
+cifras, sin `license` ni `distribution` (no hay licencia decidida ni descarga),
+con `isBasedOn` a los conjuntos de datos.gov.co.
+
+**Quién compra y comparador (2026-09-26).** Dos rutas públicas nuevas,
+estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
+`/licitaciones/entidades` (las entidades con más procesos abiertos,
+`src/lib/secop/compradores.ts`, una consulta con `count(*) over ()`; es la otra
+mitad de `/competidores`) y `/licitaciones/comparar` (hasta tres departamentos
+con las filas de `detallePorDepartamento()`; la selección va en el **hash** de
+la URL, que no llega al servidor, `src/lib/secop/comparador.ts`). Los estilos de
+un componente `"use client"` no se exportan desde él: una página de servidor
+recibiría una referencia y no el texto (`comparador/estilos.ts`).
+
+**La portada entera en oscuro (2026-09-26).** Ya no conviven un hero oscuro y
+secciones claras: el contenedor de la portada lleva `.tema-oscuro`
+(`globals.css`), que **redefine los tokens** en su ámbito, alias incluidos
+(`--text-primary`, `--border`…, que en `:root` ya se resolvieron contra el
+claro). Así Ficha Viva, rutas, cómo funciona, diagnóstico, accesos y preguntas
+cambian sin tocar su CSS, y `S7Acceso` sigue claro en `/precios` y `/cuenta`.
+En oscuro `--accent` es cian (texto y enlaces): los botones con texto blanco
+usan `--accent-fill`, que existe en los dos temas. Lo que imita la ficha real
+(el esquema de la Ficha Viva) lleva `.tema-claro`, como la tarjeta blanca del
+hero. Lo mide `tema-oscuro.test.ts`. El resto del sitio sigue claro; sin
+interruptor.
+
+**Informe mensual (2026-09-26).** `/informe`: "El mercado del agua en
+Colombia" del **último mes completo** en hora de Colombia
+(`src/lib/secop/informe.ts`, cuatro consultas probadas contra PGlite), con lo
+abierto hoy aparte. Estático (revalidate 6 h). "Descargar PDF" es la impresión
+del navegador con una hoja de impresión propia: sin dependencias. **No pide
+correo**: recogerlo exige la política de tratamiento (PENDIENTES §18) y
+enviarlo, el correo configurado (§0).
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

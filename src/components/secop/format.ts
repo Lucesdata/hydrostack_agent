@@ -5,6 +5,7 @@
 
 import type { Verdict } from "@/src/lib/secop/verdict";
 import type { VerdictPublico } from "@/src/lib/secop/verdict-publico";
+import { montoConDato } from "@/src/lib/secop/monto";
 
 /** Siglas del sector que deben conservarse en mayúsculas al normalizar títulos. */
 const ACRONYMS = ["PTAP", "PTAR", "PTAT", "ESP", "SENA", "INVIAS", "PDA", "SGP"];
@@ -46,6 +47,36 @@ export function formatCopCompact(value: number | null): string {
   if (value < 1_000_000) return COP_FULL.format(value);
   const millones = Math.round(value / 1_000_000);
   return `$${millones.toLocaleString("es-CO")} M`;
+}
+
+/**
+ * El valor de un proceso para una tarjeta: el adjudicado si lo hay, si no el
+ * presupuesto. El 0 del SECOP es "sin dato", no "gratis": nunca se pinta "$0".
+ */
+export function formatValorProceso(p: {
+  valorAdjudicacion: number | null;
+  precioBase: number | null;
+}): string {
+  const v = montoConDato(p.valorAdjudicacion) ?? montoConDato(p.precioBase);
+  return v == null ? "Sin presupuesto publicado" : formatCopCompact(v);
+}
+
+/**
+ * Monto agregado en la escala que se usa en Colombia: "$1,96 billones"
+ * (10¹²), "$114 mil M" (10⁹); por debajo, igual que `formatCopCompact`.
+ * Para sumas de muchos procesos, donde "$1.958.900 M" ya no se lee de un vistazo.
+ */
+export function formatCopEscala(value: number | null): string {
+  if (value == null) return "—";
+  const decimal = (n: number) =>
+    n.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: n < 10 ? 2 : 1 });
+  if (value >= 1e12) {
+    const cifra = decimal(value / 1e12);
+    // Singular solo para "1 billón" exacto: "1,96 billones" va en plural.
+    return `$${cifra} ${cifra === "1" ? "billón" : "billones"}`;
+  }
+  if (value >= 1e9) return `$${Math.round(value / 1e9).toLocaleString("es-CO")} mil M`;
+  return formatCopCompact(value);
 }
 
 /**

@@ -55,7 +55,7 @@ describe("modelo del mapa", () => {
       fila("23", "Córdoba", "cordoba", 224),
     ]);
     const por = (c: string) => m.continente.find((e) => e.dpto === c)!;
-    expect(por("05").escalon.indice).toBe(4);
+    expect(por("05").escalon.indice).toBe(5);
     expect(por("23").escalon.indice).toBe(2);
     expect(por("27").escalon.indice).toBe(1);
   });

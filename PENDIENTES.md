@@ -584,7 +584,7 @@ que deshacer y qué trampas tiene el entorno— está en
 [docs/rediseno-2026-09/TRASPASO.md](docs/rediseno-2026-09/TRASPASO.md). Ese
 documento es el punto de entrada para retomar el trabajo desde cero.
 
-### 37. El PNG de la planta pesa 994 kB — el 57% de la portada actual
+### 37. El PNG de la planta pesa 994 kB — el 57% de la portada actual — ✅ resuelto 2026-09-26
 Medido en producción el 2026-09-15: `public/planta-tratamiento.png` son 994 kB de
 los 1.753 kB que pesa la portada en móvil. El rediseño ya lo sacó de ahí —la
 ilustración se movió a `/nosotros`— así que la portada nueva parte con casi un
@@ -593,6 +593,13 @@ mega menos, pero **el archivo sigue pesando lo mismo, solo que en otra página**
 Optimizarlo (WebP/AVIF, o `next/image` con `sizes`) es trabajo pendiente, y ahora
 cuesta menos decidirlo porque afecta a una página secundaria y no a la puerta de
 entrada.
+
+**Resuelto el 2026-09-26:** `PlantaHero.jsx` sirve un `<picture>` con AVIF
+(48 kB) y WebP (67 kB), y el PNG (1.017 kB) queda solo de respaldo para
+navegadores sin ninguno de los dos. Los tres conservan la transparencia. El
+`<img>` lleva `width`/`height` para reservar el hueco. Las versiones se
+generaron con `sharp` fuera del repo (sin dependencia nueva): si cambia el PNG
+hay que regenerarlas.
 
 De la misma medición: once archivos de fuente, 181 kB, de las cinco familias que
 carga `layout.js`. Con la portada nueva conviene comprobar si se usan las cinco;
@@ -714,7 +721,7 @@ WebSocket. En este incidente no fue la causa —las consultas funcionan con los
 dos—, pero es un punto ciego real: ninguna verificación local ejerce el camino
 que produce el fallo.
 
-### 42. El build depende de que Google Fonts responda (2026-09-22)
+### 42. El build depende de que Google Fonts responda (2026-09-22) — ✅ resuelto 2026-09-26
 
 El job `lint` del PR #45 —un cambio de **solo documentación**— falló así:
 
@@ -746,7 +753,16 @@ License, así que incluirlas en el repositorio no tiene problema de licencia.
 **Mientras tanto**, si un build falla con ese error, relanzar el job resuelve.
 Pero relanzar no es un arreglo: es saber que esto vuelve.
 
-### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21)
+**Resuelto el 2026-09-26** (volvió a pasar en el PR #61). Las fuentes están
+versionadas en `app/fonts/` y se cargan con `next/font/local`: el build ya no
+sale a la red (verificado con `next build` en un entorno sin acceso a Google
+Fonts). Se quedaron las tres familias que se usan —Inter (variable), JetBrains
+Mono 400/500 e IBM Plex Sans Condensed 600/700—: Orbitron no tenía
+consumidores y IBM Plex Mono duplicaba a JetBrains Mono (`--mono` apunta ahora
+a esta). De **once archivos y 181 kB a cinco y 130 kB**. Los woff2 son el
+subconjunto latin de `@fontsource` (SIL OFL, licencias en `app/fonts/OFL-*.txt`).
+
+### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21) — ✅ resuelto 2026-09-26
 `cuantiaGate` ya no da FAIL cuando el valor es 0 —el "sin dato" del SECOP— sino
 UNKNOWN (`src/lib/secop/monto.ts`). Eso arregla el veredicto de un proceso
 concreto (`/api/secop/verdict`, la ficha, el semáforo público), pero **no hace
@@ -770,6 +786,16 @@ El volumen no es marginal: son 9.163 de los procesos abiertos. Con `minCop = 0`
 sí llegaban, y hasta el 2026-09-21 entraban con un **PASS falso** ("valor dentro
 de tu rango objetivo", porque `0 >= 0`); ahora entran como UNKNOWN.
 
+**Resuelto (2026-09-26): (a), pero detrás.** La (a) literal tenía una trampa:
+`getMatchesForPerfil` pide solo 25 procesos por fecha, así que los sin dato
+habrían desplazado a coincidencias que sí cumplen. `SecopQuery.incluirSinValor`
+(solo Postgres) los deja pasar y los **ordena detrás** de los que cumplen el
+mínimo: solo ocupan las plazas que sobren. Entran con la cuantía en UNKNOWN y la
+tarjeta y el correo dicen "Sin presupuesto publicado" en vez de "$0"
+(`formatValorProceso`). El explorador no cambia: allí "valor mínimo" es un filtro
+explícito del usuario. Probado contra PGlite
+(`db-search-sin-valor.db.test.ts`).
+
 ### 44. La ficha ofrece "Activar alerta para procesos como este" y la alerta no se entrega (2026-09-26) — ✅ mitigado el mismo día
 El botón principal del cierre de la ficha (`app/licitaciones/[slug]/page.tsx`,
 §9) lleva a `/cuenta` para activar una alerta, pero el envío no llega en
@@ -783,3 +809,76 @@ intente seguir un proceso.
 `src/components/secop/ficha/CierreFicha.tsx` y su botón principal es "Completar
 mis datos: diagnóstico sin cuenta" → `/diagnostico`. **Al resolver el §0**,
 devolver la alerta a ese componente (y ajustar `CierreFicha.test.tsx`).
+
+**Lo mismo en la portada (2026-09-26).** Los puntos 24 ("No te pierdas los
+cambios", tarjeta con CTA a alertas) y 25 ("Crear alerta gratis" junto a "Ver
+fichas de procesos") de la lista de mejoras esperan al §0. Mientras tanto, el
+CTA secundario del hero lleva al diagnóstico sin cuenta
+(`HeroTerritorial.jsx`), y un test comprueba que el hero no dice "alerta". Al
+resolver el §0: cambiar ese CTA, montar la tarjeta y quitar esa aserción.
+
+**"Cómo funciona" (`S3Motor.jsx`) tiene tres pasos desde el 2026-09-26**, todos
+sin cuenta: llegar a un proceso, leer su ficha y medir tu preparación. El
+runbook de correo (`docs/runbook-correo-y-alertas.md`) dice que al resolver el
+§0 se vuelva a poner "el paso 04 «aviso diario»" en ese archivo: ahora sería un
+cuarto paso nuevo, no la vuelta de uno que se quitó.
+
+**Prueba social (punto 26 de la lista de mejoras): fuera, por falta de datos.**
+No hay testimonios, logos ni cifras de usuarios verificables. Si algún día se
+cuenta "N empresas usan AquaLicita", que sea de la base y con un mínimo por
+debajo del cual no se pinta.
+
+### 45. Rendimiento de la portada: medido y con presupuesto en CI (2026-09-26)
+Lighthouse 12, móvil simulado (4G lenta + CPU ×4), build de producción local
+**sin base de datos** —así que sin ticker ni mapa con datos: con datos reales el
+peso sube algo—.
+
+| | Antes | Después (mediana de 3) |
+|---|---|---|
+| Rendimiento | 91 | **96** |
+| LCP | 3,2 s | **2,7 s** |
+| CLS | 0 | 0 |
+| Peso total | 310 KiB | 289 KiB |
+
+El LCP es el `<h1>` del hero, y el 86 % era *render delay*: en la estimación de
+Lighthouse el titular depende de todo lo precargado. El LCP **observado** era
+1,3 s, igual al FCP. Lo que se hizo: IBM Plex Sans Condensed deja de
+precargarse (`preload: false` en `app/layout.js`), porque ya no aparece en la
+parte visible de la portada. Accesibilidad según Lighthouse: 100.
+
+**Presupuesto en CI** (`npm run presupuesto`, paso del job `lint` después del
+build): JS de primera carga de `/` ≤ 125 kB gzip (hoy 118,3) y fuentes
+precargadas ≤ 100 kB (hoy 89,1). Sin dependencias: lee `.next/`. LCP y CLS no
+entran en CI porque exigen un navegador y varían entre máquinas; Lighthouse CI
+lo resolvería, pero es una dependencia nueva y esa decisión es del usuario
+(`docs/CONDUCTA.md` §2).
+
+**Queda:** LCP 2,7 s sigue por encima de los 2,5 s de "bueno". Lo siguiente
+con más efecto sería medir con datos reales en el preview de Vercel.
+
+
+### 46. Vista por municipios — planificada, sin ejecutar (2026-09-26)
+Sigue bloqueada por datos: `geografia` cubre unos 60 de los ~1.122 municipios y
+no hay geometría municipal. El plan, con los pasos y lo que necesita del dueño
+de la base, está en `docs/rediseno-2026-09/PLAN-VISTA-MUNICIPAL.md`. Dos cosas
+que no estaban anotadas: `geografia_alias` se indexa solo por nombre, así que
+cargar el DIVIPOLA completo haría que los municipios homónimos se pisen (La
+Unión, San Pedro, Villanueva…), y la ubicación es la **sede de la entidad**, que
+a nivel municipal concentra en la capital lo que contrata una gobernación. Hay
+que medir eso antes de dibujar nada.
+
+### 47. Calendario de cierres — aparcado (2026-09-26)
+Punto 44 de la lista de mejoras. Solo 132 procesos tienen fecha de cierre, menos
+del 0,4 % de los abiertos, y por eso la decisión A (AUDITORIA-SPECS-LANDING-MAPA
+§9.1) quitó la pestaña "Cierran pronto". Un calendario con esos 132 daría a
+entender que el resto no cierra. **Se retoma si la cobertura de la fecha de
+cierre sube**, cosa que hay que medir en la base (y ver si sale de otra columna
+del SECOP, como la fecha de recepción de ofertas o el cronograma).
+
+### 48. Informe mensual: la captura de correo espera al §0 y al §18 (2026-09-26)
+Punto 46 de la lista de mejoras. `/informe` ya existe y se descarga sin pedir
+nada. La idea original era darlo a cambio del correo; eso queda para cuando haya
+política de tratamiento publicada (§18, que pide la autorización de la Ley 1581)
+y correo que entregue (§0). Entonces: formulario con casilla de autorización,
+tabla nueva con `.enableRLS()` y envío del informe.
+

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import FichaDepartamento, {
+  formatPorcentaje,
   porcentajeNacional,
 } from "@/src/components/landing/hero-territorial/FichaDepartamento";
 import { filtrarTerritorios } from "@/src/components/landing/hero-territorial/ListaTerritorios";
@@ -26,6 +27,17 @@ describe("HeroTerritorial", () => {
     expect(html).toContain("Antioquia");
     expect(html).toContain("Bogotá D.C.");
     expect(html).toContain("5.155");
+  });
+
+  it("el CTA secundario lleva al diagnóstico sin cuenta y no promete alertas", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} tipos={tipos} totalAbiertos={10000} />
+    );
+    expect(html).toContain('href="/diagnostico"');
+    expect(html).toContain("Diagnóstico sin cuenta");
+    expect(html).toContain('href="/precios"');
+    // Las alertas no se entregan en producción (PENDIENTES §0).
+    expect(html.toLowerCase()).not.toContain("alerta");
   });
 
   it("etiqueta los tipos como nacionales y conserva el CTA territorial", () => {
@@ -83,10 +95,55 @@ describe("interacción territorial pura", () => {
     expect(antioquia).toContain("del total nacional");
   });
 
+  it("dice cuántas entidades contratan en el departamento, solo si se conoce", () => {
+    const con = renderToStaticMarkup(
+      <FichaDepartamento
+        departamento={{ ...departamentos[0], nEntidades: 318 }}
+        totalAbiertos={10000}
+      />
+    );
+    expect(con).toContain("<strong>318</strong> entidades contratan estos procesos");
+    const una = renderToStaticMarkup(
+      <FichaDepartamento
+        departamento={{ ...departamentos[0], nEntidades: 1 }}
+        totalAbiertos={10000}
+      />
+    );
+    expect(una).toContain("entidad contrata estos procesos");
+    const sin = renderToStaticMarkup(
+      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} />
+    );
+    expect(sin).not.toContain("aqFichaEntidades");
+  });
+
   it("solo calcula porcentaje con total nacional positivo", () => {
     expect(porcentajeNacional(10, 100)).toBe(10);
     expect(porcentajeNacional(0, 100)).toBe(0);
     expect(porcentajeNacional(0, 0)).toBeNull();
     expect(porcentajeNacional(10, null)).toBeNull();
+  });
+});
+
+describe("formatPorcentaje", () => {
+  it("no dice 0,0 % cuando hay procesos", () => {
+    expect(formatPorcentaje(0.014)).toBe("< 0,1 %");
+    expect(formatPorcentaje(0)).toBe("0,0 %");
+    expect(formatPorcentaje(14.52)).toBe("14,5 %");
+    expect(formatPorcentaje(null)).toBe("—");
+  });
+});
+
+describe("alternativa en texto al mapa (móvil)", () => {
+  it("el enlace «ver como lista» apunta a la lista de departamentos", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} tipos={tipos} totalAbiertos={10000} />
+    );
+    expect(html).toContain('href="#aq-lista-departamentos"');
+    expect(html).toContain('id="aq-lista-departamentos"');
+    expect(html).toContain("Ver los 2 departamentos como lista");
+  });
+
+  it("sin datos no ofrece una lista vacía", () => {
+    expect(renderToStaticMarkup(<HeroTerritorial />)).not.toContain("como lista");
   });
 });

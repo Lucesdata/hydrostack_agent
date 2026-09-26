@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   sentenceCaseTitle,
   formatCopCompact,
+  formatValorProceso,
+  formatCopEscala,
   formatCopFull,
   formatShortDate,
   verdictScore,
@@ -146,5 +148,40 @@ describe("formatConteo", () => {
   });
   it("el cero es un cero, no una raya", () => {
     expect(formatConteo(0)).toBe("0");
+  });
+});
+
+describe("formatCopEscala", () => {
+  it("usa billones y mil millones, como se dice en Colombia", () => {
+    expect(formatCopEscala(1_958_900_000_000)).toBe("$1,96 billones");
+    expect(formatCopEscala(1_000_000_000_000)).toBe("$1 billón");
+    expect(formatCopEscala(114_000_000_000)).toBe("$114 mil M");
+    expect(formatCopEscala(2_450_000_000)).toBe("$2 mil M");
+  });
+
+  it("por debajo de mil millones se comporta como formatCopCompact", () => {
+    expect(formatCopEscala(450_000_000)).toBe(formatCopCompact(450_000_000));
+    expect(formatCopEscala(null)).toBe("—");
+  });
+});
+
+describe("formatValorProceso", () => {
+  it("el adjudicado manda sobre el presupuesto", () => {
+    expect(formatValorProceso({ valorAdjudicacion: 300_000_000, precioBase: 200_000_000 })).toBe(
+      "$300 M"
+    );
+  });
+
+  it("un adjudicado en 0 no tapa el presupuesto", () => {
+    expect(formatValorProceso({ valorAdjudicacion: 0, precioBase: 200_000_000 })).toBe("$200 M");
+  });
+
+  it('el 0 del SECOP es "sin dato": nunca "$0" (§43)', () => {
+    expect(formatValorProceso({ valorAdjudicacion: null, precioBase: 0 })).toBe(
+      "Sin presupuesto publicado"
+    );
+    expect(formatValorProceso({ valorAdjudicacion: null, precioBase: null })).toBe(
+      "Sin presupuesto publicado"
+    );
   });
 });

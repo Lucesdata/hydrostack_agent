@@ -9,6 +9,11 @@
   --aq-line: rgba(140, 190, 225, 0.16);
   --aq-cyan: #4cc9ff;
   --aq-blue: #1a9be0;
+  /* Fondo de los botones con texto blanco. #1a9be0 daba 3,08:1 y el final del
+     degradado (#2bb7ee) 2,30:1: el texto de un CTA no se leía. Medido en
+     src/__tests__/design/contraste-oscuro.test.ts. */
+  --aq-cta: #0272b0;
+  --aq-cta-2: #0b7cbd;
   --aq-green: #3fd6a0;
   --aq-card: #ffffff;
   --aq-ink: #0b1f33;
@@ -21,6 +26,7 @@
   --aq-e2: #1f7cc0;
   --aq-e3: #2aa7e3;
   --aq-e4: #35d3c0;
+  --aq-e5: #b4f5e4;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -98,6 +104,156 @@
   color: #c3d3e0;
   hyphens: manual;
 }
+/* Buscador del hero (BuscadorFichas.jsx). */
+.hero :global(.aqBuscadorHero) {
+  position: relative;
+  z-index: 5;
+  margin: 0 0 18px;
+}
+.hero :global(.aqBuscadorHeroCampo) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 12px;
+  background: rgba(4, 16, 28, 0.75);
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroCampo:focus-within) {
+  border-color: var(--aq-cyan);
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.hero :global(.aqBuscadorHeroCampo input) {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--aq-text);
+  font:
+    15px var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroCampo input::placeholder) {
+  color: #7d93a6;
+}
+.hero :global(.aqBuscadorHeroPanel) {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  padding: 8px;
+  border: 1px solid rgba(76, 201, 255, 0.35);
+  border-radius: 12px;
+  background: #0a1d30;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+}
+.hero :global(.aqBuscadorHeroPanel[hidden]) {
+  display: none;
+}
+.hero :global(.aqBuscadorHeroEstado) {
+  margin: 4px 8px 6px;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroEstado:empty) {
+  display: none;
+}
+.hero :global(.aqBuscadorHeroPanel ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqBuscadorHeroPanel li a) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--aq-text);
+  text-decoration: none;
+}
+.hero :global(.aqBuscadorHeroPanel li a:hover),
+.hero :global(.aqBuscadorHeroPanel li a:focus-visible) {
+  background: rgba(76, 201, 255, 0.12);
+  outline: none;
+}
+.hero :global(.aqBuscadorHeroObjeto) {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font:
+    600 13.5px/1.35 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroDetalle) {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqBuscadorHeroDetalle b) {
+  flex: none;
+  color: var(--aq-cyan);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.hero :global(.aqBuscadorHeroTodos) {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 10px 10px 6px;
+  border-top: 1px solid var(--aq-line);
+  color: var(--aq-cyan);
+  text-decoration: none;
+  font:
+    600 13px var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqBuscadorHeroTodos:focus-visible) {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--aq-muted);
+  border-radius: 999px;
+  color: var(--aq-text);
+  font:
+    600 14px var(--font-inter),
+    sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.secondaryCta:hover {
+  border-color: var(--aq-cyan);
+  background: rgba(76, 201, 255, 0.08);
+}
+.secondaryCta:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
 .primaryCta {
   display: inline-flex;
   align-items: center;
@@ -105,7 +261,7 @@
   min-height: 48px;
   padding: 0 26px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1a9be0, #2bb7ee);
+  background: linear-gradient(90deg, var(--aq-cta), var(--aq-cta-2));
   box-shadow: 0 8px 28px rgba(26, 155, 224, 0.35);
   color: #fff;
   font:
@@ -122,7 +278,7 @@
 }
 .primaryCta:focus-visible,
 .allProcesses:focus-visible,
-.types a:focus-visible,
+.types a.typeFila:focus-visible,
 .fichaCta:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 3px;
@@ -136,6 +292,22 @@
   font:
     12px/1.4 var(--font-inter),
     sans-serif;
+}
+.ctaPrecios {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--aq-cyan);
+  font:
+    600 12.5px/1.4 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.ctaPrecios:hover {
+  text-decoration: underline;
+}
+.ctaPrecios:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
 }
 .puntoVivo {
   flex: none;
@@ -233,6 +405,9 @@
 .hero :global(.aqLista button:hover) {
   background: rgba(76, 201, 255, 0.07);
 }
+.hero :global(.aqLista button[data-resaltado]) {
+  background: rgba(76, 201, 255, 0.1);
+}
 .hero :global(.aqLista button[aria-pressed="true"]) {
   border-color: rgba(76, 201, 255, 0.55);
   background: rgba(26, 155, 224, 0.18);
@@ -255,6 +430,9 @@
 }
 .hero :global(.aqPunto--e4) {
   background: var(--aq-e4);
+}
+.hero :global(.aqPunto--e5) {
+  background: var(--aq-e5);
 }
 .hero :global(.aqFilaNombre) {
   overflow: hidden;
@@ -361,6 +539,8 @@
   --mapa-e2: var(--aq-e2);
   --mapa-e3: var(--aq-e3);
   --mapa-e4: var(--aq-e4);
+  --mapa-e5: var(--aq-e5);
+  --mapa-raya: rgba(140, 190, 225, 0.35);
   max-width: 680px;
   margin-inline: auto;
   color: var(--aq-text);
@@ -375,10 +555,37 @@
   stroke: rgba(6, 20, 35, 0.85);
   stroke-width: 0.7;
 }
-.map :global(.clr-mapa__link:hover .clr-mapa__dpto),
-.map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
+.map :global(.clr-mapa__link:hover .clr-mapa__dpto) {
   stroke: #eaf8ff;
   stroke-width: 1.6;
+}
+/* Con teclado, un anillo de dos tonos: trazo oscuro y halo claro. El trazo
+   claro de hover no se distinguía sobre los escalones altos de la rampa
+   (--aq-e4, --aq-e5), y el foco tiene que verse sobre cualquiera. */
+.map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
+  stroke: var(--aq-bg);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 1.5px #f3f8fc) drop-shadow(0 0 3px var(--aq-cyan));
+}
+/* Sincronía con la lista y la ficha (sincronia.js). Mientras algo está
+   señalado, el resto del mapa se atenúa para que se vea dónde está. */
+.map :global(.clr-mapa__dpto) {
+  transition:
+    opacity 0.15s,
+    stroke 0.15s,
+    stroke-width 0.15s;
+}
+.map[data-resaltando] :global(.clr-mapa__dpto:not(.is-resaltado)) {
+  opacity: 0.55;
+}
+.map :global(.clr-mapa__dpto.is-seleccionado) {
+  stroke: #4cc9ff;
+  stroke-width: 1.4;
+}
+.map :global(.clr-mapa__dpto.is-resaltado) {
+  stroke: #ffffff;
+  stroke-width: 1.8;
+  opacity: 1;
 }
 .map :global(.clr-mapa__recuadro) {
   stroke: rgba(140, 190, 225, 0.4);
@@ -429,6 +636,148 @@
   font:
     700 10.5px var(--font-inter),
     sans-serif;
+}
+/* Selector de métrica del mapa y su leyenda (solo con "monto"). */
+.controlesMapa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.controlesMapa .metrica {
+  margin-bottom: 0;
+}
+.metricaPunto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--tipo);
+  vertical-align: 1px;
+}
+.metrica button[data-familia="otros"] .metricaPunto {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.metrica {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.metrica > span {
+  margin-right: 4px;
+}
+.metrica button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--aq-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--aq-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.metrica button[aria-pressed="true"] {
+  border-color: var(--aq-cyan);
+  background: rgba(76, 201, 255, 0.14);
+  color: var(--aq-text);
+  font-weight: 600;
+}
+.metrica button:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.map[data-metrica="tipo"] :global(.atlas-map-label),
+.map[data-metrica="monto"] :global(.clr-mapa__leyenda),
+.map[data-metrica="monto"] :global(.atlas-map-label) {
+  /* La leyenda y los rótulos del servidor hablan de procesos. */
+  display: none;
+}
+.leyendaMonto {
+  margin-bottom: 8px;
+  text-align: left;
+}
+.leyendaMonto ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.leyendaMonto li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.leyendaMonto li:first-child span {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    rgba(140, 190, 225, 0.35) 2px 3px
+  ) !important;
+}
+.leyendaMonto li span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(140, 190, 225, 0.4);
+}
+.leyendaMonto p {
+  max-width: 60ch;
+  margin: 6px 0 0;
+  font:
+    11.5px/1.5 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.tooltip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid rgba(76, 201, 255, 0.4);
+  border-radius: 10px;
+  background: rgba(6, 20, 35, 0.96);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  font:
+    12px/1.45 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.tooltip strong {
+  font-size: 14px;
+  color: var(--aq-text);
+}
+.tooltipTipo b {
+  color: var(--aq-text);
+  font-weight: 600;
+}
+.tooltip em {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--aq-cyan);
+}
+.verLista {
+  display: none;
 }
 .noData {
   margin: 8px 0 0;
@@ -506,6 +855,31 @@
     sans-serif;
   color: var(--aq-ink-muted);
 }
+.hero :global(.aqFichaDatos--sec) {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e3e9ef;
+}
+.hero :global(.aqFichaDatos--sec strong) {
+  font-size: 17px;
+  white-space: nowrap;
+  color: var(--aq-ink);
+}
+.hero :global(.aqFichaEntidades) {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #e3e9ef;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
+.hero :global(.aqFichaEntidades strong) {
+  font:
+    700 17px/1.15 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink);
+}
 .hero :global(.aqFichaNota) {
   margin: 12px 0 0;
   font:
@@ -530,7 +904,7 @@
     sans-serif;
   color: var(--aq-ink-muted);
 }
-.types a {
+.typeFila {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
@@ -545,7 +919,7 @@
     500 13px var(--font-inter),
     sans-serif;
 }
-.types a:hover .typeNombre {
+a.typeFila:hover .typeNombre {
   color: #0369a1;
 }
 .typeNombre {
@@ -572,11 +946,11 @@
   border-radius: 50%;
   background: var(--tipo, #1a9be0);
 }
-.types a[data-familia="otros"] .typePunto {
+.typeFila[data-familia="otros"] .typePunto {
   background: transparent;
   border: 1.5px dashed var(--tipo);
 }
-.types a strong {
+.typeFila strong {
   grid-area: cifra;
   font:
     600 13px var(--font-inter),
@@ -597,6 +971,109 @@
   border-radius: 5px;
   background: var(--tipo, #1a9be0);
 }
+/* Destacados y tendencia del departamento elegido (ResumenDepartamento.jsx). */
+.hero :global(.aqResumen) {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e3e9ef;
+  transition: opacity 0.15s;
+}
+.hero :global(.aqResumen[data-atenuado]) {
+  opacity: 0.45;
+}
+.hero :global(.aqResumen h3) {
+  margin: 0 0 6px;
+  font:
+    650 13px var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink);
+}
+.hero :global(.aqResumenNota) {
+  margin: 4px 0 0;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
+.hero :global(.aqSpark) {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+.hero :global(.aqSparkHit) {
+  fill: transparent;
+}
+.hero :global(.aqSparkBarra) {
+  fill: #0369a1;
+  pointer-events: none;
+}
+.hero :global(.aqSparkCero) {
+  fill: #cfd9e3;
+  pointer-events: none;
+}
+.hero :global(.aqSpark g:hover .aqSparkBarra) {
+  fill: var(--aq-ink);
+}
+.hero :global(.aqDestacados) {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqDestacados a) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid #e3e9ef;
+  border-radius: 8px;
+  color: var(--aq-ink);
+  text-decoration: none;
+}
+.hero :global(.aqDestacados a:hover) {
+  border-color: #0369a1;
+}
+.hero :global(.aqDestacados a:focus-visible) {
+  outline: 2px solid #0369a1;
+  outline-offset: 2px;
+}
+.hero :global(.aqDestTipo) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  color: var(--tipo);
+}
+.hero :global(.aqDestTipo i) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.hero :global(.aqDestTipo--otros i) {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.hero :global(.aqDestObjeto) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font:
+    500 12.5px/1.4 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqDestMeta) {
+  font:
+    11.5px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
 .fichaCta {
   display: flex;
   justify-content: center;
@@ -612,6 +1089,23 @@
     650 13.5px var(--font-inter),
     sans-serif;
   text-align: center;
+}
+.comparar {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  color: #0369a1;
+  font:
+    600 12.5px var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.comparar:hover {
+  text-decoration: underline;
+}
+.comparar:focus-visible {
+  outline: 2px solid #0369a1;
+  outline-offset: 2px;
 }
 .fichaCta:hover {
   background: #0369a1;
@@ -656,7 +1150,8 @@
   grid-template-columns: 40px minmax(0, 1fr);
   grid-template-areas:
     "icono cifra"
-    "icono etiqueta";
+    "icono etiqueta"
+    "icono alcance";
   column-gap: 12px;
   align-items: center;
   padding: 6px 18px;
@@ -691,6 +1186,96 @@
     700 24px/1.2 var(--font-inter),
     sans-serif;
   color: var(--aq-text);
+}
+/* Últimos procesos publicados: los mismos del ticker, cada uno a su ficha. */
+.hero :global(.aqMercadoRecientes) {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--aq-line);
+}
+.hero :global(.aqMercadoRecientes h3) {
+  margin: 0 0 8px;
+  font:
+    600 12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqMercadoRecientes ol) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqMercadoRecientes a) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--aq-line);
+  border-radius: 10px;
+  color: var(--aq-text);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.hero :global(.aqMercadoRecientes a:hover) {
+  border-color: var(--aq-cyan);
+}
+.hero :global(.aqMercadoRecientes a:focus-visible) {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.hero :global(.aqMercadoTipo) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  color: var(--tipo);
+}
+.hero :global(.aqMercadoTipo i) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.hero :global(.aqMercadoTipo--otros i) {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.hero :global(.aqMercadoObjeto) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font:
+    500 13px/1.4 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqMercadoMeta) {
+  font:
+    11px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqMercadoVacio) {
+  margin: 0;
+  font:
+    13px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+/* Qué cuenta cada cifra: más pequeño que la etiqueta, debajo de ella. */
+.hero :global(.aqMercado dd.aqMercadoAlcance) {
+  grid-area: alcance;
+  margin-top: 2px;
+  font:
+    11px/1.4 var(--font-inter),
+    sans-serif;
+  color: #8499ab;
 }
 .hero :global(.aqMercado > p) {
   margin: 12px 0 0;
@@ -740,6 +1325,29 @@
   .kpis {
     grid-template-columns: minmax(0, 1fr);
   }
+  .verLista {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-top: 6px;
+    border: 1px solid var(--aq-line);
+    border-radius: 999px;
+    color: var(--aq-cyan);
+    text-decoration: none;
+    font:
+      600 13.5px var(--font-inter),
+      sans-serif;
+  }
+  .verLista:focus-visible {
+    outline: 2px solid var(--aq-cyan);
+    outline-offset: 2px;
+  }
+  /* Que el salto no deje la lista debajo de la barra fija. */
+  .hero :global(#aq-lista-departamentos) {
+    scroll-margin-top: calc(var(--nav-h, 56px) + 12px);
+  }
   .kpis dl {
     padding: 10px 0 0;
     border-left: 0;
@@ -756,6 +1364,9 @@
     border-left: 0;
     padding-top: 12px;
     border-top: 1px solid var(--aq-line);
+  }
+  .hero :global(.aqMercadoRecientes ol) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 600px) {

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ESCALONES, escalonDe } from "@/src/lib/mapa/escala";
+import { ESCALONES_MONTO, escalonMontoDe } from "@/src/lib/mapa/escala";
 
 /**
  * Los cortes del color del mapa.
@@ -12,8 +13,8 @@ import { ESCALONES, escalonDe } from "@/src/lib/mapa/escala";
  */
 
 describe("escala del mapa", () => {
-  it("declara cinco escalones contiguos, de menor a mayor", () => {
-    expect(ESCALONES).toHaveLength(5);
+  it("declara seis escalones contiguos, de menor a mayor", () => {
+    expect(ESCALONES).toHaveLength(6);
     ESCALONES.forEach((e, i) => expect(e.indice).toBe(i));
     for (let i = 1; i < ESCALONES.length; i++) {
       const previo = ESCALONES[i - 1];
@@ -33,7 +34,9 @@ describe("escala del mapa", () => {
       [500, 3],
       [1499, 3],
       [1500, 4],
-      [5155, 4], // Antioquia, el máximo real
+      [2999, 4],
+      [3000, 5],
+      [5155, 5], // Antioquia, el máximo real
     ];
     for (const [n, indice] of casos) expect(escalonDe(n).indice).toBe(indice);
   });
@@ -42,6 +45,11 @@ describe("escala del mapa", () => {
     // Tolima y Quindío, 708 los dos. Es el caso que descartó los cuantiles.
     expect(escalonDe(708).indice).toBe(escalonDe(708).indice);
     expect(escalonDe(708)).toBe(escalonDe(708));
+  });
+
+  it("no pinta igual al máximo real y a un departamento con 1.500", () => {
+    // Antioquia (5.155) y 1.500 compartían escalón con el "1.500+" de antes.
+    expect(escalonDe(5155).indice).toBeGreaterThan(escalonDe(1500).indice);
   });
 
   it("trata cualquier conteo imposible como 'sin procesos'", () => {
@@ -55,7 +63,31 @@ describe("escala del mapa", () => {
       "1–99",
       "100–499",
       "500–1.499",
-      "1.500+",
+      "1.500–2.999",
+      "3.000+",
     ]);
+  });
+});
+
+describe("escalonMontoDe", () => {
+  it("cae en el escalón de su década", () => {
+    expect(escalonMontoDe(5e9).indice).toBe(1);
+    expect(escalonMontoDe(1e10).indice).toBe(2);
+    expect(escalonMontoDe(99_999_999_999).indice).toBe(2);
+    expect(escalonMontoDe(1e11).indice).toBe(3);
+    expect(escalonMontoDe(1e12).indice).toBe(4);
+    expect(escalonMontoDe(1.96e12).indice).toBe(4);
+  });
+
+  it("sin presupuesto publicado no es un monto", () => {
+    expect(escalonMontoDe(0)).toBe(ESCALONES_MONTO[0]);
+    expect(escalonMontoDe(Number.NaN)).toBe(ESCALONES_MONTO[0]);
+    expect(ESCALONES_MONTO[0].etiqueta).toBe("Sin presupuesto publicado");
+  });
+
+  it("los cortes no dejan huecos entre escalones", () => {
+    for (let i = 1; i < ESCALONES_MONTO.length; i++) {
+      expect(ESCALONES_MONTO[i].min).toBe((ESCALONES_MONTO[i - 1].max ?? 0) + 1);
+    }
   });
 });

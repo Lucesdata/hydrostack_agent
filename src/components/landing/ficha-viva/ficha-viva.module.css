@@ -1,8 +1,9 @@
-/* "La Ficha Viva". Tema claro: es el umbral entre el hero oscuro y la ficha,
-   que también es clara. Usa los tokens de globals.css. */
+/* "La Ficha Viva". Usa los tokens de globals.css, así que toma el tema de la
+   portada (oscuro desde 2026-09-26). El esquema, que imita la ficha, lleva
+   .tema-claro: la ficha es clara, como la tarjeta del hero. */
 .seccion {
   padding: clamp(56px, 7vw, 96px) var(--gutter);
-  background: linear-gradient(180deg, #eef4f8 0%, var(--bg) 320px);
+  background: linear-gradient(180deg, var(--surface-alt) 0%, var(--bg) 320px);
   color: var(--text-primary);
 }
 .contenedor {
@@ -223,7 +224,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-fill);
   color: #fff;
   font:
     700 12px var(--font-inter),
@@ -471,11 +472,11 @@
     sans-serif;
 }
 .ctaPrimario {
-  background: var(--accent);
+  background: var(--accent-fill);
   color: #fff;
 }
 .ctaPrimario:hover {
-  background: var(--accent-deep);
+  background: var(--accent-fill-hover);
 }
 .ctaSecundario {
   border: 1px solid var(--border);

@@ -22,8 +22,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Usa la versión fijada en package.json (devDependencies), que instala
+      # `npm ci`. Sin fijarla, npx bajaba la última en cada ejecución y una
+      # versión nueva podía poner en rojo todos los PR sin cambiar nada.
       - name: Check formatting
         run: npx prettier --check .
 
       - name: Build check
         run: npm run build
+
+      # Falla si la portada engorda: JS de primera carga y fuentes precargadas.
+      # Sin red ni base; los límites y su porqué, en el propio script.
+      - name: Presupuesto de peso de la portada
+        run: npm run presupuesto

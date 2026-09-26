@@ -19,7 +19,7 @@ export default function S7Acceso() {
   const grupos = seccionesPorNivel();
 
   return (
-    <section className="section-pad" style={{ background: "#FAFAF7" }}>
+    <section className="section-pad" style={{ background: "var(--bg)" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
           <span style={{ width: 8, height: 8, background: "var(--accent)" }} />
@@ -37,7 +37,7 @@ export default function S7Acceso() {
         <h2
           style={{
             font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
-            color: "#0A1F1C",
+            color: "var(--text-primary)",
             margin: "0 0 40px",
             maxWidth: 760,
           }}
@@ -54,7 +54,7 @@ export default function S7Acceso() {
                 style={{
                   position: "relative",
                   border: `1px solid ${libre ? "var(--accent)" : "var(--line)"}`,
-                  background: libre ? "#fff" : "transparent",
+                  background: libre ? "var(--surface)" : "transparent",
                   padding: 22,
                   display: "flex",
                   flexDirection: "column",
@@ -97,7 +97,7 @@ export default function S7Acceso() {
                 <span
                   style={{
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: libre ? "var(--accent)" : "#6B746F",
+                    color: libre ? "var(--accent)" : "var(--ink-300)",
                     background: libre ? "var(--accent-faint)" : "transparent",
                     border: `1px solid ${libre ? "var(--accent)" : "var(--line)"}`,
                     padding: "2px 8px",
@@ -125,7 +125,7 @@ export default function S7Acceso() {
                       key={s.id}
                       style={{
                         font: "14px/1.5 var(--font-inter)",
-                        color: "#0A1F1C",
+                        color: "var(--text-primary)",
                         paddingLeft: 14,
                         borderLeft: `1px solid ${libre ? "var(--accent)" : "var(--line)"}`,
                       }}

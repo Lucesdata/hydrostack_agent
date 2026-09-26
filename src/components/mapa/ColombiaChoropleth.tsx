@@ -52,17 +52,35 @@ function etiquetaDe(e: EntradaMapa): string {
 function Departamento({
   entrada,
   disponible = true,
+  tooltipExterno = false,
 }: {
   entrada: EntradaMapa;
   disponible?: boolean;
+  tooltipExterno?: boolean;
 }) {
+  const enlazado = disponible && !!entrada.href;
+  // Con tooltip propio (el hero), el <title> de un departamento enlazado solo
+  // añadiría el tooltip nativo del navegador encima: su nombre accesible ya lo
+  // da el aria-label del enlace. Los no enlazados lo conservan siempre.
+  const conTitle = !(tooltipExterno && enlazado);
   const path = (
-    <path d={entrada.d} className={`clr-mapa__dpto clr-mapa__dpto--e${entrada.escalon.indice}`}>
-      <title>{disponible ? etiquetaDe(entrada) : `${entrada.nombre}, datos no disponibles`}</title>
+    <path
+      d={entrada.d}
+      className={`clr-mapa__dpto clr-mapa__dpto--e${entrada.escalon.indice}`}
+      // El código DIVIPOLA, para que el hero (cliente) sincronice mapa, lista
+      // y ficha por delegación de eventos sin mandar el mapa al navegador.
+      data-dpto={entrada.dpto}
+      data-nombre={entrada.nombre}
+    >
+      {conTitle && (
+        <title>
+          {disponible ? etiquetaDe(entrada) : `${entrada.nombre}, datos no disponibles`}
+        </title>
+      )}
     </path>
   );
 
-  if (!disponible || !entrada.href) return path;
+  if (!enlazado) return path;
 
   return (
     <a href={entrada.href} className="clr-mapa__link" aria-label={etiquetaDe(entrada)}>
@@ -82,6 +100,8 @@ export interface ColombiaChoroplethProps {
   /** Etiquetas visuales de referencia; no incorporan datos ni geometría al cliente. */
   etiquetas?: boolean;
   datosDisponibles?: boolean;
+  /** Quien monta el mapa pinta su propio tooltip (el hero de la portada). */
+  tooltipExterno?: boolean;
 }
 
 export default function ColombiaChoropleth({
@@ -89,6 +109,7 @@ export default function ColombiaChoropleth({
   totalAbiertos,
   etiquetas = false,
   datosDisponibles = true,
+  tooltipExterno = false,
 }: ColombiaChoroplethProps) {
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
@@ -108,8 +129,28 @@ export default function ColombiaChoropleth({
         aria-labelledby="clr-mapa-titulo"
       >
         <title id="clr-mapa-titulo">Procesos abiertos de agua y saneamiento por departamento</title>
+        {/* "Sin procesos" lleva rayado además de su tono: sobre el fondo oscuro
+            del hero ese tono se distingue apenas 1,37:1, y el color no puede
+            ser lo único que lo diga (WCAG 1.4.1). La clase --e0 lo usa. */}
+        <defs>
+          <pattern
+            id="clr-mapa-sin"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width="6" height="6" className="clr-mapa__sin-fondo" />
+            <line x1="0" y1="0" x2="0" y2="6" className="clr-mapa__sin-raya" />
+          </pattern>
+        </defs>
         {continente.map((e) => (
-          <Departamento key={e.dpto} entrada={e} disponible={datosDisponibles} />
+          <Departamento
+            key={e.dpto}
+            entrada={e}
+            disponible={datosDisponibles}
+            tooltipExterno={tooltipExterno}
+          />
         ))}
         {sanAndres && (
           <g transform={`translate(${RECUADRO_X} ${RECUADRO_Y})`}>
@@ -120,7 +161,11 @@ export default function ColombiaChoropleth({
               width={LADO_RECUADRO + 8}
               height={LADO_RECUADRO + 8}
             />
-            <Departamento entrada={sanAndres} disponible={datosDisponibles} />
+            <Departamento
+              entrada={sanAndres}
+              disponible={datosDisponibles}
+              tooltipExterno={tooltipExterno}
+            />
             <text className="clr-mapa__recuadro-txt" x={-4} y={LADO_RECUADRO + 16}>
               San Andrés
             </text>

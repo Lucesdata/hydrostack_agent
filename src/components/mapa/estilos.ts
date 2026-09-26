@@ -2,7 +2,7 @@
  * Estilos del mapa departamental. Se inyectan una vez por página, con el mismo
  * patrón que `lista/estilos.ts` y el resto del producto.
  *
- * Los cinco tintes del color viven aquí y no en `globals.css` a propósito: son
+ * Los tintes del color viven aquí y no en `globals.css` a propósito: son
  * datos, no estado. No llevan texto encima —lo que se lee es la leyenda, sobre
  * `--bg`— así que no entran en el contrato de contraste del semáforo, que es
  * donde el color sí informa de si puedes participar.
@@ -17,6 +17,7 @@ export const ESTILOS_MAPA = `
   --mapa-e2: rgba(3,105,161,.36);
   --mapa-e3: rgba(3,105,161,.62);
   --mapa-e4: var(--accent);
+  --mapa-e5: var(--accent-ocean);
   margin: 0; display: flex; flex-direction: column; gap: 14px;
 }
 .clr-mapa__svg{ width: 100%; height: auto; display: block; overflow: visible; }
@@ -24,11 +25,16 @@ export const ESTILOS_MAPA = `
   stroke: var(--bg); stroke-width: .6; stroke-linejoin: round;
   transition: fill .15s, stroke .15s;
 }
-.clr-mapa__dpto--e0{ fill: var(--mapa-e0); }
+.clr-mapa__dpto--e0{ fill: url(#clr-mapa-sin); }
+/* El rayado de "sin procesos": el tono de siempre más una raya, para que no
+   dependa solo del color (WCAG 1.4.1). --mapa-raya lo ajusta cada tema. */
+.clr-mapa__sin-fondo{ fill: var(--mapa-e0); }
+.clr-mapa__sin-raya{ stroke: var(--mapa-raya, rgba(10, 31, 28, .18)); stroke-width: 2; }
 .clr-mapa__dpto--e1{ fill: var(--mapa-e1); }
 .clr-mapa__dpto--e2{ fill: var(--mapa-e2); }
 .clr-mapa__dpto--e3{ fill: var(--mapa-e3); }
 .clr-mapa__dpto--e4{ fill: var(--mapa-e4); }
+.clr-mapa__dpto--e5{ fill: var(--mapa-e5); }
 .clr-mapa__link:hover .clr-mapa__dpto{ stroke: var(--accent-deep); stroke-width: 1.4; }
 /* El foco se pinta en el path y no con outline: un outline rectangular sobre una
    forma irregular señala el bounding box, no el departamento. */
@@ -45,6 +51,9 @@ export const ESTILOS_MAPA = `
   display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
 }
 .clr-mapa__leyenda li{ display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.clr-mapa__leyenda li:first-child .clr-mapa__swatch{
+  background-image: repeating-linear-gradient(45deg, transparent 0 2px, var(--mapa-raya, rgba(10, 31, 28, .18)) 2px 3px) !important;
+}
 .clr-mapa__swatch{
   width: 14px; height: 10px; border-radius: 2px; display: inline-block;
   border: 1px solid var(--border);

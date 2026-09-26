@@ -20,10 +20,12 @@
    ninguna variable — cambiar nombres tocaría cada sitio que las consume y
    arriesgaría la apariencia visual actual.
 
-   Las 4 familias reales (Orbitron, IBM Plex Mono, Inter, JetBrains Mono) se
-   cargan vía next/font en app/layout.js (self-hosted, ya no por <link> a
-   Google Fonts) y quedan disponibles como --font-orbitron,
-   --font-ibm-plex-mono, --font-inter y --font-jetbrains-mono en el <html>.
+   Las familias reales (Inter, JetBrains Mono e IBM Plex Sans Condensed) se
+   cargan con next/font/local desde app/fonts/ (versionadas: el build ya no
+   sale a Google Fonts, PENDIENTES §42) y quedan disponibles como
+   --font-inter, --font-jetbrains-mono y --font-ibm-plex-sans-condensed en el
+   <html>. Orbitron e IBM Plex Mono se retiraron el 2026-09-26: la primera no
+   la usaba nadie y la segunda duplicaba a JetBrains Mono.
    --mono/--sans/--orb y --font-mono/--font-sans son alias sobre esas
    variables — todo el código (incl. los ~30 sitios que antes hardcodeaban
    el nombre literal de la fuente) ahora referencia una de estas dos capas de
@@ -42,9 +44,10 @@
   /* --border vivía aquí como rgba(0,245,255,.12) del tema oscuro. Se midió: cero
      consumidores en app/ y src/. El nombre se reclama para el tema claro (abajo),
      que es el que pide el sistema de diseño vigente. */
-  --mono: var(--font-ibm-plex-mono), "Courier New", monospace;
+  --mono: var(--font-jetbrains-mono), "Courier New", monospace;
   --sans: var(--font-inter), system-ui, sans-serif;
-  --orb: var(--font-orbitron), sans-serif;
+  /* Sin consumidores; queda como alias por si algo externo lo nombra. */
+  --orb: var(--font-inter), sans-serif;
 
   /* Tema claro "clear" — landing, navbar, hubs */
   /* Superficie */
@@ -93,6 +96,13 @@
 
   /* Foco */
   --focus-ring: #0369a1;
+  /* Fondo de botón con texto blanco. Es el mismo azul que --accent en claro,
+     pero en oscuro --accent pasa a cian (texto y enlaces) y el blanco sobre
+     cian no se lee: el botón necesita su propio token. */
+  --accent-fill: #0369a1;
+  --accent-fill-hover: #0c4a6e;
+  /* El gris de las líneas de la portada, que estaba escrito a mano (#DADAD2). */
+  --line-strong: #dadad2;
 
   /* ── Alias semánticos ────────────────────────────────────────────────────
      El vocabulario que usa el spec de rediseño (superficie / texto / borde) en
@@ -1098,11 +1108,17 @@ select {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
+  /* Cerrado no se ve, así que tampoco puede recibir el foco: con solo
+     max-height y opacity, sus enlaces seguían en el orden de tabulación y el
+     teclado pasaba por seis enlaces invisibles antes del contenido. La
+     visibilidad cambia al terminar la animación de cierre, no al empezarla. */
+  visibility: hidden;
   z-index: 99;
   transition:
     max-height 0.3s ease,
     opacity 0.22s ease,
-    padding 0.3s ease;
+    padding 0.3s ease,
+    visibility 0s linear 0.3s;
 }
 .clr-mobile-menu.open {
   /* 5 pestañas + hasta 9 enlaces de cuenta no caben en los 420px que había
@@ -1111,6 +1127,8 @@ select {
   max-height: calc(100vh - var(--nav-h));
   overflow-y: auto;
   opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
   padding: 10px 28px 20px;
 }
 .clr-mobile-link {
@@ -1518,6 +1536,43 @@ select {
   padding-inline: var(--gutter);
 }
 
+/* Oculto a la vista, no a los lectores de pantalla. La usaban la ficha
+   («Disponible en el nivel de análisis de pliego») y el campo de subida del
+   pliego sin que existiera: el texto salía en pantalla. No usar display:none
+   ni visibility:hidden, que también lo ocultan al lector. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* "Saltar al contenido": lo primero que alcanza el teclado en cada página, y
+   solo se ve cuando tiene el foco. */
+.saltar-contenido {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 14px var(--font-sans);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.saltar-contenido:focus {
+  transform: none;
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
 /* Un enlace de texto suelto no llega a 44px de alto por sí mismo. */
 .tap-target {
   display: inline-flex;
@@ -1568,4 +1623,72 @@ select {
   .bp-page .center-md p {
     margin-inline: auto;
   }
+}
+
+/* ── Temas por ámbito ─────────────────────────────────────────────────────────
+   `.tema-oscuro` redefine los tokens para lo que cuelga de él (hoy, la portada
+   entera: 2026-09-26). Hay que redefinir también los alias (--text-primary,
+   --border…): en :root se resolvieron contra los tokens claros y lo heredado es
+   el valor ya resuelto. `.tema-claro` devuelve un trozo a claro, para lo que
+   imita la ficha, que es clara. Los mide contraste-oscuro.test.ts. */
+.tema-oscuro {
+  color-scheme: dark;
+  --bg: #061423;
+  --surface: #0c2034;
+  --surface-alt: #10283f;
+  --surface-elevated: #0c2034;
+  --card: #0c2034;
+  --ink-900: #f3f8fc;
+  --ink-600: #9fb4c6;
+  --ink-300: #8499ab;
+  --text-primary: #f3f8fc;
+  --text-muted: #9fb4c6;
+  --line: #1d3a55;
+  --line-soft: #1a3450;
+  --line-strong: #24476a;
+  --border: #1d3a55;
+  --accent: #4cc9ff;
+  --accent-soft: rgba(76, 201, 255, 0.14);
+  --accent-faint: rgba(76, 201, 255, 0.05);
+  --accent-river: #7dd3fc;
+  --accent-ocean: #7dd3fc;
+  --accent-deep: #7dd3fc;
+  --accent-fill: #0272b0;
+  --accent-fill-hover: #0b7cbd;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --focus-ring: #4cc9ff;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.tema-claro {
+  color-scheme: light;
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-alt: #f4f4ee;
+  --surface-elevated: #ffffff;
+  --card: #ffffff;
+  --ink-900: #0a1f1c;
+  --ink-600: #525b5a;
+  --ink-300: #6b746f;
+  --text-primary: #0a1f1c;
+  --text-muted: #525b5a;
+  --line: #e5e5e0;
+  --line-soft: #e8e8e2;
+  --line-strong: #dadad2;
+  --border: #e5e5e0;
+  --accent: #0369a1;
+  --accent-soft: rgba(3, 105, 161, 0.13);
+  --accent-faint: rgba(3, 105, 161, 0.04);
+  --accent-river: #7dd3fc;
+  --accent-ocean: #0c4a6e;
+  --accent-deep: #0c4a6e;
+  --accent-fill: #0369a1;
+  --accent-fill-hover: #0c4a6e;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --focus-ring: #0369a1;
+  color: var(--text-primary);
 }

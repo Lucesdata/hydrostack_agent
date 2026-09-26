@@ -13,6 +13,9 @@ vi.mock("@/src/lib/secop/landingStats", () => ({
 // src/__tests__/landing/cifras.test.ts.
 const { getCifrasSector } = vi.hoisted(() => ({ getCifrasSector: vi.fn() }));
 vi.mock("@/src/lib/landing/cifras", () => ({ getCifrasSector }));
+vi.mock("@/src/lib/landing/ultima-consulta", () => ({
+  getUltimaConsultaSecop: vi.fn().mockResolvedValue("2026-09-26T11:04:00.000Z"),
+}));
 
 import { GET } from "@/app/api/landing-stats/route";
 
@@ -34,6 +37,7 @@ describe("GET /api/landing-stats", () => {
     expect(body.nuevos7d).toBe(12);
     expect(body.enJuego).toEqual({ totalCop: 5_000_000, procesos: 3 });
     expect(body).toHaveProperty("destacado");
+    expect(body.ultimaConsulta).toBe("2026-09-26T11:04:00.000Z");
   });
 
   it("si las cifras del sector fallan, el resto de la respuesta sigue sirviendo", async () => {

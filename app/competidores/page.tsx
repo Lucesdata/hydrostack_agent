@@ -65,6 +65,10 @@ export default async function CompetidoresPage({ searchParams }: Props) {
             El listado de competidores —quién se presenta, cuántas gana y por cuánto— pide una
             cuenta gratuita.
           </p>
+          <p className="clr-cmp-sub">
+            La otra mitad, quién compra, se ve sin cuenta:{" "}
+            <Link href="/licitaciones/entidades">las entidades con más procesos abiertos</Link>.
+          </p>
           <p>
             <Link className="clr-cmp-btn" href="/registro?next=/competidores">
               Crear cuenta gratuita
@@ -85,7 +89,8 @@ export default async function CompetidoresPage({ searchParams }: Props) {
         <h1 className="clr-cmp-title">Competidores</h1>
         <p className="clr-cmp-sub">
           Quién se presenta a licitaciones de agua y saneamiento, cuántas gana y por cuánto.
-          Construido sobre adjudicaciones y proponentes publicados desde 2016.
+          Construido sobre adjudicaciones y proponentes publicados desde 2016. La otra mitad,{" "}
+          <Link href="/licitaciones/entidades">quién compra</Link>, está en su propia página.
         </p>
 
         <form className="clr-cmp-buscar" action="/competidores" method="get">

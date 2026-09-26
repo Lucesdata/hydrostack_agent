@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import PaginaFaceta from "@/src/components/secop/lista/PaginaFaceta";
 import { procesosDeFaceta, resolverFaceta } from "@/src/lib/secop/facetas";
+import { metadataDeFaceta } from "@/src/lib/secop/faceta-metadata";
+import { procesosPorTipo } from "@/src/lib/secop/agregados";
 
 /**
  * Ruta facetada por tipo — pública e indexable.
@@ -48,11 +50,15 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const faceta = await resolverFaceta("tipo", slug);
   if (!faceta) return { title: "No encontrado" };
-  return {
-    title: `${faceta.label} · Licitaciones de agua y saneamiento`,
-    description: faceta.descripcion,
-    alternates: { canonical: `/licitaciones/tipo/${faceta.slug}` },
-  };
+  // La cifra del tipo es un GROUP BY ligero sobre los abiertos y solo corre al
+  // regenerar la página (cada 6 h). Si la base no responde, sale sin cifra.
+  let abiertos: number | null = null;
+  try {
+    abiertos = (await procesosPorTipo()).find((t) => t.slug === faceta.slug)?.n ?? null;
+  } catch {
+    abiertos = null;
+  }
+  return metadataDeFaceta({ ...faceta, abiertos });
 }
 
 export default async function Page({ params }: Props) {
