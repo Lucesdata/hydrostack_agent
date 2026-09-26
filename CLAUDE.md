@@ -194,7 +194,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-19 (colisión de correo en el espejo `usuario`).
+Última actualización: 2026-09-26 (KPIs del Hero Territorial V2).
 
 ## graphify
 
@@ -207,11 +207,37 @@ Rules:
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
 
 
-## Landing — primera etapa 2026-09-24
+## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
-Hero/KPIs actualizado únicamente en `src/components/landing/PortadaCliente.jsx`.
-Se conservan fuentes de datos, rutas, paleta y mapa de servidor. Los tres KPIs
-no comparten universo: vigilados incluye histórico; nuevos son abiertos en
-presentación de oferta en siete días; en juego suma precio base de abiertos
-publicados este mes. No sustituirlos por cifras ni tendencias de un mockup.
-Inventario, verificación y reversión: [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
+El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
+`ListaTerritorios`, `FichaDepartamento`, `BandaMercado`) y se monta desde
+`PortadaCliente.jsx`. Se conservan fuentes de datos, rutas, paleta y mapa de
+servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
+mezclan y no se sustituyen por cifras ni tendencias de un mockup.
+
+- **KPIs del hero** (junto al CTA). Vienen de `agregadosPortada()`
+  (`src/lib/secop/agregados.ts`), calculados en el servidor en `app/page.js`
+  con `revalidate` de 6 h. Todos cuentan "abierto" con `condicionAbierto()`:
+  - *Procesos abiertos · Colombia*: `totalAbiertos`, que es el total real e
+    incluye los procesos sin geografía resuelta.
+  - *Departamentos con procesos*: `departamentos.length`, es decir, los
+    departamentos con al menos un proceso abierto y geografía resuelta.
+  - *Tipos de proyecto · Colombia*: `tipos.length`. `procesosPorTipo()`
+    devuelve siempre los cinco de `TIPOS_PROYECTO`, así que con datos siempre
+    muestra 5. Es la taxonomía, no un conteo que varíe.
+  - La suma de la lista por departamento **no cuadra** con `totalAbiertos`,
+    porque los abiertos sin geografía quedan fuera del reparto. Es correcto. El
+    % de la ficha se calcula sobre `totalAbiertos`. No "arreglarlo" sumando la
+    lista.
+  - Si la base no responde, `totalAbiertos` queda `undefined` y todo muestra
+    "—" con el mapa en gris.
+- **Banda "El mercado ahora"** (`BandaMercado`). Son los tres KPIs que antes
+  estaban en el hero. Vienen de un único fetch en cliente a `/api/landing-stats`
+  y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
+  abiertos en presentación de oferta en siete días; *en juego · este mes* suma
+  el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
+  en "—".
+
+El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
+los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
