@@ -57,7 +57,13 @@ function Departamento({
   disponible?: boolean;
 }) {
   const path = (
-    <path d={entrada.d} className={`clr-mapa__dpto clr-mapa__dpto--e${entrada.escalon.indice}`}>
+    <path
+      d={entrada.d}
+      className={`clr-mapa__dpto clr-mapa__dpto--e${entrada.escalon.indice}`}
+      // El código DIVIPOLA, para que el hero (cliente) sincronice mapa, lista
+      // y ficha por delegación de eventos sin mandar el mapa al navegador.
+      data-dpto={entrada.dpto}
+    >
       <title>{disponible ? etiquetaDe(entrada) : `${entrada.nombre}, datos no disponibles`}</title>
     </path>
   );

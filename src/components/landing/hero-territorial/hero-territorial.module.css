@@ -233,6 +233,9 @@
 .hero :global(.aqLista button:hover) {
   background: rgba(76, 201, 255, 0.07);
 }
+.hero :global(.aqLista button[data-resaltado]) {
+  background: rgba(76, 201, 255, 0.1);
+}
 .hero :global(.aqLista button[aria-pressed="true"]) {
   border-color: rgba(76, 201, 255, 0.55);
   background: rgba(26, 155, 224, 0.18);
@@ -379,6 +382,26 @@
 .map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
   stroke: #eaf8ff;
   stroke-width: 1.6;
+}
+/* Sincronía con la lista y la ficha (sincronia.js). Mientras algo está
+   señalado, el resto del mapa se atenúa para que se vea dónde está. */
+.map :global(.clr-mapa__dpto) {
+  transition:
+    opacity 0.15s,
+    stroke 0.15s,
+    stroke-width 0.15s;
+}
+.map[data-resaltando] :global(.clr-mapa__dpto:not(.is-resaltado)) {
+  opacity: 0.55;
+}
+.map :global(.clr-mapa__dpto.is-seleccionado) {
+  stroke: #4cc9ff;
+  stroke-width: 1.4;
+}
+.map :global(.clr-mapa__dpto.is-resaltado) {
+  stroke: #ffffff;
+  stroke-width: 1.8;
+  opacity: 1;
 }
 .map :global(.clr-mapa__recuadro) {
   stroke: rgba(140, 190, 225, 0.4);

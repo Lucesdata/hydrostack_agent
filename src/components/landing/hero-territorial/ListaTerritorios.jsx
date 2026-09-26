@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { formatConteo } from "@/src/components/secop/format";
 import { escalonDe } from "@/src/lib/mapa/escala";
 
@@ -22,8 +23,25 @@ export default function ListaTerritorios({
   seleccionado,
   onSeleccionar,
   datosDisponibles,
+  resaltado = null,
+  onResaltar = () => {},
 }) {
   const visibles = filtrarTerritorios(departamentos, busqueda);
+  const listaRef = useRef(null);
+
+  // Si el mapa señala un departamento que está fuera de la vista de la lista,
+  // la lista se desplaza hasta él. Solo la lista: mover la página al pasar el
+  // ratón por el mapa sería peor que no sincronizar.
+  useEffect(() => {
+    const lista = listaRef.current;
+    if (!lista || !resaltado) return;
+    const fila = lista.querySelector(`[data-clave="${resaltado}"]`);
+    if (!fila) return;
+    const f = fila.getBoundingClientRect();
+    const l = lista.getBoundingClientRect();
+    if (f.top < l.top) lista.scrollTop -= l.top - f.top;
+    else if (f.bottom > l.bottom) lista.scrollTop += f.bottom - l.bottom;
+  }, [resaltado]);
 
   return (
     <section aria-labelledby="aq-territorios-titulo">
@@ -44,14 +62,24 @@ export default function ListaTerritorios({
           onChange={(event) => onBusqueda(event.target.value)}
         />
       </label>
-      <ul className="aqLista" aria-label="Departamentos con procesos abiertos">
+      <ul
+        ref={listaRef}
+        className="aqLista"
+        aria-label="Departamentos con procesos abiertos"
+        onPointerLeave={() => onResaltar(null)}
+      >
         {visibles.map((d) => (
           <li key={d.clave}>
             <button
               type="button"
               aria-pressed={seleccionado?.clave === d.clave}
               aria-controls="aq-ficha-territorial"
+              data-clave={d.clave}
+              data-resaltado={resaltado === d.clave || undefined}
               onClick={() => onSeleccionar(d.clave)}
+              onPointerEnter={() => onResaltar(d.clave)}
+              onFocus={() => onResaltar(d.clave)}
+              onBlur={() => onResaltar(null)}
             >
               <span className={`aqPunto aqPunto--e${escalonDe(d.n).indice}`} aria-hidden="true" />
               <span className="aqFilaNombre">{d.label}</span>

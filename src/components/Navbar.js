@@ -135,6 +135,46 @@ const AUTH_CSS = `
 }
 .clr-nav-user-menu button:hover, .clr-nav-user-menu a:hover{ background: var(--bg, #FAFAF7); }
 .clr-nav-user-sep{ border-top: 1px solid var(--line, #E5E5E0); margin: 4px 0; }
+/* ── Tema oscuro de la portada ────────────────────────────────────────────
+   En "/" la barra se apoya sobre el hero, que es azul noche: una franja crema
+   encima lo partía en dos webs pegadas. Solo ahí: el resto del producto (la
+   ficha, las facetas, las cuentas) es claro y la barra clara le pertenece.
+   Los colores son los del hero (hero-territorial.module.css), no tokens de
+   globals.css, por la misma razón que el hero. */
+.clr-nav--oscuro{
+  background: rgba(6, 20, 35, 0.94);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(140, 190, 225, 0.14);
+}
+.clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; }
+.clr-nav--oscuro .clr-status-label{ color: #9fb4c6; }
+.clr-nav--oscuro .clr-nav-divider{ background: rgba(140, 190, 225, 0.2); }
+.clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; }
+.clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.06); }
+.clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #4cc9ff; background: rgba(76, 201, 255, 0.12); }
+.clr-nav--oscuro .clr-nav-cote line{ stroke: #4cc9ff; }
+.clr-nav--oscuro .clr-nav-auth-link{ color: #c3d3e0; }
+.clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; }
+.clr-nav--oscuro .clr-nav-auth-cta{
+  font: 600 13px var(--font-inter), sans-serif; background: #1a9be0;
+  border-radius: 999px; padding: 8px 16px;
+}
+.clr-nav--oscuro .clr-nav-explorar{
+  font: 600 12.5px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
+  background: #1a9be0; border-radius: 999px; padding: 0 14px;
+}
+.clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); }
+.clr-nav--oscuro .clr-hamburger-icon span{ background: #c3d3e0; }
+.clr-nav--oscuro .clr-hamburger-icon.open span{ background: #4cc9ff; }
+.clr-nav--oscuro .clr-mobile-menu{ background: #0b1b2b; border-bottom-color: rgba(140, 190, 225, 0.14); }
+.clr-nav--oscuro .clr-mobile-link{ color: #c3d3e0; border-bottom-color: rgba(140, 190, 225, 0.12); }
+.clr-nav--oscuro .clr-mobile-link:hover,
+.clr-nav--oscuro .clr-mobile-link[aria-current="page"]{ color: #4cc9ff; }
+.clr-nav--oscuro .clr-mobile-auth{ border-top-color: rgba(140, 190, 225, 0.14); }
+.clr-nav--oscuro .clr-mobile-user .clr-nav-user-name{ color: #f3f8fc; }
+.clr-nav--oscuro .clr-mobile-user .clr-nav-user-email{ color: #9fb4c6; }
+.clr-nav--oscuro .clr-avatar-dot,
+.clr-nav--oscuro .clr-avatar-badge{ border-color: #061423; }
 .clr-mobile-auth{ display: flex; flex-direction: column; border-top: 1px solid var(--line, #E5E5E0); margin-top: 6px; padding-top: 10px; gap: 8px; }
 .clr-mobile-user{ display: flex; align-items: center; gap: 10px; padding: 0 4px 6px; }
 `;
@@ -278,10 +318,12 @@ export default function Navbar() {
   const close = () => setOpen(false);
 
   const isActive = (item) => path.startsWith(item.route);
+  // Oscura solo sobre el hero de la portada; ver .clr-nav--oscuro.
+  const oscura = path === "/";
   const navAria = (active) => (active ? { "aria-current": "page" } : {});
 
   return (
-    <nav className="clr-nav" aria-label="Menú principal">
+    <nav className={`clr-nav${oscura ? " clr-nav--oscuro" : ""}`} aria-label="Menú principal">
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-nav-inner">
         <Link href="/" className="clr-logo" onClick={close} aria-label="AquaLicita inicio">
@@ -334,8 +376,15 @@ export default function Navbar() {
           )}
         </div>
 
-        <Link href={RUTA_EXPLORAR.href} className="clr-nav-explorar" onClick={close}>
-          Licitaciones
+        {/* "Fichas" a secas: "Fichas de procesos" no cabe junto al logo y la
+            hamburguesa a 360px. El nombre completo va en aria-label. */}
+        <Link
+          href={RUTA_EXPLORAR.href}
+          className="clr-nav-explorar"
+          onClick={close}
+          aria-label={NOMBRE_POR_ID.explorar}
+        >
+          Fichas
         </Link>
 
         <button

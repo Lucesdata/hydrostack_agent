@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
 import { ruta } from "@/src/components/landing/seccionesHome";
@@ -8,6 +8,7 @@ import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
+import { dptoDesdeObjetivo, useMarcasEnMapa } from "./sincronia";
 import styles from "./hero-territorial.module.css";
 
 export default function HeroTerritorial({
@@ -25,6 +26,18 @@ export default function HeroTerritorial({
     () => departamentos.find((d) => d.clave === elegido) ?? departamentos[0] ?? null,
     [departamentos, elegido]
   );
+  // Lo que el puntero o el foco señalan en el mapa o en la lista. Mientras
+  // existe, la ficha lo muestra de vista previa; al soltarlo vuelve al elegido.
+  const [resaltado, setResaltado] = useState(null);
+  const previa = useMemo(
+    () => (resaltado ? (departamentos.find((d) => d.clave === resaltado) ?? null) : null),
+    [departamentos, resaltado]
+  );
+  const vista = previa ?? seleccionado;
+  const mapaRef = useRef(null);
+  useMarcasEnMapa(mapaRef, resaltado, seleccionado?.clave ?? null);
+  const alSenalarMapa = (e) => setResaltado(dptoDesdeObjetivo(e.target));
+  const alSoltarMapa = () => setResaltado(null);
   const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
   const explorar = ruta("explorar");
 
@@ -59,6 +72,8 @@ export default function HeroTerritorial({
               onBusqueda={setBusqueda}
               seleccionado={seleccionado}
               onSeleccionar={setElegido}
+              resaltado={resaltado}
+              onResaltar={setResaltado}
               datosDisponibles={datosDisponibles}
             />
             <Link className={styles.allProcesses} href={explorar.href}>
@@ -84,14 +99,27 @@ export default function HeroTerritorial({
               </div>
             </dl>
           </div>
-          <div className={styles.map}>{mapa}</div>
+          <div
+            ref={mapaRef}
+            className={styles.map}
+            onPointerOver={alSenalarMapa}
+            onPointerLeave={alSoltarMapa}
+            onFocus={alSenalarMapa}
+            onBlur={alSoltarMapa}
+          >
+            {mapa}
+          </div>
           {mapa && totalAbiertos == null ? (
             <p className={styles.noData}>El mapa no tiene datos disponibles en este momento.</p>
           ) : null}
         </div>
 
         <div className={styles.detailPanel}>
-          <FichaDepartamento departamento={seleccionado} totalAbiertos={totalAbiertos} />
+          <FichaDepartamento
+            departamento={vista}
+            totalAbiertos={totalAbiertos}
+            vistaPrevia={previa != null}
+          />
           <div className={styles.types}>
             <h2>Tipos de proyecto · Colombia</h2>
             <p>Distribución nacional de procesos abiertos</p>
@@ -118,13 +146,13 @@ export default function HeroTerritorial({
             })}
             {tipos.length === 0 ? <p>Distribución no disponible.</p> : null}
           </div>
-          {seleccionado && seleccionado.n > 0 ? (
+          {vista && vista.n > 0 ? (
             <Link
               className={styles.fichaCta}
-              href={`/licitaciones/departamento/${seleccionado.slug}`}
-              aria-label={`Ver fichas de ${seleccionado.label}`}
+              href={`/licitaciones/departamento/${vista.slug}`}
+              aria-label={`Ver fichas de ${vista.label}`}
             >
-              Ver fichas de {seleccionado.label} <span aria-hidden="true">→</span>
+              Ver fichas de {vista.label} <span aria-hidden="true">→</span>
             </Link>
           ) : null}
         </div>
