@@ -2,40 +2,45 @@ import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
 import { ruta } from "./seccionesHome";
 
+/**
+ * "Cómo funciona", en tres pasos y los tres sin cuenta.
+ *
+ * Eran cuatro (vigilar, filtrar, ver por qué calificas, auditar lo descartado)
+ * y el spec de rediseño pedía quitar la sección. Se decidió el 2026-09-26
+ * dejar una versión compacta que cuente el camino de la Ficha Viva: llegar a
+ * una ficha, leerla y completar tus datos. Filtros, coincidencias y auditoría
+ * no desaparecen: siguen en `S7Acceso`, que lista todas las secciones.
+ *
+ * El paso 3 no dice que el diagnóstico cambie el veredicto de la ficha, porque
+ * no lo hace: no alimenta `habilitacionGate` (CLAUDE.md). Dice lo que devuelve.
+ */
 export default function S3Motor({ procesosVigilados }) {
   const PASOS = [
     {
       n: "01",
-      titulo: "Se vigila el sector entero",
-      cuerpo: `Todo lo que publica el SECOP II pasa por una red sectorial: ${formatConteo(
+      titulo: "Llega a un proceso",
+      cuerpo: `Por el mapa, por tu departamento o buscando por entidad u objeto: ${formatConteo(
         procesosVigilados
-      )} procesos de agua y saneamiento clasificados, no el SECOP completo.`,
+      )} procesos de agua y saneamiento del SECOP II, clasificados por tipo de obra.`,
       ...ruta("explorar"),
-      cta: "EXPLORAR PROCESOS",
+      cta: "VER FICHAS",
     },
     {
       n: "02",
-      titulo: "Tus reglas lo filtran",
+      titulo: "Lee su ficha",
       cuerpo:
-        "Cuantía, zona, entidad, modalidad y palabras excluidas. El motor es determinista: la misma regla da siempre el mismo resultado, y puedes auditar por qué.",
-      ...ruta("filtros"),
-      cta: "DEFINIR FILTROS",
+        "Qué se contrata, si recibe ofertas, si puedes participar y qué te falta, con el estado de cada requisito. El semáforo se ve sin cuenta.",
+      href: "#ficha-viva",
+      etiqueta: "sin cuenta",
+      cta: "CÓMO RAZONA LA FICHA",
     },
     {
       n: "03",
-      titulo: "Ves por qué calificas o por qué no",
+      titulo: "Mide tu preparación",
       cuerpo:
-        "Cada requisito habilitante es una compuerta con su estado. El semáforo lo ves sin cuenta; la explicación de cada compuerta, con cuenta.",
-      ...ruta("coincidencias"),
-      cta: "VER COINCIDENCIAS",
-    },
-    {
-      n: "04",
-      titulo: "Un filtro demasiado estrecho no da errores. Da silencio",
-      cuerpo:
-        "Guardamos cada proceso que tus reglas descartaron, con el motivo exacto. Si al revisarlos aparece algo que sí te interesaba, el filtro está mal — y ya sabes cuál.",
-      ...ruta("auditoria"),
-      cta: "VER QUÉ SE DESCARTA",
+        "Diez preguntas y sin cuenta: tu nivel de preparación, a qué escalón de contratación llegas y qué hacer primero.",
+      ...ruta("diagnostico"),
+      cta: "HACER EL DIAGNÓSTICO",
     },
   ];
 
@@ -63,7 +68,7 @@ export default function S3Motor({ procesosVigilados }) {
             maxWidth: 720,
           }}
         >
-          Un motor que vigila por ti, y que te enseña cómo decide
+          Del mapa a la ficha, y de la ficha a lo que te falta
         </h2>
 
         <div style={{ display: "grid", gap: 0 }}>
