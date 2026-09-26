@@ -269,7 +269,10 @@ fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
 **sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
-los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
+`contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra,
+el ticker y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
+`--aq-cta` (`#0272b0`/`#0b7cbd`): el `#1a9be0` de antes daba 3,08:1.
 
 **Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
 en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de

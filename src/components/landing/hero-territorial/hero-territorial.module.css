@@ -9,6 +9,11 @@
   --aq-line: rgba(140, 190, 225, 0.16);
   --aq-cyan: #4cc9ff;
   --aq-blue: #1a9be0;
+  /* Fondo de los botones con texto blanco. #1a9be0 daba 3,08:1 y el final del
+     degradado (#2bb7ee) 2,30:1: el texto de un CTA no se leía. Medido en
+     src/__tests__/design/contraste-oscuro.test.ts. */
+  --aq-cta: #0272b0;
+  --aq-cta-2: #0b7cbd;
   --aq-green: #3fd6a0;
   --aq-card: #ffffff;
   --aq-ink: #0b1f33;
@@ -105,7 +110,7 @@
   min-height: 48px;
   padding: 0 26px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1a9be0, #2bb7ee);
+  background: linear-gradient(90deg, var(--aq-cta), var(--aq-cta-2));
   box-shadow: 0 8px 28px rgba(26, 155, 224, 0.35);
   color: #fff;
   font:
