@@ -1,10 +1,4 @@
-import {
-  Orbitron,
-  IBM_Plex_Mono,
-  IBM_Plex_Sans_Condensed,
-  Inter,
-  JetBrains_Mono,
-} from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Navbar from "@/src/components/Navbar";
@@ -12,44 +6,50 @@ import S6Footer from "@/src/components/landing/S6Footer";
 import { appUrl } from "@/src/lib/app-url";
 import "./globals.css";
 
-// Las 4 familias reales de la landing + calculadoras + Hydro_Agent, self-hosted
-// vía next/font en vez del <link> a Google Fonts que había antes (evita el
-// warning de lint y el round-trip a fonts.googleapis.com). Cada .variable se
-// aplica al <html> más abajo y --mono/--sans/--orb/--font-mono/--font-sans en
-// globals.css referencian estas variables — no se usan los nombres de fuente
-// literales ("Orbitron", "IBM Plex Mono"…) en ningún lado del código.
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-orbitron",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  style: ["normal", "italic"],
-  variable: "--font-ibm-plex-mono",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
+// Fuentes versionadas en app/fonts/ y servidas con next/font/local (2026-09-26,
+// PENDIENTES §42). Antes eran cinco familias de next/font/google, y cada build
+// —en CI y en Vercel— salía a la red a buscarlas: cuando Google Fonts respondía
+// mal, el build caía entero aunque el cambio no tocara nada (pasó en los PR #45
+// y #61). Ahora el build no depende de la red.
+//
+// De paso, se quedaron las tres que se usan. Orbitron no lo usaba nadie (--orb
+// no aparece en el código) e IBM Plex Mono era una segunda monoespaciada: --mono
+// apunta ahora a JetBrains Mono, la de todo lo demás. Once archivos y 181 kB
+// pasaron a cinco y 130 kB. Los woff2 son el subconjunto latin de @fontsource
+// (licencia SIL OFL, en app/fonts/OFL-*.txt), que cubre tildes, ñ, ü, ¿ y ¡.
+//
+// Cada .variable se aplica al <html> más abajo; globals.css y los componentes
+// usan las variables, nunca el nombre literal de la fuente.
+const inter = localFont({
+  src: "./fonts/inter-latin-var.woff2",
+  weight: "100 900",
   variable: "--font-inter",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrainsMono = localFont({
+  src: [
+    { path: "./fonts/jetbrains-mono-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/jetbrains-mono-latin-500-normal.woff2", weight: "500", style: "normal" },
+  ],
   variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
-// Solo para el headline del hero (rediseño "vidrio flotante" 2026-08-15).
-const ibmPlexSansCondensed = IBM_Plex_Sans_Condensed({
-  subsets: ["latin"],
-  weight: ["600", "700"],
+// Titulares condensados (hero y secciones).
+const ibmPlexSansCondensed = localFont({
+  src: [
+    {
+      path: "./fonts/ibm-plex-sans-condensed-latin-600-normal.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/ibm-plex-sans-condensed-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-ibm-plex-sans-condensed",
   display: "swap",
 });
@@ -105,7 +105,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="es"
-      className={`${orbitron.variable} ${ibmPlexMono.variable} ${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
     >
       <body>
         <Navbar />
