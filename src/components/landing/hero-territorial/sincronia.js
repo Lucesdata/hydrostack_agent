@@ -68,8 +68,33 @@ export function contenidoTooltip({
     nombre: fila?.label ?? nombre ?? null,
     n,
     pct,
+    monto: fila?.montoAbierto ?? 0,
     principal: principal
       ? { ...principal, label: tipos[principal.clave] ?? principal.clave }
       : null,
   };
+}
+
+/**
+ * Recolorea el mapa según la métrica elegida. El SVG de servidor trae el color
+ * por procesos en su clase (`clr-mapa__dpto--eN`); con "monto", cada camino
+ * recibe el escalón de su monto en un `style.fill` que gana a la clase, y al
+ * volver a "procesos" se quita. `escalonMonto` llega por parámetro para que
+ * este archivo no dependa de la escala.
+ */
+export function useMetricaEnMapa(contenedorRef, metrica, departamentos, escalonMonto) {
+  useEffect(() => {
+    const raiz = contenedorRef.current;
+    if (!raiz) return;
+    const monto = new Map(departamentos.map((d) => [d.clave, d.montoAbierto ?? 0]));
+    for (const camino of raiz.querySelectorAll("[data-dpto]")) {
+      if (metrica === "monto") {
+        const i = escalonMonto(monto.get(camino.getAttribute("data-dpto")) ?? 0).indice;
+        camino.style.fill = `var(--mapa-e${i})`;
+      } else {
+        camino.style.removeProperty("fill");
+      }
+    }
+    raiz.setAttribute("data-metrica", metrica);
+  }, [contenedorRef, metrica, departamentos, escalonMonto]);
 }

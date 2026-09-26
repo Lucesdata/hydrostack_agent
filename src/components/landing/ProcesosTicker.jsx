@@ -193,15 +193,17 @@ export function frase(s) {
 }
 
 /** "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P." */
-function titulo(s) {
+export function titulo(s) {
   if (!s) return s;
   return s
     .split(/\s+/)
     .map((w, i) => {
+      const lower = w.toLowerCase();
+      // Primero los conectores: "DE" también cabe en la regla de las siglas, y
+      // "EMPRESA DE ACUEDUCTO" salía "Empresa DE Acueducto".
+      if (i > 0 && MINUSCULAS.has(lower)) return lower;
       const core = w.replace(/[^\p{L}]/gu, "");
       if (core.length <= 4 && core === core.toUpperCase() && core.length > 1) return w; // EAAB, E.S.P.
-      const lower = w.toLowerCase();
-      if (i > 0 && MINUSCULAS.has(lower)) return lower;
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     })
     .join(" ");

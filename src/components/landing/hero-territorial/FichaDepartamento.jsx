@@ -2,6 +2,16 @@
 
 import { formatConteo, formatCopEscala } from "@/src/components/secop/format";
 
+/**
+ * "12,5 %". Por debajo de una décima dice "< 0,1 %": con 5 procesos de 35.000,
+ * "0,0 %" se lee como que no hay ninguno.
+ */
+export function formatPorcentaje(pct) {
+  if (pct == null) return "—";
+  if (pct > 0 && pct < 0.05) return "< 0,1 %";
+  return `${pct.toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+}
+
 export function porcentajeNacional(n, totalAbiertos) {
   if (totalAbiertos == null || totalAbiertos <= 0 || n == null) return null;
   return (100 * n) / totalAbiertos;
@@ -37,11 +47,7 @@ export default function FichaDepartamento({ departamento, totalAbiertos, vistaPr
           <span>procesos abiertos</span>
         </p>
         <p className="aqFichaPorcentaje">
-          <strong>
-            {porcentaje == null
-              ? "—"
-              : `${porcentaje.toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`}
-          </strong>
+          <strong>{porcentaje == null ? "—" : formatPorcentaje(porcentaje)}</strong>
           <span>del total nacional</span>
         </p>
       </div>

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import FichaDepartamento, {
+  formatPorcentaje,
   porcentajeNacional,
 } from "@/src/components/landing/hero-territorial/FichaDepartamento";
 import { filtrarTerritorios } from "@/src/components/landing/hero-territorial/ListaTerritorios";
@@ -88,5 +89,14 @@ describe("interacción territorial pura", () => {
     expect(porcentajeNacional(0, 100)).toBe(0);
     expect(porcentajeNacional(0, 0)).toBeNull();
     expect(porcentajeNacional(10, null)).toBeNull();
+  });
+});
+
+describe("formatPorcentaje", () => {
+  it("no dice 0,0 % cuando hay procesos", () => {
+    expect(formatPorcentaje(0.014)).toBe("< 0,1 %");
+    expect(formatPorcentaje(0)).toBe("0,0 %");
+    expect(formatPorcentaje(14.52)).toBe("14,5 %");
+    expect(formatPorcentaje(null)).toBe("—");
   });
 });

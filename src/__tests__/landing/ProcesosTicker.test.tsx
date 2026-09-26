@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import ProcesosTicker, { frase, mapApiItem } from "@/src/components/landing/ProcesosTicker";
+import ProcesosTicker, { frase, mapApiItem, titulo } from "@/src/components/landing/ProcesosTicker";
 
 const base = {
   id: "CO1.REQ.1",
@@ -37,5 +37,14 @@ describe("ticker de fichas recientes", () => {
     const html = renderToStaticMarkup(<ProcesosTicker />);
     expect(html).toContain("Cargando fichas");
     expect(html).not.toContain('class="ptr-item"');
+  });
+});
+
+describe("titulo", () => {
+  it("baja los conectores y conserva las siglas", () => {
+    expect(titulo("EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P.")).toBe(
+      "Empresa de Acueducto de Bogotá E.S.P."
+    );
+    expect(titulo("EAAB")).toBe("EAAB");
   });
 });

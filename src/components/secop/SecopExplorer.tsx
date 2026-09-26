@@ -59,6 +59,13 @@ export default function SecopExplorer() {
     estado: "",
     valorMin: "",
   });
+  // La búsqueda puede llegar en la URL (?q=), desde el buscador del hero. Se lee
+  // en el cliente y una sola vez: esta ruta es estática y useSearchParams la
+  // obligaría a renderizarse en el cliente entera.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q")?.trim();
+    if (q) setFilters((f) => ({ ...f, q: q.slice(0, 120) }));
+  }, []);
   const [incluirCerrados, setIncluirCerrados] = useState(false);
   const [orden, setOrden] = useState<"fecha" | "valor">("fecha");
   const [pageSize, setPageSize] = useState(25);

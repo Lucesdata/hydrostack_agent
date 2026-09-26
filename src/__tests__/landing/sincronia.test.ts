@@ -79,6 +79,6 @@ describe("contenidoTooltip", () => {
       departamentos,
       totalAbiertos: 10000,
     });
-    expect(t).toEqual({ nombre: "Vaupés", n: 0, pct: null, principal: null });
+    expect(t).toEqual({ nombre: "Vaupés", n: 0, pct: null, monto: 0, principal: null });
   });
 });

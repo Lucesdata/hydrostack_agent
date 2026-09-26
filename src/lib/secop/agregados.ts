@@ -16,6 +16,10 @@ import { db } from "../db/client";
 import { geografia, proceso } from "../db/schema";
 import { TIPOS_PROYECTO, TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
 import { CLASES_ENTIDAD, CLASE_ENTIDAD, sqlClaseEntidad, type ClaseEntidad } from "./clase-entidad";
+// Pura y sin base: vive en ./slug para que el navegador pueda importarla.
+import { slugificar } from "./slug";
+
+export { slugificar };
 
 /**
  * Qué cuenta como "abierto ahora".
@@ -49,16 +53,6 @@ export interface FilaAgregado {
   /** Segmento de la ruta facetada. */
   slug: string;
   n: number;
-}
-
-/** Acentos fuera, espacios y signos a guiones. Estable: es superficie SEO. */
-export function slugificar(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 /**
