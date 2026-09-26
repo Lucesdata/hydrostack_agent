@@ -18,6 +18,7 @@
  */
 
 import type { SecopProceso } from "./types";
+import { montoConDato } from "./monto";
 
 export const RECIENTES_LIMIT = 25;
 
@@ -67,7 +68,6 @@ export interface RecienteRow {
 }
 
 export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
-  const valor = r.valorEstimado != null ? Number(r.valorEstimado) : null;
   return {
     id: r.secopProcesoId,
     referencia: r.referencia,
@@ -77,7 +77,10 @@ export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
     municipio: r.municipio,
     modalidad: r.modalidad,
     estado: r.estado,
-    valorEstimado: valor != null && Number.isFinite(valor) ? valor : null,
+    // El 0 del dataset se corta aquí, en la frontera del DTO, y no en la
+    // tarjeta: `valorEstimado: number | null` significa "cuantía publicada o
+    // ninguna", y un 0 que llegue al componente ya viaja como una afirmación.
+    valorEstimado: montoConDato(r.valorEstimado),
     fechaPublicacion: r.fechaPublicacion,
     url: extractUrlProceso(r.urlRaw),
   };
@@ -93,7 +96,7 @@ export function mapLiveToResumen(p: SecopProceso): ProcesoResumen {
     municipio: p.ciudad || null,
     modalidad: p.modalidad || null,
     estado: p.estado || null,
-    valorEstimado: p.precioBase,
+    valorEstimado: montoConDato(p.precioBase),
     fechaPublicacion: p.fechaPublicacion,
     url: p.url,
   };

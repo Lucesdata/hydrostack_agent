@@ -63,35 +63,50 @@ describe("mapRowToResumen", () => {
   });
 });
 
+const baseLive = {
+  id: "CO1.REQ.200",
+  referencia: "SA-9",
+  nombre: "Obra acueducto",
+  descripcion: "desc",
+  entidad: "Empresa Y ESP",
+  departamento: "CAUCA",
+  ciudad: "POPAYÁN",
+  estado: "Publicado",
+  fase: "",
+  modalidad: "Selección abreviada",
+  tipoContrato: "Obra",
+  fechaPublicacion: "2026-07-12",
+  precioBase: 900000000,
+  adjudicado: false,
+  valorAdjudicacion: null,
+  adjudicatario: null,
+  unspsc: null,
+  url: "https://community.secop.gov.co/y",
+  estadoApertura: "Abierto",
+  documentAccess: "PUBLIC",
+  accessMessage: "",
+};
+
 describe("mapLiveToResumen", () => {
   it("SecopProceso live → mismo DTO que la fila de base", () => {
-    const p = {
-      id: "CO1.REQ.200",
-      referencia: "SA-9",
-      nombre: "Obra acueducto",
-      descripcion: "desc",
-      entidad: "Empresa Y ESP",
-      departamento: "CAUCA",
-      ciudad: "POPAYÁN",
-      estado: "Publicado",
-      fase: "",
-      modalidad: "Selección abreviada",
-      tipoContrato: "Obra",
-      fechaPublicacion: "2026-07-12",
-      precioBase: 900000000,
-      adjudicado: false,
-      valorAdjudicacion: null,
-      adjudicatario: null,
-      unspsc: null,
-      url: "https://community.secop.gov.co/y",
-      estadoApertura: "Abierto",
-      documentAccess: "PUBLIC",
-      accessMessage: "",
-    } as unknown as SecopProceso;
-    const r = mapLiveToResumen(p);
+    const r = mapLiveToResumen(baseLive as unknown as SecopProceso);
     expect(r.id).toBe("CO1.REQ.200");
     expect(r.objeto).toBe("Obra acueducto");
     expect(r.municipio).toBe("POPAYÁN");
     expect(r.valorEstimado).toBe(900000000);
+  });
+});
+
+describe("el 0 de SECOP no viaja en el DTO", () => {
+  // 9.436 filas traen `valor_estimado = 0` y no es que el proceso sea gratis:
+  // es que la entidad no publicó la cuantía. Si el 0 llega al DTO, la tarjeta
+  // de `ProcesosRecientes` pinta "$ 0" y afirma un precio inexistente.
+  it("fila de base con '0.00' → valorEstimado null", () => {
+    expect(mapRowToResumen({ ...baseRow, valorEstimado: "0.00" }).valorEstimado).toBeNull();
+  });
+
+  it("el fallback live con precioBase 0 degrada igual", () => {
+    const p = { ...baseLive, precioBase: 0 } as unknown as SecopProceso;
+    expect(mapLiveToResumen(p).valorEstimado).toBeNull();
   });
 });

@@ -1,43 +1,28 @@
 /**
- * El criterio de "¿este monto es un dato?" para todo lo que lee dinero del
- * SECOP. Un solo sitio, fuera de la UI, porque la respuesta no es obvia:
+ * La regla del cero: en SECOP un 0 no es un precio, es un hueco.
  *
- * **El SECOP no deja los montos en NULL — escribe 0.** Medido sobre la base
- * viva el 2026-09-19: `proceso.valor_estimado` nunca es NULL y es 0 en 9.436 de
- * 90.622 filas (9.163 de ellas con `estado_apertura = 'Abierto'`);
- * `valor_adjudicacion` es 0 en 76.746 filas, que son las no adjudicadas. Así
- * que el `?? ` de JavaScript no sirve para caer al siguiente valor, y comparar
- * el 0 contra un rango de pesos no da "fuera de rango": da una afirmación falsa
- * sobre un proceso del que no se sabe el presupuesto.
+ * Medido el 2026-09-19 sobre la base viva: `proceso.valor_estimado = 0` en
+ * 9.436 filas, 9.163 de ellas todavía abiertas. No son procesos gratuitos —
+ * son procesos cuya entidad no publicó la cuantía, y el dataset guarda 0 donde
+ * debería guardar NULL. Pintar "$ 0" afirma un presupuesto que nadie fijó, que
+ * es peor que no decir nada: el visitante lo lee como "el presupuesto es cero".
  *
- * Vive en `src/lib/secop/` y no en `components/`: lo necesita el veredicto
- * (`verdict.ts`), que es cálculo y decide a quién se le muestra y a quién se le
- * notifica un proceso, no solo cómo se pinta.
+ * Vive en `lib/` y no en `components/secop/format.ts` porque no es formato,
+ * es normalización del dato: la aplican por igual los mapeadores de DTO, la
+ * plantilla del correo y la UI. Los formateadores de moneda ya saben pintar
+ * "—" cuando reciben `null`; esta función es la que decide cuándo hay null.
  *
- * El criterio es "hay dato", no "no es cero": un negativo tampoco es un precio.
+ * **Dónde NO aplica:** en el diff de una adenda (`antes → después`) el 0 es el
+ * dato — "de $ 0 a $2.000" es literalmente lo que cambió en el pliego. Ahí se
+ * imprime lo que publicó SECOP, sin pasar por aquí.
  */
-
-/** Lo que puede llegar como monto: número ya convertido, el string de una
- *  columna `numeric` de Postgres, o nada. */
-export type MontoCrudo = string | number | null | undefined;
 
 /**
- * El monto si es un dato real; `null` si no lo es. Un 0, un negativo, un NaN,
- * un infinito o un string no numérico son todos "sin dato".
- *
- * Es deliberadamente estricto con los strings: acepta el `"500000000.00"` que
- * devuelve `numeric::text` y rechaza cualquier otra cosa sin limpiarla. Lo que
- * necesita limpieza de centinelas de la fuente cruda ("No definido" y compañía)
- * ya pasa por `cleanText` antes, en la ingesta.
+ * Cuantía publicada, o `null` si no la hay. Acepta el `number` de la API live
+ * y el `numeric::text` de Postgres, que llega como string.
  */
-export function montoConDato(v: MontoCrudo): number | null {
+export function montoConDato(v: number | string | null | undefined): number | null {
   if (v == null) return null;
   const n = typeof v === "number" ? v : Number(v);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return n;
-}
-
-/** El mismo criterio como predicado, para los sitios que solo preguntan. */
-export function tieneMonto(v: MontoCrudo): boolean {
-  return montoConDato(v) !== null;
+  return Number.isFinite(n) && n > 0 ? n : null;
 }

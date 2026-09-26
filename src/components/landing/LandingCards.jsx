@@ -10,6 +10,7 @@ import {
   formatShortDate,
   sentenceCaseTitle,
 } from "@/src/components/secop/format";
+import { montoConDato } from "@/src/lib/secop/monto";
 
 /**
  * Las cards del landing manejan sumas grandes (precio_base agregado por mes,
@@ -17,11 +18,19 @@ import {
  * formatCopCompact (compartido con el explorador) se queda en "$X M" incluso
  * en miles de millones por contrato ya testeado (format.test.ts); esta
  * variante local añade el corte a "mil M" solo para el landing.
+ *
+ * Exportada para poder medirla sin montar el componente
+ * (`__tests__/landing/monto-destacado.test.ts`): era la única variante de
+ * moneda fuera de `format.ts` y por eso la única que se quedaba sin la regla
+ * del cero.
  */
-function formatCopMilM(value) {
-  if (value == null) return null;
-  if (value < 1_000_000_000) return formatCopCompact(value);
-  const milMillones = (value / 1_000_000_000).toLocaleString("es-CO", {
+export function formatCopMilM(value) {
+  // El 0 de SECOP no es un precio (ver `lib/secop/monto.ts`), y "—" es lo que
+  // ya dicen formatCopFull y formatCopCompact cuando no hay cuantía.
+  const monto = montoConDato(value);
+  if (monto == null) return "—";
+  if (monto < 1_000_000_000) return formatCopCompact(monto);
+  const milMillones = (monto / 1_000_000_000).toLocaleString("es-CO", {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   });
@@ -253,7 +262,7 @@ export default function LandingCards() {
             <span className="lc-stat-value">
               <StatValue
                 status={status}
-                value={totalCop != null ? formatCopMilM(totalCop) : null}
+                value={montoConDato(totalCop) != null ? formatCopMilM(totalCop) : null}
                 skeletonWidth={92}
               />
             </span>

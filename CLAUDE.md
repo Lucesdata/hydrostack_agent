@@ -182,6 +182,11 @@ módulo de diagnóstico de principio a fin: reconocimiento, spec, contrato del
 cuestionario y lecciones. `AUDIT_REPORT.md` (2026-08-02)
 y `AUDITORIA_TECH_DEBT.md` (2026-07-18) son las auditorías más recientes
 que existen en el repo.
+**Reglas de conducta del agente para el trabajo nuevo: `docs/CONDUCTA.md`**
+(aditivas, no derogan nada de este archivo). Las once decisiones cerradas el
+2026-09-21 sobre los specs de landing y mapa —plazo, cuantía, ruta, filtro
+territorial, paleta, perfil anónimo— están en
+`docs/rediseno-2026-09/AUDITORIA-SPECS-LANDING-MAPA.md` §9.
 
 ---
 
@@ -189,7 +194,7 @@ que existen en el repo.
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-19 (colisión de correo en el espejo `usuario`).
+Última actualización: 2026-09-26 (KPIs del Hero Territorial V2).
 
 ## graphify
 
@@ -200,3 +205,39 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+
+## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
+
+El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
+`ListaTerritorios`, `FichaDepartamento`, `BandaMercado`) y se monta desde
+`PortadaCliente.jsx`. Se conservan fuentes de datos, rutas, paleta y mapa de
+servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
+mezclan y no se sustituyen por cifras ni tendencias de un mockup.
+
+- **KPIs del hero** (junto al CTA). Vienen de `agregadosPortada()`
+  (`src/lib/secop/agregados.ts`), calculados en el servidor en `app/page.js`
+  con `revalidate` de 6 h. Todos cuentan "abierto" con `condicionAbierto()`:
+  - *Procesos abiertos · Colombia*: `totalAbiertos`, que es el total real e
+    incluye los procesos sin geografía resuelta.
+  - *Departamentos con procesos*: `departamentos.length`, es decir, los
+    departamentos con al menos un proceso abierto y geografía resuelta.
+  - *Tipos de proyecto · Colombia*: `tipos.length`. `procesosPorTipo()`
+    devuelve siempre los cinco de `TIPOS_PROYECTO`, así que con datos siempre
+    muestra 5. Es la taxonomía, no un conteo que varíe.
+  - La suma de la lista por departamento **no cuadra** con `totalAbiertos`,
+    porque los abiertos sin geografía quedan fuera del reparto. Es correcto. El
+    % de la ficha se calcula sobre `totalAbiertos`. No "arreglarlo" sumando la
+    lista.
+  - Si la base no responde, `totalAbiertos` queda `undefined` y todo muestra
+    "—" con el mapa en gris.
+- **Banda "El mercado ahora"** (`BandaMercado`). Son los tres KPIs que antes
+  estaban en el hero. Vienen de un único fetch en cliente a `/api/landing-stats`
+  y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
+  abiertos en presentación de oferta en siete días; *en juego · este mes* suma
+  el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
+  en "—".
+
+El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
+los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

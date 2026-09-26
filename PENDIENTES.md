@@ -487,7 +487,7 @@ de entidad (`clase-entidad.ts`), las rutas facetadas (`facetas.ts` + tres
 familias de rutas), la fila densa compartida (`src/components/secop/lista/`),
 `/precios`, la ilustración movida a `/nosotros` y la limpieza de navegación.
 
-### 32. La portada sigue sin reconstruirse — bloqueada por el TopoJSON
+### 32. La portada sigue sin reconstruirse — **desbloqueada el 2026-09-22**
 `app/page.js` conserva sus diez secciones. El hero del rediseño es 5/12 de
 mensaje y 7/12 de mapa departamental, y **no hay geometría en el repo**:
 `data/dane/divipola.ts` es un crosswalk de nombres y códigos, `public/` solo
@@ -498,6 +498,12 @@ pedía el spec no se pueden pintar con datos reales.
 
 Montar un hero provisional sin mapa significaría diseñarlo dos veces; por eso
 está parado y no a medias.
+
+**La geometría ya está** (2026-09-22): `data/geo/departamentos.geo.json`, los 33
+departamentos sacados del MGN 2025 del DANE —3.740 coordenadas, 62 kB, el código
+DIVIPOLA como texto— con `src/__tests__/geo/departamentos.test.ts` vigilando el
+contrato y `docs/rediseno-2026-09/SPEC-GEOMETRIA-MAPA.md` explicándolo. Lo que
+queda es construir el hero, que ya es trabajo de portada y no de datos.
 
 ### 33. El semáforo en la fila de la lista — ✅ resuelto 2026-09-15
 `src/lib/secop/semaforo.ts` (modelo de vista puro) y
@@ -635,7 +641,112 @@ Queda abierto:
   bucket `contracts`) no se borran con la fila: la cascada solo alcanza a esta
   base.
 
-### 40. El prefiltro SQL sigue descartando los procesos sin valor (2026-09-21)
+---
+
+## Incidente: el pooler agotado tumbó producción (2026-09-22)
+
+### 40. El pooler está en modo sesión con 15 conexiones — ✅ resuelto el 2026-09-22
+
+**Resuelto el mismo día.** `DATABASE_URL` pasó al puerto 6543 (modo transacción)
+en Production, en Preview y en local, con `DATABASE_URL_SESSION` (5432) reservada
+para drizzle-kit. Se aprovechó para rotar la contraseña de la base, que se había
+expuesto en una conversación. Verificado tras el redespliegue: siete rutas a 200
+y **24 peticiones simultáneas contra rutas que consultan la base, 24 en 200** —
+donde quince bastaban para tumbarlo todo. El procedimiento y cómo deshacerlo, en
+`docs/runbook-pooler-modo-transaccion.md`.
+
+Queda en pie la lección de abajo, que es lo que importa de este apartado.
+
+**Qué pasó.** Al desplegar la vitrina (PR #43), todas las rutas que consultan la
+base empezaron a dar 500 — incluidas las 43 facetadas, que aquel cambio no
+tocaba. Las páginas sin base (`/`, `/nosotros`, `/diagnostico`) siguieron a 200.
+El error, leído desde la propia base:
+
+```
+(EMAXCONNSESSION) max clients reached in session mode
+max clients are limited to pool_size: 15
+```
+
+No era un fallo del código: la consulta se ejecutó a mano contra la base viva con
+el driver de producción y devolvió sus 35.518 filas. Lo que faltaban eran
+conexiones, y faltaban también para un portátil conectándose desde fuera.
+
+**Qué lo disparó.** El PR #43 convirtió `/licitaciones` y
+`/licitaciones/adjudicados` en rutas renderizadas **en cada visita**
+(`dynamic = "force-dynamic"`), porque sin segmento dinámico Next las
+prerenderiza en el build y el build no puede leer `DATABASE_URL`, que en Vercel
+está marcada como secreta y solo llega al runtime. Con un pooler de 15 plazas en
+modo sesión, cada instancia caliente de Vercel se queda con la suya y no la
+suelta: basta muy poca concurrencia para agotarlo.
+
+**Cómo se resolvió.** Revirtiendo el merge. El despliegue nuevo tumba las
+instancias calientes, que es lo que de verdad libera las plazas, y el código
+vuelve a no abrir conexión por visita. Producción recuperó las ocho rutas
+comprobadas en el primer intento tras el despliegue.
+
+**La lección, que es más ancha que este incidente.** La decisión de que ninguna
+ruta pública lea `searchParams` —§4.7 del traspaso— estaba escrita como una
+cuestión de coste: cada visita, una invocación facturable. Resulta que también
+protegía el pooler. Mientras siga en modo sesión con 15 plazas, **ninguna ruta
+con tráfico puede ser dinámica**, y el margen para funciones concurrentes es
+mucho menor de lo que parece.
+
+**Lo que hay que decidir antes de volver a montar la vitrina:**
+
+1. **Pasar `DATABASE_URL` al modo transacción de Supabase** (puerto 6543 en vez
+   de 5432). Es el modo pensado para serverless: no reserva una conexión por
+   instancia. Es la corrección de raíz, y es tocar la configuración de la base
+   viva, así que se prueba antes.
+2. Si el pooler se queda como está, la vitrina tiene que volver a ser estática, y
+   entonces hay que resolver el prerender sin base: o exponer `DATABASE_URL` al
+   build —con su coste de seguridad, porque está marcada como secreta por algo—
+   o tolerar el fallo en el build, que deja la página vacía hasta la primera
+   revalidación.
+
+El trabajo del PR #43 no se perdió: la rama `vitrina/fichacard-y-listado` sigue
+entera, con sus 976 tests, y vuelve a entrar en cuanto esto se decida.
+
+### 41. La verificación local corre contra otro driver que producción
+
+`.env.local` tiene `DB_DRIVER=node`, así que todo lo que se prueba en local va
+por `node-postgres` mientras producción usa el driver serverless de Neon sobre
+WebSocket. En este incidente no fue la causa —las consultas funcionan con los
+dos—, pero es un punto ciego real: ninguna verificación local ejerce el camino
+que produce el fallo.
+
+### 42. El build depende de que Google Fonts responda (2026-09-22)
+
+El job `lint` del PR #45 —un cambio de **solo documentación**— falló así:
+
+```
+app/layout.js
+An error occurred in `next/font`.
+TypeError: Cannot read properties of null (reading '1')
+    at @next/font/dist/google/loader.js:112:78
+```
+
+Relanzado sin tocar nada, pasó. No fue el cambio: fue que Google Fonts no
+respondió como esperaba el cargador en ese momento.
+
+**Por qué importa.** `app/layout.js` carga **cinco familias** con
+`next/font/google` —Orbitron, IBM Plex Mono, Inter, JetBrains Mono e IBM Plex
+Sans Condensed, once archivos de peso en total— y no hay ni un `.woff2` en el
+repositorio. Cada build, en CI y en Vercel, sale a la red a buscarlas. Cuando
+esa petición falla, el build falla entero: en CI bloquea el merge, y en Vercel
+bloquea el despliegue. Un cambio que no toca nada se queda en rojo por algo
+que no controlamos.
+
+**Salida.** Versionar las fuentes y pasar a `next/font/local`. Quita la
+dependencia de red del build y además toca un punto que el traspaso del
+rediseño ya tenía anotado (`docs/rediseno-2026-09/TRASPASO.md` §6 ter): esas
+cinco familias son **181 kB en once archivos** en la ruta crítica, y conviene
+revisar si de verdad hacen falta las cinco. Las cinco son SIL Open Font
+License, así que incluirlas en el repositorio no tiene problema de licencia.
+
+**Mientras tanto**, si un build falla con ese error, relanzar el job resuelve.
+Pero relanzar no es un arreglo: es saber que esto vuelve.
+
+### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21)
 `cuantiaGate` ya no da FAIL cuando el valor es 0 —el "sin dato" del SECOP— sino
 UNKNOWN (`src/lib/secop/monto.ts`). Eso arregla el veredicto de un proceso
 concreto (`/api/secop/verdict`, la ficha, el semáforo público), pero **no hace

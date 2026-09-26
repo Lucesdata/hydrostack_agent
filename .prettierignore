@@ -16,3 +16,8 @@ drizzle/meta
 # de src/lib/diagnostico/cuestionario/co-apsb-v1.ts. Reformatearla rompe esa
 # trazabilidad.
 docs/referencia
+
+# Geometría generada desde el MGN del DANE (ver data/geo/README.md). Va serializada
+# compacta a propósito: formatearla la convierte en ~30.000 líneas de una coordenada
+# cada una, con lo que cualquier actualización del MGN produce un diff ilegible.
+data/geo/*.geo.json

@@ -21,8 +21,8 @@
 import type { GateStatus, Verdict } from "./verdict";
 import type { VerdictRespuesta } from "./verdict-publico";
 import { formatCopCompact } from "@/src/components/secop/format";
-import { TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
 import { montoConDato } from "./monto";
+import { TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
 
 export type EstadoCompuerta = GateStatus | "DATO";
 
@@ -120,8 +120,6 @@ export interface ProcesoParaSemaforo {
  * que el producto dice no dar.
  */
 export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
-  // El 0 del SECOP es "sin dato", no un presupuesto de cero pesos: el criterio
-  // es el mismo que usa el veredicto, y vive en un solo sitio ([./monto]).
   const valor = montoConDato(p.valorEstimado);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
 
@@ -151,8 +149,13 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
     ),
     dato(
       "cuantia",
+      // Sin `formatCopCompact(valor)` a secas: para "sin dato" esta compuerta
+      // no dice "—" sino la palabra de UNKNOWN, que `dato()` pone cuando le
+      // llega null.
       valor !== null ? formatCopCompact(valor) : null,
-      // Sin presupuesto publicado no hay exigencia que enunciar.
+      // Sin presupuesto publicado no hay exigencia que enunciar. El 0 del
+      // dataset ya vino filtrado por `montoConDato`, así que `valor === null`
+      // cubre igual "no hay columna" y "la columna dice 0".
       valor !== null ? `Presupuesto oficial de ${formatCopCompact(valor)}.` : null
     ),
     dato(
