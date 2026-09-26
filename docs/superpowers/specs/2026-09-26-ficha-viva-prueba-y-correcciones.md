@@ -38,6 +38,12 @@ Salidas finales: **avanzar con requisitos comprobados**, **resolver faltante con
 
 En `compuertasAbsolutas()` cambiar la explicación de Zona por «Entidad contratante ubicada en {lugar}. Lugar de ejecución no confirmado.» El valor corto territorial permanece y no se toca la compuerta relativa ni el modelo de datos. Criterio: para municipio y departamento conocidos, el test debe comprobar el texto completo y no debe aparecer «Se ejecuta en».
 
+## Segunda corrección de presentación
+
+La ficha debe aplicar la misma distinción territorial al título resumido para buscadores y al chip de ubicación; los datos estructurados no deben declarar `areaServed` a partir de la sede de la entidad. Si no hay pliego procesado, el siguiente paso principal abre el expediente original, sin afirmar que el pliego está disponible. El diagnóstico público se ofrece como orientación general y se indica expresamente que no verifica los requisitos de este proceso. El acceso `UNKNOWN` a documentos se presenta como «no verificado».
+
+Criterios: la ficha no atribuye a la obra la ubicación de la entidad; el enlace principal conduce al expediente cuando existe; sin URL, no aparece un enlace ficticio; ningún texto sugiere que el diagnóstico general determine la aptitud individual.
+
 ## Fases siguientes
 
 1. Auditoría de pertinencia sectorial con ejemplos verdaderos y falsos. Antes de tocar clasificador/ingesta, medir volumen, cobertura y regresiones.
