@@ -50,3 +50,11 @@ export function datasetJsonLd(base: string) {
     })),
   };
 }
+
+/**
+ * JSON listo para un `<script>`: `<` escapado, para que un `</script>` en un
+ * texto no pueda cerrar la etiqueta.
+ */
+export function jsonLdSeguro(datos: unknown): string {
+  return JSON.stringify(datos).replace(/</g, "\\u003c");
+}

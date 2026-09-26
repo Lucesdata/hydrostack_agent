@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datasetJsonLd } from "@/src/lib/landing/dataset-jsonld";
+import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 
 describe("Dataset de la portada", () => {
@@ -28,5 +28,10 @@ describe("Dataset de la portada", () => {
     expect(d).not.toHaveProperty("license");
     expect(d).not.toHaveProperty("distribution");
     expect(JSON.stringify(d)).not.toMatch(/\d{1,3}\.\d{3}/);
+  });
+
+  it("un </script> en un texto no puede cerrar la etiqueta", () => {
+    expect(jsonLdSeguro({ t: "</script><b>" })).not.toContain("</script>");
+    expect(JSON.parse(jsonLdSeguro({ t: "</script>" })).t).toBe("</script>");
   });
 });

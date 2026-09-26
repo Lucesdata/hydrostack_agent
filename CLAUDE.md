@@ -199,7 +199,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-26 (La Ficha Viva en la portada).
+Última actualización: 2026-09-26 (portada reducida a mapa + Ficha Viva).
 
 ## graphify
 
@@ -320,15 +320,17 @@ color no puede ser lo único que lo diga.
 total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
 sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
 porque Satori no lee `woff2`.
-**Preguntas frecuentes (2026-09-26).** Antes del cierre de la portada va un FAQ
-(`src/components/landing/preguntas/`), componente de servidor con `<details>`
-nativo que llega a `PortadaCliente` por prop, como el mapa: no suma JS. El texto
-y el JSON-LD `FAQPage` salen de la misma lista (`src/lib/landing/preguntas-frecuentes.ts`)
-y cada respuesta dice lo que el producto hace hoy. Si cambia la ingesta, el
-modelo de acceso o las alertas, se cambia ahí. La portada lleva además un JSON-LD
-`Dataset` (`src/lib/landing/dataset-jsonld.ts`) para Google Dataset Search: sin
-cifras, sin `license` ni `distribution` (no hay licencia decidida ni descarga),
-con `isBasedOn` a los conjuntos de datos.gov.co.
+**Portada = mapa + Ficha Viva (2026-09-26).** La portada solo lleva el ticker,
+el hero territorial (mapa, lista, ficha del departamento, buscador y banda "El
+mercado ahora") y la Ficha Viva. Salieron las rutas de intención ("¿En qué
+momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
+frecuentes (con su JSON-LD `FAQPage`) y `S5DarkClosing`: repetían lo que ya dicen
+el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y
+`/cuenta`; los demás componentes se borraron (su estado previo está en git). No
+volver a apilar secciones debajo de la Ficha Viva sin una razón medida. La
+portada conserva el JSON-LD `Dataset` (`src/lib/landing/dataset-jsonld.ts`, que
+ahora también exporta `jsonLdSeguro`) para Google Dataset Search: sin cifras,
+sin `license` ni `distribution`, con `isBasedOn` a los conjuntos de datos.gov.co.
 
 **Quién compra y comparador (2026-09-26).** Dos rutas públicas nuevas,
 estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
@@ -344,8 +346,8 @@ recibiría una referencia y no el texto (`comparador/estilos.ts`).
 secciones claras: el contenedor de la portada lleva `.tema-oscuro`
 (`globals.css`), que **redefine los tokens** en su ámbito, alias incluidos
 (`--text-primary`, `--border`…, que en `:root` ya se resolvieron contra el
-claro). Así Ficha Viva, rutas, cómo funciona, diagnóstico, accesos y preguntas
-cambian sin tocar su CSS, y `S7Acceso` sigue claro en `/precios` y `/cuenta`.
+claro). Así la Ficha Viva cambia sin tocar su CSS, y `S7Acceso` sigue claro en
+`/precios` y `/cuenta`.
 En oscuro `--accent` es cian (texto y enlaces): los botones con texto blanco
 usan `--accent-fill`, que existe en los dos temas. Lo que imita la ficha real
 (el esquema de la Ficha Viva) lleva `.tema-claro`, como la tarjeta blanca del
