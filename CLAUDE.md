@@ -262,8 +262,9 @@ con conteos `FILTER`: sigue siendo **una** consulta, no una quinta en paralelo �
 PENDIENTES §40). Cada fila trae además `nuevos7d` (abiertos con
 `fecha_publicacion` en los últimos 7 días; **no** es el mismo universo que
 *nuevos · 7 días* de la banda), `montoAbierto` + `nConMonto` (suma del
-presupuesto de los abiertos que lo publican; el 0 no cuenta) y `tipos` por
-departamento. La ficha del hero muestra los tipos **del departamento** (sin
+presupuesto de los abiertos que lo publican; el 0 no cuenta), `nEntidades`
+(entidades contratantes distintas entre los abiertos, `count(distinct)`) y
+`tipos` por departamento. La ficha del hero muestra los tipos **del departamento** (sin
 enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si la
 fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
 **sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.

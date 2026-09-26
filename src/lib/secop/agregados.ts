@@ -146,6 +146,11 @@ export interface FilaDepartamento extends FilaAgregado {
   montoAbierto: number;
   /** Cuántos de los `n` abiertos tienen presupuesto publicado. */
   nConMonto: number;
+  /**
+   * Entidades contratantes distintas entre los abiertos. Un proceso sin entidad
+   * resuelta no cuenta (`count(distinct)` ignora el NULL).
+   */
+  nEntidades: number;
   /** Abiertos por tipo de proyecto. No suma `n`: hay procesos sin clasificar. */
   tipos: Record<TipoProyecto, number>;
 }
@@ -158,6 +163,7 @@ export interface FilaDepartamentoSql {
   nuevos7d: number;
   monto: string | number | null;
   nConMonto: number;
+  nEntidades: number;
   [tipo: `t_${string}`]: number;
 }
 
@@ -172,6 +178,7 @@ export function filaDepartamentoDesdeSql(f: FilaDepartamentoSql): FilaDepartamen
     nuevos7d: f.nuevos7d ?? 0,
     montoAbierto: Number.isFinite(monto) && monto > 0 ? monto : 0,
     nConMonto: f.nConMonto ?? 0,
+    nEntidades: f.nEntidades ?? 0,
     tipos: Object.fromEntries(TIPOS_PROYECTO.map((t) => [t, f[`t_${t}`] ?? 0])) as Record<
       TipoProyecto,
       number
@@ -200,6 +207,7 @@ export async function detallePorDepartamento(): Promise<FilaDepartamento[]> {
       nuevos7d: sql<number>`(count(*) filter (where ${proceso.fechaPublicacion} >= current_date - 7))::int`,
       monto: sql<string>`coalesce(sum(${proceso.valorEstimado}) filter (where ${proceso.valorEstimado} > 0), 0)`,
       nConMonto: sql<number>`(count(*) filter (where ${proceso.valorEstimado} > 0))::int`,
+      nEntidades: sql<number>`(count(distinct ${proceso.entidadId}))::int`,
       ...porTipo,
     })
     .from(proceso)
