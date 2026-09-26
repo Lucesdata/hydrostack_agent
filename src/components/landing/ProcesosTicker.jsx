@@ -1,11 +1,14 @@
 // src/components/landing/ProcesosTicker.jsx
-// Ticker de procesos en vivo. Lee /api/procesos/recientes (Postgres →
+// Ticker de fichas recientes: cada elemento abre la ficha del proceso, no la
+// lista ni el SECOP — la ficha es el centro del producto. Lee /api/procesos/recientes (Postgres →
 // fallback Socrata); si la API falla o no trae datos, degrada honestamente
 // a un estado vacío ("—"), igual que app/api/landing-stats/route.ts — nunca
 // muestra datos ficticios sin aviso.
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { colorDeTipo } from "@/src/lib/classify/tipo-color";
+import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 
 const TICKER_CSS = `
 .ptr-bar {
@@ -78,8 +81,7 @@ const TICKER_CSS = `
   gap: 3px;
   padding: 0 20px;
   border-right: 1px solid var(--line);
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
+  font-family: var(--font-inter), sans-serif;
   text-decoration: none;
   cursor: default;
 }
@@ -89,15 +91,23 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
   display: flex; align-items: center; gap: 8px;
   font-size: 11.5px; color: var(--ink-600);
 }
+.ptr-tipo {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-weight: 600; color: var(--ink-900); white-space: nowrap;
+}
+.ptr-tipo i {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--tipo);
+}
+.ptr-tipo--otros i { background: transparent; border: 1.5px dashed var(--tipo); }
 .ptr-entidad {
   color: var(--ink-900); font-weight: 600;
-  max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+  max-width: 300px; overflow: hidden; text-overflow: ellipsis;
   transition: color .18s;
 }
 .ptr-valor { color: var(--accent); font-weight: 600; }
 .ptr-row2 {
   display: flex; align-items: center; gap: 6px;
-  font-size: 10px; color: var(--ink-600); letter-spacing: 0.04em;
+  font-size: 11px; color: var(--ink-600);
 }
 .ptr-dot {
   width: 8px; height: 1.5px; border-radius: 0;
@@ -136,8 +146,8 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
   .ptr-cap-label { display: none; }
   .ptr-item { padding: 0 14px; }
   .ptr-row1 { font-size: 10.5px; }
-  /* Sin tope: con el rótulo fuera, la entidad puede usar el ancho que hay. */
-  .ptr-entidad { max-width: none; }
+  /* Con el rótulo fuera, el objeto usa casi todo el ancho, pero con tope: los objetos del SECOP pasan de 300 caracteres. */
+  .ptr-entidad { max-width: 72vw; }
   .ptr-row2 { font-size: 9px; }
 }
 `;
@@ -145,6 +155,15 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
 /* ── Helpers de presentación ─────────────────────────────────────────────── */
 
 const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e", "en", "el"]);
+
+/** "CONSTRUCCIÓN DE LA PTAP" → "Construcción de la ptap": el objeto es una frase. */
+function frase(s) {
+  if (!s) return s;
+  const limpio = s.trim().replace(/\s+/g, " ");
+  if (limpio !== limpio.toUpperCase()) return limpio;
+  const lower = limpio.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
 
 /** "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P." */
 function titulo(s) {
@@ -178,14 +197,17 @@ function estadoTone(estado) {
 }
 
 function mapApiItem(p) {
+  const color = colorDeTipo(p.tipoProyecto);
   return {
     id: p.id,
-    entidad: titulo(p.entidad) || "Entidad por confirmar",
+    // Lo primero que se lee es qué se va a construir, no quién lo contrata.
+    entidad: frase(p.objeto) || titulo(p.entidad) || "Proceso sin objeto publicado",
+    tipo: color ? { label: TIPO_PROYECTO[p.tipoProyecto].label, color } : null,
     valor: fmtValor(p.valorEstimado),
     ciudad: titulo(p.municipio),
     departamento: titulo(p.departamento),
     estado: titulo(p.estado) || "Publicado",
-    href: "/licitaciones",
+    href: p.ficha || "/licitaciones",
   };
 }
 
@@ -203,6 +225,15 @@ function ProcesoItem({ p }) {
   const content = (
     <>
       <span className="ptr-row1">
+        {p.tipo && (
+          <span
+            className={`ptr-tipo${p.tipo.color.familia === "otros" ? " ptr-tipo--otros" : ""}`}
+            style={{ "--tipo": p.tipo.color.claro }}
+          >
+            <i aria-hidden="true" />
+            {p.tipo.label}
+          </span>
+        )}
         <span className="ptr-entidad">{p.entidad}</span>
         {p.valor && (
           <>
@@ -263,14 +294,11 @@ export default function ProcesosTicker() {
   const duration = Math.max(40, items.length * 9);
 
   return (
-    <div
-      className="ptr-bar"
-      aria-label="Procesos activos de contratación pública en agua y saneamiento"
-    >
+    <div className="ptr-bar" aria-label="Fichas recientes de procesos de agua y saneamiento">
       <style dangerouslySetInnerHTML={{ __html: TICKER_CSS }} />
       <div className="ptr-cap">
         <span className="ptr-cap-dot" />
-        <span className="ptr-cap-label">{status === "live" ? "SECOP · en vivo" : "Procesos"}</span>
+        <span className="ptr-cap-label">{status === "live" ? "Fichas recientes" : "Fichas"}</span>
       </div>
       {status === "live" ? (
         <div className="ptr-clip">
@@ -293,9 +321,7 @@ export default function ProcesosTicker() {
         </div>
       ) : (
         <div className="ptr-empty">
-          {status === "loading"
-            ? "Cargando procesos…"
-            : "— sin datos disponibles en este momento —"}
+          {status === "loading" ? "Cargando fichas…" : "— sin datos disponibles en este momento —"}
         </div>
       )}
     </div>

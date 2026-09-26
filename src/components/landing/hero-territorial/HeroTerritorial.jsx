@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
 import { ruta } from "@/src/components/landing/seccionesHome";
+import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
@@ -37,11 +38,11 @@ export default function HeroTerritorial({
               Explora el mercado de agua y saneamiento de <span>Colombia.</span>
             </h1>
             <p className={styles.lead}>
-              Descubre dónde están los procesos del SECOP II, qué se está contratando y cuáles son
-              las oportunidades en tu territorio.
+              Cada proceso del SECOP II tiene aquí su ficha: qué se contrata, si puedes participar y
+              qué te falta. Empieza por tu territorio.
             </p>
             <Link className={styles.primaryCta} href={explorar.href}>
-              Explorar procesos <span aria-hidden="true">→</span>
+              Ver fichas de procesos <span aria-hidden="true">→</span>
             </Link>
             <p className={styles.ctaMeta}>
               <span className={styles.puntoVivo} aria-hidden="true" />
@@ -94,24 +95,36 @@ export default function HeroTerritorial({
           <div className={styles.types}>
             <h2>Tipos de proyecto · Colombia</h2>
             <p>Distribución nacional de procesos abiertos</p>
-            {tipos.map((tipo) => (
-              <Link href={`/licitaciones/tipo/${tipo.slug}`} key={tipo.clave}>
-                <span className={styles.typeNombre}>{tipo.label}</span>
-                <strong>{formatConteo(tipo.n)}</strong>
-                <span className={styles.typeBar} aria-hidden="true">
-                  <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
-                </span>
-              </Link>
-            ))}
+            {tipos.map((tipo) => {
+              const color = colorDeTipo(tipo.clave);
+              return (
+                <Link
+                  href={`/licitaciones/tipo/${tipo.slug}`}
+                  key={tipo.clave}
+                  style={color ? { "--tipo": color.claro } : undefined}
+                  data-familia={color?.familia}
+                >
+                  <span className={styles.typeNombre}>
+                    <span className={styles.typePunto} aria-hidden="true" />
+                    {tipo.label}
+                    {color ? <small>{color.familiaLabel}</small> : null}
+                  </span>
+                  <strong>{formatConteo(tipo.n)}</strong>
+                  <span className={styles.typeBar} aria-hidden="true">
+                    <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
+                  </span>
+                </Link>
+              );
+            })}
             {tipos.length === 0 ? <p>Distribución no disponible.</p> : null}
           </div>
           {seleccionado && seleccionado.n > 0 ? (
             <Link
               className={styles.fichaCta}
               href={`/licitaciones/departamento/${seleccionado.slug}`}
-              aria-label={`Ver procesos de ${seleccionado.label}`}
+              aria-label={`Ver fichas de ${seleccionado.label}`}
             >
-              Ver procesos de {seleccionado.label} <span aria-hidden="true">→</span>
+              Ver fichas de {seleccionado.label} <span aria-hidden="true">→</span>
             </Link>
           ) : null}
         </div>

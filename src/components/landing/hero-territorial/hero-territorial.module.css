@@ -550,6 +550,31 @@
 }
 .typeNombre {
   grid-area: nombre;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.typeNombre small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
+.typePunto {
+  flex: none;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tipo, #1a9be0);
+}
+.types a[data-familia="otros"] .typePunto {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
 }
 .types a strong {
   grid-area: cifra;
@@ -570,7 +595,7 @@
   display: block;
   height: 100%;
   border-radius: 5px;
-  background: linear-gradient(90deg, #1a9be0, #35c7d8);
+  background: var(--tipo, #1a9be0);
 }
 .fichaCta {
   display: flex;

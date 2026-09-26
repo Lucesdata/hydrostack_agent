@@ -36,7 +36,7 @@ const ACCOUNT_ITEMS = MENU_CUENTA.map((id) => ({
 }));
 
 // El único destino que la portada persigue. Por debajo de 1024px el navbar
-// esconde toda la navegación en la hamburguesa; dejar "Licitaciones" fuera
+// esconde toda la navegación en la hamburguesa; dejar "Fichas de procesos" fuera
 // del menú es la diferencia entre un destino y un destino que hay que buscar.
 const RUTA_EXPLORAR = ruta("explorar");
 

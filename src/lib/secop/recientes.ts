@@ -35,6 +35,13 @@ export interface ProcesoResumen {
   valorEstimado: number | null;
   fechaPublicacion: string | null;
   url: string | null;
+  /** Uno de `TIPOS_PROYECTO`, o `null` si no está clasificado o viene del SECOP en vivo. */
+  tipoProyecto: string | null;
+  /**
+   * Ruta de la ficha pública. Solo cuando la fila sale de la base: un proceso
+   * leído del SECOP en vivo puede no estar ingerido, y su ficha daría 404.
+   */
+  ficha: string | null;
 }
 
 export interface ProcesosRecientesResult {
@@ -65,6 +72,7 @@ export interface RecienteRow {
   departamento: string | null;
   municipio: string | null;
   urlRaw: unknown;
+  tipoProyecto?: string | null;
 }
 
 export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
@@ -83,6 +91,8 @@ export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
     valorEstimado: montoConDato(r.valorEstimado),
     fechaPublicacion: r.fechaPublicacion,
     url: extractUrlProceso(r.urlRaw),
+    tipoProyecto: r.tipoProyecto ?? null,
+    ficha: null,
   };
 }
 
@@ -99,16 +109,19 @@ export function mapLiveToResumen(p: SecopProceso): ProcesoResumen {
     valorEstimado: montoConDato(p.precioBase),
     fechaPublicacion: p.fechaPublicacion,
     url: p.url,
+    tipoProyecto: null,
+    ficha: null,
   };
 }
 
 async function fromDb(): Promise<ProcesoResumen[]> {
   // Import perezoso: si el cliente de base no puede construirse (sin
   // DATABASE_URL), el error queda contenido aquí y aplica el fallback live.
-  const [{ db }, schema, { eq, isNull, sql }] = await Promise.all([
+  const [{ db }, schema, { eq, isNull, sql }, { slugDeProceso }] = await Promise.all([
     import("@/src/lib/db/client"),
     import("@/src/lib/db/schema"),
     import("drizzle-orm"),
+    import("./ficha"),
   ]);
   const { proceso, entidad, geografia } = schema;
 
@@ -125,6 +138,7 @@ async function fromDb(): Promise<ProcesoResumen[]> {
       departamento: geografia.departamentoNombre,
       municipio: geografia.municipioNombre,
       urlRaw: proceso.url,
+      tipoProyecto: proceso.tipoProyecto,
     })
     .from(proceso)
     .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
@@ -133,7 +147,10 @@ async function fromDb(): Promise<ProcesoResumen[]> {
     .orderBy(sql`${proceso.fechaPublicacion} DESC NULLS LAST`)
     .limit(RECIENTES_LIMIT);
 
-  return rows.map(mapRowToResumen);
+  return rows.map((r) => ({
+    ...mapRowToResumen(r),
+    ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
+  }));
 }
 
 async function fromLive(): Promise<ProcesoResumen[]> {

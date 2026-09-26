@@ -769,3 +769,12 @@ Decidir, que es producto y no solo código:
 El volumen no es marginal: son 9.163 de los procesos abiertos. Con `minCop = 0`
 sí llegaban, y hasta el 2026-09-21 entraban con un **PASS falso** ("valor dentro
 de tu rango objetivo", porque `0 >= 0`); ahora entran como UNKNOWN.
+
+### 44. La ficha ofrece "Activar alerta para procesos como este" y la alerta no se entrega (2026-09-26)
+El botón principal del cierre de la ficha (`app/licitaciones/[slug]/page.tsx`,
+§9) lleva a `/cuenta` para activar una alerta, pero el envío no llega en
+producción (§0 y §21 de este documento). La portada ya no lo promete (sección
+"La Ficha Viva"); la ficha sí. Salidas: matizarlo en la propia ficha como se
+hizo en `/cuenta`, o cambiar el CTA principal por "Completar mis datos" hasta
+que el §0 se resuelva. Es lo primero que encontrará una prueba de uso que
+intente seguir un proceso.

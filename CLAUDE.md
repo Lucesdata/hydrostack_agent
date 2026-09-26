@@ -194,7 +194,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-26 (rediseño visual del Hero Territorial).
+Última actualización: 2026-09-26 (La Ficha Viva en la portada).
 
 ## graphify
 
@@ -237,6 +237,16 @@ mezclan y no se sustituyen por cifras ni tendencias de un mockup.
   abiertos en presentación de oferta en siete días; *en juego · este mes* suma
   el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
   en "—".
+
+**La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
+existe para llegar a una. Justo después del hero va la sección
+`src/components/landing/ficha-viva/`: las cuatro preguntas con su estado real,
+un esquema ilustrativo sin cifras y el árbol de decisiones. El ticker es
+"Fichas recientes" y enlaza a cada ficha. **Color = tipo de obra**
+(`src/lib/classify/tipo-color.ts`: azul potable, marrón residual, gris redes,
+punteado `otros`), siempre con su nombre y nunca como estado. No prometer
+alertas por correo ni seguimiento de cambios mientras no existan: la sección
+los marca como tales. Spec: `docs/superpowers/specs/2026-09-26-landing-ficha-viva.md`.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.

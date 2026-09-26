@@ -20,6 +20,7 @@ import S5DarkClosing from "@/src/components/landing/S5DarkClosing";
 import S7Acceso from "@/src/components/landing/S7Acceso";
 import { ETIQUETA_POR_NIVEL, ruta } from "@/src/components/landing/seccionesHome";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
 // Las rutas de intención que quedan. Sale "Vendo o fabrico soluciones": la
 // tarjeta ocupaba un hueco de primer nivel para algo que no existe y que en
@@ -384,6 +385,10 @@ export default function LandingPage({
           sector={sector}
           heroStats={heroStats}
         />
+
+        {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo
+            después del hero porque el hero existe para llevar a una ficha. */}
+        <FichaViva />
 
         {/* Rutas de intención — ¿En qué momento estás?
             Sube justo debajo del hero: es la bifurcación real del visitante y

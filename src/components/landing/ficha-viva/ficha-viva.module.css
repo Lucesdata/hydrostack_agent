@@ -1,0 +1,509 @@
+/* "La Ficha Viva". Tema claro: es el umbral entre el hero oscuro y la ficha,
+   que también es clara. Usa los tokens de globals.css. */
+.seccion {
+  padding: clamp(56px, 7vw, 96px) var(--gutter);
+  background: linear-gradient(180deg, #eef4f8 0%, var(--bg) 320px);
+  color: var(--text-primary);
+}
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.eyebrow {
+  margin: 0 0 12px;
+  font:
+    600 11px/1.4 var(--font-jetbrains-mono),
+    monospace;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+.contenedor > h2 {
+  margin: 0;
+  max-width: 22ch;
+  font:
+    700 clamp(1.9rem, 3.4vw, 2.8rem)/1.1 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.025em;
+  hyphens: manual;
+}
+.lead {
+  max-width: 62ch;
+  margin: 16px 0 0;
+  font:
+    16px/1.6 var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+  hyphens: manual;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+  margin-top: 40px;
+}
+
+/* ── Esquema de ficha ─────────────────────────────────────────────────────── */
+.esquema {
+  position: relative;
+  margin: 0;
+  padding: 22px 22px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow:
+    0 30px 60px -30px rgba(11, 34, 57, 0.35),
+    0 2px 6px rgba(11, 34, 57, 0.06);
+}
+.esqCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.chipTipo,
+.chipEstado {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font:
+    600 12px var(--font-inter),
+    sans-serif;
+}
+.chipTipo {
+  border: 1.5px solid var(--tipo);
+  color: var(--text-primary);
+}
+.chipPunto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.chipEstado {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.barra {
+  display: block;
+  height: 10px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  background: #e6ebf0;
+}
+.barraCorta {
+  width: 42%;
+  height: 8px;
+}
+.barraTitulo {
+  width: 92%;
+  height: 14px;
+  background: #d5dde5;
+}
+.barraTitulo2 {
+  width: 64%;
+  height: 14px;
+  margin-bottom: 18px;
+  background: #d5dde5;
+}
+.esqBloque {
+  position: relative;
+  padding: 14px 0 14px 34px;
+  border-top: 1px solid var(--border);
+}
+.esqBloque > .pin {
+  position: absolute;
+  left: 0;
+  top: 13px;
+}
+.esqTitulo {
+  margin: 0 0 8px;
+  font:
+    650 13px var(--font-inter),
+    sans-serif;
+}
+.compuertas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.compuertas li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font:
+    12px var(--font-inter),
+    sans-serif;
+}
+.compuertas li span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+.compuertas li[data-estado="revisar"] span {
+  background: var(--warning);
+}
+.compuertas li[data-estado="sin dato"] span {
+  background: transparent;
+  border: 1.5px dashed var(--text-muted);
+}
+.compuertas em {
+  font-style: normal;
+  color: var(--text-muted);
+}
+.noPuedo {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--surface-alt);
+  font:
+    13px/1.5 var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+}
+.noPuedo strong {
+  color: var(--text-primary);
+}
+.fuentes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+.fuentes span {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  font:
+    12px var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+}
+.esqAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btnFalso {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #0b2239;
+  color: #fff;
+  font:
+    600 12.5px var(--font-inter),
+    sans-serif;
+}
+.btnFalsoSec {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+}
+.esquema figcaption {
+  margin-top: 10px;
+  font:
+    11.5px var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+  text-align: center;
+}
+.pin {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font:
+    700 12px var(--font-inter),
+    sans-serif;
+  box-shadow: 0 0 0 4px rgba(3, 105, 161, 0.14);
+}
+
+/* ── Las cuatro preguntas ─────────────────────────────────────────────────── */
+.preguntas {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.preguntas li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.preguntas h3 {
+  margin: 1px 0 6px;
+  font:
+    700 19px/1.25 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+.preguntas p {
+  margin: 0 0 8px;
+  font:
+    14.5px/1.6 var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+  hyphens: manual;
+}
+.estado {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  white-space: nowrap;
+  color: var(--success);
+  background: rgba(21, 128, 61, 0.1);
+}
+.estado[data-estado="pliego"] {
+  color: var(--warning);
+  background: rgba(180, 83, 9, 0.1);
+}
+.estado[data-estado="construccion"] {
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+}
+.cambios {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  font:
+    14px/1.6 var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+  hyphens: manual;
+}
+.cambios strong {
+  color: var(--text-primary);
+}
+
+/* ── Árbol de decisiones ──────────────────────────────────────────────────── */
+.arbol {
+  margin-top: 56px;
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: 16px;
+  background: #0b2239;
+  color: #f3f8fc;
+}
+.arbol h3 {
+  margin: 0 0 20px;
+  font:
+    700 20px var(--font-inter),
+    sans-serif;
+}
+.pasos {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.paso {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 0 0 22px;
+}
+/* La línea que baja de un paso al siguiente: el camino del "sí". */
+.paso:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 40px;
+  bottom: 2px;
+  width: 2px;
+  background: linear-gradient(#4cc9ff, rgba(76, 201, 255, 0.25));
+}
+.sigue {
+  position: absolute;
+  left: 32px;
+  bottom: 3px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  color: #4cc9ff;
+}
+.nodo {
+  position: relative;
+  z-index: 1;
+  justify-self: start;
+  padding: 10px 14px;
+  border: 1px solid rgba(140, 190, 225, 0.35);
+  border-radius: 10px;
+  background: #0f2a44;
+  font:
+    600 14px/1.35 var(--font-inter),
+    sans-serif;
+}
+.pregunta {
+  border-color: #4cc9ff;
+  background: #10324f;
+}
+.salida {
+  font:
+    14px/1.5 var(--font-inter),
+    sans-serif;
+  color: #c3d3e0;
+}
+.salida b,
+.finales b {
+  color: #fff;
+}
+.salidaFalta {
+  padding: 8px 12px;
+  border-left: 3px solid #a3b1c2;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.finales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.finales span {
+  padding: 7px 12px;
+  border-radius: 8px;
+  font:
+    13.5px var(--font-inter),
+    sans-serif;
+  color: #e6eef5;
+  border: 1px solid;
+}
+.finales [data-final="si"] {
+  border-color: #3fd68a;
+  background: rgba(63, 214, 138, 0.12);
+}
+.finales [data-final="subsanable"] {
+  border-color: #f5b454;
+  background: rgba(245, 180, 84, 0.12);
+}
+.finales [data-final="no"] {
+  border-color: #f28b82;
+  background: rgba(242, 139, 130, 0.12);
+}
+.arbolNota {
+  margin: 4px 0 0;
+  font:
+    13px/1.5 var(--font-inter),
+    sans-serif;
+  color: #9fb4c6;
+}
+
+/* ── Pie: leyenda de color y CTA ──────────────────────────────────────────── */
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-top: 36px;
+}
+.leyenda p {
+  margin: 0 0 10px;
+  font:
+    13px var(--font-inter),
+    sans-serif;
+  color: var(--text-muted);
+}
+.leyenda ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.leyenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font:
+    600 13px var(--font-inter),
+    sans-serif;
+}
+.leyenda li span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.leyenda li[data-familia="otros"] span {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ctaPrimario,
+.ctaSecundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font:
+    650 14px var(--font-inter),
+    sans-serif;
+}
+.ctaPrimario {
+  background: var(--accent);
+  color: #fff;
+}
+.ctaPrimario:hover {
+  background: var(--accent-deep);
+}
+.ctaSecundario {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.ctaPrimario:focus-visible,
+.ctaSecundario:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .paso {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-left: 0;
+  }
+  .paso:not(:last-child)::after {
+    display: none;
+  }
+  .sigue {
+    position: static;
+  }
+  .paso:not(:last-child) {
+    padding-bottom: 18px;
+  }
+}

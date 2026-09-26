@@ -11,6 +11,7 @@ import {
   slugDeProceso,
 } from "@/src/lib/secop/ficha";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import { formatCopFull } from "@/src/components/secop/format";
 import { montoConDato } from "@/src/lib/secop/monto";
 
@@ -107,7 +108,7 @@ export default async function FichaPage({ params }: Props) {
       <article className="fi">
         {/* 1 — Cabecera */}
         <nav className="fi-migas">
-          <Link href="/licitaciones">Licitaciones</Link>
+          <Link href="/licitaciones">Fichas de procesos</Link>
           {p.tipoProyecto && (
             <>
               {" · "}
@@ -122,6 +123,17 @@ export default async function FichaPage({ params }: Props) {
         <h1 className="fi-h1">{p.objeto ?? p.secopProcesoId}</h1>
 
         <div className="fi-chips">
+          {/* El tipo va primero y con su color de familia, siempre con el nombre
+              escrito: color = tipo de obra, nunca estado. Ver tipo-color.ts. */}
+          {p.tipoProyecto && (
+            <span
+              className={`fi-chip fi-chip--tipo fi-chip--${COLOR_TIPO[p.tipoProyecto].familia}`}
+              style={{ ["--tipo" as string]: COLOR_TIPO[p.tipoProyecto].claro }}
+            >
+              <span className="fi-chip-punto" aria-hidden="true" />
+              {TIPO_PROYECTO[p.tipoProyecto].label} · {COLOR_TIPO[p.tipoProyecto].familiaLabel}
+            </span>
+          )}
           {p.estadoActual && <span className="fi-chip fi-chip--estado">{p.estadoActual}</span>}
           {p.modalidad && <span className="fi-chip">{p.modalidad}</span>}
           {p.tipoContrato && <span className="fi-chip">{p.tipoContrato}</span>}
