@@ -112,8 +112,18 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${jetbrainsMono.variable} ${ibmPlexSansCondensed.variable}`}
     >
       <body>
+        <a className="saltar-contenido" href="#contenido">
+          Saltar al contenido
+        </a>
         <Navbar />
-        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+        {/* tabIndex -1: el salto mueve el foco aquí, no solo el scroll. */}
+        <main
+          id="contenido"
+          tabIndex={-1}
+          style={{ position: "relative", zIndex: 1, outline: "none" }}
+        >
+          {children}
+        </main>
         {/*
           El pie vivía dentro de `app/page.js`, así que SOLO existía en la
           portada: desde cualquier otra página —una faceta, /precios, /pliego—
