@@ -257,6 +257,9 @@ La ficha también etiqueta la ubicación de la entidad en los metadatos y la vis
 omite `areaServed` sin lugar de ejecución verificado, y dirige al expediente
 original antes de ofrecer el diagnóstico general: este no comprueba el pliego
 particular ni decide la elegibilidad individual.
+El cierre de la ficha distingue `Abierto`, `Cerrado` y estado de apertura ausente;
+el cerrado invita a explorar otros procesos y el estado ausente exige comprobar
+en el expediente si todavía se reciben ofertas.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
