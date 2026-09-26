@@ -12,15 +12,26 @@ import Link from "next/link";
  *
  * Al resolver el §0, la alerta puede volver aquí (PENDIENTES §44).
  */
-export default function CierreFicha({ urlSecop }: { urlSecop: string | null }) {
+export default function CierreFicha({
+  urlSecop,
+  estadoApertura,
+}: {
+  urlSecop: string | null;
+  estadoApertura: string | null;
+}) {
+  const cerrado = estadoApertura === "Cerrado";
+  const abierto = estadoApertura === "Abierto";
+
   return (
     <div>
       <h2 className="fi-h2">Qué puedes hacer ahora</h2>
       <p className="fi-vacio">
-        Para saber si puedes participar en este proceso, comprueba primero los requisitos en el
-        pliego. Esta ficha aún no tiene requisitos extraídos y no puede emitir un veredicto
-        individual. El diagnóstico orienta sobre tu preparación general, sin verificar este pliego
-        ni sustituirlo.
+        {cerrado
+          ? "Esta ficha registra el proceso como cerrado. Confirma el estado actual en el expediente y explora otros procesos abiertos."
+          : abierto
+            ? "Para saber si puedes participar, comprueba primero los requisitos en el pliego. Esta ficha aún no los tiene extraídos y no puede emitir un veredicto individual."
+            : "No consta aquí si el proceso recibe ofertas. Comprueba el estado y los requisitos en el expediente antes de decidir si puedes participar."}{" "}
+        El diagnóstico orienta sobre tu preparación general; no verifica este pliego.
       </p>
       <div className="fi-cierre">
         {urlSecop && (
@@ -33,9 +44,15 @@ export default function CierreFicha({ urlSecop }: { urlSecop: string | null }) {
             Abrir expediente en SECOP II
           </a>
         )}
-        <Link className="fi-btn" href="/diagnostico">
-          Evaluar mi preparación general sin cuenta
-        </Link>
+        {cerrado ? (
+          <Link className="fi-btn" href="/licitaciones">
+            Explorar procesos abiertos
+          </Link>
+        ) : (
+          <Link className="fi-btn" href="/diagnostico">
+            Evaluar mi preparación general sin cuenta
+          </Link>
+        )}
       </div>
     </div>
   );
