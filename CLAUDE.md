@@ -347,4 +347,12 @@ usan `--accent-fill`, que existe en los dos temas. Lo que imita la ficha real
 hero. Lo mide `tema-oscuro.test.ts`. El resto del sitio sigue claro; sin
 interruptor.
 
+**Informe mensual (2026-09-26).** `/informe`: "El mercado del agua en
+Colombia" del **último mes completo** en hora de Colombia
+(`src/lib/secop/informe.ts`, cuatro consultas probadas contra PGlite), con lo
+abierto hoy aparte. Estático (revalidate 6 h). "Descargar PDF" es la impresión
+del navegador con una hoja de impresión propia: sin dependencias. **No pide
+correo**: recogerlo exige la política de tratamiento (PENDIENTES §18) y
+enviarlo, el correo configurado (§0).
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
