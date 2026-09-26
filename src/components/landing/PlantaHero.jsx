@@ -9,7 +9,8 @@
 //   · ventanas de los dos edificios prendiéndose y apagándose
 //   · cotas de telemetría (Q, DBO, SST, pH) que se dibujan en secuencia
 //
-// El PNG vive en /public/planta-tratamiento.png (fondo transparente).
+// La imagen vive en /public/planta-tratamiento.{avif,webp,png} (fondo
+// transparente). Si cambia el PNG, regenerar las otras dos.
 
 import { WATER_CLIP, WINDOWS } from "./plantaPaths";
 
@@ -81,11 +82,22 @@ export default function PlantaHero() {
       <style dangerouslySetInnerHTML={{ __html: PLANTA_CSS }} />
       <div className="pt-shade" />
       <div className="pt-float">
-        <img
-          className="pt-img"
-          src="/planta-tratamiento.png"
-          alt="Planta de tratamiento de aguas residuales, vista isométrica"
-        />
+        {/* AVIF (48 kB) y WebP (67 kB) con el PNG (1 MB) de respaldo: los tres
+            conservan la transparencia. Medido el 2026-09-26, PENDIENTES §37.
+            width/height fijan la proporción antes de que llegue la imagen, para
+            que el SVG de encima no salte (CLS). */}
+        <picture>
+          <source srcSet="/planta-tratamiento.avif" type="image/avif" />
+          <source srcSet="/planta-tratamiento.webp" type="image/webp" />
+          <img
+            className="pt-img"
+            src="/planta-tratamiento.png"
+            width={1021}
+            height={759}
+            decoding="async"
+            alt="Planta de tratamiento de aguas residuales, vista isométrica"
+          />
+        </picture>
         <svg className="pt-svg" viewBox="0 0 1021 759" fill="none">
           <g>
             <g transform="translate(463,131) scale(1,0.465)">
