@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   sentenceCaseTitle,
   formatCopCompact,
+  formatCopEscala,
   formatCopFull,
   formatShortDate,
   verdictScore,
@@ -146,5 +147,19 @@ describe("formatConteo", () => {
   });
   it("el cero es un cero, no una raya", () => {
     expect(formatConteo(0)).toBe("0");
+  });
+});
+
+describe("formatCopEscala", () => {
+  it("usa billones y mil millones, como se dice en Colombia", () => {
+    expect(formatCopEscala(1_958_900_000_000)).toBe("$1,96 billones");
+    expect(formatCopEscala(1_000_000_000_000)).toBe("$1 billón");
+    expect(formatCopEscala(114_000_000_000)).toBe("$114 mil M");
+    expect(formatCopEscala(2_450_000_000)).toBe("$2 mil M");
+  });
+
+  it("por debajo de mil millones se comporta como formatCopCompact", () => {
+    expect(formatCopEscala(450_000_000)).toBe(formatCopCompact(450_000_000));
+    expect(formatCopEscala(null)).toBe("—");
   });
 });

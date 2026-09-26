@@ -122,7 +122,7 @@
 }
 .primaryCta:focus-visible,
 .allProcesses:focus-visible,
-.types a:focus-visible,
+.types a.typeFila:focus-visible,
 .fichaCta:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 3px;
@@ -453,6 +453,39 @@
     700 10.5px var(--font-inter),
     sans-serif;
 }
+.tooltip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid rgba(76, 201, 255, 0.4);
+  border-radius: 10px;
+  background: rgba(6, 20, 35, 0.96);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  font:
+    12px/1.45 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.tooltip strong {
+  font-size: 14px;
+  color: var(--aq-text);
+}
+.tooltipTipo b {
+  color: var(--aq-text);
+  font-weight: 600;
+}
+.tooltip em {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--aq-cyan);
+}
 .noData {
   margin: 8px 0 0;
   text-align: center;
@@ -529,6 +562,16 @@
     sans-serif;
   color: var(--aq-ink-muted);
 }
+.hero :global(.aqFichaDatos--sec) {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e3e9ef;
+}
+.hero :global(.aqFichaDatos--sec strong) {
+  font-size: 17px;
+  white-space: nowrap;
+  color: var(--aq-ink);
+}
 .hero :global(.aqFichaNota) {
   margin: 12px 0 0;
   font:
@@ -553,7 +596,7 @@
     sans-serif;
   color: var(--aq-ink-muted);
 }
-.types a {
+.typeFila {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
@@ -568,7 +611,7 @@
     500 13px var(--font-inter),
     sans-serif;
 }
-.types a:hover .typeNombre {
+a.typeFila:hover .typeNombre {
   color: #0369a1;
 }
 .typeNombre {
@@ -595,11 +638,11 @@
   border-radius: 50%;
   background: var(--tipo, #1a9be0);
 }
-.types a[data-familia="otros"] .typePunto {
+.typeFila[data-familia="otros"] .typePunto {
   background: transparent;
   border: 1.5px dashed var(--tipo);
 }
-.types a strong {
+.typeFila strong {
   grid-area: cifra;
   font:
     600 13px var(--font-inter),

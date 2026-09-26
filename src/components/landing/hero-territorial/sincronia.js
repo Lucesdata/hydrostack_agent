@@ -38,3 +38,38 @@ export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
     raiz.toggleAttribute("data-resaltando", resaltado != null);
   }, [contenedorRef, resaltado, seleccionado]);
 }
+
+/**
+ * Lo que dice el tooltip del mapa sobre un departamento: nombre, procesos
+ * abiertos, % nacional y subsistema más frecuente. Puro, para probarlo.
+ *
+ * El "más frecuente" deja fuera `otros`: `otros` es "sin subsistema
+ * identificado", no un subsistema, y ganaría en casi todos (es el 35 %).
+ * Si ninguno clasificado tiene procesos, no se nombra ninguno.
+ */
+export function contenidoTooltip({
+  dpto,
+  nombre = null,
+  departamentos = [],
+  totalAbiertos = null,
+  tipos = {},
+}) {
+  const fila = departamentos.find((d) => d.clave === dpto) ?? null;
+  const n = fila?.n ?? 0;
+  const pct = totalAbiertos > 0 && n > 0 ? (100 * n) / totalAbiertos : null;
+  let principal = null;
+  if (fila?.tipos) {
+    for (const [clave, cuenta] of Object.entries(fila.tipos)) {
+      if (clave === "otros" || cuenta <= 0) continue;
+      if (!principal || cuenta > principal.n) principal = { clave, n: cuenta };
+    }
+  }
+  return {
+    nombre: fila?.label ?? nombre ?? null,
+    n,
+    pct,
+    principal: principal
+      ? { ...principal, label: tipos[principal.clave] ?? principal.clave }
+      : null,
+  };
+}
