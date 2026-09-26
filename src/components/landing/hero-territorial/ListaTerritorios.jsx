@@ -44,7 +44,7 @@ export default function ListaTerritorios({
   }, [resaltado]);
 
   return (
-    <section aria-labelledby="aq-territorios-titulo">
+    <section id="aq-lista-departamentos" aria-labelledby="aq-territorios-titulo">
       <div className="aqListaCabecera">
         <h2 id="aq-territorios-titulo">Departamentos</h2>
         <span>{datosDisponibles ? departamentos.length : "—"}</span>

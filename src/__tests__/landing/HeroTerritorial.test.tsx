@@ -100,3 +100,18 @@ describe("formatPorcentaje", () => {
     expect(formatPorcentaje(null)).toBe("—");
   });
 });
+
+describe("alternativa en texto al mapa (móvil)", () => {
+  it("el enlace «ver como lista» apunta a la lista de departamentos", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} tipos={tipos} totalAbiertos={10000} />
+    );
+    expect(html).toContain('href="#aq-lista-departamentos"');
+    expect(html).toContain('id="aq-lista-departamentos"');
+    expect(html).toContain("Ver los 2 departamentos como lista");
+  });
+
+  it("sin datos no ofrece una lista vacía", () => {
+    expect(renderToStaticMarkup(<HeroTerritorial />)).not.toContain("como lista");
+  });
+});

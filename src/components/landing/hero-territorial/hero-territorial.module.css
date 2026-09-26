@@ -717,6 +717,9 @@
   font-size: 11px;
   color: var(--aq-cyan);
 }
+.verLista {
+  display: none;
+}
 .noData {
   margin: 8px 0 0;
   text-align: center;
@@ -1036,6 +1039,29 @@ a.typeFila:hover .typeNombre {
   }
   .kpis {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .verLista {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-top: 6px;
+    border: 1px solid var(--aq-line);
+    border-radius: 999px;
+    color: var(--aq-cyan);
+    text-decoration: none;
+    font:
+      600 13.5px var(--font-inter),
+      sans-serif;
+  }
+  .verLista:focus-visible {
+    outline: 2px solid var(--aq-cyan);
+    outline-offset: 2px;
+  }
+  /* Que el salto no deje la lista debajo de la barra fija. */
+  .hero :global(#aq-lista-departamentos) {
+    scroll-margin-top: calc(var(--nav-h, 56px) + 12px);
   }
   .kpis dl {
     padding: 10px 0 0;
