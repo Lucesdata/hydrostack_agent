@@ -66,4 +66,19 @@ describe("PortadaCliente", () => {
     expect(html).toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");
   });
+
+  it("el fondo blueprint es CSS: sin estilos en línea que dependan del scroll", () => {
+    const html = renderToStaticMarkup(<PortadaCliente />);
+    expect(html).toContain('class="bp-fondo-rejilla"');
+    expect(html).toContain("animation-timeline: scroll(root)");
+    // El hook anterior escribía top y transform en línea en cada evento de scroll.
+    expect(html).not.toMatch(/style="[^"]*top:\s*[\d.]+vh/);
+    expect(html).not.toMatch(/style="[^"]*translate3d/);
+  });
+
+  it("la portada no escucha el scroll para pintar el fondo", async () => {
+    const { readFileSync } = await import("node:fs");
+    const fuente = readFileSync("src/components/landing/PortadaCliente.jsx", "utf8");
+    expect(fuente).not.toMatch(/addEventListener\(\s*["']scroll/);
+  });
 });
