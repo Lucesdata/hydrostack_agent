@@ -2,14 +2,20 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { formatConteo } from "@/src/components/secop/format";
+import { formatConteo, formatCopEscala } from "@/src/components/secop/format";
 import { ruta } from "@/src/components/landing/seccionesHome";
 import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import ListaTerritorios from "./ListaTerritorios";
-import FichaDepartamento from "./FichaDepartamento";
+import FichaDepartamento, { formatPorcentaje } from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
-import { contenidoTooltip, dptoDesdeObjetivo, useMarcasEnMapa } from "./sincronia";
+import {
+  contenidoTooltip,
+  dptoDesdeObjetivo,
+  useMarcasEnMapa,
+  useMetricaEnMapa,
+} from "./sincronia";
+import { ESCALONES_MONTO, escalonMontoDe } from "@/src/lib/mapa/escala";
 import styles from "./hero-territorial.module.css";
 
 /** Una fila de tipo: punto de color, nombre, familia, cifra y barra. */
@@ -117,6 +123,11 @@ export default function HeroTerritorial({
   const vista = previa ?? seleccionado;
   const mapaRef = useRef(null);
   useMarcasEnMapa(mapaRef, resaltado, seleccionado?.clave ?? null);
+  // Colorear por procesos (lo que pinta el servidor) o por monto en juego. Solo
+  // se ofrece si las filas traen el monto: sin detalle no hay nada que pintar.
+  const hayMonto = departamentos.some((d) => d.montoAbierto != null);
+  const [metrica, setMetrica] = useState("procesos");
+  useMetricaEnMapa(mapaRef, hayMonto ? metrica : "procesos", departamentos, escalonMontoDe);
   // Tooltip: dónde pintarlo (relativo al panel) y de qué departamento.
   const panelRef = useRef(null);
   const [punta, setPunta] = useState(null);
@@ -226,6 +237,42 @@ export default function HeroTerritorial({
               </div>
             </dl>
           </div>
+          {hayMonto && datosDisponibles ? (
+            <div className={styles.metrica} role="group" aria-label="Colorear el mapa por">
+              <span>Colorear por</span>
+              {[
+                ["procesos", "Procesos abiertos"],
+                ["monto", "Monto en juego"],
+              ].map(([valor, etiqueta]) => (
+                <button
+                  key={valor}
+                  type="button"
+                  aria-pressed={metrica === valor}
+                  onClick={() => setMetrica(valor)}
+                >
+                  {etiqueta}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {hayMonto && metrica === "monto" ? (
+            // La leyenda del servidor es la de procesos: con monto se oculta por
+            // CSS (data-metrica) y se pinta esta, con la escala del monto.
+            <div className={styles.leyendaMonto}>
+              <ul>
+                {ESCALONES_MONTO.map((e) => (
+                  <li key={e.indice}>
+                    <span style={{ background: `var(--aq-e${e.indice})` }} aria-hidden="true" />
+                    {e.etiqueta}
+                  </li>
+                ))}
+              </ul>
+              <p>
+                Suma del presupuesto oficial de los procesos abiertos que lo publican, según la
+                ubicación de la entidad contratante.
+              </p>
+            </div>
+          ) : null}
           <div
             ref={mapaRef}
             className={styles.map}
@@ -255,15 +302,8 @@ export default function HeroTerritorial({
                   ? "Sin procesos abiertos"
                   : `${formatConteo(tip.n)} ${tip.n === 1 ? "proceso abierto" : "procesos abiertos"}`}
               </span>
-              {tip.pct != null ? (
-                <span>
-                  {tip.pct.toLocaleString("es-CO", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  })}{" "}
-                  % del total nacional
-                </span>
-              ) : null}
+              {tip.pct != null ? <span>{formatPorcentaje(tip.pct)} del total nacional</span> : null}
+              {tip.monto > 0 ? <span>{formatCopEscala(tip.monto)} en juego</span> : null}
               {tip.principal ? (
                 <span className={styles.tooltipTipo}>
                   Más frecuente: <b>{tip.principal.label}</b>

@@ -41,3 +41,27 @@ export function escalonDe(n: number): Escalon {
   if (!Number.isFinite(n) || n <= 0) return ESCALONES[0];
   return ESCALONES.find((e) => e.max === null || n <= e.max) ?? ESCALONES[0];
 }
+
+/**
+ * Escalones del mapa por **monto en juego**: la suma del presupuesto de los
+ * abiertos que lo publican (`montoAbierto` de `detallePorDepartamento`).
+ *
+ * Mismo criterio que los de procesos: cortes fijos y redondos, no cuantiles,
+ * para que el mapa de hoy y el de mañana se comparen. Van por décadas en la
+ * escala que se dice en Colombia (mil millones, billón), porque el monto de un
+ * departamento puede ser mil veces el de otro y una escala lineal dejaría todo
+ * el país en el primer tono. El índice 0 es "sin presupuesto publicado", que no
+ * es lo mismo que "sin procesos": se dice así en la leyenda.
+ */
+export const ESCALONES_MONTO: readonly Escalon[] = [
+  { indice: 0, min: 0, max: 0, etiqueta: "Sin presupuesto publicado" },
+  { indice: 1, min: 1, max: 1e10 - 1, etiqueta: "< $10 mil M" },
+  { indice: 2, min: 1e10, max: 1e11 - 1, etiqueta: "$10–100 mil M" },
+  { indice: 3, min: 1e11, max: 1e12 - 1, etiqueta: "$100 mil M–1 billón" },
+  { indice: 4, min: 1e12, max: null, etiqueta: "$1 billón o más" },
+] as const;
+
+export function escalonMontoDe(monto: number): Escalon {
+  if (!Number.isFinite(monto) || monto <= 0) return ESCALONES_MONTO[0];
+  return ESCALONES_MONTO.find((e) => e.max === null || monto <= e.max) ?? ESCALONES_MONTO[0];
+}

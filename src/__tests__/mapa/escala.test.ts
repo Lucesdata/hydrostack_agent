@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ESCALONES, escalonDe } from "@/src/lib/mapa/escala";
+import { ESCALONES_MONTO, escalonMontoDe } from "@/src/lib/mapa/escala";
 
 /**
  * Los cortes del color del mapa.
@@ -57,5 +58,28 @@ describe("escala del mapa", () => {
       "500–1.499",
       "1.500+",
     ]);
+  });
+});
+
+describe("escalonMontoDe", () => {
+  it("cae en el escalón de su década", () => {
+    expect(escalonMontoDe(5e9).indice).toBe(1);
+    expect(escalonMontoDe(1e10).indice).toBe(2);
+    expect(escalonMontoDe(99_999_999_999).indice).toBe(2);
+    expect(escalonMontoDe(1e11).indice).toBe(3);
+    expect(escalonMontoDe(1e12).indice).toBe(4);
+    expect(escalonMontoDe(1.96e12).indice).toBe(4);
+  });
+
+  it("sin presupuesto publicado no es un monto", () => {
+    expect(escalonMontoDe(0)).toBe(ESCALONES_MONTO[0]);
+    expect(escalonMontoDe(Number.NaN)).toBe(ESCALONES_MONTO[0]);
+    expect(ESCALONES_MONTO[0].etiqueta).toBe("Sin presupuesto publicado");
+  });
+
+  it("los cortes no dejan huecos entre escalones", () => {
+    for (let i = 1; i < ESCALONES_MONTO.length; i++) {
+      expect(ESCALONES_MONTO[i].min).toBe((ESCALONES_MONTO[i - 1].max ?? 0) + 1);
+    }
   });
 });
