@@ -202,6 +202,7 @@ export default function HeroTerritorial({
       })
     : null;
   const explorar = ruta("explorar");
+  const diagnostico = ruta("diagnostico");
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
@@ -217,9 +218,17 @@ export default function HeroTerritorial({
               qué te falta. Empieza por tu territorio.
             </p>
             <BuscadorFichas />
-            <Link className={styles.primaryCta} href={explorar.href}>
-              Ver fichas de procesos <span aria-hidden="true">→</span>
-            </Link>
+            <div className={styles.ctas}>
+              <Link className={styles.primaryCta} href={explorar.href}>
+                Ver fichas de procesos <span aria-hidden="true">→</span>
+              </Link>
+              {/* El secundario iba a ser "Crear alerta gratis", pero las alertas
+                  no se entregan en producción (PENDIENTES §0): se ofrece lo
+                  mismo que en el cierre de la ficha (§44), que sí funciona. */}
+              <Link className={styles.secondaryCta} href={diagnostico.href}>
+                Diagnóstico {diagnostico.etiqueta}
+              </Link>
+            </div>
             <p className={styles.ctaMeta}>
               <span className={styles.puntoVivo} aria-hidden="true" />
               {sector?.procesosVigilados == null

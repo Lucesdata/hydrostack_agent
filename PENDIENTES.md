@@ -800,6 +800,13 @@ intente seguir un proceso.
 mis datos: diagnóstico sin cuenta" → `/diagnostico`. **Al resolver el §0**,
 devolver la alerta a ese componente (y ajustar `CierreFicha.test.tsx`).
 
+**Lo mismo en la portada (2026-09-26).** Los puntos 24 ("No te pierdas los
+cambios", tarjeta con CTA a alertas) y 25 ("Crear alerta gratis" junto a "Ver
+fichas de procesos") de la lista de mejoras esperan al §0. Mientras tanto, el
+CTA secundario del hero lleva al diagnóstico sin cuenta
+(`HeroTerritorial.jsx`), y un test comprueba que el hero no dice "alerta". Al
+resolver el §0: cambiar ese CTA, montar la tarjeta y quitar esa aserción.
+
 ### 45. Rendimiento de la portada: medido y con presupuesto en CI (2026-09-26)
 Lighthouse 12, móvil simulado (4G lenta + CPU ×4), build de producción local
 **sin base de datos** —así que sin ticker ni mapa con datos: con datos reales el
