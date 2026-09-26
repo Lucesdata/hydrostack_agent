@@ -584,7 +584,7 @@ que deshacer y qué trampas tiene el entorno— está en
 [docs/rediseno-2026-09/TRASPASO.md](docs/rediseno-2026-09/TRASPASO.md). Ese
 documento es el punto de entrada para retomar el trabajo desde cero.
 
-### 37. El PNG de la planta pesa 994 kB — el 57% de la portada actual
+### 37. El PNG de la planta pesa 994 kB — el 57% de la portada actual — ✅ resuelto 2026-09-26
 Medido en producción el 2026-09-15: `public/planta-tratamiento.png` son 994 kB de
 los 1.753 kB que pesa la portada en móvil. El rediseño ya lo sacó de ahí —la
 ilustración se movió a `/nosotros`— así que la portada nueva parte con casi un
@@ -593,6 +593,13 @@ mega menos, pero **el archivo sigue pesando lo mismo, solo que en otra página**
 Optimizarlo (WebP/AVIF, o `next/image` con `sizes`) es trabajo pendiente, y ahora
 cuesta menos decidirlo porque afecta a una página secundaria y no a la puerta de
 entrada.
+
+**Resuelto el 2026-09-26:** `PlantaHero.jsx` sirve un `<picture>` con AVIF
+(48 kB) y WebP (67 kB), y el PNG (1.017 kB) queda solo de respaldo para
+navegadores sin ninguno de los dos. Los tres conservan la transparencia. El
+`<img>` lleva `width`/`height` para reservar el hueco. Las versiones se
+generaron con `sharp` fuera del repo (sin dependencia nueva): si cambia el PNG
+hay que regenerarlas.
 
 De la misma medición: once archivos de fuente, 181 kB, de las cinco familias que
 carga `layout.js`. Con la portada nueva conviene comprobar si se usan las cinco;
