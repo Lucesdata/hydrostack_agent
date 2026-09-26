@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Usa la versión fijada en package.json (devDependencies), que instala
+      # `npm ci`. Sin fijarla, npx bajaba la última en cada ejecución y una
+      # versión nueva podía poner en rojo todos los PR sin cambiar nada.
       - name: Check formatting
         run: npx prettier --check .
 

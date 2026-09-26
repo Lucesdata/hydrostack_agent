@@ -1521,6 +1521,22 @@ select {
   padding-inline: var(--gutter);
 }
 
+/* Oculto a la vista, no a los lectores de pantalla. La usaban la ficha
+   («Disponible en el nivel de análisis de pliego») y el campo de subida del
+   pliego sin que existiera: el texto salía en pantalla. No usar display:none
+   ni visibility:hidden, que también lo ocultan al lector. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Un enlace de texto suelto no llega a 44px de alto por sí mismo. */
 .tap-target {
   display: inline-flex;
