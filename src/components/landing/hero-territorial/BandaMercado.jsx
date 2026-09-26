@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatConteo, formatCopCompact } from "@/src/components/secop/format";
+import { haceCuanto } from "@/src/lib/landing/hace-cuanto";
 
 /** Cuántos procesos recientes caben en la banda sin empujar el resto. */
 export const N_RECIENTES = 3;
@@ -89,6 +90,7 @@ function Icono({ d }) {
 }
 
 export default function BandaMercado({ sector, heroStats, recientes = null }) {
+  const consultado = haceCuanto(heroStats?.ultimaConsulta ?? null);
   return (
     <section className="aqMercado" aria-labelledby="aq-mercado-titulo">
       <div className="aqMercadoTitulo">
@@ -101,22 +103,31 @@ export default function BandaMercado({ sector, heroStats, recientes = null }) {
           <Icono d={ICONOS.vigilados} />
           <dt>Procesos del sector vigilados</dt>
           <dd>{formatConteo(sector?.procesosVigilados ?? null)}</dd>
+          {/* Las tres cifras no cuentan lo mismo ni salen del mismo sitio: cada
+              una dice qué cuenta, visible, no en un tooltip que en móvil no se ve. */}
+          <dd className="aqMercadoAlcance">Histórico: abiertos y cerrados</dd>
         </div>
         <div>
           <Icono d={ICONOS.nuevos} />
           <dt>Nuevos abiertos · 7 días</dt>
           <dd>{formatConteo(heroStats?.nuevos7d ?? null)}</dd>
+          <dd className="aqMercadoAlcance">Solo abiertos, en presentación de oferta</dd>
         </div>
         <div>
           <Icono d={ICONOS.enJuego} />
           <dt>En juego · este mes · COP</dt>
           <dd>{formatCopCompact(heroStats?.enJuegoTotalCop ?? null)}</dd>
+          <dd className="aqMercadoAlcance">Presupuesto de los abiertos publicados este mes</dd>
         </div>
       </dl>
 
       <UltimosProcesos recientes={recientes} />
 
-      <p>Fuente: SECOP II. — indica un dato no disponible.</p>
+      <p>
+        Fuente: SECOP II. Los procesos vigilados salen de la base de AquaLicita
+        {consultado ? `, que consultó SECOP II ${consultado}` : ""}; las otras dos cifras se
+        consultan en directo. — indica un dato no disponible.
+      </p>
     </section>
   );
 }

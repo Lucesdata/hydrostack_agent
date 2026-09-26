@@ -340,6 +340,7 @@ export default function LandingPage({
   const [heroStats, setHeroStats] = useState({
     nuevos7d: null,
     enJuegoTotalCop: null,
+    ultimaConsulta: null,
   });
 
   // Fichas recientes: una sola petición para el ticker y la banda del hero.
@@ -355,6 +356,7 @@ export default function LandingPage({
         setHeroStats({
           nuevos7d: d.nuevos7d ?? null,
           enJuegoTotalCop: d.enJuego?.totalCop ?? null,
+          ultimaConsulta: d.ultimaConsulta ?? null,
         });
       })
       .catch(() => {

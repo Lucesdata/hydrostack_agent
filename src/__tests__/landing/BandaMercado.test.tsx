@@ -72,3 +72,23 @@ describe("una sola petición para ticker y banda", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 });
+
+describe("qué cuenta cada cifra", () => {
+  it("cada KPI dice su universo, visible", () => {
+    const html = renderToStaticMarkup(<BandaMercado sector={null} heroStats={null} />);
+    expect(html).toContain("Histórico: abiertos y cerrados");
+    expect(html).toContain("Solo abiertos, en presentación de oferta");
+    expect(html).toContain("Presupuesto de los abiertos publicados este mes");
+    expect(html).toContain("las otras dos cifras se consultan en directo");
+  });
+
+  it("dice cuándo se consultó SECOP II solo si lo sabe", () => {
+    const hace3h = new Date(Date.now() - 3 * 3_600_000 - 60_000).toISOString();
+    const con = renderToStaticMarkup(
+      <BandaMercado sector={null} heroStats={{ ultimaConsulta: hace3h }} />
+    );
+    expect(con).toContain("que consultó SECOP II hace 3 h");
+    const sin = renderToStaticMarkup(<BandaMercado sector={null} heroStats={null} />);
+    expect(sin).not.toContain("que consultó");
+  });
+});
