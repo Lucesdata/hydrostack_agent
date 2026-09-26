@@ -176,6 +176,13 @@
       "when": 1789444140705,
       "tag": "0024_long_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789830198024,
+      "tag": "0025_trigger_borrado_auth_users",
+      "breakpoints": true
     }
   ]
 }

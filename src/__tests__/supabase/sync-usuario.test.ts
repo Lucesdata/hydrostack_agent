@@ -7,23 +7,18 @@
  * FK que apuntan a `usuario` tal como existen en la base viva (verificado el
  * 2026-09-19: diez `ON DELETE CASCADE`, `pliego_proceso` con `SET NULL`).
  *
- * `auth.users` es de Supabase y no está en las migraciones: se simula con las
- * dos columnas que lee el código. La tabla real tiene un único parcial sobre
- * `email`; aquí se omite a propósito para poder representar el caso "la otra
- * cuenta sigue viva" (espejo desfasado tras un cambio de correo, o SSO).
+ * `auth.users` es de Supabase y no está en las migraciones: lo simula
+ * `crearBaseDePrueba` (ver su comentario, también sobre el único de `email`).
  */
-import path from "node:path";
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { User } from "@supabase/supabase-js";
 import { eq, sql } from "drizzle-orm";
-import { migrate } from "drizzle-orm/pglite/migrator";
 
 vi.mock("@/src/lib/db/client", async () => {
-  const { PGlite } = await import("@electric-sql/pglite");
-  const { drizzle } = await import("drizzle-orm/pglite");
+  const { crearBaseDePrueba } = await import("../helpers/base-pglite");
   const schema = await import("@/src/lib/db/schema");
-  const client = new PGlite();
-  return { db: drizzle(client, { schema }), pool: { end: () => client.close() }, schema };
+  const { client, db } = await crearBaseDePrueba();
+  return { db, pool: { end: () => client.close() }, schema };
 });
 
 import { db } from "@/src/lib/db/client";
@@ -116,12 +111,6 @@ const NINGUNA = {
   coincidencia: 0,
   diagnostico: 0,
 };
-
-beforeAll(async () => {
-  await migrate(db as never, { migrationsFolder: path.resolve(__dirname, "../../../drizzle") });
-  await db.execute(sql`create schema if not exists auth`);
-  await db.execute(sql`create table auth.users (id uuid primary key, email text)`);
-}, 60_000);
 
 const avisos = vi.spyOn(console, "warn").mockImplementation(() => {});
 

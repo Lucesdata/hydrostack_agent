@@ -29,7 +29,9 @@ export class ColisionEmailUsuarioError extends Error {
  * ellos: se sincroniza en código en cada login/signup exitoso. `usuario.id` es
  * el UUID de `auth.users.id`.
  *
- * Borrar una cuenta en el dashboard de Supabase deja su fila aquí. Si la misma
+ * Desde `drizzle/0025`, borrar una cuenta en Auth borra su fila aquí (trigger
+ * `on_auth_user_deleted`). Aun así puede quedar una fila huérfana: cuentas
+ * borradas antes de ese trigger, o el borrado suave de la API admin. Si esa
  * dirección se registra otra vez, Auth emite un id NUEVO y el upsert choca
  * contra el único de `email`, que `ON CONFLICT (id)` no cubre. Ver
  * `liberarEmailDeCuentaBorrada`.
