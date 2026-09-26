@@ -248,6 +248,14 @@ punteado `otros`), siempre con su nombre y nunca como estado. No prometer
 alertas por correo ni seguimiento de cambios mientras no existan: la sección
 los marca como tales. Spec: `docs/superpowers/specs/2026-09-26-landing-ficha-viva.md`.
 
+**Cabecera, ticker y sincronía (2026-09-26).** En `/` la barra de navegación
+va en oscuro (`.clr-nav--oscuro`, en `Navbar.js`) y el ticker también; en el
+resto del sitio la barra sigue clara. El ticker son tarjetas con botón de pausa
+(WCAG 2.2.2). Mapa, lista y ficha del hero están sincronizados al pasar el
+puntero o el foco (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de
+servidor, cada camino lleva `data-dpto` y el hero escucha por delegación. El
+clic del mapa **sigue navegando** a la faceta (decisión D).
+
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
 
