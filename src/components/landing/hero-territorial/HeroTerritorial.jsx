@@ -9,6 +9,7 @@ import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto"
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento, { formatPorcentaje } from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
+import ResumenDepartamento from "./ResumenDepartamento";
 import BuscadorFichas from "./BuscadorFichas";
 import {
   contenidoTooltip,
@@ -390,6 +391,13 @@ export default function HeroTerritorial({
             vistaPrevia={previa != null}
           />
           <TiposProyecto tipos={tipos} departamento={vista} />
+          {/* Del departamento elegido, no del señalado: pedirlo al pasar el
+              puntero sería una petición por cada departamento cruzado. Mientras
+              se previsualiza otro, se atenúa y su título dice de cuál es. */}
+          <ResumenDepartamento
+            departamento={seleccionado}
+            atenuado={previa != null && previa.clave !== seleccionado?.clave}
+          />
           {vista && vista.n > 0 ? (
             <Link
               className={styles.fichaCta}

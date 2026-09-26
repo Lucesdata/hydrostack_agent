@@ -84,6 +84,15 @@ describe("la tarjeta blanca de la ficha", () => {
       expect(contraste(t[token], t["aq-card"])).toBeGreaterThanOrEqual(AA.texto);
     });
   }
+  it("barras de la tendencia y tipos de los destacados sobre la tarjeta", () => {
+    pinta(css, "#0369a1");
+    // Las barras no llevan texto: basta el contraste de componente (3:1).
+    expect(contraste("#0369a1", t["aq-card"])).toBeGreaterThanOrEqual(3);
+    // El nombre del tipo sí es texto, en su color claro.
+    for (const f of FAMILIAS) {
+      expect(contraste(f.claro, t["aq-card"]), f.label).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
   it("el blanco del botón de la ficha se lee sobre --aq-navy", () => {
     expect(contraste("#ffffff", t["aq-navy"])).toBeGreaterThanOrEqual(AA.texto);
   });

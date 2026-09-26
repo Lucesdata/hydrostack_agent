@@ -917,6 +917,109 @@ a.typeFila:hover .typeNombre {
   border-radius: 5px;
   background: var(--tipo, #1a9be0);
 }
+/* Destacados y tendencia del departamento elegido (ResumenDepartamento.jsx). */
+.hero :global(.aqResumen) {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e3e9ef;
+  transition: opacity 0.15s;
+}
+.hero :global(.aqResumen[data-atenuado]) {
+  opacity: 0.45;
+}
+.hero :global(.aqResumen h3) {
+  margin: 0 0 6px;
+  font:
+    650 13px var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink);
+}
+.hero :global(.aqResumenNota) {
+  margin: 4px 0 0;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
+.hero :global(.aqSpark) {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+.hero :global(.aqSparkHit) {
+  fill: transparent;
+}
+.hero :global(.aqSparkBarra) {
+  fill: #0369a1;
+  pointer-events: none;
+}
+.hero :global(.aqSparkCero) {
+  fill: #cfd9e3;
+  pointer-events: none;
+}
+.hero :global(.aqSpark g:hover .aqSparkBarra) {
+  fill: var(--aq-ink);
+}
+.hero :global(.aqDestacados) {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqDestacados a) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid #e3e9ef;
+  border-radius: 8px;
+  color: var(--aq-ink);
+  text-decoration: none;
+}
+.hero :global(.aqDestacados a:hover) {
+  border-color: #0369a1;
+}
+.hero :global(.aqDestacados a:focus-visible) {
+  outline: 2px solid #0369a1;
+  outline-offset: 2px;
+}
+.hero :global(.aqDestTipo) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  color: var(--tipo);
+}
+.hero :global(.aqDestTipo i) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.hero :global(.aqDestTipo--otros i) {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.hero :global(.aqDestObjeto) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font:
+    500 12.5px/1.4 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqDestMeta) {
+  font:
+    11.5px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
 .fichaCta {
   display: flex;
   justify-content: center;
