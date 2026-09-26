@@ -35,6 +35,7 @@ describe("HeroTerritorial", () => {
     );
     expect(html).toContain('href="/diagnostico"');
     expect(html).toContain("Diagnóstico sin cuenta");
+    expect(html).toContain('href="/precios"');
     // Las alertas no se entregan en producción (PENDIENTES §0).
     expect(html.toLowerCase()).not.toContain("alerta");
   });

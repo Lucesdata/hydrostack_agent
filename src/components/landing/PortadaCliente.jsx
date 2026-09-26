@@ -316,14 +316,16 @@ function BlueprintBackground({ fx }) {
  *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  *   totalAbiertos?: number | null,
  *   tipos?: import("@/src/lib/secop/agregados").FilaAgregado[],
- * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
- * import: importarlo aquí arrastraría la geometría al bundle del navegador.
+ *   preguntas?: import("react").ReactNode,
+ * }} props — `mapa` y `preguntas` llegan ya renderizados desde el servidor. Son
+ * huecos y no imports: importarlos aquí los arrastraría al bundle del navegador.
  */
 export default function LandingPage({
   mapa = null,
   departamentos = [],
   totalAbiertos = null,
   tipos = [],
+  preguntas = null,
 }) {
   const fx = useBlueprintFX();
 
@@ -499,6 +501,10 @@ export default function LandingPage({
 
         {/* S7 — Qué te llevas sin pagar: el modelo de acceso, dicho una vez */}
         <S7Acceso />
+
+        {/* Preguntas frecuentes, con su JSON-LD. Llegan del servidor por la
+            misma razón que el mapa: son estáticas y no deben sumar JS. */}
+        {preguntas}
 
         {/* Banda oscura de cierre */}
         <S5DarkClosing />

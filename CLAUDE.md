@@ -315,4 +315,11 @@ color no puede ser lo único que lo diga.
 total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
 sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
 porque Satori no lee `woff2`.
+**Preguntas frecuentes (2026-09-26).** Antes del cierre de la portada va un FAQ
+(`src/components/landing/preguntas/`), componente de servidor con `<details>`
+nativo que llega a `PortadaCliente` por prop, como el mapa: no suma JS. El texto
+y el JSON-LD `FAQPage` salen de la misma lista (`src/lib/landing/preguntas-frecuentes.ts`)
+y cada respuesta dice lo que el producto hace hoy. Si cambia la ingesta, el
+modelo de acceso o las alertas, se cambia ahí.
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
