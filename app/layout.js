@@ -52,6 +52,10 @@ const ibmPlexSansCondensed = localFont({
   ],
   variable: "--font-ibm-plex-sans-condensed",
   display: "swap",
+  // No se precarga: ya no aparece en la parte visible de la portada (el titular
+  // es Inter), y sus 39 kB competían con el LCP en una conexión lenta. Se pide
+  // cuando una hoja la usa. Medido con Lighthouse el 2026-09-26.
+  preload: false,
 });
 
 /**

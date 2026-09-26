@@ -140,7 +140,8 @@ const AUTH_CSS = `
    encima lo partía en dos webs pegadas. Solo ahí: el resto del producto (la
    ficha, las facetas, las cuentas) es claro y la barra clara le pertenece.
    Los colores son los del hero (hero-territorial.module.css), no tokens de
-   globals.css, por la misma razón que el hero. */
+   globals.css, por la misma razón que el hero. El azul de los botones es
+   --aq-cta: el texto blanco sobre él se mide en contraste-oscuro.test.ts. */
 .clr-nav--oscuro{
   background: rgba(6, 20, 35, 0.94);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
@@ -156,12 +157,12 @@ const AUTH_CSS = `
 .clr-nav--oscuro .clr-nav-auth-link{ color: #c3d3e0; }
 .clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; }
 .clr-nav--oscuro .clr-nav-auth-cta{
-  font: 600 13px var(--font-inter), sans-serif; background: #1a9be0;
+  font: 600 13px var(--font-inter), sans-serif; background: #0272b0;
   border-radius: 999px; padding: 8px 16px;
 }
 .clr-nav--oscuro .clr-nav-explorar{
   font: 600 12.5px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
-  background: #1a9be0; border-radius: 999px; padding: 0 14px;
+  background: #0272b0; border-radius: 999px; padding: 0 14px;
 }
 .clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); }
 .clr-nav--oscuro .clr-hamburger-icon span{ background: #c3d3e0; }

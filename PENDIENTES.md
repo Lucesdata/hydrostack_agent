@@ -799,3 +799,32 @@ intente seguir un proceso.
 `src/components/secop/ficha/CierreFicha.tsx` y su botón principal es "Completar
 mis datos: diagnóstico sin cuenta" → `/diagnostico`. **Al resolver el §0**,
 devolver la alerta a ese componente (y ajustar `CierreFicha.test.tsx`).
+
+### 45. Rendimiento de la portada: medido y con presupuesto en CI (2026-09-26)
+Lighthouse 12, móvil simulado (4G lenta + CPU ×4), build de producción local
+**sin base de datos** —así que sin ticker ni mapa con datos: con datos reales el
+peso sube algo—.
+
+| | Antes | Después (mediana de 3) |
+|---|---|---|
+| Rendimiento | 91 | **96** |
+| LCP | 3,2 s | **2,7 s** |
+| CLS | 0 | 0 |
+| Peso total | 310 KiB | 289 KiB |
+
+El LCP es el `<h1>` del hero, y el 86 % era *render delay*: en la estimación de
+Lighthouse el titular depende de todo lo precargado. El LCP **observado** era
+1,3 s, igual al FCP. Lo que se hizo: IBM Plex Sans Condensed deja de
+precargarse (`preload: false` en `app/layout.js`), porque ya no aparece en la
+parte visible de la portada. Accesibilidad según Lighthouse: 100.
+
+**Presupuesto en CI** (`npm run presupuesto`, paso del job `lint` después del
+build): JS de primera carga de `/` ≤ 125 kB gzip (hoy 118,3) y fuentes
+precargadas ≤ 100 kB (hoy 89,1). Sin dependencias: lee `.next/`. LCP y CLS no
+entran en CI porque exigen un navegador y varían entre máquinas; Lighthouse CI
+lo resolvería, pero es una dependencia nueva y esa decisión es del usuario
+(`docs/CONDUCTA.md` §2).
+
+**Queda:** LCP 2,7 s sigue por encima de los 2,5 s de "bueno". Lo siguiente
+con más efecto sería medir con datos reales en el preview de Vercel.
+

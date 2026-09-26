@@ -269,7 +269,10 @@ fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
 **sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
-los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
+`contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra,
+el ticker y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
+`--aq-cta` (`#0272b0`/`#0b7cbd`): el `#1a9be0` de antes daba 3,08:1.
 
 **Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
 en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de
@@ -281,4 +284,9 @@ elige los 10 departamentos con más procesos y los coloca sin solaparse en un
 viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
 estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
 entidades ni municipios, que la portada no calcula.
+**Imagen para compartir (2026-09-26).** `app/opengraph-image.js` genera con
+`next/og` la vista previa de 1200×630: el mapa real con la rampa del hero y el
+total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
+sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
+porque Satori no lee `woff2`.
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
