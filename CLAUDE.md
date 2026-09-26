@@ -236,7 +236,9 @@ mezclan y no se sustituyen por cifras ni tendencias de un mockup.
   y no comparten universo: *vigilados* incluye histórico; *nuevos · 7 días* son
   abiertos en presentación de oferta en siete días; *en juego · este mes* suma
   el precio base de los abiertos publicados este mes. Si el fetch falla, quedan
-  en "—".
+  en "—". Cada cifra lleva debajo una nota visible con lo que cuenta, y el pie
+  dice cuándo consultó la ingesta SECOP II (`ultimaConsulta`, de `sync_log`:
+  "consultó", no "actualizó", porque `sync_log` se cierra antes del transform).
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección

@@ -1079,7 +1079,8 @@ a.typeFila:hover .typeNombre {
   grid-template-columns: 40px minmax(0, 1fr);
   grid-template-areas:
     "icono cifra"
-    "icono etiqueta";
+    "icono etiqueta"
+    "icono alcance";
   column-gap: 12px;
   align-items: center;
   padding: 6px 18px;
@@ -1195,6 +1196,15 @@ a.typeFila:hover .typeNombre {
     13px var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
+}
+/* Qué cuenta cada cifra: más pequeño que la etiqueta, debajo de ella. */
+.hero :global(.aqMercado dd.aqMercadoAlcance) {
+  grid-area: alcance;
+  margin-top: 2px;
+  font:
+    11px/1.4 var(--font-inter),
+    sans-serif;
+  color: #8499ab;
 }
 .hero :global(.aqMercado > p) {
   margin: 12px 0 0;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getNuevos7d, getEnJuegoMes, getDestacado } from "@/src/lib/secop/landingStats";
 import { getCifrasSector, type CifrasSector } from "@/src/lib/landing/cifras";
+import { getUltimaConsultaSecop } from "@/src/lib/landing/ultima-consulta";
 
 export const runtime = "nodejs";
 export const revalidate = 1800;
@@ -17,6 +18,8 @@ export interface LandingStatsResponse {
   destacado: Awaited<ReturnType<typeof getDestacado>>;
   /** Cifras del sector leídas de la base (no de Socrata). */
   sector: CifrasSector;
+  /** Fin de la última consulta de la ingesta a SECOP II (ISO), de `sync_log`. */
+  ultimaConsulta: string | null;
 }
 
 /**
@@ -26,11 +29,12 @@ export interface LandingStatsResponse {
  * lanza un error al cliente.
  */
 export async function GET() {
-  const [nuevos7d, enJuego, destacado, sector] = await Promise.allSettled([
+  const [nuevos7d, enJuego, destacado, sector, ultimaConsulta] = await Promise.allSettled([
     getNuevos7d(),
     getEnJuegoMes(),
     getDestacado(),
     getCifrasSector(),
+    getUltimaConsultaSecop(),
   ]);
 
   const body: LandingStatsResponse = {
@@ -38,6 +42,7 @@ export async function GET() {
     enJuego: enJuego.status === "fulfilled" ? enJuego.value : { totalCop: null, procesos: null },
     destacado: destacado.status === "fulfilled" ? destacado.value : null,
     sector: sector.status === "fulfilled" ? sector.value : SECTOR_VACIO,
+    ultimaConsulta: ultimaConsulta.status === "fulfilled" ? ultimaConsulta.value : null,
   };
 
   return NextResponse.json(body, {
