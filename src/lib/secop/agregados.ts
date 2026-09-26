@@ -138,9 +138,90 @@ export async function procesosPorClaseEntidad(): Promise<FilaAgregado[]> {
   })).sort((a, b) => b.n - a.n);
 }
 
+/**
+ * Un departamento de la portada con lo que su ficha del hero necesita. Es un
+ * superconjunto de `FilaAgregado`, así que el mapa y la lista lo aceptan igual.
+ */
+export interface FilaDepartamento extends FilaAgregado {
+  /** Abiertos cuya fecha de publicación cae en los últimos 7 días. */
+  nuevos7d: number;
+  /**
+   * Suma del presupuesto oficial de los abiertos que lo publican. El 0 del
+   * SECOP es "sin dato" (ver `montoConDato`), así que no suma ni cuenta.
+   */
+  montoAbierto: number;
+  /** Cuántos de los `n` abiertos tienen presupuesto publicado. */
+  nConMonto: number;
+  /** Abiertos por tipo de proyecto. No suma `n`: hay procesos sin clasificar. */
+  tipos: Record<TipoProyecto, number>;
+}
+
+/** Fila cruda de `detallePorDepartamento`: pg entrega `numeric` como texto. */
+export interface FilaDepartamentoSql {
+  clave: string | null;
+  label: string | null;
+  n: number;
+  nuevos7d: number;
+  monto: string | number | null;
+  nConMonto: number;
+  [tipo: `t_${string}`]: number;
+}
+
+export function filaDepartamentoDesdeSql(f: FilaDepartamentoSql): FilaDepartamento | null {
+  if (!f.clave || !f.label) return null;
+  const monto = Number(f.monto ?? 0);
+  return {
+    clave: f.clave,
+    label: f.label,
+    slug: slugificar(f.label),
+    n: f.n,
+    nuevos7d: f.nuevos7d ?? 0,
+    montoAbierto: Number.isFinite(monto) && monto > 0 ? monto : 0,
+    nConMonto: f.nConMonto ?? 0,
+    tipos: Object.fromEntries(TIPOS_PROYECTO.map((t) => [t, f[`t_${t}`] ?? 0])) as Record<
+      TipoProyecto,
+      number
+    >,
+  };
+}
+
+/**
+ * `procesosPorDepartamento` con el detalle de la ficha del hero, en **una sola
+ * consulta** (conteos con `FILTER`). Solo la usa la portada: las facetas siguen
+ * con la consulta ligera. No se añade como quinta consulta en paralelo porque
+ * el pool ya se agotó una vez (PENDIENTES §40); sustituye a la de siempre.
+ */
+export async function detallePorDepartamento(): Promise<FilaDepartamento[]> {
+  const porTipo = Object.fromEntries(
+    TIPOS_PROYECTO.map((t) => [
+      `t_${t}`,
+      sql<number>`(count(*) filter (where ${proceso.tipoProyecto} = ${t}))::int`,
+    ])
+  );
+  const filas = await db
+    .select({
+      clave: geografia.departamentoCodigo,
+      label: geografia.departamentoNombre,
+      n: conteo,
+      nuevos7d: sql<number>`(count(*) filter (where ${proceso.fechaPublicacion} >= current_date - 7))::int`,
+      monto: sql<string>`coalesce(sum(${proceso.valorEstimado}) filter (where ${proceso.valorEstimado} > 0), 0)`,
+      nConMonto: sql<number>`(count(*) filter (where ${proceso.valorEstimado} > 0))::int`,
+      ...porTipo,
+    })
+    .from(proceso)
+    .innerJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
+    .where(condicionAbierto())
+    .groupBy(geografia.departamentoCodigo, geografia.departamentoNombre)
+    .orderBy(desc(conteo));
+
+  return (filas as unknown as FilaDepartamentoSql[])
+    .map(filaDepartamentoDesdeSql)
+    .filter((f): f is FilaDepartamento => f !== null);
+}
+
 export interface AgregadosPortada {
   totalAbiertos: number;
-  departamentos: FilaAgregado[];
+  departamentos: FilaDepartamento[];
   tipos: FilaAgregado[];
   clasesEntidad: FilaAgregado[];
 }
@@ -149,7 +230,7 @@ export interface AgregadosPortada {
 export async function agregadosPortada(): Promise<AgregadosPortada> {
   const [total, departamentos, tipos, clasesEntidad] = await Promise.all([
     db.select({ n: conteo }).from(proceso).where(condicionAbierto()),
-    procesosPorDepartamento(),
+    detallePorDepartamento(),
     procesosPorTipo(),
     procesosPorClaseEntidad(),
   ]);

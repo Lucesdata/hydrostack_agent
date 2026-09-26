@@ -1,6 +1,6 @@
 "use client";
 
-import { formatConteo } from "@/src/components/secop/format";
+import { formatConteo, formatCopEscala } from "@/src/components/secop/format";
 
 export function porcentajeNacional(n, totalAbiertos) {
   if (totalAbiertos == null || totalAbiertos <= 0 || n == null) return null;
@@ -45,6 +45,24 @@ export default function FichaDepartamento({ departamento, totalAbiertos, vistaPr
           <span>del total nacional</span>
         </p>
       </div>
+      {departamento?.nuevos7d != null ? (
+        <div className="aqFichaDatos aqFichaDatos--sec">
+          <p>
+            <strong>{formatConteo(departamento.nuevos7d)}</strong>
+            <span>publicados en los últimos 7 días</span>
+          </p>
+          <p>
+            <strong>
+              {departamento.nConMonto > 0 ? formatCopEscala(departamento.montoAbierto) : "—"}
+            </strong>
+            {/* No todos publican presupuesto: se dice sobre cuántos se suma. */}
+            <span>
+              en juego · {formatConteo(departamento.nConMonto)} de {formatConteo(departamento.n)}{" "}
+              con presupuesto
+            </span>
+          </p>
+        </div>
+      ) : null}
       <p className="aqFichaNota">Según ubicación de la entidad contratante</p>
     </aside>
   );

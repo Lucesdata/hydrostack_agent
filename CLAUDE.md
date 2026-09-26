@@ -256,6 +256,18 @@ puntero o el foco (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de
 servidor, cada camino lleva `data-dpto` y el hero escucha por delegación. El
 clic del mapa **sigue navegando** a la faceta (decisión D).
 
+**Ficha del departamento y tooltip (2026-09-26).** La portada ya no usa
+`procesosPorDepartamento()` sino `detallePorDepartamento()` (misma consulta,
+con conteos `FILTER`: sigue siendo **una** consulta, no una quinta en paralelo —
+PENDIENTES §40). Cada fila trae además `nuevos7d` (abiertos con
+`fecha_publicacion` en los últimos 7 días; **no** es el mismo universo que
+*nuevos · 7 días* de la banda), `montoAbierto` + `nConMonto` (suma del
+presupuesto de los abiertos que lo publican; el 0 no cuenta) y `tipos` por
+departamento. La ficha del hero muestra los tipos **del departamento** (sin
+enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si la
+fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
+**sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
+
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
 

@@ -5,11 +5,92 @@ import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
 import { ruta } from "@/src/components/landing/seccionesHome";
 import { colorDeTipo } from "@/src/lib/classify/tipo-color";
+import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento from "./FichaDepartamento";
 import BandaMercado from "./BandaMercado";
-import { dptoDesdeObjetivo, useMarcasEnMapa } from "./sincronia";
+import { contenidoTooltip, dptoDesdeObjetivo, useMarcasEnMapa } from "./sincronia";
 import styles from "./hero-territorial.module.css";
+
+/** Una fila de tipo: punto de color, nombre, familia, cifra y barra. */
+function FilaTipo({ clave, label, n, max }) {
+  const color = colorDeTipo(clave);
+  return (
+    <>
+      <span className={styles.typeNombre}>
+        <span className={styles.typePunto} aria-hidden="true" />
+        {label}
+        {color ? <small>{color.familiaLabel}</small> : null}
+      </span>
+      <strong>{formatConteo(n)}</strong>
+      <span className={styles.typeBar} aria-hidden="true">
+        <span style={{ width: `${(100 * n) / max}%` }} />
+      </span>
+    </>
+  );
+}
+
+/**
+ * Tipos de proyecto de la ficha. Con el detalle del departamento, su propio
+ * reparto (sin enlace por fila: no hay faceta departamento × tipo, y mandar al
+ * tipo nacional contradiría la cifra). Sin él, el reparto nacional de siempre,
+ * con enlace a cada faceta de tipo.
+ */
+function TiposProyecto({ tipos, departamento }) {
+  const propios = departamento?.tipos
+    ? TIPOS_PROYECTO.map((t) => ({
+        clave: t,
+        label: TIPO_PROYECTO[t].label,
+        n: departamento.tipos[t] ?? 0,
+      }))
+    : null;
+
+  if (propios) {
+    const max = Math.max(1, ...propios.map((t) => t.n));
+    return (
+      <div className={styles.types}>
+        <h2>Tipos de proyecto · {departamento.label}</h2>
+        <p>Procesos abiertos del departamento, por tipo</p>
+        {propios.map((t) => {
+          const color = colorDeTipo(t.clave);
+          return (
+            <div
+              key={t.clave}
+              className={styles.typeFila}
+              style={color ? { "--tipo": color.claro } : undefined}
+              data-familia={color?.familia}
+            >
+              <FilaTipo {...t} max={max} />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const max = Math.max(1, ...tipos.map((t) => t.n));
+  return (
+    <div className={styles.types}>
+      <h2>Tipos de proyecto · Colombia</h2>
+      <p>Distribución nacional de procesos abiertos</p>
+      {tipos.map((tipo) => {
+        const color = colorDeTipo(tipo.clave);
+        return (
+          <Link
+            href={`/licitaciones/tipo/${tipo.slug}`}
+            key={tipo.clave}
+            className={styles.typeFila}
+            style={color ? { "--tipo": color.claro } : undefined}
+            data-familia={color?.familia}
+          >
+            <FilaTipo clave={tipo.clave} label={tipo.label} n={tipo.n} max={max} />
+          </Link>
+        );
+      })}
+      {tipos.length === 0 ? <p>Distribución no disponible.</p> : null}
+    </div>
+  );
+}
 
 export default function HeroTerritorial({
   mapa = null,
@@ -36,9 +117,51 @@ export default function HeroTerritorial({
   const vista = previa ?? seleccionado;
   const mapaRef = useRef(null);
   useMarcasEnMapa(mapaRef, resaltado, seleccionado?.clave ?? null);
-  const alSenalarMapa = (e) => setResaltado(dptoDesdeObjetivo(e.target));
-  const alSoltarMapa = () => setResaltado(null);
-  const maxTipo = Math.max(1, ...tipos.map((t) => t.n));
+  // Tooltip: dónde pintarlo (relativo al panel) y de qué departamento.
+  const panelRef = useRef(null);
+  const [punta, setPunta] = useState(null);
+  const colocarPunta = (x, y, dpto, nombre) => {
+    const panel = panelRef.current?.getBoundingClientRect();
+    if (!panel || !dpto) return setPunta(null);
+    setPunta({ x: x - panel.left, y: y - panel.top, dpto, nombre, ancho: panel.width });
+  };
+  const nombreDe = (objetivo) =>
+    objetivo?.closest?.("[data-nombre]")?.getAttribute("data-nombre") ??
+    objetivo?.querySelector?.("[data-nombre]")?.getAttribute("data-nombre") ??
+    null;
+  const alSenalarMapa = (e) => {
+    const dpto = dptoDesdeObjetivo(e.target);
+    setResaltado(dpto);
+    // Con teclado no hay puntero: el tooltip va al centro del departamento.
+    if (e.type === "focus" && dpto) {
+      const r = e.target.getBoundingClientRect();
+      colocarPunta(r.left + r.width / 2, r.top + r.height / 2, dpto, nombreDe(e.target));
+    }
+  };
+  const alMoverEnMapa = (e) => {
+    // En táctil el toque navega: un tooltip que aparece al tocar y se va al
+    // soltar solo estorba.
+    if (e.pointerType === "touch") return;
+    const dpto = dptoDesdeObjetivo(e.target);
+    colocarPunta(e.clientX, e.clientY, dpto, nombreDe(e.target));
+  };
+  const alSoltarMapa = () => {
+    setResaltado(null);
+    setPunta(null);
+  };
+  const etiquetasTipo = useMemo(
+    () => Object.fromEntries(tipos.map((t) => [t.clave, t.label])),
+    [tipos]
+  );
+  const tip = punta
+    ? contenidoTooltip({
+        dpto: punta.dpto,
+        nombre: punta.nombre,
+        departamentos,
+        totalAbiertos,
+        tipos: etiquetasTipo,
+      })
+    : null;
   const explorar = ruta("explorar");
 
   return (
@@ -82,7 +205,11 @@ export default function HeroTerritorial({
           </div>
         </div>
 
-        <div className={styles.mapPanel} aria-label="Procesos abiertos por departamento">
+        <div
+          ref={panelRef}
+          className={styles.mapPanel}
+          aria-label="Procesos abiertos por departamento"
+        >
           <div className={styles.kpis} aria-label="Indicadores nacionales">
             <div className={styles.kpiTotal}>
               <span className={styles.kpiTitulo}>Procesos abiertos · Colombia</span>
@@ -103,12 +230,48 @@ export default function HeroTerritorial({
             ref={mapaRef}
             className={styles.map}
             onPointerOver={alSenalarMapa}
+            onPointerMove={alMoverEnMapa}
             onPointerLeave={alSoltarMapa}
             onFocus={alSenalarMapa}
             onBlur={alSoltarMapa}
           >
             {mapa}
           </div>
+          {tip && datosDisponibles ? (
+            // Duplica lo que ya dicen la ficha (vista previa) y el aria-label
+            // de cada departamento: es una ayuda visual, fuera del árbol
+            // accesible.
+            <div
+              className={styles.tooltip}
+              aria-hidden="true"
+              style={{
+                left: Math.min(punta.x + 14, punta.ancho - 230),
+                top: punta.y + 14,
+              }}
+            >
+              <strong>{tip.nombre}</strong>
+              <span>
+                {tip.n === 0
+                  ? "Sin procesos abiertos"
+                  : `${formatConteo(tip.n)} ${tip.n === 1 ? "proceso abierto" : "procesos abiertos"}`}
+              </span>
+              {tip.pct != null ? (
+                <span>
+                  {tip.pct.toLocaleString("es-CO", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  % del total nacional
+                </span>
+              ) : null}
+              {tip.principal ? (
+                <span className={styles.tooltipTipo}>
+                  Más frecuente: <b>{tip.principal.label}</b>
+                </span>
+              ) : null}
+              {tip.n > 0 ? <em>Clic para ver sus fichas</em> : null}
+            </div>
+          ) : null}
           {mapa && totalAbiertos == null ? (
             <p className={styles.noData}>El mapa no tiene datos disponibles en este momento.</p>
           ) : null}
@@ -120,32 +283,7 @@ export default function HeroTerritorial({
             totalAbiertos={totalAbiertos}
             vistaPrevia={previa != null}
           />
-          <div className={styles.types}>
-            <h2>Tipos de proyecto · Colombia</h2>
-            <p>Distribución nacional de procesos abiertos</p>
-            {tipos.map((tipo) => {
-              const color = colorDeTipo(tipo.clave);
-              return (
-                <Link
-                  href={`/licitaciones/tipo/${tipo.slug}`}
-                  key={tipo.clave}
-                  style={color ? { "--tipo": color.claro } : undefined}
-                  data-familia={color?.familia}
-                >
-                  <span className={styles.typeNombre}>
-                    <span className={styles.typePunto} aria-hidden="true" />
-                    {tipo.label}
-                    {color ? <small>{color.familiaLabel}</small> : null}
-                  </span>
-                  <strong>{formatConteo(tipo.n)}</strong>
-                  <span className={styles.typeBar} aria-hidden="true">
-                    <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
-                  </span>
-                </Link>
-              );
-            })}
-            {tipos.length === 0 ? <p>Distribución no disponible.</p> : null}
-          </div>
+          <TiposProyecto tipos={tipos} departamento={vista} />
           {vista && vista.n > 0 ? (
             <Link
               className={styles.fichaCta}

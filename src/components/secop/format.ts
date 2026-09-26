@@ -49,6 +49,24 @@ export function formatCopCompact(value: number | null): string {
 }
 
 /**
+ * Monto agregado en la escala que se usa en Colombia: "$1,96 billones"
+ * (10¹²), "$114 mil M" (10⁹); por debajo, igual que `formatCopCompact`.
+ * Para sumas de muchos procesos, donde "$1.958.900 M" ya no se lee de un vistazo.
+ */
+export function formatCopEscala(value: number | null): string {
+  if (value == null) return "—";
+  const decimal = (n: number) =>
+    n.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: n < 10 ? 2 : 1 });
+  if (value >= 1e12) {
+    const cifra = decimal(value / 1e12);
+    // Singular solo para "1 billón" exacto: "1,96 billones" va en plural.
+    return `$${cifra} ${cifra === "1" ? "billón" : "billones"}`;
+  }
+  if (value >= 1e9) return `$${Math.round(value / 1e9).toLocaleString("es-CO")} mil M`;
+  return formatCopCompact(value);
+}
+
+/**
  * Fecha corta para la fila de lista ("2 jul"). Vacía si null/inválida.
  *
  * La normalización asume la salida ICU/CLDR de es-CO vigente al escribirla
