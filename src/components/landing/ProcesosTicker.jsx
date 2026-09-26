@@ -12,10 +12,20 @@ import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 
 const TICKER_CSS = `
 .ptr-bar {
+  /* Tema oscuro: el ticker va entre la barra y el hero de la portada, que son
+     azul noche. Colores del hero (hero-territorial.module.css). */
+  --ptr-bg: #081a2b;
+  --ptr-line: rgba(140, 190, 225, 0.14);
+  --ptr-texto: #f3f8fc;
+  --ptr-muted: #9fb4c6;
+  --ptr-tenue: #6f8596;
+  --ptr-acento: #4cc9ff;
+  --ptr-vivo: #3fd6a0;
+  --ptr-aviso: #f5b454;
   width: 100%;
   height: 54px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
+  border-bottom: 1px solid var(--ptr-line);
+  background: var(--ptr-bg);
   position: relative;
   display: flex;
   align-items: stretch;
@@ -25,29 +35,29 @@ const TICKER_CSS = `
   align-items: center;
   gap: 7px;
   padding: 0 16px;
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--ptr-line);
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.12em;
-  color: var(--accent);
+  color: var(--ptr-acento);
   text-transform: uppercase;
   white-space: nowrap;
-  background: var(--surface);
+  background: var(--ptr-bg);
   z-index: 2;
   flex-shrink: 0;
 }
 .ptr-cap-dot {
   position: relative;
   width: 8px; height: 8px; border-radius: 0;
-  border: 1.5px solid var(--success);
+  border: 1.5px solid var(--ptr-vivo);
   background: none;
   transform: rotate(45deg);
   flex-shrink: 0;
 }
 .ptr-cap-dot::after {
   content: ""; position: absolute; inset: -4px; border-radius: 0;
-  border: 1px solid var(--success); opacity: .5;
+  border: 1px solid var(--ptr-vivo); opacity: .5;
   animation: ptr-pulse 2.4s ease-out infinite;
 }
 @keyframes ptr-pulse {
@@ -80,38 +90,38 @@ const TICKER_CSS = `
   justify-content: center;
   gap: 3px;
   padding: 0 20px;
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--ptr-line);
   font-family: var(--font-inter), sans-serif;
   text-decoration: none;
   cursor: default;
 }
 a.ptr-item { cursor: pointer; }
-a.ptr-item:hover .ptr-entidad { color: var(--accent); }
+a.ptr-item:hover .ptr-entidad { color: var(--ptr-acento); }
 .ptr-row1 {
   display: flex; align-items: center; gap: 8px;
-  font-size: 11.5px; color: var(--ink-600);
+  font-size: 11.5px; color: var(--ptr-muted);
 }
 .ptr-tipo {
   display: inline-flex; align-items: center; gap: 5px;
-  font-weight: 600; color: var(--ink-900); white-space: nowrap;
+  font-weight: 600; color: var(--ptr-texto); white-space: nowrap;
 }
 .ptr-tipo i {
   width: 8px; height: 8px; border-radius: 50%; background: var(--tipo);
 }
 .ptr-tipo--otros i { background: transparent; border: 1.5px dashed var(--tipo); }
 .ptr-entidad {
-  color: var(--ink-900); font-weight: 600;
+  color: var(--ptr-texto); font-weight: 600;
   max-width: 300px; overflow: hidden; text-overflow: ellipsis;
   transition: color .18s;
 }
-.ptr-valor { color: var(--accent); font-weight: 600; }
+.ptr-valor { color: var(--ptr-acento); font-weight: 600; }
 .ptr-row2 {
   display: flex; align-items: center; gap: 6px;
-  font-size: 11px; color: var(--ink-600);
+  font-size: 11px; color: var(--ptr-muted);
 }
 .ptr-dot {
   width: 8px; height: 1.5px; border-radius: 0;
-  background: var(--ink-300); flex-shrink: 0;
+  background: var(--ptr-tenue); flex-shrink: 0;
   margin-left: 3px;
   position: relative;
 }
@@ -119,8 +129,8 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
   content: ""; position: absolute; left: 0; top: -3px;
   width: 1.5px; height: 8px; background: inherit;
 }
-.ptr-dot--live { background: var(--success); }
-.ptr-dot--warn { background: var(--warning); }
+.ptr-dot--live { background: var(--ptr-vivo); }
+.ptr-dot--warn { background: var(--ptr-aviso); }
 .ptr-lugar {
   max-width: 220px; overflow: hidden; text-overflow: ellipsis;
 }
@@ -132,7 +142,7 @@ a.ptr-item:hover .ptr-entidad { color: var(--accent); }
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: var(--ink-600);
+  color: var(--ptr-muted);
 }
 @media (max-width: 640px) {
   .ptr-bar { height: 48px; }
@@ -228,7 +238,7 @@ function ProcesoItem({ p }) {
         {p.tipo && (
           <span
             className={`ptr-tipo${p.tipo.color.familia === "otros" ? " ptr-tipo--otros" : ""}`}
-            style={{ "--tipo": p.tipo.color.claro }}
+            style={{ "--tipo": p.tipo.color.oscuro }}
           >
             <i aria-hidden="true" />
             {p.tipo.label}
