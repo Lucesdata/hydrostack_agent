@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { colorDeTipo } from "@/src/lib/classify/tipo-color";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+import { frase, titulo } from "./texto";
+
+export { frase, titulo };
 
 const TICKER_CSS = `
 .ptr-bar {
@@ -176,42 +179,6 @@ a.ptr-item:hover .ptr-objeto { color: #fff; }
 `;
 
 /* ── Helpers de presentación ─────────────────────────────────────────────── */
-
-const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e", "en", "el"]);
-
-/** "CONSTRUCCIÓN DE LA PTAP" → "Construcción de la ptap": el objeto es una frase. */
-export function frase(s) {
-  if (!s) return s;
-  const limpio = s.trim().replace(/\s+/g, " ");
-  if (limpio !== limpio.toUpperCase()) return limpio;
-  const lower = limpio.toLowerCase();
-  // Las siglas del sector vuelven a mayúsculas: "ptar" no se lee como PTAR.
-  const conSiglas = lower.replace(/\b(ptap|ptar|ptard|pdas?|pmaa|e\.s\.p\.?|esp|aaa|ips)\b/g, (m) =>
-    m.toUpperCase()
-  );
-  return conSiglas.charAt(0).toUpperCase() + conSiglas.slice(1);
-}
-
-/**
- * "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P."
- * Con `siglas = false` (nombres de lugar) no conserva ninguna: "META" y "CALI"
- * no son siglas aunque quepan en cuatro letras.
- */
-export function titulo(s, siglas = true) {
-  if (!s) return s;
-  return s
-    .split(/\s+/)
-    .map((w, i) => {
-      const lower = w.toLowerCase();
-      // Primero los conectores: "DE" también cabe en la regla de las siglas, y
-      // "EMPRESA DE ACUEDUCTO" salía "Empresa DE Acueducto".
-      if (i > 0 && MINUSCULAS.has(lower)) return lower;
-      const core = w.replace(/[^\p{L}]/gu, "");
-      if (siglas && core.length <= 4 && core === core.toUpperCase() && core.length > 1) return w; // EAAB, E.S.P.
-      return lower.charAt(0).toUpperCase() + lower.slice(1);
-    })
-    .join(" ");
-}
 
 /** 4_850_000_000 → "$4.850 M" (millones COP). */
 function fmtValor(n) {

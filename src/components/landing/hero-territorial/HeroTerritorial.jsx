@@ -420,6 +420,11 @@ export default function HeroTerritorial({
               Ver fichas de {vista.label} <span aria-hidden="true">→</span>
             </Link>
           ) : null}
+          {vista && vista.n > 0 ? (
+            <Link className={styles.comparar} href={`/licitaciones/comparar#${vista.clave}`}>
+              Comparar {vista.label} con otros departamentos
+            </Link>
+          ) : null}
         </div>
       </div>
 

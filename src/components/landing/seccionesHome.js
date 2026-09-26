@@ -22,6 +22,18 @@ export const SECCIONES_HOME = [
   { id: "diagnostico", href: "/diagnostico", capacidad: "diagnostico", etiqueta: "sin cuenta" },
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   {
+    id: "comparar",
+    href: "/licitaciones/comparar",
+    capacidad: "explorar",
+    etiqueta: "sin cuenta",
+  },
+  {
+    id: "compradores",
+    href: "/licitaciones/entidades",
+    capacidad: "explorar",
+    etiqueta: "sin cuenta",
+  },
+  {
     id: "veredicto",
     href: "/licitaciones",
     capacidad: "veredicto_resumen",
@@ -104,6 +116,8 @@ export const NOMBRE_POR_ID = {
   // "Fichas de procesos" y no "Licitaciones": decisión C del 2026-09-21
   // (AUDITORIA-SPECS-LANDING-MAPA §9). La ruta /licitaciones se conserva.
   explorar: "Fichas de procesos",
+  compradores: "Quién compra",
+  comparar: "Comparar departamentos",
   soluciones: "Soluciones",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
@@ -149,7 +163,7 @@ export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas", "nosotros"];
  * ruta con nombre quede sin una puerta visible.
  */
 export const COLUMNAS_PIE = [
-  { grupo: "Explorar", ids: ["explorar", "diagnostico", "soluciones"] },
+  { grupo: "Explorar", ids: ["explorar", "compradores", "comparar", "diagnostico", "soluciones"] },
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores", "auditoria"] },
   { grupo: "AquaLicita", ids: ["nosotros", "precios", "pliego"] },
 ];
