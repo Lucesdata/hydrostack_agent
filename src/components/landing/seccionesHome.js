@@ -21,6 +21,7 @@ export const ETIQUETA_POR_NIVEL = {
 export const SECCIONES_HOME = [
   { id: "diagnostico", href: "/diagnostico", capacidad: "diagnostico", etiqueta: "sin cuenta" },
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
+  { id: "informe", href: "/informe", capacidad: "explorar", etiqueta: "sin cuenta" },
   {
     id: "comparar",
     href: "/licitaciones/comparar",
@@ -118,6 +119,7 @@ export const NOMBRE_POR_ID = {
   explorar: "Fichas de procesos",
   compradores: "Quién compra",
   comparar: "Comparar departamentos",
+  informe: "Informe mensual",
   soluciones: "Soluciones",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
@@ -163,7 +165,10 @@ export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas", "nosotros"];
  * ruta con nombre quede sin una puerta visible.
  */
 export const COLUMNAS_PIE = [
-  { grupo: "Explorar", ids: ["explorar", "compradores", "comparar", "diagnostico", "soluciones"] },
+  {
+    grupo: "Explorar",
+    ids: ["explorar", "compradores", "comparar", "informe", "diagnostico", "soluciones"],
+  },
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores", "auditoria"] },
   { grupo: "AquaLicita", ids: ["nosotros", "precios", "pliego"] },
 ];

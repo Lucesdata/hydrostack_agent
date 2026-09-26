@@ -865,3 +865,10 @@ entender que el resto no cierra. **Se retoma si la cobertura de la fecha de
 cierre sube**, cosa que hay que medir en la base (y ver si sale de otra columna
 del SECOP, como la fecha de recepción de ofertas o el cronograma).
 
+### 48. Informe mensual: la captura de correo espera al §0 y al §18 (2026-09-26)
+Punto 46 de la lista de mejoras. `/informe` ya existe y se descarga sin pedir
+nada. La idea original era darlo a cambio del correo; eso queda para cuando haya
+política de tratamiento publicada (§18, que pide la autorización de la Ley 1581)
+y correo que entregue (§0). Entonces: formulario con casilla de autorización,
+tabla nueva con `.enableRLS()` y envío del informe.
+
