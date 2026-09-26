@@ -7,7 +7,7 @@ export function porcentajeNacional(n, totalAbiertos) {
   return (100 * n) / totalAbiertos;
 }
 
-export default function FichaDepartamento({ departamento, totalAbiertos }) {
+export default function FichaDepartamento({ departamento, totalAbiertos, vistaPrevia = false }) {
   const porcentaje = porcentajeNacional(departamento?.n ?? null, totalAbiertos);
 
   return (
@@ -15,10 +15,13 @@ export default function FichaDepartamento({ departamento, totalAbiertos }) {
       id="aq-ficha-territorial"
       className="aqFicha"
       aria-label="Resumen del territorio"
-      aria-live="polite"
+      // Pasar el ratón por el mapa cambia la ficha a cada departamento: anunciar
+      // cada paso sería ruido. Solo se anuncia la elección.
+      aria-live={vistaPrevia ? "off" : "polite"}
+      data-vista-previa={vistaPrevia || undefined}
       aria-atomic="true"
     >
-      <p className="aqFichaEyebrow">Territorio seleccionado</p>
+      <p className="aqFichaEyebrow">{vistaPrevia ? "Vista previa" : "Territorio seleccionado"}</p>
       <h2>
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <path
