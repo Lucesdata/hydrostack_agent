@@ -11,7 +11,7 @@
 // Requiere: src/components/landing/ProcesosTicker.jsx (sin cambios).
 // El fondo es el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProcesosTicker, { useRecientes } from "@/src/components/landing/ProcesosTicker";
 import S2Diagnostico from "@/src/components/landing/S2Diagnostico";
@@ -67,6 +67,62 @@ const BLUEPRINT_CSS = `
 @keyframes bp-ripple { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:.55} 100%{transform:translate(-50%,-50%) scale(2.6);opacity:0} }
 @keyframes bp-flash { 0%{opacity:1;filter:brightness(1.9)} 60%{opacity:.5} 100%{opacity:0} }
 .bp-page a { text-decoration: none; cursor: pointer; }
+
+/* ── Fondo "blueprint", sin JS (ver BlueprintBackground) ── */
+@property --bp-prof { syntax: "<integer>"; inherits: false; initial-value: 0; }
+@keyframes bp-parallax { to { transform: translate3d(0, -150px, 0); } }
+@keyframes bp-bajar { from { top: 0vh; } to { top: 100vh; } }
+@keyframes bp-nivel { from { top: 0vh; opacity: .08; } to { top: 100vh; opacity: .26; } }
+@keyframes bp-profundidad { to { --bp-prof: 6; } }
+.bp-fondo-rejilla {
+  position: fixed; top: -160px; left: 0; right: 0; bottom: -160px; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px);
+  background-size: 32px 32px;
+}
+.bp-fondo-agua {
+  position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; pointer-events: none; opacity: .08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>");
+  background-repeat: repeat; background-size: 120px 14px;
+  animation: bp-scroll 22s linear infinite;
+}
+.bp-fondo-linea {
+  position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent);
+}
+.bp-fondo-onda {
+  position: fixed; top: 0; width: 16px; height: 16px; border-radius: 50%; z-index: 0; pointer-events: none;
+  border: 1px solid rgba(3,105,161,0.5);
+  animation: bp-ripple 2.6s ease-out infinite;
+}
+.bp-fondo-regla {
+  position: fixed; left: 10px; top: 72px; bottom: 16px; width: 1px; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px);
+}
+.bp-regla-marca { position: fixed; left: 6px; top: 0; z-index: 0; pointer-events: none; }
+.bp-fondo-flecha { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid #0369A1; }
+.bp-fondo-prof {
+  font: 10px var(--font-jetbrains-mono),monospace; color: #0369A1;
+  background: rgba(252,252,249,0.85); padding: 1px 4px; border-radius: 2px;
+  counter-reset: bp-prof var(--bp-prof);
+}
+.bp-fondo-prof::after { content: counter(bp-prof) " m"; }
+@supports (animation-timeline: scroll()) {
+  .bp-fondo-rejilla { animation: bp-parallax linear both; animation-timeline: scroll(root); }
+  .bp-fondo-agua { animation: bp-scroll 22s linear infinite, bp-nivel linear both; animation-timeline: auto, scroll(root); }
+  .bp-fondo-linea { animation: bp-bajar linear both; animation-timeline: scroll(root); }
+  .bp-fondo-onda { animation: bp-ripple 2.6s ease-out infinite, bp-bajar linear both; animation-timeline: auto, scroll(root); }
+  .bp-regla-marca { animation: bp-bajar linear both; animation-timeline: scroll(root); }
+  .bp-fondo-prof { animation: bp-profundidad linear both; animation-timeline: scroll(root); }
+}
+/* Sin animaciones ligadas al scroll, la marca de profundidad diría "0 m" para
+   siempre: mejor no pintarla. */
+@supports not (animation-timeline: scroll()) {
+  .bp-regla-marca { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bp-fondo-agua, .bp-fondo-onda, .bp-fondo-rejilla, .bp-fondo-linea, .bp-regla-marca, .bp-fondo-prof { animation: none !important; }
+  .bp-fondo-onda, .bp-regla-marca { display: none !important; }
+}
 
 .bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
 .bp-card:hover { border-color: #0369A1; transform: translateY(-2px); }
@@ -132,179 +188,34 @@ const BLUEPRINT_CSS = `
 }
 `;
 
-/* ── Hook: progreso de scroll + revelado por sección para el fondo "blueprint" ── */
-function useBlueprintFX() {
-  const heroRef = useRef(null);
-
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [parallax, setParallax] = useState(0);
-  const [visible, setVisible] = useState({
-    hero: false,
-  });
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      setScrollProgress(Math.min(1, Math.max(0, window.scrollY / max)));
-      setParallax(window.scrollY * -0.06);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-    handleScroll();
-
-    let io;
-    if ("IntersectionObserver" in window) {
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (!e.isIntersecting) return;
-            if (e.target === heroRef.current) {
-              setVisible((v) => ({ ...v, hero: true }));
-            }
-            io.unobserve(e.target);
-          });
-        },
-        { threshold: 0.3 }
-      );
-      if (heroRef.current) io.observe(heroRef.current);
-    } else {
-      setVisible({ hero: true });
-    }
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      if (io) io.disconnect();
-    };
-  }, []);
-
-  const p = scrollProgress;
-  return {
-    refs: { heroRef },
-    h1Weight: visible.hero ? 700 : 500,
-    gridTransform: `translate3d(0, ${parallax.toFixed(1)}px, 0)`,
-    scanTopPct: (p * 100).toFixed(1),
-    lineADashoffset: visible.hero ? 0 : 560,
-    waterFillOpacity: (0.08 + p * 0.18).toFixed(3),
-    depthLabel: (p * 6).toFixed(1) + "m",
-  };
-}
-
-function BlueprintBackground({ fx }) {
+/**
+ * El fondo "blueprint": rejilla, nivel de agua, ondas y la regla de
+ * profundidad que siguen al scroll. Todo en CSS (`BLUEPRINT_CSS`, con
+ * `animation-timeline: scroll()`): hasta el 2026-09-26 lo movía un hook que
+ * hacía dos `setState` por evento de scroll y volvía a renderizar la portada
+ * entera en cada fotograma solo para mover líneas de fondo.
+ *
+ * Sin soporte de animaciones ligadas al scroll, el fondo se queda en su estado
+ * inicial, que es lo que se veía al cargar.
+ */
+function BlueprintBackground() {
   return (
     <>
-      <div
-        aria-hidden="true"
-        style={{
-          position: "fixed",
-          top: -160,
-          left: 0,
-          right: 0,
-          bottom: -160,
-          backgroundImage:
-            "linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px)",
-          backgroundSize: "32px 32px",
-          pointerEvents: "none",
-          zIndex: 0,
-          transform: fx.gridTransform,
-          willChange: "transform",
-        }}
-      />
-
-      <div
-        style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          top: `${fx.scanTopPct}vh`,
-          bottom: 0,
-          pointerEvents: "none",
-          zIndex: 0,
-          backgroundImage:
-            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>\")",
-          backgroundRepeat: "repeat",
-          backgroundSize: "120px 14px",
-          opacity: fx.waterFillOpacity,
-          animation: "bp-scroll 22s linear infinite",
-          transition: "top .08s linear",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          height: 2,
-          background: "linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent)",
-          pointerEvents: "none",
-          zIndex: 0,
-          top: `${fx.scanTopPct}vh`,
-          transition: "top .08s linear",
-        }}
-      />
+      <div aria-hidden="true" className="bp-fondo-rejilla" />
+      <div aria-hidden="true" className="bp-fondo-agua bp-sigue" />
+      <div aria-hidden="true" className="bp-fondo-linea bp-sigue" />
       {[14, 50, 84].map((leftPct, i) => (
         <div
           key={leftPct}
-          style={{
-            position: "fixed",
-            left: `${leftPct}%`,
-            top: `${fx.scanTopPct}vh`,
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            border: "1px solid rgba(3,105,161,0.5)",
-            pointerEvents: "none",
-            zIndex: 0,
-            transition: "top .08s linear",
-            animation: `bp-ripple 2.6s ease-out ${i * 0.9}s infinite`,
-          }}
+          aria-hidden="true"
+          className="bp-fondo-onda bp-sigue"
+          style={{ left: `${leftPct}%`, animationDelay: `${i * 0.9}s, 0s` }}
         />
       ))}
-
-      <div
-        className="bp-regla-plano"
-        style={{
-          position: "fixed",
-          left: 10,
-          top: 72,
-          bottom: 16,
-          width: 1,
-          background:
-            "repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-      <div
-        className="bp-regla-plano bp-regla-marca"
-        style={{
-          position: "fixed",
-          left: 6,
-          top: `${fx.scanTopPct}vh`,
-          pointerEvents: "none",
-          zIndex: 0,
-          transition: "top .08s linear",
-        }}
-      >
-        <div
-          style={{
-            width: 0,
-            height: 0,
-            borderTop: "4px solid transparent",
-            borderBottom: "4px solid transparent",
-            borderLeft: "6px solid #0369A1",
-          }}
-        />
-        <span
-          style={{
-            font: "10px var(--font-jetbrains-mono),monospace",
-            color: "#0369A1",
-            background: "rgba(252,252,249,0.85)",
-            padding: "1px 4px",
-            borderRadius: 2,
-          }}
-        >
-          {fx.depthLabel}
-        </span>
+      <div aria-hidden="true" className="bp-regla-plano bp-fondo-regla" />
+      <div aria-hidden="true" className="bp-regla-plano bp-regla-marca bp-sigue">
+        <div className="bp-fondo-flecha" />
+        <span className="bp-fondo-prof" />
       </div>
     </>
   );
@@ -327,8 +238,6 @@ export default function LandingPage({
   tipos = [],
   preguntas = null,
 }) {
-  const fx = useBlueprintFX();
-
   // Cifras del sector (procesos vigilados, para el CTA, los KPIs y S3Motor) y
   // las dos cifras vivas de los KPIs del hero (nuevos en 7 días, valor en juego
   // este mes). Todas vienen de la misma respuesta de /api/landing-stats — un
@@ -379,7 +288,7 @@ export default function LandingPage({
       }}
     >
       <style dangerouslySetInnerHTML={{ __html: BLUEPRINT_CSS }} />
-      <BlueprintBackground fx={fx} />
+      <BlueprintBackground />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
         <ProcesosTicker recientes={recientes} />
