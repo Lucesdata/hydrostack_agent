@@ -762,7 +762,7 @@ consumidores y IBM Plex Mono duplicaba a JetBrains Mono (`--mono` apunta ahora
 a esta). De **once archivos y 181 kB a cinco y 130 kB**. Los woff2 son el
 subconjunto latin de `@fontsource` (SIL OFL, licencias en `app/fonts/OFL-*.txt`).
 
-### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21)
+### 43. El prefiltro SQL descarta los procesos sin valor antes del veredicto (2026-09-21) — ✅ resuelto 2026-09-26
 `cuantiaGate` ya no da FAIL cuando el valor es 0 —el "sin dato" del SECOP— sino
 UNKNOWN (`src/lib/secop/monto.ts`). Eso arregla el veredicto de un proceso
 concreto (`/api/secop/verdict`, la ficha, el semáforo público), pero **no hace
@@ -785,6 +785,16 @@ Decidir, que es producto y no solo código:
 El volumen no es marginal: son 9.163 de los procesos abiertos. Con `minCop = 0`
 sí llegaban, y hasta el 2026-09-21 entraban con un **PASS falso** ("valor dentro
 de tu rango objetivo", porque `0 >= 0`); ahora entran como UNKNOWN.
+
+**Resuelto (2026-09-26): (a), pero detrás.** La (a) literal tenía una trampa:
+`getMatchesForPerfil` pide solo 25 procesos por fecha, así que los sin dato
+habrían desplazado a coincidencias que sí cumplen. `SecopQuery.incluirSinValor`
+(solo Postgres) los deja pasar y los **ordena detrás** de los que cumplen el
+mínimo: solo ocupan las plazas que sobren. Entran con la cuantía en UNKNOWN y la
+tarjeta y el correo dicen "Sin presupuesto publicado" en vez de "$0"
+(`formatValorProceso`). El explorador no cambia: allí "valor mínimo" es un filtro
+explícito del usuario. Probado contra PGlite
+(`db-search-sin-valor.db.test.ts`).
 
 ### 44. La ficha ofrece "Activar alerta para procesos como este" y la alerta no se entrega (2026-09-26) — ✅ mitigado el mismo día
 El botón principal del cierre de la ficha (`app/licitaciones/[slug]/page.tsx`,

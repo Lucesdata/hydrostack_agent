@@ -123,7 +123,7 @@ async function prepare(query: SecopQuery) {
     import("@/src/lib/db/client"),
     import("drizzle-orm"),
   ]);
-  const { and, eq, gte, ilike, isNull, or, sql } = ops;
+  const { and, eq, gte, ilike, isNull, lte, or, sql } = ops;
   const { proceso, entidad, geografia, rawRecord } = schema;
   const payload = rawRecord.payload;
 
@@ -156,7 +156,15 @@ async function prepare(query: SecopQuery) {
     aguaClauses.length > 0 ? or(...aguaClauses) : undefined,
     query.departamento ? ilike(geografia.departamentoNombre, `%${query.departamento}%`) : undefined,
     query.estado ? eq(proceso.estadoActual, query.estado) : undefined,
-    query.valorMin != null ? gte(proceso.valorEstimado, String(query.valorMin)) : undefined,
+    query.valorMin != null
+      ? query.incluirSinValor
+        ? or(
+            gte(proceso.valorEstimado, String(query.valorMin)),
+            isNull(proceso.valorEstimado),
+            lte(proceso.valorEstimado, "0")
+          )
+        : gte(proceso.valorEstimado, String(query.valorMin))
+      : undefined,
     query.desde ? gte(proceso.fechaPublicacion, query.desde) : undefined,
     query.apertura ? eq(aperturaRaw, query.apertura) : undefined,
     query.q
@@ -233,7 +241,13 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
     .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
     .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
     .where(where)
-    .orderBy(sql`${orderCol} DESC NULLS LAST`)
+    .orderBy(
+      // Los sin presupuesto van detrás de los que cumplen el mínimo, no mezclados.
+      ...(query.valorMin != null && query.incluirSinValor
+        ? [sql`(${proceso.valorEstimado} > 0) DESC NULLS LAST`]
+        : []),
+      sql`${orderCol} DESC NULLS LAST`
+    )
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 

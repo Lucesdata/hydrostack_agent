@@ -7,7 +7,7 @@
  */
 
 import type { Match } from "@/src/lib/matching/match";
-import { sentenceCaseTitle, formatCopCompact, verdictScore } from "@/src/components/secop/format";
+import { sentenceCaseTitle, formatValorProceso, verdictScore } from "@/src/components/secop/format";
 import { signUnsubscribeToken } from "./unsubscribe-token";
 import { appUrl } from "@/src/lib/app-url";
 
@@ -36,7 +36,7 @@ export function renderDigest(matches: Match[], usuario: { id: string; email: str
   const filas = matches.map(({ proceso, verdict }) => {
     const score = verdictScore(verdict);
     const titulo = sentenceCaseTitle(proceso.nombre || proceso.referencia);
-    const valor = formatCopCompact(proceso.valorAdjudicacion ?? proceso.precioBase);
+    const valor = formatValorProceso(proceso);
     const link = proceso.url ? withUtm(proceso.url) : null;
     return { titulo, entidad: proceso.entidad, valor, score, link };
   });

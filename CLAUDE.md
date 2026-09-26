@@ -64,6 +64,11 @@ Entidades y flujos principales:
   escalón ↔ `proceso.modalidad`. **No alimenta `habilitacionGate`**: es
   cualitativo y no produce indicadores RUP ni contratos en SMMLV. Diseño y
   decisiones en `docs/diagnostico/`.
+- **Coincidencias sin presupuesto publicado** (2026-09-26, PENDIENTES §43):
+  `getMatchesForPerfil` pasa `incluirSinValor`, así que los procesos con valor 0
+  o nulo entran con la cuantía en UNKNOWN pero **ordenados detrás** de los que
+  cumplen el mínimo, sin quitarles plaza. El valor de una tarjeta se pinta con
+  `formatValorProceso`: el 0 del SECOP nunca sale como "$0".
 - **Alertas**: envío diario idempotente (`src/lib/alertas/`,
   `envio_log` UNIQUE).
 
