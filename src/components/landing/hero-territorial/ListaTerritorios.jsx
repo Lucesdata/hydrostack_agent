@@ -1,6 +1,7 @@
 "use client";
 
 import { formatConteo } from "@/src/components/secop/format";
+import { escalonDe } from "@/src/lib/mapa/escala";
 
 export const normalizarTerritorio = (texto = "") =>
   texto
@@ -23,7 +24,6 @@ export default function ListaTerritorios({
   datosDisponibles,
 }) {
   const visibles = filtrarTerritorios(departamentos, busqueda);
-  const max = Math.max(1, ...departamentos.map((d) => d.n));
 
   return (
     <section aria-labelledby="aq-territorios-titulo">
@@ -32,7 +32,10 @@ export default function ListaTerritorios({
         <span>{datosDisponibles ? departamentos.length : "—"}</span>
       </div>
       <label className="aqBuscador">
-        <span aria-hidden="true">⌕</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+          <path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
         <input
           type="search"
           aria-label="Buscar departamento"
@@ -50,11 +53,12 @@ export default function ListaTerritorios({
               aria-controls="aq-ficha-territorial"
               onClick={() => onSeleccionar(d.clave)}
             >
+              <span className={`aqPunto aqPunto--e${escalonDe(d.n).indice}`} aria-hidden="true" />
               <span className="aqFilaNombre">{d.label}</span>
-              <span className="aqBarra" aria-hidden="true">
-                <span style={{ width: `${(100 * d.n) / max}%` }} />
-              </span>
               <strong>{formatConteo(d.n)}</strong>
+              <span className="aqChevron" aria-hidden="true">
+                ›
+              </span>
             </button>
           </li>
         ))}

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
 
 export function porcentajeNacional(n, totalAbiertos) {
@@ -20,26 +19,30 @@ export default function FichaDepartamento({ departamento, totalAbiertos }) {
       aria-atomic="true"
     >
       <p className="aqFichaEyebrow">Territorio seleccionado</p>
-      <h2>{departamento?.label ?? "Colombia"}</h2>
-      <p className="aqFichaNumero">
-        <strong>{formatConteo(departamento?.n ?? null)}</strong>
-        <span>procesos abiertos</span>
-      </p>
-      <p className="aqFichaPorcentaje">
-        {porcentaje == null
-          ? "—"
-          : `${porcentaje.toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} % del total nacional`}
-      </p>
+      <h2>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path
+            d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"
+            fill="currentColor"
+          />
+        </svg>
+        {departamento?.label ?? "Colombia"}
+      </h2>
+      <div className="aqFichaDatos">
+        <p className="aqFichaNumero">
+          <strong>{formatConteo(departamento?.n ?? null)}</strong>
+          <span>procesos abiertos</span>
+        </p>
+        <p className="aqFichaPorcentaje">
+          <strong>
+            {porcentaje == null
+              ? "—"
+              : `${porcentaje.toLocaleString("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`}
+          </strong>
+          <span>del total nacional</span>
+        </p>
+      </div>
       <p className="aqFichaNota">Según ubicación de la entidad contratante</p>
-      {departamento && departamento.n > 0 ? (
-        <Link
-          className="aqFichaCta"
-          href={`/licitaciones/departamento/${departamento.slug}`}
-          aria-label={`Ver procesos de ${departamento.label}`}
-        >
-          Ver procesos de {departamento.label} <span aria-hidden="true">→</span>
-        </Link>
-      ) : null}
     </aside>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import ColombiaChoropleth, { ROTULOS } from "@/src/components/mapa/ColombiaChoropleth";
+import ColombiaChoropleth from "@/src/components/mapa/ColombiaChoropleth";
+import { ANCLAS } from "@/src/lib/mapa/rotulos";
 import geo from "@/data/geo/departamentos.geo.json";
 import { ANCHO_MAPA, ALTO_MAPA } from "@/src/lib/mapa/modelo";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
@@ -22,18 +23,14 @@ const filas: FilaAgregado[] = [
 const html = renderToStaticMarkup(<ColombiaChoropleth filas={filas} totalAbiertos={35518} />);
 
 describe("ColombiaChoropleth", () => {
-  it("cada rótulo pertenece a la geometría y su caja cabe en el viewBox", () => {
+  it("cada ancla de rótulo pertenece a la geometría y cae dentro del mapa", () => {
     const codigos = new Set(geo.features.map((f) => f.properties.dpto));
-    for (const [codigo, [x, y, anclaX, anclaY]] of Object.entries(ROTULOS)) {
+    for (const [codigo, [x, y]] of Object.entries(ANCLAS)) {
       expect(codigos.has(codigo), `código ${codigo} ausente en geometría`).toBe(true);
-      expect(x - 44).toBeGreaterThanOrEqual(0);
-      expect(x + 44).toBeLessThanOrEqual(ANCHO_MAPA);
-      expect(y - 17).toBeGreaterThanOrEqual(0);
-      expect(y + 19).toBeLessThanOrEqual(ALTO_MAPA);
-      expect(anclaX).toBeGreaterThanOrEqual(0);
-      expect(anclaX).toBeLessThanOrEqual(ANCHO_MAPA);
-      expect(anclaY).toBeGreaterThanOrEqual(0);
-      expect(anclaY).toBeLessThanOrEqual(ALTO_MAPA);
+      expect(x).toBeGreaterThanOrEqual(0);
+      expect(x).toBeLessThanOrEqual(ANCHO_MAPA);
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(ALTO_MAPA);
     }
   });
 

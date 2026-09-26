@@ -14,8 +14,8 @@ export default function HeroTerritorial({
   departamentos = [],
   totalAbiertos = null,
   tipos = [],
-  sector,
-  heroStats,
+  sector = null,
+  heroStats = null,
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
@@ -29,67 +29,64 @@ export default function HeroTerritorial({
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
-      <div className={styles.topGrid}>
-        <div className={styles.copy}>
-          <p className={styles.eyebrow}>AGUA Y SANEAMIENTO · COLOMBIA</p>
-          <h1 id="aq-hero-title">
-            Explora el mercado de agua.
-            <span>Entiende cada proceso.</span>
-          </h1>
-          <p className={styles.lead}>
-            Explora los procesos de agua y saneamiento del SECOP II en Colombia. Encuentra
-            oportunidades, consulta su ficha y sigue lo que te importa.
-          </p>
-          <Link className={styles.primaryCta} href={explorar.href}>
-            Explorar procesos <span aria-hidden="true">→</span>
-          </Link>
-          <p className={styles.ctaMeta}>
-            {sector?.procesosVigilados == null
-              ? explorar.etiqueta
-              : `${explorar.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
-          </p>
+      <div className={styles.grid}>
+        <div className={styles.colIzq}>
+          <div className={styles.copy}>
+            <p className={styles.eyebrow}>INTELIGENCIA DE CONTRATACIÓN PÚBLICA</p>
+            <h1 id="aq-hero-title">
+              Explora el mercado de agua y saneamiento de <span>Colombia.</span>
+            </h1>
+            <p className={styles.lead}>
+              Descubre dónde están los procesos del SECOP II, qué se está contratando y cuáles son
+              las oportunidades en tu territorio.
+            </p>
+            <Link className={styles.primaryCta} href={explorar.href}>
+              Explorar procesos <span aria-hidden="true">→</span>
+            </Link>
+            <p className={styles.ctaMeta}>
+              <span className={styles.puntoVivo} aria-hidden="true" />
+              {sector?.procesosVigilados == null
+                ? `${explorar.etiqueta} · datos desde SECOP II`
+                : `${explorar.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
+            </p>
+          </div>
 
-          <div className={styles.kpis} aria-label="Indicadores nacionales">
-            <div>
-              <span>Procesos abiertos · Colombia</span>
-              <strong>{formatConteo(totalAbiertos)}</strong>
-            </div>
-            <div>
-              <span>Departamentos con procesos</span>
-              <strong>{datosDisponibles ? formatConteo(departamentos.length) : "—"}</strong>
-            </div>
-            <div>
-              <span>Tipos de proyecto · Colombia</span>
-              <strong>{tipos.length || datosDisponibles ? formatConteo(tipos.length) : "—"}</strong>
-            </div>
+          <div className={styles.listPanel}>
+            <ListaTerritorios
+              departamentos={departamentos}
+              busqueda={busqueda}
+              onBusqueda={setBusqueda}
+              seleccionado={seleccionado}
+              onSeleccionar={setElegido}
+              datosDisponibles={datosDisponibles}
+            />
+            <Link className={styles.allProcesses} href={explorar.href}>
+              Ver todos los procesos <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
 
         <div className={styles.mapPanel} aria-label="Procesos abiertos por departamento">
-          <div className={styles.mapHeading}>
-            <span>Procesos abiertos por departamento</span>
-            <strong>{datosDisponibles ? formatConteo(totalAbiertos) : "—"}</strong>
+          <div className={styles.kpis} aria-label="Indicadores nacionales">
+            <div className={styles.kpiTotal}>
+              <span className={styles.kpiTitulo}>Procesos abiertos · Colombia</span>
+              <strong>{formatConteo(totalAbiertos)}</strong>
+            </div>
+            <dl>
+              <div>
+                <dt>Departamentos con procesos</dt>
+                <dd>{datosDisponibles ? formatConteo(departamentos.length) : "—"}</dd>
+              </div>
+              <div>
+                <dt>Tipos de proyecto · Colombia</dt>
+                <dd>{tipos.length || datosDisponibles ? formatConteo(tipos.length) : "—"}</dd>
+              </div>
+            </dl>
           </div>
           <div className={styles.map}>{mapa}</div>
           {mapa && totalAbiertos == null ? (
             <p className={styles.noData}>El mapa no tiene datos disponibles en este momento.</p>
           ) : null}
-        </div>
-      </div>
-
-      <div className={styles.territorialGrid}>
-        <div className={styles.listPanel}>
-          <ListaTerritorios
-            departamentos={departamentos}
-            busqueda={busqueda}
-            onBusqueda={setBusqueda}
-            seleccionado={seleccionado}
-            onSeleccionar={setElegido}
-            datosDisponibles={datosDisponibles}
-          />
-          <Link className={styles.allProcesses} href={explorar.href}>
-            Ver todos los procesos <span aria-hidden="true">→</span>
-          </Link>
         </div>
 
         <div className={styles.detailPanel}>
@@ -99,15 +96,24 @@ export default function HeroTerritorial({
             <p>Distribución nacional de procesos abiertos</p>
             {tipos.map((tipo) => (
               <Link href={`/licitaciones/tipo/${tipo.slug}`} key={tipo.clave}>
-                <span>{tipo.label}</span>
+                <span className={styles.typeNombre}>{tipo.label}</span>
+                <strong>{formatConteo(tipo.n)}</strong>
                 <span className={styles.typeBar} aria-hidden="true">
                   <span style={{ width: `${(100 * tipo.n) / maxTipo}%` }} />
                 </span>
-                <strong>{formatConteo(tipo.n)}</strong>
               </Link>
             ))}
             {tipos.length === 0 ? <p>Distribución no disponible.</p> : null}
           </div>
+          {seleccionado && seleccionado.n > 0 ? (
+            <Link
+              className={styles.fichaCta}
+              href={`/licitaciones/departamento/${seleccionado.slug}`}
+              aria-label={`Ver procesos de ${seleccionado.label}`}
+            >
+              Ver procesos de {seleccionado.label} <span aria-hidden="true">→</span>
+            </Link>
+          ) : null}
         </div>
       </div>
 
