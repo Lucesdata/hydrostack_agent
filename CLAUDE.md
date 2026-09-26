@@ -194,7 +194,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-26 (KPIs del Hero Territorial V2).
+Última actualización: 2026-09-26 (rediseño visual del Hero Territorial).
 
 ## graphify
 
@@ -215,7 +215,7 @@ El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
 servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
 mezclan y no se sustituyen por cifras ni tendencias de un mockup.
 
-- **KPIs del hero** (junto al CTA). Vienen de `agregadosPortada()`
+- **KPIs del hero** (franja sobre el mapa, columna central). Vienen de `agregadosPortada()`
   (`src/lib/secop/agregados.ts`), calculados en el servidor en `app/page.js`
   con `revalidate` de 6 h. Todos cuentan "abierto" con `condicionAbierto()`:
   - *Procesos abiertos · Colombia*: `totalAbiertos`, que es el total real e
@@ -240,4 +240,15 @@ mezclan y no se sustituyen por cifras ni tendencias de un mockup.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
+
+**Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
+en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de
+1280px la ficha baja bajo el mapa; debajo de 900px el orden es mensaje, mapa,
+ficha, lista. La rampa del mapa se redefine en el hero (`--aq-e0..4`) porque la
+de `estilos.ts` sale de `--accent` sobre crema y en oscuro el escalón 0 salía
+crema. Los rótulos del mapa ya no son cinco fijos: `src/lib/mapa/rotulos.ts`
+elige los 10 departamentos con más procesos y los coloca sin solaparse en un
+viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
+estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
+entidades ni municipios, que la portada no calcula.
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

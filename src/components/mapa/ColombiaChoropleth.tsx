@@ -6,6 +6,7 @@ import {
   construirModeloMapa,
   type EntradaMapa,
 } from "@/src/lib/mapa/modelo";
+import { ALTO_ROTULO, ANCHO_ROTULO, MARGEN_ROTULOS, colocarRotulos } from "@/src/lib/mapa/rotulos";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
 
 /**
@@ -83,17 +84,6 @@ export interface ColombiaChoroplethProps {
   datosDisponibles?: boolean;
 }
 
-// Posiciones de rótulos en el viewBox existente, separadas para evitar solapes.
-export const ROTULOS: Record<string, [number, number, number, number]> = {
-  // Caja x/y y ancla x/y (centroide del polígono principal en esta proyección).
-  // Las cajas se separan de la zona andina para no tapar departamentos pequeños.
-  "44": [335, 35, 225, 31],
-  "05": [44, 172, 128, 174],
-  "68": [340, 155, 193, 181],
-  "76": [44, 315, 99, 269],
-  "91": [44, 430, 254, 437],
-};
-
 export default function ColombiaChoropleth({
   filas,
   totalAbiertos,
@@ -102,12 +92,18 @@ export default function ColombiaChoropleth({
 }: ColombiaChoroplethProps) {
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
+  const rotulos = etiquetas && datosDisponibles ? colocarRotulos(continente) : [];
+  // Con rótulos, el lienzo se ensancha a los lados para que las cajas puedan
+  // salir de la silueta sin tapar la costa.
+  const viewBox = etiquetas
+    ? `${-MARGEN_ROTULOS} 0 ${ANCHO_MAPA + 2 * MARGEN_ROTULOS} ${ALTO_MAPA}`
+    : `0 0 ${ANCHO_MAPA} ${ALTO_MAPA}`;
 
   return (
     <figure className="clr-mapa">
       <svg
         className="clr-mapa__svg"
-        viewBox={`0 0 ${ANCHO_MAPA} ${ALTO_MAPA}`}
+        viewBox={viewBox}
         role="group"
         aria-labelledby="clr-mapa-titulo"
       >
@@ -130,32 +126,39 @@ export default function ColombiaChoropleth({
             </text>
           </g>
         )}
-        {etiquetas &&
-          datosDisponibles &&
-          continente
-            .filter((e) => ROTULOS[e.dpto] && e.n > 0)
-            .map((e) => {
-              const [x, y, anclaX, anclaY] = ROTULOS[e.dpto];
-              return (
-                <g
-                  key={e.dpto}
-                  className="atlas-map-label"
-                  transform={`translate(${x} ${y})`}
-                  aria-hidden="true"
-                  pointerEvents="none"
-                >
-                  <line x1={anclaX > x ? 44 : -44} y1={0} x2={anclaX - x} y2={anclaY - y} />
-                  <circle cx={anclaX - x} cy={anclaY - y} r={2} />
-                  <rect x={-44} y={-17} width={88} height={36} rx={6} />
-                  <text textAnchor="middle" y={-3}>
-                    {e.nombre}
-                  </text>
-                  <text textAnchor="middle" y={11} className="atlas-map-label-count">
-                    {numero.format(e.n)}
-                  </text>
-                </g>
-              );
-            })}
+        {rotulos.map((r) => {
+          const bordeX = r.anclaX < r.x ? -ANCHO_ROTULO / 2 : ANCHO_ROTULO / 2;
+          return (
+            <g
+              key={r.dpto}
+              className="atlas-map-label"
+              transform={`translate(${r.x} ${r.y})`}
+              aria-hidden="true"
+              pointerEvents="none"
+            >
+              <line x1={bordeX} y1={0} x2={r.anclaX - r.x} y2={r.anclaY - r.y} />
+              <circle
+                className="atlas-map-label-ancla"
+                cx={r.anclaX - r.x}
+                cy={r.anclaY - r.y}
+                r={2.6}
+              />
+              <rect
+                x={-ANCHO_ROTULO / 2}
+                y={-ALTO_ROTULO / 2}
+                width={ANCHO_ROTULO}
+                height={ALTO_ROTULO}
+                rx={5}
+              />
+              <text x={-ANCHO_ROTULO / 2 + 7} y={-3}>
+                {r.nombre}
+              </text>
+              <text x={-ANCHO_ROTULO / 2 + 7} y={10} className="atlas-map-label-count">
+                {numero.format(r.n)}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       {datosDisponibles ? (

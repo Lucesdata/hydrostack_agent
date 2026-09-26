@@ -51,6 +51,11 @@ export const ESTILOS_MAPA = `
 }
 .clr-mapa__nota{ margin: 0; font-size: 12.5px; color: var(--text-primary); }
 .clr-mapa__sin{ margin: 0; font-size: 12px; color: var(--text-muted); }
+.atlas-map-label rect{ fill: var(--surface); stroke: var(--border); stroke-width: .8; }
+.atlas-map-label line{ stroke: var(--text-muted); stroke-width: .8; }
+.atlas-map-label-ancla{ fill: var(--surface); stroke: var(--accent-deep); stroke-width: 1.2; }
+.atlas-map-label text{ font-size: 7.5px; fill: var(--text-muted); font-family: inherit; }
+.atlas-map-label text.atlas-map-label-count{ font-size: 10.5px; font-weight: 700; fill: var(--text-primary); }
 @media (max-width: 640px){
   .clr-mapa__leyenda{ gap: 4px 10px; }
   .clr-mapa__leyenda li{ font-size: 11.5px; }

@@ -77,9 +77,10 @@ describe("interacción territorial pura", () => {
       <FichaDepartamento departamento={departamentos[1]} totalAbiertos={10000} />
     );
     expect(antioquia).toContain("Antioquia");
-    expect(antioquia).toContain("51,6 % del total nacional");
+    expect(antioquia).toContain("51,6 %");
     expect(bogota).toContain("Bogotá D.C.");
-    expect(bogota).toContain("48,2 % del total nacional");
+    expect(bogota).toContain("48,2 %");
+    expect(antioquia).toContain("del total nacional");
   });
 
   it("solo calcula porcentaje con total nacional positivo", () => {

@@ -58,10 +58,10 @@ describe("PortadaCliente", () => {
     expect(conDatos).not.toContain("El mapa no tiene datos disponibles");
   });
 
-  it("usa el copy V2 y ya no muestra el CTA secundario del diagnóstico", () => {
+  it("usa el copy del hero y ya no muestra el CTA secundario del diagnóstico", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain("Explora el mercado de agua.");
-    expect(html).toContain("Entiende cada proceso.");
+    expect(html).toContain("Explora el mercado de agua y saneamiento de");
+    expect(html).toContain("Colombia.");
     expect(html).toContain("Explorar procesos");
     expect(html).toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");

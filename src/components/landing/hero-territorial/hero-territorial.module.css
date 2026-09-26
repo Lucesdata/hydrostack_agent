@@ -1,190 +1,159 @@
+/* Hero territorial de la portada. Tema oscuro propio: no usa los tokens de
+   globals.css (que son de fondo claro), así que contraste.test.ts no lo cubre.
+   Los contrastes de texto se eligieron ≥ 4,5:1 sobre --aq-bg y sobre --aq-card. */
 .hero {
-  --aq-bg: #06121d;
-  --aq-panel: #0b1b29;
-  --aq-panel-2: #0d2232;
-  --aq-text: #f3f7fa;
-  --aq-muted: #9db0bf;
-  --aq-line: rgba(168, 201, 222, 0.16);
-  --aq-cyan: #53c8ff;
-  --aq-blue: #1594d2;
-  --aq-green: #4bd79a;
+  --aq-bg: #061423;
+  --aq-panel: rgba(12, 32, 52, 0.72);
+  --aq-text: #f3f8fc;
+  --aq-muted: #9fb4c6;
+  --aq-line: rgba(140, 190, 225, 0.16);
+  --aq-cyan: #4cc9ff;
+  --aq-blue: #1a9be0;
+  --aq-green: #3fd6a0;
+  --aq-card: #ffffff;
+  --aq-ink: #0b1f33;
+  --aq-ink-muted: #51667a;
+  --aq-navy: #0b2239;
+  /* Rampa del mapa, compartida con los puntos de la lista. Del azul profundo
+     al turquesa: el escalón más alto es el que más destaca. */
+  --aq-e0: #13304a;
+  --aq-e1: #1a5687;
+  --aq-e2: #1f7cc0;
+  --aq-e3: #2aa7e3;
+  --aq-e4: #35d3c0;
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(42px, 6vw, 78px) var(--gutter) 28px;
+  padding: clamp(36px, 4.5vw, 64px) var(--gutter) 32px;
   background:
-    linear-gradient(rgba(91, 150, 185, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91, 150, 185, 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 15% 5%, rgba(27, 156, 211, 0.14), transparent 30%), var(--aq-bg);
+    radial-gradient(ellipse 60% 55% at 52% 42%, rgba(34, 150, 220, 0.16), transparent 70%),
+    radial-gradient(circle at 8% 0%, rgba(40, 170, 230, 0.14), transparent 35%),
+    linear-gradient(rgba(91, 150, 185, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 150, 185, 0.035) 1px, transparent 1px), var(--aq-bg);
   background-size:
-    32px 32px,
-    32px 32px,
     auto,
+    auto,
+    40px 40px,
+    40px 40px,
     auto;
   color: var(--aq-text);
 }
-.topGrid {
+
+/* ── Rejilla: mensaje y lista · mapa · ficha ─────────────────────────────── */
+.grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
-  gap: clamp(30px, 4vw, 64px);
+  grid-template-columns: minmax(290px, 340px) minmax(0, 1fr) minmax(280px, 330px);
+  grid-template-areas: "izq mapa ficha";
+  gap: clamp(20px, 2.4vw, 36px);
   align-items: start;
 }
+.colIzq {
+  grid-area: izq;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+.mapPanel {
+  grid-area: mapa;
+}
+.detailPanel {
+  grid-area: ficha;
+}
+
+/* ── Mensaje ──────────────────────────────────────────────────────────────── */
 .copy {
   min-width: 0;
-  max-width: 680px;
 }
 .eyebrow {
-  margin: 0 0 20px;
+  margin: 0 0 14px;
   font:
     600 11px/1.4 var(--font-jetbrains-mono),
     monospace;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.14em;
   color: var(--aq-cyan);
 }
 .copy h1 {
   margin: 0;
-  max-width: 12ch;
   font:
-    700 clamp(2.7rem, 5vw, 4.7rem)/0.98 var(--font-ibm-plex-sans-condensed),
-    var(--font-inter),
+    700 clamp(2.1rem, 2.9vw, 2.8rem)/1.08 var(--font-inter),
     sans-serif;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.028em;
+  /* globals.css activa `hyphens: auto` en los titulares de `.bp-page`; aquí
+     partía "mer-cado" en pleno escritorio. */
+  hyphens: manual;
+  text-wrap: balance;
 }
 .copy h1 span {
-  display: block;
-  color: #c6e9fb;
+  background: linear-gradient(90deg, #4cc9ff, #35d3c0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .lead {
-  max-width: 62ch;
-  margin: 24px 0 28px;
+  margin: 16px 0 24px;
   font:
-    400 15px/1.7 var(--font-inter),
+    400 15px/1.6 var(--font-inter),
     sans-serif;
-  color: var(--aq-muted);
+  color: #c3d3e0;
+  hyphens: manual;
 }
 .primaryCta {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  min-height: 46px;
-  padding: 0 20px;
-  border: 1px solid rgba(109, 218, 255, 0.48);
-  border-radius: 5px;
-  background: var(--aq-blue);
-  color: white;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1a9be0, #2bb7ee);
+  box-shadow: 0 8px 28px rgba(26, 155, 224, 0.35);
+  color: #fff;
   font:
-    650 13px var(--font-inter),
+    650 15px var(--font-inter),
     sans-serif;
   text-decoration: none;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 .primaryCta:hover {
-  background: #1ca6e7;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 32px rgba(26, 155, 224, 0.5);
 }
 .primaryCta:focus-visible,
 .allProcesses:focus-visible,
-.types a:focus-visible {
+.types a:focus-visible,
+.fichaCta:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 3px;
 }
 .ctaMeta {
-  margin: 9px 0 0;
-  color: #7f95a6;
-  font:
-    10px var(--font-jetbrains-mono),
-    monospace;
-}
-.kpis {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 34px;
-}
-.kpis > div {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--aq-line);
-  background: rgba(9, 29, 43, 0.72);
-}
-.kpis span {
-  display: block;
-  min-height: 30px;
-  font:
-    10px/1.45 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.kpis strong {
-  display: block;
-  margin-top: 8px;
-  font:
-    700 22px var(--font-ibm-plex-sans-condensed),
-    sans-serif;
-  color: var(--aq-text);
-}
-.mapPanel,
-.listPanel,
-.detailPanel {
-  min-width: 0;
-  border: 1px solid var(--aq-line);
-  background: linear-gradient(180deg, rgba(14, 38, 55, 0.96), rgba(7, 23, 35, 0.96));
-}
-.mapPanel {
-  padding: 16px;
-}
-.mapHeading {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
-.mapHeading span {
-  font:
-    600 11px var(--font-inter),
-    sans-serif;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 0;
   color: var(--aq-muted);
-}
-.mapHeading strong {
   font:
-    700 18px var(--font-ibm-plex-sans-condensed),
+    12px/1.4 var(--font-inter),
     sans-serif;
-  color: var(--aq-cyan);
 }
-.map {
+.puntoVivo {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aq-green);
+  box-shadow: 0 0 10px rgba(63, 214, 160, 0.7);
+}
+
+/* ── Lista de departamentos ───────────────────────────────────────────────── */
+.listPanel {
   min-width: 0;
-}
-.map :global(.clr-mapa) {
-  max-width: 430px;
-  margin-inline: auto;
-  color: var(--aq-text);
-}
-.map :global(.clr-mapa__svg) {
-  max-height: 510px;
-  width: auto;
-  margin-inline: auto;
-}
-.map :global(.clr-mapa__nota),
-.map :global(.clr-mapa__sin),
-.map :global(.clr-mapa__leyenda) {
-  color: var(--aq-muted);
-}
-.noData {
-  margin: 8px 0 0;
-  text-align: center;
-  font:
-    12px/1.5 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.territorialGrid {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.9fr) minmax(340px, 1.1fr);
-  gap: 18px;
-  margin-top: 18px;
-}
-.listPanel,
-.detailPanel {
-  padding: 18px;
+  padding: 16px;
+  border: 1px solid var(--aq-line);
+  border-radius: 14px;
+  background: var(--aq-panel);
+  backdrop-filter: blur(6px);
 }
 .hero :global(.aqListaCabecera) {
   display: flex;
@@ -192,11 +161,10 @@
   justify-content: space-between;
   margin-bottom: 12px;
 }
-.hero :global(.aqListaCabecera h2),
-.types h2 {
+.hero :global(.aqListaCabecera h2) {
   margin: 0;
   font:
-    650 13px var(--font-inter),
+    650 14px var(--font-inter),
     sans-serif;
   color: var(--aq-text);
 }
@@ -210,10 +178,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
-  padding: 0 11px;
+  min-height: 42px;
+  padding: 0 14px;
   border: 1px solid var(--aq-line);
-  background: rgba(4, 17, 27, 0.7);
+  border-radius: 999px;
+  background: rgba(4, 16, 28, 0.6);
   color: var(--aq-muted);
 }
 .hero :global(.aqBuscador:focus-within) {
@@ -232,66 +201,80 @@
     sans-serif;
 }
 .hero :global(.aqBuscador input::placeholder) {
-  color: #6f8596;
+  color: #7d93a6;
 }
 .hero :global(.aqLista) {
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
-  max-height: 330px;
+  max-height: 352px;
   overflow: auto;
   scrollbar-width: thin;
+  scrollbar-color: rgba(140, 190, 225, 0.3) transparent;
+}
+.hero :global(.aqLista li + li) {
+  margin-top: 2px;
 }
 .hero :global(.aqLista button) {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 76px auto;
+  grid-template-columns: 10px minmax(0, 1fr) auto 10px;
   gap: 10px;
   align-items: center;
   width: 100%;
   min-height: 44px;
-  padding: 9px 7px;
-  border: 0;
-  border-bottom: 1px solid var(--aq-line);
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   background: transparent;
   color: var(--aq-text);
   text-align: left;
   cursor: pointer;
 }
 .hero :global(.aqLista button:hover) {
-  background: rgba(76, 184, 237, 0.07);
+  background: rgba(76, 201, 255, 0.07);
 }
 .hero :global(.aqLista button[aria-pressed="true"]) {
-  background: rgba(76, 184, 237, 0.11);
-  box-shadow: inset 2px 0 var(--aq-cyan);
+  border-color: rgba(76, 201, 255, 0.55);
+  background: rgba(26, 155, 224, 0.18);
 }
 .hero :global(.aqLista button:focus-visible) {
   outline: 2px solid var(--aq-cyan);
   outline-offset: -2px;
+}
+.hero :global(.aqPunto) {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--aq-e1);
+}
+.hero :global(.aqPunto--e2) {
+  background: var(--aq-e2);
+}
+.hero :global(.aqPunto--e3) {
+  background: var(--aq-e3);
+}
+.hero :global(.aqPunto--e4) {
+  background: var(--aq-e4);
 }
 .hero :global(.aqFilaNombre) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font:
-    12px var(--font-inter),
+    13px var(--font-inter),
     sans-serif;
-}
-.hero :global(.aqBarra) {
-  height: 4px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
-}
-.hero :global(.aqBarra span) {
-  display: block;
-  height: 100%;
-  background: var(--aq-blue);
 }
 .hero :global(.aqLista strong) {
   font:
-    600 11px var(--font-jetbrains-mono),
-    monospace;
+    600 13px var(--font-inter),
+    sans-serif;
+  font-variant-numeric: tabular-nums;
   color: #d7edf8;
+}
+.hero :global(.aqChevron) {
+  color: var(--aq-muted);
+  font-size: 16px;
+  line-height: 1;
 }
 .hero :global(.aqVacio) {
   margin: 12px 0;
@@ -301,124 +284,321 @@
   color: var(--aq-muted);
 }
 .allProcesses {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  display: inline-flex;
+  gap: 8px;
   margin-top: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--aq-line);
+  padding: 6px 2px;
   color: var(--aq-cyan);
   text-decoration: none;
   font:
+    600 13px var(--font-inter),
+    sans-serif;
+}
+
+/* ── Mapa ─────────────────────────────────────────────────────────────────── */
+.mapPanel {
+  position: relative;
+  min-width: 0;
+}
+.kpis {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: end;
+  gap: 12px 24px;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border: 1px solid rgba(76, 201, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(8, 26, 44, 0.7);
+  backdrop-filter: blur(6px);
+}
+.kpiTotal {
+  display: flex;
+  flex-direction: column;
+}
+.kpiTitulo {
+  font:
     600 12px var(--font-inter),
     sans-serif;
+  color: var(--aq-muted);
 }
-.hero :global(.aqFicha) {
-  min-height: 220px;
-  padding: 4px 2px 22px;
-  border-bottom: 1px solid var(--aq-line);
-}
-.hero :global(.aqFichaEyebrow) {
-  margin: 0 0 8px;
+.kpiTotal > strong {
+  margin-top: 2px;
   font:
-    600 10px var(--font-jetbrains-mono),
-    monospace;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--aq-cyan);
-}
-.hero :global(.aqFicha h2) {
-  margin: 0;
-  font:
-    700 clamp(1.6rem, 3vw, 2.4rem) var(--font-ibm-plex-sans-condensed),
+    700 34px/1.1 var(--font-inter),
     sans-serif;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--aq-text);
 }
-.hero :global(.aqFichaNumero) {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 20px 0 4px;
+.kpis dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0 0 3px;
+  padding-left: 24px;
+  border-left: 1px solid var(--aq-line);
 }
-.hero :global(.aqFichaNumero strong) {
+.kpis dt {
   font:
-    700 34px var(--font-ibm-plex-sans-condensed),
+    12px/1.35 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.kpis dd {
+  margin: 3px 0 0;
+  font:
+    700 20px var(--font-inter),
     sans-serif;
   color: var(--aq-text);
 }
-.hero :global(.aqFichaNumero span),
-.hero :global(.aqFichaPorcentaje),
-.hero :global(.aqFichaNota) {
+.map {
+  min-width: 0;
+}
+.map :global(.clr-mapa) {
+  --mapa-e0: var(--aq-e0);
+  --mapa-e1: var(--aq-e1);
+  --mapa-e2: var(--aq-e2);
+  --mapa-e3: var(--aq-e3);
+  --mapa-e4: var(--aq-e4);
+  max-width: 680px;
+  margin-inline: auto;
+  color: var(--aq-text);
+}
+.map :global(.clr-mapa__svg) {
+  max-height: 660px;
+  width: 100%;
+  margin-inline: auto;
+  filter: drop-shadow(0 0 28px rgba(42, 167, 227, 0.22));
+}
+.map :global(.clr-mapa__dpto) {
+  stroke: rgba(6, 20, 35, 0.85);
+  stroke-width: 0.7;
+}
+.map :global(.clr-mapa__link:hover .clr-mapa__dpto),
+.map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto) {
+  stroke: #eaf8ff;
+  stroke-width: 1.6;
+}
+.map :global(.clr-mapa__recuadro) {
+  stroke: rgba(140, 190, 225, 0.4);
+}
+.map :global(.clr-mapa__recuadro-txt) {
+  fill: var(--aq-muted);
+}
+.map :global(.clr-mapa__leyenda) {
+  justify-content: center;
+}
+.map :global(.clr-mapa__leyenda li) {
+  color: var(--aq-muted);
+}
+.map :global(.clr-mapa__swatch) {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border-color: rgba(140, 190, 225, 0.4);
+}
+.map :global(.clr-mapa__nota),
+.map :global(.clr-mapa__sin) {
+  text-align: center;
+  color: var(--aq-muted);
+}
+/* Rótulos del mapa. */
+.map :global(.atlas-map-label rect) {
+  fill: rgba(7, 22, 38, 0.9);
+  stroke: rgba(140, 190, 225, 0.35);
+  stroke-width: 0.7;
+}
+.map :global(.atlas-map-label line) {
+  stroke: rgba(234, 248, 255, 0.55);
+  stroke-width: 0.7;
+}
+.map :global(.atlas-map-label-ancla) {
+  fill: var(--aq-bg);
+  stroke: #eaf8ff;
+  stroke-width: 1.3;
+}
+.map :global(.atlas-map-label text) {
+  fill: #c3d3e0;
+  font:
+    500 7.6px var(--font-inter),
+    sans-serif;
+}
+.map :global(.atlas-map-label text.atlas-map-label-count) {
+  fill: #fff;
+  font:
+    700 10.5px var(--font-inter),
+    sans-serif;
+}
+.noData {
+  margin: 8px 0 0;
+  text-align: center;
   font:
     12px/1.5 var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
 }
-.hero :global(.aqFichaPorcentaje) {
-  margin: 4px 0;
-  color: #c6e9fb;
+
+/* ── Ficha (tarjeta clara) ────────────────────────────────────────────────── */
+.detailPanel {
+  min-width: 0;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--aq-card);
+  color: var(--aq-ink);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(76, 201, 255, 0.15);
+}
+.hero :global(.aqFicha) {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e3e9ef;
+}
+.hero :global(.aqFichaEyebrow) {
+  margin: 0 0 8px;
+  font:
+    600 10.5px var(--font-jetbrains-mono),
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0369a1;
+}
+.hero :global(.aqFicha h2) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font:
+    700 clamp(1.4rem, 1.9vw, 1.75rem)/1.15 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.015em;
+  color: var(--aq-ink);
+  hyphens: manual;
+}
+.hero :global(.aqFicha h2 svg) {
+  flex: none;
+  color: #1a9be0;
+}
+.hero :global(.aqFichaDatos) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 16px;
+}
+.hero :global(.aqFichaDatos > p) {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero :global(.aqFichaDatos > p + p) {
+  padding-left: 16px;
+  border-left: 1px solid #e3e9ef;
+}
+.hero :global(.aqFichaDatos strong) {
+  font:
+    700 24px/1.15 var(--font-inter),
+    sans-serif;
+  color: #0369a1;
+}
+.hero :global(.aqFichaDatos span) {
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
 }
 .hero :global(.aqFichaNota) {
-  margin: 4px 0 18px;
-}
-.hero :global(.aqFichaCta) {
-  display: inline-flex;
-  gap: 10px;
-  color: var(--aq-cyan);
-  text-decoration: none;
+  margin: 12px 0 0;
   font:
-    650 12px var(--font-inter),
+    11.5px/1.4 var(--font-inter),
     sans-serif;
-}
-.hero :global(.aqFichaCta:focus-visible) {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 3px;
+  color: var(--aq-ink-muted);
 }
 .types {
-  padding-top: 18px;
+  padding-top: 16px;
+}
+.types h2 {
+  margin: 0;
+  font:
+    650 14px var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink);
 }
 .types > p {
-  margin: 5px 0 10px;
+  margin: 3px 0 10px;
   font:
-    11px/1.5 var(--font-inter),
+    12px/1.5 var(--font-inter),
     sans-serif;
-  color: var(--aq-muted);
+  color: var(--aq-ink-muted);
 }
 .types a {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 90px auto;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "nombre cifra"
+    "barra barra";
+  gap: 6px 10px;
   align-items: center;
-  min-height: 38px;
-  border-top: 1px solid var(--aq-line);
-  color: var(--aq-text);
+  padding: 8px 0;
+  color: var(--aq-ink);
   text-decoration: none;
   font:
-    11px var(--font-inter),
+    500 13px var(--font-inter),
     sans-serif;
 }
+.types a:hover .typeNombre {
+  color: #0369a1;
+}
+.typeNombre {
+  grid-area: nombre;
+}
 .types a strong {
-  color: #d7edf8;
+  grid-area: cifra;
   font:
-    600 10px var(--font-jetbrains-mono),
-    monospace;
+    600 13px var(--font-inter),
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--aq-ink);
 }
 .typeBar {
-  height: 3px;
-  border-radius: 3px;
+  grid-area: barra;
+  height: 5px;
+  border-radius: 5px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.07);
+  background: #e6edf3;
 }
 .typeBar span {
   display: block;
   height: 100%;
-  background: var(--aq-blue);
+  border-radius: 5px;
+  background: linear-gradient(90deg, #1a9be0, #35c7d8);
 }
+.fichaCta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  margin-top: 16px;
+  border-radius: 10px;
+  background: var(--aq-navy);
+  color: #fff;
+  text-decoration: none;
+  font:
+    650 13.5px var(--font-inter),
+    sans-serif;
+  text-align: center;
+}
+.fichaCta:hover {
+  background: #0369a1;
+}
+
+/* ── Banda "El mercado ahora" ─────────────────────────────────────────────── */
 .hero :global(.aqMercado) {
-  margin-top: 18px;
-  padding: 18px;
+  margin-top: 32px;
+  padding: 20px 22px;
   border: 1px solid var(--aq-line);
-  background: #071725;
+  border-radius: 14px;
+  background: var(--aq-panel);
 }
 .hero :global(.aqMercadoTitulo) {
   display: flex;
@@ -430,107 +610,143 @@
   height: 7px;
   border-radius: 50%;
   background: var(--aq-green);
-  box-shadow: 0 0 14px rgba(75, 215, 154, 0.55);
+  box-shadow: 0 0 12px rgba(63, 214, 160, 0.6);
 }
 .hero :global(.aqMercadoTitulo h2) {
   margin: 0;
   font:
     650 11px var(--font-jetbrains-mono),
     monospace;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: var(--aq-cyan);
 }
 .hero :global(.aqMercado dl) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
   margin: 14px 0 0;
-  border-top: 1px solid var(--aq-line);
-  border-bottom: 1px solid var(--aq-line);
 }
 .hero :global(.aqMercado dl > div) {
-  padding: 14px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-areas:
+    "icono cifra"
+    "icono etiqueta";
+  column-gap: 12px;
+  align-items: center;
+  padding: 6px 18px;
+}
+.hero :global(.aqMercado dl > div:first-child) {
+  padding-left: 0;
 }
 .hero :global(.aqMercado dl > div + div) {
   border-left: 1px solid var(--aq-line);
 }
+.hero :global(.aqMercadoIcono) {
+  grid-area: icono;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(76, 201, 255, 0.45);
+  border-radius: 50%;
+  color: var(--aq-cyan);
+}
 .hero :global(.aqMercado dt) {
-  min-height: 30px;
+  grid-area: etiqueta;
   font:
-    10px/1.4 var(--font-inter),
+    12px/1.4 var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
 }
 .hero :global(.aqMercado dd) {
-  margin: 6px 0 0;
+  grid-area: cifra;
+  margin: 0;
   font:
-    700 22px var(--font-ibm-plex-sans-condensed),
+    700 24px/1.2 var(--font-inter),
     sans-serif;
+  color: var(--aq-text);
 }
 .hero :global(.aqMercado > p) {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   font:
-    10px/1.5 var(--font-inter),
+    11px/1.5 var(--font-inter),
     sans-serif;
-  color: #73899a;
+  color: #8499ab;
 }
-@media (max-width: 1024px) {
-  .topGrid {
+
+/* ── Adaptación ───────────────────────────────────────────────────────────── */
+@media (max-width: 1280px) {
+  .grid {
+    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+    grid-template-areas:
+      "izq mapa"
+      "izq ficha";
+  }
+  .detailPanel {
+    max-width: 560px;
+    width: 100%;
+    justify-self: center;
+  }
+}
+@media (max-width: 900px) {
+  .grid {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "copy"
+      "mapa"
+      "ficha"
+      "lista";
+  }
+  /* La columna izquierda se deshace para que el mapa suba justo después del
+     mensaje y la lista baje al final. */
+  .colIzq {
+    display: contents;
   }
   .copy {
+    grid-area: copy;
+  }
+  .listPanel {
+    grid-area: lista;
+  }
+  .detailPanel {
     max-width: none;
   }
-  .copy h1 {
-    max-width: 14ch;
-  }
-  .mapPanel {
-    max-width: 680px;
-    width: 100%;
-    margin-inline: auto;
-  }
-}
-@media (max-width: 760px) {
-  .hero {
-    padding: 36px var(--gutter) 20px;
-  }
-  .kpis,
-  .territorialGrid,
-  .hero :global(.aqMercado dl) {
+  .kpis {
     grid-template-columns: minmax(0, 1fr);
   }
-  .territorialGrid {
-    gap: 14px;
+  .kpis dl {
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--aq-line);
+  }
+  .hero :global(.aqMercado dl) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .hero :global(.aqMercado dl > div) {
+    padding: 0;
   }
   .hero :global(.aqMercado dl > div + div) {
     border-left: 0;
+    padding-top: 12px;
     border-top: 1px solid var(--aq-line);
+  }
+}
+@media (max-width: 600px) {
+  /* A este ancho el texto de los rótulos baja de 6px: no se lee y tapa el mapa.
+     La cifra de cada departamento sigue en la lista y en el <title>. */
+  .map :global(.atlas-map-label) {
+    display: none;
   }
 }
 @media (max-width: 430px) {
   .hero {
     padding-inline: 16px;
   }
-  .copy h1 {
-    font-size: clamp(2.55rem, 13vw, 3.25rem);
-  }
-  .mapPanel,
-  .listPanel,
-  .detailPanel {
-    padding: 14px;
-  }
-  .map :global(.clr-mapa__svg) {
-    width: 100%;
-    height: auto;
-    max-height: none;
-  }
-  .hero :global(.aqLista button) {
-    grid-template-columns: minmax(0, 1fr) 58px auto;
-    gap: 7px;
-  }
-  .types a {
-    grid-template-columns: minmax(0, 1fr) 58px auto;
-    gap: 7px;
+  .detailPanel,
+  .listPanel {
+    padding: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
