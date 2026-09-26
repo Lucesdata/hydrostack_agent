@@ -12,7 +12,10 @@ describe("PortadaCliente", () => {
     );
     expect(html).toContain('href="/licitaciones/departamento/antioquia"');
     expect(html).toContain("5.155");
-    expect(html).toContain("6.000");
+    // El total nacional ya no se pinta como KPI (2026-09-26): sigue siendo la
+    // base del porcentaje de la ficha, 5.155 / 6.000.
+    expect(html).toContain("85,9");
+    expect(html).not.toContain("Procesos abiertos · Colombia");
     expect(html).toContain('aria-pressed="true"');
   });
 

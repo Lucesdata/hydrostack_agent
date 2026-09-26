@@ -217,25 +217,21 @@ Rules:
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
 `ListaTerritorios`, `FichaDepartamento`) y se monta desde
 `PortadaCliente.jsx`. Se conservan fuentes de datos, rutas, paleta y mapa de
-servidor. Hay **dos grupos de KPIs**, cada uno con su propia fuente. No se
-mezclan y no se sustituyen por cifras ni tendencias de un mockup.
+servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 
-- **KPIs del hero** (franja sobre el mapa, columna central). Vienen de `agregadosPortada()`
-  (`src/lib/secop/agregados.ts`), calculados en el servidor en `app/page.js`
-  con `revalidate` de 6 h. Todos cuentan "abierto" con `condicionAbierto()`:
-  - *Procesos abiertos · Colombia*: `totalAbiertos`, que es el total real e
-    incluye los procesos sin geografía resuelta.
-  - *Departamentos con procesos*: `departamentos.length`, es decir, los
-    departamentos con al menos un proceso abierto y geografía resuelta.
-  - *Tipos de proyecto · Colombia*: `tipos.length`. `procesosPorTipo()`
-    devuelve siempre los cinco de `TIPOS_PROYECTO`, así que con datos siempre
-    muestra 5. Es la taxonomía, no un conteo que varíe.
-  - La suma de la lista por departamento **no cuadra** con `totalAbiertos`,
-    porque los abiertos sin geografía quedan fuera del reparto. Es correcto. El
-    % de la ficha se calcula sobre `totalAbiertos`. No "arreglarlo" sumando la
-    lista.
-  - Si la base no responde, `totalAbiertos` queda `undefined` y todo muestra
-    "—" con el mapa en gris.
+- **Franja de KPIs del hero**: retirada el 2026-09-26 (*Procesos abiertos ·
+  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*). El
+  mapa ocupa ese sitio: sus controles (colorear por, tipo) van centrados como
+  cabecera de la columna, y en tres columnas mapa y ficha son `sticky` mientras
+  se recorre la lista, cada uno solo si cabe en la ventana. Por eso `.hero` usa
+  `overflow: clip` y no `hidden`, que anularía el sticky.
+- `agregadosPortada()` (`src/lib/secop/agregados.ts`) sigue alimentando el mapa,
+  la lista y la ficha, calculado en el servidor en `app/page.js` con
+  `revalidate` de 6 h y "abierto" según `condicionAbierto()`. `totalAbiertos`
+  ya no se pinta, pero es la base del % de la ficha e incluye los procesos sin
+  geografía resuelta: la suma de la lista **no cuadra** con él y es correcto.
+  No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
+  queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
   `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
   ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker

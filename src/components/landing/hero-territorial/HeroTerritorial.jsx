@@ -260,22 +260,6 @@ export default function HeroTerritorial({
           className={styles.mapPanel}
           aria-label="Procesos abiertos por departamento"
         >
-          <div className={styles.kpis} aria-label="Indicadores nacionales">
-            <div className={styles.kpiTotal}>
-              <span className={styles.kpiTitulo}>Procesos abiertos · Colombia</span>
-              <strong>{formatConteo(totalAbiertos)}</strong>
-            </div>
-            <dl>
-              <div>
-                <dt>Departamentos con procesos</dt>
-                <dd>{datosDisponibles ? formatConteo(departamentos.length) : "—"}</dd>
-              </div>
-              <div>
-                <dt>Tipos de proyecto · Colombia</dt>
-                <dd>{tipos.length || datosDisponibles ? formatConteo(tipos.length) : "—"}</dd>
-              </div>
-            </dl>
-          </div>
           {hayDetalle && datosDisponibles ? (
             <div className={styles.controlesMapa}>
               <div className={styles.metrica} role="group" aria-label="Colorear el mapa por">
