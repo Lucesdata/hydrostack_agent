@@ -76,33 +76,33 @@ const BLUEPRINT_CSS = `
 @keyframes bp-profundidad { to { --bp-prof: 6; } }
 .bp-fondo-rejilla {
   position: fixed; top: -160px; left: 0; right: 0; bottom: -160px; z-index: 0; pointer-events: none;
-  background-image: linear-gradient(rgba(3,105,161,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(3,105,161,0.055) 1px,transparent 1px);
+  background-image: linear-gradient(rgba(76,201,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(76,201,255,0.05) 1px,transparent 1px);
   background-size: 32px 32px;
 }
 .bp-fondo-agua {
   position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; pointer-events: none; opacity: .08;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%230369A1' stroke-width='0.6' fill='none'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%234cc9ff' stroke-width='0.6' fill='none'/></svg>");
   background-repeat: repeat; background-size: 120px 14px;
   animation: bp-scroll 22s linear infinite;
 }
 .bp-fondo-linea {
   position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 0; pointer-events: none;
-  background: linear-gradient(90deg,transparent,rgba(3,105,161,0.35),transparent);
+  background: linear-gradient(90deg,transparent,rgba(76,201,255,0.35),transparent);
 }
 .bp-fondo-onda {
   position: fixed; top: 0; width: 16px; height: 16px; border-radius: 50%; z-index: 0; pointer-events: none;
-  border: 1px solid rgba(3,105,161,0.5);
+  border: 1px solid rgba(76,201,255,0.5);
   animation: bp-ripple 2.6s ease-out infinite;
 }
 .bp-fondo-regla {
   position: fixed; left: 10px; top: 72px; bottom: 16px; width: 1px; z-index: 0; pointer-events: none;
-  background: repeating-linear-gradient(180deg,rgba(3,105,161,0.3) 0 1px,transparent 1px 40px);
+  background: repeating-linear-gradient(180deg,rgba(76,201,255,0.3) 0 1px,transparent 1px 40px);
 }
 .bp-regla-marca { position: fixed; left: 6px; top: 0; z-index: 0; pointer-events: none; }
-.bp-fondo-flecha { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid #0369A1; }
+.bp-fondo-flecha { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid var(--accent); }
 .bp-fondo-prof {
-  font: 10px var(--font-jetbrains-mono),monospace; color: #0369A1;
-  background: rgba(252,252,249,0.85); padding: 1px 4px; border-radius: 2px;
+  font: 10px var(--font-jetbrains-mono),monospace; color: var(--accent);
+  background: rgba(6,20,35,0.85); padding: 1px 4px; border-radius: 2px;
   counter-reset: bp-prof var(--bp-prof);
 }
 .bp-fondo-prof::after { content: counter(bp-prof) " m"; }
@@ -125,12 +125,12 @@ const BLUEPRINT_CSS = `
 }
 
 .bp-card { position: relative; overflow: hidden; cursor: pointer; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
-.bp-card:hover { border-color: #0369A1; transform: translateY(-2px); }
+.bp-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .bp-card-seal {
   position: absolute; top: -10px; right: 14px; width: 46px; height: 46px; border-radius: 50%;
-  border: 1.5px dashed #0369A1; display: flex; align-items: center; justify-content: center;
-  background: rgba(252,252,249,0.95); font: 600 7px/1.15 var(--font-jetbrains-mono),monospace; letter-spacing: .05em;
-  color: #0369A1; text-align: center; transform: scale(0.5) rotate(-10deg); opacity: 0;
+  border: 1.5px dashed var(--accent); display: flex; align-items: center; justify-content: center;
+  background: var(--surface); font: 600 7px/1.15 var(--font-jetbrains-mono),monospace; letter-spacing: .05em;
+  color: var(--accent); text-align: center; transform: scale(0.5) rotate(-10deg); opacity: 0;
   transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; pointer-events: none;
 }
 .bp-card-dark .bp-card-seal { border-color: #7DD3FC; color: #7DD3FC; }
@@ -163,7 +163,7 @@ const BLUEPRINT_CSS = `
 .bp-ps-pain-text { text-align: right; }
 .bp-ps-connector { grid-area: connector; display: flex; align-items: center; justify-content: center; }
 .bp-ps-answer { grid-area: answer; padding-left: 22px; }
-.bp-pillars-wrap { padding: 64px var(--gutter); border-top: 1px dashed #DADAD2; }
+.bp-pillars-wrap { padding: 64px var(--gutter); border-top: 1px dashed var(--line-strong); }
 .bp-credentials-strip { display: flex; flex-wrap: wrap; }
 @media (max-width: 900px) {
   .bp-credentials-strip > div { flex-basis: 100%; border-left: none !important; padding: 16px 0 !important; border-top: 1px solid #DADAD2; }
@@ -280,10 +280,12 @@ export default function LandingPage({
 
   return (
     <div
-      className="bp-page"
+      // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
+      // el resto se unifica redefiniendo los tokens (globals.css, .tema-oscuro).
+      className="bp-page tema-oscuro"
       style={{
         position: "relative",
-        background: "#FCFCF9",
+        background: "var(--bg)",
         fontFamily: "var(--font-inter), sans-serif",
       }}
     >
@@ -312,11 +314,11 @@ export default function LandingPage({
             estaba enterrada bajo cuatro secciones. */}
         <div className="bp-pillars-wrap" id="asistentes-proyecto" style={{ paddingTop: 80 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-            <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+            <span style={{ width: 8, height: 8, background: "var(--accent)" }} />
             <span
               style={{
                 font: "11px var(--font-jetbrains-mono),monospace",
-                color: "#0369A1",
+                color: "var(--accent)",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
               }}
@@ -331,10 +333,10 @@ export default function LandingPage({
                 href={c.href}
                 className="bp-card"
                 style={{
-                  border: "1px solid #DADAD2",
+                  border: "1px solid var(--line-strong)",
                   padding: 22,
-                  background: "#fff",
-                  color: "#0A1F1C",
+                  background: "var(--surface)",
+                  color: "var(--text-primary)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 12,
@@ -348,8 +350,8 @@ export default function LandingPage({
                     left: -1,
                     width: 10,
                     height: 10,
-                    borderTop: "2px solid #0369A1",
-                    borderLeft: "2px solid #0369A1",
+                    borderTop: "2px solid var(--accent)",
+                    borderLeft: "2px solid var(--accent)",
                   }}
                 />
                 <span
@@ -359,16 +361,16 @@ export default function LandingPage({
                     right: -1,
                     width: 10,
                     height: 10,
-                    borderBottom: "2px solid #0369A1",
-                    borderRight: "2px solid #0369A1",
+                    borderBottom: "2px solid var(--accent)",
+                    borderRight: "2px solid var(--accent)",
                   }}
                 />
                 <span
                   style={{
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: esLibre(c.etiqueta) ? "var(--accent)" : "#6B746F",
+                    color: esLibre(c.etiqueta) ? "var(--accent)" : "var(--ink-300)",
                     background: esLibre(c.etiqueta) ? "var(--accent-faint)" : "transparent",
-                    border: `1px solid ${esLibre(c.etiqueta) ? "var(--accent)" : "#DADAD2"}`,
+                    border: `1px solid ${esLibre(c.etiqueta) ? "var(--accent)" : "var(--line-strong)"}`,
                     padding: "2px 8px",
                     textTransform: "uppercase",
                     letterSpacing: ".06em",
@@ -381,7 +383,7 @@ export default function LandingPage({
                 <p
                   style={{
                     font: "13px/1.5 var(--font-inter)",
-                    color: "#525B5A",
+                    color: "var(--text-muted)",
                     flexGrow: 1,
                     margin: 0,
                   }}
@@ -391,7 +393,7 @@ export default function LandingPage({
                 <span
                   style={{
                     font: "600 12px var(--font-jetbrains-mono),monospace",
-                    color: "#0369A1",
+                    color: "var(--accent)",
                   }}
                 >
                   [ {c.cta} ]

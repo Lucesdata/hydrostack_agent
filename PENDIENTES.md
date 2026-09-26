@@ -856,3 +856,12 @@ cargar el DIVIPOLA completo haría que los municipios homónimos se pisen (La
 Unión, San Pedro, Villanueva…), y la ubicación es la **sede de la entidad**, que
 a nivel municipal concentra en la capital lo que contrata una gobernación. Hay
 que medir eso antes de dibujar nada.
+
+### 47. Calendario de cierres — aparcado (2026-09-26)
+Punto 44 de la lista de mejoras. Solo 132 procesos tienen fecha de cierre, menos
+del 0,4 % de los abiertos, y por eso la decisión A (AUDITORIA-SPECS-LANDING-MAPA
+§9.1) quitó la pestaña "Cierran pronto". Un calendario con esos 132 daría a
+entender que el resto no cierra. **Se retoma si la cobertura de la fecha de
+cierre sube**, cosa que hay que medir en la base (y ver si sale de otra columna
+del SECOP, como la fecha de recepción de ofertas o el cronograma).
+

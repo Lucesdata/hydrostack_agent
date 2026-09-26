@@ -48,11 +48,11 @@ export default function S3Motor({ procesosVigilados }) {
     <section className="section-pad">
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-          <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+          <span style={{ width: 8, height: 8, background: "var(--accent)" }} />
           <span
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
-              color: "#0369A1",
+              color: "var(--accent)",
               letterSpacing: ".08em",
             }}
           >
@@ -63,7 +63,7 @@ export default function S3Motor({ procesosVigilados }) {
         <h2
           style={{
             font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
-            color: "#0A1F1C",
+            color: "var(--text-primary)",
             margin: "0 0 48px",
             maxWidth: 720,
           }}
@@ -80,23 +80,28 @@ export default function S3Motor({ procesosVigilados }) {
                 gridTemplateColumns: "minmax(0,1fr)",
                 gap: 8,
                 padding: "28px 0",
-                borderTop: "1px solid #DADAD2",
+                borderTop: "1px solid var(--line-strong)",
               }}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 16, flexWrap: "wrap" }}>
                 <span
-                  style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#525B5A" }}
+                  style={{
+                    font: "10px var(--font-jetbrains-mono),monospace",
+                    color: "var(--text-muted)",
+                  }}
                 >
                   [ {p.n} ]
                 </span>
-                <div style={{ font: "600 20px/1.3 var(--font-inter)", color: "#0A1F1C" }}>
+                <div
+                  style={{ font: "600 20px/1.3 var(--font-inter)", color: "var(--text-primary)" }}
+                >
                   {p.titulo}
                 </div>
                 <span
                   style={{
                     font: "10px var(--font-jetbrains-mono),monospace",
-                    color: "#6B746F",
-                    border: "1px solid #DADAD2",
+                    color: "var(--ink-300)",
+                    border: "1px solid var(--line-strong)",
                     padding: "2px 8px",
                     textTransform: "uppercase",
                     letterSpacing: ".06em",
@@ -108,7 +113,7 @@ export default function S3Motor({ procesosVigilados }) {
               <p
                 style={{
                   font: "14px/1.6 var(--font-inter)",
-                  color: "#525B5A",
+                  color: "var(--text-muted)",
                   margin: 0,
                   maxWidth: "65ch",
                 }}
@@ -120,7 +125,7 @@ export default function S3Motor({ procesosVigilados }) {
                 className="tap-target"
                 style={{
                   font: "600 12px var(--font-jetbrains-mono),monospace",
-                  color: "#0369A1",
+                  color: "var(--accent)",
                   textDecoration: "none",
                 }}
               >
