@@ -9,17 +9,21 @@ describe("CierreFicha", () => {
     expect(html).not.toContain('href="/cuenta"');
   });
 
-  it("el paso principal es dar los datos con el diagnóstico sin cuenta", () => {
+  it("separa los requisitos del proceso del diagnóstico general", () => {
     const html = renderToStaticMarkup(<CierreFicha urlSecop={null} />);
     expect(html).toContain('href="/diagnostico"');
-    expect(html).toContain("Completar mis datos");
+    expect(html).toContain("preparación general");
+    expect(html).toContain("no puede emitir un veredicto individual");
+    expect(html).not.toContain("fi-btn--primario");
   });
 
   it("enlaza el expediente del SECOP II solo si existe", () => {
     const con = renderToStaticMarkup(<CierreFicha urlSecop="https://community.secop.gov.co/x" />);
     const sin = renderToStaticMarkup(<CierreFicha urlSecop={null} />);
     expect(con).toContain('href="https://community.secop.gov.co/x"');
+    expect(con).toContain("Abrir expediente en SECOP II");
+    expect(con).toMatch(/fi-btn--primario[^>]*href="https:\/\/community\.secop\.gov\.co\/x"/);
     expect(con).toContain('rel="noopener noreferrer"');
-    expect(sin).not.toContain("SECOP II</a>");
+    expect(sin).not.toContain("Abrir expediente en SECOP II</a>");
   });
 });
