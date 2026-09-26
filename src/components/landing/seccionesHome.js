@@ -101,7 +101,9 @@ export function ruta(id) {
  */
 export const NOMBRE_POR_ID = {
   diagnostico: "Diagnóstico",
-  explorar: "Licitaciones",
+  // "Fichas de procesos" y no "Licitaciones": decisión C del 2026-09-21
+  // (AUDITORIA-SPECS-LANDING-MAPA §9). La ruta /licitaciones se conserva.
+  explorar: "Fichas de procesos",
   soluciones: "Soluciones",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",

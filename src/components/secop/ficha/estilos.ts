@@ -13,6 +13,10 @@ export const ESTILOS_FICHA = `
   padding: 4px 9px; border: 1px solid var(--border); color: var(--text-muted);
 }
 .fi-chip--estado{ color: var(--accent); background: var(--accent-faint); border-color: var(--accent-soft); }
+.fi-chip--tipo{ display: inline-flex; align-items: center; gap: 6px; color: var(--text-primary); font-weight: 600; border: 1.5px solid var(--tipo); }
+.fi-chip-punto{ width: 8px; height: 8px; border-radius: 50%; background: var(--tipo); }
+.fi-chip--otros{ border-style: dashed; }
+.fi-chip--otros .fi-chip-punto{ background: transparent; border: 1.5px dashed var(--tipo); }
 
 .fi-sec{ margin-top: 40px; }
 .fi-h2{

@@ -34,7 +34,7 @@ describe("HeroTerritorial", () => {
     );
     expect(html).toContain("Tipos de proyecto · Colombia");
     expect(html).toContain('href="/licitaciones/departamento/antioquia"');
-    expect(html).toContain("Ver procesos de Antioquia");
+    expect(html).toContain("Ver fichas de Antioquia");
     expect(html).toContain('href="/licitaciones"');
   });
 

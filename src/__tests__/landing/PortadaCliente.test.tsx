@@ -62,7 +62,7 @@ describe("PortadaCliente", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
     expect(html).toContain("Explora el mercado de agua y saneamiento de");
     expect(html).toContain("Colombia.");
-    expect(html).toContain("Explorar procesos");
+    expect(html).toContain("Ver fichas de procesos");
     expect(html).toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");
   });

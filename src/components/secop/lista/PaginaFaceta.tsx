@@ -47,7 +47,7 @@ export default function PaginaFaceta({
       <div className="clr-container">
         <header className="lp-cab">
           <nav className="lp-cab-migas" aria-label="Ruta de navegación">
-            <Link href="/licitaciones">Licitaciones</Link>
+            <Link href="/licitaciones">Fichas de procesos</Link>
             {" · "}
             {NOMBRE_FAMILIA[faceta.familia]}
           </nav>

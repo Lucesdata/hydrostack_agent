@@ -110,3 +110,17 @@ describe("el 0 de SECOP no viaja en el DTO", () => {
     expect(mapLiveToResumen(p).valorEstimado).toBeNull();
   });
 });
+
+describe("enlace a la ficha", () => {
+  it("la fila mapeada no inventa ficha: la ruta se añade solo al leer de la base", () => {
+    const r = mapRowToResumen({ ...baseRow, tipoProyecto: "ptar" });
+    expect(r.tipoProyecto).toBe("ptar");
+    expect(r.ficha).toBeNull();
+  });
+
+  it("un proceso leído del SECOP en vivo no enlaza ficha, que podría no existir", () => {
+    const r = mapLiveToResumen(baseLive as unknown as SecopProceso);
+    expect(r.ficha).toBeNull();
+    expect(r.tipoProyecto).toBeNull();
+  });
+});
