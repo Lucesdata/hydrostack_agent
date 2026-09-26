@@ -292,6 +292,11 @@ se colorea por procesos o por **monto en juego** (`ESCALONES_MONTO` en
 `escala.ts`, cortes fijos por décadas). `slugificar`, `slugDeProceso` e
 `idDesdeSlug` viven en `src/lib/secop/slug.ts` (puro, sin base) y
 `agregados.ts`/`ficha.ts` las reexportan.
+El mapa también se **filtra por tipo** (`indicesDeModo` en `sincronia.js`): el
+hero cambia la clase de escalón de cada camino (`usePinturaEnMapa`), nunca un
+color en línea, así que el CSS del mapa manda en todos los modos. **"Sin
+procesos" va rayado** (patrón `#clr-mapa-sin` en el SVG) además de su tono: el
+color no puede ser lo único que lo diga.
 
 **Imagen para compartir (2026-09-26).** `app/opengraph-image.js` genera con
 `next/og` la vista previa de 1200×630: el mapa real con la rampa del hero y el

@@ -488,6 +488,7 @@
   --mapa-e2: var(--aq-e2);
   --mapa-e3: var(--aq-e3);
   --mapa-e4: var(--aq-e4);
+  --mapa-raya: rgba(140, 190, 225, 0.35);
   max-width: 680px;
   margin-inline: auto;
   color: var(--aq-text);
@@ -578,6 +579,28 @@
     sans-serif;
 }
 /* Selector de métrica del mapa y su leyenda (solo con "monto"). */
+.controlesMapa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.controlesMapa .metrica {
+  margin-bottom: 0;
+}
+.metricaPunto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--tipo);
+  vertical-align: 1px;
+}
+.metrica button[data-familia="otros"] .metricaPunto {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
 .metrica {
   display: flex;
   flex-wrap: wrap;
@@ -612,6 +635,7 @@
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
 }
+.map[data-metrica="tipo"] :global(.atlas-map-label),
 .map[data-metrica="monto"] :global(.clr-mapa__leyenda),
 .map[data-metrica="monto"] :global(.atlas-map-label) {
   /* La leyenda y los rótulos del servidor hablan de procesos. */
@@ -638,6 +662,13 @@
     12px var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
+}
+.leyendaMonto li:first-child span {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    rgba(140, 190, 225, 0.35) 2px 3px
+  ) !important;
 }
 .leyendaMonto li span {
   width: 12px;

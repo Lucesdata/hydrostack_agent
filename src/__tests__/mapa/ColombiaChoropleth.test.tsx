@@ -99,3 +99,14 @@ describe("ColombiaChoropleth", () => {
     expect(solo).not.toContain("sin ubicación");
   });
 });
+
+describe("«sin procesos» no depende solo del color (WCAG 1.4.1)", () => {
+  it("el SVG define el rayado y el escalón 0 lo usa en el mapa y en la leyenda", async () => {
+    const { ESTILOS_MAPA } = await import("@/src/components/mapa/estilos");
+    expect(html).toContain('id="clr-mapa-sin"');
+    expect(ESTILOS_MAPA).toMatch(/\.clr-mapa__dpto--e0\{\s*fill:\s*url\(#clr-mapa-sin\)/);
+    expect(ESTILOS_MAPA).toMatch(
+      /li:first-child \.clr-mapa__swatch\{[^}]*repeating-linear-gradient/
+    );
+  });
+});

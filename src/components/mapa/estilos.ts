@@ -24,7 +24,11 @@ export const ESTILOS_MAPA = `
   stroke: var(--bg); stroke-width: .6; stroke-linejoin: round;
   transition: fill .15s, stroke .15s;
 }
-.clr-mapa__dpto--e0{ fill: var(--mapa-e0); }
+.clr-mapa__dpto--e0{ fill: url(#clr-mapa-sin); }
+/* El rayado de "sin procesos": el tono de siempre más una raya, para que no
+   dependa solo del color (WCAG 1.4.1). --mapa-raya lo ajusta cada tema. */
+.clr-mapa__sin-fondo{ fill: var(--mapa-e0); }
+.clr-mapa__sin-raya{ stroke: var(--mapa-raya, rgba(10, 31, 28, .18)); stroke-width: 2; }
 .clr-mapa__dpto--e1{ fill: var(--mapa-e1); }
 .clr-mapa__dpto--e2{ fill: var(--mapa-e2); }
 .clr-mapa__dpto--e3{ fill: var(--mapa-e3); }
@@ -45,6 +49,9 @@ export const ESTILOS_MAPA = `
   display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
 }
 .clr-mapa__leyenda li{ display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.clr-mapa__leyenda li:first-child .clr-mapa__swatch{
+  background-image: repeating-linear-gradient(45deg, transparent 0 2px, var(--mapa-raya, rgba(10, 31, 28, .18)) 2px 3px) !important;
+}
 .clr-mapa__swatch{
   width: 14px; height: 10px; border-radius: 2px; display: inline-block;
   border: 1px solid var(--border);

@@ -53,6 +53,7 @@ export function contenidoTooltip({
   departamentos = [],
   totalAbiertos = null,
   tipos = {},
+  tipoFiltro = null,
 }) {
   const fila = departamentos.find((d) => d.clave === dpto) ?? null;
   const n = fila?.n ?? 0;
@@ -69,6 +70,8 @@ export function contenidoTooltip({
     n,
     pct,
     monto: fila?.montoAbierto ?? 0,
+    // Con el mapa filtrado por tipo, cuántos de sus abiertos son de ese tipo.
+    ...(tipoFiltro ? { nTipo: fila?.tipos?.[tipoFiltro] ?? 0 } : {}),
     principal: principal
       ? { ...principal, label: tipos[principal.clave] ?? principal.clave }
       : null,
@@ -76,25 +79,46 @@ export function contenidoTooltip({
 }
 
 /**
- * Recolorea el mapa según la métrica elegida. El SVG de servidor trae el color
- * por procesos en su clase (`clr-mapa__dpto--eN`); con "monto", cada camino
- * recibe el escalón de su monto en un `style.fill` que gana a la clase, y al
- * volver a "procesos" se quita. `escalonMonto` llega por parámetro para que
- * este archivo no dependa de la escala.
+ * El escalón de color de cada departamento según el modo del mapa. `null` en
+ * "procesos": es lo que ya pinta el servidor y no hay nada que cambiar.
+ *
+ * - "monto": escalón del monto en juego (sin presupuesto publicado → 0).
+ * - "tipo": escalón de los abiertos de ese tipo, con la escala de procesos.
+ *
+ * Puro, para probarlo. Las escalas llegan por parámetro para que este archivo
+ * no dependa de ellas.
  */
-export function useMetricaEnMapa(contenedorRef, metrica, departamentos, escalonMonto) {
+export function indicesDeModo({ modo, tipo, departamentos, escalonDe, escalonMontoDe }) {
+  if (modo === "monto") {
+    return new Map(departamentos.map((d) => [d.clave, escalonMontoDe(d.montoAbierto ?? 0).indice]));
+  }
+  if (modo === "tipo" && tipo) {
+    return new Map(departamentos.map((d) => [d.clave, escalonDe(d.tipos?.[tipo] ?? 0).indice]));
+  }
+  return null;
+}
+
+const ESCALON = /clr-mapa__dpto--e\d/;
+
+/**
+ * Pinta el mapa con los escalones dados cambiando la clase `clr-mapa__dpto--eN`
+ * de cada camino, no con un color en línea: así el CSS del mapa —incluido el
+ * rayado de "sin procesos"— se aplica igual en todos los modos. La clase del
+ * servidor se guarda en `data-e-orig` y se restaura con `indices === null`.
+ * Los departamentos que no están en `indices` (sin procesos abiertos) van a 0.
+ */
+export function usePinturaEnMapa(contenedorRef, modo, indices) {
   useEffect(() => {
     const raiz = contenedorRef.current;
     if (!raiz) return;
-    const monto = new Map(departamentos.map((d) => [d.clave, d.montoAbierto ?? 0]));
     for (const camino of raiz.querySelectorAll("[data-dpto]")) {
-      if (metrica === "monto") {
-        const i = escalonMonto(monto.get(camino.getAttribute("data-dpto")) ?? 0).indice;
-        camino.style.fill = `var(--mapa-e${i})`;
-      } else {
-        camino.style.removeProperty("fill");
-      }
+      const actual = camino.getAttribute("class") ?? "";
+      if (camino.dataset.eOrig == null) camino.dataset.eOrig = actual.match(ESCALON)?.[0] ?? "";
+      const destino = indices
+        ? `clr-mapa__dpto--e${indices.get(camino.getAttribute("data-dpto")) ?? 0}`
+        : camino.dataset.eOrig;
+      camino.setAttribute("class", actual.replace(ESCALON, destino).trim());
     }
-    raiz.setAttribute("data-metrica", metrica);
-  }, [contenedorRef, metrica, departamentos, escalonMonto]);
+    raiz.setAttribute("data-metrica", modo);
+  }, [contenedorRef, modo, indices]);
 }

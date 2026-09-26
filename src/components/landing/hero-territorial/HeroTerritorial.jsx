@@ -13,10 +13,11 @@ import BuscadorFichas from "./BuscadorFichas";
 import {
   contenidoTooltip,
   dptoDesdeObjetivo,
+  indicesDeModo,
   useMarcasEnMapa,
-  useMetricaEnMapa,
+  usePinturaEnMapa,
 } from "./sincronia";
-import { ESCALONES_MONTO, escalonMontoDe } from "@/src/lib/mapa/escala";
+import { ESCALONES_MONTO, escalonDe, escalonMontoDe } from "@/src/lib/mapa/escala";
 import styles from "./hero-territorial.module.css";
 
 /** Una fila de tipo: punto de color, nombre, familia, cifra y barra. */
@@ -124,11 +125,34 @@ export default function HeroTerritorial({
   const vista = previa ?? seleccionado;
   const mapaRef = useRef(null);
   useMarcasEnMapa(mapaRef, resaltado, seleccionado?.clave ?? null);
-  // Colorear por procesos (lo que pinta el servidor) o por monto en juego. Solo
-  // se ofrece si las filas traen el monto: sin detalle no hay nada que pintar.
-  const hayMonto = departamentos.some((d) => d.montoAbierto != null);
-  const [metrica, setMetrica] = useState("procesos");
-  useMetricaEnMapa(mapaRef, hayMonto ? metrica : "procesos", departamentos, escalonMontoDe);
+  // Cómo se colorea el mapa: por procesos (lo que pinta el servidor), por monto
+  // en juego o por los procesos de un solo tipo de proyecto. Solo se ofrece si
+  // las filas traen el detalle: sin él no hay nada que pintar.
+  const hayDetalle = departamentos.some((d) => d.montoAbierto != null && d.tipos);
+  const [modo, setModo] = useState("procesos");
+  const [tipoFiltro, setTipoFiltro] = useState(null);
+  const modoEfectivo = hayDetalle ? modo : "procesos";
+  const indices = useMemo(
+    () =>
+      indicesDeModo({
+        modo: modoEfectivo,
+        tipo: tipoFiltro,
+        departamentos,
+        escalonDe,
+        escalonMontoDe,
+      }),
+    [modoEfectivo, tipoFiltro, departamentos]
+  );
+  usePinturaEnMapa(mapaRef, modoEfectivo, indices);
+  const elegirMetrica = (valor) => {
+    setModo(valor);
+    setTipoFiltro(null);
+  };
+  const elegirTipo = (tipo) => {
+    // Un tipo pinta procesos de ese tipo: el monto no está desglosado por tipo.
+    setTipoFiltro(tipo);
+    setModo(tipo ? "tipo" : "procesos");
+  };
   // Tooltip: dónde pintarlo (relativo al panel) y de qué departamento.
   const panelRef = useRef(null);
   const [punta, setPunta] = useState(null);
@@ -172,6 +196,7 @@ export default function HeroTerritorial({
         departamentos,
         totalAbiertos,
         tipos: etiquetasTipo,
+        tipoFiltro: modoEfectivo === "tipo" ? tipoFiltro : null,
       })
     : null;
   const explorar = ruta("explorar");
@@ -239,25 +264,49 @@ export default function HeroTerritorial({
               </div>
             </dl>
           </div>
-          {hayMonto && datosDisponibles ? (
-            <div className={styles.metrica} role="group" aria-label="Colorear el mapa por">
-              <span>Colorear por</span>
-              {[
-                ["procesos", "Procesos abiertos"],
-                ["monto", "Monto en juego"],
-              ].map(([valor, etiqueta]) => (
-                <button
-                  key={valor}
-                  type="button"
-                  aria-pressed={metrica === valor}
-                  onClick={() => setMetrica(valor)}
-                >
-                  {etiqueta}
+          {hayDetalle && datosDisponibles ? (
+            <div className={styles.controlesMapa}>
+              <div className={styles.metrica} role="group" aria-label="Colorear el mapa por">
+                <span>Colorear por</span>
+                {[
+                  ["procesos", "Procesos abiertos"],
+                  ["monto", "Monto en juego"],
+                ].map(([valor, etiqueta]) => (
+                  <button
+                    key={valor}
+                    type="button"
+                    aria-pressed={modo === valor || (valor === "procesos" && modo === "tipo")}
+                    onClick={() => elegirMetrica(valor)}
+                  >
+                    {etiqueta}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.metrica} role="group" aria-label="Filtrar el mapa por tipo">
+                <span>Tipo</span>
+                <button type="button" aria-pressed={!tipoFiltro} onClick={() => elegirTipo(null)}>
+                  Todos
                 </button>
-              ))}
+                {TIPOS_PROYECTO.map((t) => {
+                  const color = colorDeTipo(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      aria-pressed={tipoFiltro === t}
+                      onClick={() => elegirTipo(t)}
+                      data-familia={color.familia}
+                      style={{ "--tipo": color.oscuro }}
+                    >
+                      <i className={styles.metricaPunto} aria-hidden="true" />
+                      {TIPO_PROYECTO[t].label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ) : null}
-          {hayMonto && metrica === "monto" ? (
+          {modoEfectivo === "monto" ? (
             // La leyenda del servidor es la de procesos: con monto se oculta por
             // CSS (data-metrica) y se pinta esta, con la escala del monto.
             <div className={styles.leyendaMonto}>
@@ -305,6 +354,11 @@ export default function HeroTerritorial({
                   : `${formatConteo(tip.n)} ${tip.n === 1 ? "proceso abierto" : "procesos abiertos"}`}
               </span>
               {tip.pct != null ? <span>{formatPorcentaje(tip.pct)} del total nacional</span> : null}
+              {tip.nTipo != null ? (
+                <span className={styles.tooltipTipo}>
+                  <b>{formatConteo(tip.nTipo)}</b> de {TIPO_PROYECTO[tipoFiltro].label}
+                </span>
+              ) : null}
               {tip.monto > 0 ? <span>{formatCopEscala(tip.monto)} en juego</span> : null}
               {tip.principal ? (
                 <span className={styles.tooltipTipo}>

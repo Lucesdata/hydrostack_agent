@@ -129,6 +129,21 @@ export default function ColombiaChoropleth({
         aria-labelledby="clr-mapa-titulo"
       >
         <title id="clr-mapa-titulo">Procesos abiertos de agua y saneamiento por departamento</title>
+        {/* "Sin procesos" lleva rayado además de su tono: sobre el fondo oscuro
+            del hero ese tono se distingue apenas 1,37:1, y el color no puede
+            ser lo único que lo diga (WCAG 1.4.1). La clase --e0 lo usa. */}
+        <defs>
+          <pattern
+            id="clr-mapa-sin"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width="6" height="6" className="clr-mapa__sin-fondo" />
+            <line x1="0" y1="0" x2="0" y2="6" className="clr-mapa__sin-raya" />
+          </pattern>
+        </defs>
         {continente.map((e) => (
           <Departamento
             key={e.dpto}
