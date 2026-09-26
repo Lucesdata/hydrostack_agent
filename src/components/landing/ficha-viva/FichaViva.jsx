@@ -72,7 +72,12 @@ function Pin({ n }) {
 function Esquema() {
   const tipo = COLOR_TIPO.acueducto;
   return (
-    <figure className={styles.esquema} aria-label="Esquema ilustrativo de una ficha">
+    // tema-claro: el esquema imita la ficha, que es clara, igual que la tarjeta
+    // blanca del hero; el resto de la sección va en el tema oscuro de la portada.
+    <figure
+      className={`${styles.esquema} tema-claro`}
+      aria-label="Esquema ilustrativo de una ficha"
+    >
       <div className={styles.esqCabecera}>
         <span className={styles.chipTipo} style={{ "--tipo": tipo.claro }}>
           <span className={styles.chipPunto} aria-hidden="true" />
@@ -231,7 +236,7 @@ export default function FichaViva() {
             <p>El color dice el tipo de obra, siempre con su nombre. El estado va aparte.</p>
             <ul>
               {FAMILIAS.map((f) => (
-                <li key={f.familia} data-familia={f.familia} style={{ "--tipo": f.claro }}>
+                <li key={f.familia} data-familia={f.familia} style={{ "--tipo": f.oscuro }}>
                   <span aria-hidden="true" />
                   {f.label}
                 </li>

@@ -96,6 +96,13 @@
 
   /* Foco */
   --focus-ring: #0369a1;
+  /* Fondo de botón con texto blanco. Es el mismo azul que --accent en claro,
+     pero en oscuro --accent pasa a cian (texto y enlaces) y el blanco sobre
+     cian no se lee: el botón necesita su propio token. */
+  --accent-fill: #0369a1;
+  --accent-fill-hover: #0c4a6e;
+  /* El gris de las líneas de la portada, que estaba escrito a mano (#DADAD2). */
+  --line-strong: #dadad2;
 
   /* ── Alias semánticos ────────────────────────────────────────────────────
      El vocabulario que usa el spec de rediseño (superficie / texto / borde) en
@@ -1616,4 +1623,72 @@ select {
   .bp-page .center-md p {
     margin-inline: auto;
   }
+}
+
+/* ── Temas por ámbito ─────────────────────────────────────────────────────────
+   `.tema-oscuro` redefine los tokens para lo que cuelga de él (hoy, la portada
+   entera: 2026-09-26). Hay que redefinir también los alias (--text-primary,
+   --border…): en :root se resolvieron contra los tokens claros y lo heredado es
+   el valor ya resuelto. `.tema-claro` devuelve un trozo a claro, para lo que
+   imita la ficha, que es clara. Los mide contraste-oscuro.test.ts. */
+.tema-oscuro {
+  color-scheme: dark;
+  --bg: #061423;
+  --surface: #0c2034;
+  --surface-alt: #10283f;
+  --surface-elevated: #0c2034;
+  --card: #0c2034;
+  --ink-900: #f3f8fc;
+  --ink-600: #9fb4c6;
+  --ink-300: #8499ab;
+  --text-primary: #f3f8fc;
+  --text-muted: #9fb4c6;
+  --line: #1d3a55;
+  --line-soft: #1a3450;
+  --line-strong: #24476a;
+  --border: #1d3a55;
+  --accent: #4cc9ff;
+  --accent-soft: rgba(76, 201, 255, 0.14);
+  --accent-faint: rgba(76, 201, 255, 0.05);
+  --accent-river: #7dd3fc;
+  --accent-ocean: #7dd3fc;
+  --accent-deep: #7dd3fc;
+  --accent-fill: #0272b0;
+  --accent-fill-hover: #0b7cbd;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --focus-ring: #4cc9ff;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.tema-claro {
+  color-scheme: light;
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-alt: #f4f4ee;
+  --surface-elevated: #ffffff;
+  --card: #ffffff;
+  --ink-900: #0a1f1c;
+  --ink-600: #525b5a;
+  --ink-300: #6b746f;
+  --text-primary: #0a1f1c;
+  --text-muted: #525b5a;
+  --line: #e5e5e0;
+  --line-soft: #e8e8e2;
+  --line-strong: #dadad2;
+  --border: #e5e5e0;
+  --accent: #0369a1;
+  --accent-soft: rgba(3, 105, 161, 0.13);
+  --accent-faint: rgba(3, 105, 161, 0.04);
+  --accent-river: #7dd3fc;
+  --accent-ocean: #0c4a6e;
+  --accent-deep: #0c4a6e;
+  --accent-fill: #0369a1;
+  --accent-fill-hover: #0c4a6e;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --focus-ring: #0369a1;
+  color: var(--text-primary);
 }

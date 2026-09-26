@@ -24,14 +24,14 @@ const DEVUELVE = [
 
 export default function S2Diagnostico() {
   return (
-    <section className="section-pad" style={{ background: "rgba(3, 105, 161, 0.04)" }}>
+    <section className="section-pad" style={{ background: "var(--accent-faint)" }}>
       <div style={{ maxWidth: 1440, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-          <span style={{ width: 8, height: 8, background: "#0369A1" }} />
+          <span style={{ width: 8, height: 8, background: "var(--accent)" }} />
           <span
             style={{
               font: "11px var(--font-jetbrains-mono),monospace",
-              color: "#0369A1",
+              color: "var(--accent)",
               letterSpacing: ".08em",
             }}
           >
@@ -42,7 +42,7 @@ export default function S2Diagnostico() {
         <h2
           style={{
             font: "700 var(--step-h2)/1.2 var(--font-ibm-plex-sans-condensed)",
-            color: "#0A1F1C",
+            color: "var(--text-primary)",
             margin: "0 0 16px",
             maxWidth: 720,
           }}
@@ -53,7 +53,7 @@ export default function S2Diagnostico() {
         <p
           style={{
             font: "15px/1.6 var(--font-inter)",
-            color: "#525B5A",
+            color: "var(--text-muted)",
             maxWidth: "65ch",
             margin: "0 0 40px",
           }}
@@ -64,20 +64,31 @@ export default function S2Diagnostico() {
 
         <div className="grid-cards" style={{ marginBottom: 40 }}>
           {DEVUELVE.map((x) => (
-            <div key={x.n} style={{ borderTop: "2px solid #0369A1", paddingTop: 16 }}>
-              <span style={{ font: "10px var(--font-jetbrains-mono),monospace", color: "#525B5A" }}>
+            <div key={x.n} style={{ borderTop: "2px solid var(--accent)", paddingTop: 16 }}>
+              <span
+                style={{
+                  font: "10px var(--font-jetbrains-mono),monospace",
+                  color: "var(--text-muted)",
+                }}
+              >
                 [ {x.n} ]
               </span>
               <div
                 style={{
                   font: "600 16px/1.3 var(--font-inter)",
-                  color: "#0A1F1C",
+                  color: "var(--text-primary)",
                   margin: "8px 0 6px",
                 }}
               >
                 {x.t}
               </div>
-              <p style={{ font: "13px/1.5 var(--font-inter)", color: "#525B5A", margin: 0 }}>
+              <p
+                style={{
+                  font: "13px/1.5 var(--font-inter)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                }}
+              >
                 {x.d}
               </p>
             </div>
@@ -90,7 +101,7 @@ export default function S2Diagnostico() {
           style={{
             gap: 8,
             padding: "12px 24px",
-            background: "#0369A1",
+            background: "var(--accent-fill)",
             color: "#fff",
             font: "600 14px var(--font-inter)",
             borderRadius: 4,

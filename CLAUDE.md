@@ -335,4 +335,16 @@ la URL, que no llega al servidor, `src/lib/secop/comparador.ts`). Los estilos de
 un componente `"use client"` no se exportan desde él: una página de servidor
 recibiría una referencia y no el texto (`comparador/estilos.ts`).
 
+**La portada entera en oscuro (2026-09-26).** Ya no conviven un hero oscuro y
+secciones claras: el contenedor de la portada lleva `.tema-oscuro`
+(`globals.css`), que **redefine los tokens** en su ámbito, alias incluidos
+(`--text-primary`, `--border`…, que en `:root` ya se resolvieron contra el
+claro). Así Ficha Viva, rutas, cómo funciona, diagnóstico, accesos y preguntas
+cambian sin tocar su CSS, y `S7Acceso` sigue claro en `/precios` y `/cuenta`.
+En oscuro `--accent` es cian (texto y enlaces): los botones con texto blanco
+usan `--accent-fill`, que existe en los dos temas. Lo que imita la ficha real
+(el esquema de la Ficha Viva) lleva `.tema-claro`, como la tarjeta blanca del
+hero. Lo mide `tema-oscuro.test.ts`. El resto del sitio sigue claro; sin
+interruptor.
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
