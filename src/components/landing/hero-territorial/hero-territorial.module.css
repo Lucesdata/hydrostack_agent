@@ -717,6 +717,9 @@
   font-size: 11px;
   color: var(--aq-cyan);
 }
+.verLista {
+  display: none;
+}
 .noData {
   margin: 8px 0 0;
   text-align: center;
@@ -989,6 +992,87 @@ a.typeFila:hover .typeNombre {
     sans-serif;
   color: var(--aq-text);
 }
+/* Últimos procesos publicados: los mismos del ticker, cada uno a su ficha. */
+.hero :global(.aqMercadoRecientes) {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--aq-line);
+}
+.hero :global(.aqMercadoRecientes h3) {
+  margin: 0 0 8px;
+  font:
+    600 12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqMercadoRecientes ol) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqMercadoRecientes a) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--aq-line);
+  border-radius: 10px;
+  color: var(--aq-text);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.hero :global(.aqMercadoRecientes a:hover) {
+  border-color: var(--aq-cyan);
+}
+.hero :global(.aqMercadoRecientes a:focus-visible) {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.hero :global(.aqMercadoTipo) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    600 11px var(--font-inter),
+    sans-serif;
+  color: var(--tipo);
+}
+.hero :global(.aqMercadoTipo i) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tipo);
+}
+.hero :global(.aqMercadoTipo--otros i) {
+  background: transparent;
+  border: 1.5px dashed var(--tipo);
+}
+.hero :global(.aqMercadoObjeto) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font:
+    500 13px/1.4 var(--font-inter),
+    sans-serif;
+}
+.hero :global(.aqMercadoMeta) {
+  font:
+    11px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.hero :global(.aqMercadoVacio) {
+  margin: 0;
+  font:
+    13px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
 .hero :global(.aqMercado > p) {
   margin: 12px 0 0;
   font:
@@ -1037,6 +1121,29 @@ a.typeFila:hover .typeNombre {
   .kpis {
     grid-template-columns: minmax(0, 1fr);
   }
+  .verLista {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-top: 6px;
+    border: 1px solid var(--aq-line);
+    border-radius: 999px;
+    color: var(--aq-cyan);
+    text-decoration: none;
+    font:
+      600 13.5px var(--font-inter),
+      sans-serif;
+  }
+  .verLista:focus-visible {
+    outline: 2px solid var(--aq-cyan);
+    outline-offset: 2px;
+  }
+  /* Que el salto no deje la lista debajo de la barra fija. */
+  .hero :global(#aq-lista-departamentos) {
+    scroll-margin-top: calc(var(--nav-h, 56px) + 12px);
+  }
   .kpis dl {
     padding: 10px 0 0;
     border-left: 0;
@@ -1053,6 +1160,9 @@ a.typeFila:hover .typeNombre {
     border-left: 0;
     padding-top: 12px;
     border-top: 1px solid var(--aq-line);
+  }
+  .hero :global(.aqMercadoRecientes ol) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 600px) {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { AA, componer, contraste, leerTokensHex } from "@/src/lib/design/contraste";
+import { FAMILIAS } from "@/src/lib/classify/tipo-color";
 
 /**
  * El guardia de legibilidad del tema oscuro de la portada.
@@ -126,6 +127,14 @@ describe("barra, ticker y árbol de la Ficha Viva", () => {
     for (const color of ["#c3d3e0", "#9fb4c6", "#4cc9ff"]) {
       pinta(fichaViva, color);
       expect(contraste(color, "#0b2239")).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
+});
+
+describe('últimos procesos de la banda "El mercado ahora"', () => {
+  it("el nombre del tipo, en su color, se lee sobre el panel", () => {
+    for (const f of FAMILIAS) {
+      expect(contraste(f.oscuro, panel()), f.label).toBeGreaterThanOrEqual(AA.texto);
     }
   });
 });

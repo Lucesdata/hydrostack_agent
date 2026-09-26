@@ -107,6 +107,7 @@ export default function HeroTerritorial({
   tipos = [],
   sector = null,
   heroStats = null,
+  recientes = null,
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [elegido, setElegido] = useState(null);
@@ -335,6 +336,15 @@ export default function HeroTerritorial({
           >
             {mapa}
           </div>
+          {datosDisponibles && departamentos.length > 0 ? (
+            // En móvil los rótulos del mapa se ocultan y la lista queda al final,
+            // debajo de la ficha: este enlace dice que existe y lleva a ella.
+            // Es la alternativa en texto al mapa (cada cifra, legible).
+            <a className={styles.verLista} href="#aq-lista-departamentos">
+              Ver los {formatConteo(departamentos.length)} departamentos como lista{" "}
+              <span aria-hidden="true">↓</span>
+            </a>
+          ) : null}
           {tip && datosDisponibles ? (
             // Duplica lo que ya dicen la ficha (vista previa) y el aria-label
             // de cada departamento: es una ayuda visual, fuera del árbol
@@ -392,7 +402,7 @@ export default function HeroTerritorial({
         </div>
       </div>
 
-      <BandaMercado sector={sector} heroStats={heroStats} />
+      <BandaMercado sector={sector} heroStats={heroStats} recientes={recientes} />
     </section>
   );
 }

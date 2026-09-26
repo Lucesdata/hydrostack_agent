@@ -30,6 +30,12 @@ export interface Faceta {
   label: string;
   /** Una frase para la metadata de la ruta. */
   descripcion: string;
+  /**
+   * Procesos abiertos de la faceta, cuando se conoce sin consulta extra (el
+   * departamento lo trae al resolverse) o el llamador lo añade. Solo lo usa la
+   * metadata (`faceta-metadata.ts`).
+   */
+  abiertos?: number | null;
 }
 
 /**
@@ -69,6 +75,7 @@ export async function resolverFaceta(familia: FamiliaFaceta, slug: string): Prom
     slug,
     label: dep.label,
     descripcion: `Procesos de agua y saneamiento abiertos en ${dep.label}.`,
+    abiertos: dep.n,
   };
 }
 

@@ -41,6 +41,13 @@ describe("ticker de fichas recientes", () => {
 });
 
 describe("titulo", () => {
+  it("en nombres de lugar no ve siglas", () => {
+    expect(titulo("META", false)).toBe("Meta");
+    expect(mapApiItem({ ...base, municipio: "CALI", departamento: "VALLE DEL CAUCA" }).ciudad).toBe(
+      "Cali"
+    );
+  });
+
   it("baja los conectores y conserva las siglas", () => {
     expect(titulo("EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P.")).toBe(
       "Empresa de Acueducto de Bogotá E.S.P."

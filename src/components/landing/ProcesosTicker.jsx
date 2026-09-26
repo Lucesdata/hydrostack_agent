@@ -192,8 +192,12 @@ export function frase(s) {
   return conSiglas.charAt(0).toUpperCase() + conSiglas.slice(1);
 }
 
-/** "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P." */
-export function titulo(s) {
+/**
+ * "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P."
+ * Con `siglas = false` (nombres de lugar) no conserva ninguna: "META" y "CALI"
+ * no son siglas aunque quepan en cuatro letras.
+ */
+export function titulo(s, siglas = true) {
   if (!s) return s;
   return s
     .split(/\s+/)
@@ -203,7 +207,7 @@ export function titulo(s) {
       // "EMPRESA DE ACUEDUCTO" salía "Empresa DE Acueducto".
       if (i > 0 && MINUSCULAS.has(lower)) return lower;
       const core = w.replace(/[^\p{L}]/gu, "");
-      if (core.length <= 4 && core === core.toUpperCase() && core.length > 1) return w; // EAAB, E.S.P.
+      if (siglas && core.length <= 4 && core === core.toUpperCase() && core.length > 1) return w; // EAAB, E.S.P.
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     })
     .join(" ");
@@ -233,11 +237,45 @@ export function mapApiItem(p) {
     objeto: frase(p.objeto) || titulo(p.entidad) || "Proceso sin objeto publicado",
     tipo: color ? { label: TIPO_PROYECTO[p.tipoProyecto].label, color } : null,
     valor: fmtValor(p.valorEstimado),
-    ciudad: titulo(p.municipio),
-    departamento: titulo(p.departamento),
+    ciudad: titulo(p.municipio, false),
+    departamento: titulo(p.departamento, false),
     estado: titulo(p.estado) || "Publicado",
     href: p.ficha || "/licitaciones",
+    fecha: p.fechaPublicacion ?? null,
   };
+}
+
+/**
+ * Los procesos recientes, pedidos una vez. La portada lo llama arriba y reparte
+ * el resultado al ticker y a la banda "El mercado ahora": un solo fetch para
+ * los dos. Con `activo = false` no pide nada (el ticker ya recibió los datos).
+ * "loading" | "live" | "empty" — nunca hay un cuarto estado con datos ficticios.
+ */
+export function useRecientes(activo = true) {
+  const [recientes, setRecientes] = useState({ status: "loading", items: [] });
+
+  useEffect(() => {
+    if (!activo) return undefined;
+    let cancel = false;
+    fetch("/api/procesos/recientes")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((data) => {
+        if (cancel) return;
+        if (!Array.isArray(data?.items) || data.items.length === 0) {
+          setRecientes({ status: "empty", items: [] });
+          return;
+        }
+        setRecientes({ status: "live", items: data.items.map(mapApiItem) });
+      })
+      .catch(() => {
+        if (!cancel) setRecientes({ status: "empty", items: [] });
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [activo]);
+
+  return recientes;
 }
 
 /* ── Componentes ─────────────────────────────────────────────────────────── */
@@ -288,32 +326,10 @@ function ProcesoItem({ p, copia = false }) {
   return <span className="ptr-item">{content}</span>;
 }
 
-export default function ProcesosTicker() {
-  const [items, setItems] = useState([]);
-  // "loading" | "live" | "empty" — nunca hay un cuarto estado con datos ficticios.
-  const [status, setStatus] = useState("loading");
+export default function ProcesosTicker({ recientes = null } = {}) {
+  const propios = useRecientes(!recientes);
+  const { status, items } = recientes ?? propios;
   const [pausado, setPausado] = useState(false);
-
-  useEffect(() => {
-    let cancel = false;
-    fetch("/api/procesos/recientes")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((data) => {
-        if (cancel) return;
-        if (!Array.isArray(data?.items) || data.items.length === 0) {
-          setStatus("empty");
-          return;
-        }
-        setItems(data.items.map(mapApiItem));
-        setStatus("live");
-      })
-      .catch(() => {
-        if (!cancel) setStatus("empty");
-      });
-    return () => {
-      cancel = true;
-    };
-  }, []);
 
   // La velocidad se mantiene constante aunque cambie el nº de procesos.
   const duration = Math.max(40, items.length * 9);
