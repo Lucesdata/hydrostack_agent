@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
+import CierreFicha from "@/src/components/secop/ficha/CierreFicha";
 import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
@@ -305,16 +306,7 @@ export default async function FichaPage({ params }: Props) {
 
         {/* 9 — Cierre */}
         <section className="fi-sec">
-          <div className="fi-cierre">
-            <Link className="fi-btn fi-btn--primario" href="/cuenta">
-              Activar alerta para procesos como este
-            </Link>
-            {p.url && (
-              <a className="fi-btn" href={p.url} target="_blank" rel="noopener noreferrer">
-                Ver en el SECOP II
-              </a>
-            )}
-          </div>
+          <CierreFicha urlSecop={p.url} />
         </section>
       </article>
     </div>

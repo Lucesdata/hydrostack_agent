@@ -45,7 +45,7 @@ real (la prueba de Codex) debe encontrar, sin prometer nada que no exista.
 | Fuente de cada dato / expediente | Existe (separa SECOP y pliego, enlaza expediente) | ficha §3, §6, §9 |
 | Siguiente paso | Existe: expediente y perfil/diagnóstico | ficha §9, `/diagnostico` |
 | Cambios del proceso (adendas, estados) | **No existe** en la ficha | `contrato_evento` sin usar aquí |
-| Alertas por correo | Código hecho, **no entrega en prod** | PENDIENTES §0, §44 |
+| Alertas por correo | Código hecho, **no entrega en prod**; la ficha ya no las ofrece | PENDIENTES §0, §44 |
 
 ## Archivos
 
