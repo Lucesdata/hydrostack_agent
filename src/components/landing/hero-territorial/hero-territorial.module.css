@@ -26,6 +26,7 @@
   --aq-e2: #1f7cc0;
   --aq-e3: #2aa7e3;
   --aq-e4: #35d3c0;
+  --aq-e5: #b4f5e4;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -383,6 +384,9 @@
 .hero :global(.aqPunto--e4) {
   background: var(--aq-e4);
 }
+.hero :global(.aqPunto--e5) {
+  background: var(--aq-e5);
+}
 .hero :global(.aqFilaNombre) {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -488,6 +492,7 @@
   --mapa-e2: var(--aq-e2);
   --mapa-e3: var(--aq-e3);
   --mapa-e4: var(--aq-e4);
+  --mapa-e5: var(--aq-e5);
   --mapa-raya: rgba(140, 190, 225, 0.35);
   max-width: 680px;
   margin-inline: auto;

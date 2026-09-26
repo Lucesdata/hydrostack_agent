@@ -138,3 +138,22 @@ describe('últimos procesos de la banda "El mercado ahora"', () => {
     }
   });
 });
+
+describe("rampa del mapa", () => {
+  const rampa = [0, 1, 2, 3, 4, 5].map((i) => t[`aq-e${i}`]);
+
+  it("cada escalón se distingue del anterior", () => {
+    // No lleva texto encima, así que no se mide contra AA. Lo que no puede
+    // pasar es que dos escalones vecinos se confundan: el más cercano de los
+    // de siempre (--aq-e3 → --aq-e4) está en 1,45:1.
+    expect(rampa.every(Boolean)).toBe(true);
+    for (let i = 1; i < rampa.length; i++) {
+      expect(contraste(rampa[i - 1], rampa[i]), `e${i - 1} → e${i}`).toBeGreaterThanOrEqual(1.4);
+    }
+  });
+
+  it("la imagen para compartir usa la misma rampa", () => {
+    const og = leer("app/opengraph-image.js");
+    for (const color of rampa) pinta(og, color);
+  });
+});
