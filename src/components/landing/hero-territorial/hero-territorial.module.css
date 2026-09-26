@@ -223,6 +223,37 @@
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
 }
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--aq-muted);
+  border-radius: 999px;
+  color: var(--aq-text);
+  font:
+    600 14px var(--font-inter),
+    sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.secondaryCta:hover {
+  border-color: var(--aq-cyan);
+  background: rgba(76, 201, 255, 0.08);
+}
+.secondaryCta:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
 .primaryCta {
   display: inline-flex;
   align-items: center;

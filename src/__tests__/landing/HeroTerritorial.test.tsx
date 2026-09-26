@@ -29,6 +29,16 @@ describe("HeroTerritorial", () => {
     expect(html).toContain("5.155");
   });
 
+  it("el CTA secundario lleva al diagnóstico sin cuenta y no promete alertas", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} tipos={tipos} totalAbiertos={10000} />
+    );
+    expect(html).toContain('href="/diagnostico"');
+    expect(html).toContain("Diagnóstico sin cuenta");
+    // Las alertas no se entregan en producción (PENDIENTES §0).
+    expect(html.toLowerCase()).not.toContain("alerta");
+  });
+
   it("etiqueta los tipos como nacionales y conserva el CTA territorial", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} tipos={tipos} totalAbiertos={10000} />
