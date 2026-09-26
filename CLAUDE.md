@@ -269,6 +269,15 @@ enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si l
 fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
 **sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
 
+**Destacados y tendencia del departamento (2026-09-26).** Debajo de los tipos, la
+ficha muestra los tres abiertos de mayor presupuesto y una sparkline de
+**publicados por semana** en las últimas 12. No van en `detallePorDepartamento()`:
+salen de `/api/departamento/[dpto]/resumen` (`src/lib/secop/resumen-departamento.ts`),
+cacheado 6 h en el CDN, y se piden al **elegir** un departamento, no al pasar el
+puntero. La serie cuenta **todos** los publicados, no solo los abiertos: los
+abiertos se concentran en las semanas recientes y la curva subiría siempre. Sus
+consultas se prueban contra PGlite con las migraciones reales.
+
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
 `contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra,
