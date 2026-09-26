@@ -293,6 +293,22 @@
     12px/1.4 var(--font-inter),
     sans-serif;
 }
+.ctaPrecios {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--aq-cyan);
+  font:
+    600 12.5px/1.4 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.ctaPrecios:hover {
+  text-decoration: underline;
+}
+.ctaPrecios:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
 .puntoVivo {
   flex: none;
   width: 8px;

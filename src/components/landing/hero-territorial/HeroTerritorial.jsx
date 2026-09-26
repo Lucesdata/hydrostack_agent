@@ -203,6 +203,7 @@ export default function HeroTerritorial({
     : null;
   const explorar = ruta("explorar");
   const diagnostico = ruta("diagnostico");
+  const precios = ruta("precios");
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
@@ -235,6 +236,9 @@ export default function HeroTerritorial({
                 ? `${explorar.etiqueta} · datos desde SECOP II`
                 : `${explorar.etiqueta} · ${formatConteo(sector.procesosVigilados)} procesos del sector`}
             </p>
+            <Link className={styles.ctaPrecios} href={precios.href}>
+              Qué es gratis y qué pide cuenta <span aria-hidden="true">→</span>
+            </Link>
           </div>
 
           <div className={styles.listPanel}>
