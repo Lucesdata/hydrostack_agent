@@ -811,6 +811,21 @@
   white-space: nowrap;
   color: var(--aq-ink);
 }
+.hero :global(.aqFichaEntidades) {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #e3e9ef;
+  font:
+    12px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink-muted);
+}
+.hero :global(.aqFichaEntidades strong) {
+  font:
+    700 17px/1.15 var(--font-inter),
+    sans-serif;
+  color: var(--aq-ink);
+}
 .hero :global(.aqFichaNota) {
   margin: 12px 0 0;
   font:

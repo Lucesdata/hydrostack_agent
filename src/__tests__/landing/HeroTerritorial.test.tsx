@@ -84,6 +84,27 @@ describe("interacción territorial pura", () => {
     expect(antioquia).toContain("del total nacional");
   });
 
+  it("dice cuántas entidades contratan en el departamento, solo si se conoce", () => {
+    const con = renderToStaticMarkup(
+      <FichaDepartamento
+        departamento={{ ...departamentos[0], nEntidades: 318 }}
+        totalAbiertos={10000}
+      />
+    );
+    expect(con).toContain("<strong>318</strong> entidades contratan estos procesos");
+    const una = renderToStaticMarkup(
+      <FichaDepartamento
+        departamento={{ ...departamentos[0], nEntidades: 1 }}
+        totalAbiertos={10000}
+      />
+    );
+    expect(una).toContain("entidad contrata estos procesos");
+    const sin = renderToStaticMarkup(
+      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} />
+    );
+    expect(sin).not.toContain("aqFichaEntidades");
+  });
+
   it("solo calcula porcentaje con total nacional positivo", () => {
     expect(porcentajeNacional(10, 100)).toBe(10);
     expect(porcentajeNacional(0, 100)).toBe(0);

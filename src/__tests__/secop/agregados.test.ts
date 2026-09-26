@@ -33,6 +33,7 @@ describe("filaDepartamentoDesdeSql", () => {
     nuevos7d: 212,
     monto: "812345678901.50",
     nConMonto: 5020,
+    nEntidades: 318,
     t_acueducto: 1800,
     t_alcantarillado: 900,
     t_ptap: 300,
@@ -46,6 +47,7 @@ describe("filaDepartamentoDesdeSql", () => {
     expect(f.slug).toBe("antioquia");
     expect(f.nuevos7d).toBe(212);
     expect(f.nConMonto).toBe(5020);
+    expect(f.nEntidades).toBe(318);
   });
 
   it("devuelve los cinco tipos, y cero en los que faltan", () => {

@@ -69,6 +69,13 @@ export default function FichaDepartamento({ departamento, totalAbiertos, vistaPr
           </p>
         </div>
       ) : null}
+      {departamento?.nEntidades != null ? (
+        <p className="aqFichaEntidades">
+          <strong>{formatConteo(departamento.nEntidades)}</strong>{" "}
+          {departamento.nEntidades === 1 ? "entidad contrata" : "entidades contratan"} estos
+          procesos
+        </p>
+      ) : null}
       <p className="aqFichaNota">Según ubicación de la entidad contratante</p>
     </aside>
   );
