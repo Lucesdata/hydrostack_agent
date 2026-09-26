@@ -27,3 +27,8 @@ jobs:
 
       - name: Build check
         run: npm run build
+
+      # Falla si la portada engorda: JS de primera carga y fuentes precargadas.
+      # Sin red ni base; los límites y su porqué, en el propio script.
+      - name: Presupuesto de peso de la portada
+        run: npm run presupuesto
