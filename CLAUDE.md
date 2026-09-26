@@ -253,6 +253,10 @@ los marca como tales. Spec: `docs/superpowers/specs/2026-09-26-landing-ficha-viv
 contratante: la fuente no publica lugar de ejecución. La observación, el árbol
 de decisiones y las siguientes correcciones están en
 `docs/superpowers/specs/2026-09-26-ficha-viva-prueba-y-correcciones.md`.
+La ficha también etiqueta la ubicación de la entidad en los metadatos y la vista,
+omite `areaServed` sin lugar de ejecución verificado, y dirige al expediente
+original antes de ofrecer el diagnóstico general: este no comprueba el pliego
+particular ni decide la elegibilidad individual.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre.
