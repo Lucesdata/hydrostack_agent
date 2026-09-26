@@ -488,6 +488,7 @@
   --mapa-e2: var(--aq-e2);
   --mapa-e3: var(--aq-e3);
   --mapa-e4: var(--aq-e4);
+  --mapa-raya: rgba(140, 190, 225, 0.35);
   max-width: 680px;
   margin-inline: auto;
   color: var(--aq-text);
@@ -661,6 +662,13 @@
     12px var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
+}
+.leyendaMonto li:first-child span {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    rgba(140, 190, 225, 0.35) 2px 3px
+  ) !important;
 }
 .leyendaMonto li span {
   width: 12px;
