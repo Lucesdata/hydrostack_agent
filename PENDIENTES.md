@@ -908,8 +908,10 @@ cosas no se borraron a propósito:
 - **La tabla `lista_espera_mercado`** sigue en el esquema aunque su endpoint ya
   no existe. Quitarla del esquema genera un `DROP TABLE` en la próxima migración
   y borra filas de la base viva: decisión del usuario, no de una limpieza.
-- **`clearOferentePerfil()` no la llama nadie, y eso es un fallo, no código
-  sobrante.** `SecopExplorer` guarda en `localStorage` el perfil que baja del
+- ~~**`clearOferentePerfil()` no la llama nadie, y eso es un fallo, no código
+  sobrante.**~~ *Resuelto el 2026-09-27 (PR #86): `/logout` responde con
+  `Clear-Site-Data: "storage"` y los botones de cerrar sesión la llaman antes de
+  enviar.* `SecopExplorer` guarda en `localStorage` el perfil que baja del
   servidor, y `/logout` no lo borra: en un navegador compartido la siguiente
   persona ve el perfil de la anterior. Es el mismo caso que ya se cerró para el
   `session_token` del diagnóstico. Arreglarlo es llamarla al cerrar sesión.
