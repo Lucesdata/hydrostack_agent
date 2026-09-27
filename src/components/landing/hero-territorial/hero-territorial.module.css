@@ -19,14 +19,16 @@
   --aq-ink: #0b1f33;
   --aq-ink-muted: #51667a;
   --aq-navy: #0b2239;
-  /* Rampa del mapa, compartida con los puntos de la lista. Del azul profundo
-     al turquesa: el escalón más alto es el que más destaca. */
+  /* Rampa del mapa, compartida con los puntos de la lista. Un solo tono que
+     gana luz (2026-09-27): los dos escalones altos eran turquesa y menta, se
+     leían como otra categoría y el verde agua se acercaba al verde de "cumple"
+     del semáforo. Vecinos ≥ 1,48:1 (contraste-oscuro.test.ts pide 1,4). */
   --aq-e0: #13304a;
   --aq-e1: #1a5687;
   --aq-e2: #1f7cc0;
-  --aq-e3: #2aa7e3;
-  --aq-e4: #35d3c0;
-  --aq-e5: #b4f5e4;
+  --aq-e3: #3a9fe0;
+  --aq-e4: #7cc4f0;
+  --aq-e5: #c4e8fc;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -34,17 +36,9 @@
      sticky del mapa y la ficha no se pegaría a nada. */
   overflow: clip;
   padding: clamp(36px, 4.5vw, 64px) var(--gutter) 32px;
-  background:
-    radial-gradient(ellipse 60% 55% at 52% 42%, rgba(34, 150, 220, 0.16), transparent 70%),
-    radial-gradient(circle at 8% 0%, rgba(40, 170, 230, 0.14), transparent 35%),
-    linear-gradient(rgba(91, 150, 185, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91, 150, 185, 0.035) 1px, transparent 1px), var(--aq-bg);
-  background-size:
-    auto,
-    auto,
-    40px 40px,
-    40px 40px,
-    auto;
+  /* Fondo plano (2026-09-27): sin los dos resplandores radiales ni la rejilla
+     de 40 px. El brillo se reserva para el mapa. */
+  background: var(--aq-bg);
   color: var(--aq-text);
 }
 
@@ -502,7 +496,6 @@
   max-height: 780px;
   width: 100%;
   margin-inline: auto;
-  filter: drop-shadow(0 0 28px rgba(42, 167, 227, 0.22));
 }
 .map :global(.clr-mapa__dpto) {
   stroke: rgba(6, 20, 35, 0.85);
@@ -520,25 +513,34 @@
   stroke-width: 2.4;
   filter: drop-shadow(0 0 1.5px #f3f8fc) drop-shadow(0 0 3px var(--aq-cyan));
 }
-/* Sincronía con la lista y la ficha (sincronia.js). Mientras algo está
-   señalado, el resto del mapa se atenúa para que se vea dónde está. */
+/* Sincronía con la lista y la ficha (sincronia.js). El resto del mapa ya no
+   se atenúa al señalar (2026-09-27): apagaba el mapa entero en cada
+   movimiento del puntero, y la ficha ya dice qué está señalado. */
 .map :global(.clr-mapa__dpto) {
   transition:
-    opacity 0.15s,
     stroke 0.15s,
     stroke-width 0.15s;
 }
-.map[data-resaltando] :global(.clr-mapa__dpto:not(.is-resaltado)) {
-  opacity: 0.55;
-}
+/* El seleccionado lleva el anillo de dos tonos del foco, más fino. Un trazo
+   solo blanco daba 1,29:1 sobre --aq-e5, y el cian de antes casi no se veía
+   sobre los escalones altos: Antioquia, elegida por defecto, parecía sin
+   elegir. Se dibuja en la capa de selección, encima de todo, para que los
+   vecinos no le tapen medio borde (sincronia.js copia el contorno). La clase
+   queda para San Andrés, que va en su recuadro, fuera de esa capa. */
+.map :global(.clr-mapa__marca),
 .map :global(.clr-mapa__dpto.is-seleccionado) {
-  stroke: #4cc9ff;
-  stroke-width: 1.4;
+  stroke: var(--aq-bg);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 1.2px #f3f8fc);
+}
+.map :global(.clr-mapa__marca) {
+  fill: none;
+  pointer-events: none;
 }
 .map :global(.clr-mapa__dpto.is-resaltado) {
   stroke: #ffffff;
   stroke-width: 1.8;
-  opacity: 1;
 }
 .map :global(.clr-mapa__recuadro) {
   stroke: rgba(140, 190, 225, 0.4);

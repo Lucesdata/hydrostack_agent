@@ -53,6 +53,24 @@ ticker) y no cambia la disposición: si algo sale mal, se revierte solo.
 
 Criterios del spec que cierra: 1, 9 y, en parte, 2.
 
+**Desviaciones al implementarlo (2026-09-27).**
+- **El anillo del seleccionado va en una capa aparte.** Con solo la clase
+  `is-seleccionado`, los vecinos que se pintan después tapaban la mitad de su
+  borde (medido en captura: Cundinamarca perdía el lado este). Ahora
+  `ColombiaChoropleth` dibuja, con la prop `capaSeleccion`, un camino vacío
+  encima de los 32 del continente (`.clr-mapa__marca`), y
+  `useMarcasEnMapa` le copia el `d` del elegido (`contornoSeleccionado`, pura
+  y probada). No se reordena el SVG: lo pinta React. San Andrés, en su
+  recuadro, sigue con la clase.
+- **Los logs de Vercel no se miraron**: no son accesibles desde el entorno
+  donde se hizo el PR. La comprobación de tráfico a `/api/procesos/recientes`
+  queda para antes del merge.
+- **La regla `.bp-page a { text-decoration: none }` se queda**: vivía en el CSS
+  del fondo pero afecta a todos los enlaces de la portada.
+- **Medido tras el PR** (mismas fixtures que la línea de base): 0 animaciones
+  en marcha; a 1440 × 900, 22 controles, 218 palabras y 33 cifras en el primer
+  pliegue; `/` pasa de 16,7 kB (112 kB First Load) a 12,6 kB (108 kB).
+
 ### PR 2 — Dos zonas: mensaje y resultado · mapa
 
 1. **`HeroTerritorial.jsx`**, rejilla nueva (`5fr 7fr` desde 900 px):

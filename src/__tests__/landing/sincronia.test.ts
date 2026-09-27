@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   contenidoTooltip,
+  contornoSeleccionado,
   dptoDesdeObjetivo,
   indicesDeModo,
 } from "@/src/components/landing/hero-territorial/sincronia";
@@ -120,5 +121,35 @@ describe("indicesDeModo", () => {
     expect(
       contenidoTooltip({ dpto: "05", departamentos, totalAbiertos: 10000 }).nTipo
     ).toBeUndefined();
+  });
+});
+
+describe("contornoSeleccionado", () => {
+  /** Una raíz mínima: los caminos por código, cada uno con su `d` y si va en el recuadro. */
+  function raiz(caminos: Record<string, { d: string; recuadro?: boolean }>): any {
+    return {
+      querySelector: (sel: string) => {
+        const codigo = sel.match(/data-dpto="(\d+)"/)?.[1];
+        const c = codigo ? caminos[codigo] : undefined;
+        if (!c) return null;
+        return {
+          getAttribute: (n: string) => (n === "d" ? c.d : null),
+          closest: (s: string) => (s === "g[transform]" && c.recuadro ? {} : null),
+        };
+      },
+    };
+  }
+
+  it("copia el contorno del departamento elegido", () => {
+    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), "05")).toBe("M1 1Z");
+  });
+
+  it("sin elección, o con un código que no está en el mapa, no pinta nada", () => {
+    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), null)).toBeNull();
+    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), "99")).toBeNull();
+  });
+
+  it("San Andrés no: va en su recuadro, con otra transformación", () => {
+    expect(contornoSeleccionado(raiz({ "88": { d: "M2 2Z", recuadro: true } }), "88")).toBeNull();
   });
 });

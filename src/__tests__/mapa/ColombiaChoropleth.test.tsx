@@ -48,6 +48,21 @@ describe("ColombiaChoropleth", () => {
     expect(html.match(/<path/g)).toHaveLength(33);
   });
 
+  it("con capa de selección, añade un camino vacío encima de los departamentos", () => {
+    const conCapa = renderToStaticMarkup(
+      <ColombiaChoropleth filas={filas} totalAbiertos={35518} capaSeleccion />
+    );
+    // Vacío (sin `d`): el hero le copia el contorno del elegido. Fuera del árbol
+    // accesible y sin recibir el puntero, que es de los departamentos.
+    expect(conCapa).toContain(
+      '<path class="clr-mapa__marca" aria-hidden="true" pointer-events="none">'
+    );
+    // Va después de los 32 del continente: encima de ellos al pintar.
+    const marca = conCapa.indexOf("clr-mapa__marca");
+    expect(conCapa.lastIndexOf('data-dpto="05"')).toBeLessThan(marca);
+    expect(html).not.toContain("clr-mapa__marca");
+  });
+
   // Cero real: la base respondió y no hay procesos abiertos. Con el total en 0
   // el cálculo de "sin ubicación" sí se ejecuta, y no debe pintar "0 procesos".
   it("sigue dibujando los 33 departamentos cuando la base responde con cero", () => {

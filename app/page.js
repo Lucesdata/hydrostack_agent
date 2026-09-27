@@ -60,6 +60,7 @@ export default async function Page() {
               totalAbiertos={totalAbiertos}
               etiquetas
               tooltipExterno
+              capaSeleccion
               datosDisponibles={totalAbiertos != null}
             />
           </>

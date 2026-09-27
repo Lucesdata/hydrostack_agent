@@ -71,18 +71,20 @@ describe("PortadaCliente", () => {
     expect(html).not.toContain("o mira antes si estás listo");
   });
 
-  it("el fondo blueprint es CSS: sin estilos en línea que dependan del scroll", () => {
+  it("sin ticker ni fondo animado: la portada se aligeró (2026-09-27)", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain('class="bp-fondo-rejilla"');
-    expect(html).toContain("animation-timeline: scroll(root)");
-    // El hook anterior escribía top y transform en línea en cada evento de scroll.
-    expect(html).not.toMatch(/style="[^"]*top:\s*[\d.]+vh/);
-    expect(html).not.toMatch(/style="[^"]*translate3d/);
+    expect(html).not.toContain("Fichas recientes");
+    expect(html).not.toContain("ptr-");
+    expect(html).not.toContain("bp-fondo");
+    expect(html).not.toContain("@keyframes");
+    // La regla de los enlaces, que vivía en el CSS del fondo, se queda.
+    expect(html).toContain(".bp-page a");
   });
 
-  it("la portada no escucha el scroll para pintar el fondo", async () => {
+  it("la portada no escucha el scroll ni pide las fichas recientes", async () => {
     const { readFileSync } = await import("node:fs");
     const fuente = readFileSync("src/components/landing/PortadaCliente.jsx", "utf8");
     expect(fuente).not.toMatch(/addEventListener\(\s*["']scroll/);
+    expect(fuente).not.toContain("procesos/recientes");
   });
 });

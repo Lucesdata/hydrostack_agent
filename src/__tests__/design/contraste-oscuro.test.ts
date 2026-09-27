@@ -8,9 +8,10 @@ import { FAMILIAS } from "@/src/lib/classify/tipo-color";
  * El guardia de legibilidad del tema oscuro de la portada.
  *
  * `contraste.test.ts` mide los tokens de `globals.css`, que son del tema claro.
- * El hero, la barra de navegación y el ticker de la portada pintan con colores
- * propios (`--aq-*` en hero-territorial.module.css y sus copias en Navbar.js y
- * ProcesosTicker.jsx), así que hasta el 2026-09-26 nadie los medía — y el texto
+ * El hero y la barra de navegación de la portada pintan con colores propios
+ * (`--aq-*` en hero-territorial.module.css y sus copias en Navbar.js; el ticker,
+ * que también los copiaba, salió el 2026-09-27), así que hasta el 2026-09-26
+ * nadie los medía — y el texto
  * blanco de los botones azules daba 3,08:1 y 2,30:1.
  *
  * Se leen los archivos reales. Los colores escritos a mano (no tokens) se
@@ -22,7 +23,6 @@ const leer = (ruta: string) => readFileSync(join(process.cwd(), ruta), "utf8");
 const HERO = "src/components/landing/hero-territorial/hero-territorial.module.css";
 const css = leer(HERO);
 const navbar = leer("src/components/Navbar.js");
-const ticker = leer("src/components/landing/ProcesosTicker.jsx");
 const fichaViva = leer("src/components/landing/ficha-viva/ficha-viva.module.css");
 const t = leerTokensHex(css);
 
@@ -113,20 +113,12 @@ describe("botones azules con texto blanco", () => {
   });
 });
 
-describe("barra, ticker y árbol de la Ficha Viva", () => {
+describe("barra y árbol de la Ficha Viva", () => {
   const barra = componer([6, 20, 35], 0.94, "#061423");
-  it("enlaces y estado de la barra oscura", () => {
+  it("enlaces y texto secundario de la barra oscura", () => {
     for (const color of ["#c3d3e0", "#9fb4c6"]) {
       pinta(navbar, color);
       expect(contraste(color, barra)).toBeGreaterThanOrEqual(AA.texto);
-    }
-  });
-
-  it("texto, secundario y monto del ticker", () => {
-    pinta(ticker, "#081a2b");
-    for (const color of ["#f3f8fc", "#9fb4c6", "#4cc9ff"]) {
-      pinta(ticker, color);
-      expect(contraste(color, "#081a2b")).toBeGreaterThanOrEqual(AA.texto);
     }
   });
 
@@ -158,6 +150,17 @@ describe("rampa del mapa", () => {
     for (let i = 1; i < rampa.length; i++) {
       expect(contraste(rampa[i - 1], rampa[i]), `e${i - 1} → e${i}`).toBeGreaterThanOrEqual(1.4);
     }
+  });
+
+  it("el anillo del seleccionado se ve sobre el escalón más claro y junto al más oscuro", () => {
+    // Trazo --aq-bg y halo claro (2026-09-27). Un trazo solo blanco daba 1,29:1
+    // sobre --aq-e5. Componente no textual: 3:1 (WCAG 1.4.11).
+    const regla = css.slice(css.indexOf(".clr-mapa__dpto.is-seleccionado"));
+    const bloque = regla.slice(0, regla.indexOf("}"));
+    expect(bloque).toContain("stroke: var(--aq-bg)");
+    expect(bloque).toContain("#f3f8fc");
+    expect(contraste(t["aq-bg"], t["aq-e5"])).toBeGreaterThanOrEqual(AA.noTextual);
+    expect(contraste("#f3f8fc", t["aq-e0"])).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
   it("la imagen para compartir usa la misma rampa", () => {

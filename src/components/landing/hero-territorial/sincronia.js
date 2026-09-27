@@ -25,7 +25,24 @@ export function dptoDesdeObjetivo(objetivo) {
   return null;
 }
 
-/** Aplica `is-resaltado` y `is-seleccionado` a los caminos del mapa. */
+/**
+ * El contorno que la capa de selección (`.clr-mapa__marca`) copia del
+ * departamento elegido: su `d`, o `null` si no hay que pintar nada. San Andrés
+ * va en un recuadro con su propia transformación y la capa no la comparte: ahí
+ * basta la clase `is-seleccionado`, porque en el recuadro no tiene vecinos.
+ */
+export function contornoSeleccionado(raiz, seleccionado) {
+  if (!seleccionado) return null;
+  const camino = raiz.querySelector(`path[data-dpto="${seleccionado}"]`);
+  if (!camino || camino.closest("g[transform]")) return null;
+  return camino.getAttribute("d");
+}
+
+/**
+ * Aplica `is-resaltado` y `is-seleccionado` a los caminos del mapa, y copia el
+ * contorno del elegido a la capa de selección, que va encima de todos. No se
+ * reordena el SVG: lo pinta React y moverle nodos rompería la reconciliación.
+ */
 export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
   useEffect(() => {
     const raiz = contenedorRef.current;
@@ -36,6 +53,12 @@ export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
       camino.classList.toggle("is-seleccionado", codigo === seleccionado);
     }
     raiz.toggleAttribute("data-resaltando", resaltado != null);
+    const marca = raiz.querySelector(".clr-mapa__marca");
+    if (marca) {
+      const d = contornoSeleccionado(raiz, seleccionado);
+      if (d) marca.setAttribute("d", d);
+      else marca.removeAttribute("d");
+    }
   }, [contenedorRef, resaltado, seleccionado]);
 }
 

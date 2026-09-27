@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { formatCopCompact } from "@/src/components/secop/format";
-import { frase, titulo } from "@/src/components/landing/ProcesosTicker";
+import { frase, titulo } from "@/src/components/landing/texto";
 import { slugDeProceso } from "@/src/lib/secop/slug";
 
 /**

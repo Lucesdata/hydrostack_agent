@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatConteo } from "@/src/components/secop/format";
-import { mapApiItem } from "@/src/components/landing/ProcesosTicker";
+import { mapApiItem } from "@/src/components/landing/proceso-resumen";
 
 /**
  * Destacados y tendencia del departamento elegido, dentro de la tarjeta de la

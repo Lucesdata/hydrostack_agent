@@ -25,7 +25,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /** La rampa del hero (--aq-e0..5 en hero-territorial.module.css). */
-const RAMPA = ["#13304a", "#1a5687", "#1f7cc0", "#2aa7e3", "#35d3c0", "#b4f5e4"];
+const RAMPA = ["#13304a", "#1a5687", "#1f7cc0", "#3a9fe0", "#7cc4f0", "#c4e8fc"];
 
 const numero = new Intl.NumberFormat("es-CO");
 
