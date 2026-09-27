@@ -1,36 +1,24 @@
 /**
- * Cifras del home. Tres conteos y ninguno más: cada uno tiene una sección que
- * lo consume, para que no haya cifras huérfanas que envejezcan sin dueño.
+ * Cifras del home. Un conteo y ninguno más: cada cifra tiene una sección que
+ * la consume, para que no haya cifras huérfanas que envejezcan sin dueño.
  *
  * Salen de Postgres por Drizzle, NO de Socrata. `landingStats.ts` consulta la
  * fuente en vivo por razones históricas; lo nuevo se alimenta de la base ya
  * ingerida, que es más rápida, no gasta cuota de la API pública y refleja
  * exactamente lo que el producto vigila.
  *
- * Degradación honesta: cada conteo
- * falla por separado y devuelve `null`, nunca lanza. La UI muestra "—" y la
- * frase sigue siendo cierta sin la cifra.
+ * Degradación honesta: el conteo que falla devuelve `null`, nunca lanza. La UI
+ * muestra la frase sin la cifra.
  */
 
 import { sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/src/lib/db/client";
 import { proceso } from "@/src/lib/db/schema/hechos";
-import { alOferentesHistorico, alSanciones } from "@/src/lib/db/schema/aqualicita";
-
-export interface CifrasSector {
-  /** Procesos del sector ya ingeridos y vigilados. */
-  procesosVigilados: number | null;
-  /** Registros de quién se presentó a qué y por cuánto. */
-  oferentesHistoricos: number | null;
-  /** Sanciones cruzables contra un competidor. */
-  sanciones: number | null;
-}
 
 /**
  * `count(*)` sobre una tabla. Nunca lanza: un fallo de red o SQL, o una fila
- * sin número utilizable, degradan igual a `null`. Así cada cifra falla por
- * su cuenta sin tumbar las otras dos.
+ * sin número utilizable, degradan igual a `null`.
  *
  * `nombre` solo identifica la cifra en el log — igual que `getEnJuegoMes`
  * (`landingStats.ts`) logea con `console.warn` antes de degradar, para que un fallo real (drift de
@@ -51,19 +39,11 @@ async function contar(nombre: string, tabla: PgTable): Promise<number | null> {
 }
 
 /**
- * Solo el primero de los tres conteos. Es lo único que la portada pide a
- * `/api/landing-stats`; los otros dos son de /competidores.
+ * Procesos del sector ya ingeridos y vigilados: la línea bajo el CTA del hero,
+ * vía `/api/landing-stats`. Era uno de tres conteos (`getCifrasSector`); los
+ * otros dos —oferentes históricos y sanciones— los pintaba /competidores y se
+ * fueron con esa página (2026-09-27).
  */
 export function getProcesosVigilados(): Promise<number | null> {
   return contar("procesosVigilados", proceso);
-}
-
-export async function getCifrasSector(): Promise<CifrasSector> {
-  const [procesosVigilados, oferentesHistoricos, sanciones] = await Promise.all([
-    getProcesosVigilados(),
-    contar("oferentesHistoricos", alOferentesHistorico),
-    contar("sanciones", alSanciones),
-  ]);
-
-  return { procesosVigilados, oferentesHistoricos, sanciones };
 }

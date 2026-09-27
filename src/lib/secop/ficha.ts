@@ -128,6 +128,8 @@ export function aSecopProceso(p: ProcesoFicha): SecopProceso {
 }
 
 export interface Competidor {
+  /** Llave del competidor en el histórico: `nit:<nit>` o `nom:<nombre normalizado>`. */
+  proveedorKey: string;
   nombre: string | null;
   presentados: number;
   ganados: number;
@@ -143,6 +145,10 @@ export interface Competidor {
  *
  * Se excluye el proceso en curso por si su histórico ya existiera, para no
  * contarse a sí mismo.
+ *
+ * Agrupa por `proveedor_key` y no por nombre: el nombre es texto libre de la
+ * fuente (la misma empresa aparece con y sin «S.A.S.»), y la llave es lo que
+ * permite abrir el historial de cada rival desde la ficha.
  */
 export async function competidoresComparables(
   p: Pick<ProcesoFicha, "id" | "tipoProyecto" | "departamentoCodigo">,
@@ -157,7 +163,12 @@ export async function competidoresComparables(
   // revés: Drizzle no tipa un `.from(sql\`...\`)` y la cadena entera se queda
   // en `never`. Mismo patrón que `procesosPorClaseEntidad` en agregados.ts.
   return db
-    .select({ nombre: sql<string | null>`h.proveedor_nombre`, presentados, ganados })
+    .select({
+      proveedorKey: sql<string>`h.proveedor_key`,
+      nombre: sql<string | null>`max(h.proveedor_nombre)`,
+      presentados,
+      ganados,
+    })
     .from(proceso)
     .innerJoin(sql`al_oferentes_historico h`, sql`h.proceso_id = ${proceso.id}`)
     .innerJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
@@ -168,7 +179,7 @@ export async function competidoresComparables(
         ne(proceso.id, p.id)
       )
     )
-    .groupBy(sql`h.proveedor_nombre`)
+    .groupBy(sql`h.proveedor_key`)
     .orderBy(desc(presentados), desc(ganados))
     .limit(limite);
 }

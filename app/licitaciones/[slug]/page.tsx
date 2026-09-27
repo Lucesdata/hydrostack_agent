@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
 import CierreFicha from "@/src/components/secop/ficha/CierreFicha";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
+import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
 import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
@@ -272,35 +273,7 @@ export default async function FichaPage({ params }: Props) {
         <section className="fi-sec">
           <h2 className="fi-h2">Quién suele competir aquí</h2>
           {competidores.length > 0 ? (
-            <div className="fi-panel">
-              <table className="fi-tabla">
-                <thead>
-                  <tr>
-                    <th>Oferente</th>
-                    <th className="num" style={{ textAlign: "right" }}>
-                      Presentados
-                    </th>
-                    <th className="num" style={{ textAlign: "right" }}>
-                      Ganados
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {competidores.map((c) => (
-                    <tr key={c.nombre ?? Math.random()}>
-                      <td>{c.nombre ?? "Sin nombre"}</td>
-                      <td className="num">{c.presentados}</td>
-                      <td className="num">{c.ganados}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="fi-n2-nota">
-                Histórico de procesos comparables: mismo tipo de proyecto y mismo departamento, ya
-                cerrados. No son los oferentes de este proceso — todavía no se sabe quién se
-                presentará.
-              </p>
-            </div>
+            <RivalesFicha rivales={competidores} procesoId={p.secopProcesoId} slug={canonico} />
           ) : (
             <p className="fi-vacio">
               No hay histórico de oferentes para procesos comparables a este. Hace falta que el

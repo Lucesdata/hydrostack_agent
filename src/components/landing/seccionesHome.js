@@ -59,9 +59,11 @@ export const SECCIONES_HOME = [
     etiqueta: "cuenta gratuita",
   },
   { id: "alertas", href: "/cuenta", capacidad: "alertas", etiqueta: "cuenta gratuita" },
+  // Como `pliego`: sin página propia desde el 2026-09-27. El historial de cada
+  // rival se abre en la §7 de la ficha; su puerta son las fichas.
   {
     id: "competidores",
-    href: "/competidores",
+    href: "/licitaciones",
     capacidad: "competidores",
     etiqueta: "cuenta gratuita",
   },
@@ -93,9 +95,9 @@ export function ruta(id) {
  * habría dejado dos listas que se desincronizan en el primer renombrado.
  *
  * Los asistentes, `/auditoria`, `/soluciones` y `/nosotros` salieron del
- * catálogo el 2026-09-27 (plan «la ficha como centro»). `pliego` se quedó, pero
- * apunta a las fichas: su página también salió y el análisis vive en la §4 de
- * cada una.
+ * catálogo el 2026-09-27 (plan «la ficha como centro»). `pliego` y
+ * `competidores` se quedaron, pero apuntan a las fichas: sus páginas también
+ * salieron y viven en la §4 y la §7 de cada una.
  *
  * Una sección sin entrada aquí no se lista en ningún índice. Hoy la única es
  * `veredicto`, que no es una página aparte sino una parte de /licitaciones.
@@ -110,7 +112,7 @@ export const NOMBRE_POR_ID = {
   informe: "Informe mensual",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
-  competidores: "Competidores",
+  competidores: "Competidores en cada ficha",
   // `alertas` estuvo sin nombre desde 2026-09-10 para que no apareciera en
   // ningún índice: el envío diario no se entrega (falta AUTH_RESEND_KEY en
   // Vercel, PENDIENTES §0 y §21) y anunciarlo prometía algo que no ocurre.
@@ -153,8 +155,9 @@ export const COLUMNAS_PIE = [
     grupo: "Explorar",
     ids: ["explorar", "compradores", "comparar", "informe", "diagnostico"],
   },
-  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores"] },
-  { grupo: "AquaLicita", ids: ["precios", "pliego"] },
+  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas"] },
+  { grupo: "En cada ficha", ids: ["competidores", "pliego"] },
+  { grupo: "AquaLicita", ids: ["precios"] },
 ];
 
 /**
@@ -169,7 +172,6 @@ export const MENU_CUENTA = [
   "perfil",
   "coincidencias",
   "filtros",
-  "competidores",
   "diagnostico-historial",
   "alertas",
 ];
