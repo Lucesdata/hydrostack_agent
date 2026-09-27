@@ -61,22 +61,7 @@ export const SECCIONES_HOME = [
     capacidad: "competidores",
     etiqueta: "cuenta gratuita",
   },
-  { id: "auditoria", href: "/auditoria", capacidad: "filtros", etiqueta: "cuenta gratuita" },
   { id: "pliego", href: "/pliego", capacidad: "pliego_extraer", etiqueta: "plan pro" },
-  {
-    id: "asistente-ejecucion",
-    href: "/asistente/ejecucion",
-    capacidad: "asistentes",
-    etiqueta: "plan pro",
-  },
-  {
-    id: "asistente-operacion",
-    href: "/asistente/operacion",
-    capacidad: "asistentes",
-    etiqueta: "plan pro",
-  },
-  { id: "soluciones", href: "/soluciones", capacidad: "explorar", etiqueta: "sin cuenta" },
-  { id: "nosotros", href: "/nosotros", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "precios", href: "/precios", capacidad: "explorar", etiqueta: "sin cuenta" },
 ];
 
@@ -104,10 +89,9 @@ export function ruta(id) {
  * leerlo. `S7Acceso.jsx` necesita exactamente los mismos strings, y copiarlos
  * habría dejado dos listas que se desincronizan en el primer renombrado.
  *
- * Los tres nombres de `plan pro` no son invención de esta sección: son
- * literalmente los que ya usa la navegación en `src/components/Navbar.js`
- * — "Pliegos" en `NAV_ITEMS`, "Asistente: ejecución" y "Asistente: operación"
- * en `ACCOUNT_ITEMS`.
+ * "Pliegos", el nombre de `plan pro`, es el que ya usa la navegación en
+ * `src/components/Navbar.js`. Los asistentes, `/auditoria`, `/soluciones` y
+ * `/nosotros` salieron del catálogo el 2026-09-27 (plan «la ficha como centro»).
  *
  * Una sección sin entrada aquí no se lista en ningún índice. Hoy la única es
  * `veredicto`, que no es una página aparte sino una parte de /licitaciones.
@@ -120,11 +104,9 @@ export const NOMBRE_POR_ID = {
   compradores: "Quién compra",
   comparar: "Comparar departamentos",
   informe: "Informe mensual",
-  soluciones: "Soluciones",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
   competidores: "Competidores",
-  auditoria: "Qué se descarta",
   // `alertas` estuvo sin nombre desde 2026-09-10 para que no apareciera en
   // ningún índice: el envío diario no se entrega (falta AUTH_RESEND_KEY en
   // Vercel, PENDIENTES §0 y §21) y anunciarlo prometía algo que no ocurre.
@@ -136,29 +118,27 @@ export const NOMBRE_POR_ID = {
   // mejor sitio que la ausencia del enlace. Lo que no se puede es volver a
   // prometerlo como pilar de la portada; eso sigue vetado hasta el §0.
   alertas: "Alertas",
-  nosotros: "Nosotros",
   precios: "Precios y acceso",
   perfil: "Mi perfil RUP",
   "diagnostico-historial": "Historial de diagnóstico",
   pliego: "Pliegos",
-  "asistente-ejecucion": "Asistente: ejecución",
-  "asistente-operacion": "Asistente: operación",
 };
 
 /**
- * El nav principal. Cuatro destinos, no cinco, y sin numerar.
+ * El nav principal. Tres destinos y sin numerar (eran cuatro hasta que salió
+ * /nosotros, 2026-09-27).
  *
  * Antes el navbar declaraba sus cinco pestañas en `Navbar.js` y el pie otras
  * cuatro distintas en `S6Footer.jsx`: dos listas, ningún criterio común y un
  * usuario que veía una navegación arriba y otra abajo. Ahora las dos salen de
  * aquí, que es el mismo catálogo que `enlaces.test.ts` verifica contra `app/`.
  *
- * `Diagnóstico` y `Soluciones` bajan al pie: son puertas de entrada de campaña,
- * no destinos a los que se vuelve. `Alertas` (/cuenta) sube, porque hasta ahora
+ * `Diagnóstico` baja al pie: es una puerta de entrada de campaña, no un
+ * destino al que se vuelve. `Alertas` (/cuenta) sube, porque hasta ahora
  * solo se llegaba a ella desde el propio correo de alertas — o sea, solo si ya
  * la tenías.
  */
-export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas", "nosotros"];
+export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas"];
 
 /**
  * Las columnas del pie. Incluye todo lo que el nav deja fuera, para que ninguna
@@ -167,10 +147,10 @@ export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas", "nosotros"];
 export const COLUMNAS_PIE = [
   {
     grupo: "Explorar",
-    ids: ["explorar", "compradores", "comparar", "informe", "diagnostico", "soluciones"],
+    ids: ["explorar", "compradores", "comparar", "informe", "diagnostico"],
   },
-  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores", "auditoria"] },
-  { grupo: "AquaLicita", ids: ["nosotros", "precios", "pliego"] },
+  { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas", "competidores"] },
+  { grupo: "AquaLicita", ids: ["precios", "pliego"] },
 ];
 
 /**
@@ -186,10 +166,7 @@ export const MENU_CUENTA = [
   "coincidencias",
   "filtros",
   "competidores",
-  "auditoria",
   "diagnostico-historial",
-  "asistente-ejecucion",
-  "asistente-operacion",
   "alertas",
 ];
 

@@ -41,7 +41,7 @@ proceso necesita, no como una página genérica aparte.
 ## Criterios de aceptación
 
 1. Ninguna de las siete rutas responde con página propia. Cada una redirige
-   (301) a su sitio más cercano: `/pliego` y `/soluciones` → `/licitaciones`;
+   con un 308 (permanente) a su sitio más cercano: `/pliego` y `/soluciones` → `/licitaciones`;
    `/competidores` y `/competidores/[key]` → `/licitaciones/entidades`;
    `/auditoria` → `/mis-filtros`; `/asistente/*`, `/reportes/*` y `/nosotros`
    → `/`. Un enlace viejo nunca da 404.

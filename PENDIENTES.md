@@ -276,6 +276,9 @@ CLAUDE.md §4: `pliego_extraer` y `asistentes` están declaradas `pro` en
 
 Decidir el acceso a `GEMINI_API_KEY` por usuario antes de mandar tráfico ahí.
 
+**2026-09-27:** los asistentes se retiraron (plan «la ficha como centro», PR 1);
+sus tablas siguen en el esquema. El pliego se muda a la ficha en el PR 2.
+
 Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
 home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no
 el plan. Dos ejemplos reales, ambos corregidos: se prometía que el asistente de
@@ -409,7 +412,7 @@ que el test lo diga. Se arregla oscureciendo `--ink-300` un paso (`#69726D` da
   `--border`, que ya existe y apunta a `--line`.
 - **`PlantaHero.jsx` tiene 4 verdes `#16A34A` fuera del sistema** y cero tokens
   en todo el archivo. Es ilustración, no estado, así que se dejó; el spec lo
-  mueve a `/nosotros` de todas formas.
+  mueve a `/nosotros` de todas formas. *(Borrado con `/nosotros` el 2026-09-27.)*
 - **Los tintes `rgba()` siguen derivados del escalón -600.** Al 10% la diferencia
   con el -700 es de 4 puntos RGB sobre 255 — imperceptible — y re-derivarlos
   tocaría 25 sitios en seis archivos sin que se note. El test comprueba que el
