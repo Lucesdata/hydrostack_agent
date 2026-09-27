@@ -6,7 +6,7 @@ const RUTA_EXPLORAR = ruta("explorar");
 /**
  * Qué te llevas sin pagar: el modelo de acceso, dicho una vez y entero.
  *
- * Las tres columnas no son listas escritas a mano: salen de
+ * Las columnas no son listas escritas a mano: salen de
  * `seccionesPorNivel()`, que agrupa SECCIONES_HOME por su etiqueta de acceso.
  * Añadir una ruta con nombre en NOMBRE_POR_ID la hace aparecer en su columna
  * sin tocar este archivo — que es justo lo que evita que la promesa del home y
@@ -14,6 +14,8 @@ const RUTA_EXPLORAR = ruta("explorar");
  *
  * Aquí no hay cifras ni precios: la spec deja el contenido comercial del plan
  * pro fuera de alcance, así que la columna pro nombra las funciones y nada más.
+ * Hoy no hay ninguna función de pago y esa columna no se pinta (ver
+ * `seccionesPorNivel`).
  */
 export default function S7Acceso() {
   const grupos = seccionesPorNivel();

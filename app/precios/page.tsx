@@ -10,13 +10,13 @@ import S7Acceso from "@/src/components/landing/S7Acceso";
  * No inventa una tabla de precios. `S7Acceso` deriva sus tres columnas de
  * `seccionesPorNivel()`, o sea del mismo catálogo de rutas que gobierna el
  * navbar y el pie — así que dice exactamente lo que el producto hace hoy, y
- * añadir una ruta la hace aparecer aquí sin tocar esta página. El día que haya
- * plan de pago, la columna «plan pro» ya está en su sitio.
+ * añadir una ruta la hace aparecer aquí sin tocar esta página. Hoy no hay nada
+ * de pago —el análisis de pliego pasó a gratis el 2026-09-27—, así que la
+ * columna «plan pro» no se pinta; vuelve sola el día que algo lo sea.
  */
 export const metadata = {
   title: "Precios y acceso",
-  description:
-    "Qué puedes usar en AquaLicita sin cuenta, qué abre una cuenta gratuita y qué queda para el plan pro.",
+  description: "Qué puedes usar en AquaLicita sin cuenta y qué abre una cuenta gratuita.",
 };
 
 export default function PreciosPage() {
