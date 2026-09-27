@@ -1,57 +1,27 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@/src/lib/secop/landingStats", () => ({
-  getNuevos7d: vi.fn().mockResolvedValue(12),
-  getEnJuegoMes: vi.fn().mockResolvedValue({ totalCop: 5_000_000, procesos: 3 }),
-  getDestacado: vi.fn().mockResolvedValue(null),
-}));
-
-// `getCifrasSector` vive en un `vi.hoisted` en vez de un `const` simple:
-// con vitest@4.1.6, referenciar una variable de módulo dentro del factory
-// de `vi.mock` (que se hoistea por encima de los imports) revienta con
-// "Cannot access before initialization" — ver el mismo patrón en
-// src/__tests__/landing/cifras.test.ts.
-const { getCifrasSector } = vi.hoisted(() => ({ getCifrasSector: vi.fn() }));
-vi.mock("@/src/lib/landing/cifras", () => ({ getCifrasSector }));
-vi.mock("@/src/lib/landing/ultima-consulta", () => ({
-  getUltimaConsultaSecop: vi.fn().mockResolvedValue("2026-09-26T11:04:00.000Z"),
-}));
+// `vi.hoisted` y no un `const` simple: el factory de `vi.mock` se hoistea por
+// encima de los imports — ver el mismo patrón en src/__tests__/landing/cifras.test.ts.
+const { getProcesosVigilados } = vi.hoisted(() => ({ getProcesosVigilados: vi.fn() }));
+vi.mock("@/src/lib/landing/cifras", () => ({ getProcesosVigilados }));
 
 import { GET } from "@/app/api/landing-stats/route";
 
 describe("GET /api/landing-stats", () => {
-  it("añade el bloque sector sin alterar el contrato existente", async () => {
-    getCifrasSector.mockResolvedValue({
-      procesosVigilados: 90076,
-      oferentesHistoricos: 27035,
-      sanciones: 2114,
-    });
+  it("sirve solo la cifra que lee la portada, en `sector.procesosVigilados`", async () => {
+    getProcesosVigilados.mockResolvedValue(90076);
 
     const body = await (await GET()).json();
 
-    expect(body.sector).toEqual({
-      procesosVigilados: 90076,
-      oferentesHistoricos: 27035,
-      sanciones: 2114,
-    });
-    expect(body.nuevos7d).toBe(12);
-    expect(body.enJuego).toEqual({ totalCop: 5_000_000, procesos: 3 });
-    expect(body).toHaveProperty("destacado");
-    expect(body.ultimaConsulta).toBe("2026-09-26T11:04:00.000Z");
+    expect(body).toEqual({ sector: { procesosVigilados: 90076 } });
   });
 
-  it("si las cifras del sector fallan, el resto de la respuesta sigue sirviendo", async () => {
-    getCifrasSector.mockRejectedValue(new Error("base caída"));
+  it("si la base falla, responde 200 con la cifra en null", async () => {
+    getProcesosVigilados.mockRejectedValue(new Error("base caída"));
 
     const res = await GET();
-    const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body.nuevos7d).toBe(12);
-    expect(body.sector).toEqual({
-      procesosVigilados: null,
-      oferentesHistoricos: null,
-      sanciones: null,
-    });
+    expect(await res.json()).toEqual({ sector: { procesosVigilados: null } });
   });
 });

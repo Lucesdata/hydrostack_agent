@@ -49,8 +49,3 @@ export function construirHistorial(
     };
   });
 }
-
-/** Cuántas versiones distintas de cuestionario aparecen en el historial. */
-export function versionesEnHistorial(diagnosticos: readonly DiagnosticoGuardado[]): string[] {
-  return [...new Set(diagnosticos.map((d) => d.version))];
-}

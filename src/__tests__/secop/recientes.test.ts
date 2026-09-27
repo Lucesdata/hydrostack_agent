@@ -100,7 +100,7 @@ describe("mapLiveToResumen", () => {
 describe("el 0 de SECOP no viaja en el DTO", () => {
   // 9.436 filas traen `valor_estimado = 0` y no es que el proceso sea gratis:
   // es que la entidad no publicó la cuantía. Si el 0 llega al DTO, la tarjeta
-  // de `ProcesosRecientes` pinta "$ 0" y afirma un precio inexistente.
+  // del ticker de fichas recientes pinta "$ 0" y afirma un precio inexistente.
   it("fila de base con '0.00' → valorEstimado null", () => {
     expect(mapRowToResumen({ ...baseRow, valorEstimado: "0.00" }).valorEstimado).toBeNull();
   });

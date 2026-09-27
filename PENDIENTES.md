@@ -305,6 +305,14 @@ borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
 consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
 endpoint que sirve más de lo que nadie lee.
 
+**Resuelto el 2026-09-27: (b).** `LandingCards.jsx` se borró junto con su único
+test (`monto-destacado.test.ts`, que medía `formatCopMilM`, usada solo ahí), y
+`/api/landing-stats` se recortó a `{ sector: { procesosVigilados } }`, lo único
+que la portada lee. Dejó de hacer tres consultas en vivo a Socrata y tres a la
+base por visita. Con él salieron `getNuevos7d`, `getDestacado` y
+`getUltimaConsultaSecop` (que servía a la banda "El mercado ahora", retirada el
+2026-09-26); `getEnJuegoMes` se queda porque la lee /mis-coincidencias.
+
 ### 21. El aviso por correo, bajado a mención en el home — decidido 2026-09-10
 El home alineado (2026-09-08) promovía la alerta diaria a uno de los cuatro
 pasos del motor (`S3Motor.jsx`, paso 04) y la repetía en el cierre. El código de
@@ -393,8 +401,9 @@ que el test lo diga. Se arregla oscureciendo `--ink-300` un paso (`#69726D` da
 4,56 incluso sobre el crema del spec) cuando alguien toque esa superficie.
 
 ### 26. Restos del sistema de color, sin impacto visible
-- **`LandingCards.jsx` es código muerto**: 11 KB que nadie importa, y es el único
-  portador del marcado `clr-verdict-*`. Borrarlo con la Tarea 2.
+- ~~**`LandingCards.jsx` es código muerto**~~ — borrado el 2026-09-27, junto con
+  las reglas `clr-verdict-*` de `globals.css` y el resto del CSS del tema séptico
+  que ya no pintaba nada (calculadoras `hs-*`, Hydro_Agent, rejilla, scanline).
 - **`#DADAD2` aparece 20 veces sin ser token**, conviviendo con `--line`
   (`#E5E5E0`): hay dos grises de borde y ninguno lo sabe. Consolidar en
   `--border`, que ya existe y apunta a `--line`.
@@ -882,3 +891,23 @@ política de tratamiento publicada (§18, que pide la autorización de la Ley 15
 y correo que entregue (§0). Entonces: formulario con casilla de autorización,
 tabla nueva con `.enableRLS()` y envío del informe.
 
+
+### 49. Lo que quedó tras la limpieza de huérfanos (2026-09-27)
+Se borró todo lo que nada llamaba: archivos sin importador, CSS del tema séptico,
+`/api/mercado/waitlist`, `/api/al/sanciones/[nit]`, el clasificador binario
+(`classify/classifier.ts` y compañía), `config/smmlv.ts` y tres funciones sueltas
+(`versionesEnHistorial`, `municipioFromLocalizacion`, `assertExtractable`). Tres
+cosas no se borraron a propósito:
+
+- **La tabla `lista_espera_mercado`** sigue en el esquema aunque su endpoint ya
+  no existe. Quitarla del esquema genera un `DROP TABLE` en la próxima migración
+  y borra filas de la base viva: decisión del usuario, no de una limpieza.
+- **`clearOferentePerfil()` no la llama nadie, y eso es un fallo, no código
+  sobrante.** `SecopExplorer` guarda en `localStorage` el perfil que baja del
+  servidor, y `/logout` no lo borra: en un navegador compartido la siguiente
+  persona ve el perfil de la anterior. Es el mismo caso que ya se cerró para el
+  `session_token` del diagnóstico. Arreglarlo es llamarla al cerrar sesión.
+- **Lo que solo usan los scripts** (`al/historico/backfill.ts`,
+  `al/matching/red-sectorial.ts`, `archivo/exportar.ts`) y los ayudantes de test
+  (`clearDatasetIdCache`, `versionesRegistradas`, `CAPACIDADES`,
+  `design/contraste.ts`) sí tienen quien los llame.

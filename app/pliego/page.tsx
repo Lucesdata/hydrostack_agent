@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /pliego — cableado UI de la extracción de pliegos (Hydro_Agent Capa 3),
+ * /pliego — cableado UI de la extracción de pliegos (el extractor híbrido; antes "Hydro_Agent Capa 3"),
  * integrado como pestaña de Licitaciones. Sube el Documento Base (+ opcional
  * Formulario 1 de presupuesto) y llama a POST /api/pliego/extract, que corre
  * el extractor híbrido: reglas primero, Gemini solo para lo que falte — ver
@@ -83,7 +83,7 @@ export default function PliegoPage() {
       <div className="clr-container clr-pl-container">
         <LicitacionesTabs />
         <header className="clr-pl-header">
-          <span className="clr-tag">Hydro_Agent · Capa 3</span>
+          <span className="clr-tag">SECOP II · Pliegos</span>
           <h1 className="clr-h1">Extracción de pliegos</h1>
           <p className="clr-sub">
             Sube el Documento Base de un proceso SECOP II — y, si lo tienes, el Formulario 1 de

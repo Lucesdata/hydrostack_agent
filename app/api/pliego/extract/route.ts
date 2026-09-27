@@ -1,7 +1,7 @@
 /**
  * Route handler: POST /api/pliego/extract
  *
- * Cableado real de la extracción de pliegos (Hydro_Agent Capa 3) al producto.
+ * Cableado real de la extracción de pliegos (el extractor híbrido; antes "Hydro_Agent Capa 3") al producto.
  * Recibe el Documento Base (multipart/form-data, campo `file`) y, opcional,
  * el Formulario 1 de presupuesto (campo `formulario1`, .xls/.xlsx) — ejecuta
  * el extractor híbrido: reglas primero, Gemini solo para lo que las reglas no

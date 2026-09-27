@@ -29,9 +29,11 @@ Entidades y flujos principales:
 - **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
   transform → entidades canónicas (`proceso`, `contrato`,
   `contrato_evento`, `entidad`, `proveedor`, `geografia`).
-- **Clasificación sectorial**: derivada, versionada por
-  `clasificadorVersion` (`src/lib/classify/classifier.ts`). Responde "¿esto es de
-  agua?" — binaria. `clasificacion_sectorial` sigue con 0 filas: nadie la escribe.
+- **Clasificación sectorial**: la pregunta binaria "¿esto es de agua?" la
+  responde hoy el filtro de la ingesta (`src/lib/secop/ingest-net.ts`). El
+  clasificador versionado que iba a escribir `clasificacion_sectorial`
+  (`src/lib/classify/classifier.ts`) nunca se cableó y se borró el 2026-09-27;
+  la tabla sigue en el esquema con 0 filas. Su estado previo está en git.
 - **Tipo de proyecto** (`src/lib/classify/tipo-proyecto.ts`): cinco valores y solo
   cinco — `acueducto | alcantarillado | ptap | ptar | otros`. Responde una pregunta
   distinta de la anterior ("¿de qué subsistema?") y por eso es un módulo aparte.
@@ -233,9 +235,10 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
   queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
-  `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
-  ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker
-  pide sus fichas recientes por su cuenta.
+  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats` sirve ya solo
+  `sector.procesosVigilados` (una consulta a la base, recortado el 2026-09-27),
+  para la línea bajo el CTA del hero; el ticker pide sus fichas recientes por su
+  cuenta.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
