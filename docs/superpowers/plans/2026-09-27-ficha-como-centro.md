@@ -76,6 +76,17 @@ capacidades a mano.
 5. Revisar qué queda de `al/consulta/competidor.ts` y `getCifrasSector()`
    (sus dos cifras eran de `/competidores`).
 
+**Desviaciones al implementarlo (2026-09-27).**
+- La ruta del punto 3 **no** se cachea en el CDN: el historial de un rival
+  exigía cuenta gratuita en /competidores/[key] (capacidad `competidores`), y
+  una respuesta pública en el CDN se la serviría a cualquiera. Va con
+  `Cache-Control: private` y responde 401 sin sesión; el desplegable ofrece
+  entrar y vuelve a la misma ficha.
+- Sin JavaScript el `<details>` se abre pero no trae el historial, y lo dice
+  (`<noscript>`). Es el precio del criterio 6: la alternativa era una consulta
+  por rival en el render de la ficha.
+- La capacidad `competidores` se queda: la usa la ruta nueva.
+
 ## Verificación en cada PR
 
 ```

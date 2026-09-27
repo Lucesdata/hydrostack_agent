@@ -49,7 +49,9 @@ export type Capacidad =
  * `pro`; salió con los asistentes el 2026-09-27.)
  *
  * `competidores` (SDD módulo 2) es `gratis`: el histórico es dato de mercado, no
- * de nadie, pero navegarlo es una función de producto y no una landing. Los
+ * de nadie, pero navegarlo es una función de producto y no una landing. Desde
+ * el 2026-09-27 se aplica en GET /api/ficha/[id]/rival/[key], el historial de
+ * cada rival en la §7 de la ficha. Los
  * reportes públicos de mercado (`al_reportes` con `visibilidad='publico'`) son
  * otra cosa y ésos sí van sin cuenta.
  *

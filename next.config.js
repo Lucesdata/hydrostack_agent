@@ -35,6 +35,9 @@ const nextConfig = {
       { source: "/auditoria", destination: "/mis-filtros", permanent: true },
       // PR 2: el pliego se sube y se lee en la §4 de cada ficha.
       { source: "/pliego", destination: "/licitaciones", permanent: true },
+      // PR 3: cada rival se abre en la §7 de la ficha; quién compra sigue aparte.
+      { source: "/competidores", destination: "/licitaciones/entidades", permanent: true },
+      { source: "/competidores/:key*", destination: "/licitaciones/entidades", permanent: true },
     ];
   },
 };

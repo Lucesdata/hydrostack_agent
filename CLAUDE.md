@@ -348,7 +348,7 @@ sin `license` ni `distribution`, con `isBasedOn` a los conjuntos de datos.gov.co
 estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
 `/licitaciones/entidades` (las entidades con más procesos abiertos,
 `src/lib/secop/compradores.ts`, una consulta con `count(*) over ()`; es la otra
-mitad de `/competidores`) y `/licitaciones/comparar` (hasta tres departamentos
+mitad de «Quién suele competir aquí», la §7 de cada ficha) y `/licitaciones/comparar` (hasta tres departamentos
 con las filas de `detallePorDepartamento()`; la selección va en el **hash** de
 la URL, que no llega al servidor, `src/lib/secop/comparador.ts`). Los estilos de
 un componente `"use client"` no se exportan desde él: una página de servidor
@@ -392,7 +392,18 @@ sigue estática: el formulario se pinta para todos, la acción de servidor
 resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
 `/api/pliego/extract` y `/api/eligibility/extract` (su paso lo hace ahora
 `uploadPliego`). La frontera `pro` de `pliego_extraer` sigue sin aplicarse:
-hoy toda cuenta es `gratis` y aplicarla apagaría la subida. Falta PR 3 (el rival
-desplegable en la §7, fuera `/competidores`).
+hoy toda cuenta es `gratis` y aplicarla apagaría la subida.
+PR 3 hecho: en la §7 cada rival es un `<details>` (`RivalesFicha.tsx`) que al
+abrirse pide `GET /api/ficha/[id]/rival/[key]` → `historialComparable()`
+(`src/lib/al/consulta/competidor.ts`): cuántas gana, tasa, mediana
+adjudicado/presupuesto y sus últimos procesos comparables (enlazados a su
+ficha), recortado al mismo tipo y departamento que la ficha; las multas no se
+recortan. Exige la capacidad `competidores` (cuenta gratuita), así que la
+respuesta es `private` y no se cachea en el CDN. `competidoresComparables()`
+agrupa ya por `proveedor_key`, no por nombre. Salieron `/competidores`,
+`/competidores/[key]` (redirigen a `/licitaciones/entidades`), `S4Competidores`,
+`historialCompetidor`, `topCompetidores`, `precioReferencia` y
+`getCifrasSector` (`cifras.ts` solo exporta `getProcesosVigilados`). Con esto el
+plan queda completo.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

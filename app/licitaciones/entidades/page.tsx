@@ -41,8 +41,8 @@ export default async function Page() {
           <h1 className="lp-cab-h1">Quién compra</h1>
           <p className="lp-cab-desc">
             Las entidades con más procesos abiertos de agua y saneamiento en el SECOP II. El
-            departamento es el de la sede de la entidad. Quién se presenta y gana está en{" "}
-            <Link href="/competidores">Competidores</Link>.
+            departamento es el de la sede de la entidad. Quién se presenta y gana está en cada
+            ficha, en «Quién suele competir aquí».
           </p>
           {datos && datos.totalEntidades > 0 ? (
             <p className="lp-cab-conteo">
