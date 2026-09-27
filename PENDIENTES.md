@@ -305,6 +305,12 @@ borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
 consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
 endpoint que sirve más de lo que nadie lee.
 
+**Resuelto a medias el 2026-09-27: (b), primera mitad.** `LandingCards.jsx` se
+borró junto con su único test (`monto-destacado.test.ts`, que medía
+`formatCopMilM`, usada solo ahí). Falta la segunda mitad: la portada ya solo lee
+`sector.procesosVigilados` de `/api/landing-stats`, y el endpoint sigue
+calculando `destacado`, `enJuego`, `sanciones` y `oferentesHistoricos`.
+
 ### 21. El aviso por correo, bajado a mención en el home — decidido 2026-09-10
 El home alineado (2026-09-08) promovía la alerta diaria a uno de los cuatro
 pasos del motor (`S3Motor.jsx`, paso 04) y la repetía en el cierre. El código de
@@ -393,8 +399,9 @@ que el test lo diga. Se arregla oscureciendo `--ink-300` un paso (`#69726D` da
 4,56 incluso sobre el crema del spec) cuando alguien toque esa superficie.
 
 ### 26. Restos del sistema de color, sin impacto visible
-- **`LandingCards.jsx` es código muerto**: 11 KB que nadie importa, y es el único
-  portador del marcado `clr-verdict-*`. Borrarlo con la Tarea 2.
+- ~~**`LandingCards.jsx` es código muerto**~~ — borrado el 2026-09-27, junto con
+  las reglas `clr-verdict-*` de `globals.css` y el resto del CSS del tema séptico
+  que ya no pintaba nada (calculadoras `hs-*`, Hydro_Agent, rejilla, scanline).
 - **`#DADAD2` aparece 20 veces sin ser token**, conviviendo con `--line`
   (`#E5E5E0`): hay dos grises de borde y ninguno lo sabe. Consolidar en
   `--border`, que ya existe y apunta a `--line`.
