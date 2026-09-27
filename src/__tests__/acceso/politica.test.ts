@@ -41,7 +41,7 @@ describe("puede", () => {
     "filtros",
     "competidores",
   ];
-  const dePago: Capacidad[] = ["pliego_extraer", "asistentes"];
+  const dePago: Capacidad[] = ["pliego_extraer"];
 
   it("el anónimo puede exactamente lo abierto", () => {
     for (const cap of abiertas) expect(puede("anonimo", cap)).toBe(true);

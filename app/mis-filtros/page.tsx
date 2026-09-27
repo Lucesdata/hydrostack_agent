@@ -44,10 +44,7 @@ export default async function MisFiltrosPage() {
           El motor es determinista: mismos criterios, mismo resultado, sin IA y sin coste por
           licitación. Lo que un filtro descarta queda registrado con su motivo — un criterio
           demasiado estrecho no produce falsos positivos, produce silencio, y el silencio es
-          invisible si no se audita.{" "}
-          <Link className="clr-flt-link" href="/auditoria">
-            Ver qué se está descartando
-          </Link>
+          invisible si no se audita.
         </p>
       </div>
     </main>

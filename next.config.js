@@ -23,6 +23,18 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Páginas retiradas el 2026-09-27 (plan «la ficha como centro»,
+  // docs/superpowers/plans/2026-09-27-ficha-como-centro.md). 308 (permanente) a su sitio
+  // más cercano para que un enlace viejo nunca dé 404.
+  async redirects() {
+    return [
+      { source: "/asistente/:path*", destination: "/", permanent: true },
+      { source: "/reportes/:path*", destination: "/", permanent: true },
+      { source: "/nosotros", destination: "/", permanent: true },
+      { source: "/soluciones", destination: "/licitaciones", permanent: true },
+      { source: "/auditoria", destination: "/mis-filtros", permanent: true },
+    ];
+  },
 };
 
 module.exports = nextConfig;

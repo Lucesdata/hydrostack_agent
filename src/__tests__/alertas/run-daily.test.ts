@@ -45,15 +45,6 @@ vi.mock("@/src/lib/al/notificacion/recopilar", () => ({
   recopilarNovedades: (...args: unknown[]) => mockNovedades(...args),
 }));
 
-vi.mock("@/src/lib/al/reportes/generar", () => ({
-  generarReporte: async () => ({
-    id: "rep-1",
-    slug: "digest-x",
-    url: "http://x/reportes/digest-x",
-  }),
-  slugDigest: () => "digest-x",
-}));
-
 const mockSendDigestEmail = vi.fn();
 vi.mock("@/src/lib/email/send", () => ({
   sendDigestEmail: (...args: unknown[]) => mockSendDigestEmail(...args),
@@ -172,11 +163,12 @@ describe("runDailyAlertas", () => {
 
     const r = await runDailyAlertas();
 
-    // Un solo correo con todo dentro: novedades + enlace al reporte + perfil.
+    // Un solo correo con todo dentro: novedades + perfil. Sin enlace a reporte
+    // permanente desde que /reportes/[slug] se retiró (2026-09-27).
     expect(mockRenderDigest).toHaveBeenCalledWith(
       expect.objectContaining({ total: 0 }),
       { id: "u1", email: "a@b.com" },
-      "http://x/reportes/digest-x",
+      null,
       matches
     );
     expect(mockSendDigestEmail).toHaveBeenCalledWith("a@b.com", digest);

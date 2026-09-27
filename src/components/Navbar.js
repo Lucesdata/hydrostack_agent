@@ -14,8 +14,7 @@ import { MENU_CUENTA, NAV_PRINCIPAL, NOMBRE_POR_ID, ruta } from "./landing/secci
 //
 // `route` existe aparte de `href` porque el resaltado activo es por prefijo y no
 // por igualdad: /diagnostico/historial debe pintar su sección como activa.
-// Los asistentes (/asistente/*) NO están aquí: exigen cuenta y viven en el menú
-// de usuario junto al resto de lo autenticado.
+// Lo que exige cuenta NO está aquí: vive en el menú de usuario (MENU_CUENTA).
 const NAV_ITEMS = NAV_PRINCIPAL.map((id) => {
   const seccion = ruta(id);
   return { href: seccion.href, route: seccion.href, label: NOMBRE_POR_ID[id] };

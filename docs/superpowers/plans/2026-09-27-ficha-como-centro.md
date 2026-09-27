@@ -17,7 +17,7 @@ ficha. Tres PR, cada uno verificable por separado.
 Páginas: `/asistente/*`, `/auditoria`, `/reportes/[slug]`, `/soluciones` y
 `/nosotros`.
 
-1. Redirecciones 301 en `next.config.js` (`redirects()`), según el criterio 1
+1. Redirecciones permanentes (308) en `next.config.js` (`redirects()`), según el criterio 1
    del spec.
 2. Quitar entradas de `SECCIONES_HOME` y `NOMBRE_POR_ID` (`seccionesHome.js`),
    `sitemap.ts`, `robots.ts`, `PROTECTED_PREFIXES` (`middleware.ts`) y el enlace
@@ -58,7 +58,7 @@ capacidades a mano.
    en dinámica.
 4. Borrar `app/pliego/`, `/api/pliego/extract` si ya no la llama nadie, la
    pestaña «Analizar pliego» de `LicitacionesTabs.tsx` y su entrada en el
-   catálogo. Redirección 301 `/pliego` → `/licitaciones`.
+   catálogo. Redirección permanente (308) `/pliego` → `/licitaciones`.
 
 ### PR 3 — El rival en la ficha, y fuera `/competidores`
 
@@ -72,7 +72,7 @@ capacidades a mano.
    `/api/departamento/[dpto]/resumen`.
 4. Borrar `app/competidores/`, `S4Competidores.jsx`, la capacidad
    `competidores` si queda sin uso y el enlace de `/licitaciones/entidades`.
-   Redirecciones 301.
+   Redirecciones permanentes (308).
 5. Revisar qué queda de `al/consulta/competidor.ts` y `getCifrasSector()`
    (sus dos cifras eran de `/competidores`).
 
@@ -86,5 +86,5 @@ npx prettier --check "src/**/*" "app/**/*"
 ```
 
 Además: grafo de imports sin huérfanos, `curl -I` a cada ruta retirada para ver
-el 301 en el preview de Vercel, y en PR 2 y PR 3 una ficha real abierta en el
+el 308 en el preview de Vercel, y en PR 2 y PR 3 una ficha real abierta en el
 preview con y sin sesión.

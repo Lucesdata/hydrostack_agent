@@ -171,9 +171,10 @@ Entidades y flujos principales:
   compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
   hacerla en el render dejaría los `reason` en la pestaña de red.
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
-  lee todavía**: `pliego_extraer` y `asistentes` están declaradas como `pro` en
-  la política y siguen protegidas solo por `PROTECTED_PREFIXES`. Activar esa
-  frontera es hacer que sus handlers consulten `puede()`. La columna ya existe en
+  lee todavía**: `pliego_extraer` está declarada como `pro` en la política y
+  sigue protegida solo por `PROTECTED_PREFIXES`. Activar esa frontera es hacer
+  que sus handlers consulten `puede()`. (`asistentes` salió con los asistentes
+  el 2026-09-27.) La columna ya existe en
   la Supabase viva: verificado el 2026-09-15, las 24 migraciones del repo
   (`0000`–`0023`) están aplicadas.
 
@@ -369,5 +370,17 @@ abierto hoy aparte. Estático (revalidate 6 h). "Descargar PDF" es la impresión
 del navegador con una hoja de impresión propia: sin dependencias. **No pide
 correo**: recogerlo exige la política de tratamiento (PENDIENTES §18) y
 enviarlo, el correo configurado (§0).
+
+**La ficha como centro (2026-09-27).** Siete páginas que respondían preguntas
+fuera de la ficha se retiran en tres PR
+(`docs/superpowers/plans/2026-09-27-ficha-como-centro.md`). PR 1 hecho: fuera
+`/asistente/*` (con `/api/assistant`, `/api/documents` y las dependencias
+`ai`/`@ai-sdk`), `/auditoria`, `/reportes/[slug]` (el correo de alertas ya no
+genera reporte permanente), `/soluciones` y `/nosotros` (con `PlantaHero`). Cada
+URL retirada redirige con un 308 (permanente) desde `next.config.js`. Las tablas
+(`conversacion`, `mensaje`, `documento`, `al_reportes`, `al_descartes`) se
+quedan: soltarlas es un `DROP` sobre la base viva. Faltan PR 2 (el pliego en la
+§4 de la ficha, fuera `/pliego`) y PR 3 (el rival desplegable en la §7, fuera
+`/competidores`).
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

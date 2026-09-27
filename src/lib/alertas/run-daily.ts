@@ -43,7 +43,6 @@ import { getMatchesForPerfil } from "@/src/lib/matching/get-matches-for-perfil";
 import { recordCoincidencias } from "@/src/lib/matching/record-coincidencias";
 import { renderDigestAgregado } from "@/src/lib/al/notificacion/digest-agregado";
 import { recopilarNovedades } from "@/src/lib/al/notificacion/recopilar";
-import { generarReporte, slugDigest } from "@/src/lib/al/reportes/generar";
 import { sendDigestEmail } from "@/src/lib/email/send";
 import { isPerfilCompleto } from "@/src/lib/oferente/perfil-minimo";
 import type { PerfilGuardado } from "@/src/lib/oferente/perfil-minimo";
@@ -159,33 +158,12 @@ export async function runDailyAlertas(opts: { desde?: Date } = {}): Promise<Dail
         continue;
       }
 
-      // El reporte se genera ANTES del envío: el correo lo enlaza, y un enlace
-      // a un reporte que no existe es peor que no enlazar nada.
-      const reporte = await generarReporte({
-        slug: slugDigest(fecha),
-        tipo: "digest_diario",
-        titulo: `Novedades del ${fecha}`,
-        visibilidad: "privado",
-        accountId: cuenta.usuarioId,
-        parametros: { fecha },
-        payload: {
-          fecha,
-          novedades,
-          matches: matches.map((m) => ({
-            secopProcesoId: m.proceso.id,
-            nombre: m.proceso.nombre,
-            entidad: m.proceso.entidad,
-            precioBase: m.proceso.precioBase,
-            url: m.proceso.url,
-            veredicto: m.verdict.overall,
-          })),
-        },
-      });
-
       const digest = renderDigestAgregado(
         novedades,
         { id: cuenta.usuarioId, email: cuenta.email },
-        reporte.url,
+        // Sin reporte permanente: /reportes/[slug] se retiró el 2026-09-27 (plan
+        // «la ficha como centro»). El correo dice «y N más» sin enlace.
+        null,
         matches
       );
       const mensajeId = await sendDigestEmail(cuenta.email, digest);
@@ -194,7 +172,6 @@ export async function runDailyAlertas(opts: { desde?: Date } = {}): Promise<Dail
         .set({
           estado: "enviado",
           matches: matches.length + novedades.total,
-          reporteId: reporte.id,
           // Sin esto el webhook empareja por destinatario y última fila, que
           // atribuye mal en cuanto hay dos envíos al mismo correo.
           proveedorMensajeId: mensajeId,

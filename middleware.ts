@@ -4,8 +4,7 @@ import { updateSession } from "@/src/lib/supabase/middleware";
 /**
  * Refresca la sesión de Supabase en cada request y protege las rutas que
  * requieren cuenta: /pliego (análisis de pliegos), /cuenta (preferencias de
- * alerta), /asistente/* (asistentes de proyecto, Prompt 03) y sus rutas de
- * API (/api/assistant, /api/documents). Una ruta de API que se llama con
+ * alerta) y /diagnostico/historial. Una ruta de API que se llama con
  * fetch() desde un botón (no una navegación) NO va aquí: un redirect de
  * middleware lo sigue en silencio como un 200 con el HTML de /login en vez del
  * 401 que el botón espera. Esa ruta hace su propio gate de sesión. (La lección
@@ -33,9 +32,6 @@ const PROTECTED_PREFIXES = [
   "/pliego",
   "/api/pliego",
   "/cuenta",
-  "/asistente",
-  "/api/assistant",
-  "/api/documents",
 ];
 
 export async function middleware(request: NextRequest) {
