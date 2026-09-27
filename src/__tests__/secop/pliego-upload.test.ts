@@ -24,6 +24,11 @@ vi.mock("@/src/lib/pliego/extractPliegoHybrid", () => ({
   extractPliegoHybrid: (...args: unknown[]) => extractPliegoHybridMock(...args),
 }));
 
+const extractStructuredMock = vi.fn();
+vi.mock("@/src/lib/eligibility/extract-requirements", () => ({
+  extractStructuredRequirements: (...args: unknown[]) => extractStructuredMock(...args),
+}));
+
 import { uploadPliego } from "@/src/lib/secop/pliego-upload";
 import { NO_ENCONTRADO, type PliegoExtraction } from "@/src/lib/pliego/schema";
 
@@ -182,5 +187,84 @@ describe("uploadPliego", () => {
     expect(r).toEqual({ ok: false, error: expect.stringContaining("supera el máximo") });
     expect(extractPliegoHybridMock).not.toHaveBeenCalled();
     expect(insertValuesMock).not.toHaveBeenCalled();
+  });
+
+  it("pasa el Formulario 1 al extractor y rechaza uno de más de 10 MB", async () => {
+    extractPliegoHybridMock.mockResolvedValueOnce({ extraction: extraccion(), origen: ORIGEN_LLM });
+    const xls = Buffer.from("xls");
+    await uploadPliego({
+      procesoId: "CO1.REQ.1",
+      subidoPorUsuarioId: "u1",
+      nombreArchivo: "pliego.pdf",
+      buffer: PDF_BUFFER,
+      formulario1: xls,
+    });
+    expect(extractPliegoHybridMock).toHaveBeenCalledWith(PDF_BUFFER, { formulario1: xls });
+
+    const r = await uploadPliego({
+      procesoId: "CO1.REQ.1",
+      subidoPorUsuarioId: "u1",
+      nombreArchivo: "pliego.pdf",
+      buffer: PDF_BUFFER,
+      formulario1: Buffer.alloc(11 * 1024 * 1024),
+    });
+    expect(r).toEqual({ ok: false, error: expect.stringContaining("Formulario 1") });
+  });
+
+  describe("requisitos habilitantes → requisitos_proceso", () => {
+    const conRequisitos = () =>
+      extraccion({
+        requisitos_habilitantes: {
+          experiencia_especifica: "Dos contratos de acueducto por 100% del presupuesto",
+          capacidad_financiera: NO_ENCONTRADO,
+          capacidad_organizacional: NO_ENCONTRADO,
+        },
+      });
+    const subir = () =>
+      uploadPliego({
+        procesoId: "CO1.REQ.7",
+        subidoPorUsuarioId: "u1",
+        nombreArchivo: "pliego.pdf",
+        buffer: PDF_BUFFER,
+      });
+
+    it("si el pliego declara alguno, los estructura y los cachea por proceso", async () => {
+      extractPliegoHybridMock.mockResolvedValueOnce({
+        extraction: conRequisitos(),
+        origen: ORIGEN_LLM,
+      });
+      const estructurados = { experiencia: { minContratos: 2 } };
+      extractStructuredMock.mockResolvedValueOnce(estructurados);
+
+      expect((await subir()).ok).toBe(true);
+      expect(extractStructuredMock).toHaveBeenCalledWith(conRequisitos().requisitos_habilitantes);
+      expect(insertValuesMock).toHaveBeenCalledWith({
+        procesoId: "CO1.REQ.7",
+        requisitos: estructurados,
+      });
+    });
+
+    it("si no declara ninguno, no llama al modelo", async () => {
+      extractPliegoHybridMock.mockResolvedValueOnce({
+        extraction: extraccion(),
+        origen: ORIGEN_LLM,
+      });
+      await subir();
+      expect(extractStructuredMock).not.toHaveBeenCalled();
+      expect(insertValuesMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("si la estructuración falla, la subida sigue siendo un éxito", async () => {
+      extractPliegoHybridMock.mockResolvedValueOnce({
+        extraction: conRequisitos(),
+        origen: ORIGEN_LLM,
+      });
+      extractStructuredMock.mockRejectedValueOnce(new Error("cuota agotada"));
+      const aviso = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      expect(await subir()).toEqual({ ok: true, gateMatematicoPasado: true });
+      expect(aviso).toHaveBeenCalledWith(expect.stringContaining("cuota agotada"));
+      aviso.mockRestore();
+    });
   });
 });

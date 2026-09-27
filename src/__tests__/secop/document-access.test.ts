@@ -7,7 +7,6 @@ import {
   classifyProbeResponse,
   probeDocument,
   canExtract,
-  assertExtractable,
   type DocumentAccess,
 } from "@/src/lib/secop/document-access";
 import { FIELDS_PROCESOS } from "@/src/lib/secop/config";
@@ -219,10 +218,5 @@ describe("gate de extracción (C2)", () => {
     (["RESTRICTED", "NOT_PUBLISHED", "UNKNOWN"] as DocumentAccess[]).forEach((s) =>
       expect(canExtract(s)).toBe(false)
     );
-  });
-
-  it("assertExtractable: lanza para no-PUBLIC, no lanza para PUBLIC", () => {
-    expect(() => assertExtractable("PUBLIC")).not.toThrow();
-    expect(() => assertExtractable("RESTRICTED")).toThrow(/solo procesa documentos PUBLIC/);
   });
 });

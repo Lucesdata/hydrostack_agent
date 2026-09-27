@@ -8,8 +8,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // una rechazada persistente (`mockRejectedValue`, sin "Once") hace que
 // `@vitest/spy` reporte un "unhandled rejection" fantasma contra el test
 // siguiente — reproducido incluso con un mock ajeno a Drizzle y sin
-// `Promise.all`/`allSettled` de por medio, así que no es un bug de
-// `getCifrasSector`. Un `vi.fn()` fresco por test lo evita.
+// `Promise.all`/`allSettled` de por medio. Un `vi.fn()` fresco por test lo
+// evita.
 const mocks = vi.hoisted(() => ({ contar: vi.fn() }));
 
 vi.mock("@/src/lib/db/client", () => ({
@@ -18,13 +18,12 @@ vi.mock("@/src/lib/db/client", () => ({
   },
 }));
 
-import { getCifrasSector } from "@/src/lib/landing/cifras";
+import { getProcesosVigilados } from "@/src/lib/landing/cifras";
 
-describe("getCifrasSector", () => {
+describe("getProcesosVigilados", () => {
   // contar() logea con console.warn cuando degrada por un fallo real (ver
   // cifras.ts). Los tests de degradación lo disparan a propósito — se
-  // silencia aquí, igual que se silenciaría cualquier log esperado, para que
-  // la salida del test quede limpia.
+  // silencia aquí para que la salida del test quede limpia.
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -36,50 +35,21 @@ describe("getCifrasSector", () => {
     warnSpy.mockRestore();
   });
 
-  it("devuelve los tres conteos cuando todas las consultas responden", async () => {
-    mocks.contar
-      .mockResolvedValueOnce([{ n: 90076 }])
-      .mockResolvedValueOnce([{ n: 27035 }])
-      .mockResolvedValueOnce([{ n: 2114 }]);
-
-    expect(await getCifrasSector()).toEqual({
-      procesosVigilados: 90076,
-      oferentesHistoricos: 27035,
-      sanciones: 2114,
-    });
+  it("devuelve el conteo cuando la consulta responde", async () => {
+    mocks.contar.mockResolvedValueOnce([{ n: 90076 }]);
+    expect(await getProcesosVigilados()).toBe(90076);
   });
 
-  it("degrada a null solo la cifra que falla, no las demás", async () => {
-    mocks.contar
-      .mockResolvedValueOnce([{ n: 90076 }])
-      .mockRejectedValueOnce(new Error("timeout"))
-      .mockResolvedValueOnce([{ n: 2114 }]);
-
-    expect(await getCifrasSector()).toEqual({
-      procesosVigilados: 90076,
-      oferentesHistoricos: null,
-      sanciones: 2114,
-    });
-  });
-
-  it("nunca lanza: si todo falla devuelve los tres en null", async () => {
-    mocks.contar.mockRejectedValue(new Error("caída"));
-    expect(await getCifrasSector()).toEqual({
-      procesosVigilados: null,
-      oferentesHistoricos: null,
-      sanciones: null,
-    });
+  it("nunca lanza: si la consulta falla devuelve null y deja rastro", async () => {
+    mocks.contar.mockRejectedValueOnce(new Error("caída"));
+    expect(await getProcesosVigilados()).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("caída"));
   });
 
   it("degrada a null si la fila viene sin número utilizable", async () => {
-    mocks.contar
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ n: null }])
-      .mockResolvedValueOnce([{ n: 2114 }]);
-
-    const r = await getCifrasSector();
-    expect(r.procesosVigilados).toBeNull();
-    expect(r.oferentesHistoricos).toBeNull();
-    expect(r.sanciones).toBe(2114);
+    mocks.contar.mockResolvedValueOnce([]);
+    expect(await getProcesosVigilados()).toBeNull();
+    mocks.contar.mockResolvedValueOnce([{ n: null }]);
+    expect(await getProcesosVigilados()).toBeNull();
   });
 });

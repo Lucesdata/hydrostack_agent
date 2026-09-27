@@ -36,20 +36,22 @@ export type Capacidad =
   | "alertas"
   | "filtros"
   | "competidores"
-  | "pliego_extraer"
-  | "asistentes";
+  | "pliego_extraer";
 
 /**
  * La tabla. `veredicto_resumen` es el semáforo agregado y el estado de cada
  * compuerta; `veredicto_detalle` es el `reason` que explica cada estado — esa
  * es la frontera de captura de leads del producto.
  *
- * `pliego_extraer` y `asistentes` están en `pro` pero la frontera todavía no se
- * aplica: hoy esas rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso
- * siguen. Activarlas es cambiar sus handlers para consultar `puede()`.
+ * `pliego_extraer` está en `pro` pero la frontera todavía no se aplica: hoy sus
+ * rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso siguen. Activarla es
+ * cambiar sus handlers para consultar `puede()`. (`asistentes` también era
+ * `pro`; salió con los asistentes el 2026-09-27.)
  *
  * `competidores` (SDD módulo 2) es `gratis`: el histórico es dato de mercado, no
- * de nadie, pero navegarlo es una función de producto y no una landing. Los
+ * de nadie, pero navegarlo es una función de producto y no una landing. Desde
+ * el 2026-09-27 se aplica en GET /api/ficha/[id]/rival/[key], el historial de
+ * cada rival en la §7 de la ficha. Los
  * reportes públicos de mercado (`al_reportes` con `visibilidad='publico'`) son
  * otra cosa y ésos sí van sin cuenta.
  *
@@ -76,7 +78,6 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   filtros: "gratis",
   competidores: "gratis",
   pliego_extraer: "pro",
-  asistentes: "pro",
 };
 
 /** Todas las capacidades, para iterarlas sin repetir la lista a mano. */

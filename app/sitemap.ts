@@ -29,21 +29,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = appUrl().replace(/\/$/, "");
   const ahora = new Date();
 
-  const fijas = [
-    "",
-    "/licitaciones",
-    "/licitaciones/adjudicados",
-    "/diagnostico",
-    "/pliego",
-    "/soluciones",
-    "/nosotros",
-    "/precios",
-  ].map((ruta) => ({
-    url: `${base}${ruta}`,
-    lastModified: ahora,
-    changeFrequency: "weekly" as const,
-    priority: ruta === "" ? 1 : 0.7,
-  }));
+  const fijas = ["", "/licitaciones", "/licitaciones/adjudicados", "/diagnostico", "/precios"].map(
+    (ruta) => ({
+      url: `${base}${ruta}`,
+      lastModified: ahora,
+      changeFrequency: "weekly" as const,
+      priority: ruta === "" ? 1 : 0.7,
+    })
+  );
 
   // Si la base no responde, el sitemap sale con las páginas fijas en vez de
   // romper la ruta entera: media superficie indexable es mejor que un 500.

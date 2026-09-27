@@ -3,14 +3,13 @@ import { updateSession } from "@/src/lib/supabase/middleware";
 
 /**
  * Refresca la sesión de Supabase en cada request y protege las rutas que
- * requieren cuenta: /pliego (análisis de pliegos), /cuenta (preferencias de
- * alerta), /asistente/* (asistentes de proyecto, Prompt 03) y sus rutas de
- * API (/api/assistant, /api/documents). /api/mercado/waitlist NO está aquí a
- * propósito: es un fetch() disparado desde un botón en la home (no una
- * navegación), y un redirect de middleware ahí lo sigue en silencio como un
- * 200 con el HTML de /login en vez de dar el 401 que el botón espera — el
- * propio route handler ya hace su gate de sesión (ver
- * app/api/mercado/waitlist/route.ts) y eso es lo único que debe protegerlo.
+ * requieren cuenta: /cuenta (preferencias de alerta) y /diagnostico/historial.
+ * La subida del pliego desde la ficha no pasa por aquí: la ficha es pública y
+ * la acción de servidor exige sesión por su cuenta (pliego-actions.ts). Una ruta de API que se llama con
+ * fetch() desde un botón (no una navegación) NO va aquí: un redirect de
+ * middleware lo sigue en silencio como un 200 con el HTML de /login en vez del
+ * 401 que el botón espera. Esa ruta hace su propio gate de sesión. (La lección
+ * salió de /api/mercado/waitlist, retirada el 2026-09-27.)
  * Este archivo hace UNA sola distinción: anónimo o con sesión, por prefijo de
  * ruta. No puede hacer más: corre en el runtime Edge y no puede consultar
  * Postgres, así que no puede leer `usuario.plan` ni decidir nada sobre el
@@ -31,12 +30,7 @@ const PROTECTED_PREFIXES = [
   // Solo este subcamino: /diagnostico a secas es público y debe seguir siéndolo,
   // porque responder sin cuenta es el flujo principal del módulo.
   "/diagnostico/historial",
-  "/pliego",
-  "/api/pliego",
   "/cuenta",
-  "/asistente",
-  "/api/assistant",
-  "/api/documents",
 ];
 
 export async function middleware(request: NextRequest) {

@@ -1,9 +1,10 @@
 /**
  * Quién compra: las entidades con más procesos abiertos de agua y saneamiento.
  *
- * Es la otra mitad de `/competidores` (quién se presenta y gana). Aquel pide
- * cuenta porque cruza histórico de adjudicaciones; esto son los mismos procesos
- * abiertos que cuentan las facetas, dato público, y se ve sin cuenta.
+ * Es la otra mitad de «Quién suele competir aquí», la §7 de cada ficha (quién se
+ * presenta y gana; antes /competidores). Aquel pide cuenta para el historial
+ * porque cruza adjudicaciones; esto son los mismos procesos abiertos que
+ * cuentan las facetas, dato público, y se ve sin cuenta.
  *
  * Una sola consulta: el `count(*) over ()` se evalúa después del GROUP BY y
  * antes del LIMIT, así que trae cuántas entidades compran en total sin una

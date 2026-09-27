@@ -41,8 +41,8 @@ export const usuario = pgTable("usuario", {
    * `envio_log.tipo`: agregar un valor no debe pedir migración.
    *
    * Hoy toda cuenta es 'gratis' y ningún handler la lee: la frontera de `pro`
-   * (pliego_extraer, asistentes) está declarada en la política pero no
-   * aplicada, y esas rutas ya exigen cuenta por `PROTECTED_PREFIXES`.
+   * (pliego_extraer) está declarada en la política pero no aplicada, y sus
+   * rutas ya exigen cuenta por `PROTECTED_PREFIXES`.
    */
   plan: text("plan").notNull().default("gratis"),
 }).enableRLS();

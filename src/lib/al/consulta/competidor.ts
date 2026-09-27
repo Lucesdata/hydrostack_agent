@@ -1,334 +1,146 @@
 /**
- * Ruta rápida de consulta sobre el histórico (SDD §8.1). SQL parametrizado,
- * respuesta en milisegundos, coste cero por consulta. Sin IA.
+ * Un rival visto desde una ficha: su historial en procesos **comparables** al
+ * de la ficha (mismo tipo de proyecto, mismo departamento), no su perfil global.
  *
- * Responde las dos preguntas del módulo 2:
- *   - `historialCompetidor` → **contra quién compito** y con qué frecuencia gana.
- *   - `precioReferencia`    → **a qué precio se gana** en una familia y una zona.
+ * Es lo que queda del módulo 2 del SDD tras mudarlo a la ficha (plan «la ficha
+ * como centro», PR 3, 2026-09-27). Antes vivía en /competidores/[key], una
+ * página por empresa con todo su histórico; la pregunta de quien está en una
+ * ficha es más estrecha — «¿cómo le va a este en obras como esta, aquí?» — y
+ * la respuesta también.
  *
- * Limitación heredada de la fuente, y hay que decirla en la UI: el NIT solo
- * aparece en el 49% de las adjudicaciones. Un competidor sin NIT publicado se
- * consulta por `proveedorKey` (`nom:<nombre normalizado>`), que es la llave con
- * la que se deduplica.
+ * "Comparable" es exactamente el criterio de `competidoresComparables()`
+ * (`src/lib/secop/ficha.ts`): el histórico unido a `proceso` por `proceso_id`,
+ * mismo `tipo_proyecto`, misma `departamento_codigo` y excluido el propio
+ * proceso. Si cambia allí, cambia aquí.
+ *
+ * Las sanciones NO se recortan: una multa pesa igual la haya recibido en esta
+ * zona o en otra. Van con sus dos vías separadas (`sancionesDeProveedor`).
+ *
+ * Limitación heredada de la fuente: el NIT solo aparece en el 49% de las
+ * adjudicaciones. Sin NIT, el rival se identifica por `nom:<nombre>` y sus
+ * sanciones no se pueden cruzar por documento.
  */
 
 import { sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { sancionesDeProveedor, type HistorialSancionatorio } from "@/src/lib/al/sanciones/consulta";
-import { normalizarNombre } from "@/src/lib/al/historico/mapear";
+import { slugDeProceso } from "@/src/lib/secop/slug";
+import type { TipoProyecto } from "@/src/lib/classify/tipo-proyecto";
 
-export interface AgregadoPorEntidad {
+export interface ProcesoDeReferencia {
+  /** Uuid interno de `proceso`: el de la ficha, que se excluye. */
+  id: string;
+  tipoProyecto: TipoProyecto;
+  departamentoCodigo: string;
+}
+
+export interface ParticipacionComparable {
+  /** Slug de la ficha de ese proceso, para enlazarla. */
+  slug: string;
+  objeto: string | null;
   entidad: string | null;
-  entidadNit: string | null;
-  participaciones: number;
-  ganadas: number;
-  valorGanado: string;
+  fecha: string | null;
+  adjudicado: boolean;
 }
 
-export interface AgregadoPorAnio {
-  anio: number;
-  participaciones: number;
-  ganadas: number;
-  valorGanado: string;
-}
-
-export interface Rival {
-  proveedorKey: string;
-  nombre: string;
-  encuentros: number;
-  /** Veces que el rival ganó un proceso en el que ambos se presentaron. */
-  ganadosPorElRival: number;
-}
-
-export interface HistorialCompetidor {
-  proveedor: { proveedorKey: string; nitCanonico: string | null; nombre: string | null };
-  participaciones: number;
-  adjudicaciones: number;
-  /** adjudicaciones / participaciones. NULL sin participaciones. */
-  tasaExito: number | null;
-  valorTotalAdjudicado: string;
-  /**
-   * Mediana de valor_adjudicado / valor_estimado en lo que ganó. Por debajo de 1
-   * ganó bajando el precio de referencia; por encima, la entidad subestimó.
-   * NULL si no hay ninguna adjudicación con ambos valores.
-   */
-  ratioAdjudicadoSobreEstimado: number | null;
-  porEntidad: AgregadoPorEntidad[];
-  porAnio: AgregadoPorAnio[];
-  /** Con quién se cruza más en los mismos procesos. Es el "contra quién compito". */
-  rivalesFrecuentes: Rival[];
-  /** Historial sancionatorio (módulo 3). NO son inhabilidades: son multas. */
-  sanciones: HistorialSancionatorio;
-}
-
-/**
- * Drizzle no serializa un array de JS como array de Postgres: lo bindea como
- * escalar y el `::text[]` revienta con "malformed array literal". Se construye
- * el literal a mano; `null` deja el filtro inerte.
- */
-function arrayLiteral(a: string[] | null | undefined): string | null {
-  if (!a || a.length === 0) return null;
-  return `{${a.map((s) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
-}
-
-/** Acepta el NIT (dígitos) o directamente la `proveedor_key`. */
-function aKey(idOrNit: string): string {
-  return /^\d+$/.test(idOrNit) ? `nit:${idOrNit}` : idOrNit;
-}
-
-export async function historialCompetidor(
-  idOrNit: string,
-  opts: { limiteEntidades?: number; limiteRivales?: number } = {}
-): Promise<HistorialCompetidor | null> {
-  const key = aKey(idOrNit);
-  const topEntidades = opts.limiteEntidades ?? 10;
-  const topRivales = opts.limiteRivales ?? 10;
-
-  const base = await db.execute<{
-    proveedor_key: string;
-    proveedor_nit: string | null;
-    nombre: string | null;
-    participaciones: string;
-    adjudicaciones: string;
-    valor_total: string | null;
-    ratio: string | null;
-  }>(sql`
-    SELECT
-      h.proveedor_key,
-      max(h.proveedor_nit)                                        AS proveedor_nit,
-      max(h.proveedor_nombre)                                     AS nombre,
-      count(*)                                                    AS participaciones,
-      count(*) FILTER (WHERE h.adjudicado)                        AS adjudicaciones,
-      coalesce(sum(h.valor_adjudicado) FILTER (WHERE h.adjudicado), 0) AS valor_total,
-      percentile_cont(0.5) WITHIN GROUP (
-        ORDER BY h.valor_adjudicado / h.valor_estimado
-      ) FILTER (
-        WHERE h.adjudicado AND h.valor_adjudicado IS NOT NULL
-          AND h.valor_estimado IS NOT NULL AND h.valor_estimado > 0
-      )                                                           AS ratio
-    FROM al_oferentes_historico h
-    WHERE h.proveedor_key = ${key}
-    GROUP BY h.proveedor_key
-  `);
-
-  const b = base.rows[0];
-  if (!b) return null;
-
-  const porEntidad = await db.execute<{
-    entidad: string | null;
-    entidad_nit: string | null;
-    participaciones: string;
-    ganadas: string;
-    valor_ganado: string;
-  }>(sql`
-    SELECT e.nombre AS entidad, h.entidad_nit,
-           count(*) AS participaciones,
-           count(*) FILTER (WHERE h.adjudicado) AS ganadas,
-           coalesce(sum(h.valor_adjudicado) FILTER (WHERE h.adjudicado), 0) AS valor_ganado
-    FROM al_oferentes_historico h
-    LEFT JOIN entidad e ON e.id = h.entidad_id
-    WHERE h.proveedor_key = ${key}
-    GROUP BY 1, 2
-    ORDER BY participaciones DESC
-    LIMIT ${topEntidades}
-  `);
-
-  const porAnio = await db.execute<{
-    anio: number;
-    participaciones: string;
-    ganadas: string;
-    valor_ganado: string;
-  }>(sql`
-    SELECT extract(year FROM coalesce(h.fecha_adjudicacion, h.fecha_publicacion))::int AS anio,
-           count(*) AS participaciones,
-           count(*) FILTER (WHERE h.adjudicado) AS ganadas,
-           coalesce(sum(h.valor_adjudicado) FILTER (WHERE h.adjudicado), 0) AS valor_ganado
-    FROM al_oferentes_historico h
-    WHERE h.proveedor_key = ${key}
-      AND coalesce(h.fecha_adjudicacion, h.fecha_publicacion) IS NOT NULL
-    GROUP BY 1
-    ORDER BY 1
-  `);
-
-  /**
-   * Rivales: quién más se presentó a los mismos procesos. Un self-join sobre
-   * `secop_proceso_id` excluyéndose a sí mismo — la consulta que justifica que
-   * el histórico guarde también a los que pierden.
-   */
-  const rivales = await db.execute<{
-    proveedor_key: string;
-    nombre: string;
-    encuentros: string;
-    ganados_por_el_rival: string;
-  }>(sql`
-    SELECT r.proveedor_key,
-           max(r.proveedor_nombre) AS nombre,
-           count(*) AS encuentros,
-           count(*) FILTER (WHERE r.adjudicado) AS ganados_por_el_rival
-    FROM al_oferentes_historico yo
-    JOIN al_oferentes_historico r
-      ON r.secop_proceso_id = yo.secop_proceso_id
-     AND r.proveedor_key <> yo.proveedor_key
-    WHERE yo.proveedor_key = ${key}
-    GROUP BY r.proveedor_key
-    ORDER BY encuentros DESC, ganados_por_el_rival DESC
-    LIMIT ${topRivales}
-  `);
-
-  const sanciones = await sancionesDeProveedor(b.proveedor_nit ?? b.proveedor_key);
-
-  const participaciones = Number(b.participaciones);
-  const adjudicaciones = Number(b.adjudicaciones);
-
-  return {
-    proveedor: {
-      proveedorKey: b.proveedor_key,
-      nitCanonico: b.proveedor_nit,
-      nombre: b.nombre,
-    },
-    participaciones,
-    adjudicaciones,
-    tasaExito: participaciones > 0 ? adjudicaciones / participaciones : null,
-    valorTotalAdjudicado: b.valor_total ?? "0",
-    ratioAdjudicadoSobreEstimado: b.ratio === null ? null : Number(b.ratio),
-    porEntidad: porEntidad.rows.map((r) => ({
-      entidad: r.entidad,
-      entidadNit: r.entidad_nit,
-      participaciones: Number(r.participaciones),
-      ganadas: Number(r.ganadas),
-      valorGanado: r.valor_ganado,
-    })),
-    porAnio: porAnio.rows.map((r) => ({
-      anio: r.anio,
-      participaciones: Number(r.participaciones),
-      ganadas: Number(r.ganadas),
-      valorGanado: r.valor_ganado,
-    })),
-    rivalesFrecuentes: rivales.rows.map((r) => ({
-      proveedorKey: r.proveedor_key,
-      nombre: r.nombre,
-      encuentros: Number(r.encuentros),
-      ganadosPorElRival: Number(r.ganados_por_el_rival),
-    })),
-    sanciones,
-  };
-}
-
-export interface PrecioReferencia {
-  n: number;
-  medianaRatio: number | null;
-  p25: number | null;
-  p75: number | null;
-  medianaValorAdjudicado: string | null;
-}
-
-/**
- * Distribución del ratio adjudicado/estimado. Solo cuenta adjudicaciones con
- * ambos valores: `precio_base = 0` es frecuente en la fuente y se guardó como
- * NULL, no como cero, precisamente para que no envenene esta mediana.
- */
-export async function precioReferencia(
-  params: {
-    unspsc?: string[];
-    divipola?: string[];
-    desde?: string;
-  } = {}
-): Promise<PrecioReferencia> {
-  const unspsc = arrayLiteral(params.unspsc);
-  const divipola = arrayLiteral(params.divipola);
-
-  const res = await db.execute<{
-    n: string;
-    mediana: string | null;
-    p25: string | null;
-    p75: string | null;
-    mediana_valor: string | null;
-  }>(sql`
-    WITH base AS (
-      SELECT h.valor_adjudicado, h.valor_estimado,
-             h.valor_adjudicado / h.valor_estimado AS ratio
-      FROM al_oferentes_historico h
-      WHERE h.adjudicado
-        AND h.valor_adjudicado IS NOT NULL
-        AND h.valor_estimado IS NOT NULL AND h.valor_estimado > 0
-        AND (${unspsc}::text[] IS NULL OR h.unspsc = ANY(${unspsc}::text[]))
-        AND (${divipola}::text[] IS NULL OR EXISTS (
-              SELECT 1 FROM unnest(${divipola}::text[]) d
-              WHERE h.geografia_id LIKE d || '%'))
-        AND (${params.desde ?? null}::date IS NULL
-             OR h.fecha_adjudicacion >= ${params.desde ?? null}::date)
-    )
-    SELECT count(*) AS n,
-           percentile_cont(0.5)  WITHIN GROUP (ORDER BY ratio) AS mediana,
-           percentile_cont(0.25) WITHIN GROUP (ORDER BY ratio) AS p25,
-           percentile_cont(0.75) WITHIN GROUP (ORDER BY ratio) AS p75,
-           percentile_cont(0.5)  WITHIN GROUP (ORDER BY valor_adjudicado)::text AS mediana_valor
-    FROM base
-  `);
-
-  const r = res.rows[0];
-  return {
-    n: Number(r.n),
-    medianaRatio: r.mediana === null ? null : Number(r.mediana),
-    p25: r.p25 === null ? null : Number(r.p25),
-    p75: r.p75 === null ? null : Number(r.p75),
-    medianaValorAdjudicado: r.mediana_valor,
-  };
-}
-
-export interface FilaCompetidor {
-  [k: string]: unknown;
+export interface HistorialComparable {
   proveedorKey: string;
   nombre: string | null;
   nitCanonico: string | null;
   participaciones: number;
   adjudicaciones: number;
-  valorGanado: string | null;
-  ultimaFecha: string | null;
+  /** adjudicaciones / participaciones; `null` sin participaciones. */
+  tasaExito: number | null;
+  /**
+   * Mediana de valor_adjudicado / valor_estimado en lo que ganó aquí. Por debajo
+   * de 1 ganó bajando el presupuesto. `null` si no hay adjudicación con ambos.
+   */
+  ratioAdjudicadoSobreEstimado: number | null;
+  /** Las más recientes primero; como mucho `limiteRecientes`. */
+  recientes: ParticipacionComparable[];
+  sanciones: HistorialSancionatorio;
 }
 
-/**
- * Listado de competidores del sector, ordenado por adjudicaciones.
- *
- * `q` filtra por nombre o NIT. La insensibilidad a acentos NO se resuelve con
- * `unaccent` —la extensión no está instalada y no vale añadir una a la base por
- * un buscador— sino reusando lo que ya se guarda: `proveedor_key` contiene el
- * nombre normalizado por `normalizarNombre` (mayúsculas, sin tildes, sin
- * puntuación). Buscar contra esa columna da lo mismo, gratis y sin migración.
- */
-export async function topCompetidores(
-  params: {
-    q?: string | null;
-    limit?: number;
-  } = {}
-): Promise<FilaCompetidor[]> {
-  const limit = Math.min(params.limit ?? 50, 200);
-  const q = params.q?.trim() ?? "";
-  const patron = `%${q}%`;
-  /** El mismo normalizador con el que se construyó `proveedor_key`. */
-  const patronNorm = `%${normalizarNombre(q)}%`;
+/** Las condiciones de "comparable", en SQL, sobre `h` (histórico) y `pr` (proceso). */
+const comparable = (ref: ProcesoDeReferencia) => sql`
+  pr.deleted_at IS NULL
+  AND pr.tipo_proyecto = ${ref.tipoProyecto}
+  AND pr.id <> ${ref.id}
+  AND g.departamento_codigo = ${ref.departamentoCodigo}
+`;
 
-  const res = await db.execute<FilaCompetidor>(sql`
-    SELECT proveedor_key                                   AS "proveedorKey",
-           max(proveedor_nombre)                           AS nombre,
-           max(proveedor_nit)                              AS "nitCanonico",
-           count(*)::int                                   AS participaciones,
-           count(*) FILTER (WHERE adjudicado)::int         AS adjudicaciones,
-           coalesce(sum(valor_adjudicado) FILTER (WHERE adjudicado), 0)::text AS "valorGanado",
-           max(fecha_adjudicacion)::text                   AS "ultimaFecha"
-      FROM al_oferentes_historico
-     WHERE ${
-       q === ""
-         ? sql`TRUE`
-         : sql`(
-             lower(proveedor_nombre) LIKE lower(${patron})
-             OR proveedor_key LIKE ${patronNorm}
-             OR proveedor_nit LIKE ${patron}
-           )`
-     }
-     GROUP BY proveedor_key
-     ORDER BY count(*) FILTER (WHERE adjudicado) DESC, count(*) DESC
-     LIMIT ${limit}
+export async function historialComparable(
+  proveedorKey: string,
+  ref: ProcesoDeReferencia,
+  opts: { limiteRecientes?: number } = {}
+): Promise<HistorialComparable | null> {
+  const limite = opts.limiteRecientes ?? 5;
+
+  const base = await db.execute<{
+    nombre: string | null;
+    nit: string | null;
+    participaciones: string;
+    adjudicaciones: string;
+    ratio: string | null;
+  }>(sql`
+    SELECT max(h.proveedor_nombre)                       AS nombre,
+           max(h.proveedor_nit)                          AS nit,
+           count(*)                                      AS participaciones,
+           count(*) FILTER (WHERE h.adjudicado)          AS adjudicaciones,
+           percentile_cont(0.5) WITHIN GROUP (
+             ORDER BY h.valor_adjudicado / h.valor_estimado
+           ) FILTER (
+             WHERE h.adjudicado AND h.valor_adjudicado IS NOT NULL
+               AND h.valor_estimado IS NOT NULL AND h.valor_estimado > 0
+           )                                             AS ratio
+    FROM al_oferentes_historico h
+    JOIN proceso pr ON pr.id = h.proceso_id
+    JOIN geografia g ON g.codigo_divipola = pr.geografia_id
+    WHERE h.proveedor_key = ${proveedorKey} AND ${comparable(ref)}
   `);
-  return res.rows;
+
+  const b = base.rows[0];
+  const participaciones = Number(b?.participaciones ?? 0);
+  if (!b || participaciones === 0) return null;
+
+  const recientes = await db.execute<{
+    secop_proceso_id: string;
+    objeto: string | null;
+    entidad: string | null;
+    fecha: string | null;
+    adjudicado: boolean;
+  }>(sql`
+    SELECT pr.secop_proceso_id, pr.objeto, e.nombre AS entidad,
+           coalesce(h.fecha_adjudicacion, h.fecha_publicacion)::text AS fecha,
+           h.adjudicado
+    FROM al_oferentes_historico h
+    JOIN proceso pr ON pr.id = h.proceso_id
+    JOIN geografia g ON g.codigo_divipola = pr.geografia_id
+    LEFT JOIN entidad e ON e.id = pr.entidad_id
+    WHERE h.proveedor_key = ${proveedorKey} AND ${comparable(ref)}
+    ORDER BY coalesce(h.fecha_adjudicacion, h.fecha_publicacion) DESC NULLS LAST,
+             pr.secop_proceso_id
+    LIMIT ${limite}
+  `);
+
+  const adjudicaciones = Number(b.adjudicaciones);
+  const sanciones = await sancionesDeProveedor(b.nit ?? proveedorKey);
+
+  return {
+    proveedorKey,
+    nombre: b.nombre,
+    nitCanonico: b.nit,
+    participaciones,
+    adjudicaciones,
+    tasaExito: adjudicaciones / participaciones,
+    ratioAdjudicadoSobreEstimado: b.ratio === null ? null : Number(b.ratio),
+    recientes: recientes.rows.map((r) => ({
+      slug: slugDeProceso(r.objeto, r.secop_proceso_id),
+      objeto: r.objeto,
+      entidad: r.entidad,
+      fecha: r.fecha,
+      adjudicado: r.adjudicado,
+    })),
+    sanciones,
+  };
 }

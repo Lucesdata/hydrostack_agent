@@ -1,49 +1,34 @@
 import { NextResponse } from "next/server";
-import { getNuevos7d, getEnJuegoMes, getDestacado } from "@/src/lib/secop/landingStats";
-import { getCifrasSector, type CifrasSector } from "@/src/lib/landing/cifras";
-import { getUltimaConsultaSecop } from "@/src/lib/landing/ultima-consulta";
+import { getProcesosVigilados } from "@/src/lib/landing/cifras";
 
 export const runtime = "nodejs";
 export const revalidate = 1800;
 
-const SECTOR_VACIO: CifrasSector = {
-  procesosVigilados: null,
-  oferentesHistoricos: null,
-  sanciones: null,
-};
-
 export interface LandingStatsResponse {
-  nuevos7d: number | null;
-  enJuego: { totalCop: number | null; procesos: number | null };
-  destacado: Awaited<ReturnType<typeof getDestacado>>;
-  /** Cifras del sector leídas de la base (no de Socrata). */
-  sector: CifrasSector;
-  /** Fin de la última consulta de la ingesta a SECOP II (ISO), de `sync_log`. */
-  ultimaConsulta: string | null;
+  /** Leído de la base (no de Socrata). `null` si la base no responde. */
+  sector: { procesosVigilados: number | null };
 }
 
 /**
- * Agregados en vivo para las dashboard cards del landing. Cada query es
- * independiente (Promise.allSettled): si Socrata falla para una, las otras
- * siguen sirviendo dato real y la card fallida degrada a null — nunca se
- * lanza un error al cliente.
+ * La línea bajo el CTA del hero: cuántos procesos del sector vigila el
+ * producto. Es lo único que la portada lee de aquí.
+ *
+ * Hasta el 2026-09-27 servía también `nuevos7d`, `enJuego`, `destacado`,
+ * `ultimaConsulta` y las otras dos cifras del sector —tres consultas en vivo
+ * a Socrata y cuatro a la base por visita— para las tarjetas y la banda "El
+ * mercado ahora", que ya no existen. Se conserva la forma `sector.*` para no
+ * tocar al cliente. Nunca lanza: sin base, la cifra es `null` y el hero pinta
+ * la frase sin número.
  */
 export async function GET() {
-  const [nuevos7d, enJuego, destacado, sector, ultimaConsulta] = await Promise.allSettled([
-    getNuevos7d(),
-    getEnJuegoMes(),
-    getDestacado(),
-    getCifrasSector(),
-    getUltimaConsultaSecop(),
-  ]);
+  let procesosVigilados: number | null = null;
+  try {
+    procesosVigilados = await getProcesosVigilados();
+  } catch {
+    // `getProcesosVigilados` ya degrada a null; esto es la red por si alguna vez lanza.
+  }
 
-  const body: LandingStatsResponse = {
-    nuevos7d: nuevos7d.status === "fulfilled" ? nuevos7d.value : null,
-    enJuego: enJuego.status === "fulfilled" ? enJuego.value : { totalCop: null, procesos: null },
-    destacado: destacado.status === "fulfilled" ? destacado.value : null,
-    sector: sector.status === "fulfilled" ? sector.value : SECTOR_VACIO,
-    ultimaConsulta: ultimaConsulta.status === "fulfilled" ? ultimaConsulta.value : null,
-  };
+  const body: LandingStatsResponse = { sector: { procesosVigilados } };
 
   return NextResponse.json(body, {
     headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },

@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
 import CierreFicha from "@/src/components/secop/ficha/CierreFicha";
+import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
+import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
+import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
 import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
@@ -81,9 +84,13 @@ export default async function FichaPage({ params }: Props) {
   // cambiado pero el id correcto, la página responde y la canónica de arriba
   // apunta al slug bueno. No se redirige para no pagar una invocación extra.
   const canonico = slugDeProceso(p.objeto, p.secopProcesoId);
-  const competidores = await competidoresComparables(p);
+  const [competidores, pliego] = await Promise.all([
+    competidoresComparables(p),
+    pliegoDeProceso(p.secopProcesoId),
+  ]);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const valor = montoConDato(p.valorEstimado);
+  const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
 
   const schema = {
     "@context": "https://schema.org",
@@ -190,36 +197,54 @@ export default async function FichaPage({ params }: Props) {
           </div>
         </section>
 
-        {/* 4 — Qué exige el pliego */}
-        <section className="fi-sec">
+        {/* 4 — Qué exige el pliego. El `id` es el ancla a la que vuelve la subida. */}
+        <section className="fi-sec" id="pliego">
           <h2 className="fi-h2">Qué exige el pliego</h2>
-          <p className="fi-vacio">
-            <strong>Todavía no hay requisitos extraídos para este proceso.</strong> Los requisitos
-            habilitantes —y si cada uno es subsanable o no— están en el pliego, no en los datos
-            abiertos del SECOP. El extractor existe y funciona; lo que falta es que el pliego de
-            este proceso se haya procesado aquí. Consulta el expediente original para comprobar si
-            el pliego está disponible y qué exige.
-          </p>
+          <PliegoFicha pliego={pliego} slug={canonico} urlSecop={p.url} />
         </section>
 
         {/* 5 — Cronograma */}
         <section className="fi-sec">
           <h2 className="fi-h2">Cronograma</h2>
-          <p className="fi-vacio">
-            {p.fechaRecepcion ? (
-              <>
-                Recepción de ofertas hasta el <strong>{fecha(p.fechaRecepcion)}</strong>. El resto
-                de hitos vive en el cronograma del pliego, que aún no se ha procesado para este
-                proceso.
-              </>
-            ) : (
-              <>
-                <strong>El SECOP no publica la fecha de cierre en este dataset.</strong> La ventana
-                de apertura es lo único que llega ({p.estadoApertura ?? "sin dato"}); el cronograma
-                completo está en el pliego.
-              </>
-            )}
-          </p>
+          {pliego && pliego.cronograma.length > 0 ? (
+            <div className="fi-panel">
+              <table className="fi-tabla">
+                <thead>
+                  <tr>
+                    <th>Hito</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pliego.cronograma.map((h, i) => (
+                    <tr key={i}>
+                      <td>{h.hito}</td>
+                      <td>{h.fecha ?? "Sin fecha en el pliego"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="fi-n2-nota">
+                Del cronograma del pliego procesado en la sección anterior.
+              </p>
+            </div>
+          ) : (
+            <p className="fi-vacio">
+              {p.fechaRecepcion ? (
+                <>
+                  Recepción de ofertas hasta el <strong>{fecha(p.fechaRecepcion)}</strong>. El resto
+                  de hitos vive en el cronograma del pliego, que aún no se ha procesado para este
+                  proceso.
+                </>
+              ) : (
+                <>
+                  <strong>El SECOP no publica la fecha de cierre en este dataset.</strong> La
+                  ventana de apertura es lo único que llega ({p.estadoApertura ?? "sin dato"}); el
+                  cronograma completo está en el pliego.
+                </>
+              )}
+            </p>
+          )}
         </section>
 
         {/* 6 — Documentos */}
@@ -248,35 +273,7 @@ export default async function FichaPage({ params }: Props) {
         <section className="fi-sec">
           <h2 className="fi-h2">Quién suele competir aquí</h2>
           {competidores.length > 0 ? (
-            <div className="fi-panel">
-              <table className="fi-tabla">
-                <thead>
-                  <tr>
-                    <th>Oferente</th>
-                    <th className="num" style={{ textAlign: "right" }}>
-                      Presentados
-                    </th>
-                    <th className="num" style={{ textAlign: "right" }}>
-                      Ganados
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {competidores.map((c) => (
-                    <tr key={c.nombre ?? Math.random()}>
-                      <td>{c.nombre ?? "Sin nombre"}</td>
-                      <td className="num">{c.presentados}</td>
-                      <td className="num">{c.ganados}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="fi-n2-nota">
-                Histórico de procesos comparables: mismo tipo de proyecto y mismo departamento, ya
-                cerrados. No son los oferentes de este proceso — todavía no se sabe quién se
-                presentará.
-              </p>
-            </div>
+            <RivalesFicha rivales={competidores} procesoId={p.secopProcesoId} slug={canonico} />
           ) : (
             <p className="fi-vacio">
               No hay histórico de oferentes para procesos comparables a este. Hace falta que el
@@ -286,12 +283,48 @@ export default async function FichaPage({ params }: Props) {
           )}
         </section>
 
-        {/* 8 — Nivel 2, desenfocado y no oculto */}
+        {/* 8 — Nivel 2. Con pliego procesado, el presupuesto por capítulo ya existe
+            y se pinta; las otras dos filas siguen sin calcularse en ningún caso. */}
         <section className="fi-sec">
           <h2 className="fi-h2">Análisis de oferta</h2>
           <div className="fi-panel fi-n2">
+            {capitulos.length > 0 ? (
+              <>
+                <table className="fi-tabla">
+                  <thead>
+                    <tr>
+                      <th>Presupuesto por capítulo</th>
+                      <th className="num" style={{ textAlign: "right" }}>
+                        Ítems
+                      </th>
+                      <th className="num" style={{ textAlign: "right", width: 160 }}>
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {capitulos.map((c, i) => (
+                      <tr key={i}>
+                        <td>{c.nombre}</td>
+                        <td className="num">{c.items}</td>
+                        <td className="num" style={{ width: 160 }}>
+                          {formatCopFull(c.total)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="fi-n2-nota">
+                  Del pliego procesado (
+                  {pliego?.origen.capitulos === "reglas"
+                    ? "leído del Formulario 1 con reglas deterministas"
+                    : "leído por el modelo; compruébalo en el pliego"}
+                  ).
+                </p>
+              </>
+            ) : null}
             {[
-              "Presupuesto desagregado por capítulo",
+              ...(capitulos.length > 0 ? [] : ["Presupuesto desagregado por capítulo"]),
               "Rango probable de la oferta ganadora",
               "Probabilidad de adjudicación",
             ].map((l) => (
@@ -300,13 +333,13 @@ export default async function FichaPage({ params }: Props) {
                 {/* Barra gris difuminada, NO una cifra falsa debajo: se ve que
                       la fila existe y qué mide, y no hay nada que descifrar. */}
                 <span className="fi-n2-oculto" aria-hidden="true" />
-                <span className="sr-only">Disponible en el nivel de análisis de pliego</span>
+                <span className="sr-only">Todavía no calculado para este proceso</span>
               </div>
             ))}
             <p className="fi-n2-nota">
-              Estas tres salen del pliego procesado, no de los datos abiertos. Se muestran sin
-              valores porque para este proceso todavía no existen — no es un muro de pago sobre algo
-              ya calculado.
+              {capitulos.length > 0
+                ? "El rango de la oferta ganadora y la probabilidad de adjudicación todavía no se calculan para ningún proceso — no es un muro de pago sobre algo ya calculado."
+                : "Estas tres salen del pliego procesado, no de los datos abiertos. Se muestran sin valores porque para este proceso todavía no existen — no es un muro de pago sobre algo ya calculado."}
             </p>
           </div>
         </section>

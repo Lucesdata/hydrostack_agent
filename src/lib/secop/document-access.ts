@@ -3,7 +3,7 @@
  *  Acceso documental (Fase B2/C) — estados y preclasificación barata
  * ──────────────────────────────────────────────────────────────────────────
  *
- *  Protege el test binario de Fase 0: el extractor de pliegos (Hydro_Agent)
+ *  Protege el test binario de Fase 0: el extractor de pliegos (`extractPliegoHybrid`)
  *  SOLO debe recibir procesos cuyos documentos son realmente descargables. Un
  *  HTML de login alimentado al extractor produce líneas de presupuesto
  *  alucinadas. Este módulo decide qué llega al extractor.
@@ -150,7 +150,7 @@ export function accessMessage(state: DocumentAccess): string {
  * Implicación: un probe server-side NUNCA obtiene el contenido del detalle →
  * cae en el muro → `RESTRICTED`. Eso ES el valor del gate: detectar que el
  * documento no es accesible por máquina y mantenerlo FUERA del extractor (un
- * HTML de captcha alimentado a Hydro_Agent = presupuesto alucinado). `PUBLIC`
+ * HTML de captcha alimentado al extractor = presupuesto alucinado). `PUBLIC`
  * solo es plausible para una URL de documento descargable directo (PDF), no para
  * la página de detalle. Coherente con `gate-verdict.md` (descarga manual).
  */
@@ -305,19 +305,10 @@ export async function probeDocument(
 }
 
 /**
- * C2 — gate del extractor: SOLO `PUBLIC` puede llegar a Hydro_Agent. Garantiza
+ * C2 — gate del extractor: SOLO `PUBLIC` puede llegar al extractor. Garantiza
  * que el extractor jamás reciba un HTML de captcha/login → cero líneas de
  * presupuesto alucinadas (parte del pass/fail de Fase 0).
  */
 export function canExtract(state: DocumentAccess): boolean {
   return state === "PUBLIC";
-}
-
-/** Lanza si el estado no permite extracción. Usar antes de alimentar el extractor. */
-export function assertExtractable(state: DocumentAccess): void {
-  if (!canExtract(state)) {
-    throw new Error(
-      `Gate de acceso documental: estado "${state}" — el extractor solo procesa documentos PUBLIC. ${accessMessage(state)}`
-    );
-  }
 }

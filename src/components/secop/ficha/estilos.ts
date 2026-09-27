@@ -55,6 +55,47 @@ export const ESTILOS_FICHA = `
 .fi-n2-oculto{ height: 12px; width: 108px; border-radius: 3px; background: var(--border); filter: blur(3px); flex-shrink: 0; }
 .fi-n2-nota{ font: 12.5px/1.6 var(--font-sans); color: var(--text-muted); margin: 14px 0 0; }
 
+/* §4 — el pliego procesado y su subida. Estados con --success y --warning, los
+   tokens -700 que ya aguantan AA como texto (CLAUDE.md §3). */
+.fi-pl-meta{ font: 12.5px/1.6 var(--font-sans); color: var(--text-muted); margin: 0 0 4px; }
+.fi-pl-ok{ color: var(--success); }
+.fi-pl-aviso{ color: var(--warning); }
+.fi-pl-h3{ font: 600 14px var(--font-sans); color: var(--text-primary); margin: 20px 0 2px; }
+.fi-pl-origen{ font: 11px var(--font-mono); color: var(--text-muted); margin: 0 0 8px; }
+.fi-pl-dl{ margin: 0; }
+.fi-pl-dl > div{ padding: 9px 0; border-top: 1px solid var(--border); }
+.fi-pl-dl dt{ font: 10.5px var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.fi-pl-dl dd{ font: 13.5px/1.55 var(--font-sans); color: var(--text-primary); margin: 4px 0 0; }
+.fi-pl-falta{ font: italic 13px/1.55 var(--font-sans); color: var(--text-muted); }
+.fi-pl-cifra{ font: 600 19px var(--font-mono); color: var(--text-primary); margin: 4px 0 0; }
+.fi-pl-lista{ margin: 4px 0 0; padding-left: 18px; font: 13.5px/1.6 var(--font-sans); color: var(--text-primary); }
+.fi-pl-lista li{ margin: 4px 0; }
+.fi-pl-sev{ font: 10.5px var(--font-mono); text-transform: uppercase; color: var(--text-muted); }
+.fi-pl-form{ display: grid; gap: 12px; margin-top: 14px; font: 13px var(--font-sans); color: var(--text-primary); }
+.fi-pl-form label{ display: grid; gap: 6px; }
+.fi-pl-form .fi-btn{ justify-self: start; cursor: pointer; }
+.fi-pl-nota{ font: 12.5px/1.6 var(--font-sans); color: var(--text-muted); margin: 0; }
+.fi-pl-reemplazo{ margin-top: 14px; font: 13px var(--font-sans); color: var(--text-muted); }
+.fi-pl-reemplazo summary{ cursor: pointer; color: var(--accent); }
+.fi-pl-resultado{ font: 600 13.5px var(--font-sans); margin: 0 0 12px; }
+
+/* §7 — cada rival se despliega. La fila del <summary> repite la rejilla de la
+   cabecera para que se lea como una tabla. */
+.fi-rival-cab, .fi-rival summary{
+  display: grid; grid-template-columns: 1fr 96px 80px; gap: 10px; align-items: baseline;
+}
+.fi-rival-cab{ font: 10.5px var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; padding: 0 0 8px 18px; }
+.fi-rival-cab .num, .fi-rival summary .num{ text-align: right; font-family: var(--font-mono); }
+.fi-rival-lista{ list-style: none; margin: 0; padding: 0; }
+.fi-rival{ border-top: 1px solid var(--border); }
+.fi-rival summary{ cursor: pointer; padding: 9px 0; font: 13.5px var(--font-sans); color: var(--text-primary); list-style: none; }
+.fi-rival summary::-webkit-details-marker{ display: none; }
+.fi-rival-nombre::before{ content: "▸"; display: inline-block; width: 18px; color: var(--accent); }
+.fi-rival[open] .fi-rival-nombre::before{ content: "▾"; }
+.fi-rival-cuerpo{ padding: 4px 0 16px 18px; }
+.fi-rival-cifras{ margin: 6px 0 4px; }
+.fi-rival-h{ font: 600 13px var(--font-sans); color: var(--text-primary); margin: 14px 0 2px; }
+
 .fi-cierre{ display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
 .fi-btn{
   font: 500 13px var(--font-sans); text-decoration: none; padding: 10px 16px;

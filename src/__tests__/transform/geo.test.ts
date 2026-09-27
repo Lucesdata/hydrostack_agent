@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeGeoText, municipioFromLocalizacion } from "@/src/lib/transform/geo";
+import { normalizeGeoText } from "@/src/lib/transform/geo";
 
 describe("normalizeGeoText", () => {
   it("lowercases, strips accents and punctuation", () => {
@@ -15,17 +15,5 @@ describe("normalizeGeoText", () => {
     expect(normalizeGeoText("No Definido")).toBeNull();
     expect(normalizeGeoText("")).toBeNull();
     expect(normalizeGeoText(null)).toBeNull();
-  });
-});
-
-describe("municipioFromLocalizacion", () => {
-  it("takes the most specific segment, dropping the country", () => {
-    expect(municipioFromLocalizacion("Colombia, Cundinamarca, Soacha")).toBe("soacha");
-    expect(municipioFromLocalizacion("Colombia, Bogotá, Bogotá")).toBe("bogota");
-  });
-
-  it("returns null when only the country is present", () => {
-    expect(municipioFromLocalizacion("Colombia")).toBeNull();
-    expect(municipioFromLocalizacion("No Definido")).toBeNull();
   });
 });

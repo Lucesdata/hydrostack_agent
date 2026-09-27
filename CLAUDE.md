@@ -29,9 +29,11 @@ Entidades y flujos principales:
 - **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
   transform → entidades canónicas (`proceso`, `contrato`,
   `contrato_evento`, `entidad`, `proveedor`, `geografia`).
-- **Clasificación sectorial**: derivada, versionada por
-  `clasificadorVersion` (`src/lib/classify/classifier.ts`). Responde "¿esto es de
-  agua?" — binaria. `clasificacion_sectorial` sigue con 0 filas: nadie la escribe.
+- **Clasificación sectorial**: la pregunta binaria "¿esto es de agua?" la
+  responde hoy el filtro de la ingesta (`src/lib/secop/ingest-net.ts`). El
+  clasificador versionado que iba a escribir `clasificacion_sectorial`
+  (`src/lib/classify/classifier.ts`) nunca se cableó y se borró el 2026-09-27;
+  la tabla sigue en el esquema con 0 filas. Su estado previo está en git.
 - **Tipo de proyecto** (`src/lib/classify/tipo-proyecto.ts`): cinco valores y solo
   cinco — `acueducto | alcantarillado | ptap | ptar | otros`. Responde una pregunta
   distinta de la anterior ("¿de qué subsistema?") y por eso es un módulo aparte.
@@ -49,8 +51,11 @@ Entidades y flujos principales:
   entidad: sin eso, un contrato de imprimir facturas de una "Empresa de Acueducto,
   Alcantarillado y Aseo" puntúa como acueducto.
 - **Pliegos**: extracción híbrida (reglas + fallback Gemini) —
-  `src/lib/pliego/extractPliegoHybrid.ts`, único extractor cableado a
-  `/api/pliego/extract`.
+  `src/lib/pliego/extractPliegoHybrid.ts`, único extractor. Se llega a él por
+  `uploadPliego()` (`src/lib/secop/pliego-upload.ts`) desde la §4 de la ficha o
+  desde /mis-coincidencias; persiste en `pliego_proceso` y además cachea los
+  requisitos estructurados en `requisitos_proceso`, que alimenta la compuerta de
+  habilitación del semáforo.
 - **Oferente / matching**: perfil de oferente (`src/lib/oferente/`) cruzado
   contra oportunidades (`src/lib/matching/`).
 - **Diagnóstico de preparación** (`src/lib/diagnostico/`): cuestionario público
@@ -176,9 +181,10 @@ Entidades y flujos principales:
   compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
   hacerla en el render dejaría los `reason` en la pestaña de red.
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
-  lee todavía**: `pliego_extraer` y `asistentes` están declaradas como `pro` en
-  la política y siguen protegidas solo por `PROTECTED_PREFIXES`. Activar esa
-  frontera es hacer que sus handlers consulten `puede()`. La columna ya existe en
+  lee todavía**: `pliego_extraer` está declarada como `pro` en la política y
+  sigue protegida solo por `PROTECTED_PREFIXES`. Activar esa frontera es hacer
+  que sus handlers consulten `puede()`. (`asistentes` salió con los asistentes
+  el 2026-09-27.) La columna ya existe en
   la Supabase viva: verificado el 2026-09-15, las 24 migraciones del repo
   (`0000`–`0023`) están aplicadas.
 
@@ -240,9 +246,10 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
   queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
-  `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
-  ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker
-  pide sus fichas recientes por su cuenta.
+  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats` sirve ya solo
+  `sector.procesosVigilados` (una consulta a la base, recortado el 2026-09-27),
+  para la línea bajo el CTA del hero; el ticker pide sus fichas recientes por su
+  cuenta.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -348,7 +355,7 @@ sin `license` ni `distribution`, con `isBasedOn` a los conjuntos de datos.gov.co
 estáticas (revalidate 6 h) y sin leer `searchParams`, como las facetas:
 `/licitaciones/entidades` (las entidades con más procesos abiertos,
 `src/lib/secop/compradores.ts`, una consulta con `count(*) over ()`; es la otra
-mitad de `/competidores`) y `/licitaciones/comparar` (hasta tres departamentos
+mitad de «Quién suele competir aquí», la §7 de cada ficha) y `/licitaciones/comparar` (hasta tres departamentos
 con las filas de `detallePorDepartamento()`; la selección va en el **hash** de
 la URL, que no llega al servidor, `src/lib/secop/comparador.ts`). Los estilos de
 un componente `"use client"` no se exportan desde él: una página de servidor
@@ -373,5 +380,37 @@ abierto hoy aparte. Estático (revalidate 6 h). "Descargar PDF" es la impresión
 del navegador con una hoja de impresión propia: sin dependencias. **No pide
 correo**: recogerlo exige la política de tratamiento (PENDIENTES §18) y
 enviarlo, el correo configurado (§0).
+
+**La ficha como centro (2026-09-27).** Siete páginas que respondían preguntas
+fuera de la ficha se retiran en tres PR
+(`docs/superpowers/plans/2026-09-27-ficha-como-centro.md`). PR 1 hecho: fuera
+`/asistente/*` (con `/api/assistant`, `/api/documents` y las dependencias
+`ai`/`@ai-sdk`), `/auditoria`, `/reportes/[slug]` (el correo de alertas ya no
+genera reporte permanente), `/soluciones` y `/nosotros` (con `PlantaHero`). Cada
+URL retirada redirige con un 308 (permanente) desde `next.config.js`. Las tablas
+(`conversacion`, `mensaje`, `documento`, `al_reportes`, `al_descartes`) se
+quedan: soltarlas es un `DROP` sobre la base viva.
+PR 2 hecho: el pliego vive en la §4 de la ficha (`PliegoFicha.tsx`,
+`src/lib/secop/pliego-ficha.ts`): con pliego subido muestra requisitos,
+presupuesto y causales con su origen (reglas o modelo), y su cronograma y
+capítulos llenan la §5 y la §8; sin pliego, ofrece subirlo ahí mismo. La ficha
+sigue estática: el formulario se pinta para todos, la acción de servidor
+(`subirPliegoDesdeFichaAction`) exige sesión, revalida la ficha y devuelve el
+resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
+`/api/pliego/extract` y `/api/eligibility/extract` (su paso lo hace ahora
+`uploadPliego`). La frontera `pro` de `pliego_extraer` sigue sin aplicarse:
+hoy toda cuenta es `gratis` y aplicarla apagaría la subida.
+PR 3 hecho: en la §7 cada rival es un `<details>` (`RivalesFicha.tsx`) que al
+abrirse pide `GET /api/ficha/[id]/rival/[key]` → `historialComparable()`
+(`src/lib/al/consulta/competidor.ts`): cuántas gana, tasa, mediana
+adjudicado/presupuesto y sus últimos procesos comparables (enlazados a su
+ficha), recortado al mismo tipo y departamento que la ficha; las multas no se
+recortan. Exige la capacidad `competidores` (cuenta gratuita), así que la
+respuesta es `private` y no se cachea en el CDN. `competidoresComparables()`
+agrupa ya por `proveedor_key`, no por nombre. Salieron `/competidores`,
+`/competidores/[key]` (redirigen a `/licitaciones/entidades`), `S4Competidores`,
+`historialCompetidor`, `topCompetidores`, `precioReferencia` y
+`getCifrasSector` (`cifras.ts` solo exporta `getProcesosVigilados`). Con esto el
+plan queda completo.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
