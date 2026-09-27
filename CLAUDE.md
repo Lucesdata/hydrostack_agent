@@ -29,9 +29,11 @@ Entidades y flujos principales:
 - **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
   transform → entidades canónicas (`proceso`, `contrato`,
   `contrato_evento`, `entidad`, `proveedor`, `geografia`).
-- **Clasificación sectorial**: derivada, versionada por
-  `clasificadorVersion` (`src/lib/classify/classifier.ts`). Responde "¿esto es de
-  agua?" — binaria. `clasificacion_sectorial` sigue con 0 filas: nadie la escribe.
+- **Clasificación sectorial**: la pregunta binaria "¿esto es de agua?" la
+  responde hoy el filtro de la ingesta (`src/lib/secop/ingest-net.ts`). El
+  clasificador versionado que iba a escribir `clasificacion_sectorial`
+  (`src/lib/classify/classifier.ts`) nunca se cableó y se borró el 2026-09-27;
+  la tabla sigue en el esquema con 0 filas. Su estado previo está en git.
 - **Tipo de proyecto** (`src/lib/classify/tipo-proyecto.ts`): cinco valores y solo
   cinco — `acueducto | alcantarillado | ptap | ptar | otros`. Responde una pregunta
   distinta de la anterior ("¿de qué subsistema?") y por eso es un módulo aparte.

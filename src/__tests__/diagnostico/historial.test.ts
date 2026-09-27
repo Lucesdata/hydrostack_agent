@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { construirHistorial, versionesEnHistorial } from "@/src/lib/diagnostico/historial";
+import { construirHistorial } from "@/src/lib/diagnostico/historial";
 import type { DiagnosticoGuardado } from "@/src/lib/diagnostico/diagnostico-store";
 
 /** Fila mínima: al historial solo le importan versión, puntaje y bloqueantes. */
@@ -84,18 +84,5 @@ describe("construirHistorial", () => {
     ]);
     expect(entradas.map((e) => e.diagnostico.puntajeTotal)).toEqual([80, 70, 60]);
     expect(entradas.map((e) => e.variacion)).toEqual([10, 10, null]);
-  });
-});
-
-describe("versionesEnHistorial", () => {
-  it("lista las variantes distintas, sin repetir y en orden de aparición", () => {
-    expect(
-      versionesEnHistorial([
-        d("co-apsb-v1", 80, [], 30),
-        d("co-esp-v1", 90, [], 20),
-        d("co-apsb-v1", 60, [], 10),
-      ])
-    ).toEqual(["co-apsb-v1", "co-esp-v1"]);
-    expect(versionesEnHistorial([])).toEqual([]);
   });
 });

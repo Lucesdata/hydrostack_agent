@@ -20,18 +20,3 @@ export function normalizeGeoText(value: unknown): string | null {
     .trim();
   return norm || null;
 }
-
-/**
- * `localizaci_n` de contratos viene como "Colombia, Bogotá, Bogotá" (país, depto,
- * municipio). Devuelve el último segmento normalizado (el más específico) como
- * pista de municipio cuando `ciudad` no resuelve. `null` si no hay segmentos.
- */
-export function municipioFromLocalizacion(value: unknown): string | null {
-  const s = cleanText(value);
-  if (s === null) return null;
-  const parts = s
-    .split(",")
-    .map((p) => normalizeGeoText(p))
-    .filter((p): p is string => p !== null && p !== "colombia");
-  return parts.length ? parts[parts.length - 1] : null;
-}

@@ -5,7 +5,7 @@
  * un caso degradado. Por eso NO está en `PROTECTED_PREFIXES` de middleware.ts,
  * y por eso siempre responde JSON: un redirect de middleware convertiría este
  * `fetch()` en un 200 con el HTML de /login, que es exactamente el problema
- * documentado en el docstring de middleware.ts a raíz de /api/mercado/waitlist.
+ * documentado en el docstring de middleware.ts.
  *
  * Sin sesión, la fila se guarda con un `session_token` que viaja en cookie
  * httpOnly y que el registro reclama después (ver diagnostico-store.ts). Con

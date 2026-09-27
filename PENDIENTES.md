@@ -891,3 +891,23 @@ política de tratamiento publicada (§18, que pide la autorización de la Ley 15
 y correo que entregue (§0). Entonces: formulario con casilla de autorización,
 tabla nueva con `.enableRLS()` y envío del informe.
 
+
+### 49. Lo que quedó tras la limpieza de huérfanos (2026-09-27)
+Se borró todo lo que nada llamaba: archivos sin importador, CSS del tema séptico,
+`/api/mercado/waitlist`, `/api/al/sanciones/[nit]`, el clasificador binario
+(`classify/classifier.ts` y compañía), `config/smmlv.ts` y tres funciones sueltas
+(`versionesEnHistorial`, `municipioFromLocalizacion`, `assertExtractable`). Tres
+cosas no se borraron a propósito:
+
+- **La tabla `lista_espera_mercado`** sigue en el esquema aunque su endpoint ya
+  no existe. Quitarla del esquema genera un `DROP TABLE` en la próxima migración
+  y borra filas de la base viva: decisión del usuario, no de una limpieza.
+- **`clearOferentePerfil()` no la llama nadie, y eso es un fallo, no código
+  sobrante.** `SecopExplorer` guarda en `localStorage` el perfil que baja del
+  servidor, y `/logout` no lo borra: en un navegador compartido la siguiente
+  persona ve el perfil de la anterior. Es el mismo caso que ya se cerró para el
+  `session_token` del diagnóstico. Arreglarlo es llamarla al cerrar sesión.
+- **Lo que solo usan los scripts** (`al/historico/backfill.ts`,
+  `al/matching/red-sectorial.ts`, `archivo/exportar.ts`) y los ayudantes de test
+  (`clearDatasetIdCache`, `versionesRegistradas`, `CAPACIDADES`,
+  `design/contraste.ts`) sí tienen quien los llame.

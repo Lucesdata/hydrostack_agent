@@ -312,12 +312,3 @@ export async function probeDocument(
 export function canExtract(state: DocumentAccess): boolean {
   return state === "PUBLIC";
 }
-
-/** Lanza si el estado no permite extracción. Usar antes de alimentar el extractor. */
-export function assertExtractable(state: DocumentAccess): void {
-  if (!canExtract(state)) {
-    throw new Error(
-      `Gate de acceso documental: estado "${state}" — el extractor solo procesa documentos PUBLIC. ${accessMessage(state)}`
-    );
-  }
-}
