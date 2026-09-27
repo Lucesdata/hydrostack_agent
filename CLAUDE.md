@@ -51,8 +51,11 @@ Entidades y flujos principales:
   entidad: sin eso, un contrato de imprimir facturas de una "Empresa de Acueducto,
   Alcantarillado y Aseo" puntúa como acueducto.
 - **Pliegos**: extracción híbrida (reglas + fallback Gemini) —
-  `src/lib/pliego/extractPliegoHybrid.ts`, único extractor cableado a
-  `/api/pliego/extract`.
+  `src/lib/pliego/extractPliegoHybrid.ts`, único extractor. Se llega a él por
+  `uploadPliego()` (`src/lib/secop/pliego-upload.ts`) desde la §4 de la ficha o
+  desde /mis-coincidencias; persiste en `pliego_proceso` y además cachea los
+  requisitos estructurados en `requisitos_proceso`, que alimenta la compuerta de
+  habilitación del semáforo.
 - **Oferente / matching**: perfil de oferente (`src/lib/oferente/`) cruzado
   contra oportunidades (`src/lib/matching/`).
 - **Diagnóstico de preparación** (`src/lib/diagnostico/`): cuestionario público
@@ -379,8 +382,17 @@ fuera de la ficha se retiran en tres PR
 genera reporte permanente), `/soluciones` y `/nosotros` (con `PlantaHero`). Cada
 URL retirada redirige con un 308 (permanente) desde `next.config.js`. Las tablas
 (`conversacion`, `mensaje`, `documento`, `al_reportes`, `al_descartes`) se
-quedan: soltarlas es un `DROP` sobre la base viva. Faltan PR 2 (el pliego en la
-§4 de la ficha, fuera `/pliego`) y PR 3 (el rival desplegable en la §7, fuera
-`/competidores`).
+quedan: soltarlas es un `DROP` sobre la base viva.
+PR 2 hecho: el pliego vive en la §4 de la ficha (`PliegoFicha.tsx`,
+`src/lib/secop/pliego-ficha.ts`): con pliego subido muestra requisitos,
+presupuesto y causales con su origen (reglas o modelo), y su cronograma y
+capítulos llenan la §5 y la §8; sin pliego, ofrece subirlo ahí mismo. La ficha
+sigue estática: el formulario se pinta para todos, la acción de servidor
+(`subirPliegoDesdeFichaAction`) exige sesión, revalida la ficha y devuelve el
+resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
+`/api/pliego/extract` y `/api/eligibility/extract` (su paso lo hace ahora
+`uploadPliego`). La frontera `pro` de `pliego_extraer` sigue sin aplicarse:
+hoy toda cuenta es `gratis` y aplicarla apagaría la subida. Falta PR 3 (el rival
+desplegable en la §7, fuera `/competidores`).
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
