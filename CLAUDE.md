@@ -138,6 +138,13 @@ Entidades y flujos principales:
   `WHERE` (`src/lib/diagnostico/session-token.ts`), y se borra al reclamarlo y
   al cerrar sesión — si no, en un navegador compartido la siguiente cuenta
   heredaría el diagnóstico de otra persona.
+- **El perfil de oferente del navegador también muere al cerrar sesión**
+  (2026-09-27). `SecopExplorer` copia el perfil de la cuenta a `localStorage`
+  y el semáforo de cada ficha lo lee de ahí; antes sobrevivía al logout. Ahora
+  `/logout` responde con `Clear-Site-Data: "storage"` y los tres botones de
+  cerrar sesión (`FormCerrarSesion`) llaman a `clearOferentePerfil()` antes de
+  enviar, para los navegadores que ignoran la cabecera. Cualquier dato de la
+  cuenta que se copie al navegador tiene que borrarse ahí.
 - **Refuerzo pendiente, menor:** `anon` y `authenticated` conservan los GRANT
   (incluido `TRUNCATE`, que en Postgres *no* está sujeto a RLS). Hoy no es
   explotable porque PostgREST no expone `TRUNCATE` y nadie tiene credenciales

@@ -40,5 +40,13 @@ export async function POST(request: NextRequest) {
   // que no es suyo.
   borrarSessionToken(response);
 
+  // Mismo motivo para el perfil de oferente que SecopExplorer copia de la
+  // cuenta al localStorage: sin esto, la siguiente persona en este navegador
+  // vería el semáforo de cada ficha calculado con el perfil de otra. La
+  // cabecera cubre el cierre sin JavaScript; FormCerrarSesion lo borra además
+  // en el cliente para los navegadores que la ignoran. "storage" no toca las
+  // cookies (las de Supabase ya las limpió signOut) ni la caché HTTP.
+  response.headers.set("Clear-Site-Data", '"storage"');
+
   return response;
 }

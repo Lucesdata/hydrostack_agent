@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MENU_CUENTA, NAV_PRINCIPAL, NOMBRE_POR_ID, ruta } from "./landing/seccionesHome";
+import FormCerrarSesion from "./auth/FormCerrarSesion";
 
 // Las pestañas del navbar ya NO se declaran aquí: salen de `NAV_PRINCIPAL`
 // (seccionesHome.js), el mismo catálogo del que come el pie. Antes eran dos
@@ -264,12 +265,13 @@ function UserMenu({ user, hasNewMatches }) {
             </Link>
           ))}
           <div className="clr-nav-user-sep" aria-hidden="true" />
-          {/* Sin onSubmit: el submit navega fuera de la página (redirect a /),
-              cerrar el dropdown acá desmontaría el <form> a mitad del envío
-              ("Form submission canceled because the form is not connected"). */}
-          <form action="/logout" method="POST">
+          {/* Sin cerrar el dropdown al enviar: el submit navega fuera de la
+              página (redirect a /), y cerrarlo acá desmontaría el <form> a
+              mitad del envío ("Form submission canceled because the form is
+              not connected"). FormCerrarSesion solo borra el perfil local. */}
+          <FormCerrarSesion>
             <button type="submit">Cerrar sesión</button>
-          </form>
+          </FormCerrarSesion>
         </div>
       )}
     </div>
@@ -435,11 +437,11 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
-              <form action="/logout" method="POST" onSubmit={close}>
+              <FormCerrarSesion onSubmit={close}>
                 <button type="submit" className="clr-mobile-link" style={{ width: "100%" }}>
                   Cerrar sesión
                 </button>
-              </form>
+              </FormCerrarSesion>
             </>
           ) : (
             <>
