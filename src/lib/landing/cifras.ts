@@ -7,7 +7,7 @@
  * ingerida, que es más rápida, no gasta cuota de la API pública y refleja
  * exactamente lo que el producto vigila.
  *
- * Degradación honesta, igual que `app/api/landing-stats/route.ts`: cada conteo
+ * Degradación honesta: cada conteo
  * falla por separado y devuelve `null`, nunca lanza. La UI muestra "—" y la
  * frase sigue siendo cierta sin la cifra.
  */
@@ -32,9 +32,8 @@ export interface CifrasSector {
  * sin número utilizable, degradan igual a `null`. Así cada cifra falla por
  * su cuenta sin tumbar las otras dos.
  *
- * `nombre` solo identifica la cifra en el log — igual que las funciones de
- * `landingStats.ts` (`getNuevos7d`, `getEnJuegoMes`, `getDestacado`) logean
- * con `console.warn` antes de degradar, para que un fallo real (drift de
+ * `nombre` solo identifica la cifra en el log — igual que `getEnJuegoMes`
+ * (`landingStats.ts`) logea con `console.warn` antes de degradar, para que un fallo real (drift de
  * esquema, conexión, permisos) deje rastro y no se quede solo como un "—"
  * silencioso en el home.
  */
@@ -51,9 +50,17 @@ async function contar(nombre: string, tabla: PgTable): Promise<number | null> {
   }
 }
 
+/**
+ * Solo el primero de los tres conteos. Es lo único que la portada pide a
+ * `/api/landing-stats`; los otros dos son de /competidores.
+ */
+export function getProcesosVigilados(): Promise<number | null> {
+  return contar("procesosVigilados", proceso);
+}
+
 export async function getCifrasSector(): Promise<CifrasSector> {
   const [procesosVigilados, oferentesHistoricos, sanciones] = await Promise.all([
-    contar("procesosVigilados", proceso),
+    getProcesosVigilados(),
     contar("oferentesHistoricos", alOferentesHistorico),
     contar("sanciones", alSanciones),
   ]);

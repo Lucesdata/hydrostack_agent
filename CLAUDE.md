@@ -233,9 +233,10 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
   queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
-  `BandaMercado` y `hace-cuanto.ts`. De `/api/landing-stats` la portada solo lee
-  ya `sector.procesosVigilados`, para la línea bajo el CTA del hero; el ticker
-  pide sus fichas recientes por su cuenta.
+  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats` sirve ya solo
+  `sector.procesosVigilados` (una consulta a la base, recortado el 2026-09-27),
+  para la línea bajo el CTA del hero; el ticker pide sus fichas recientes por su
+  cuenta.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección

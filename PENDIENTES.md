@@ -305,11 +305,13 @@ borrar el componente y recortar `/api/landing-stats` a lo que el hero sí
 consume (`nuevos7d`, `enJuego.totalCop`, `sector`), en vez de mantener un
 endpoint que sirve más de lo que nadie lee.
 
-**Resuelto a medias el 2026-09-27: (b), primera mitad.** `LandingCards.jsx` se
-borró junto con su único test (`monto-destacado.test.ts`, que medía
-`formatCopMilM`, usada solo ahí). Falta la segunda mitad: la portada ya solo lee
-`sector.procesosVigilados` de `/api/landing-stats`, y el endpoint sigue
-calculando `destacado`, `enJuego`, `sanciones` y `oferentesHistoricos`.
+**Resuelto el 2026-09-27: (b).** `LandingCards.jsx` se borró junto con su único
+test (`monto-destacado.test.ts`, que medía `formatCopMilM`, usada solo ahí), y
+`/api/landing-stats` se recortó a `{ sector: { procesosVigilados } }`, lo único
+que la portada lee. Dejó de hacer tres consultas en vivo a Socrata y tres a la
+base por visita. Con él salieron `getNuevos7d`, `getDestacado` y
+`getUltimaConsultaSecop` (que servía a la banda "El mercado ahora", retirada el
+2026-09-26); `getEnJuegoMes` se queda porque la lee /mis-coincidencias.
 
 ### 21. El aviso por correo, bajado a mención en el home — decidido 2026-09-10
 El home alineado (2026-09-08) promovía la alerta diaria a uno de los cuatro
