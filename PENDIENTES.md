@@ -277,7 +277,10 @@ CLAUDE.md §4: `pliego_extraer` y `asistentes` están declaradas `pro` en
 Decidir el acceso a `GEMINI_API_KEY` por usuario antes de mandar tráfico ahí.
 
 **2026-09-27:** los asistentes se retiraron (plan «la ficha como centro», PR 1);
-sus tablas siguen en el esquema. El pliego se muda a la ficha en el PR 2.
+sus tablas siguen en el esquema. El pliego se mudó a la §4 de la ficha (PR 2):
+cualquier cuenta gratuita puede subirlo, igual que antes en /pliego. La decisión
+de `GEMINI_API_KEY` por usuario sigue abierta, y ahora pesa más: la puerta está
+en cada ficha pública, no en una página aparte.
 
 Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
 home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no

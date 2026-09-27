@@ -41,6 +41,10 @@ export const SECCIONES_HOME = [
     etiqueta: "sin cuenta",
   },
   { id: "perfil", href: "/perfil", capacidad: "perfil_guardar", etiqueta: "cuenta gratuita" },
+  // El análisis de pliego ya no tiene página: vive en la §4 de cada ficha
+  // (2026-09-27). Sigue en el catálogo para que /precios y /cuenta lo nombren en
+  // su nivel; su puerta son las fichas.
+  { id: "pliego", href: "/licitaciones", capacidad: "pliego_extraer", etiqueta: "plan pro" },
   { id: "filtros", href: "/mis-filtros", capacidad: "filtros", etiqueta: "cuenta gratuita" },
   {
     id: "diagnostico-historial",
@@ -61,7 +65,6 @@ export const SECCIONES_HOME = [
     capacidad: "competidores",
     etiqueta: "cuenta gratuita",
   },
-  { id: "pliego", href: "/pliego", capacidad: "pliego_extraer", etiqueta: "plan pro" },
   { id: "precios", href: "/precios", capacidad: "explorar", etiqueta: "sin cuenta" },
 ];
 
@@ -89,9 +92,10 @@ export function ruta(id) {
  * leerlo. `S7Acceso.jsx` necesita exactamente los mismos strings, y copiarlos
  * habría dejado dos listas que se desincronizan en el primer renombrado.
  *
- * "Pliegos", el nombre de `plan pro`, es el que ya usa la navegación en
- * `src/components/Navbar.js`. Los asistentes, `/auditoria`, `/soluciones` y
- * `/nosotros` salieron del catálogo el 2026-09-27 (plan «la ficha como centro»).
+ * Los asistentes, `/auditoria`, `/soluciones` y `/nosotros` salieron del
+ * catálogo el 2026-09-27 (plan «la ficha como centro»). `pliego` se quedó, pero
+ * apunta a las fichas: su página también salió y el análisis vive en la §4 de
+ * cada una.
  *
  * Una sección sin entrada aquí no se lista en ningún índice. Hoy la única es
  * `veredicto`, que no es una página aparte sino una parte de /licitaciones.
@@ -121,12 +125,12 @@ export const NOMBRE_POR_ID = {
   precios: "Precios y acceso",
   perfil: "Mi perfil RUP",
   "diagnostico-historial": "Historial de diagnóstico",
-  pliego: "Pliegos",
+  pliego: "Análisis de pliego en cada ficha",
 };
 
 /**
- * El nav principal. Tres destinos y sin numerar (eran cuatro hasta que salió
- * /nosotros, 2026-09-27).
+ * El nav principal. Dos destinos y sin numerar: las fichas y las alertas.
+ * Eran cuatro hasta que salieron /nosotros y /pliego (2026-09-27).
  *
  * Antes el navbar declaraba sus cinco pestañas en `Navbar.js` y el pie otras
  * cuatro distintas en `S6Footer.jsx`: dos listas, ningún criterio común y un
@@ -138,7 +142,7 @@ export const NOMBRE_POR_ID = {
  * solo se llegaba a ella desde el propio correo de alertas — o sea, solo si ya
  * la tenías.
  */
-export const NAV_PRINCIPAL = ["explorar", "pliego", "alertas"];
+export const NAV_PRINCIPAL = ["explorar", "alertas"];
 
 /**
  * Las columnas del pie. Incluye todo lo que el nav deja fuera, para que ninguna

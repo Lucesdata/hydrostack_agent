@@ -33,6 +33,8 @@ const nextConfig = {
       { source: "/nosotros", destination: "/", permanent: true },
       { source: "/soluciones", destination: "/licitaciones", permanent: true },
       { source: "/auditoria", destination: "/mis-filtros", permanent: true },
+      // PR 2: el pliego se sube y se lee en la §4 de cada ficha.
+      { source: "/pliego", destination: "/licitaciones", permanent: true },
     ];
   },
 };

@@ -3,8 +3,9 @@ import { updateSession } from "@/src/lib/supabase/middleware";
 
 /**
  * Refresca la sesión de Supabase en cada request y protege las rutas que
- * requieren cuenta: /pliego (análisis de pliegos), /cuenta (preferencias de
- * alerta) y /diagnostico/historial. Una ruta de API que se llama con
+ * requieren cuenta: /cuenta (preferencias de alerta) y /diagnostico/historial.
+ * La subida del pliego desde la ficha no pasa por aquí: la ficha es pública y
+ * la acción de servidor exige sesión por su cuenta (pliego-actions.ts). Una ruta de API que se llama con
  * fetch() desde un botón (no una navegación) NO va aquí: un redirect de
  * middleware lo sigue en silencio como un 200 con el HTML de /login en vez del
  * 401 que el botón espera. Esa ruta hace su propio gate de sesión. (La lección
@@ -29,8 +30,6 @@ const PROTECTED_PREFIXES = [
   // Solo este subcamino: /diagnostico a secas es público y debe seguir siéndolo,
   // porque responder sin cuenta es el flujo principal del módulo.
   "/diagnostico/historial",
-  "/pliego",
-  "/api/pliego",
   "/cuenta",
 ];
 

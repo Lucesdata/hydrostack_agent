@@ -97,6 +97,9 @@ export function validatePliego(p: PliegoExtraction): ValidationReport {
 /** Tope compartido para la subida directa del Documento Base (PDF). */
 export const MAX_BYTES_PDF = 20 * 1024 * 1024;
 
+/** Tope del Formulario 1 de presupuesto (.xls/.xlsx), opcional junto al PDF. */
+export const MAX_BYTES_XLS = 10 * 1024 * 1024;
+
 const PDF_MAGIC = "%PDF-";
 
 /** Chequeo barato de magic bytes — descarta un HTML de captcha/login antes de gastar una llamada al extractor. */
