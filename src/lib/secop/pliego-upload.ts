@@ -24,6 +24,7 @@ import { requisitosProceso } from "@/src/lib/db/schema/eligibility";
 import { extractStructuredRequirements } from "@/src/lib/eligibility/extract-requirements";
 import { NO_ENCONTRADO, type RequisitosHabilitantes } from "@/src/lib/pliego/schema";
 import { recordUserSignal } from "@/src/lib/signals/record-signal";
+import { mensajeCuotaAgotada, reservarExtraccion } from "@/src/lib/pliego/cuota";
 
 export interface UploadPliegoParams {
   procesoId: string;
@@ -54,6 +55,11 @@ export async function uploadPliego(params: UploadPliegoParams): Promise<UploadPl
       error: `El Formulario 1 supera el máximo de ${MAX_BYTES_XLS / (1024 * 1024)}MB.`,
     };
   }
+
+  // La cuota se reserva aquí, después de lo que se rechaza gratis y justo
+  // antes de gastar la primera llamada a Gemini (ver src/lib/pliego/cuota.ts).
+  const reserva = await reservarExtraccion(params.subidoPorUsuarioId);
+  if (reserva.ok === false) return { ok: false, error: mensajeCuotaAgotada(reserva) };
 
   let result: HybridExtraction;
   try {

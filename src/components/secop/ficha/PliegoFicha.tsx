@@ -1,6 +1,7 @@
 import { formatCopFull } from "@/src/components/secop/format";
 import { subirPliegoDesdeFichaAction } from "@/src/lib/secop/pliego-actions";
 import type { OrigenCampo, PliegoFicha as Pliego } from "@/src/lib/secop/pliego-ficha";
+import { CUOTA_PLIEGOS, VENTANA_HORAS } from "@/src/lib/pliego/cuota-limites";
 import AvisoPliego from "./AvisoPliego";
 
 /**
@@ -155,8 +156,8 @@ function Formulario({ slug, reemplaza }: { slug: string; reemplaza: boolean }) {
         {reemplaza ? "Procesar y reemplazar" : "Procesar pliego"}
       </button>
       <p className="fi-pl-nota">
-        Hace falta una cuenta gratuita. El proceso tarda entre 10 y 40 segundos; no cierres la
-        pestaña.
+        Hace falta una cuenta gratuita, con hasta {CUOTA_PLIEGOS} pliegos cada {VENTANA_HORAS}{" "}
+        horas. El proceso tarda entre 10 y 40 segundos; no cierres la pestaña.
       </p>
     </form>
   );

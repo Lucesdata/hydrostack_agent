@@ -284,8 +284,12 @@ en cada ficha pública, no en una página aparte.
 
 **Resuelto el acceso (2026-09-27):** el análisis de pliego es **gratis** por
 decisión del usuario; `pliego_extraer` pasó a `gratis` en `politica.ts` y las
-acciones de subida consultan `puede()`. Queda abierta solo la cuota de
-`GEMINI_API_KEY` por usuario.
+acciones de subida consultan `puede()`.
+
+**Resuelta la cuota (2026-09-27):** 5 pliegos por cuenta en 24 h móviles,
+contando cada intento que llega a Gemini (`src/lib/pliego/cuota.ts`). Si algún
+día se quiere una tabla propia para el uso en vez de `senal_usuario`, exige una
+migración aplicada a mano antes de desplegar.
 
 Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
 home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no
