@@ -7,6 +7,7 @@
  * formulario de acceso, solo el estado de la cuenta + preferencias.
  */
 
+import FormCerrarSesion from "@/src/components/auth/FormCerrarSesion";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPreferencias, savePreferencias } from "@/src/lib/alertas/preferencias-store";
@@ -79,11 +80,11 @@ export default async function CuentaPage() {
       <div className="clr-cuenta-card">
         <h1 className="clr-cuenta-title">Tu cuenta</h1>
         {user && <p className="clr-cuenta-email">{user.email}</p>}
-        <form action="/logout" method="POST">
+        <FormCerrarSesion>
           <button type="submit" className="clr-cuenta-btn-secondary">
             Cerrar sesión
           </button>
-        </form>
+        </FormCerrarSesion>
         {preferencias && (
           <div className="clr-cuenta-prefs">
             <p className="clr-cuenta-prefs-title">Alertas por correo</p>
