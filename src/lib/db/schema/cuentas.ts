@@ -40,9 +40,9 @@ export const usuario = pgTable("usuario", {
    * `src/lib/acceso/politica.ts`. `text` y no enum por la misma razón que
    * `envio_log.tipo`: agregar un valor no debe pedir migración.
    *
-   * Hoy toda cuenta es 'gratis' y ningún handler la lee: la frontera de `pro`
-   * (pliego_extraer) está declarada en la política pero no aplicada, y sus
-   * rutas ya exigen cuenta por `PROTECTED_PREFIXES`.
+   * Hoy toda cuenta es 'gratis' y ningún handler la lee: ninguna capacidad de
+   * la política es `pro` desde que `pliego_extraer` pasó a `gratis`
+   * (2026-09-27).
    */
   plan: text("plan").notNull().default("gratis"),
 }).enableRLS();

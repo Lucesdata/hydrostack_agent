@@ -21,8 +21,10 @@ describe("NOMBRE_POR_ID", () => {
 });
 
 describe("seccionesPorNivel", () => {
-  it("devuelve un grupo por nivel, en el orden de ETIQUETA_POR_NIVEL", () => {
-    expect(seccionesPorNivel().map((g) => g.nivel)).toEqual(Object.keys(ETIQUETA_POR_NIVEL));
+  it("devuelve los niveles en el orden de ETIQUETA_POR_NIVEL, sin inventar ninguno", () => {
+    const orden = Object.keys(ETIQUETA_POR_NIVEL);
+    const niveles = seccionesPorNivel().map((g) => g.nivel);
+    expect(niveles).toEqual(orden.filter((n) => niveles.includes(n)));
   });
 
   it("cada grupo lleva la etiqueta que le corresponde a su nivel", () => {
@@ -32,15 +34,19 @@ describe("seccionesPorNivel", () => {
     }
   });
 
-  it("ningún nivel queda vacío: los tres tienen algo que mostrar", () => {
-    // Es lo que impide que la columna "plan pro" del home salga en blanco
-    // justo donde debe explicar qué cuesta dinero.
+  it("ningún nivel sale vacío: el que no tiene secciones no se devuelve", () => {
+    // Es lo que impide que una columna de /precios salga en blanco. Desde el
+    // 2026-09-27 ninguna función es de pago, así que "plan pro" no aparece.
     for (const g of seccionesPorNivel()) {
-      expect(
-        g.secciones.length,
-        `el nivel ${g.nivel} no tiene ninguna sección con nombre en NOMBRE_POR_ID`
-      ).toBeGreaterThan(0);
+      expect(g.secciones.length, `el nivel ${g.nivel} salió vacío`).toBeGreaterThan(0);
     }
+    expect(seccionesPorNivel().map((g) => g.nivel)).toEqual(["anonimo", "gratis"]);
+  });
+
+  it("sin cuenta y con cuenta gratuita siempre tienen algo que mostrar", () => {
+    const niveles = seccionesPorNivel().map((g) => g.nivel);
+    expect(niveles).toContain("anonimo");
+    expect(niveles).toContain("gratis");
   });
 
   it("omite las secciones sin nombre en vez de inventarles uno", () => {

@@ -43,10 +43,14 @@ export type Capacidad =
  * compuerta; `veredicto_detalle` es el `reason` que explica cada estado — esa
  * es la frontera de captura de leads del producto.
  *
- * `pliego_extraer` está en `pro` pero la frontera todavía no se aplica: hoy sus
- * rutas exigen cuenta vía `PROTECTED_PREFIXES` y con eso siguen. Activarla es
- * cambiar sus handlers para consultar `puede()`. (`asistentes` también era
- * `pro`; salió con los asistentes el 2026-09-27.)
+ * `pliego_extraer` es `gratis` desde el 2026-09-27, decisión de producto: el
+ * análisis de pliego vive en la §4 de cada ficha y basta una cuenta para subir
+ * uno. Lo aplican las dos acciones de `src/lib/secop/pliego-actions.ts`. Era
+ * `pro`, pero la frontera nunca se aplicó (toda cuenta es `gratis`), así que el
+ * cambio no le quita nada a nadie. Hoy ninguna capacidad es `pro`: el nivel
+ * sigue en el modelo para el día que haya plan de pago, y /precios no pinta su
+ * columna mientras esté vacía (`seccionesPorNivel`). (`asistentes` también era
+ * `pro`; salió con los asistentes el mismo día.)
  *
  * `competidores` (SDD módulo 2) es `gratis`: el histórico es dato de mercado, no
  * de nadie, pero navegarlo es una función de producto y no una landing. Desde
@@ -77,7 +81,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   alertas: "gratis",
   filtros: "gratis",
   competidores: "gratis",
-  pliego_extraer: "pro",
+  pliego_extraer: "gratis",
 };
 
 /** Todas las capacidades, para iterarlas sin repetir la lista a mano. */

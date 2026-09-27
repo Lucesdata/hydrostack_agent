@@ -40,8 +40,11 @@ describe("puede", () => {
     "alertas",
     "filtros",
     "competidores",
+    "pliego_extraer",
   ];
-  const dePago: Capacidad[] = ["pliego_extraer"];
+  // Vacío desde el 2026-09-27: el análisis de pliego pasó a gratis y no queda
+  // ninguna capacidad de pago. Los tests de abajo siguen valiendo cuando la haya.
+  const dePago: Capacidad[] = [];
 
   it("el anónimo puede exactamente lo abierto", () => {
     for (const cap of abiertas) expect(puede("anonimo", cap)).toBe(true);

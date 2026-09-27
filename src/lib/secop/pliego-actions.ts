@@ -14,9 +14,8 @@
  * Las dos revalidan la ficha del proceso: sin eso, el pliego recién subido no
  * se vería en ella hasta 12 horas después.
  *
- * Exigen sesión, como antes exigía /pliego vía PROTECTED_PREFIXES. La política
- * declara `pliego_extraer` como `pro`, pero hoy toda cuenta es `gratis`
- * (CLAUDE.md §4): aplicar esa frontera aquí apagaría la subida para todos.
+ * El acceso lo decide la política (`puede(nivel, "pliego_extraer")`), que desde
+ * el 2026-09-27 lo deja en `gratis`: basta una cuenta.
  *
  * No tienen test directo — mismo criterio que saveMinimoPerfilAction en
  * src/lib/oferente/actions.ts; la lógica vive en pliego-upload.ts.
@@ -28,6 +27,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { proceso } from "@/src/lib/db/schema";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { nivelDe, puede } from "@/src/lib/acceso/politica";
 import { uploadPliego } from "./pliego-upload";
 import { idDesdeSlug, slugDeProceso } from "./slug";
 
@@ -49,7 +49,7 @@ async function formulario1De(formData: FormData): Promise<Buffer | undefined> {
 
 export async function uploadPliegoAction(formData: FormData): Promise<void> {
   const user = await getSessionUser();
-  if (!user?.id) {
+  if (!user?.id || !puede(nivelDe(user, null), "pliego_extraer")) {
     redirect("/login?next=/mis-coincidencias");
   }
 
@@ -96,7 +96,9 @@ export async function subirPliegoDesdeFichaAction(formData: FormData): Promise<v
   const volver = (estado: string) => redirect(`${ficha}#pliego=${encodeURIComponent(estado)}`);
 
   const user = await getSessionUser();
-  if (!user?.id) redirect(`/login?next=${encodeURIComponent(`${ficha}#pliego`)}`);
+  if (!user?.id || !puede(nivelDe(user, null), "pliego_extraer")) {
+    redirect(`/login?next=${encodeURIComponent(`${ficha}#pliego`)}`);
+  }
 
   const file = formData.get("file");
   if (!(file instanceof Blob) || file.size === 0) volver("error:Falta el PDF del pliego.");

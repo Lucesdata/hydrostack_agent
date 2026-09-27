@@ -181,10 +181,12 @@ Entidades y flujos principales:
   compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
   hacerla en el render dejaría los `reason` en la pestaña de red.
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
-  lee todavía**: `pliego_extraer` está declarada como `pro` en la política y
-  sigue protegida solo por `PROTECTED_PREFIXES`. Activar esa frontera es hacer
-  que sus handlers consulten `puede()`. (`asistentes` salió con los asistentes
-  el 2026-09-27.) La columna ya existe en
+  lee todavía**, y hoy no hace falta: **ninguna capacidad es `pro`**. El
+  análisis de pliego (`pliego_extraer`) pasó a `gratis` el 2026-09-27 por
+  decisión de producto, y sus dos acciones (`pliego-actions.ts`) ya consultan
+  `puede()`; `asistentes`, el otro `pro`, salió con los asistentes ese mismo
+  día. El nivel `pro` sigue en el modelo, y /precios no pinta su columna
+  mientras esté vacía (`seccionesPorNivel`). La columna ya existe en
   la Supabase viva: verificado el 2026-09-15, las 24 migraciones del repo
   (`0000`–`0023`) están aplicadas.
 
@@ -398,8 +400,8 @@ sigue estática: el formulario se pinta para todos, la acción de servidor
 (`subirPliegoDesdeFichaAction`) exige sesión, revalida la ficha y devuelve el
 resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
 `/api/pliego/extract` y `/api/eligibility/extract` (su paso lo hace ahora
-`uploadPliego`). La frontera `pro` de `pliego_extraer` sigue sin aplicarse:
-hoy toda cuenta es `gratis` y aplicarla apagaría la subida.
+`uploadPliego`). El análisis de pliego es gratis (basta una cuenta) desde el
+mismo día: `pliego_extraer` pasó de `pro` a `gratis` en la política.
 PR 3 hecho: en la §7 cada rival es un `<details>` (`RivalesFicha.tsx`) que al
 abrirse pide `GET /api/ficha/[id]/rival/[key]` → `historialComparable()`
 (`src/lib/al/consulta/competidor.ts`): cuántas gana, tasa, mediana

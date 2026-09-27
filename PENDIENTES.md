@@ -282,6 +282,11 @@ cualquier cuenta gratuita puede subirlo, igual que antes en /pliego. La decisió
 de `GEMINI_API_KEY` por usuario sigue abierta, y ahora pesa más: la puerta está
 en cada ficha pública, no en una página aparte.
 
+**Resuelto el acceso (2026-09-27):** el análisis de pliego es **gratis** por
+decisión del usuario; `pliego_extraer` pasó a `gratis` en `politica.ts` y las
+acciones de subida consultan `puede()`. Queda abierta solo la cuota de
+`GEMINI_API_KEY` por usuario.
+
 Y una lección de la revisión, que vale más que las dos anteriores: **el copy del
 home hacía afirmaciones que el código no sostiene**, y las cazó la revisión, no
 el plan. Dos ejemplos reales, ambos corregidos: se prometía que el asistente de

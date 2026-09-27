@@ -44,7 +44,7 @@ export const SECCIONES_HOME = [
   // El análisis de pliego ya no tiene página: vive en la §4 de cada ficha
   // (2026-09-27). Sigue en el catálogo para que /precios y /cuenta lo nombren en
   // su nivel; su puerta son las fichas.
-  { id: "pliego", href: "/licitaciones", capacidad: "pliego_extraer", etiqueta: "plan pro" },
+  { id: "pliego", href: "/licitaciones", capacidad: "pliego_extraer", etiqueta: "cuenta gratuita" },
   { id: "filtros", href: "/mis-filtros", capacidad: "filtros", etiqueta: "cuenta gratuita" },
   {
     id: "diagnostico-historial",
@@ -186,13 +186,20 @@ export const MENU_CUENTA = [
  * El criterio de aceptación de la sección ("añadir una ruta con nombre la
  * hace aparecer en su columna sin tocar el componente") deja de ser una
  * promesa y pasa a estar en `src/__tests__/landing/nombres.test.ts`.
+ *
+ * Un nivel sin ninguna sección no se devuelve: una columna vacía diría que
+ * existe algo que no existe. Es el caso de `pro` desde el 2026-09-27, cuando el
+ * análisis de pliego pasó a gratis; su columna vuelve sola cuando algo sea de
+ * pago.
  */
 export function seccionesPorNivel() {
-  return Object.entries(ETIQUETA_POR_NIVEL).map(([nivel, etiqueta]) => ({
-    nivel,
-    etiqueta,
-    secciones: SECCIONES_HOME.filter((s) => s.etiqueta === etiqueta && NOMBRE_POR_ID[s.id]).map(
-      (s) => ({ ...s, nombre: NOMBRE_POR_ID[s.id] })
-    ),
-  }));
+  return Object.entries(ETIQUETA_POR_NIVEL)
+    .map(([nivel, etiqueta]) => ({
+      nivel,
+      etiqueta,
+      secciones: SECCIONES_HOME.filter((s) => s.etiqueta === etiqueta && NOMBRE_POR_ID[s.id]).map(
+        (s) => ({ ...s, nombre: NOMBRE_POR_ID[s.id] })
+      ),
+    }))
+    .filter((g) => g.secciones.length > 0);
 }
