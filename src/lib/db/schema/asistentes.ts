@@ -67,16 +67,3 @@ export const mensaje = pgTable(
   },
   (t) => [index("mensaje_conversacion_idx").on(t.conversacionId)]
 ).enableRLS();
-
-/** Interés registrado para el contexto 'mercado' (Fase 2, aún sin implementar). */
-export const listaEsperaMercado = pgTable(
-  "lista_espera_mercado",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    usuarioId: text("usuario_id")
-      .notNull()
-      .references(() => usuario.id, { onDelete: "cascade" }),
-    creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (t) => [uniqueIndex("lista_espera_mercado_usuario_uq").on(t.usuarioId)]
-).enableRLS();

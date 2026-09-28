@@ -20,9 +20,9 @@ describe("enlaces del home", () => {
     expect(existeRuta(href), `${href} no tiene page en app/`).toBe(true);
   });
 
-  it("ninguna sección enlaza a /terms o /privacy, que no existen", () => {
-    const rotos = SECCIONES_HOME.filter((s) => ["/terms", "/privacy"].includes(s.href));
-    expect(rotos).toEqual([]);
+  it("las páginas legales enlazadas desde el pie existen", () => {
+    expect(existeRuta("/terms")).toBe(true);
+    expect(existeRuta("/privacy")).toBe(true);
   });
 
   it("no hay ids duplicados", () => {

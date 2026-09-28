@@ -67,7 +67,7 @@ export const SMART_COLLECTIONS: SmartCollection[] = [
   {
     id: "listos-para-extraer",
     titulo: "Listos para extraer",
-    descripcion: "El pliego ya se probó como público — se puede analizar en /pliego.",
+    descripcion: "El pliego se detectó como público. Abre la ficha del proceso para analizarlo.",
     glyph: "📄",
     pills: [
       {

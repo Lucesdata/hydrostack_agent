@@ -1,11 +1,9 @@
 /**
  * Route handler: GET /api/cron/alertas
  *
- * Disparador HTTP del envío diario de alertas (Fase 1.4). Lo invoca Vercel
- * Cron según `vercel.json` (`schedule: "0 12 * * *"` → una hora después de
- * `cron/ingest`, deliberadamente desacoplado: si la ingesta de ese día falló,
- * el matching corre igual sobre los datos del día anterior — degradación
- * aceptable, ver docs/plan-arquitectura-roadmap.md §3.4).
+ * Disparador HTTP del envío de alertas (Fase 1.4). La ruta existe, pero
+ * `vercel.json` solo programa `/api/cron/tick`: el envío no se ejecuta
+ * automáticamente hasta configurar su programación y el correo saliente.
  *
  * Mismo patrón de seguridad que `cron/ingest`: `CRON_SECRET` es obligatorio;
  * si no está definido o no coincide como `Bearer`, responde 401 (fail-closed).

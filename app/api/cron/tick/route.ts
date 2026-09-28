@@ -9,7 +9,7 @@
  * arquitectura (restricción R4), es un despachador que decide internamente qué
  * corre según la fecha; las demás etapas son funciones, no rutas de cron.
  *
- * `vercel.json` sigue declarando exactamente dos entradas: ésta y `alertas`.
+ * `vercel.json` declara solo este cron; `alertas` no está programado.
  * `/api/cron/ingest` se conserva como disparador manual de la ingesta sola.
  *
  * **Ninguna etapa aborta a las siguientes.** Cada una va en su propio try/catch y
