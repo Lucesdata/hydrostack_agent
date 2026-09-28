@@ -1,8 +1,31 @@
 # Pendientes — AquaLicita
 
-Derivados del diagnóstico del 2026-08-02 (detalle completo con líneas exactas en `AUDIT_REPORT.md`).
+Registro histórico iniciado con el diagnóstico del 2026-08-02 (`AUDIT_REPORT.md`).
+Las secciones conservan la numeración original y pueden incluir hallazgos ya
+resueltos; **la fecha y la actualización más reciente de cada sección mandan**
+sobre su redacción inicial. Antes de actuar, verificar código, despliegue y base
+viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 
-**Ya resuelto en esa fecha:** anclas del navbar — `Navbar.js` ahora apunta a rutas reales (`/build`, `/calculators`, `/chat`, `/nosotros`) y se eliminó la lógica muerta de IntersectionObserver.
+## Índice de trabajo abierto (revisión documental 2026-09-28)
+
+| Área | Secciones | Siguiente comprobación |
+| --- | --- | --- |
+| Correo y operación | §0, §44, §48 | Ejecutar runbook; confirmar SMTP, Resend, cron y entregas reales |
+| Fiabilidad del pliego | §2, §5, §6 | Fixture real, citas verificadas y alcance del gate matemático |
+| Seguridad y cuenta | §13, §15, §18, §39 | Prueba con cuenta real, grants, páginas legales y destino del PR #39 |
+| Datos y procedencia | §28–31, §38, §41 | Calidad de clasificación, espacio en Postgres, FK y paridad de drivers |
+| Interfaz y eficiencia | §24–26, §46, §47, §50 | Contraste, estilos heredados, funcionalidades planificadas y consultas sin consumidores |
+| Decisiones de producto | §11, §12, §14, §29–30 | Confirmar alcance y límites antes de implementar |
+
+§19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
+ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es
+historial del bloqueo del mapa y del hero, ya construidos. §49 registra la
+limpieza hecha y la decisión abierta sobre la tabla `lista_espera_mercado`.
+Esta tabla no se elimina de una migración sin revisar filas y uso futuro.
+
+**Histórico del 2026-08-02:** se corrigieron las anclas del navbar y se
+eliminó la lógica de IntersectionObserver de aquella versión; las rutas
+citadas en auditorías antiguas no describen necesariamente la navegación actual.
 
 ---
 
@@ -266,7 +289,7 @@ antes a `src/components/landing/seccionesHome.js`: el pie resuelve cada `href`
 por id contra ese catálogo y **lanza en build** si falta, que es justo lo que
 impide que el enlace roto vuelva.
 
-### 19. Pliegos y asistentes: cero uso y acceso sin resolver
+### 19. Pliegos y asistentes: historial; acceso y cuota resueltos 2026-09-27
 `pliego_proceso`, `conversacion`, `mensaje` y `documento` están a 0 filas: el
 extractor de pliegos y los dos asistentes nunca se han usado en producción. El
 home ya no los vende como pilares — bajaron a la rejilla de intención marcados
@@ -517,7 +540,7 @@ de entidad (`clase-entidad.ts`), las rutas facetadas (`facetas.ts` + tres
 familias de rutas), la fila densa compartida (`src/components/secop/lista/`),
 `/precios`, la ilustración movida a `/nosotros` y la limpieza de navegación.
 
-### 32. La portada sigue sin reconstruirse — **desbloqueada el 2026-09-22**
+### 32. Historial del bloqueo de la portada — hero construido 2026-09-26
 `app/page.js` conserva sus diez secciones. El hero del rediseño es 5/12 de
 mensaje y 7/12 de mapa departamental, y **no hay geometría en el repo**:
 `data/dane/divipola.ts` es un crosswalk de nombres y códigos, `public/` solo
@@ -913,7 +936,7 @@ y correo que entregue (§0). Entonces: formulario con casilla de autorización,
 tabla nueva con `.enableRLS()` y envío del informe.
 
 
-### 49. Lo que quedó tras la limpieza de huérfanos (2026-09-27)
+### 49. Limpieza de huérfanos: resuelto salvo decisión de tabla (2026-09-27)
 Se borró todo lo que nada llamaba: archivos sin importador, CSS del tema séptico,
 `/api/mercado/waitlist`, `/api/al/sanciones/[nit]`, el clasificador binario
 (`classify/classifier.ts` y compañía), `config/smmlv.ts` y tres funciones sueltas
