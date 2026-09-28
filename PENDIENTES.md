@@ -300,7 +300,9 @@ notificador; es un chat reactivo), y el hero mostraba `127` procesos nuevos y
 — que resultaron ser 242 y $309.727 M. Antes de escribir una afirmación nueva en
 el home, ábrase el módulo que la sostiene.
 
-### 20. `LandingCards` se importa en el home y no se renderiza en ningún lado
+### 20. `LandingCards` se importa en el home y no se renderiza en ningún lado — ✅ resuelto 2026-09-27
+*El archivo se borró en el PR #82 (limpieza de huérfanos); ya no hay import ni componente.*
+
 `app/page.js` importa `LandingCards` desde
 `src/components/landing/LandingCards.jsx` pero nunca la monta — el import
 sobrevivió a la reescritura del home mientras el JSX que la usaba desapareció.
@@ -376,7 +378,9 @@ que la información llegara — ver `CLAUDE.md` §3. Lo que ya se hizo:
 
 Lo que quedó abierto, en orden de impacto:
 
-### 22. El segmento UNKNOWN de la barra de elegibilidad es invisible
+### 22. El segmento UNKNOWN de la barra de elegibilidad es invisible — ✅ resuelto 2026-09-28
+*UNKNOWN ya no se rellena con `--line`: va con contorno discontinuo y glifo `?` en `--ink-600`, que contra la tarjeta pasa de 3:1. La excepción conocida de `contraste.test.ts` se retiró. Solo quedaba esta barra en el panel de `/licitaciones/explorar` (`ProcessDetail`); la ficha y la vitrina ya usan `semaforo/Semaforo.tsx`, que lo resolvió antes.*
+
 `.clr-elig-seg--unknown` se pinta con `var(--line)` (`#E5E5E0`), que contra la
 tarjeta blanca da **1,26:1** cuando un elemento no textual exige 3,0. En la barra
 de cinco segmentos, UNKNOWN no se lee como un estado: se lee como pista vacía. Y
@@ -389,7 +393,9 @@ ninguno llega a 3,0 (`#A9AFA8` se queda en 2,24). Necesita contorno, trama o un
 gris medio — es un rediseño del componente. **Va con la vitrina (Tarea 3 del
 spec de rediseño), que es donde el semáforo se rehace de todos modos.**
 
-### 23. La barra de cinco segmentos es solo color, sin texto
+### 23. La barra de cinco segmentos es solo color, sin texto — ✅ resuelto 2026-09-28
+*Cada tramo lleva su glifo (`✓ ! ✕ ?`), blanco sobre el color de estado (4,5:1 o más, medido en `contraste.test.ts`). La barra va con `aria-hidden`: la lista de compuertas de debajo dice lo mismo con palabras. Probado en `ProcessDetail.test.tsx`.*
+
 La lista de compuertas sí lleva glifo (`✓ ! ✕ ?`) junto al nombre, así que ahí el
 color nunca viaja solo. La barra no. Y las luminancias del verde y el ámbar
 difieren un 4%, así que para alguien con deuteranopia o protanopia PASS y WARN

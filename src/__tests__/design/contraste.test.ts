@@ -74,6 +74,15 @@ describe("semáforo de elegibilidad", () => {
     const glifos = { PASS: "✓", WARN: "!", FAIL: "✕", UNKNOWN: "?" };
     expect(Object.keys(glifos).sort()).toEqual(Object.keys(estados).sort());
   });
+
+  // La barra de /licitaciones/explorar pinta el glifo en blanco dentro del
+  // tramo relleno; UNKNOWN va sin relleno, con contorno y glifo en --ink-600,
+  // que ya cubre la prueba de arriba (y un contorno solo exige 3:1).
+  for (const token of ["success", "warning", "danger"]) {
+    it(`el glifo blanco se lee sobre el tramo --${token} de la barra`, () => {
+      expect(contraste("#ffffff", t[token])).toBeGreaterThanOrEqual(AA.texto);
+    });
+  }
 });
 
 describe("texto sobre superficie", () => {
@@ -193,14 +202,6 @@ describe("excepciones conocidas (no deben empeorar)", () => {
       "surface-alt",
       4.36,
       "texto tenue sobre la superficie alterna: por debajo de AA desde antes de esta medición",
-    ],
-    [
-      "--line sobre --surface (segmento UNKNOWN de la barra)",
-      "line",
-      "surface",
-      1.26,
-      "la barra pinta UNKNOWN con --line y no se ve: exige 3:1 por ser elemento no textual. " +
-        "Ningún gris claro llega — se arregla rediseñando la barra, no oscureciendo el token",
     ],
   ];
 
