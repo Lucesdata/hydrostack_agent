@@ -607,11 +607,22 @@ const CSS = `
 }
 .clr-elig-count{ font-weight: 400; color: var(--ink-600); font-size: 11.5px; }
 .clr-elig-bar{ display: flex; gap: 3px; margin-bottom: 10px; }
-.clr-elig-seg{ flex: 1; height: 5px; border-radius: 2px; }
+/* Tramos con glifo blanco sobre el color de estado (los -700 dan 4,5:1 o más).
+   UNKNOWN no se rellena: va con contorno discontinuo en --ink-600, que contra
+   la tarjeta pasa de 3:1. Antes era --line (1,26:1) y se leía como pista vacía,
+   justo en el estado más frecuente de habilitación. PENDIENTES §22-§23. */
+.clr-elig-seg{
+  flex: 1; height: 16px; border-radius: 3px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  font: 600 10.5px/1 var(--font-mono); color: #fff;
+}
 .clr-elig-seg--pass{ background: var(--success); }
 .clr-elig-seg--warn{ background: var(--warning); }
 .clr-elig-seg--fail{ background: var(--danger); }
-.clr-elig-seg--unknown{ background: var(--line); }
+.clr-elig-seg--unknown{
+  background: transparent; color: var(--ink-600);
+  border: 1px dashed var(--ink-600);
+}
 .clr-elig-gates{ list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .clr-elig-gate{
   display: grid; grid-template-columns: 16px 78px 1fr; gap: 7px;

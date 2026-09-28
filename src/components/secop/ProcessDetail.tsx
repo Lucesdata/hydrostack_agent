@@ -181,13 +181,19 @@ export default function ProcessDetail({
               {passCount} de {gateTotal} compuertas
             </span>
           </header>
-          <div className="clr-elig-bar">
-            {GATE_LABEL.map(([key]) => (
-              <span
-                key={key}
-                className={`clr-elig-seg clr-elig-seg--${STATUS[v.gates[key].status].cls}`}
-              />
-            ))}
+          {/* Resumen de un vistazo. Cada tramo lleva su glifo, así que el color
+              nunca viaja solo (verde y ámbar difieren un 4% en luminancia). Se
+              oculta a lectores de pantalla porque la lista de abajo dice lo
+              mismo con palabras. */}
+          <div className="clr-elig-bar" aria-hidden="true">
+            {GATE_LABEL.map(([key]) => {
+              const s = STATUS[v.gates[key].status];
+              return (
+                <span key={key} className={`clr-elig-seg clr-elig-seg--${s.cls}`}>
+                  {s.glyph}
+                </span>
+              );
+            })}
           </div>
           <ul className="clr-elig-gates">
             {GATE_LABEL.map(([key, label]) => {
