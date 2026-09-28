@@ -10,10 +10,6 @@ import { mapApiItem } from "@/src/components/landing/proceso-resumen";
  * el puntero, que dispararía una petición por cada departamento cruzado— y se
  * guardan en memoria para no volver a pedir el mismo.
  *
- * La serie de publicados por semana salió el 2026-09-28 (decisión del usuario,
- * plan portada-esencial). `/api/departamento/[dpto]/resumen` la sigue
- * devolviendo; aquí ya no se lee (PENDIENTES).
- *
  * Solo datos reales: cargando dice que carga, y si falla muestra "—".
  */
 

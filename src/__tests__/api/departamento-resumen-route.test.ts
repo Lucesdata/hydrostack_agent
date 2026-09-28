@@ -18,12 +18,12 @@ describe("GET /api/departamento/[dpto]/resumen", () => {
   });
 
   it("devuelve el resumen con caché de CDN", async () => {
-    resumenDepartamento.mockResolvedValue({ destacados: [], semanas: [1, 2] });
+    resumenDepartamento.mockResolvedValue({ destacados: [] });
     const res = await pedir("05");
     expect(res.status).toBe(200);
     expect(resumenDepartamento).toHaveBeenCalledWith("05");
     expect(res.headers.get("Cache-Control")).toContain("s-maxage=21600");
-    expect(await res.json()).toEqual({ destacados: [], semanas: [1, 2] });
+    expect(await res.json()).toEqual({ destacados: [] });
   });
 
   it("si la base falla, 503 y sin caché", async () => {

@@ -964,10 +964,9 @@ PR 2 de `docs/superpowers/plans/2026-09-27-portada-esencial.md`. Tres cosas
 quedan a medias a propósito, para no mezclar la limpieza de datos con el
 cambio visual:
 
-- **`/api/departamento/[dpto]/resumen` sigue calculando la serie semanal**
-  (`semanas`), que ya no se pinta: es una consulta de más por departamento
-  elegido, cacheada 6 h. Quitarla toca `resumen-departamento.ts`, su ruta y sus
-  tests contra PGlite.
+- ✅ **Serie semanal retirada de `/api/departamento/[dpto]/resumen`**: ya no se
+  pintaba en la portada; se eliminó su consulta, respuesta y pruebas específicas.
+  Se conserva la consulta de los tres procesos destacados.
 - **`agregadosPortada()` sigue calculando `tipos` y `clasesEntidad`**, que la
   portada ya no pinta (`app/page.js` solo lee `departamentos` y
   `totalAbiertos`). Son dos `GROUP BY` de más en cada revalidación (6 h).

@@ -1,5 +1,5 @@
 /**
- * GET /api/departamento/[dpto]/resumen — destacados y serie semanal de un
+ * GET /api/departamento/[dpto]/resumen — destacados de un
  * departamento para la ficha del hero (`src/lib/secop/resumen-departamento.ts`).
  *
  * La ruta es dinámica (lee el parámetro), así que la caché la hace el CDN con
