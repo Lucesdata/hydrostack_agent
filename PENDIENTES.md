@@ -20,8 +20,7 @@ viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 §19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
 ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es
 historial del bloqueo del mapa y del hero, ya construidos. §49 registra la
-limpieza hecha y la decisión abierta sobre la tabla `lista_espera_mercado`.
-Esta tabla no se elimina de una migración sin revisar filas y uso futuro.
+limpieza y la migración protegida de `lista_espera_mercado`, aún sin aplicar.
 
 **Histórico del 2026-08-02:** se corrigieron las anclas del navbar y se
 eliminó la lógica de IntersectionObserver de aquella versión; las rutas
@@ -282,12 +281,9 @@ distinguirlas, y "8 preguntas · 3 minutos" no dice cuál es cuál.
 Del plan `docs/superpowers/plans/2026-09-08-home-alineado-producto.md`.
 
 ### 18. Páginas legales `/terms` y `/privacy`
-El pie del home las enlazaba sin que existieran como rutas — dos enlaces rotos
-en producción, desde siempre. Se quitaron los enlaces al alinear el home. Falta
-escribir las páginas y volver a enlazarlas desde `S6Footer.jsx`, añadiéndolas
-antes a `src/components/landing/seccionesHome.js`: el pie resuelve cada `href`
-por id contra ese catálogo y **lanza en build** si falta, que es justo lo que
-impide que el enlace roto vuelva.
+**Resuelto 2026-09-28:** las páginas ya existen y se enlazan desde `S6Footer.jsx`.
+La prueba de enlaces verifica sus rutas. Revisar el contenido legal cuando cambien
+los tratamientos de datos o los proveedores.
 
 ### 19. Pliegos y asistentes: historial; acceso y cuota resueltos 2026-09-27
 `pliego_proceso`, `conversacion`, `mensaje` y `documento` están a 0 filas: el
@@ -936,16 +932,19 @@ y correo que entregue (§0). Entonces: formulario con casilla de autorización,
 tabla nueva con `.enableRLS()` y envío del informe.
 
 
-### 49. Limpieza de huérfanos: resuelto salvo decisión de tabla (2026-09-27)
+### 49. Limpieza de huérfanos: migración de tabla preparada (2026-09-28)
 Se borró todo lo que nada llamaba: archivos sin importador, CSS del tema séptico,
 `/api/mercado/waitlist`, `/api/al/sanciones/[nit]`, el clasificador binario
 (`classify/classifier.ts` y compañía), `config/smmlv.ts` y tres funciones sueltas
 (`versionesEnHistorial`, `municipioFromLocalizacion`, `assertExtractable`). Tres
 cosas no se borraron a propósito:
 
-- **La tabla `lista_espera_mercado`** sigue en el esquema aunque su endpoint ya
-  no existe. Quitarla del esquema genera un `DROP TABLE` en la próxima migración
-  y borra filas de la base viva: decisión del usuario, no de una limpieza.
+- **La tabla `lista_espera_mercado`:** retirada del esquema Drizzle. La migración
+  `0025_fine_emma_frost.sql` bloquea nuevas escrituras, rechaza la eliminación si
+  hay alguna fila y usa `DROP TABLE ... RESTRICT` para preservar dependencias
+  desconocidas. No se pudo inspeccionar la base desplegada desde este entorno
+  (sin credenciales); la migración permanece pendiente de aplicación. Si falla,
+  se revisan y conservan las filas o dependencias antes de volver a ejecutarla.
 - ~~**`clearOferentePerfil()` no la llama nadie, y eso es un fallo, no código
   sobrante.**~~ *Resuelto el 2026-09-27 (PR #86): `/logout` responde con
   `Clear-Site-Data: "storage"` y los botones de cerrar sesión la llaman antes de
@@ -975,4 +974,3 @@ cambio visual:
   quedan 17.** La leyenda del mapa conserva sus seis escalones con los rangos
   («100–499», «1.500–2.999»…), que suman 9. La maqueta que fijó el criterio
   pintaba solo los extremos; se prefirió que la escala se pudiera leer.
-

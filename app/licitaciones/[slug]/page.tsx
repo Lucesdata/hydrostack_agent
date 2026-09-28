@@ -25,18 +25,16 @@ import { montoConDato } from "@/src/lib/secop/monto";
  * Es la única página del producto que un buscador puede traer tráfico hacia:
  * hasta ahora el detalle vivía dentro de un componente de cliente sin URL.
  *
- * ISR de 1 hora y `generateStaticParams` VACÍO, por lo mismo que las rutas
+ * ISR de 12 horas y `generateStaticParams` VACÍO, por lo mismo que las rutas
  * facetadas: prerrenderizar miles de fichas en build ataría cada despliegue a
  * la base de producción. Con la lista vacía, la primera visita a cada ficha la
- * genera y la deja cacheada; el coste es una invocación por ficha y por hora,
+ * genera y la deja cacheada; el coste es una invocación por ficha y por ventana de caché,
  * no una por visitante.
  */
 /**
- * Revalidación cada 12 horas: el doble que las facetas porque una ficha cambia
- * menos. Su objeto, su presupuesto y su entidad no se mueven una vez publicado
- * el proceso; lo único que cambia es el estado, y lo cambia la ingesta, que no
- * corre a diario (`vercel.json` tiene `"crons": []` — ver la nota de las rutas
- * facetadas).
+ * Revalidación cada 12 horas. La ingesta se programa diariamente mediante
+ * `/api/cron/tick`; una ficha puede mostrar datos de la corrida anterior
+ * durante esta ventana de caché.
  */
 export const revalidate = 43200;
 

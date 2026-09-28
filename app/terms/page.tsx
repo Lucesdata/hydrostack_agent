@@ -1,8 +1,7 @@
 // app/terms/page.tsx
 
 /**
- * Términos de servicio. Como /privacy, existía el enlace en el pie pero no la
- * ruta: 404.
+ * Términos de servicio. La ruta ya existe y se enlaza desde el pie.
  *
  * La sección 2 ("qué no es") es la que importa y la que hay que mantener
  * honesta. AquaLicita emite veredictos de elegibilidad y extrae requisitos de

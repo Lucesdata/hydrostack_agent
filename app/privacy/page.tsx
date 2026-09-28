@@ -3,7 +3,7 @@
 /**
  * Política de tratamiento de datos personales (Ley 1581 de 2012, Decreto 1377
  * de 2013). El pie de la landing la enlazaba desde antes de que existiera: la
- * ruta devolvía 404.
+ * ruta devolvía 404. La página existe ahora y se enlaza desde el pie.
  *
  * El inventario de datos de más abajo NO es genérico: cada viñeta corresponde a
  * una tabla real del esquema Drizzle o a un tercero realmente cableado. Si se
@@ -51,8 +51,8 @@ export default function PrivacyPage() {
 
       <h2 id="datos">2. Qué datos tratamos</h2>
       <p>
-        Esta es la lista completa. Cada punto corresponde a algo que el sistema efectivamente
-        guarda, no a una plantilla.
+        Este inventario incluye los datos de las funciones actuales y las tablas históricas que
+        siguen en el esquema.
       </p>
 
       <h3>Datos de tu cuenta</h3>
@@ -89,8 +89,9 @@ export default function PrivacyPage() {
           adjuntas, el formulario de presupuesto.
         </li>
         <li>
-          <strong>Conversaciones con los asistentes de proyecto:</strong> los mensajes que escribes
-          y las respuestas que recibes.
+          <strong>Historial de asistentes retirados:</strong> las tablas de conversaciones y
+          mensajes permanecen en el esquema. Los asistentes ya no están disponibles; cualquier
+          registro anterior se trata según los plazos de conservación de esta política.
         </li>
       </ul>
 

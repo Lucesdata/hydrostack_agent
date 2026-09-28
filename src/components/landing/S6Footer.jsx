@@ -2,9 +2,9 @@ import Link from "next/link";
 import { COLUMNAS_PIE, NOMBRE_POR_ID, ruta } from "./seccionesHome";
 
 /**
- * El pie enlazaba a /terms y /privacy, que nunca existieron. Ahora las rutas
- * salen de SECCIONES_HOME, que `enlaces.test.ts` verifica contra `app/`: un
- * enlace roto en el pie deja de ser algo que se descubre haciendo clic.
+ * Los enlaces del producto salen de SECCIONES_HOME, que `enlaces.test.ts`
+ * verifica contra `app/`. Las dos páginas legales se enlazan directamente
+ * desde el pie y también se comprueban en esa prueba.
  *
  * Desde 2026-09-15 tampoco decide sus propias columnas: las declara
  * `COLUMNAS_PIE` en seccionesHome.js, junto al nav. Eran dos listas sueltas
@@ -90,6 +90,14 @@ export default function S6Footer() {
           <span>Datos SECOP II · actualización diaria</span>
         </div>
         <p style={{ margin: 0 }}>© 2026 AquaLicita. Todos los derechos reservados.</p>
+        <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+          <Link href="/terms" style={linkStyle}>
+            Términos de servicio
+          </Link>
+          <Link href="/privacy" style={linkStyle}>
+            Tratamiento de datos
+          </Link>
+        </div>
       </div>
     </footer>
   );

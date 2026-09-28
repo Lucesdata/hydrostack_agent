@@ -11,18 +11,9 @@ import { procesosDeFaceta, resolverFaceta } from "@/src/lib/secop/facetas";
  * un buscador sabe recorrer — una query string no siempre se indexa.
  */
 /**
- * Revalidación cada 6 horas.
- *
- * No es un número a ojo: manda la cadencia real de la ingesta. Medido el
- * 2026-09-15, los datos NO entran a diario — `vercel.json` tiene `"crons": []`,
- * así que nada dispara `/api/cron/ingest` y alguien la ejecuta a mano: las altas
- * llegan a saltos de dos y tres días. Revalidar cada 30 minutos regeneraba la
- * página 48 veces al día para un dato que cambia cada dos o tres.
- *
- * A 6 horas queda como mucho un cuarto de día por detrás de la ingesta
- * —imperceptible a esa cadencia— y el techo de regeneraciones baja de 48 a 4 por
- * página y día. Si el cron llega a programarse de verdad, este número se puede
- * bajar; mientras tanto, bajarlo solo gasta.
+ * Revalidación cada 6 horas. `vercel.json` programa `/api/cron/tick`
+ * diariamente a las 11:00 UTC; la caché de esta faceta puede tardar hasta
+ * seis horas adicionales en reflejar una ingesta correcta.
  */
 export const revalidate = 21600;
 
@@ -35,7 +26,7 @@ export const revalidate = 21600;
  *
  * Con la lista vacía, Next no prerrenderiza nada en build pero la ruta sigue
  * siendo de generación estática: la primera visita a cada faceta la renderiza y
- * la deja cacheada, y `revalidate` la refresca cada 30 minutos. El coste se paga
+ * la deja cacheada, y `revalidate` la refresca cada 6 horas. El coste se paga
  * una vez por faceta y por ventana, no una vez por visitante.
  */
 export async function generateStaticParams() {

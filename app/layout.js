@@ -126,7 +126,7 @@ export default function RootLayout({ children }) {
         </main>
         {/*
           El pie vivía dentro de `app/page.js`, así que SOLO existía en la
-          portada: desde cualquier otra página —una faceta, /precios, /pliego—
+          portada: desde cualquier otra página —una faceta, /precios o una ficha—
           no había forma de llegar a nada salvo por el nav. Sube aquí, que es
           donde un pie tiene sentido, y con él suben sus enlaces a /cuenta y
           /mis-coincidencias, que hasta ahora solo se alcanzaban desde el correo.
