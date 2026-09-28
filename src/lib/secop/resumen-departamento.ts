@@ -20,8 +20,7 @@ export function esCodigoDepartamento(v: unknown): v is string {
 
 export async function resumenDepartamento(dpto: string): Promise<ResumenDepartamento> {
   const delDepartamento = eq(geografia.departamentoCodigo, dpto);
-  const destacados = await
-    db
+  const destacados = await db
       .select({
         secopProcesoId: proceso.secopProcesoId,
         referencia: proceso.referencia,
@@ -42,7 +41,6 @@ export async function resumenDepartamento(dpto: string): Promise<ResumenDepartam
       .where(and(condicionAbierto(), delDepartamento))
       .orderBy(sql`${proceso.valorEstimado} DESC NULLS LAST`, desc(proceso.fechaPublicacion))
       .limit(N_DESTACADOS);
-
 
   return {
     destacados: destacados.map((r) => ({
