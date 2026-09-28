@@ -25,7 +25,11 @@
   position: relative;
   isolation: isolate;
   overflow: clip;
-  padding: clamp(36px, 4.5vw, 64px) var(--gutter) 32px;
+  /* Recortado (2026-09-28): el hero completo —mensaje, mapa y resultado— debe
+     caber en el primer pantallazo en un portátil típico sin bajar. El tope
+     alto de 64px sumado al resto de márgenes empujaba el mapa fuera de vista;
+     ver también el `clamp(vh)` del svg más abajo. */
+  padding: clamp(20px, 3vw, 36px) var(--gutter) 20px;
   /* Fondo plano (2026-09-27): sin los dos resplandores radiales ni la rejilla
      de 40 px. El brillo se reserva para el mapa. */
   background: var(--aq-bg);
@@ -38,7 +42,7 @@
   /* El mensaje tiene un ancho de lectura; el mapa se queda con el resto. En
      fracciones (5fr/7fr) la tierra del mapa bajaba a 454 px a 1280. */
   grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
-  gap: clamp(28px, 4vw, 64px);
+  gap: clamp(20px, 3vw, 40px);
   align-items: start;
   max-width: 1360px;
   margin: 0 auto;
@@ -56,7 +60,7 @@
 .copy h1 {
   margin: 0;
   font:
-    700 clamp(2rem, 2.6vw, 2.6rem)/1.08 var(--font-inter),
+    700 clamp(1.7rem, 2.1vw, 2.2rem)/1.1 var(--font-inter),
     sans-serif;
   letter-spacing: -0.028em;
   /* globals.css activa `hyphens: auto` en los titulares de `.bp-page`; aquí
@@ -69,9 +73,9 @@
 }
 .lead {
   max-width: 40ch;
-  margin: 16px 0 26px;
+  margin: 10px 0 18px;
   font:
-    400 16.5px/1.6 var(--font-inter),
+    400 15.5px/1.5 var(--font-inter),
     sans-serif;
   color: #c3d3e0;
   hyphens: manual;
@@ -80,13 +84,13 @@
 .hero :global(.aqBuscadorHero) {
   position: relative;
   z-index: 5;
-  margin: 0 0 18px;
+  margin: 0 0 12px;
 }
 .hero :global(.aqBuscadorHeroCampo) {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 50px;
+  min-height: 44px;
   padding: 0 16px;
   border: 1px solid rgba(140, 190, 225, 0.3);
   border-radius: 12px;
@@ -199,8 +203,8 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  min-height: 46px;
-  margin-top: 14px;
+  min-height: 42px;
+  margin-top: 10px;
   padding: 0 22px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--aq-cta), var(--aq-cta-2));
@@ -226,8 +230,8 @@
    blanca de antes era lo más luminoso de la pantalla y le quitaba la mirada al
    mapa. */
 .resultado {
-  margin-top: 44px;
-  padding-top: 20px;
+  margin-top: 20px;
+  padding-top: 14px;
   border-top: 1px solid var(--aq-line);
 }
 .hero :global(.aqFichaCab) {
@@ -268,7 +272,7 @@
   color: var(--aq-text);
 }
 .hero :global(.aqResumen) {
-  margin-top: 18px;
+  margin-top: 12px;
   transition: opacity 0.15s;
 }
 .hero :global(.aqResumen[data-atenuado]) {
@@ -297,7 +301,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px 14px;
-  padding: 10px 0;
+  padding: 7px 0;
   border-top: 1px solid var(--aq-line);
   color: var(--aq-text);
   text-decoration: none;
@@ -335,7 +339,7 @@
 }
 .fichaCta {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 10px;
   color: var(--aq-cyan);
   font:
     600 15px var(--font-inter),
@@ -355,7 +359,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 6px 16px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font:
     13.5px/1.4 var(--font-inter),
     sans-serif;
@@ -515,10 +519,13 @@
   gap: 10px;
   color: var(--aq-text);
 }
-/* Sin la franja de KPIs encima (2026-09-26), el mapa ocupa ese alto: crece
-   hasta acompañar a la columna del mensaje y a la ficha. */
+/* Alto ligado al viewport, no fijo (2026-09-28): a 780px fijos el hero
+   entero —mensaje, mapa y resultado— no cabía en un portátil típico y había
+   que bajar para ver el resto. 56vh dejaba sitio a la cabecera, la leyenda y
+   el enlace de la lista debajo sin salirse del primer pantallazo; el suelo de
+   300px evita que se aplaste en ventanas muy bajas. */
 .map :global(.clr-mapa__svg) {
-  max-height: 780px;
+  max-height: clamp(300px, 56vh, 620px);
   width: 100%;
   margin-inline: auto;
 }
@@ -671,7 +678,7 @@
 
 /* ── Lista plegada ────────────────────────────────────────────────────────── */
 .lista {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 .lista summary {
   display: inline-block;
