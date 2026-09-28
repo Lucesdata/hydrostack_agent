@@ -106,7 +106,7 @@ describe("detallePorDepartamento · nEntidades (SQL real)", () => {
     const filas = await detallePorDepartamento();
     const antioquia = filas.find((f) => f.clave === "05")!;
     // Abiertos de Antioquia: A dos veces, B una, uno sin entidad → 2 distintas.
-    expect(antioquia.n).toBe(5);
+    expect(antioquia.n).toBe(4);
     expect(antioquia.nEntidades).toBe(2);
   });
 });
