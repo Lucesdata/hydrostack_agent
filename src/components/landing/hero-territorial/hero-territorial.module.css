@@ -43,7 +43,12 @@
      fracciones (5fr/7fr) la tierra del mapa bajaba a 454 px a 1280. */
   grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
   gap: clamp(20px, 3vw, 40px);
-  align-items: start;
+  /* Centradas entre sí, no ancladas arriba (2026-09-28): el mapa mide su alto
+     en vh y el mensaje no, así que según la pantalla puede sobrar alto en
+     cualquiera de las dos columnas. Con `start` ese sobrante quedaba como un
+     hueco vacío debajo de la más corta; centradas, el sobrante se reparte
+     arriba y abajo y deja de leerse como un error de maquetación. */
+  align-items: center;
   max-width: 1360px;
   margin: 0 auto;
 }
