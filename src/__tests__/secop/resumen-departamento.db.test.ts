@@ -19,7 +19,7 @@ vi.mock("@/src/lib/db/client", async () => {
 
 import { db } from "@/src/lib/db/client";
 import { entidad, geografia, proceso } from "@/src/lib/db/schema";
-import { resumenDepartamento, SEMANAS } from "@/src/lib/secop/resumen-departamento";
+import { resumenDepartamento } from "@/src/lib/secop/resumen-departamento";
 import { detallePorDepartamento } from "@/src/lib/secop/agregados";
 
 /** Fecha de hace `dias` días, como la escribe la ingesta (date, sin hora). */
@@ -81,10 +81,8 @@ beforeAll(async () => {
   await unProceso({ diasAtras: 3, valor: "900", entidadId: entA, objeto: "Grande" });
   await unProceso({ diasAtras: 8, valor: null, entidadId: entB, objeto: "Sin presupuesto" });
   await unProceso({ diasAtras: 20, valor: "500", entidadId: null, objeto: "Mediana" });
-  // Cerrado: cuenta en la serie, no en destacados ni en el detalle de abiertos.
+  // Cerrado: no aparece en destacados ni en el detalle de abiertos.
   await unProceso({ diasAtras: 40, abierto: false, valor: "99999", entidadId: entB });
-  // Fuera de la ventana de 12 semanas.
-  await unProceso({ diasAtras: SEMANAS * 7, valor: "1" });
   // Otro departamento: no se mezcla.
   await unProceso({ dpto: "08", diasAtras: 1, valor: "5000" });
 });
@@ -97,22 +95,9 @@ describe("resumenDepartamento (SQL real)", () => {
     expect(destacados[0].tipoProyecto).toBe("ptar");
   });
 
-  it("la serie cuenta abiertos y cerrados, por semanas de 7 días hacia atrás", async () => {
-    const { semanas } = await resumenDepartamento("05");
-    expect(semanas).toHaveLength(SEMANAS);
-    const ultima = SEMANAS - 1;
-    expect(semanas[ultima]).toBe(2); // hoy y hace 3 días
-    expect(semanas[ultima - 1]).toBe(1); // hace 8 días
-    expect(semanas[ultima - 2]).toBe(1); // hace 20 días
-    expect(semanas[ultima - 5]).toBe(1); // hace 40 días, ya cerrado
-    // El de hace 84 días queda fuera; el de Atlántico, también.
-    expect(semanas.reduce((a, b) => a + b, 0)).toBe(5);
-  });
-
-  it("un departamento sin procesos devuelve una serie de ceros y ningún destacado", async () => {
+  it("un departamento sin procesos no devuelve destacados", async () => {
     const r = await resumenDepartamento("99");
     expect(r.destacados).toEqual([]);
-    expect(r.semanas.every((x) => x === 0)).toBe(true);
   });
 });
 
