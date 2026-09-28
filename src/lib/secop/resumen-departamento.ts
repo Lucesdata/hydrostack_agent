@@ -44,8 +44,8 @@ export async function resumenDepartamento(dpto: string): Promise<ResumenDepartam
 
   return {
     destacados: destacados.map((r) => ({
-    ...mapRowToResumen(r),
-    ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
+      ...mapRowToResumen(r),
+      ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
     })),
   };
 }
