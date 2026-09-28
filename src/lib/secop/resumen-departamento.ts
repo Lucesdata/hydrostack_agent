@@ -21,31 +21,31 @@ export function esCodigoDepartamento(v: unknown): v is string {
 export async function resumenDepartamento(dpto: string): Promise<ResumenDepartamento> {
   const delDepartamento = eq(geografia.departamentoCodigo, dpto);
   const destacados = await db
-      .select({
-        secopProcesoId: proceso.secopProcesoId,
-        referencia: proceso.referencia,
-        objeto: proceso.objeto,
-        modalidad: proceso.modalidad,
-        estado: proceso.estadoActual,
-        valorEstimado: proceso.valorEstimado,
-        fechaPublicacion: proceso.fechaPublicacion,
-        entidadNombre: entidad.nombre,
-        departamento: geografia.departamentoNombre,
-        municipio: geografia.municipioNombre,
-        urlRaw: proceso.url,
-        tipoProyecto: proceso.tipoProyecto,
-      })
-      .from(proceso)
-      .innerJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
-      .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
-      .where(and(condicionAbierto(), delDepartamento))
-      .orderBy(sql`${proceso.valorEstimado} DESC NULLS LAST`, desc(proceso.fechaPublicacion))
-      .limit(N_DESTACADOS);
+    .select({
+      secopProcesoId: proceso.secopProcesoId,
+      referencia: proceso.referencia,
+      objeto: proceso.objeto,
+      modalidad: proceso.modalidad,
+      estado: proceso.estadoActual,
+      valorEstimado: proceso.valorEstimado,
+      fechaPublicacion: proceso.fechaPublicacion,
+      entidadNombre: entidad.nombre,
+      departamento: geografia.departamentoNombre,
+      municipio: geografia.municipioNombre,
+      urlRaw: proceso.url,
+      tipoProyecto: proceso.tipoProyecto,
+    })
+    .from(proceso)
+    .innerJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
+    .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
+    .where(and(condicionAbierto(), delDepartamento))
+    .orderBy(sql`${proceso.valorEstimado} DESC NULLS LAST`, desc(proceso.fechaPublicacion))
+    .limit(N_DESTACADOS);
 
   return {
     destacados: destacados.map((r) => ({
-      ...mapRowToResumen(r),
-      ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
+    ...mapRowToResumen(r),
+    ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
     })),
   };
 }
