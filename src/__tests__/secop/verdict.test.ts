@@ -459,6 +459,48 @@ describe("habilitacionGate (L2 — con requisitos estructurados)", () => {
     expect(r.requiredLevel).toBe(2);
   });
 
+  it("indicador exigido que el perfil no declara → WARN y faltanEnPerfil con su etiqueta", () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: {
+          valor_min_smmlv: 3000,
+          unspsc_exigidos: ["83101500"],
+          max_contratos_aportables: null,
+          verificar_manual: false,
+          cita_textual: "x",
+        },
+        indicadores_financieros: [
+          {
+            indicador: "patrimonio_smmlv",
+            operador: "gte",
+            valor: 1000,
+            verificar_manual: false,
+            cita_textual: "y",
+          },
+        ],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe("WARN");
+    expect(r.faltanEnPerfil).toEqual(["patrimonio (SMMLV)"]);
+  });
+
+  it("sin datos que falten en el perfil no hay faltanEnPerfil", () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: {
+          valor_min_smmlv: 3000,
+          unspsc_exigidos: ["83101500"],
+          max_contratos_aportables: null,
+          verificar_manual: false,
+          cita_textual: "x",
+        },
+        indicadores_financieros: [],
+      },
+    });
+    expect(habilitacionGate(perfilConRup, p)).not.toHaveProperty("faltanEnPerfil");
+  });
+
   it("brecha de experiencia cuantificada exacta", () => {
     const p = proc({
       requisitosHabilitantes: {

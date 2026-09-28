@@ -136,6 +136,20 @@ filtra por `FAIL` es el matching, y queda fijado por test.
 Riesgo: medio. Es la página más visitada por buscadores; se protege con el
 criterio 5 (HTML sin JS completo y sin perfil) y con el build de producción.
 
+**Hecho el 2026-09-28, con tres desvíos respecto a lo escrito arriba:**
+
+- **Punto 7:** «Define tu perfil» no enlaza al explorador con `?volver=`. Al
+  reconocer se vio que el explorador pide sesión para abrir su asistente, así
+  que D1 no se cumplía por esa vía. El bloque monta `OferenteWizard`, que guarda
+  en `localStorage` sin cuenta, dentro de la propia ficha.
+- **Tests de la isla:** no hay entorno DOM en el repo (ni jsdom ni Testing
+  Library), y añadirlo es una dependencia (`CONDUCTA.md` §2). `BloqueDecision`
+  se prueba con `renderToStaticMarkup`, que es justo el HTML sin JS del
+  criterio 5. Lo interactivo lo cubren las funciones puras y
+  `sincronizar-perfil.test.ts`.
+- **Contraste:** las pastillas del canal van al 6 % de su color, no al 10 % de
+  la maqueta: al 10 % el verde y el ámbar daban 4,38 y 4,39:1.
+
 ### PR 3 — Debajo del bloque, en orden de decisión
 
 1. `page.tsx`: orden Pliego → Competencia → Fechas → Detalle (plegado en

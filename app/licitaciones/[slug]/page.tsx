@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
+import BloqueDecision from "@/src/components/secop/ficha/BloqueDecision";
+import CopiarNumero from "@/src/components/secop/ficha/CopiarNumero";
 import CierreFicha from "@/src/components/secop/ficha/CierreFicha";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
-import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
 import {
@@ -49,6 +49,20 @@ type Props = { params: Promise<{ slug: string }> };
 const fecha = (iso: string | null) =>
   iso
     ? new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })
+    : null;
+
+/** «14 oct 2026». En hora de Colombia, fijo: el servidor no debe depender de su huso. */
+const fechaCorta = (iso: string | null) =>
+  iso
+    ? new Date(iso)
+        .toLocaleDateString("es-CO", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "America/Bogota",
+        })
+        .replace(/\./g, "")
+        .replace(/ de /g, " ")
     : null;
 
 export async function generateMetadata({ params }: Props) {
@@ -107,7 +121,7 @@ export default async function FichaPage({ params }: Props) {
 
   return (
     <div className="clr-page">
-      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA + ESTILOS_SEMAFORO }} />
+      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -127,12 +141,16 @@ export default async function FichaPage({ params }: Props) {
           )}
         </nav>
 
-        <p className="fi-entidad">{p.entidadNombre ?? "Entidad sin resolver"}</p>
+        <p className="fi-entidad">
+          {p.entidadNombre ?? "Entidad sin resolver"}
+          {lugar && <span className="fi-entidad-lugar"> · entidad en {lugar}</span>}
+        </p>
         <h1 className="fi-h1">{p.objeto ?? p.secopProcesoId}</h1>
 
         <div className="fi-chips">
           {/* El tipo va primero y con su color de familia, siempre con el nombre
-              escrito: color = tipo de obra, nunca estado. Ver tipo-color.ts. */}
+              escrito: color = tipo de obra, nunca estado. Ver tipo-color.ts.
+              Solo tres chips: UNSPSC y tipo de contrato bajan al detalle. */}
           {p.tipoProyecto && (
             <span
               className={`fi-chip fi-chip--tipo fi-chip--${COLOR_TIPO[p.tipoProyecto].familia}`}
@@ -144,58 +162,41 @@ export default async function FichaPage({ params }: Props) {
           )}
           {p.estadoActual && <span className="fi-chip fi-chip--estado">{p.estadoActual}</span>}
           {p.modalidad && <span className="fi-chip">{p.modalidad}</span>}
-          {p.tipoContrato && <span className="fi-chip">{p.tipoContrato}</span>}
-          {p.unspsc && <span className="fi-chip">UNSPSC {p.unspsc.replace(/^V\d+\./i, "")}</span>}
-          <span className="fi-chip">{p.secopProcesoId}</span>
-          {lugar && <span className="fi-chip">Entidad en {lugar}</span>}
         </div>
 
-        {/* 2 — Cómo te queda a ti */}
-        <section className="fi-sec">
-          <h2 className="fi-h2">Cómo te queda a ti</h2>
-          <div className="fi-panel">
-            {/*
-              El servidor pinta la lectura ABSOLUTA —lo que el proceso exige—, que
-              es la que se cachea, la que indexa un buscador y la que ve quien
-              llega sin nada. La isla de cliente la sustituye por la relativa si
-              encuentra perfil. Ver SemaforoConPerfil para el porqué de que no se
-              calcule aquí.
-            */}
-            <SemaforoConPerfil
-              proceso={aSecopProceso(p)}
-              absolutas={compuertasAbsolutas(p)}
-              nota="Estas cinco son lecturas del proceso, no un dictamen de elegibilidad: quien decide si calificas es el pliego. Con un perfil definido, cada compuerta pasa de decir qué exige el proceso a decir cómo te queda a ti."
-            />
-          </div>
-        </section>
+        {/* Para el experto: el número a un clic y el expediente a otro. La ficha
+            acompaña al SECOP II, no lo sustituye. */}
+        <div className="fi-expediente">
+          <CopiarNumero numero={p.secopProcesoId} />
+          {p.url && (
+            <a className="fi-btn" href={p.url} target="_blank" rel="noopener noreferrer">
+              Abrir en SECOP II ↗
+            </a>
+          )}
+        </div>
 
-        {/* 3 — Cifras */}
-        <section className="fi-sec">
-          <h2 className="fi-h2">Cifras</h2>
-          <div className="fi-panel fi-cifras">
-            <div>
-              <div className="fi-cifra-v">{formatCopFull(valor)}</div>
-              <div className="fi-cifra-l">Presupuesto oficial</div>
-            </div>
-            <div>
-              <div className="fi-cifra-v">{fecha(p.fechaPublicacion) ?? "—"}</div>
-              <div className="fi-cifra-l">Publicado</div>
-            </div>
-            {/*
-              Anticipo, plazo de ejecución y parámetro técnico los pedía el spec y
-              NO están en el dataset de Procesos del SECOP: viven en el pliego, y
-              `pliego_proceso` está vacía. Se declaran como pendientes en vez de
-              omitirse, para que se vea qué falta y no parezca que el proceso no
-              lo tiene.
-            */}
-            {["Anticipo", "Plazo de ejecución", "Parámetro técnico"].map((l) => (
-              <div key={l} className="fi-cifra--falta">
-                <div className="fi-cifra-v">está en el pliego</div>
-                <div className="fi-cifra-l">{l}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* 2 — El bloque de decisión: veredicto, tres datos, las cinco compuertas
+            y un único siguiente paso. Sustituye a «Cómo te queda a ti» y a
+            «Cifras». Spec: docs/superpowers/specs/2026-09-28-ficha-bloque-decision.md */}
+        <BloqueDecision
+          proceso={aSecopProceso(p)}
+          absolutas={compuertasAbsolutas(p)}
+          conPliego={pliego !== null}
+          urlSecop={p.url}
+          presupuesto={valor !== null ? formatCopFull(valor) : "Sin presupuesto publicado"}
+          conPresupuesto={valor !== null}
+          fechaPublicacion={p.fechaPublicacion}
+          fechaRecepcion={p.fechaRecepcion}
+          fechaPublicacionTexto={fechaCorta(p.fechaPublicacion)}
+          fechaRecepcionTexto={fechaCorta(p.fechaRecepcion)}
+          estadoApertura={p.estadoApertura}
+          modalidad={p.modalidad}
+          hrefExplorar={
+            p.tipoProyecto
+              ? `/licitaciones/tipo/${TIPO_PROYECTO[p.tipoProyecto].slug}`
+              : "/licitaciones/explorar"
+          }
+        />
 
         {/* 4 — Qué exige el pliego. El `id` es el ancla a la que vuelve la subida. */}
         <section className="fi-sec" id="pliego">

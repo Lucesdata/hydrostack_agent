@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-28 (Ficha Viva condensada; esquema y árbol en «Cómo participar»).
+Última actualización: 2026-09-28 (bloque de decisión en la ficha; zona fuera de cobertura en revisar).
 
 ## graphify
 
@@ -448,5 +448,25 @@ agrupa ya por `proveedor_key`, no por nombre. Salieron `/competidores`,
 `historialCompetidor`, `topCompetidores`, `precioReferencia` y
 `getCifrasSector` (`cifras.ts` solo exporta `getProcesosVigilados`). Con esto el
 plan queda completo.
+
+**Bloque de decisión (2026-09-28).** Arriba de cada ficha, en lugar de «Cómo te
+queda a ti» y «Cifras»: `BloqueDecision.tsx` (isla de cliente que sustituye a
+`SemaforoConPerfil`, con su misma regla: el HTML cacheado lleva la lectura
+absoluta y nada del perfil). Veredicto en una frase, tres datos (cuánto, hasta
+cuándo, cómo se contrata), las cinco compuertas dibujadas como **canal**
+(`CanalCompuertas.tsx`: la forma dice el estado además de la palabra y el color;
+el agua se corta en la primera que no cumple) y **un único siguiente paso**.
+Frase y paso salen de funciones puras de `semaforo.ts` (`fraseVeredicto`,
+`siguientePaso`, `ventanaDeOfertas`, `explicacionModalidad`): la frase se deriva
+del conteo de compuertas, nunca es un juicio aparte. «Quedan N días» se calcula
+en el navegador (la ficha revalida cada 12 h). **Sin cuenta se define el perfil
+ahí mismo** con `OferenteWizard` (localStorage); la cuenta se pide al subir el
+pliego, y `sincronizarPerfilConCuenta()` (`clientStore.ts`, compartida con el
+explorador) sube el perfil local a la cuenta nueva. `habilitacionGate` devuelve
+`faltanEnPerfil` y `verdict-publico.ts` lo redacta con el `reason`. La banda va
+en `--accent-ocean` con `--on-ocean-muted` y `--accent-river`; las pastillas del
+canal, al 6 % de su color (al 10 % el verde y el ámbar no llegaban a AA: lo midió
+`contraste.test.ts`). En móvil la barra de acción es `sticky` y solo lleva los
+botones. Spec y plan: `docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

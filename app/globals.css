@@ -68,6 +68,10 @@
   --accent-faint: rgba(3, 105, 161, 0.04);
   --accent-river: #7dd3fc;
   --accent-ocean: #0c4a6e;
+  /* Texto secundario sobre --accent-ocean (banda del bloque de decisión de la
+     ficha, 2026-09-28). El principal va en blanco y el acento en --accent-river.
+     Lo mide contraste.test.ts. */
+  --on-ocean-muted: #c7e6f7;
 
   /* Semánticos — el semáforo de elegibilidad y los avisos.
 

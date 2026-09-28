@@ -89,6 +89,13 @@ export interface GateResult {
   resolvedBy: "metadata" | "document";
   /** CRÍTICO: declara si la compuerta necesita el pliego para resolverse de verdad. */
   requiredLevel: ResolutionLevel;
+  /**
+   * Solo habilitación: los indicadores que el pliego exige y el perfil no
+   * declara (etiquetas de `INDICADOR_LABEL`). Es lo que la ficha convierte en
+   * «completa ese dato»; sin él habría que leerlo del texto de `reason`.
+   * Revela tanto como `reason`, así que `verdict-publico.ts` lo redacta con él.
+   */
+  faltanEnPerfil?: string[];
 }
 
 // ===========================================================================
@@ -495,6 +502,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
   }
 
   const razones: { status: GateStatus; texto: string }[] = [];
+  const faltanEnPerfil: string[] = [];
 
   // Experiencia
   if (req.experiencia.verificar_manual) {
@@ -551,6 +559,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
     }
     const valorPerfil = valorPerfilIndicador(p, ind.indicador);
     if (valorPerfil == null) {
+      faltanEnPerfil.push(label);
       razones.push({
         status: "WARN",
         texto: `${label}: no declaraste este dato en tu perfil (exigen ${ind.operador === "gte" ? "≥" : "≤"} ${ind.valor})`,
@@ -591,6 +600,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
     reason: razones.map((r) => r.texto).join(" · "),
     resolvedBy: "document",
     requiredLevel: 2,
+    ...(faltanEnPerfil.length > 0 ? { faltanEnPerfil } : {}),
   };
 };
 

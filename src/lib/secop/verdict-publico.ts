@@ -46,7 +46,8 @@ type ClaveGate = keyof Verdict["gates"];
  * consumo.
  */
 export type GateResultPublico =
-  ({ redactado: false } & GateResult) | ({ redactado: true } & Omit<GateResult, "reason">);
+  | ({ redactado: false } & GateResult)
+  | ({ redactado: true } & Omit<GateResult, "reason" | "faltanEnPerfil">);
 
 export interface VerdictPublico extends Omit<Verdict, "gates"> {
   /** Pasó por la redacción; qué compuertas se redactaron lo dice cada una. */
@@ -81,6 +82,7 @@ export function redactarVerdict(v: Verdict): VerdictPublico {
           reason: g.reason,
           resolvedBy: g.resolvedBy,
           requiredLevel: g.requiredLevel,
+          ...(g.faltanEnPerfil ? { faltanEnPerfil: g.faltanEnPerfil } : {}),
         }
       : {
           redactado: true,
@@ -111,7 +113,7 @@ export function redactarVerdict(v: Verdict): VerdictPublico {
  */
 function esRedactado(
   g: GateResult | GateResultPublico
-): g is { redactado: true } & Omit<GateResult, "reason"> {
+): g is { redactado: true } & Omit<GateResult, "reason" | "faltanEnPerfil"> {
   return "redactado" in g && g.redactado === true;
 }
 

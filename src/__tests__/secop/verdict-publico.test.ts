@@ -146,6 +146,45 @@ describe("redactarVerdict — zona fuera de cobertura (D2, 2026-09-28)", () => {
   });
 });
 
+describe("redactarVerdict — faltanEnPerfil", () => {
+  const CENTINELA_FALTA = "CENTINELA-FALTA-9f30";
+  const base = verdict(
+    {
+      sectorial: "PASS",
+      cuantia: "PASS",
+      plazo: "PASS",
+      ubicacion: "PASS",
+      habilitacion: "WARN",
+    },
+    "WARN"
+  );
+  const conFalta: Verdict = {
+    ...base,
+    gates: {
+      ...base.gates,
+      habilitacion: { ...base.gates.habilitacion, faltanEnPerfil: [CENTINELA_FALTA] },
+    },
+  };
+
+  it("sin cuenta se redacta junto con la razón", () => {
+    const json = JSON.stringify(redactarVerdict(conFalta));
+    expect(json).not.toContain(CENTINELA_FALTA);
+    expect(json).not.toContain(CENTINELA.habilitacion);
+  });
+
+  it("cuando la razón se conserva, faltanEnPerfil viaja con ella", () => {
+    const fail: Verdict = {
+      ...conFalta,
+      overall: "FAIL",
+      gates: {
+        ...conFalta.gates,
+        habilitacion: { ...conFalta.gates.habilitacion, status: "FAIL" },
+      },
+    };
+    expect(JSON.stringify(redactarVerdict(fail))).toContain(CENTINELA_FALTA);
+  });
+});
+
 describe("redactarVerdict — excepción UNKNOWN", () => {
   const conUnknown = verdict(
     {

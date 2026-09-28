@@ -192,6 +192,48 @@ describe("pastillas de etapa del FichaCard (revisión final 2026-09-21, arreglo 
  * valor de hoy, y el test falla si baja. Así la deuda es visible y acotada, en
  * vez de desaparecer hasta que alguien se queja.
  */
+describe("bloque de decisión de la ficha (2026-09-28)", () => {
+  /**
+   * La banda del veredicto va en --accent-ocean con el titular en blanco, el
+   * texto secundario en --on-ocean-muted y los antetítulos, la barra del plazo y
+   * los enlaces en --accent-river. El antetítulo es de 11px: texto normal, 4,5:1.
+   */
+  const BANDA: Array<[string, string]> = [
+    ["titular blanco", "#ffffff"],
+    ["texto secundario (--on-ocean-muted)", t["on-ocean-muted"]],
+    ["antetítulos y enlaces (--accent-river)", t["accent-river"]],
+  ];
+
+  for (const [nombre, color] of BANDA) {
+    it(`${nombre} se lee sobre --accent-ocean`, () => {
+      const ratio = contraste(color, t["accent-ocean"]);
+      expect(
+        ratio,
+        `${color} sobre ${t["accent-ocean"]} da ${ratio.toFixed(2)}:1`
+      ).toBeGreaterThanOrEqual(AA.texto);
+    });
+  }
+
+  // Las palabras del canal van sobre su propio color al 6% (rgba del -700). Al
+  // 10% el verde y el ámbar bajaban a 4,38 y 4,39:1: lo atrapó esta prueba.
+  const PALABRAS: Array<[string, [number, number, number]]> = [
+    ["success", [21, 128, 61]],
+    ["warning", [180, 83, 9]],
+    ["danger", [185, 28, 28]],
+  ];
+
+  for (const [token, rgb] of PALABRAS) {
+    it(`la palabra --${token} del canal se lee sobre su pastilla al 6%`, () => {
+      const fondo = componer(rgb, 0.06, t["surface"]);
+      expect(contraste(t[token], fondo)).toBeGreaterThanOrEqual(AA.texto);
+    });
+  }
+
+  it("el botón principal (texto blanco sobre --accent) se lee", () => {
+    expect(contraste("#ffffff", t["accent"])).toBeGreaterThanOrEqual(AA.texto);
+  });
+});
+
 describe("excepciones conocidas (no deben empeorar)", () => {
   const conocidas: Array<[string, string, string, number, string]> = [
     [

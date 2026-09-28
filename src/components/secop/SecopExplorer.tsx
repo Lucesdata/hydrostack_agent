@@ -18,7 +18,11 @@ import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { VerdictRespuesta } from "@/src/lib/secop/verdict-publico";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
 import { ESTADOS_PROCESO } from "@/src/lib/secop/config";
-import { getOferentePerfil, saveOferentePerfil } from "@/src/lib/state/clientStore";
+import {
+  getOferentePerfil,
+  saveOferentePerfil,
+  sincronizarPerfilConCuenta,
+} from "@/src/lib/state/clientStore";
 import ProcessList, { type ProcesoVeredicto } from "./ProcessList";
 import ProcessDetail from "./ProcessDetail";
 import type { EscalonContratacion } from "@/src/lib/diagnostico/types";
@@ -114,35 +118,14 @@ export default function SecopExplorer() {
   }, []);
 
   useEffect(() => {
-    const local = getOferentePerfil();
-    setPerfil(local);
-
+    setPerfil(getOferentePerfil());
     (async () => {
-      let res: Response;
-      try {
-        res = await fetch("/api/perfil");
-      } catch {
-        return; // sin red o sin sesión configurada — el perfil local sigue siendo la fuente
-      }
-      if (!res.ok) return; // 401: sin sesión, el flujo anónimo actual no cambia
+      // Local primero, cuenta después; la reconciliación (y la migración de un
+      // perfil anónimo a una cuenta nueva) vive en clientStore.
+      const { perfil: vigente, conCuenta } = await sincronizarPerfilConCuenta();
+      if (!conCuenta) return;
       setHasSession(true);
-      const { perfil: remoto } = (await res.json()) as { perfil: OferenteProfile | null };
-      if (remoto) {
-        // La cuenta ya tiene perfil — es la fuente de verdad, sincroniza el caché local.
-        setPerfil(remoto);
-        saveOferentePerfil(remoto);
-      } else if (local) {
-        // Cuenta nueva con perfil local previo (anónimo que inició sesión): migra una vez.
-        try {
-          await fetch("/api/perfil", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(local),
-          });
-        } catch {
-          /* la próxima vez que complete el wizard se reintenta el PUT */
-        }
-      }
+      setPerfil(vigente);
     })();
   }, []);
 
