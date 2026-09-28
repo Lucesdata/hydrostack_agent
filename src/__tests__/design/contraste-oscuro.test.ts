@@ -37,18 +37,7 @@ const panel = () => componer([12, 32, 52], 0.72, fondo());
 
 describe("tokens del hero", () => {
   it("define los que este test necesita", () => {
-    const requeridos = [
-      "aq-bg",
-      "aq-text",
-      "aq-muted",
-      "aq-cyan",
-      "aq-card",
-      "aq-ink",
-      "aq-ink-muted",
-      "aq-navy",
-      "aq-cta",
-      "aq-cta-2",
-    ];
+    const requeridos = ["aq-bg", "aq-text", "aq-muted", "aq-cyan", "aq-cta", "aq-cta-2"];
     expect(requeridos.filter((k) => !t[k])).toEqual([]);
   });
 });
@@ -77,23 +66,15 @@ describe("texto sobre el fondo oscuro", () => {
   });
 });
 
-describe("la tarjeta blanca de la ficha", () => {
-  for (const token of ["aq-ink", "aq-ink-muted"]) {
-    it(`--${token} se lee sobre la tarjeta`, () => {
-      expect(contraste(t[token], t["aq-card"])).toBeGreaterThanOrEqual(AA.texto);
-    });
-  }
-  it("barras de la tendencia y tipos de los destacados sobre la tarjeta", () => {
-    pinta(css, "#0369a1");
-    // Las barras no llevan texto: basta el contraste de componente (3:1).
-    expect(contraste("#0369a1", t["aq-card"])).toBeGreaterThanOrEqual(3);
-    // El nombre del tipo sí es texto, en su color claro.
-    for (const f of FAMILIAS) {
-      expect(contraste(f.claro, t["aq-card"]), f.label).toBeGreaterThanOrEqual(AA.texto);
+describe("resultado y opciones del mapa", () => {
+  // El resultado del departamento dejó de ser una tarjeta blanca (2026-09-27):
+  // va sobre el fondo, con los colores de texto de arriba. Lo nuevo es el panel
+  // flotante de «Opciones del mapa».
+  it("etiquetas y valores del panel de opciones llegan a AA", () => {
+    pinta(css, "#0a1d30");
+    for (const token of ["aq-text", "aq-muted", "aq-cyan"]) {
+      expect(contraste(t[token], "#0a1d30"), `--${token}`).toBeGreaterThanOrEqual(AA.texto);
     }
-  });
-  it("el blanco del botón de la ficha se lee sobre --aq-navy", () => {
-    expect(contraste("#ffffff", t["aq-navy"])).toBeGreaterThanOrEqual(AA.texto);
   });
 });
 

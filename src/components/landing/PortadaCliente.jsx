@@ -8,7 +8,6 @@
 // dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
 // hueco `semaforo` en `FilaProceso`.
 
-import { useEffect, useState } from "react";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
@@ -33,36 +32,13 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   mapa?: import("react").ReactNode,
  *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  *   totalAbiertos?: number | null,
- *   tipos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador.
+ *
+ * Ya no pide `/api/landing-stats` (2026-09-27): la línea «N procesos del
+ * sector» bajo el botón del hero salió con el resto de la carga.
  */
-export default function LandingPage({
-  mapa = null,
-  departamentos = [],
-  totalAbiertos = null,
-  tipos = [],
-}) {
-  // Procesos del sector vigilados, para la línea bajo el CTA del hero. Se
-  // queda en null si el fetch falla: la UI dice "datos desde SECOP II" sin la
-  // cifra.
-  const [sector, setSector] = useState(null);
-
-  useEffect(() => {
-    let vivo = true;
-    fetch("/api/landing-stats")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (vivo && d?.sector) setSector(d.sector);
-      })
-      .catch(() => {
-        /* se queda en null: la frase sigue siendo cierta sin la cifra */
-      });
-    return () => {
-      vivo = false;
-    };
-  }, []);
-
+export default function LandingPage({ mapa = null, departamentos = [], totalAbiertos = null }) {
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -77,13 +53,7 @@ export default function LandingPage({
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial
-          mapa={mapa}
-          departamentos={departamentos}
-          totalAbiertos={totalAbiertos}
-          tipos={tipos}
-          sector={sector}
-        />
+        <HeroTerritorial mapa={mapa} departamentos={departamentos} totalAbiertos={totalAbiertos} />
 
         {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo
             después del hero porque el hero existe para llevar a una ficha. */}

@@ -90,7 +90,7 @@ Criterios del spec que cierra: 1, 9 y, en parte, 2.
    un filete.
 3. **`ResumenDepartamento.jsx`**: solo los tres destacados, como filas (objeto
    en una línea, valor, entidad · municipio) y el enlace «Ver las N fichas de
-   X». Fuera `Sparkline` y su tabla (**decisión pendiente 1**). La API
+   X». Fuera `Sparkline` y su tabla (decidido por el usuario el 2026-09-28). La API
    `/api/departamento/[dpto]/resumen` no se toca en este PR: sigue devolviendo
    `semanas`. Anotar en `PENDIENTES.md` que esa consulta queda sin uso.
 4. **`ListaTerritorios.jsx`** dentro del `<details>`: dos columnas, sin su
@@ -128,6 +128,32 @@ Criterios del spec que cierra: 1, 9 y, en parte, 2.
    del mapa») y `PENDIENTES.md`.
 
 Criterios del spec que cierra: 2 a 8.
+
+**Desviaciones al implementarlo (2026-09-28).**
+- **La rejilla no es `5fr 7fr`**, sino `minmax(300px, 380px) 1fr`. Con
+  fracciones, la tierra del mapa medía 490 px a 1440 y 454 a 1280 (criterio 5:
+  ≥ 500). Con la columna del mensaje acotada: 522 y 517.
+- **En móvil el SVG se ensancha** para que el hueco lateral de los rótulos,
+  que ahí van ocultos, no encoja el país: la tierra pasa de 246 a 321 px de
+  ancho en 390.
+- **La caja de los rótulos se oculta por CSS**, no se quita del SVG:
+  `colocarRotulos()` la usa para no solapar, y `ColombiaChoropleth` no cambia
+  para otros usos. Solo gana la prop `maxRotulos`.
+- **Sin departamento, el resultado habla del país**: su total (0 si es 0), sin
+  porcentaje. Antes el «0» de un cero real salía del contador de la lista, que
+  ya no existe.
+- **`mapApiItem` devuelve también la entidad**, para la segunda línea de los
+  destacados.
+- **Salió también `src/lib/landing/cifras.ts`** con sus tests: solo lo usaba
+  `/api/landing-stats`.
+- **Criterio 2, parcial:** 12 controles y 189 palabras cumplen; las cifras
+  quedan en 17 (≤ 12 pedido) porque la leyenda conserva sus seis rangos.
+  PENDIENTES §50.
+- **Medido** (mismas fixtures): a 1440 × 900, 12 controles, 189 palabras,
+  17 cifras y 0 animaciones; tierra 522 × 720 (1440) y 517 × 714 (1280);
+  rótulos 12,8 / 17,5 px a 1440; a 1280 el resultado ocupa y = 509–595;
+  en móvil el mapa empieza en y = 541. `/` pasa de 12,6 kB (108 kB First
+  Load) a 9,5 kB (105 kB); `npm run presupuesto`: 110,4 kB de 125.
 
 ### PR 3 — Ficha Viva condensada (no empieza sin la decisión 2)
 

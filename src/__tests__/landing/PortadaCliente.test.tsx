@@ -27,19 +27,6 @@ describe("PortadaCliente", () => {
     expect(sinDatos).not.toContain('href="/licitaciones/departamento/');
   });
 
-  it("identifica los tipos como nacionales, aunque la ficha muestre un departamento", () => {
-    const html = renderToStaticMarkup(
-      <PortadaCliente
-        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 50 }]}
-        tipos={[{ clave: "ptar", label: "PTAR", slug: "ptar", n: 150 }]}
-        totalAbiertos={300}
-      />
-    );
-    expect(html).toContain("Tipos de proyecto · Colombia");
-    expect(html).toContain('href="/licitaciones/tipo/ptar"');
-    expect(html).toContain("150");
-  });
-
   it("renderiza el mapa del servidor una sola vez dentro del Hero Territorial", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
@@ -49,7 +36,7 @@ describe("PortadaCliente", () => {
       />
     );
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
-    expect(html).toContain("Buscar departamento");
+    expect(html).toContain("Ver el departamento como lista");
   });
 
   it("sin agregados, el hero avisa que el mapa no tiene datos", () => {

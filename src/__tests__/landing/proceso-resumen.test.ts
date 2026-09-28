@@ -37,6 +37,11 @@ describe("mapApiItem", () => {
     expect(item.valor).toBe("$4.280 M");
     expect(mapApiItem({ ...base, tipoProyecto: null }).tipo).toBeNull();
   });
+
+  it("dice quién contrata, en título; sin entidad no la inventa", () => {
+    expect(mapApiItem(base).entidad).toBe("Municipio de Chinu");
+    expect(mapApiItem({ ...base, entidad: null }).entidad).toBeNull();
+  });
 });
 
 describe("titulo", () => {

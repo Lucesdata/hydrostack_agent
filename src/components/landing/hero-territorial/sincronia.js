@@ -63,45 +63,6 @@ export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
 }
 
 /**
- * Lo que dice el tooltip del mapa sobre un departamento: nombre, procesos
- * abiertos, % nacional y subsistema más frecuente. Puro, para probarlo.
- *
- * El "más frecuente" deja fuera `otros`: `otros` es "sin subsistema
- * identificado", no un subsistema, y ganaría en casi todos (es el 35 %).
- * Si ninguno clasificado tiene procesos, no se nombra ninguno.
- */
-export function contenidoTooltip({
-  dpto,
-  nombre = null,
-  departamentos = [],
-  totalAbiertos = null,
-  tipos = {},
-  tipoFiltro = null,
-}) {
-  const fila = departamentos.find((d) => d.clave === dpto) ?? null;
-  const n = fila?.n ?? 0;
-  const pct = totalAbiertos > 0 && n > 0 ? (100 * n) / totalAbiertos : null;
-  let principal = null;
-  if (fila?.tipos) {
-    for (const [clave, cuenta] of Object.entries(fila.tipos)) {
-      if (clave === "otros" || cuenta <= 0) continue;
-      if (!principal || cuenta > principal.n) principal = { clave, n: cuenta };
-    }
-  }
-  return {
-    nombre: fila?.label ?? nombre ?? null,
-    n,
-    pct,
-    monto: fila?.montoAbierto ?? 0,
-    // Con el mapa filtrado por tipo, cuántos de sus abiertos son de ese tipo.
-    ...(tipoFiltro ? { nTipo: fila?.tipos?.[tipoFiltro] ?? 0 } : {}),
-    principal: principal
-      ? { ...principal, label: tipos[principal.clave] ?? principal.clave }
-      : null,
-  };
-}
-
-/**
  * El escalón de color de cada departamento según el modo del mapa. `null` en
  * "procesos": es lo que ya pinta el servidor y no hay nada que cambiar.
  *

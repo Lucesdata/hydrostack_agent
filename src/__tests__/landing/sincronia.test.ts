@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  contenidoTooltip,
   contornoSeleccionado,
   dptoDesdeObjetivo,
   indicesDeModo,
@@ -44,48 +43,6 @@ describe("dptoDesdeObjetivo", () => {
   });
 });
 
-describe("contenidoTooltip", () => {
-  const departamentos = [
-    {
-      clave: "05",
-      label: "Antioquia",
-      n: 5000,
-      tipos: { acueducto: 1200, alcantarillado: 900, ptap: 100, ptar: 300, otros: 2000 },
-    },
-    {
-      clave: "99",
-      label: "Vichada",
-      n: 1,
-      tipos: { acueducto: 0, alcantarillado: 0, ptap: 0, ptar: 0, otros: 1 },
-    },
-  ];
-  const tipos = { acueducto: "Acueducto", otros: "Otros" };
-
-  it("da nombre, cifra, % nacional y el subsistema más frecuente sin contar «otros»", () => {
-    const t = contenidoTooltip({ dpto: "05", departamentos, totalAbiertos: 10000, tipos });
-    expect(t.nombre).toBe("Antioquia");
-    expect(t.n).toBe(5000);
-    expect(t.pct).toBe(50);
-    expect(t.principal).toEqual({ clave: "acueducto", n: 1200, label: "Acueducto" });
-  });
-
-  it("si solo hay «otros», no nombra un subsistema", () => {
-    expect(
-      contenidoTooltip({ dpto: "99", departamentos, totalAbiertos: 10000, tipos }).principal
-    ).toBeNull();
-  });
-
-  it("un departamento sin procesos usa el nombre del mapa y no inventa %", () => {
-    const t = contenidoTooltip({
-      dpto: "97",
-      nombre: "Vaupés",
-      departamentos,
-      totalAbiertos: 10000,
-    });
-    expect(t).toEqual({ nombre: "Vaupés", n: 0, pct: null, monto: 0, principal: null });
-  });
-});
-
 describe("indicesDeModo", () => {
   const departamentos = [
     { clave: "05", n: 5000, montoAbierto: 2e12, tipos: { acueducto: 1200, ptar: 40 } },
@@ -108,19 +65,6 @@ describe("indicesDeModo", () => {
     expect(m.get("05")).toBe(escalonDe(40).indice);
     expect(m.get("99")).toBe(escalonDe(1).indice);
     expect(indicesDeModo({ ...base, modo: "tipo", tipo: "acueducto" })!.get("99")).toBe(0);
-  });
-
-  it("el tooltip dice cuántos son del tipo filtrado", () => {
-    const t = contenidoTooltip({
-      dpto: "05",
-      departamentos,
-      totalAbiertos: 10000,
-      tipoFiltro: "ptar",
-    });
-    expect(t.nTipo).toBe(40);
-    expect(
-      contenidoTooltip({ dpto: "05", departamentos, totalAbiertos: 10000 }).nTipo
-    ).toBeUndefined();
   });
 });
 

@@ -54,7 +54,8 @@ sola pregunta, **dónde hay procesos abiertos y cómo llegar a sus fichas**.
 | Monto en juego y entidades del departamento | `/licitaciones/comparar` |
 | Reparto por tipo del departamento | `/licitaciones/tipo/[slug]` y el filtro del mapa |
 | «Comparar con otros departamentos» | Pie: «Comparar departamentos» |
-| Publicados en 7 días y serie semanal | **Ninguna otra página hoy** (decisión 1) |
+| Publicados en 7 días | `/licitaciones/comparar` (fila «Abiertos publicados en los últimos 7 días») |
+| Serie semanal de publicados | **Ninguna otra página**: sale por decisión del usuario (2026-09-28) |
 | Esquema, árbol, leyenda y «Seguir sus cambios» de la Ficha Viva | Sin destino fijado (decisión 2) |
 
 ## Qué no cambia
@@ -87,11 +88,11 @@ la ventana; «cifras», grupos de dígitos en texto visible.
    imagen para compartir usa la misma rampa.
 10. `npm test`, `npm run build`, `npm run lint` y prettier en verde.
 
-## Decisiones pendientes del usuario
+## Decisiones del usuario
 
-1. **Publicados en 7 días y la serie semanal** salen de la portada y no tienen
-   otra página. El plan los quita (así está D); si deben quedarse, se retira
-   esa tarea del PR 2.
+1. ~~Publicados en 7 días y la serie semanal.~~ **Decidido el 2026-09-28:
+   salen los dos.** Los 7 días siguen en `/licitaciones/comparar`; la serie
+   semanal no queda en ninguna página.
 2. **La Ficha Viva condensada.** El esquema y el árbol de decisiones son
    explicativos y pesan en la primera visita. Candidata a acogerlos:
    `/licitaciones/como-participar` (no revisada). El plan deja esto en un PR 3

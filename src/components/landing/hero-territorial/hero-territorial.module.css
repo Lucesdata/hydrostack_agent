@@ -1,24 +1,17 @@
 /* Hero territorial de la portada. Tema oscuro propio: no usa los tokens de
    globals.css (que son de fondo claro), así que contraste.test.ts no lo cubre.
-   Los contrastes de texto se eligieron ≥ 4,5:1 sobre --aq-bg y sobre --aq-card. */
+   Los contrastes de texto se eligieron ≥ 4,5:1 sobre --aq-bg. */
 .hero {
   --aq-bg: #061423;
-  --aq-panel: rgba(12, 32, 52, 0.72);
   --aq-text: #f3f8fc;
   --aq-muted: #9fb4c6;
   --aq-line: rgba(140, 190, 225, 0.16);
   --aq-cyan: #4cc9ff;
-  --aq-blue: #1a9be0;
   /* Fondo de los botones con texto blanco. #1a9be0 daba 3,08:1 y el final del
      degradado (#2bb7ee) 2,30:1: el texto de un CTA no se leía. Medido en
      src/__tests__/design/contraste-oscuro.test.ts. */
   --aq-cta: #0272b0;
   --aq-cta-2: #0b7cbd;
-  --aq-green: #3fd6a0;
-  --aq-card: #ffffff;
-  --aq-ink: #0b1f33;
-  --aq-ink-muted: #51667a;
-  --aq-navy: #0b2239;
   /* Rampa del mapa, compartida con los puntos de la lista. Un solo tono que
      gana luz (2026-09-27): los dos escalones altos eran turquesa y menta, se
      leían como otra categoría y el verde agua se acercaba al verde de "cumple"
@@ -31,9 +24,6 @@
   --aq-e5: #c4e8fc;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  /* clip recorta igual pero no crea un contenedor de scroll: con hidden, el
-     sticky del mapa y la ficha no se pegaría a nada. */
   overflow: clip;
   padding: clamp(36px, 4.5vw, 64px) var(--gutter) 32px;
   /* Fondo plano (2026-09-27): sin los dos resplandores radiales ni la rejilla
@@ -42,44 +32,31 @@
   color: var(--aq-text);
 }
 
-/* ── Rejilla: mensaje y lista · mapa · ficha ─────────────────────────────── */
+/* ── Rejilla: mensaje y resultado · mapa (2026-09-27, plan portada-esencial) ─ */
 .grid {
   display: grid;
-  grid-template-columns: minmax(290px, 340px) minmax(0, 1fr) minmax(280px, 330px);
-  grid-template-areas: "izq mapa ficha";
-  gap: clamp(20px, 2.4vw, 36px);
+  /* El mensaje tiene un ancho de lectura; el mapa se queda con el resto. En
+     fracciones (5fr/7fr) la tierra del mapa bajaba a 454 px a 1280. */
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 64px);
   align-items: start;
+  max-width: 1360px;
+  margin: 0 auto;
 }
 .colIzq {
-  grid-area: izq;
   display: flex;
   flex-direction: column;
-  gap: 28px;
   min-width: 0;
-}
-.mapPanel {
-  grid-area: mapa;
-}
-.detailPanel {
-  grid-area: ficha;
 }
 
 /* ── Mensaje ──────────────────────────────────────────────────────────────── */
 .copy {
   min-width: 0;
 }
-.eyebrow {
-  margin: 0 0 14px;
-  font:
-    600 11px/1.4 var(--font-jetbrains-mono),
-    monospace;
-  letter-spacing: 0.14em;
-  color: var(--aq-cyan);
-}
 .copy h1 {
   margin: 0;
   font:
-    700 clamp(2.1rem, 2.9vw, 2.8rem)/1.08 var(--font-inter),
+    700 clamp(2rem, 2.6vw, 2.6rem)/1.08 var(--font-inter),
     sans-serif;
   letter-spacing: -0.028em;
   /* globals.css activa `hyphens: auto` en los titulares de `.bp-page`; aquí
@@ -88,15 +65,13 @@
   text-wrap: balance;
 }
 .copy h1 span {
-  background: linear-gradient(90deg, #4cc9ff, #35d3c0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--aq-cyan);
 }
 .lead {
-  margin: 16px 0 24px;
+  max-width: 40ch;
+  margin: 16px 0 26px;
   font:
-    400 15px/1.6 var(--font-inter),
+    400 16.5px/1.6 var(--font-inter),
     sans-serif;
   color: #c3d3e0;
   hyphens: manual;
@@ -220,178 +195,245 @@
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
 }
-.ctas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-.secondaryCta {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  padding: 0 22px;
-  border: 1px solid var(--aq-muted);
-  border-radius: 999px;
-  color: var(--aq-text);
-  font:
-    600 14px var(--font-inter),
-    sans-serif;
-  white-space: nowrap;
-  text-decoration: none;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-}
-.secondaryCta:hover {
-  border-color: var(--aq-cyan);
-  background: rgba(76, 201, 255, 0.08);
-}
-.secondaryCta:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 3px;
-}
 .primaryCta {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  min-height: 48px;
-  padding: 0 26px;
+  min-height: 46px;
+  margin-top: 14px;
+  padding: 0 22px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--aq-cta), var(--aq-cta-2));
-  box-shadow: 0 8px 28px rgba(26, 155, 224, 0.35);
   color: #fff;
   font:
     650 15px var(--font-inter),
     sans-serif;
   text-decoration: none;
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
 }
 .primaryCta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 32px rgba(26, 155, 224, 0.5);
+  background: var(--aq-cta-2);
 }
 .primaryCta:focus-visible,
-.allProcesses:focus-visible,
-.types a.typeFila:focus-visible,
-.fichaCta:focus-visible {
+.fichaCta:focus-visible,
+.lista summary:focus-visible,
+.opciones summary:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 3px;
-}
-.ctaMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 14px 0 0;
-  color: var(--aq-muted);
-  font:
-    12px/1.4 var(--font-inter),
-    sans-serif;
-}
-.ctaPrecios {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--aq-cyan);
-  font:
-    600 12.5px/1.4 var(--font-inter),
-    sans-serif;
-  text-decoration: none;
-}
-.ctaPrecios:hover {
-  text-decoration: underline;
-}
-.ctaPrecios:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 3px;
-}
-.puntoVivo {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--aq-green);
-  box-shadow: 0 0 10px rgba(63, 214, 160, 0.7);
 }
 
-/* ── Lista de departamentos ───────────────────────────────────────────────── */
-.listPanel {
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--aq-line);
-  border-radius: 14px;
-  background: var(--aq-panel);
-  backdrop-filter: blur(6px);
+/* ── Resultado del departamento elegido ───────────────────────────────────── */
+/* Texto sobre el fondo, separado por un filete: no es una tarjeta. La tarjeta
+   blanca de antes era lo más luminoso de la pantalla y le quitaba la mirada al
+   mapa. */
+.resultado {
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--aq-line);
 }
-.hero :global(.aqListaCabecera) {
+.hero :global(.aqFichaCab) {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 12px;
 }
-.hero :global(.aqListaCabecera h2) {
+.hero :global(.aqFicha h2) {
   margin: 0;
   font:
-    650 14px var(--font-inter),
+    700 22px/1.2 var(--font-inter),
     sans-serif;
+  letter-spacing: -0.015em;
+  hyphens: manual;
+}
+.hero :global(.aqFichaPrevia) {
+  flex: none;
+  font:
+    600 12px var(--font-inter),
+    sans-serif;
+  color: var(--aq-cyan);
+}
+.hero :global(.aqFichaCifra) {
+  margin: 4px 0 0;
+  font:
+    15px/1.4 var(--font-inter),
+    sans-serif;
+  color: #c3d3e0;
+}
+.hero :global(.aqFichaCifra strong) {
+  margin-right: 4px;
+  font:
+    700 28px var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   color: var(--aq-text);
 }
-.hero :global(.aqListaCabecera span) {
+.hero :global(.aqResumen) {
+  margin-top: 18px;
+  transition: opacity 0.15s;
+}
+.hero :global(.aqResumen[data-atenuado]) {
+  opacity: 0.45;
+}
+.hero :global(.aqResumen h3) {
+  margin: 0 0 4px;
   font:
-    11px var(--font-jetbrains-mono),
-    monospace;
+    600 12.5px var(--font-inter),
+    sans-serif;
   color: var(--aq-muted);
 }
-.hero :global(.aqBuscador) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 14px;
-  border: 1px solid var(--aq-line);
-  border-radius: 999px;
-  background: rgba(4, 16, 28, 0.6);
+.hero :global(.aqResumenNota) {
+  margin: 4px 0 0;
+  font:
+    13px/1.4 var(--font-inter),
+    sans-serif;
   color: var(--aq-muted);
 }
-.hero :global(.aqBuscador:focus-within) {
+.hero :global(.aqDestacados) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero :global(.aqDestacados a) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--aq-line);
+  color: var(--aq-text);
+  text-decoration: none;
+}
+.hero :global(.aqDestacados a:hover .aqDestObjeto) {
+  color: var(--aq-cyan);
+}
+.hero :global(.aqDestacados a:focus-visible) {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
 }
-.hero :global(.aqBuscador input) {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--aq-text);
+.hero :global(.aqDestObjeto) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font:
-    13px var(--font-inter),
+    500 14px/1.4 var(--font-inter),
     sans-serif;
 }
-.hero :global(.aqBuscador input::placeholder) {
-  color: #7d93a6;
+.hero :global(.aqDestValor) {
+  font:
+    600 14px/1.4 var(--font-inter),
+    sans-serif;
+  font-variant-numeric: tabular-nums;
 }
+.hero :global(.aqDestMeta) {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font:
+    12.5px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.fichaCta {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--aq-cyan);
+  font:
+    600 15px var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.fichaCta:hover {
+  text-decoration: underline;
+}
+
+/* ── Cabecera del mapa y sus opciones ─────────────────────────────────────── */
+.mapaCab {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-bottom: 8px;
+  font:
+    13.5px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.mapaCab p {
+  margin: 0;
+}
+.mapaCab strong {
+  font-weight: 600;
+  color: #c3d3e0;
+}
+.opciones summary,
+.lista summary {
+  cursor: pointer;
+  color: var(--aq-cyan);
+  font:
+    600 13.5px var(--font-inter),
+    sans-serif;
+}
+/* El panel de opciones flota sobre el mapa: abrirlo no empuja nada. */
+.opciones {
+  position: relative;
+}
+.opcionesPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  display: grid;
+  gap: 12px;
+  min-width: 240px;
+  padding: 14px;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 10px;
+  background: #0a1d30;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+.opcionesPanel label {
+  display: grid;
+  gap: 6px;
+  font:
+    12.5px var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.opcionesPanel select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 8px;
+  background: var(--aq-bg);
+  color: var(--aq-text);
+  font:
+    14px var(--font-inter),
+    sans-serif;
+}
+.opcionesPanel select:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+
+/* ── Lista de departamentos ───────────────────────────────────────────────── */
 .hero :global(.aqLista) {
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 24px;
   margin: 10px 0 0;
   padding: 0;
-  max-height: 352px;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(140, 190, 225, 0.3) transparent;
-}
-.hero :global(.aqLista li + li) {
-  margin-top: 2px;
 }
 .hero :global(.aqLista button) {
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr) auto 10px;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   width: 100%;
-  min-height: 44px;
-  padding: 8px 10px;
+  min-height: 40px;
+  padding: 6px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
@@ -451,24 +493,6 @@
   font-size: 16px;
   line-height: 1;
 }
-.hero :global(.aqVacio) {
-  margin: 12px 0;
-  font:
-    12px/1.6 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.allProcesses {
-  display: inline-flex;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 6px 2px;
-  color: var(--aq-cyan);
-  text-decoration: none;
-  font:
-    600 13px var(--font-inter),
-    sans-serif;
-}
 
 /* ── Mapa ─────────────────────────────────────────────────────────────────── */
 .mapPanel {
@@ -488,6 +512,7 @@
   --mapa-raya: rgba(140, 190, 225, 0.35);
   max-width: 760px;
   margin-inline: auto;
+  gap: 10px;
   color: var(--aq-text);
 }
 /* Sin la franja de KPIs encima (2026-09-26), el mapa ocupa ese alto: crece
@@ -548,111 +573,45 @@
 .map :global(.clr-mapa__recuadro-txt) {
   fill: var(--aq-muted);
 }
-.map :global(.clr-mapa__leyenda) {
-  justify-content: center;
+.map :global(.clr-mapa__nota) {
+  /* La definición va en la cabecera del mapa (.mapaCab): no se repite. */
+  display: none;
 }
-.map :global(.clr-mapa__leyenda li) {
-  color: var(--aq-muted);
-}
-.map :global(.clr-mapa__swatch) {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border-color: rgba(140, 190, 225, 0.4);
-}
-.map :global(.clr-mapa__nota),
 .map :global(.clr-mapa__sin) {
-  text-align: center;
   color: var(--aq-muted);
+  font-size: 12px;
 }
-/* Rótulos del mapa. */
+/* Rótulos del mapa: sin caja (2026-09-27). Nombre y cifra con halo del fondo,
+   más grandes que antes (7,6 y 10,5 unidades salían a ≈8 y ≈12 px). La caja
+   sigue en el SVG porque colocarRotulos() la usa para no solapar; aquí no se
+   pinta. */
 .map :global(.atlas-map-label rect) {
-  fill: rgba(7, 22, 38, 0.9);
-  stroke: rgba(140, 190, 225, 0.35);
-  stroke-width: 0.7;
+  display: none;
 }
 .map :global(.atlas-map-label line) {
-  stroke: rgba(234, 248, 255, 0.55);
-  stroke-width: 0.7;
+  stroke: rgba(234, 248, 255, 0.5);
+  stroke-width: 0.6;
 }
 .map :global(.atlas-map-label-ancla) {
   fill: var(--aq-bg);
   stroke: #eaf8ff;
-  stroke-width: 1.3;
+  stroke-width: 1.2;
 }
 .map :global(.atlas-map-label text) {
+  paint-order: stroke;
+  stroke: var(--aq-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
   fill: #c3d3e0;
   font:
-    500 7.6px var(--font-inter),
+    500 9.2px var(--font-inter),
     sans-serif;
 }
 .map :global(.atlas-map-label text.atlas-map-label-count) {
   fill: #fff;
   font:
-    700 10.5px var(--font-inter),
+    700 12.6px var(--font-inter),
     sans-serif;
-}
-/* Selector de métrica del mapa y su leyenda (solo con "monto"). Centrados,
-   como el mapa y su leyenda: son la cabecera de esa columna. */
-.controlesMapa {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-.controlesMapa .metrica {
-  justify-content: center;
-}
-.controlesMapa .metrica {
-  margin-bottom: 0;
-}
-.metricaPunto {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 6px;
-  border-radius: 50%;
-  background: var(--tipo);
-  vertical-align: 1px;
-}
-.metrica button[data-familia="otros"] .metricaPunto {
-  background: transparent;
-  border: 1.5px dashed var(--tipo);
-}
-.metrica {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 10px;
-  font:
-    12px var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.metrica > span {
-  margin-right: 4px;
-}
-.metrica button {
-  min-height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--aq-line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--aq-muted);
-  font: inherit;
-  cursor: pointer;
-}
-.metrica button[aria-pressed="true"] {
-  border-color: var(--aq-cyan);
-  background: rgba(76, 201, 255, 0.14);
-  color: var(--aq-text);
-  font-weight: 600;
-}
-.metrica button:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 2px;
 }
 .map[data-metrica="tipo"] :global(.atlas-map-label),
 .map[data-metrica="monto"] :global(.clr-mapa__leyenda),
@@ -660,27 +619,39 @@
   /* La leyenda y los rótulos del servidor hablan de procesos. */
   display: none;
 }
+/* Leyendas como una barra de escalones bajo el mapa, en el mismo sitio en los
+   dos modos: cambiar a «monto» ya no mueve el mapa. */
+.map :global(.clr-mapa__leyenda),
 .leyendaMonto {
-  margin-bottom: 8px;
-  text-align: center;
-}
-.leyendaMonto ul {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 14px;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 0 3px;
+  max-width: 520px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.map :global(.clr-mapa__leyenda li),
 .leyendaMonto li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
   font:
-    12px var(--font-inter),
+    11px/1.3 var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
+}
+.map :global(.clr-mapa__swatch),
+.leyendaMonto li span {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border: 0;
+  border-radius: 0;
+}
+.leyendaMonto {
+  margin-top: 10px;
 }
 .leyendaMonto li:first-child span {
   background-image: repeating-linear-gradient(
@@ -688,56 +659,6 @@
     transparent 0 2px,
     rgba(140, 190, 225, 0.35) 2px 3px
   ) !important;
-}
-.leyendaMonto li span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1px solid rgba(140, 190, 225, 0.4);
-}
-.leyendaMonto p {
-  max-width: 60ch;
-  margin: 6px auto 0;
-  font:
-    11.5px/1.5 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.tooltip {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: max-content;
-  max-width: 220px;
-  padding: 10px 12px;
-  border: 1px solid rgba(76, 201, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(6, 20, 35, 0.96);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  font:
-    12px/1.45 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-}
-.tooltip strong {
-  font-size: 14px;
-  color: var(--aq-text);
-}
-.tooltipTipo b {
-  color: var(--aq-text);
-  font-weight: 600;
-}
-.tooltip em {
-  margin-top: 4px;
-  font-style: normal;
-  font-size: 11px;
-  color: var(--aq-cyan);
-}
-.verLista {
-  display: none;
 }
 .noData {
   margin: 8px 0 0;
@@ -748,422 +669,60 @@
   color: var(--aq-muted);
 }
 
-/* ── Ficha (tarjeta clara) ────────────────────────────────────────────────── */
-.detailPanel {
-  min-width: 0;
-  padding: 22px;
-  border-radius: 16px;
-  background: var(--aq-card);
-  color: var(--aq-ink);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(76, 201, 255, 0.15);
-}
-.hero :global(.aqFicha) {
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e3e9ef;
-}
-.hero :global(.aqFichaEyebrow) {
-  margin: 0 0 8px;
-  font:
-    600 10.5px var(--font-jetbrains-mono),
-    monospace;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #0369a1;
-}
-.hero :global(.aqFicha h2) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font:
-    700 clamp(1.4rem, 1.9vw, 1.75rem)/1.15 var(--font-inter),
-    sans-serif;
-  letter-spacing: -0.015em;
-  color: var(--aq-ink);
-  hyphens: manual;
-}
-.hero :global(.aqFicha h2 svg) {
-  flex: none;
-  color: #1a9be0;
-}
-.hero :global(.aqFichaDatos) {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* ── Lista plegada ────────────────────────────────────────────────────────── */
+.lista {
   margin-top: 16px;
 }
-.hero :global(.aqFichaDatos > p) {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.hero :global(.aqFichaDatos > p + p) {
-  padding-left: 16px;
-  border-left: 1px solid #e3e9ef;
-}
-.hero :global(.aqFichaDatos strong) {
-  font:
-    700 24px/1.15 var(--font-inter),
-    sans-serif;
-  color: #0369a1;
-}
-.hero :global(.aqFichaDatos span) {
-  font:
-    12px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.hero :global(.aqFichaDatos--sec) {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed #e3e9ef;
-}
-.hero :global(.aqFichaDatos--sec strong) {
-  font-size: 17px;
-  white-space: nowrap;
-  color: var(--aq-ink);
-}
-.hero :global(.aqFichaEntidades) {
-  margin: 12px 0 0;
-  padding-top: 12px;
-  border-top: 1px dashed #e3e9ef;
-  font:
-    12px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.hero :global(.aqFichaEntidades strong) {
-  font:
-    700 17px/1.15 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink);
-}
-.hero :global(.aqFichaNota) {
-  margin: 12px 0 0;
-  font:
-    11.5px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.types {
-  padding-top: 16px;
-}
-.types h2 {
-  margin: 0;
-  font:
-    650 14px var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink);
-}
-.types > p {
-  margin: 3px 0 10px;
-  font:
-    12px/1.5 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.typeFila {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "nombre cifra"
-    "barra barra";
-  gap: 6px 10px;
-  align-items: center;
-  padding: 8px 0;
-  color: var(--aq-ink);
-  text-decoration: none;
-  font:
-    500 13px var(--font-inter),
-    sans-serif;
-}
-a.typeFila:hover .typeNombre {
-  color: #0369a1;
-}
-.typeNombre {
-  grid-area: nombre;
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  min-width: 0;
-}
-.typeNombre small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font:
-    12px var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.typePunto {
-  flex: none;
-  align-self: center;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--tipo, #1a9be0);
-}
-.typeFila[data-familia="otros"] .typePunto {
-  background: transparent;
-  border: 1.5px dashed var(--tipo);
-}
-.typeFila strong {
-  grid-area: cifra;
-  font:
-    600 13px var(--font-inter),
-    sans-serif;
-  font-variant-numeric: tabular-nums;
-  color: var(--aq-ink);
-}
-.typeBar {
-  grid-area: barra;
-  height: 5px;
-  border-radius: 5px;
-  overflow: hidden;
-  background: #e6edf3;
-}
-.typeBar span {
-  display: block;
-  height: 100%;
-  border-radius: 5px;
-  background: var(--tipo, #1a9be0);
-}
-/* Destacados y tendencia del departamento elegido (ResumenDepartamento.jsx). */
-.hero :global(.aqResumen) {
-  display: grid;
-  gap: 14px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px dashed #e3e9ef;
-  transition: opacity 0.15s;
-}
-.hero :global(.aqResumen[data-atenuado]) {
-  opacity: 0.45;
-}
-.hero :global(.aqResumen h3) {
-  margin: 0 0 6px;
-  font:
-    650 13px var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink);
-}
-.hero :global(.aqResumenNota) {
-  margin: 4px 0 0;
-  font:
-    12px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.hero :global(.aqSpark) {
-  display: block;
-  width: 100%;
-  height: 44px;
-}
-.hero :global(.aqSparkHit) {
-  fill: transparent;
-}
-.hero :global(.aqSparkBarra) {
-  fill: #0369a1;
-  pointer-events: none;
-}
-.hero :global(.aqSparkCero) {
-  fill: #cfd9e3;
-  pointer-events: none;
-}
-.hero :global(.aqSpark g:hover .aqSparkBarra) {
-  fill: var(--aq-ink);
-}
-.hero :global(.aqDestacados) {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.hero :global(.aqDestacados a) {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 8px 10px;
-  border: 1px solid #e3e9ef;
-  border-radius: 8px;
-  color: var(--aq-ink);
-  text-decoration: none;
-}
-.hero :global(.aqDestacados a:hover) {
-  border-color: #0369a1;
-}
-.hero :global(.aqDestacados a:focus-visible) {
-  outline: 2px solid #0369a1;
-  outline-offset: 2px;
-}
-.hero :global(.aqDestTipo) {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font:
-    600 11px var(--font-inter),
-    sans-serif;
-  color: var(--tipo);
-}
-.hero :global(.aqDestTipo i) {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tipo);
-}
-.hero :global(.aqDestTipo--otros i) {
-  background: transparent;
-  border: 1.5px dashed var(--tipo);
-}
-.hero :global(.aqDestObjeto) {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  font:
-    500 12.5px/1.4 var(--font-inter),
-    sans-serif;
-}
-.hero :global(.aqDestMeta) {
-  font:
-    11.5px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-ink-muted);
-}
-.fichaCta {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  margin-top: 16px;
-  border-radius: 10px;
-  background: var(--aq-navy);
-  color: #fff;
-  text-decoration: none;
-  font:
-    650 13.5px var(--font-inter),
-    sans-serif;
-  text-align: center;
-}
-.comparar {
-  display: block;
-  margin-top: 10px;
-  text-align: center;
-  color: #0369a1;
-  font:
-    600 12.5px var(--font-inter),
-    sans-serif;
-  text-decoration: none;
-}
-.comparar:hover {
-  text-decoration: underline;
-}
-.comparar:focus-visible {
-  outline: 2px solid #0369a1;
-  outline-offset: 2px;
-}
-.fichaCta:hover {
-  background: #0369a1;
-}
-
-/* En tres columnas, la del mensaje y la lista es la más alta. Mapa y ficha
-   acompañan el recorrido de la lista en vez de dejar un hueco debajo: están
-   sincronizados con ella (sincronia.js), así que deben seguir a la vista.
-   Cada panel se fija solo si cabe entero en la ventana (mapa ~720px, ficha
-   ~850px): uno más alto que ella dejaría su final fuera de alcance. */
-@media (min-width: 1281px) and (min-height: 820px) {
-  .mapPanel {
-    position: sticky;
-    top: calc(var(--nav-h, 56px) + 16px);
-  }
-}
-@media (min-width: 1281px) and (min-height: 960px) {
-  .detailPanel {
-    position: sticky;
-    top: calc(var(--nav-h, 56px) + 16px);
-  }
+.lista summary {
+  display: inline-block;
+  padding: 6px 0;
 }
 
 /* ── Adaptación ───────────────────────────────────────────────────────────── */
-@media (max-width: 1280px) {
-  .grid {
-    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
-    grid-template-areas:
-      "izq mapa"
-      "izq ficha";
-  }
-  .detailPanel {
-    max-width: 560px;
-    width: 100%;
-    justify-self: center;
-  }
-}
-@media (max-width: 900px) {
+@media (max-width: 899px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "copy"
-      "mapa"
-      "ficha"
-      "lista";
   }
-  /* La columna izquierda se deshace para que el mapa suba justo después del
-     mensaje y la lista baje al final. */
+  /* Mensaje, mapa y resultado: el mapa sube justo después del botón. */
   .colIzq {
     display: contents;
   }
   .copy {
-    grid-area: copy;
+    order: 1;
   }
-  .listPanel {
-    grid-area: lista;
+  .mapPanel {
+    order: 2;
   }
-  .detailPanel {
-    max-width: none;
+  .resultado {
+    order: 3;
+    margin-top: 0;
   }
-  .verLista {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    margin-top: 6px;
-    border: 1px solid var(--aq-line);
-    border-radius: 999px;
-    color: var(--aq-cyan);
-    text-decoration: none;
-    font:
-      600 13.5px var(--font-inter),
-      sans-serif;
-  }
-  .verLista:focus-visible {
-    outline: 2px solid var(--aq-cyan);
-    outline-offset: 2px;
-  }
-  /* Que el salto no deje la lista debajo de la barra fija. */
-  .hero :global(#aq-lista-departamentos) {
-    scroll-margin-top: calc(var(--nav-h, 56px) + 12px);
+  .opcionesPanel {
+    left: 0;
+    right: auto;
   }
 }
 @media (max-width: 600px) {
   /* A este ancho el texto de los rótulos baja de 6px: no se lee y tapa el mapa.
-     La cifra de cada departamento sigue en la lista y en el <title>. */
+     La cifra de cada departamento sigue en la lista y en su nombre accesible. */
   .map :global(.atlas-map-label) {
     display: none;
+  }
+  /* Sin rótulos, el hueco lateral del viewBox (MARGEN_ROTULOS = 64 a cada lado
+     de un mapa de 420) solo encogía el país: se ensancha el SVG y ese hueco
+     queda fuera de la vista. Así el mapa ocupa todo el ancho del móvil. */
+  .map :global(.clr-mapa__svg) {
+    width: calc(100% * 548 / 420);
+    max-width: none;
+    margin-inline: calc(-100% * 64 / 420);
+  }
+  .hero :global(.aqLista) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 430px) {
   .hero {
     padding-inline: 16px;
-  }
-  .detailPanel,
-  .listPanel {
-    padding: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -24,6 +24,8 @@ export function mapApiItem(p) {
     // Lo primero que se lee es qué se va a construir, no quién lo contrata.
     objeto: frase(p.objeto) || titulo(p.entidad) || "Proceso sin objeto publicado",
     tipo: color ? { label: TIPO_PROYECTO[p.tipoProyecto].label, color } : null,
+    // Quién contrata: sin ella, un objeto como «Suministro» no dice nada.
+    entidad: titulo(p.entidad) || null,
     valor: fmtValor(p.valorEstimado),
     ciudad: titulo(p.municipio, false),
     departamento: titulo(p.departamento, false),

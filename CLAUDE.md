@@ -214,7 +214,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-27 (fuera el ticker y el fondo animado de la portada).
+Última actualización: 2026-09-28 (portada en dos zonas: mensaje y resultado · mapa).
 
 ## graphify
 
@@ -235,11 +235,18 @@ El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
 servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 
 - **Franja de KPIs del hero**: retirada el 2026-09-26 (*Procesos abiertos ·
-  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*). El
-  mapa ocupa ese sitio: sus controles (colorear por, tipo) van centrados como
-  cabecera de la columna, y en tres columnas mapa y ficha son `sticky` mientras
-  se recorre la lista, cada uno solo si cabe en la ventana. Por eso `.hero` usa
-  `overflow: clip` y no `hidden`, que anularía el sticky.
+  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*).
+- **Dos zonas desde el 2026-09-28** (PR 2 de
+  `docs/superpowers/plans/2026-09-27-portada-esencial.md`): a la izquierda
+  titular, una frase, el buscador, un botón y el **resultado** del departamento
+  (nombre, procesos, % nacional, sus tres abiertos de mayor presupuesto y
+  «Ver las N fichas de X»); a la derecha el mapa, con «Opciones del mapa»
+  (colorear por, tipo: dos `<select>`) y la lista de departamentos plegadas en
+  `<details>`. Ya no hay tercera columna, tarjeta blanca, tooltip, `sticky`,
+  segundo buscador, tipos por departamento, serie semanal ni enlaces a
+  diagnóstico, precios o comparar en el hero: siguen en su página y en el pie.
+  La columna del mensaje mide como mucho 380 px: con fracciones la tierra del
+  mapa bajaba a 454 px a 1280.
 - `agregadosPortada()` (`src/lib/secop/agregados.ts`) sigue alimentando el mapa,
   la lista y la ficha, calculado en el servidor en `app/page.js` con
   `revalidate` de 6 h y "abierto" según `condicionAbierto()`. `totalAbiertos`
@@ -248,9 +255,9 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
   queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
-  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats` sirve ya solo
-  `sector.procesosVigilados` (una consulta a la base, recortado el 2026-09-27),
-  para la línea bajo el CTA del hero.
+  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats`, que quedó sirviendo
+  solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
+  esa línea y con `src/lib/landing/cifras.ts`.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -292,14 +299,16 @@ PENDIENTES §40). Cada fila trae además `nuevos7d` (abiertos con
 *nuevos · 7 días* de la banda), `montoAbierto` + `nConMonto` (suma del
 presupuesto de los abiertos que lo publican; el 0 no cuenta), `nEntidades`
 (entidades contratantes distintas entre los abiertos, `count(distinct)`) y
-`tipos` por departamento. La ficha del hero muestra los tipos **del departamento** (sin
-enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si la
-fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
-**sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
+`tipos` por departamento. Desde el 2026-09-28 el hero solo usa `n` (el resultado)
+y `montoAbierto`/`tipos` (pintar el mapa por monto o por tipo); los 7 días, el
+monto y las entidades se leen en `/licitaciones/comparar`. El tooltip del mapa
+salió: la vista previa la hace el resultado. Las facetas siguen con
+`procesosPorDepartamento()`.
 
-**Destacados y tendencia del departamento (2026-09-26).** Debajo de los tipos, la
-ficha muestra los tres abiertos de mayor presupuesto y una sparkline de
-**publicados por semana** en las últimas 12. No van en `detallePorDepartamento()`:
+**Destacados y tendencia del departamento (2026-09-26).** El resultado muestra los
+tres abiertos de mayor presupuesto (objeto, valor, entidad · municipio). La
+sparkline de **publicados por semana** salió el 2026-09-28 por decisión del
+usuario; la API la sigue devolviendo sin que nadie la lea (PENDIENTES §50). No van en `detallePorDepartamento()`:
 salen de `/api/departamento/[dpto]/resumen` (`src/lib/secop/resumen-departamento.ts`),
 cacheado 6 h en el CDN, y se piden al **elegir** un departamento, no al pasar el
 puntero. La serie cuenta **todos** los publicados, no solo los abiertos: los
@@ -312,16 +321,18 @@ los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
 y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
 `--aq-cta` (`#0272b0`/`#0b7cbd`): el `#1a9be0` de antes daba 3,08:1.
 
-**Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
-en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de
-1280px la ficha baja bajo el mapa; debajo de 900px el orden es mensaje, mapa,
-ficha, lista. La rampa del mapa se redefine en el hero (`--aq-e0..5`) porque la
+**Rediseño visual (2026-09-26).** Sustituido el 2026-09-28 por las dos zonas de
+arriba; debajo de 900 px el orden es mensaje, mapa (con la lista plegada) y
+resultado. La rampa del mapa se redefine en el hero (`--aq-e0..5`) porque la
 de `estilos.ts` sale de `--accent` sobre crema y en oscuro el escalón 0 salía
 crema. Desde el 2026-09-27 es **de un solo tono** (`#13304a` → `#c4e8fc`): los
 escalones altos eran turquesa y menta, se leían como otra categoría y el verde
 agua rozaba el "cumple" del semáforo. La imagen para compartir usa la misma. Los rótulos del mapa ya no son cinco fijos: `src/lib/mapa/rotulos.ts`
-elige los 10 departamentos con más procesos y los coloca sin solaparse en un
-viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
+elige los departamentos con más procesos y los coloca sin solaparse en un
+viewBox ensanchado (`MARGEN_ROTULOS`). La portada pide 5 (`maxRotulos`) y los
+pinta sin caja, con halo: la caja sigue en el SVG para que el algoritmo no los
+solape. Se ocultan bajo 600 px, y ahí el SVG se ensancha para que el hueco de
+los rótulos no encoja el país. Se tomó la
 estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
 entidades ni municipios, que la portada no calcula.
 **Buscador y métrica del mapa (2026-09-26).** El hero lleva un buscador
