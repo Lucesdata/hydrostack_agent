@@ -1,6 +1,7 @@
 # La ficha que decide: bloque de decisión arriba del todo
 
-**Fecha:** 2026-09-28 · **Estado:** spec, pendiente de aprobar (y después, plan).
+**Fecha:** 2026-09-28 · **Estado:** spec con las tres decisiones cerradas por el usuario (2026-09-28);
+falta el plan.
 **Maqueta:** escritorio y móvil, con los tres estados conmutables, en el lienzo
 «Bloque de decisión — ficha» (artefacto privado del usuario; datos de ejemplo,
 no un proceso real).
@@ -97,8 +98,9 @@ línea de ayuda y un enlace secundario.
 
 | Estado | Botón principal | Ayuda | Secundario |
 |---|---|---|---|
-| Sin perfil | Define tu perfil (ver decisión D1) | Especialidad, capacidad de contratación y departamentos donde trabajas. | Prefiero verlo en SECOP II |
-| Perfil, sin pliego | **Sube el pliego** | Es el PDF que ya descargaste del SECOP II. Lo leemos y comparamos sus requisitos con tu perfil. Hasta 5 pliegos cada 24 horas. | Abrir el expediente |
+| Sin perfil | Define tu perfil (D1: sin cuenta) | Un minuto y sin crear cuenta: especialidad, capacidad de contratación y departamentos donde trabajas. | Prefiero verlo en SECOP II |
+| Perfil sin cuenta, sin pliego | Sube el pliego | Para leer el pliego necesitas una cuenta gratuita; tu perfil pasa a ella. | Abrir el expediente |
+| Cuenta con perfil, sin pliego | **Sube el pliego** | Es el PDF que ya descargaste del SECOP II. Lo leemos y comparamos sus requisitos con tu perfil. Hasta 5 pliegos cada 24 horas. | Abrir el expediente |
 | Pliego leído, falta un dato del perfil | Completa ese dato (p. ej. índice de endeudamiento) | Con ese dato la compuerta se resuelve sola. | Ver los requisitos del pliego |
 | Pliego leído, todo resuelto | Preparar la oferta en SECOP II | La oferta se presenta en SECOP II. | Ver los requisitos del pliego |
 | Alguna compuerta no cumple | Ver por qué (ancla a la compuerta) | — | Explorar procesos parecidos |
@@ -143,31 +145,44 @@ datos.
   `UNKNOWN`). «Por qué, una por una» respeta eso: donde la razón esté redactada,
   pide cuenta en vez de mostrarla.
 - Zona = **sede de la entidad**. Toda explicación dice «la entidad está en…» y
-  «lugar de ejecución no confirmado».
+  «lugar de ejecución no confirmado». Fuera de la cobertura, la zona queda en
+  **revisar**, nunca en «no cumple» (D2).
 - Color = tipo de obra en el chip; los colores de estado son `--success`,
   `--warning`, `--danger` y **se miden** (`contraste.test.ts`), también sobre la
   banda oscura (ver criterio 9).
 - No se prometen alertas ni seguimiento de cambios.
 
-## Decisiones abiertas (del usuario)
+## Decisiones tomadas (usuario, 2026-09-28)
 
-- **D1 — Botón principal sin perfil.** El perfil puede vivir en `localStorage`
-  sin cuenta (`CONDUCTA.md` §6), pero guardarlo en la cuenta exige nivel
-  `gratis` (`perfil_guardar`), y sin cuenta las razones se redactan y el pliego
-  no se puede subir. Opciones: (a) «Define tu perfil» sin cuenta, y la cuenta se
-  pide al subir el pliego; (b) «Crea tu cuenta gratis y define tu perfil» de
-  entrada. La maqueta muestra (b). Recomendación: **(a)**, porque enseña el
-  valor antes de pedir el registro.
-- **D2 — Zona en «no cumple».** Hoy `ubicacionGate` da `FAIL` («el proceso está
-  en X, fuera de tu cobertura») cuando la **entidad** está fuera de la cobertura
-  del perfil, aunque la fuente no publica dónde se ejecuta la obra. Con el canal,
-  ese `FAIL` corta el agua y se ve como un «no» rotundo. ¿Se queda así, o la zona
-  fuera de cobertura baja a «revisar»? Tocar la compuerta cambia `verdict.ts` y
-  sus tests, así que es una decisión aparte de este spec; aquí solo se pide que
-  su texto hable de la entidad y no del proceso.
+- **D1 — Sin perfil, el botón principal es «Define tu perfil», sin cuenta.** El
+  perfil vive en `localStorage` mientras no haya cuenta (`CONDUCTA.md` §6). La
+  cuenta gratuita se pide en el paso que la necesita: **subir el pliego**
+  (`pliego_extraer` es `gratis`) y guardar el perfil (`perfil_guardar`). Al
+  crearla, el perfil local pasa a la cuenta. Así el visitante ve el valor antes
+  del registro. Con perfil local y sin cuenta, las razones siguen redactadas
+  por `verdict-publico.ts`: «Por qué, una por una» lo dice y ofrece la cuenta.
+- **D2 — Zona fuera de cobertura baja a «revisar».** `ubicacionGate` pasa de
+  `FAIL` a `WARN` cuando la entidad está fuera de la cobertura del perfil, y su
+  `reason` habla de la **entidad** («la entidad está en X, fuera de tu
+  cobertura; el lugar de ejecución no está confirmado»), no del proceso. Motivo:
+  la fuente no publica dónde se ejecuta la obra, así que un «no cumple» afirma
+  algo que no sabemos. Las ubicaciones no reconocidas siguen en `UNKNOWN`.
+
+  **Consecuencia que el plan tiene que resolver:** `getMatchesForPerfil` y
+  `getMatchesForPerfilMinimo` descartan los procesos con `overall === "FAIL"`.
+  Hoy eso saca de /mis-coincidencias todo lo que está fuera de la cobertura; con
+  la zona en `WARN`, entraría. **Decisión por defecto:** /mis-coincidencias
+  conserva el comportamiento de hoy con un filtro explícito por zona en el
+  matching (la cobertura sigue siendo un filtro de la lista), mientras que la
+  ficha muestra «revisar». Si se prefiere que entren ordenados detrás, como los
+  procesos sin presupuesto (PENDIENTES §43), se dice en el plan.
+
+  Otra consecuencia: `verdict-publico.ts` enseña sin cuenta las razones cuando
+  `overall === "FAIL"`. Un proceso que solo fallaba por zona deja de ser `FAIL`,
+  así que su razón pasa a redactarse para quien no tiene cuenta. Es coherente con
+  la regla (ya no es un «no puedes») y el plan lo fija con un test.
 - **D3 — Banda oscura.** La banda del veredicto usa `--accent-ocean`
-  (`#0C4A6E`), que enlaza con la portada oscura. Alternativa: banda clara con
-  borde. Se decide al ver la maqueta en el navegador real.
+  (`#0C4A6E`) y enlaza con la portada oscura.
 
 ## Criterios de aceptación
 
@@ -193,14 +208,18 @@ datos.
     promete algo que no existe.
 11. Zonas táctiles ≥ 44 px en móvil; todo control es un `<button>`, `<a>` o
     `<details>` real.
-12. Prueba con dos personas (un experto y un novato), misma tarea: *«decide si te
+12. Con la entidad fuera de la cobertura del perfil, la zona sale «revisar» y el
+    canal no se corta en ella; /mis-coincidencias no cambia de contenido
+    respecto a hoy (test de regresión en el matching).
+13. Prueba con dos personas (un experto y un novato), misma tarea: *«decide si te
     presentas a este proceso»*. Se mide el tiempo hasta decidir y se anota qué
     buscaron y no encontraron. Precedente: la prueba de visitante del
     2026-09-26.
 
 ## Fuera de alcance
 
-- Cambiar la lógica de cualquier compuerta (ver D2).
+- Cambiar la lógica de cualquier compuerta **salvo** la zona fuera de
+  cobertura (D2).
 - Calcular el rango probable de la oferta ganadora o la probabilidad de
   adjudicación: siguen sin existir y siguen sin fingirse.
 - Buscar por número de proceso o pegar un enlace del SECOP para llegar a la
