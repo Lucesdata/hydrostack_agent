@@ -27,19 +27,6 @@ describe("PortadaCliente", () => {
     expect(sinDatos).not.toContain('href="/licitaciones/departamento/');
   });
 
-  it("identifica los tipos como nacionales, aunque la ficha muestre un departamento", () => {
-    const html = renderToStaticMarkup(
-      <PortadaCliente
-        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 50 }]}
-        tipos={[{ clave: "ptar", label: "PTAR", slug: "ptar", n: 150 }]}
-        totalAbiertos={300}
-      />
-    );
-    expect(html).toContain("Tipos de proyecto · Colombia");
-    expect(html).toContain('href="/licitaciones/tipo/ptar"');
-    expect(html).toContain("150");
-  });
-
   it("renderiza el mapa del servidor una sola vez dentro del Hero Territorial", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
@@ -49,7 +36,7 @@ describe("PortadaCliente", () => {
       />
     );
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
-    expect(html).toContain("Buscar departamento");
+    expect(html).toContain("Ver el departamento como lista");
   });
 
   it("sin agregados, el hero avisa que el mapa no tiene datos", () => {
@@ -71,18 +58,20 @@ describe("PortadaCliente", () => {
     expect(html).not.toContain("o mira antes si estás listo");
   });
 
-  it("el fondo blueprint es CSS: sin estilos en línea que dependan del scroll", () => {
+  it("sin ticker ni fondo animado: la portada se aligeró (2026-09-27)", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain('class="bp-fondo-rejilla"');
-    expect(html).toContain("animation-timeline: scroll(root)");
-    // El hook anterior escribía top y transform en línea en cada evento de scroll.
-    expect(html).not.toMatch(/style="[^"]*top:\s*[\d.]+vh/);
-    expect(html).not.toMatch(/style="[^"]*translate3d/);
+    expect(html).not.toContain("Fichas recientes");
+    expect(html).not.toContain("ptr-");
+    expect(html).not.toContain("bp-fondo");
+    expect(html).not.toContain("@keyframes");
+    // La regla de los enlaces, que vivía en el CSS del fondo, se queda.
+    expect(html).toContain(".bp-page a");
   });
 
-  it("la portada no escucha el scroll para pintar el fondo", async () => {
+  it("la portada no escucha el scroll ni pide las fichas recientes", async () => {
     const { readFileSync } = await import("node:fs");
     const fuente = readFileSync("src/components/landing/PortadaCliente.jsx", "utf8");
     expect(fuente).not.toMatch(/addEventListener\(\s*["']scroll/);
+    expect(fuente).not.toContain("procesos/recientes");
   });
 });

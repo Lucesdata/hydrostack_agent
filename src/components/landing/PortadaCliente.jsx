@@ -7,12 +7,7 @@
 // árbol `"use client"` todo eso viajaría al navegador. Ahora el servidor lo
 // dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
 // hueco `semaforo` en `FilaProceso`.
-//
-// Requiere: src/components/landing/ProcesosTicker.jsx (sin cambios).
-// El fondo es el sistema "blueprint" (grilla + diagrama + nivel de agua) de abajo.
 
-import { useEffect, useState } from "react";
-import ProcesosTicker from "@/src/components/landing/ProcesosTicker";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
@@ -21,147 +16,29 @@ import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 // diagnóstico, el modelo de acceso, las preguntas frecuentes y la banda de
 // cierre: repetían lo que ya dicen el hero y la ficha, o tienen su propia
 // página (/diagnostico, /precios, las rutas de cada asistente).
+//
+// El 2026-09-27 salieron también el ticker de fichas recientes y el fondo
+// "blueprint" animado (rejilla, línea de nivel, ondas y regla de profundidad):
+// había quejas de usuarios de que la portada estaba muy cargada, y en el primer
+// pliegue había 15 animaciones en marcha. Plan:
+// docs/superpowers/plans/2026-09-27-portada-esencial.md. Su estado previo está
+// en git.
 
-/* ── CSS: animaciones + reset de la sección (todo lo que no puede ir inline) ── */
-const BLUEPRINT_CSS = `
-@keyframes bp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-@keyframes bp-ripple { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:.55} 100%{transform:translate(-50%,-50%) scale(2.6);opacity:0} }
-@keyframes bp-flash { 0%{opacity:1;filter:brightness(1.9)} 60%{opacity:.5} 100%{opacity:0} }
-.bp-page a { text-decoration: none; cursor: pointer; }
-
-/* ── Fondo "blueprint", sin JS (ver BlueprintBackground) ── */
-@property --bp-prof { syntax: "<integer>"; inherits: false; initial-value: 0; }
-@keyframes bp-parallax { to { transform: translate3d(0, -150px, 0); } }
-@keyframes bp-bajar { from { top: 0vh; } to { top: 100vh; } }
-@keyframes bp-nivel { from { top: 0vh; opacity: .08; } to { top: 100vh; opacity: .26; } }
-@keyframes bp-profundidad { to { --bp-prof: 6; } }
-.bp-fondo-rejilla {
-  position: fixed; top: -160px; left: 0; right: 0; bottom: -160px; z-index: 0; pointer-events: none;
-  background-image: linear-gradient(rgba(76,201,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(76,201,255,0.05) 1px,transparent 1px);
-  background-size: 32px 32px;
-}
-.bp-fondo-agua {
-  position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; pointer-events: none; opacity: .08;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'><path d='M0,7 Q30,1 60,7 T120,7' stroke='%234cc9ff' stroke-width='0.6' fill='none'/></svg>");
-  background-repeat: repeat; background-size: 120px 14px;
-  animation: bp-scroll 22s linear infinite;
-}
-.bp-fondo-linea {
-  position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 0; pointer-events: none;
-  background: linear-gradient(90deg,transparent,rgba(76,201,255,0.35),transparent);
-}
-.bp-fondo-onda {
-  position: fixed; top: 0; width: 16px; height: 16px; border-radius: 50%; z-index: 0; pointer-events: none;
-  border: 1px solid rgba(76,201,255,0.5);
-  animation: bp-ripple 2.6s ease-out infinite;
-}
-.bp-fondo-regla {
-  position: fixed; left: 10px; top: 72px; bottom: 16px; width: 1px; z-index: 0; pointer-events: none;
-  background: repeating-linear-gradient(180deg,rgba(76,201,255,0.3) 0 1px,transparent 1px 40px);
-}
-.bp-regla-marca { position: fixed; left: 6px; top: 0; z-index: 0; pointer-events: none; }
-.bp-fondo-flecha { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid var(--accent); }
-.bp-fondo-prof {
-  font: 10px var(--font-jetbrains-mono),monospace; color: var(--accent);
-  background: rgba(6,20,35,0.85); padding: 1px 4px; border-radius: 2px;
-  counter-reset: bp-prof var(--bp-prof);
-}
-.bp-fondo-prof::after { content: counter(bp-prof) " m"; }
-@supports (animation-timeline: scroll()) {
-  .bp-fondo-rejilla { animation: bp-parallax linear both; animation-timeline: scroll(root); }
-  .bp-fondo-agua { animation: bp-scroll 22s linear infinite, bp-nivel linear both; animation-timeline: auto, scroll(root); }
-  .bp-fondo-linea { animation: bp-bajar linear both; animation-timeline: scroll(root); }
-  .bp-fondo-onda { animation: bp-ripple 2.6s ease-out infinite, bp-bajar linear both; animation-timeline: auto, scroll(root); }
-  .bp-regla-marca { animation: bp-bajar linear both; animation-timeline: scroll(root); }
-  .bp-fondo-prof { animation: bp-profundidad linear both; animation-timeline: scroll(root); }
-}
-/* Sin animaciones ligadas al scroll, la marca de profundidad diría "0 m" para
-   siempre: mejor no pintarla. */
-@supports not (animation-timeline: scroll()) {
-  .bp-regla-marca { display: none !important; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bp-fondo-agua, .bp-fondo-onda, .bp-fondo-rejilla, .bp-fondo-linea, .bp-regla-marca, .bp-fondo-prof { animation: none !important; }
-  .bp-fondo-onda, .bp-regla-marca { display: none !important; }
-}
-
-.bp-regla-plano { display: none; }
-.bp-regla-marca { align-items: center; gap: 4px; }
-
-@media (min-width: 768px) {
-  .bp-regla-plano { display: block; }
-  .bp-regla-marca { display: flex; }
-}
-`;
-
-/**
- * El fondo "blueprint": rejilla, nivel de agua, ondas y la regla de
- * profundidad que siguen al scroll. Todo en CSS (`BLUEPRINT_CSS`, con
- * `animation-timeline: scroll()`): hasta el 2026-09-26 lo movía un hook que
- * hacía dos `setState` por evento de scroll y volvía a renderizar la portada
- * entera en cada fotograma solo para mover líneas de fondo.
- *
- * Sin soporte de animaciones ligadas al scroll, el fondo se queda en su estado
- * inicial, que es lo que se veía al cargar.
- */
-function BlueprintBackground() {
-  return (
-    <>
-      <div aria-hidden="true" className="bp-fondo-rejilla" />
-      <div aria-hidden="true" className="bp-fondo-agua bp-sigue" />
-      <div aria-hidden="true" className="bp-fondo-linea bp-sigue" />
-      {[14, 50, 84].map((leftPct, i) => (
-        <div
-          key={leftPct}
-          aria-hidden="true"
-          className="bp-fondo-onda bp-sigue"
-          style={{ left: `${leftPct}%`, animationDelay: `${i * 0.9}s, 0s` }}
-        />
-      ))}
-      <div aria-hidden="true" className="bp-regla-plano bp-fondo-regla" />
-      <div aria-hidden="true" className="bp-regla-plano bp-regla-marca bp-sigue">
-        <div className="bp-fondo-flecha" />
-        <span className="bp-fondo-prof" />
-      </div>
-    </>
-  );
-}
+/** Lo único que quedaba del CSS del fondo y no era el fondo. */
+const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
 
 /**
  * @param {{
  *   mapa?: import("react").ReactNode,
  *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  *   totalAbiertos?: number | null,
- *   tipos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador.
+ *
+ * Ya no pide `/api/landing-stats` (2026-09-27): la línea «N procesos del
+ * sector» bajo el botón del hero salió con el resto de la carga.
  */
-export default function LandingPage({
-  mapa = null,
-  departamentos = [],
-  totalAbiertos = null,
-  tipos = [],
-}) {
-  // Procesos del sector vigilados, para la línea bajo el CTA del hero. Se
-  // queda en null si el fetch falla: la UI dice "datos desde SECOP II" sin la
-  // cifra.
-  const [sector, setSector] = useState(null);
-
-  useEffect(() => {
-    let vivo = true;
-    fetch("/api/landing-stats")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (vivo && d?.sector) setSector(d.sector);
-      })
-      .catch(() => {
-        /* se queda en null: la frase sigue siendo cierta sin la cifra */
-      });
-    return () => {
-      vivo = false;
-    };
-  }, []);
-
+export default function LandingPage({ mapa = null, departamentos = [], totalAbiertos = null }) {
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -173,19 +50,10 @@ export default function LandingPage({
         fontFamily: "var(--font-inter), sans-serif",
       }}
     >
-      <style dangerouslySetInnerHTML={{ __html: BLUEPRINT_CSS }} />
-      <BlueprintBackground />
+      <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <ProcesosTicker />
-
-        <HeroTerritorial
-          mapa={mapa}
-          departamentos={departamentos}
-          totalAbiertos={totalAbiertos}
-          tipos={tipos}
-          sector={sector}
-        />
+        <HeroTerritorial mapa={mapa} departamentos={departamentos} totalAbiertos={totalAbiertos} />
 
         {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo
             después del hero porque el hero existe para llevar a una ficha. */}

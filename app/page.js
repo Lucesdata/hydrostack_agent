@@ -27,16 +27,14 @@ export default async function Page() {
   // Si la base no responde, la portada sale con el mapa en gris en vez de
   // caerse. Importa más de lo que parece: el CI corre `npm run build`, que
   // prerenderiza esta ruta, y las rutas facetadas ya evitaron a propósito atar
-  // el despliegue a que la base conteste. Mismo criterio que `/api/landing-stats`,
-  // que degrada a "—" sin inventar cifras.
+  // el despliegue a que la base conteste. Se degrada a "—", sin inventar
+  // cifras.
   let departamentos = [];
   let totalAbiertos;
-  let tipos = [];
   try {
     const agregados = await agregadosPortada();
     departamentos = agregados.departamentos;
     totalAbiertos = agregados.totalAbiertos;
-    tipos = agregados.tipos;
   } catch (error) {
     console.error("[portada] agregados no disponibles, el mapa sale vacío:", error);
   }
@@ -51,7 +49,6 @@ export default async function Page() {
       <PortadaCliente
         departamentos={departamentos}
         totalAbiertos={totalAbiertos}
-        tipos={tipos}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
@@ -60,6 +57,8 @@ export default async function Page() {
               totalAbiertos={totalAbiertos}
               etiquetas
               tooltipExterno
+              capaSeleccion
+              maxRotulos={5}
               datosDisponibles={totalAbiertos != null}
             />
           </>

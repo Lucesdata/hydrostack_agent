@@ -102,6 +102,14 @@ export interface ColombiaChoroplethProps {
   datosDisponibles?: boolean;
   /** Quien monta el mapa pinta su propio tooltip (el hero de la portada). */
   tooltipExterno?: boolean;
+  /**
+   * Una capa vacía encima de los departamentos donde el hero dibuja el
+   * contorno del elegido (`sincronia.js`). Sin ella, los vecinos que se pintan
+   * después tapan la mitad de su borde: en SVG manda el orden del documento.
+   */
+  capaSeleccion?: boolean;
+  /** Cuántos rótulos como mucho. La portada pide 5 (plan portada-esencial). */
+  maxRotulos?: number;
 }
 
 export default function ColombiaChoropleth({
@@ -110,10 +118,12 @@ export default function ColombiaChoropleth({
   etiquetas = false,
   datosDisponibles = true,
   tooltipExterno = false,
+  capaSeleccion = false,
+  maxRotulos,
 }: ColombiaChoroplethProps) {
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
-  const rotulos = etiquetas && datosDisponibles ? colocarRotulos(continente) : [];
+  const rotulos = etiquetas && datosDisponibles ? colocarRotulos(continente, maxRotulos) : [];
   // Con rótulos, el lienzo se ensancha a los lados para que las cajas puedan
   // salir de la silueta sin tapar la costa.
   const viewBox = etiquetas
@@ -152,6 +162,10 @@ export default function ColombiaChoropleth({
             tooltipExterno={tooltipExterno}
           />
         ))}
+        {/* Sin `d`: el cliente le copia el contorno del departamento elegido. */}
+        {capaSeleccion && (
+          <path className="clr-mapa__marca" aria-hidden="true" pointerEvents="none" />
+        )}
         {sanAndres && (
           <g transform={`translate(${RECUADRO_X} ${RECUADRO_Y})`}>
             <rect

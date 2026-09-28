@@ -25,7 +25,24 @@ export function dptoDesdeObjetivo(objetivo) {
   return null;
 }
 
-/** Aplica `is-resaltado` y `is-seleccionado` a los caminos del mapa. */
+/**
+ * El contorno que la capa de selección (`.clr-mapa__marca`) copia del
+ * departamento elegido: su `d`, o `null` si no hay que pintar nada. San Andrés
+ * va en un recuadro con su propia transformación y la capa no la comparte: ahí
+ * basta la clase `is-seleccionado`, porque en el recuadro no tiene vecinos.
+ */
+export function contornoSeleccionado(raiz, seleccionado) {
+  if (!seleccionado) return null;
+  const camino = raiz.querySelector(`path[data-dpto="${seleccionado}"]`);
+  if (!camino || camino.closest("g[transform]")) return null;
+  return camino.getAttribute("d");
+}
+
+/**
+ * Aplica `is-resaltado` y `is-seleccionado` a los caminos del mapa, y copia el
+ * contorno del elegido a la capa de selección, que va encima de todos. No se
+ * reordena el SVG: lo pinta React y moverle nodos rompería la reconciliación.
+ */
 export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
   useEffect(() => {
     const raiz = contenedorRef.current;
@@ -36,46 +53,13 @@ export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
       camino.classList.toggle("is-seleccionado", codigo === seleccionado);
     }
     raiz.toggleAttribute("data-resaltando", resaltado != null);
-  }, [contenedorRef, resaltado, seleccionado]);
-}
-
-/**
- * Lo que dice el tooltip del mapa sobre un departamento: nombre, procesos
- * abiertos, % nacional y subsistema más frecuente. Puro, para probarlo.
- *
- * El "más frecuente" deja fuera `otros`: `otros` es "sin subsistema
- * identificado", no un subsistema, y ganaría en casi todos (es el 35 %).
- * Si ninguno clasificado tiene procesos, no se nombra ninguno.
- */
-export function contenidoTooltip({
-  dpto,
-  nombre = null,
-  departamentos = [],
-  totalAbiertos = null,
-  tipos = {},
-  tipoFiltro = null,
-}) {
-  const fila = departamentos.find((d) => d.clave === dpto) ?? null;
-  const n = fila?.n ?? 0;
-  const pct = totalAbiertos > 0 && n > 0 ? (100 * n) / totalAbiertos : null;
-  let principal = null;
-  if (fila?.tipos) {
-    for (const [clave, cuenta] of Object.entries(fila.tipos)) {
-      if (clave === "otros" || cuenta <= 0) continue;
-      if (!principal || cuenta > principal.n) principal = { clave, n: cuenta };
+    const marca = raiz.querySelector(".clr-mapa__marca");
+    if (marca) {
+      const d = contornoSeleccionado(raiz, seleccionado);
+      if (d) marca.setAttribute("d", d);
+      else marca.removeAttribute("d");
     }
-  }
-  return {
-    nombre: fila?.label ?? nombre ?? null,
-    n,
-    pct,
-    monto: fila?.montoAbierto ?? 0,
-    // Con el mapa filtrado por tipo, cuántos de sus abiertos son de ese tipo.
-    ...(tipoFiltro ? { nTipo: fila?.tipos?.[tipoFiltro] ?? 0 } : {}),
-    principal: principal
-      ? { ...principal, label: tipos[principal.clave] ?? principal.clave }
-      : null,
-  };
+  }, [contenedorRef, resaltado, seleccionado]);
 }
 
 /**

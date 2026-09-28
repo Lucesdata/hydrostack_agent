@@ -1,28 +1,16 @@
 /**
- * Vista rápida "últimos 25 procesos" — momento 1 (ver, sin filtrar).
+ * El DTO de un proceso en resumen y su mapeo desde la fila de base.
  *
- * Lee de la tabla `proceso` (Neon, ingesta cron) con joins mínimos; si la base
- * está vacía o falla (p. ej. sin DATABASE_URL en local), degrada a Socrata live
- * con la query por defecto. Sin count, sin verdict, sin probe: eso pertenece al
- * momento 2 (elegibilidad on-demand).
- *
- * Política de fallback (adelgazamiento de raw_record): a diferencia de
- * `db-search.ts`, aquí NO hay `coalesce` al payload — `url` sale directo de
- * `proceso.url`. Entre el deploy de las columnas promovidas y que corra el
- * backfill (`scripts/rellenar-columnas.ts`), esta vista degrada a `url: null`
- * en vez de leer el JSON crudo. Decisión deliberada, no un olvido: esta
- * pantalla no es la superficie de búsqueda principal (esa es `db-search.ts`,
- * que sí mantiene el fallback) y el costo de degradar unas horas es bajo.
- *
- * Spec: docs/superpowers/specs/2026-07-15-vista-simple-y-elegibilidad-diferida.md
+ * Nació para el ticker "últimos 25 procesos" de la portada, que salió el
+ * 2026-09-27 junto con `/api/procesos/recientes` (plan
+ * `docs/superpowers/plans/2026-09-27-portada-esencial.md`). Lo que queda lo usa
+ * `resumen-departamento.ts` para los destacados del departamento. Su estado
+ * previo, con la consulta y el fallback a Socrata en vivo, está en git.
  */
 
-import type { SecopProceso } from "./types";
 import { montoConDato } from "./monto";
 
-export const RECIENTES_LIMIT = 25;
-
-/** DTO liviano de la tarjeta simple. Todo lo que la vista rápida necesita. */
+/** DTO liviano de un proceso en resumen: lo que pinta una fila de destacados. */
 export interface ProcesoResumen {
   id: string;
   referencia: string | null;
@@ -35,18 +23,13 @@ export interface ProcesoResumen {
   valorEstimado: number | null;
   fechaPublicacion: string | null;
   url: string | null;
-  /** Uno de `TIPOS_PROYECTO`, o `null` si no está clasificado o viene del SECOP en vivo. */
+  /** Uno de `TIPOS_PROYECTO`, o `null` si no está clasificado. */
   tipoProyecto: string | null;
   /**
-   * Ruta de la ficha pública. Solo cuando la fila sale de la base: un proceso
-   * leído del SECOP en vivo puede no estar ingerido, y su ficha daría 404.
+   * Ruta de la ficha pública. `mapRowToResumen` no la inventa: la añade quien
+   * lee la fila, que sabe que el proceso está ingerido.
    */
   ficha: string | null;
-}
-
-export interface ProcesosRecientesResult {
-  items: ProcesoResumen[];
-  fuente: "db" | "live";
 }
 
 /** `urlproceso` llega como `{ url }`, string, o basura. Igual que en client.ts. */
@@ -94,87 +77,4 @@ export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
     tipoProyecto: r.tipoProyecto ?? null,
     ficha: null,
   };
-}
-
-export function mapLiveToResumen(p: SecopProceso): ProcesoResumen {
-  return {
-    id: p.id,
-    referencia: p.referencia || null,
-    objeto: p.nombre || p.descripcion || "",
-    entidad: p.entidad || null,
-    departamento: p.departamento || null,
-    municipio: p.ciudad || null,
-    modalidad: p.modalidad || null,
-    estado: p.estado || null,
-    valorEstimado: montoConDato(p.precioBase),
-    fechaPublicacion: p.fechaPublicacion,
-    url: p.url,
-    tipoProyecto: null,
-    ficha: null,
-  };
-}
-
-async function fromDb(): Promise<ProcesoResumen[]> {
-  // Import perezoso: si el cliente de base no puede construirse (sin
-  // DATABASE_URL), el error queda contenido aquí y aplica el fallback live.
-  const [{ db }, schema, { eq, isNull, sql }, { slugDeProceso }] = await Promise.all([
-    import("@/src/lib/db/client"),
-    import("@/src/lib/db/schema"),
-    import("drizzle-orm"),
-    import("./ficha"),
-  ]);
-  const { proceso, entidad, geografia } = schema;
-
-  const rows = await db
-    .select({
-      secopProcesoId: proceso.secopProcesoId,
-      referencia: proceso.referencia,
-      objeto: proceso.objeto,
-      modalidad: proceso.modalidad,
-      estado: proceso.estadoActual,
-      valorEstimado: proceso.valorEstimado,
-      fechaPublicacion: proceso.fechaPublicacion,
-      entidadNombre: entidad.nombre,
-      departamento: geografia.departamentoNombre,
-      municipio: geografia.municipioNombre,
-      urlRaw: proceso.url,
-      tipoProyecto: proceso.tipoProyecto,
-    })
-    .from(proceso)
-    .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
-    .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
-    .where(isNull(proceso.deletedAt))
-    .orderBy(sql`${proceso.fechaPublicacion} DESC NULLS LAST`)
-    .limit(RECIENTES_LIMIT);
-
-  return rows.map((r) => ({
-    ...mapRowToResumen(r),
-    ficha: `/licitaciones/${slugDeProceso(r.objeto, r.secopProcesoId)}`,
-  }));
-}
-
-async function fromLive(): Promise<ProcesoResumen[]> {
-  const { searchProcesos } = await import("./client");
-  const result = await searchProcesos({
-    orden: "fecha",
-    soloAgua: true,
-    page: 1,
-    pageSize: RECIENTES_LIMIT,
-  });
-  return result.items.map(mapLiveToResumen);
-}
-
-/** Últimos 25 procesos: base propia primero, Socrata como red de seguridad. */
-export async function getProcesosRecientes(): Promise<ProcesosRecientesResult> {
-  try {
-    const items = await fromDb();
-    if (items.length > 0) return { items, fuente: "db" };
-  } catch {
-    // base no disponible → live
-  }
-  try {
-    return { items: await fromLive(), fuente: "live" };
-  } catch {
-    return { items: [], fuente: "live" };
-  }
 }

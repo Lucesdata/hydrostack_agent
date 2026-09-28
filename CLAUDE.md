@@ -219,7 +219,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-26 (portada reducida a mapa + Ficha Viva).
+Última actualización: 2026-09-28 (Ficha Viva condensada; esquema y árbol en «Cómo participar»).
 
 ## graphify
 
@@ -240,11 +240,18 @@ El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,
 servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 
 - **Franja de KPIs del hero**: retirada el 2026-09-26 (*Procesos abiertos ·
-  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*). El
-  mapa ocupa ese sitio: sus controles (colorear por, tipo) van centrados como
-  cabecera de la columna, y en tres columnas mapa y ficha son `sticky` mientras
-  se recorre la lista, cada uno solo si cabe en la ventana. Por eso `.hero` usa
-  `overflow: clip` y no `hidden`, que anularía el sticky.
+  Colombia*, *Departamentos con procesos*, *Tipos de proyecto · Colombia*).
+- **Dos zonas desde el 2026-09-28** (PR 2 de
+  `docs/superpowers/plans/2026-09-27-portada-esencial.md`): a la izquierda
+  titular, una frase, el buscador, un botón y el **resultado** del departamento
+  (nombre, procesos, % nacional, sus tres abiertos de mayor presupuesto y
+  «Ver las N fichas de X»); a la derecha el mapa, con «Opciones del mapa»
+  (colorear por, tipo: dos `<select>`) y la lista de departamentos plegadas en
+  `<details>`. Ya no hay tercera columna, tarjeta blanca, tooltip, `sticky`,
+  segundo buscador, tipos por departamento, serie semanal ni enlaces a
+  diagnóstico, precios o comparar en el hero: siguen en su página y en el pie.
+  La columna del mensaje mide como mucho 380 px: con fracciones la tierra del
+  mapa bajaba a 454 px a 1280.
 - `agregadosPortada()` (`src/lib/secop/agregados.ts`) sigue alimentando el mapa,
   la lista y la ficha, calculado en el servidor en `app/page.js` con
   `revalidate` de 6 h y "abierto" según `condicionAbierto()`. `totalAbiertos`
@@ -253,16 +260,19 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   No "arreglarlo" sumando la lista. Si la base no responde, `totalAbiertos`
   queda `undefined`, la ficha muestra "—" y el mapa sale en gris.
 - **Banda "El mercado ahora"**: retirada el 2026-09-26 junto con
-  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats` sirve ya solo
-  `sector.procesosVigilados` (una consulta a la base, recortado el 2026-09-27),
-  para la línea bajo el CTA del hero; el ticker pide sus fichas recientes por su
-  cuenta.
+  `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats`, que quedó sirviendo
+  solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
+  esa línea y con `src/lib/landing/cifras.ts`.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
-`src/components/landing/ficha-viva/`: las cuatro preguntas con su estado real,
-un esquema ilustrativo sin cifras y el árbol de decisiones. El ticker es
-"Fichas recientes" y enlaza a cada ficha. **Color = tipo de obra**
+`src/components/landing/ficha-viva/`: desde el 2026-09-28 (PR 3 del plan
+portada-esencial) solo el titular, las cuatro preguntas con su estado real en
+fila y un botón, más el enlace «Cómo razona la ficha». El esquema ilustrativo sin
+cifras, el árbol de decisiones, el aviso de «Seguir sus cambios» y la leyenda de
+color se mudaron a `/licitaciones/como-participar#como-razona`
+(`ficha-viva/ComoRazonaFicha.jsx`, mismo módulo CSS; en esa página clara la
+leyenda usa el color `claro` de cada familia). **Color = tipo de obra**
 (`src/lib/classify/tipo-color.ts`: azul potable, marrón residual, gris redes,
 punteado `otros`), siempre con su nombre y nunca como estado. No prometer
 alertas por correo ni seguimiento de cambios mientras no existan: la sección
@@ -281,13 +291,15 @@ El cierre de la ficha distingue `Abierto`, `Cerrado` y estado de apertura ausent
 el cerrado invita a explorar otros procesos y el estado ausente exige comprobar
 en el expediente si todavía se reciben ofertas.
 
-**Cabecera, ticker y sincronía (2026-09-26).** En `/` la barra de navegación
-va en oscuro (`.clr-nav--oscuro`, en `Navbar.js`) y el ticker también; en el
-resto del sitio la barra sigue clara. El ticker son tarjetas con botón de pausa
-(WCAG 2.2.2). Mapa, lista y ficha del hero están sincronizados al pasar el
-puntero o el foco (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de
-servidor, cada camino lleva `data-dpto` y el hero escucha por delegación. El
-clic del mapa **sigue navegando** a la faceta (decisión D).
+**Cabecera y sincronía (2026-09-26).** En `/` la barra de navegación va en
+oscuro (`.clr-nav--oscuro`, en `Navbar.js`), sin el «En línea» desde el
+2026-09-27; en el resto del sitio la barra sigue clara y lo conserva. Mapa, lista
+y ficha del hero están sincronizados al pasar el puntero o el foco
+(`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de servidor, cada
+camino lleva `data-dpto` y el hero escucha por delegación. El contorno del
+elegido se dibuja en una capa aparte encima de todos (`.clr-mapa__marca`, prop
+`capaSeleccion`): el cliente le copia el `d`, **no reordena el SVG**, que es de
+React. El clic del mapa **sigue navegando** a la faceta (decisión D).
 
 **Ficha del departamento y tooltip (2026-09-26).** La portada ya no usa
 `procesosPorDepartamento()` sino `detallePorDepartamento()` (misma consulta,
@@ -297,14 +309,16 @@ PENDIENTES §40). Cada fila trae además `nuevos7d` (abiertos con
 *nuevos · 7 días* de la banda), `montoAbierto` + `nConMonto` (suma del
 presupuesto de los abiertos que lo publican; el 0 no cuenta), `nEntidades`
 (entidades contratantes distintas entre los abiertos, `count(distinct)`) y
-`tipos` por departamento. La ficha del hero muestra los tipos **del departamento** (sin
-enlace por fila: no hay faceta departamento × tipo) y cae a los nacionales si la
-fila no trae detalle. El tooltip del mapa nombra el subsistema más frecuente
-**sin contar `otros`**. Las facetas siguen con `procesosPorDepartamento()`.
+`tipos` por departamento. Desde el 2026-09-28 el hero solo usa `n` (el resultado)
+y `montoAbierto`/`tipos` (pintar el mapa por monto o por tipo); los 7 días, el
+monto y las entidades se leen en `/licitaciones/comparar`. El tooltip del mapa
+salió: la vista previa la hace el resultado. Las facetas siguen con
+`procesosPorDepartamento()`.
 
-**Destacados y tendencia del departamento (2026-09-26).** Debajo de los tipos, la
-ficha muestra los tres abiertos de mayor presupuesto y una sparkline de
-**publicados por semana** en las últimas 12. No van en `detallePorDepartamento()`:
+**Destacados y tendencia del departamento (2026-09-26).** El resultado muestra los
+tres abiertos de mayor presupuesto (objeto, valor, entidad · municipio). La
+sparkline de **publicados por semana** salió el 2026-09-28 por decisión del
+usuario; la API la sigue devolviendo sin que nadie la lea (PENDIENTES §50). No van en `detallePorDepartamento()`:
 salen de `/api/departamento/[dpto]/resumen` (`src/lib/secop/resumen-departamento.ts`),
 cacheado 6 h en el CDN, y se piden al **elegir** un departamento, no al pasar el
 puntero. La serie cuenta **todos** los publicados, no solo los abiertos: los
@@ -313,18 +327,22 @@ consultas se prueban contra PGlite con las migraciones reales.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
-`contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra,
-el ticker y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
+`contraste-oscuro.test.ts`, que lee los `--aq-*` reales y los colores de la barra
+y el árbol de la Ficha Viva. Texto blanco sobre azul va sobre
 `--aq-cta` (`#0272b0`/`#0b7cbd`): el `#1a9be0` de antes daba 3,08:1.
 
-**Rediseño visual (2026-09-26).** Tres columnas: mensaje + lista · mapa · ficha
-en tarjeta blanca (con los tipos nacionales y el CTA del departamento). Debajo de
-1280px la ficha baja bajo el mapa; debajo de 900px el orden es mensaje, mapa,
-ficha, lista. La rampa del mapa se redefine en el hero (`--aq-e0..4`) porque la
+**Rediseño visual (2026-09-26).** Sustituido el 2026-09-28 por las dos zonas de
+arriba; debajo de 900 px el orden es mensaje, mapa (con la lista plegada) y
+resultado. La rampa del mapa se redefine en el hero (`--aq-e0..5`) porque la
 de `estilos.ts` sale de `--accent` sobre crema y en oscuro el escalón 0 salía
-crema. Los rótulos del mapa ya no son cinco fijos: `src/lib/mapa/rotulos.ts`
-elige los 10 departamentos con más procesos y los coloca sin solaparse en un
-viewBox ensanchado (`MARGEN_ROTULOS`). Se ocultan bajo 600px. Se tomó la
+crema. Desde el 2026-09-27 es **de un solo tono** (`#13304a` → `#c4e8fc`): los
+escalones altos eran turquesa y menta, se leían como otra categoría y el verde
+agua rozaba el "cumple" del semáforo. La imagen para compartir usa la misma. Los rótulos del mapa ya no son cinco fijos: `src/lib/mapa/rotulos.ts`
+elige los departamentos con más procesos y los coloca sin solaparse en un
+viewBox ensanchado (`MARGEN_ROTULOS`). La portada pide 5 (`maxRotulos`) y los
+pinta sin caja, con halo: la caja sigue en el SVG para que el algoritmo no los
+solape. Se ocultan bajo 600 px, y ahí el SVG se ensancha para que el hueco de
+los rótulos no encoja el país. Se tomó la
 estructura de un mockup, **no sus cifras**: nada de tendencias, valor estimado,
 entidades ni municipios, que la portada no calcula.
 **Buscador y métrica del mapa (2026-09-26).** El hero lleva un buscador
@@ -346,9 +364,13 @@ color no puede ser lo único que lo diga.
 total de abiertos, de `agregadosPortada()`, revalidada cada 6 h. Sin base, sale
 sin cifras. Inter va en `woff` aparte (`app/fonts/inter-latin-{400,700}-normal.woff`)
 porque Satori no lee `woff2`.
-**Portada = mapa + Ficha Viva (2026-09-26).** La portada solo lleva el ticker,
-el hero territorial (mapa, lista, ficha del departamento y buscador) y la Ficha
-Viva. Salieron las rutas de intención ("¿En qué
+**Portada = mapa + Ficha Viva (2026-09-26).** La portada solo lleva el hero
+territorial (mapa, lista, ficha del departamento y buscador) y la Ficha Viva.
+**El ticker de fichas recientes salió el 2026-09-27** con `/api/procesos/recientes`
+y el fondo animado "blueprint", por quejas de portada cargada (había 15
+animaciones en el primer pliegue): plan de tres PR en
+`docs/superpowers/plans/2026-09-27-portada-esencial.md`. `mapApiItem` vive ahora
+en `src/components/landing/proceso-resumen.js`. Salieron las rutas de intención ("¿En qué
 momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
 frecuentes (con su JSON-LD `FAQPage`), `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
 el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y

@@ -5,12 +5,14 @@ import PortadaCliente from "@/src/components/landing/PortadaCliente";
 
 /**
  * La sección "La Ficha Viva" promete lo que una ficha responde. Estos tests
- * vigilan que la promesa no se adelante a lo que existe.
+ * vigilan que la promesa no se adelante a lo que existe. Desde el 2026-09-28 es
+ * titular, cuatro preguntas y un botón; lo demás vive en «Cómo participar»
+ * (ComoRazonaFicha.test.tsx).
  */
 const html = renderToStaticMarkup(<FichaViva />);
 
 describe("FichaViva", () => {
-  it("plantea las cuatro preguntas de la ficha", () => {
+  it("plantea las cuatro preguntas de la ficha, cada una con su estado real", () => {
     for (const q of [
       "¿Puedo participar?",
       "¿Qué me falta?",
@@ -19,16 +21,8 @@ describe("FichaViva", () => {
     ]) {
       expect(html).toContain(q);
     }
-  });
-
-  it("dice «todavía no puedo determinarlo» en vez de adivinar", () => {
-    expect(html).toContain("Todavía no puedo determinarlo");
-    expect(html).toContain("todavía no puedo determinarlo");
-  });
-
-  it("marca el seguimiento de cambios como en construcción", () => {
-    expect(html).toContain("Seguir sus cambios");
-    expect(html).toContain("En construcción");
+    expect(html).toContain("Depende del pliego");
+    expect(html.match(/>Disponible</g)).toHaveLength(3);
   });
 
   it("no promete alertas por correo, que hoy no se entregan (PENDIENTES §0)", () => {
@@ -36,27 +30,18 @@ describe("FichaViva", () => {
     expect(html).not.toContain("Activar alerta");
   });
 
-  it("rotula el esquema como ilustrativo y no pinta cifras", () => {
-    expect(html).toContain("Esquema ilustrativo");
-    const esquema = html.slice(html.indexOf("<figure"), html.indexOf("</figure>"));
-    // Solo el texto visible, sin las chinchetas numeradas (aria-hidden) que
-    // enlazan cada bloque con su pregunta.
-    const texto = esquema
-      .replace(/<span[^>]*aria-hidden="true"[^>]*>\d<\/span>/g, "")
-      .replace(/<[^>]+>/g, " ");
-    expect(texto).not.toMatch(/\d/);
-  });
-
-  it("lleva a las fichas y al diagnóstico", () => {
+  it("un botón a las fichas y un enlace a cómo razona la ficha", () => {
     expect(html).toContain('href="/licitaciones"');
-    expect(html).toContain('href="/diagnostico"');
+    expect(html).toContain('href="/licitaciones/como-participar#como-razona"');
+    // El diagnóstico sigue en el pie y en cada ficha, no aquí.
+    expect(html).not.toContain('href="/diagnostico"');
   });
 
-  it("explica el color: tipo de obra con su nombre, y el estado aparte", () => {
-    for (const f of ["Agua potable", "Aguas residuales", "Redes y alcantarillado"]) {
-      expect(html).toContain(f);
-    }
-    expect(html).toContain("El estado va aparte");
+  it("el esquema, el árbol y la leyenda ya no van en la portada (2026-09-28)", () => {
+    expect(html).not.toContain("<figure");
+    expect(html).not.toContain("Cómo razona la ficha</h3>");
+    expect(html).not.toContain("El estado va aparte");
+    expect(html).not.toContain("Seguir sus cambios");
   });
 
   it("va en la portada justo después del hero, y la cierra", () => {

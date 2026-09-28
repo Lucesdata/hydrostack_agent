@@ -148,8 +148,10 @@ const AUTH_CSS = `
   border-bottom: 1px solid rgba(140, 190, 225, 0.14);
 }
 .clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; }
-.clr-nav--oscuro .clr-status-label{ color: #9fb4c6; }
-.clr-nav--oscuro .clr-nav-divider{ background: rgba(140, 190, 225, 0.2); }
+/* En la portada no va "En línea" (2026-09-27): su punto late sin parar y era
+   una de las 15 animaciones del primer pliegue. El resto del sitio lo conserva. */
+.clr-nav--oscuro .clr-status,
+.clr-nav--oscuro .clr-nav-divider{ display: none; }
 .clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; }
 .clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.06); }
 .clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #4cc9ff; background: rgba(76, 201, 255, 0.12); }

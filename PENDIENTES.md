@@ -928,3 +928,23 @@ cosas no se borraron a propósito:
   `al/matching/red-sectorial.ts`, `archivo/exportar.ts`) y los ayudantes de test
   (`clearDatasetIdCache`, `versionesRegistradas`, `CAPACIDADES`,
   `design/contraste.ts`) sí tienen quien los llame.
+
+
+### 50. Lo que deja la portada esencial (2026-09-28)
+PR 2 de `docs/superpowers/plans/2026-09-27-portada-esencial.md`. Tres cosas
+quedan a medias a propósito, para no mezclar la limpieza de datos con el
+cambio visual:
+
+- **`/api/departamento/[dpto]/resumen` sigue calculando la serie semanal**
+  (`semanas`), que ya no se pinta: es una consulta de más por departamento
+  elegido, cacheada 6 h. Quitarla toca `resumen-departamento.ts`, su ruta y sus
+  tests contra PGlite.
+- **`agregadosPortada()` sigue calculando `tipos` y `clasesEntidad`**, que la
+  portada ya no pinta (`app/page.js` solo lee `departamentos` y
+  `totalAbiertos`). Son dos `GROUP BY` de más en cada revalidación (6 h).
+  `procesosPorTipo()` lo siguen usando las facetas.
+- **El criterio 2 del spec (≤ 12 cifras en el primer pliegue) no se cumple:
+  quedan 17.** La leyenda del mapa conserva sus seis escalones con los rangos
+  («100–499», «1.500–2.999»…), que suman 9. La maqueta que fijó el criterio
+  pintaba solo los extremos; se prefirió que la escala se pudiera leer.
+
