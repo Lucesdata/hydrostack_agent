@@ -55,7 +55,12 @@ Entidades y flujos principales:
   `uploadPliego()` (`src/lib/secop/pliego-upload.ts`) desde la §4 de la ficha o
   desde /mis-coincidencias; persiste en `pliego_proceso` y además cachea los
   requisitos estructurados en `requisitos_proceso`, que alimenta la compuerta de
-  habilitación del semáforo.
+  habilitación del semáforo. **Cuota: 5 pliegos por cuenta en 24 h móviles**
+  (`src/lib/pliego/cuota.ts`, 2026-09-27): se reserva antes de llamar a Gemini,
+  así que cuenta todo intento que llegue al modelo, también los que fallan; lo
+  que se rechaza antes (no es PDF, pesa demasiado) no cuenta. Se guarda en
+  `senal_usuario` con la señal `uso:extractor_pliego`, sin migración; si algún
+  día se analizan las señales de intención, excluirla.
 - **Oferente / matching**: perfil de oferente (`src/lib/oferente/`) cruzado
   contra oportunidades (`src/lib/matching/`).
 - **Diagnóstico de preparación** (`src/lib/diagnostico/`): cuestionario público

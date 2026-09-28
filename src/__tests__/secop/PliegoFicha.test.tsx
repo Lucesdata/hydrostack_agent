@@ -39,6 +39,7 @@ describe("PliegoFicha (§4 de la ficha)", () => {
     expect(html).toContain('name="file"');
     expect(html).toContain('name="formulario1"');
     expect(html).toContain("Procesar pliego");
+    expect(html).toContain("hasta 5 pliegos cada 24");
     expect(html).not.toContain("<details");
   });
 

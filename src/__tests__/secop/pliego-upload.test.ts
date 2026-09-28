@@ -24,6 +24,12 @@ vi.mock("@/src/lib/pliego/extractPliegoHybrid", () => ({
   extractPliegoHybrid: (...args: unknown[]) => extractPliegoHybridMock(...args),
 }));
 
+const reservarMock = vi.fn().mockResolvedValue({ ok: true, restantes: 4 });
+vi.mock("@/src/lib/pliego/cuota", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/src/lib/pliego/cuota")>()),
+  reservarExtraccion: (...args: unknown[]) => reservarMock(...args),
+}));
+
 const extractStructuredMock = vi.fn();
 vi.mock("@/src/lib/eligibility/extract-requirements", () => ({
   extractStructuredRequirements: (...args: unknown[]) => extractStructuredMock(...args),
@@ -265,6 +271,46 @@ describe("uploadPliego", () => {
       expect(await subir()).toEqual({ ok: true, gateMatematicoPasado: true });
       expect(aviso).toHaveBeenCalledWith(expect.stringContaining("cuota agotada"));
       aviso.mockRestore();
+    });
+  });
+
+  describe("cuota de Gemini", () => {
+    const subir = (buffer = PDF_BUFFER) =>
+      uploadPliego({
+        procesoId: "CO1.REQ.1",
+        subidoPorUsuarioId: "u1",
+        nombreArchivo: "pliego.pdf",
+        buffer,
+      });
+
+    it("con la cuota agotada no llama al modelo ni guarda nada, y dice cuándo se libera", async () => {
+      reservarMock.mockResolvedValueOnce({
+        ok: false,
+        limite: 5,
+        disponibleDesde: new Date("2026-09-28T14:15:00Z"),
+      });
+      const r = await subir();
+      expect(r).toEqual({ ok: false, error: expect.stringContaining("límite de 5 pliegos") });
+      if (r.ok === false) expect(r.error).toContain("09:15");
+      expect(extractPliegoHybridMock).not.toHaveBeenCalled();
+      expect(insertValuesMock).not.toHaveBeenCalled();
+    });
+
+    it("reserva para quien sube, antes de llamar al modelo", async () => {
+      extractPliegoHybridMock.mockResolvedValueOnce({
+        extraction: extraccion(),
+        origen: ORIGEN_LLM,
+      });
+      await subir();
+      expect(reservarMock).toHaveBeenCalledWith("u1");
+      expect(reservarMock.mock.invocationCallOrder[0]).toBeLessThan(
+        extractPliegoHybridMock.mock.invocationCallOrder[0]
+      );
+    });
+
+    it("lo que se rechaza sin llegar al modelo no gasta cuota", async () => {
+      await subir(Buffer.from("no soy un pdf"));
+      expect(reservarMock).not.toHaveBeenCalled();
     });
   });
 });
