@@ -185,6 +185,13 @@ Entidades y flujos principales:
   `overall === "FAIL"` (quien no puede participar merece saber por qué) y las
   compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
   hacerla en el render dejaría los `reason` en la pestaña de red.
+- **La zona fuera de cobertura es `WARN`, no `FAIL`** (2026-09-28, D2 de
+  `docs/superpowers/specs/2026-09-28-ficha-bloque-decision.md`): la fuente
+  publica la sede de la entidad, no el lugar de ejecución. Consecuencias: un
+  proceso que solo fallaba por zona ya no es `overall === "FAIL"`, así que su
+  razón se redacta sin cuenta; y el matching (/mis-coincidencias, alertas, vista
+  previa del perfil) sigue excluyéndolo con `fueraDeCobertura()`, no por el
+  `overall`. No devolver la zona a `FAIL` para "arreglar" el filtro.
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
   lee todavía**, y hoy no hace falta: **ninguna capacidad es `pro`**. El
   análisis de pliego (`pliego_extraer`) pasó a `gratis` el 2026-09-27 por

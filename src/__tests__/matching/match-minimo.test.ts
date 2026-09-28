@@ -44,11 +44,12 @@ describe("matchProcesosMinimo", () => {
     expect(m.overall).toBe("PASS");
   });
 
-  it("fuera de cobertura → overall FAIL", () => {
+  it("fuera de cobertura → zona WARN (revisar), ya no FAIL", () => {
     const [m] = matchProcesosMinimo(perfil, [
       proceso({ departamento: "Cundinamarca", ciudad: "Bogotá" }),
     ]);
-    expect(m.overall).toBe("FAIL");
+    expect(m.gates.ubicacion.status).toBe("WARN");
+    expect(m.overall).toBe("WARN");
   });
 });
 

@@ -4,6 +4,7 @@ import {
   cuantiaGate,
   plazoGate,
   ubicacionGate,
+  fueraDeCobertura,
   habilitacionGate,
   aggregateVerdict,
   buildVerdict,
@@ -224,8 +225,24 @@ describe("ubicacionGate (L0 — DIVIPOLA depto)", () => {
     expect(ubicacionGate(profile, proc({ departamento: "Valle del Cauca" })).status).toBe("PASS");
   });
 
-  it("departamento fuera de la cobertura → FAIL", () => {
-    expect(ubicacionGate(profile, proc({ departamento: "Antioquia" })).status).toBe("FAIL");
+  it("departamento fuera de la cobertura → WARN, hablando de la entidad (D2, 2026-09-28)", () => {
+    const g = ubicacionGate(profile, proc({ departamento: "Antioquia", ciudad: "" }));
+    expect(g.status).toBe("WARN");
+    expect(g.reason).toBe(
+      "la entidad está en Antioquia, fuera de tu cobertura; el lugar de ejecución no está confirmado"
+    );
+    expect(fueraDeCobertura(g)).toBe(true);
+  });
+
+  it("dentro de la cobertura habla de la entidad, no del proceso", () => {
+    const g = ubicacionGate(profile, proc());
+    expect(g.reason).toBe("la entidad está en tu cobertura (Cali, Valle del Cauca)");
+    expect(fueraDeCobertura(g)).toBe(false);
+  });
+
+  it("ubicación no reconocida no cuenta como fuera de cobertura", () => {
+    const g = ubicacionGate(profile, proc({ departamento: "Tierra del Nunca" }));
+    expect(fueraDeCobertura(g)).toBe(false);
   });
 
   it("departamento no reconocido → UNKNOWN", () => {
@@ -241,11 +258,11 @@ describe("ubicacionGate (L0 — DIVIPOLA depto)", () => {
     ).toBe("PASS");
   });
 
-  it("#2 cobertura solo por municipio → FAIL si el municipio no coincide", () => {
+  it("#2 cobertura solo por municipio → WARN si el municipio no coincide", () => {
     const soloMuni = { ...profile, cobertura: { departamentos: [], municipios: ["76001"] } };
     expect(
       ubicacionGate(soloMuni, proc({ departamento: "Valle del Cauca", ciudad: "Palmira" })).status
-    ).toBe("FAIL");
+    ).toBe("WARN");
   });
 
   it("ubicacionGate acepta un PerfilMinimo", () => {
@@ -393,6 +410,12 @@ describe("buildVerdict (orquestador)", () => {
     expect(v.gates.habilitacion.status).toBe("UNKNOWN");
     // proc por defecto: sectorial PASS, cuantia PASS, plazo WARN (abierto), ubicacion PASS → overall WARN
     expect(v.overall).toBe("WARN");
+  });
+
+  it("la zona fuera de cobertura ya no hace FAIL el veredicto", () => {
+    const v = buildVerdict(profile, proc({ departamento: "Antioquia", ciudad: "" }), NOW);
+    expect(v.gates.ubicacion.status).toBe("WARN");
+    expect(v.overall).not.toBe("FAIL");
   });
 });
 

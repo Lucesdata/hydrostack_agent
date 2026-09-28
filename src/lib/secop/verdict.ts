@@ -384,11 +384,18 @@ export const plazoGate: PlazoGate = (proc, now) => {
 };
 
 /**
- * Ubicación (L0): la ubicación del proceso ∈ cobertura del perfil (DIVIPOLA).
- * Matchea por departamento O por municipio (la cobertura puede declararse a
- * cualquier granularidad). Resuelve nombre→código vía el crosswalk DANE estático
- * (parcial, best-effort); el depto desambigua el municipio. UNKNOWN si no resuelve
- * ni depto ni municipio.
+ * Ubicación (L0): la ubicación de la ENTIDAD contratante ∈ cobertura del perfil
+ * (DIVIPOLA). Matchea por departamento O por municipio (la cobertura puede
+ * declararse a cualquier granularidad). Resuelve nombre→código vía el crosswalk
+ * DANE estático (parcial, best-effort); el depto desambigua el municipio. UNKNOWN
+ * si no resuelve ni depto ni municipio.
+ *
+ * Fuera de cobertura es WARN, no FAIL (2026-09-28, spec
+ * `2026-09-28-ficha-bloque-decision.md` D2): el SECOP publica la sede de la
+ * entidad, no el lugar de ejecución, así que un "no cumple" afirmaría algo que no
+ * sabemos. Quien necesite seguir excluyendo esos procesos —el matching de
+ * /mis-coincidencias y de las alertas— lo hace con `fueraDeCobertura()`, no
+ * mirando el `overall`.
  */
 export const ubicacionGate: UbicacionGate = (p, proc) => {
   const deptKey = normalizeGeoText(proc.departamento);
@@ -404,7 +411,7 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
   if (deptHit || muniHit) {
     return {
       status: "PASS",
-      reason: `el proceso está en tu cobertura (${lugar})`,
+      reason: `la entidad está en tu cobertura (${lugar})`,
       resolvedBy: "metadata",
       requiredLevel: 0,
     };
@@ -418,12 +425,21 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
     };
   }
   return {
-    status: "FAIL",
-    reason: `el proceso está en ${lugar}, fuera de tu cobertura`,
+    status: "WARN",
+    reason: `la entidad está en ${lugar}, fuera de tu cobertura; el lugar de ejecución no está confirmado`,
     resolvedBy: "metadata",
     requiredLevel: 0,
   };
 };
+
+/**
+ * ¿La compuerta de ubicación dice "fuera de tu cobertura"? Hoy es su único WARN,
+ * pero se pregunta aquí y no con `status === "WARN"` suelto para que el matching
+ * no dependa de esa coincidencia si la compuerta gana otro WARN.
+ */
+export function fueraDeCobertura(g: GateResult): boolean {
+  return g.status === "WARN";
+}
 
 /** Etiqueta legible de cada indicador financiero, para mensajes de brecha. */
 const INDICADOR_LABEL: Record<string, string> = {
