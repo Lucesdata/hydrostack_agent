@@ -2,6 +2,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import ResumenDepartamento from "@/src/components/landing/hero-territorial/ResumenDepartamento";
 
+const destacado = {
+  id: "CO1.REQ.1",
+  objeto: "OPTIMIZACIÓN DE LA PTAR MUNICIPAL",
+  entidad: "MUNICIPIO DE CHINU",
+  tipoProyecto: "ptar",
+  departamento: "CÓRDOBA",
+  municipio: "CHINÚ",
+  valorEstimado: 4_280_000_000,
+  estadoApertura: "Abierto",
+  fechaRecepcion: null,
+  ficha: "/licitaciones/optimizacion-de-la-ptar--CO1.REQ.1",
+};
+
 describe("ResumenDepartamento", () => {
   it("antes de cargar dice que carga, sin filas ficticias", () => {
     const html = renderToStaticMarkup(
@@ -21,7 +34,43 @@ describe("ResumenDepartamento", () => {
     expect(html).not.toContain("aqSpark");
   });
 
-  it("sin departamento no pinta nada", () => {
-    expect(renderToStaticMarkup(<ResumenDepartamento departamento={null} />)).toBe("");
+  it("sin departamento habla del país; sin destacados dice «—»", () => {
+    const html = renderToStaticMarkup(<ResumenDepartamento departamento={null} />);
+    expect(html).toContain("Procesos abiertos de mayor presupuesto en Colombia");
+    expect(html).toContain('<p class="aqResumenNota">—</p>');
+    expect(html).not.toContain("Cargando…");
+  });
+
+  it("vista país sin procesos abiertos lo dice", () => {
+    const html = renderToStaticMarkup(
+      <ResumenDepartamento departamento={null} destacadosPais={[]} />
+    );
+    expect(html).toContain("Sin procesos abiertos");
+    expect(html).not.toContain("aqGancho");
+  });
+
+  it("cada destacado lleva el semáforo absoluto y ya no el importe (v2)", () => {
+    const html = renderToStaticMarkup(
+      <ResumenDepartamento departamento={null} destacadosPais={[destacado]} />
+    );
+    expect(html).toContain("Optimización de la PTAR municipal");
+    expect(html).toContain("Municipio de Chinu · Chinú");
+    // El importe lo enuncia la compuerta Cuantía, no una columna aparte.
+    expect(html).not.toContain("aqDestValor");
+    expect(html).toContain("Cuantía");
+    expect(html.match(/\$4\.280 M|\$\s?4\.280/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
+    expect(html.match(/sf-punto--dato/g)).toHaveLength(4);
+    // Habilitación vive en el pliego: sin dato, nunca un veredicto.
+    expect(html.match(/sf-punto--unknown/g)).toHaveLength(1);
+    expect(html).not.toMatch(/sf-punto--(pass|warn|fail)/);
+    expect(html).toContain("Córdoba");
+  });
+
+  it("con destacados invita a crear perfil", () => {
+    const html = renderToStaticMarkup(
+      <ResumenDepartamento departamento={null} destacadosPais={[destacado]} />
+    );
+    expect(html).toContain('class="aqGancho"');
+    expect(html).toContain('<a href="/registro">Crea tu perfil</a>');
   });
 });

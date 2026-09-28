@@ -35,12 +35,14 @@ describe("HeroTerritorial", () => {
     expect(html).toContain("5.155");
   });
 
-  it("un solo botón en el mensaje: ni diagnóstico, ni precios, ni alertas (2026-09-27)", () => {
+  it("un solo botón, el del resultado: ni diagnóstico, ni precios, ni alertas (v2, 2026-09-28)", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain("Ver fichas de procesos");
-    expect(html).toContain('href="/licitaciones');
+    expect(html).toContain("Descubre en qué procesos de agua puedes <span>participar.</span>");
+    // La píldora del mensaje salió: el buscador es la entrada general.
+    expect(html).not.toContain("Ver fichas de procesos");
+    expect(html.match(/class="_primaryCta_/g) ?? html.match(/primaryCta/g)).toHaveLength(1);
     // Salieron del hero; siguen en el pie y en su página.
     expect(html).not.toContain('href="/diagnostico"');
     expect(html).not.toContain('href="/precios"');
@@ -49,22 +51,99 @@ describe("HeroTerritorial", () => {
     expect(html.toLowerCase()).not.toContain("alerta");
   });
 
-  it("el resultado lleva a las fichas del departamento, con su número", () => {
+  it("se llega a la vista país, no al primer departamento", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain('href="/licitaciones/departamento/antioquia"');
-    expect(html).toContain("Ver las 5.155 fichas de Antioquia");
+    expect(html).toContain("<h2>Colombia</h2>");
+    expect(html).toContain("10.000");
+    expect(html).not.toContain("del total nacional");
+    expect(html).not.toContain('aria-pressed="true"');
+    // Sin elección no hay a dónde volver.
+    expect(html).not.toContain("aqFichaVolver");
+  });
+
+  it("en vista país el botón lleva a todas las fichas, con su número y la nota", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(html).toMatch(/href="\/licitaciones"[^>]*>Ver las 10\.000 fichas/);
+    expect(html).toContain("Elige un departamento en el mapa para ver sus procesos.");
+    expect(html).not.toContain('href="/licitaciones/departamento/antioquia"');
+  });
+
+  it("sin datos no hay botón ni nota", () => {
+    const html = renderToStaticMarkup(<HeroTerritorial departamentos={departamentos} />);
+    expect(html).not.toContain("fichas <span");
+    expect(html).not.toContain("Elige un departamento");
+  });
+
+  it("la vista país pinta los destacados nacionales que llegan del servidor", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial
+        departamentos={departamentos}
+        totalAbiertos={10000}
+        destacadosPais={[
+          {
+            id: "CO1.REQ.9",
+            objeto: "CONSTRUCCIÓN DE LA PTAR",
+            entidad: "MUNICIPIO DE CHINU",
+            municipio: "CHINÚ",
+            departamento: "CÓRDOBA",
+            valorEstimado: 4_280_000_000,
+            tipoProyecto: "ptar",
+            estadoApertura: "Abierto",
+            fechaRecepcion: null,
+            ficha: "/licitaciones/construccion-de-la-ptar--CO1.REQ.9",
+          },
+        ]}
+      />
+    );
+    expect(html).toContain("Procesos abiertos de mayor presupuesto en Colombia");
+    expect(html).toContain('href="/licitaciones/construccion-de-la-ptar--CO1.REQ.9"');
+    expect(html).toContain('class="sf sf--linea"');
+    // Los estilos del semáforo viajan con el hero: la portada no los inyectaba.
+    expect(html).toContain(".sf-punto--dato");
+  });
+
+  it("sin datos no pinta destacados aunque lleguen", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} destacadosPais={[]} />
+    );
+    expect(html).toContain('<p class="aqResumenNota">—</p>');
+  });
+
+  it("el resultado no trae extras del hero anterior", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
     // Fuera de la portada: tipos por departamento, comparar y el tooltip.
     expect(html).not.toContain("Tipos de proyecto ·");
     expect(html).not.toContain("Comparar");
   });
 
-  it("la nota de la sede va en la cabecera del mapa", () => {
+  it("la base territorial es el titular del mapa", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain("según ubicación de la entidad contratante");
+    expect(html).toContain("Dónde están las entidades que contratan");
+    expect(html).toContain("según la sede de la entidad contratante, no el lugar de la obra.");
+    expect(html).toContain('aria-label="Procesos abiertos por departamento"');
+  });
+
+  it("la fecha de actualización sale solo si llega", () => {
+    const con = renderToStaticMarkup(
+      <HeroTerritorial
+        departamentos={departamentos}
+        totalAbiertos={10000}
+        actualizado="26 sep 2026"
+      />
+    );
+    expect(con).toContain("SECOP II · actualizado el 26 sep 2026");
+    const sin = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(sin).not.toContain("actualizado el");
   });
 
   it("las opciones del mapa van plegadas y solo si hay detalle", () => {
@@ -128,6 +207,25 @@ describe("resultado del departamento", () => {
     );
     expect(uno).toContain("proceso abierto");
     expect(uno).not.toContain("procesos abiertos");
+  });
+
+  it("elegido, ofrece volver a Colombia; en vista previa, no", () => {
+    const volver = () => {};
+    const elegido = renderToStaticMarkup(
+      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} onVolver={volver} />
+    );
+    expect(elegido).toContain('aria-label="Volver a la vista de Colombia"');
+    expect(elegido).toContain("Colombia</button>");
+    const previa = renderToStaticMarkup(
+      <FichaDepartamento
+        departamento={departamentos[0]}
+        totalAbiertos={10000}
+        vistaPrevia
+        onVolver={volver}
+      />
+    );
+    expect(previa).not.toContain("Volver a la vista de Colombia");
+    expect(previa).toContain("Vista previa");
   });
 
   it("la vista previa se marca y no se anuncia", () => {

@@ -11,6 +11,7 @@ import ResumenDepartamento from "./ResumenDepartamento";
 import BuscadorFichas from "./BuscadorFichas";
 import { dptoDesdeObjetivo, indicesDeModo, useMarcasEnMapa, usePinturaEnMapa } from "./sincronia";
 import { ESCALONES_MONTO, escalonDe, escalonMontoDe } from "@/src/lib/mapa/escala";
+import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import styles from "./hero-territorial.module.css";
 
 /**
@@ -26,12 +27,25 @@ import styles from "./hero-territorial.module.css";
  * segundo botón, enlace a precios, línea de procesos del sector y un segundo
  * buscador. Lo que salió y sigue existiendo vive en su página (comparar,
  * facetas de tipo, /diagnostico, /precios), enlazada desde el pie.
+ *
+ * Hero v2 (2026-09-28): se llega a la vista país (Colombia), no al primer
+ * departamento; el único botón es el del resultado, y cada destacado lleva el
+ * semáforo en su lectura absoluta. La cabecera del mapa dice qué es la base
+ * territorial (la sede de la entidad) y cuándo se actualizó.
  */
-export default function HeroTerritorial({ mapa = null, departamentos = [], totalAbiertos = null }) {
+export default function HeroTerritorial({
+  mapa = null,
+  departamentos = [],
+  totalAbiertos = null,
+  destacadosPais = null,
+  actualizado = null,
+}) {
   const [elegido, setElegido] = useState(null);
   const datosDisponibles = totalAbiertos != null;
+  // Sin elección, la vista país: `FichaDepartamento` ya habla de Colombia
+  // cuando no recibe departamento.
   const seleccionado = useMemo(
-    () => departamentos.find((d) => d.clave === elegido) ?? departamentos[0] ?? null,
+    () => (elegido ? (departamentos.find((d) => d.clave === elegido) ?? null) : null),
     [departamentos, elegido]
   );
   // Lo que el puntero o el foco señalan en el mapa o en la lista. Mientras
@@ -79,20 +93,22 @@ export default function HeroTerritorial({ mapa = null, departamentos = [], total
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
+      {/* El semáforo de los destacados. Sus colores son de fondo claro: el tema
+          oscuro los sobreescribe dentro de .hero (hero-territorial.module.css). */}
+      <style dangerouslySetInnerHTML={{ __html: ESTILOS_SEMAFORO }} />
       <div className={styles.grid}>
         <div className={styles.colIzq}>
           <div className={styles.copy}>
             <h1 id="aq-hero-title">
-              Explora el mercado de agua y saneamiento de <span>Colombia.</span>
+              Descubre en qué procesos de agua puedes <span>participar.</span>
             </h1>
             <p className={styles.lead}>
-              Cada proceso del SECOP II tiene su ficha: qué se contrata, si puedes participar y qué
-              te falta.
+              Cada proceso de acueducto, alcantarillado y tratamiento del SECOP II tiene su ficha:
+              qué se contrata y qué te falta para presentarte.
             </p>
+            {/* La entrada general: con Enter lleva al explorador. El botón
+                principal es el del resultado, más abajo. */}
             <BuscadorFichas />
-            <Link className={styles.primaryCta} href={explorar.href}>
-              Ver fichas de procesos <span aria-hidden="true">→</span>
-            </Link>
           </div>
 
           <div className={styles.resultado}>
@@ -100,57 +116,89 @@ export default function HeroTerritorial({ mapa = null, departamentos = [], total
               departamento={vista}
               totalAbiertos={totalAbiertos}
               vistaPrevia={previa != null}
+              onVolver={elegido != null && resaltado == null ? () => setElegido(null) : undefined}
             />
             {/* Del departamento elegido, no del señalado: pedirlo al pasar el
                 puntero sería una petición por cada departamento cruzado. Mientras
                 se previsualiza otro, se atenúa. */}
             <ResumenDepartamento
               departamento={seleccionado}
+              destacadosPais={datosDisponibles ? destacadosPais : null}
               atenuado={previa != null && previa.clave !== seleccionado?.clave}
             />
-            {vista && vista.n > 0 ? (
-              <Link className={styles.fichaCta} href={`/licitaciones/departamento/${vista.slug}`}>
-                Ver {vista.n === 1 ? "la ficha" : `las ${formatConteo(vista.n)} fichas`} de{" "}
-                {vista.label} <span aria-hidden="true">→</span>
-              </Link>
+            {vista ? (
+              vista.n > 0 ? (
+                <Link
+                  className={styles.primaryCta}
+                  href={`/licitaciones/departamento/${vista.slug}`}
+                >
+                  Ver {vista.n === 1 ? "la ficha" : `las ${formatConteo(vista.n)} fichas`} de{" "}
+                  {vista.label} <span aria-hidden="true">→</span>
+                </Link>
+              ) : null
+            ) : totalAbiertos > 0 ? (
+              <>
+                <Link className={styles.primaryCta} href={explorar.href}>
+                  Ver{" "}
+                  {totalAbiertos === 1 ? "la ficha" : `las ${formatConteo(totalAbiertos)} fichas`}{" "}
+                  <span aria-hidden="true">→</span>
+                </Link>
+                {departamentos.length > 0 ? (
+                  <p className={styles.notaPais}>
+                    Elige un departamento en el mapa para ver sus procesos.
+                  </p>
+                ) : null}
+              </>
             ) : null}
           </div>
         </div>
 
         <div className={styles.mapPanel} aria-label="Procesos abiertos por departamento">
           <div className={styles.mapaCab}>
-            <p>
-              <strong>Procesos abiertos por departamento</strong>{" "}
-              <span>· según ubicación de la entidad contratante</span>
-            </p>
-            {hayDetalle && datosDisponibles ? (
-              <details className={styles.opciones}>
-                <summary>Opciones del mapa</summary>
-                <div className={styles.opcionesPanel}>
-                  <label>
-                    Colorear por
-                    <select
-                      value={modoEfectivo === "monto" ? "monto" : "procesos"}
-                      onChange={(e) => elegirMetrica(e.target.value)}
-                    >
-                      <option value="procesos">Procesos abiertos</option>
-                      <option value="monto">Monto en juego</option>
-                    </select>
-                  </label>
-                  <label>
-                    Tipo de proyecto
-                    <select value={tipoFiltro ?? ""} onChange={(e) => elegirTipo(e.target.value)}>
-                      <option value="">Todos</option>
-                      {TIPOS_PROYECTO.map((t) => (
-                        <option key={t} value={t}>
-                          {TIPO_PROYECTO[t].label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              </details>
-            ) : null}
+            <div className={styles.mapaTitulo}>
+              <p className={styles.mapaH}>Dónde están las entidades que contratan</p>
+              <p>
+                Procesos abiertos por departamento, según la sede de la entidad contratante, no el
+                lugar de la obra.
+              </p>
+            </div>
+            <div className={styles.mapaCabDer}>
+              {/* Sin fecha registrada la línea no sale: no se inventa. */}
+              {actualizado ? (
+                <p className={styles.actualizado}>
+                  <span aria-hidden="true" />
+                  SECOP II · actualizado el {actualizado}
+                </p>
+              ) : null}
+              {hayDetalle && datosDisponibles ? (
+                <details className={styles.opciones}>
+                  <summary>Opciones del mapa</summary>
+                  <div className={styles.opcionesPanel}>
+                    <label>
+                      Colorear por
+                      <select
+                        value={modoEfectivo === "monto" ? "monto" : "procesos"}
+                        onChange={(e) => elegirMetrica(e.target.value)}
+                      >
+                        <option value="procesos">Procesos abiertos</option>
+                        <option value="monto">Monto en juego</option>
+                      </select>
+                    </label>
+                    <label>
+                      Tipo de proyecto
+                      <select value={tipoFiltro ?? ""} onChange={(e) => elegirTipo(e.target.value)}>
+                        <option value="">Todos</option>
+                        {TIPOS_PROYECTO.map((t) => (
+                          <option key={t} value={t}>
+                            {TIPO_PROYECTO[t].label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                </details>
+              ) : null}
+            </div>
           </div>
           <div
             ref={mapaRef}

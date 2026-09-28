@@ -976,3 +976,26 @@ cambio visual:
   («100–499», «1.500–2.999»…), que suman 9. La maqueta que fijó el criterio
   pintaba solo los extremos; se prefirió que la escala se pudiera leer.
 
+
+### 51. Hero v2: lo que queda abierto (2026-09-28)
+Traspaso «Hero de la portada v2»: vista país al llegar, un solo botón (el del
+resultado), cabecera del mapa con la sede de la entidad y la fecha de ingesta, y
+semáforo absoluto en los destacados.
+
+- **No cabe en 1366×768.** Medido con Playwright sobre datos de relleno con
+  objetos y entidades largos: el resultado termina a 892 px (124 px bajo el
+  pliegue) y el botón principal queda debajo. En 1440×900 termina a 895 px y sí
+  cabe. Cada fila del semáforo ocupa 2–3 líneas en la columna de 380 px, así que
+  los tres destacados suman unos 135 px. Ya se aplicó el primer recorte del
+  traspaso (`.lead` a 15px y `.resultado` con `margin-top: 16px`); el siguiente
+  toca el mapa, o cuántos destacados se muestran, y es decisión de producto.
+- **Con perfil, el semáforo sigue siendo absoluto y el gancho «Crea tu perfil»
+  se sigue viendo.** Debería pasar a relativo y ocultarse el gancho, como hace
+  `SemaforoConPerfil` en la ficha. Quedó fuera de este cambio por alcance.
+- **Sin base, el cliente de Neon puede dejar consultas colgadas en frío.** Al
+  prerenderizar `/` en el build, `resumenNacional()` y `ultimaActualizacion()`
+  no se resolvían nunca en el primer render de cada intento (las demás fallaban
+  en milisegundos). `app/page.js` ya no las espera si fallan los agregados. La
+  misma línea base tenía un reintento en `/` y el build tiene reintentos en
+  `/licitaciones/comparar` y `/licitaciones/entidades`: probablemente es la
+  misma causa, sin investigar.

@@ -4,6 +4,8 @@ import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { agregadosPortada } from "@/src/lib/secop/agregados";
+import { formatFechaCorta, ultimaActualizacion } from "@/src/lib/secop/actualizacion";
+import { resumenNacional } from "@/src/lib/secop/resumen-departamento";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -29,12 +31,34 @@ export default async function Page() {
   // prerenderiza esta ruta, y las rutas facetadas ya evitaron a propósito atar
   // el despliegue a que la base conteste. Se degrada a "—", sin inventar
   // cifras.
+  //
+  // Los destacados del país y la fecha de la última ingesta se lanzan a la
+  // vez, pero solo se esperan si los agregados llegaron: sin base, el cliente
+  // puede dejar consultas colgadas en frío durante el build (visto el
+  // 2026-09-28: `/` agotaba los 60 s de prerender tres veces). Sin agregados
+  // el hero no pinta destacados, así que no hay nada que esperar. Si falla
+  // solo uno de los dos, el resultado dice "—" o la línea «actualizado el …»
+  // se oculta.
   let departamentos = [];
   let totalAbiertos;
+  let destacadosPais = null;
+  let actualizado = null;
+  const nacional = resumenNacional().then(
+    (r) => r.destacados,
+    (error) => {
+      console.error("[portada] destacados nacionales no disponibles:", error);
+      return null;
+    }
+  );
+  const fecha = ultimaActualizacion().then(formatFechaCorta, (error) => {
+    console.error("[portada] fecha de actualización no disponible:", error);
+    return null;
+  });
   try {
     const agregados = await agregadosPortada();
     departamentos = agregados.departamentos;
     totalAbiertos = agregados.totalAbiertos;
+    [destacadosPais, actualizado] = await Promise.all([nacional, fecha]);
   } catch (error) {
     console.error("[portada] agregados no disponibles, el mapa sale vacío:", error);
   }
@@ -49,6 +73,8 @@ export default async function Page() {
       <PortadaCliente
         departamentos={departamentos}
         totalAbiertos={totalAbiertos}
+        destacadosPais={destacadosPais}
+        actualizado={actualizado}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />

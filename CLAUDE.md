@@ -219,7 +219,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-28 (Ficha Viva condensada; esquema y árbol en «Cómo participar»).
+Última actualización: 2026-09-28 (hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -263,6 +263,19 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   `BandaMercado` y `hace-cuanto.ts`. `/api/landing-stats`, que quedó sirviendo
   solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
   esa línea y con `src/lib/landing/cifras.ts`.
+
+**Hero v2 (2026-09-28).** Se llega a la **vista país** (Colombia), no al
+primer departamento; «← Colombia» vuelve a ella. Un solo botón, el del
+resultado («Ver las N fichas», o las del departamento). La cabecera del mapa dice
+que la base es la **sede de la entidad**, no el lugar de la obra, y la fecha de
+la última ingesta (`src/lib/secop/actualizacion.ts`, `sync_log`; sin fecha la
+línea se oculta). Los destacados del país (`resumenNacional()`) se calculan en
+`app/page.js` y solo se esperan si los agregados llegaron: sin base, el cliente
+dejaba consultas colgadas y el build agotaba el prerender. Cada destacado lleva
+el semáforo **absoluto** (`compuertasAbsolutas()`, estado `DATO`) y ya no el
+importe, que enuncia la compuerta Cuantía; el hero sobreescribe sus colores para
+el oscuro (medidos en `contraste-oscuro.test.ts`). No cabe en 1366×768:
+PENDIENTES §51.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección

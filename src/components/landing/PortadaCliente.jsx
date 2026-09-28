@@ -32,13 +32,21 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   mapa?: import("react").ReactNode,
  *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
  *   totalAbiertos?: number | null,
+ *   destacadosPais?: import("@/src/lib/secop/recientes").ProcesoResumen[] | null,
+ *   actualizado?: string | null,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador.
  *
  * Ya no pide `/api/landing-stats` (2026-09-27): la línea «N procesos del
  * sector» bajo el botón del hero salió con el resto de la carga.
  */
-export default function LandingPage({ mapa = null, departamentos = [], totalAbiertos = null }) {
+export default function LandingPage({
+  mapa = null,
+  departamentos = [],
+  totalAbiertos = null,
+  destacadosPais = null,
+  actualizado = null,
+}) {
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -53,7 +61,13 @@ export default function LandingPage({ mapa = null, departamentos = [], totalAbie
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial mapa={mapa} departamentos={departamentos} totalAbiertos={totalAbiertos} />
+        <HeroTerritorial
+          mapa={mapa}
+          departamentos={departamentos}
+          totalAbiertos={totalAbiertos}
+          destacadosPais={destacadosPais}
+          actualizado={actualizado}
+        />
 
         {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo
             después del hero porque el hero existe para llevar a una ficha. */}
