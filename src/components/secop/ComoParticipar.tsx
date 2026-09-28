@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import TrackedCtaLink from "./TrackedCtaLink";
+import ComoRazonaFicha from "@/src/components/landing/ficha-viva/ComoRazonaFicha";
 import LicitacionesTabs from "./LicitacionesTabs";
 
 export default function ComoParticipar() {
@@ -83,6 +84,18 @@ export default function ComoParticipar() {
           </p>
         </section>
 
+        {/* Vivía en la Ficha Viva de la portada hasta el 2026-09-28 (plan
+            portada-esencial): la portada enlaza aquí, a #como-razona. */}
+        <section className="clr-cp-section clr-cp-razona" id="como-razona">
+          <h2 className="clr-cp-h2">Cómo te acompaña la ficha</h2>
+          <p>
+            Cada proceso de AquaLicita tiene una ficha que lee el proceso del SECOP II y te dice qué
+            se sabe y qué todavía no para los pasos 1 a 3: si puedes participar, qué exige el pliego
+            y de dónde sale cada dato. Así razona, con un ejemplo ilustrativo.
+          </p>
+          <ComoRazonaFicha />
+        </section>
+
         <section className="clr-cp-section">
           <h2 className="clr-cp-h2">4. Prepara y presenta tu oferta</h2>
           <p>
@@ -127,12 +140,16 @@ const CSS = `
 .clr-cp-container{ max-width: 720px; }
 .clr-cp-header{ margin-bottom: 24px; }
 .clr-cp-section{ margin-bottom: 22px; }
-.clr-cp-section p{
+/* Solo los párrafos de la guía: «Cómo razona la ficha» trae los suyos, con
+   estilos propios que este selector pisaría. */
+.clr-cp-section > p{
   font-size: 14px; color: var(--ink-700, var(--ink-900));
   line-height: 1.7; margin: 0 0 10px;
 }
-.clr-cp-section p:last-child{ margin-bottom: 0; }
+.clr-cp-section > p:last-child{ margin-bottom: 0; }
 .clr-cp-section a{ color: var(--accent); text-decoration: underline; }
+.clr-cp-razona{ scroll-margin-top: calc(var(--nav-h, 56px) + 16px); }
+.clr-cp-razona > p{ margin-bottom: 18px; }
 .clr-cp-h2{
   font-size: 16px; font-weight: 600; color: var(--ink-900);
   margin: 0 0 10px;

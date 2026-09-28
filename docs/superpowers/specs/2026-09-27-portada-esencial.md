@@ -56,7 +56,7 @@ sola pregunta, **dónde hay procesos abiertos y cómo llegar a sus fichas**.
 | «Comparar con otros departamentos» | Pie: «Comparar departamentos» |
 | Publicados en 7 días | `/licitaciones/comparar` (fila «Abiertos publicados en los últimos 7 días») |
 | Serie semanal de publicados | **Ninguna otra página**: sale por decisión del usuario (2026-09-28) |
-| Esquema, árbol, leyenda y «Seguir sus cambios» de la Ficha Viva | Sin destino fijado (decisión 2) |
+| Esquema, árbol, leyenda y «Seguir sus cambios» de la Ficha Viva | `/licitaciones/como-participar#como-razona` (decisión 2) |
 
 ## Qué no cambia
 
@@ -93,7 +93,7 @@ la ventana; «cifras», grupos de dígitos en texto visible.
 1. ~~Publicados en 7 días y la serie semanal.~~ **Decidido el 2026-09-28:
    salen los dos.** Los 7 días siguen en `/licitaciones/comparar`; la serie
    semanal no queda en ninguna página.
-2. **La Ficha Viva condensada.** El esquema y el árbol de decisiones son
-   explicativos y pesan en la primera visita. Candidata a acogerlos:
-   `/licitaciones/como-participar` (no revisada). El plan deja esto en un PR 3
-   aparte que no empieza sin respuesta.
+2. ~~La Ficha Viva condensada.~~ **Decidido el 2026-09-28:** el esquema, el
+   árbol, el aviso de «Seguir sus cambios» y la leyenda de color se mudan a
+   `/licitaciones/como-participar`, en una sección con ancla `#como-razona`
+   que la portada enlaza.

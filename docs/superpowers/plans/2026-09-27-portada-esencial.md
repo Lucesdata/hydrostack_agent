@@ -169,6 +169,21 @@ Criterios del spec que cierra: 2 a 8.
 4. Si el esquema y el árbol se mudan a otra página, es trabajo aparte con su
    propio spec.
 
+**Hecho el 2026-09-28, con la mudanza dentro del mismo PR** (decisión del
+usuario: van a `/licitaciones/como-participar`).
+- El esquema, el árbol, «Seguir sus cambios» y la leyenda salen a
+  `ficha-viva/ComoRazonaFicha.jsx`, que reutiliza el módulo CSS de la Ficha
+  Viva. «Cómo participar» la monta tras el paso 3, en «Cómo te acompaña la
+  ficha» (`#como-razona`). La leyenda usa ahí el color `claro` de cada familia:
+  la página es clara.
+- La portada queda en titular, las cuatro preguntas en fila (cuatro columnas,
+  dos bajo 1100 px, una bajo 600) y un botón, más el enlace «Cómo razona la
+  ficha». Salen el lead y el botón al diagnóstico, que sigue en el pie.
+- `.clr-cp-section p` pasó a `.clr-cp-section > p`: con más especificidad que
+  las clases del módulo, pisaba el tamaño y el color de los párrafos del
+  esquema y del árbol.
+- Los casos de test del esquema pasaron a `ComoRazonaFicha.test.tsx`.
+
 ## Riesgos
 
 - **Rutas de API retiradas.** Sin consumidores en el repo, pero pueden tener

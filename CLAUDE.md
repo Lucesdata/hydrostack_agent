@@ -214,7 +214,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-28 (portada en dos zonas: mensaje y resultado · mapa).
+Última actualización: 2026-09-28 (Ficha Viva condensada; esquema y árbol en «Cómo participar»).
 
 ## graphify
 
@@ -261,8 +261,13 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
-`src/components/landing/ficha-viva/`: las cuatro preguntas con su estado real,
-un esquema ilustrativo sin cifras y el árbol de decisiones. **Color = tipo de obra**
+`src/components/landing/ficha-viva/`: desde el 2026-09-28 (PR 3 del plan
+portada-esencial) solo el titular, las cuatro preguntas con su estado real en
+fila y un botón, más el enlace «Cómo razona la ficha». El esquema ilustrativo sin
+cifras, el árbol de decisiones, el aviso de «Seguir sus cambios» y la leyenda de
+color se mudaron a `/licitaciones/como-participar#como-razona`
+(`ficha-viva/ComoRazonaFicha.jsx`, mismo módulo CSS; en esa página clara la
+leyenda usa el color `claro` de cada familia). **Color = tipo de obra**
 (`src/lib/classify/tipo-color.ts`: azul potable, marrón residual, gris redes,
 punteado `otros`), siempre con su nombre y nunca como estado. No prometer
 alertas por correo ni seguimiento de cambios mientras no existan: la sección
