@@ -155,9 +155,7 @@ Los términos del código, sin sinónimos nuevos ni traducciones.
 - **Oferente** — la empresa que se presenta. **Entidad** — quien convoca.
 - **Subsanable** — requisito corregible tras presentar la oferta.
 
-**Estructura de la portada** tal como la define el rediseño en curso: ticker,
-hero con mapa, banda de métricas, "Navega por los datos", vitrina, más el nav y
-el pie derivados de `seccionesHome.js`.
+**Estructura de la portada (2026-09-28):** hero territorial y sección Ficha Viva, más navegación y pie. La composición vigente se define en `PortadaCliente.jsx` y `seccionesHome.js`; antes de cambiarla, consultar `CLAUDE.md` y el código actual.
 
 ## 8. Comunicación
 
