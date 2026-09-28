@@ -1,151 +1,53 @@
-# 🌊 AquaLicita — Inteligencia para contratación pública en agua y saneamiento
+# AquaLicita
 
-**Plataforma que cruza el perfil de un oferente con los procesos activos de SECOP II en agua y saneamiento — elegibilidad, pliegos y alertas en un solo lugar.**
+Inteligencia de contratación pública de agua y saneamiento en Colombia, basada en SECOP II. El recorrido principal va de la búsqueda territorial a la ficha de un proceso y su veredicto de elegibilidad. El análisis del pliego y las alertas dependen de los datos y servicios disponibles.
 
-**Live:** https://aqualicita.vercel.app
-**Status:** ✅ En producción
+## Desarrollo local
 
----
-
-## ✨ Qué hace
-
-### 🔍 **Exploración de procesos SECOP**
-- Procesos activos y contratos en agua y saneamiento, actualizados diariamente desde SECOP II (Socrata).
-- Filtro por defecto al sector agua; búsqueda por entidad, departamento, estado, valor y fecha.
-
-### 📄 **Extracción de pliegos**
-- Extractor híbrido (reglas + fallback con Gemini) que decodifica requisitos legales y técnicos de un pliego en minutos.
-- Contrato de salida validado por schema — no confía directamente en el JSON generado por el LLM.
-
-### 👤 **Perfil de oferente y elegibilidad**
-- Mini-wizard de perfil de oferente (RUP, capacidad financiera) sin necesidad de cuenta.
-- Cruce contra los requisitos habilitantes de cada proceso.
-
-### 🔔 **Alertas**
-- Envío diario de coincidencias por correo (Resend), idempotente por diseño (`envio_log`).
-
----
-
-## 🚀 Getting Started
-
-### Requisitos
-- Node.js 18+
-- npm
-
-### Instalación
+Requisitos: Node.js 20 o 22, npm y acceso a las variables necesarias para la funcionalidad que se vaya a probar.
 
 ```bash
-git clone <repo-url>
-cd aqualicita
 npm install
 cp .env.example .env.local
-# completa DATABASE_URL, AUTH_SECRET, AUTH_RESEND_KEY, GEMINI_API_KEY (ver .env.example)
-```
-
-### Desarrollo
-
-```bash
 npm run dev
-# → http://localhost:3000
 ```
 
-### Build de producción
+La aplicación se abre en http://localhost:3000. Configura `DATABASE_URL` para las consultas a Postgres y `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` para Supabase Auth. `GEMINI_API_KEY` es necesaria para el extractor de pliegos. El correo requiere además las variables de Resend descritas en `.env.example`. Nunca copies claves reales al repositorio.
+
+## Arquitectura actual
+
+| Capa | Implementación |
+| --- | --- |
+| Aplicación | Next.js 14, React 18, TypeScript |
+| Datos | PostgreSQL en Supabase, Drizzle ORM; el cliente usa `@neondatabase/serverless` como driver sobre `DATABASE_URL`, o `pg` con `DB_DRIVER=node` |
+| Autenticación | Supabase Auth (`@supabase/ssr`) |
+| Extracción de pliegos | Reglas y Gemini |
+| Correo | Resend; puesta en marcha documentada en `docs/runbook-correo-y-alertas.md` |
+| Pruebas y despliegue | Vitest, Vercel |
+
+El pipeline de SECOP alimenta la clasificación, la ficha, las compuertas de elegibilidad y las vistas territoriales. El mapa de la portada se renderiza en el servidor. Para las decisiones de producto y seguridad vigentes consulta `CLAUDE.md`; `docs/CONDUCTA.md` establece el flujo de cambios.
+
+## Comandos
 
 ```bash
+npm test
+npm run lint
 npm run build
-npm run start
+npm run db:ingest
+npm run db:transform
+npm run db:seed-geografia
+npm run analyze-pliego-hybrid
 ```
 
----
+`npm run db:migrate` modifica el esquema de la base indicada en `DATABASE_URL`: verifica el destino antes de ejecutarlo.
 
-## 📁 Estructura del proyecto
+## Seguridad y operación
 
-```
-├── CLAUDE.md                    # Reglas de comportamiento del agente
-├── PENDIENTES.md                # Pendientes activos
-│
-├── docs/
-│   ├── adr/                     # Decisiones arquitectónicas
-│   ├── fase-0/, fase-1/, fase-a/ # Historial de diseño por fase
-│   └── secop/                   # Casos de referencia (gate de calidad del extractor)
-│
-├── app/                          # Next.js App Router
-│   ├── licitaciones/            # Exploración de procesos SECOP
-│   ├── pliego/                  # Extractor de pliegos
-│   ├── cuenta/                  # Cuenta de usuario (Auth.js)
-│   ├── mis-coincidencias/       # Alertas / matching
-│   └── api/
-│       ├── secop/               # Procesos, contratos, veredicto de elegibilidad
-│       ├── pliego/extract/      # Extracción de pliegos (Gemini)
-│       ├── cron/                # Ingesta diaria + alertas (Vercel Cron)
-│       ├── alertas/              # Preferencias, unsubscribe
-│       ├── perfil/               # Perfil de oferente
-│       └── auth/                # Auth.js
-│
-├── src/
-│   ├── components/secop/        # SecopExplorer, OferenteWizard
-│   ├── lib/
-│   │   ├── ingest/, transform/  # Pipeline ELT (SECOP/Socrata → Postgres)
-│   │   ├── classify/            # Clasificación sectorial
-│   │   ├── pliego/              # Extractor híbrido + validación
-│   │   ├── oferente/, matching/ # Perfil de oferente + elegibilidad
-│   │   ├── alertas/, email/     # Envío diario de alertas
-│   │   ├── auth/, db/           # Auth.js, Drizzle + schema
-│   │   └── secop/               # Cliente de datos SECOP
-│   └── __tests__/               # Tests (Vitest)
-│
-├── scripts/                     # Ingesta/transform/análisis de pliegos vía CLI
-└── drizzle/                     # Migraciones
-```
+Las tablas públicas de la aplicación tienen RLS activado. Las consultas de datos de la aplicación usan Drizzle y conexión directa a Postgres; el aislamiento entre cuentas en esas consultas exige filtrar por usuario. Las rutas cron requieren `CRON_SECRET` y fallan con 401 si no está configurado. La programación actual y las tareas pendientes de correo están en `vercel.json`, `PENDIENTES.md` y `docs/runbook-correo-y-alertas.md`.
 
----
+## Documentación
 
-## 💻 Desarrollo
-
-| Capa | Tecnología |
-|-------|-----------|
-| **Framework** | Next.js 14 (App Router) |
-| **UI** | React 18 |
-| **Lenguaje** | TypeScript |
-| **Base de datos** | Postgres (Neon) vía Drizzle ORM |
-| **Auth** | Auth.js (NextAuth v5), magic link vía Resend |
-| **LLM** | Gemini (extractor de pliegos) |
-| **Testing** | Vitest |
-| **Deployment** | Vercel |
-
-### Tests
-
-```bash
-npm run test           # Correr todos los tests
-npm run test:watch     # Modo watch
-```
-
-### Scripts de datos
-
-```bash
-npm run db:ingest              # Ingesta manual (SECOP/Socrata → raw_record)
-npm run db:transform           # Transform (raw_record → entidades canónicas)
-npm run db:seed-geografia      # Seed de catálogo de geografía
-npm run analyze-pliego-hybrid  # Prueba el extractor híbrido contra un PDF local
-```
-
----
-
-## 🔒 Seguridad
-
-- `/api/cron/*` exige `CRON_SECRET` como `Bearer` y falla cerrado (401) si la variable no está definida.
-- No hay RLS en Postgres — la defensa multi-tenant depende del `WHERE usuarioId=...` de cada query de aplicación. Auditar manualmente cada query sobre tablas de cuentas/oferente antes de tocarlas.
-
----
-
-## 📚 Documentación
-
-- **[CLAUDE.md](./CLAUDE.md)** — reglas de comportamiento del agente sobre este repo
-- **[docs/adr/](./docs/adr/)** — decisiones arquitectónicas
-- **[PENDIENTES.md](./PENDIENTES.md)** — pendientes activos
-
----
-
-## 📄 Licencia
-
-Privado — todos los derechos reservados.
+- `CLAUDE.md`: decisiones vigentes del dominio, arquitectura y seguridad.
+- `PENDIENTES.md`: problemas abiertos y referencias históricas.
+- `docs/CONDUCTA.md`: reglas de contribución y revisión.
+- `docs/adr/` y `docs/superpowers/`: decisiones y especificaciones; comprueba fecha y estado antes de implementarlas.
