@@ -46,17 +46,26 @@ export const ESTILOS_FICHA = `
 .fi-tabla td{ font: 13.5px var(--font-sans); color: var(--text-primary); padding: 9px 10px 9px 0; border-top: 1px solid var(--border); }
 .fi-tabla td.num{ font-family: var(--font-mono); text-align: right; width: 84px; }
 
-/* Nivel 2: se ven las filas y qué miden, no los valores. El desenfoque va sobre
-   una barra gris y NO sobre un número falso — no hay cifra debajo que leer. */
-.fi-n2{ position: relative; }
-.fi-n2-fila{ display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--border); }
-.fi-n2-fila:first-child{ border-top: none; }
-.fi-n2-label{ font: 13.5px var(--font-sans); color: var(--text-primary); }
-.fi-n2-oculto{ height: 12px; width: 108px; border-radius: 3px; background: var(--border); filter: blur(3px); flex-shrink: 0; }
+/* Nota al pie de una tabla o un panel. */
 .fi-n2-nota{ font: 12.5px/1.6 var(--font-sans); color: var(--text-muted); margin: 14px 0 0; }
 
 /* §4 — el pliego procesado y su subida. Estados con --success y --warning, los
    tokens -700 que ya aguantan AA como texto (CLAUDE.md §3). */
+/* Sin pliego: lo que se desbloquea al subirlo (paso 3 del plan del bloque de decisión). */
+.fi-desbloquea{ border: 1px dashed var(--border); border-radius: 10px; padding: 16px 20px; font: 13.5px/1.6 var(--font-sans); color: var(--text-muted); }
+.fi-desbloquea strong{ color: var(--text-primary); font-weight: 600; }
+.fi-desbloquea-titulo{ margin: 0 0 6px; }
+.fi-desbloquea-lista{ margin: 0 0 10px; padding-left: 20px; }
+.fi-desbloquea-lista li{ margin: 4px 0; }
+.fi-desbloquea-nota{ margin: 0; }
+.fi-tabla th.num, .fi-tabla td.num{ text-align: right; }
+.fi-tabla .fi-tabla-total{ width: 160px; }
+
+/* Detalle del proceso, plegado. El resumen lleva el estilo del h2. */
+.fi-detalle > summary{ cursor: pointer; list-style: revert; }
+.fi-detalle[open] > summary{ margin-bottom: 6px; }
+.fi-detalle .fi-pl-dl > div:first-child{ border-top: 0; }
+
 .fi-pl-meta{ font: 12.5px/1.6 var(--font-sans); color: var(--text-muted); margin: 0 0 4px; }
 .fi-pl-ok{ color: var(--success); }
 .fi-pl-aviso{ color: var(--warning); }

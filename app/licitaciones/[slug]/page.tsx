@@ -104,7 +104,6 @@ export default async function FichaPage({ params }: Props) {
   ]);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const valor = montoConDato(p.valorEstimado);
-  const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
 
   const schema = {
     "@context": "https://schema.org",
@@ -198,15 +197,29 @@ export default async function FichaPage({ params }: Props) {
           }
         />
 
-        {/* 4 — Qué exige el pliego. El `id` es el ancla a la que vuelve la subida. */}
+        {/* 3 — Qué exige el pliego. El `id` es el ancla a la que vuelve la subida. */}
         <section className="fi-sec" id="pliego">
-          <h2 className="fi-h2">Qué exige el pliego</h2>
+          <h2 className="fi-h2">Qué te exige el pliego</h2>
           <PliegoFicha pliego={pliego} slug={canonico} urlSecop={p.url} />
         </section>
 
-        {/* 5 — Cronograma */}
+        {/* 4 — Quién suele competir aquí */}
         <section className="fi-sec">
-          <h2 className="fi-h2">Cronograma</h2>
+          <h2 className="fi-h2">Quién suele competir aquí</h2>
+          {competidores.length > 0 ? (
+            <RivalesFicha rivales={competidores} procesoId={p.secopProcesoId} slug={canonico} />
+          ) : (
+            <p className="fi-vacio">
+              No hay histórico de oferentes para procesos comparables a este. Hace falta que el
+              proceso tenga tipo y departamento resueltos, y que existan procesos cerrados del mismo
+              perfil.
+            </p>
+          )}
+        </section>
+
+        {/* 5 — Fechas */}
+        <section className="fi-sec">
+          <h2 className="fi-h2">Fechas</h2>
           {pliego && pliego.cronograma.length > 0 ? (
             <div className="fi-panel">
               <table className="fi-tabla">
@@ -226,7 +239,7 @@ export default async function FichaPage({ params }: Props) {
                 </tbody>
               </table>
               <p className="fi-n2-nota">
-                Del cronograma del pliego procesado en la sección anterior.
+                Del cronograma del pliego procesado, en «Qué te exige el pliego».
               </p>
             </div>
           ) : (
@@ -248,104 +261,41 @@ export default async function FichaPage({ params }: Props) {
           )}
         </section>
 
-        {/* 6 — Documentos */}
+        {/* 6 — Detalle del proceso, plegado: lo que el experto consulta y el
+            novato no necesita para decidir. */}
         <section className="fi-sec">
-          <h2 className="fi-h2">Documentos</h2>
-          <p className="fi-vacio">
-            Acceso a documentos:{" "}
-            <strong>
-              {p.documentAccess === "UNKNOWN" || !p.documentAccess
-                ? "no verificado"
-                : p.documentAccess}
-            </strong>
-            .{" "}
-            {p.url ? (
-              <>
-                Comprueba en el expediente del SECOP II qué documentos están disponibles; todavía no
-                se replican aquí.
-              </>
-            ) : (
-              <>Este proceso no publicó una URL de expediente.</>
-            )}
-          </p>
-        </section>
-
-        {/* 7 — Quién suele competir aquí */}
-        <section className="fi-sec">
-          <h2 className="fi-h2">Quién suele competir aquí</h2>
-          {competidores.length > 0 ? (
-            <RivalesFicha rivales={competidores} procesoId={p.secopProcesoId} slug={canonico} />
-          ) : (
-            <p className="fi-vacio">
-              No hay histórico de oferentes para procesos comparables a este. Hace falta que el
-              proceso tenga tipo y departamento resueltos, y que existan procesos cerrados del mismo
-              perfil.
-            </p>
-          )}
-        </section>
-
-        {/* 8 — Nivel 2. Con pliego procesado, el presupuesto por capítulo ya existe
-            y se pinta; las otras dos filas siguen sin calcularse en ningún caso. */}
-        <section className="fi-sec">
-          <h2 className="fi-h2">Análisis de oferta</h2>
-          <div className="fi-panel fi-n2">
-            {capitulos.length > 0 ? (
-              <>
-                <table className="fi-tabla">
-                  <thead>
-                    <tr>
-                      <th>Presupuesto por capítulo</th>
-                      <th className="num" style={{ textAlign: "right" }}>
-                        Ítems
-                      </th>
-                      <th className="num" style={{ textAlign: "right", width: 160 }}>
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {capitulos.map((c, i) => (
-                      <tr key={i}>
-                        <td>{c.nombre}</td>
-                        <td className="num">{c.items}</td>
-                        <td className="num" style={{ width: 160 }}>
-                          {formatCopFull(c.total)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p className="fi-n2-nota">
-                  Del pliego procesado (
-                  {pliego?.origen.capitulos === "reglas"
-                    ? "leído del Formulario 1 con reglas deterministas"
-                    : "leído por el modelo; compruébalo en el pliego"}
-                  ).
-                </p>
-              </>
-            ) : null}
-            {[
-              ...(capitulos.length > 0 ? [] : ["Presupuesto desagregado por capítulo"]),
-              "Rango probable de la oferta ganadora",
-              "Probabilidad de adjudicación",
-            ].map((l) => (
-              <div key={l} className="fi-n2-fila">
-                <span className="fi-n2-label">{l}</span>
-                {/* Barra gris difuminada, NO una cifra falsa debajo: se ve que
-                      la fila existe y qué mide, y no hay nada que descifrar. */}
-                <span className="fi-n2-oculto" aria-hidden="true" />
-                <span className="sr-only">Todavía no calculado para este proceso</span>
+          <details className="fi-detalle">
+            <summary className="fi-h2">Detalle del proceso</summary>
+            <dl className="fi-pl-dl">
+              {p.tipoContrato && (
+                <div>
+                  <dt>Tipo de contrato</dt>
+                  <dd>{p.tipoContrato}</dd>
+                </div>
+              )}
+              {p.unspsc && (
+                <div>
+                  <dt>Código UNSPSC</dt>
+                  <dd>{p.unspsc.replace(/^V\d+\./i, "")}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Acceso a documentos</dt>
+                <dd>
+                  {p.documentAccess === "UNKNOWN" || !p.documentAccess
+                    ? "No verificado"
+                    : p.documentAccess}
+                  .{" "}
+                  {p.url
+                    ? "Comprueba en el expediente del SECOP II qué documentos están disponibles; todavía no se replican aquí."
+                    : "Este proceso no publicó una URL de expediente."}
+                </dd>
               </div>
-            ))}
-            <p className="fi-n2-nota">
-              {capitulos.length > 0
-                ? "El rango de la oferta ganadora y la probabilidad de adjudicación todavía no se calculan para ningún proceso — no es un muro de pago sobre algo ya calculado."
-                : "Estas tres salen del pliego procesado, no de los datos abiertos. Se muestran sin valores porque para este proceso todavía no existen — no es un muro de pago sobre algo ya calculado."}
-            </p>
-          </div>
+            </dl>
+          </details>
         </section>
 
-        {/* 9 — Cierre */}
+        {/* 7 — Cierre */}
         <section className="fi-sec">
           <CierreFicha urlSecop={p.url} estadoApertura={p.estadoApertura} />
         </section>

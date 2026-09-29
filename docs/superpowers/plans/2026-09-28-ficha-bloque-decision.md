@@ -162,6 +162,12 @@ criterio 5 (HTML sin JS completo y sin perfil) y con el build de producción.
 
 Riesgo: bajo. Solo reordena y agrupa.
 
+**Hecho el 2026-09-28.** «Análisis de oferta» sale entera: su tabla de
+capítulos pasa a `PliegoFicha` y sus dos filas grises (rango de la oferta
+ganadora, probabilidad de adjudicación) se quitan en vez de mudarse al aviso,
+porque el pliego no las desbloquea: no se calculan para ningún proceso. El aviso
+lista solo lo que el extractor saca; `PliegoFicha.test.tsx` lo fija.
+
 ## Validación de cada PR
 
 Antes de pedir revisión, con la salida pegada en el PR (`CONDUCTA.md` §5):

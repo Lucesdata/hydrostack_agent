@@ -428,8 +428,9 @@ URL retirada redirige con un 308 (permanente) desde `next.config.js`. Las tablas
 quedan: soltarlas es un `DROP` sobre la base viva.
 PR 2 hecho: el pliego vive en la §4 de la ficha (`PliegoFicha.tsx`,
 `src/lib/secop/pliego-ficha.ts`): con pliego subido muestra requisitos,
-presupuesto y causales con su origen (reglas o modelo), y su cronograma y
-capítulos llenan la §5 y la §8; sin pliego, ofrece subirlo ahí mismo. La ficha
+presupuesto (también por capítulo, desde el 2026-09-28) y causales con su
+origen (reglas o modelo), y su cronograma llena «Fechas»; sin pliego, dice lo
+que se desbloquea al subirlo y ofrece subirlo ahí mismo. La ficha
 sigue estática: el formulario se pinta para todos, la acción de servidor
 (`subirPliegoDesdeFichaAction`) exige sesión, revalida la ficha y devuelve el
 resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
@@ -467,6 +468,13 @@ explorador) sube el perfil local a la cuenta nueva. `habilitacionGate` devuelve
 en `--accent-ocean` con `--on-ocean-muted` y `--accent-river`; las pastillas del
 canal, al 6 % de su color (al 10 % el verde y el ámbar no llegaban a AA: lo midió
 `contraste.test.ts`). En móvil la barra de acción es `sticky` y solo lleva los
-botones. Spec y plan: `docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`.
+botones. Debajo del bloque, en orden de decisión (paso 3, 2026-09-28): «Qué te
+exige el pliego» → «Quién suele competir aquí» → «Fechas» → «Detalle del
+proceso» (plegado: tipo de contrato, UNSPSC, acceso a documentos) → cierre.
+«Análisis de oferta» salió: el presupuesto por capítulo va con el pliego y las
+dos filas grises (rango de la oferta ganadora, probabilidad de adjudicación) se
+quitaron, porque no se calculan para ningún proceso. Sin pliego, un solo aviso
+«lo que se desbloquea al subirlo» lista solo lo que el extractor saca. Spec y
+plan: `docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).

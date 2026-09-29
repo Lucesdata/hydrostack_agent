@@ -23,6 +23,9 @@ describe(".sr-only", () => {
     const usos = execSync('grep -rl "sr-only" app src --include=*.tsx --include=*.jsx', {
       encoding: "utf8",
     });
-    expect(usos).toContain("app/licitaciones/[slug]/page.tsx");
+    // La ficha dejó de usarla el 2026-09-28, al quitar las filas grises de
+    // «Análisis de oferta»; la siguen usando la subida del pliego y el comparador.
+    expect(usos.trim().split("\n").filter(Boolean).length).toBeGreaterThan(0);
+    expect(usos).toContain("src/components/secop/PliegoUploadBlock.tsx");
   });
 });
