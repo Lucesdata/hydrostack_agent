@@ -982,13 +982,15 @@ Traspaso «Hero de la portada v2»: vista país al llegar, un solo botón (el de
 resultado), cabecera del mapa con la sede de la entidad y la fecha de ingesta, y
 semáforo absoluto en los destacados.
 
-- **No cabe en 1366×768.** Medido con Playwright sobre datos de relleno con
-  objetos y entidades largos: el resultado termina a 892 px (124 px bajo el
-  pliegue) y el botón principal queda debajo. En 1440×900 termina a 895 px y sí
-  cabe. Cada fila del semáforo ocupa 2–3 líneas en la columna de 380 px, así que
-  los tres destacados suman unos 135 px. Ya se aplicó el primer recorte del
-  traspaso (`.lead` a 15px y `.resultado` con `margin-top: 16px`); el siguiente
-  toca el mapa, o cuántos destacados se muestran, y es decisión de producto.
+- ✅ **No cabía en 1366×768.** Medido con Playwright sobre datos de relleno con
+  objetos y entidades largos: el resultado terminaba a 892 px (124 px bajo el
+  pliegue) y el botón principal quedaba debajo. Cada fila del semáforo ocupa 2–3
+  líneas en la columna de 380 px. Tras el primer recorte del traspaso (`.lead` a
+  15px, `.resultado` con `margin-top: 16px`), el usuario eligió el 2026-09-29
+  **dos destacados y sin Habilitación** en el semáforo del hero (siempre «sin
+  datos» ahí; la ficha conserva las cinco). El mapa no se tocó. La API sigue
+  sirviendo tres: el recorte es del componente. Medido después: el resultado
+  termina a 762 px en 1366×768 y a 765 px en 1440×900; cada semáforo, 2 líneas.
 - **Con perfil, el semáforo sigue siendo absoluto y el gancho «Crea tu perfil»
   se sigue viendo.** Debería pasar a relativo y ocultarse el gancho, como hace
   `SemaforoConPerfil` en la ficha. Quedó fuera de este cambio por alcance.

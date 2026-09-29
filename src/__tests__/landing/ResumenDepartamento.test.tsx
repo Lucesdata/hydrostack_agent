@@ -60,10 +60,24 @@ describe("ResumenDepartamento", () => {
     expect(html).toContain("Cuantía");
     expect(html.match(/\$4\.280 M|\$\s?4\.280/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
     expect(html.match(/sf-punto--dato/g)).toHaveLength(4);
-    // Habilitación vive en el pliego: sin dato, nunca un veredicto.
-    expect(html.match(/sf-punto--unknown/g)).toHaveLength(1);
     expect(html).not.toMatch(/sf-punto--(pass|warn|fail)/);
     expect(html).toContain("Córdoba");
+  });
+
+  it("en el hero, dos filas y sin Habilitación, que aquí siempre dice «sin datos» (1366×768)", () => {
+    const tres = [1, 2, 3].map((i) => ({
+      ...destacado,
+      id: `CO1.REQ.${i}`,
+      objeto: `OBRA NÚMERO ${i}`,
+      ficha: `/licitaciones/obra--CO1.REQ.${i}`,
+    }));
+    const html = renderToStaticMarkup(
+      <ResumenDepartamento departamento={null} destacadosPais={tres} />
+    );
+    expect(html.match(/<li>/g)).toHaveLength(2);
+    expect(html).not.toContain("CO1.REQ.3");
+    expect(html).not.toContain("Habilitación");
+    expect(html.match(/class="sf-item"/g)).toHaveLength(8);
   });
 
   it("con destacados invita a crear perfil", () => {

@@ -274,8 +274,10 @@ línea se oculta). Los destacados del país (`resumenNacional()`) se calculan en
 dejaba consultas colgadas y el build agotaba el prerender. Cada destacado lleva
 el semáforo **absoluto** (`compuertasAbsolutas()`, estado `DATO`) y ya no el
 importe, que enuncia la compuerta Cuantía; el hero sobreescribe sus colores para
-el oscuro (medidos en `contraste-oscuro.test.ts`). No cabe en 1366×768:
-PENDIENTES §51.
+el oscuro (medidos en `contraste-oscuro.test.ts`). Para caber en 1366×768 el
+hero pinta **dos** destacados y el semáforo **sin Habilitación**, que ahí siempre
+dice «sin datos» (decisión del 2026-09-29, PENDIENTES §51); la ficha conserva
+las cinco compuertas y la API sigue sirviendo tres.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección

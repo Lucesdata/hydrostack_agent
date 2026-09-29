@@ -21,7 +21,16 @@ import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
  * hace `SemaforoConPerfil` en la ficha: pendiente, fuera de este cambio.
  *
  * Solo datos reales: cargando dice que carga, y si falla muestra "—".
+ *
+ * Dos filas y cuatro compuertas, no tres y cinco (2026-09-29): con el semáforo
+ * cada fila ocupa 2–3 líneas en la columna de 380 px, y el hero se pasaba 124 px
+ * del primer pantallazo en 1366×768, con el botón principal debajo. Habilitación
+ * sale del hero porque aquí siempre dice «sin datos»: vive en el pliego. La
+ * ficha sigue mostrando las cinco. La API sigue sirviendo tres.
  */
+
+const FILAS_HERO = 2;
+const sinHabilitacion = (c) => c.clave !== "habilitacion";
 
 const cache = new Map();
 
@@ -86,7 +95,7 @@ export default function ResumenDepartamento({
       {hay ? (
         <>
           <ol className="aqDestacados">
-            {datos.destacados.map((p) => (
+            {datos.destacados.slice(0, FILAS_HERO).map((p) => (
               <li key={p.id}>
                 <Link href={p.href} title={p.objeto}>
                   <span className="aqDestObjeto">{p.objeto}</span>
@@ -95,7 +104,10 @@ export default function ResumenDepartamento({
                   </span>
                   {/* Un div: el semáforo es una lista, y un span no puede contenerla. */}
                   <div className="aqDestSemaforo">
-                    <Semaforo compuertas={compuertasAbsolutas(p.semaforo)} disposicion="linea" />
+                    <Semaforo
+                      compuertas={compuertasAbsolutas(p.semaforo).filter(sinHabilitacion)}
+                      disposicion="linea"
+                    />
                   </div>
                 </Link>
               </li>
