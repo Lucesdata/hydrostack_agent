@@ -7,7 +7,7 @@ import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
-import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
+import { compuertasAbsolutas, fechaCortaDeDia } from "@/src/lib/secop/semaforo";
 import {
   aSecopProceso,
   competidoresComparables,
@@ -49,20 +49,6 @@ type Props = { params: Promise<{ slug: string }> };
 const fecha = (iso: string | null) =>
   iso
     ? new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })
-    : null;
-
-/** «14 oct 2026». En hora de Colombia, fijo: el servidor no debe depender de su huso. */
-const fechaCorta = (iso: string | null) =>
-  iso
-    ? new Date(iso)
-        .toLocaleDateString("es-CO", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          timeZone: "America/Bogota",
-        })
-        .replace(/\./g, "")
-        .replace(/ de /g, " ")
     : null;
 
 export async function generateMetadata({ params }: Props) {
@@ -186,8 +172,8 @@ export default async function FichaPage({ params }: Props) {
           conPresupuesto={valor !== null}
           fechaPublicacion={p.fechaPublicacion}
           fechaRecepcion={p.fechaRecepcion}
-          fechaPublicacionTexto={fechaCorta(p.fechaPublicacion)}
-          fechaRecepcionTexto={fechaCorta(p.fechaRecepcion)}
+          fechaPublicacionTexto={fechaCortaDeDia(p.fechaPublicacion)}
+          fechaRecepcionTexto={fechaCortaDeDia(p.fechaRecepcion)}
           estadoApertura={p.estadoApertura}
           modalidad={p.modalidad}
           hrefExplorar={

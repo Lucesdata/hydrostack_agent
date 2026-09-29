@@ -427,3 +427,25 @@ export function explicacionModalidad(modalidad: string | null): string | null {
     return "La entidad contrata con su propio manual y no con el Estatuto General, como hacen muchas empresas de servicios públicos.";
   return null;
 }
+
+/**
+ * «15 oct 2026» a partir de una fecha de día («2026-10-15», columna `date`).
+ *
+ * Se formatea en UTC y no en hora de Colombia a propósito: `new Date("2026-10-15")`
+ * es la medianoche UTC, y pasada a Bogotá (UTC−5) cae el 14. Así salió en la
+ * primera versión del bloque, un día antes que las compuertas y que «Fechas».
+ */
+export function fechaCortaDeDia(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d
+    .toLocaleDateString("es-CO", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+    .replace(/\./g, "")
+    .replace(/ de /g, " ");
+}

@@ -6,6 +6,7 @@ import {
   compuertasAbsolutas,
   compuertasDesdeVeredicto,
   explicacionModalidad,
+  fechaCortaDeDia,
   fraseVeredicto,
   siguientePaso,
   textoDiasRestantes,
@@ -433,5 +434,17 @@ describe("explicacionModalidad", () => {
   it("no inventa: una modalidad desconocida o ausente no tiene explicación", () => {
     expect(explicacionModalidad("Otra cosa")).toBeNull();
     expect(explicacionModalidad(null)).toBeNull();
+  });
+});
+
+describe("fechaCortaDeDia", () => {
+  it("una fecha de día no se corre al día anterior por el huso de Colombia", () => {
+    expect(fechaCortaDeDia("2026-10-15")).toMatch(/^15 oct/);
+    expect(fechaCortaDeDia("2026-10-15")).toContain("2026");
+  });
+
+  it("sin fecha o con basura, nada", () => {
+    expect(fechaCortaDeDia(null)).toBeNull();
+    expect(fechaCortaDeDia("no es fecha")).toBeNull();
   });
 });
