@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { mapApiItem } from "@/src/components/landing/proceso-resumen";
 import Semaforo from "@/src/components/secop/semaforo/Semaforo";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
@@ -12,7 +12,11 @@ import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
  * Del departamento elegido: se piden al elegirlo —no al pasar el puntero, que
  * dispararía una petición por cada departamento cruzado— y se guardan en
  * memoria para no volver a pedir el mismo. Sin departamento (la vista país, la
- * inicial) llegan ya calculados del servidor por `destacadosPais`.
+ * inicial) no se pinta: no hay consulta nacional sin tocar el backend
+ * (decisión del 2026-09-30).
+ *
+ * La API no trae la fecha de recepción ni el estado de apertura, así que la
+ * compuerta Plazo sale «sin datos» (`UNKNOWN`): se dice que falta, no se deduce.
  *
  * Cada fila lleva el semáforo en su lectura absoluta (`DATO`): qué exige el
  * proceso, sin juzgar a nadie. Por eso ya no pinta el importe a la derecha: la
@@ -68,56 +72,50 @@ export function useResumenDepartamento(clave) {
   return estado.clave === clave ? estado : { clave, status: "loading", datos: null };
 }
 
-export default function ResumenDepartamento({
-  departamento,
-  destacadosPais = null,
-  atenuado = false,
-}) {
-  const remoto = useResumenDepartamento(departamento?.clave ?? null);
-  const pais = useMemo(
-    () =>
-      Array.isArray(destacadosPais)
-        ? { status: "live", datos: { destacados: destacadosPais.map(mapApiItem) } }
-        : { status: "empty", datos: null },
-    [destacadosPais]
+/** Las filas con su semáforo. Separada del componente para probarla sin red. */
+export function ListaDestacados({ destacados }) {
+  return (
+    <>
+      <ol className="aqDestacados">
+        {destacados.slice(0, FILAS_HERO).map((p) => (
+          <li key={p.id}>
+            <Link href={p.href} title={p.objeto}>
+              <span className="aqDestObjeto">{p.objeto}</span>
+              <span className="aqDestMeta">
+                {[p.entidad, p.ciudad].filter(Boolean).join(" · ")}
+              </span>
+              {/* Un div: el semáforo es una lista, y un span no puede contenerla. */}
+              <div className="aqDestSemaforo">
+                <Semaforo
+                  compuertas={compuertasAbsolutas(p.semaforo).filter(sinHabilitacion)}
+                  disposicion="linea"
+                />
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <p className="aqGancho">
+        Así ves qué exige cada proceso. <Link href="/registro">Crea tu perfil</Link> para saber si
+        cumples.
+      </p>
+    </>
   );
-  const { status, datos } = departamento ? remoto : pais;
-  const lugar = departamento?.label ?? "Colombia";
-  const hay = status === "live" && datos.destacados.length > 0;
+}
+
+export default function ResumenDepartamento({ departamento, atenuado = false }) {
+  const { status, datos } = useResumenDepartamento(departamento?.clave ?? null);
+  if (!departamento) return null;
 
   return (
     <section
       className="aqResumen"
-      aria-label={`Procesos abiertos de mayor presupuesto en ${lugar}`}
+      aria-label={`Procesos abiertos de mayor presupuesto en ${departamento.label}`}
       data-atenuado={atenuado || undefined}
     >
       <h3>Mayor presupuesto abierto</h3>
-      {hay ? (
-        <>
-          <ol className="aqDestacados">
-            {datos.destacados.slice(0, FILAS_HERO).map((p) => (
-              <li key={p.id}>
-                <Link href={p.href} title={p.objeto}>
-                  <span className="aqDestObjeto">{p.objeto}</span>
-                  <span className="aqDestMeta">
-                    {[p.entidad, p.ciudad].filter(Boolean).join(" · ")}
-                  </span>
-                  {/* Un div: el semáforo es una lista, y un span no puede contenerla. */}
-                  <div className="aqDestSemaforo">
-                    <Semaforo
-                      compuertas={compuertasAbsolutas(p.semaforo).filter(sinHabilitacion)}
-                      disposicion="linea"
-                    />
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ol>
-          <p className="aqGancho">
-            Así ves qué exige cada proceso. <Link href="/registro">Crea tu perfil</Link> para saber
-            si cumples.
-          </p>
-        </>
+      {status === "live" && datos.destacados.length > 0 ? (
+        <ListaDestacados destacados={datos.destacados} />
       ) : (
         <p className="aqResumenNota">
           {status === "loading" ? "Cargando…" : status === "live" ? "Sin procesos abiertos" : "—"}

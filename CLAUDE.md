@@ -267,17 +267,15 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
 **Hero v2 (2026-09-28).** Se llega a la **vista país** (Colombia), no al
 primer departamento; «← Colombia» vuelve a ella. Un solo botón, el del
 resultado («Ver las N fichas», o las del departamento). La cabecera del mapa dice
-que la base es la **sede de la entidad**, no el lugar de la obra, y la fecha de
-la última ingesta (`src/lib/secop/actualizacion.ts`, `sync_log`; sin fecha la
-línea se oculta). Los destacados del país (`resumenNacional()`) se calculan en
-`app/page.js` y solo se esperan si los agregados llegaron: sin base, el cliente
-dejaba consultas colgadas y el build agotaba el prerender. Cada destacado lleva
-el semáforo **absoluto** (`compuertasAbsolutas()`, estado `DATO`) y ya no el
-importe, que enuncia la compuerta Cuantía; el hero sobreescribe sus colores para
-el oscuro (medidos en `contraste-oscuro.test.ts`). Para caber en 1366×768 el
-hero pinta **dos** destacados y el semáforo **sin Habilitación**, que ahí siempre
-dice «sin datos» (decisión del 2026-09-29, PENDIENTES §51); la ficha conserva
-las cinco compuertas y la API sigue sirviendo tres.
+que la base es la **sede de la entidad**, no el lugar de la obra. Cada destacado
+lleva el semáforo **absoluto** (`compuertasAbsolutas()`, estado `DATO`) y ya no
+el importe, que enuncia la compuerta Cuantía; el hero sobreescribe sus colores
+para el oscuro (medidos en `contraste-oscuro.test.ts`). Para caber en 1366×768
+pinta **dos** destacados y el semáforo **sin Habilitación** (decisión del
+2026-09-29). **Sin cambios de backend** (decisión del 2026-09-30): la vista país
+no trae destacados —aparecen al elegir un departamento—, la compuerta Plazo sale
+«sin datos» porque la API no trae fecha de recepción ni apertura, y no hay línea
+de «actualizado el …». Lo que haría falta para recuperarlo, en PENDIENTES §51.
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección

@@ -19,7 +19,7 @@ vi.mock("@/src/lib/db/client", async () => {
 
 import { db } from "@/src/lib/db/client";
 import { entidad, geografia, proceso } from "@/src/lib/db/schema";
-import { resumenDepartamento, resumenNacional } from "@/src/lib/secop/resumen-departamento";
+import { resumenDepartamento } from "@/src/lib/secop/resumen-departamento";
 import { detallePorDepartamento } from "@/src/lib/secop/agregados";
 
 /** Fecha de hace `dias` días, como la escribe la ingesta (date, sin hora). */
@@ -33,21 +33,18 @@ async function unProceso(v: {
   valor?: string | null;
   entidadId?: string | null;
   objeto?: string;
-  sinGeografia?: boolean;
-  fechaRecepcion?: string;
 }) {
   n += 1;
   await db.insert(proceso).values({
     secopProcesoId: `CO1.REQ.${n}`,
     objeto: v.objeto ?? `Obra ${n}`,
-    geografiaId: v.sinGeografia ? null : `${v.dpto ?? "05"}000`,
+    geografiaId: `${v.dpto ?? "05"}000`,
     entidadId: v.entidadId ?? null,
     valorEstimado: v.valor ?? null,
     fechaPublicacion: hace(v.diasAtras) as unknown as string,
     estadoApertura: v.abierto === false ? "Cerrado" : "Abierto",
     estadoActual: v.abierto === false ? "Adjudicado" : "Publicado",
     tipoProyecto: "ptar",
-    fechaRecepcion: v.fechaRecepcion ?? null,
   });
 }
 
@@ -87,15 +84,7 @@ beforeAll(async () => {
   // Cerrado: no aparece en destacados ni en el detalle de abiertos.
   await unProceso({ diasAtras: 40, abierto: false, valor: "99999", entidadId: entB });
   // Otro departamento: no se mezcla.
-  await unProceso({ dpto: "08", diasAtras: 1, valor: "5000", objeto: "Atlántico grande" });
-  // Sin geografía resuelta: fuera de cada departamento, dentro del país.
-  await unProceso({
-    diasAtras: 2,
-    valor: "7000",
-    objeto: "Sin geografía",
-    sinGeografia: true,
-    fechaRecepcion: "2026-10-15",
-  });
+  await unProceso({ dpto: "08", diasAtras: 1, valor: "5000" });
 });
 
 describe("resumenDepartamento (SQL real)", () => {
@@ -106,30 +95,9 @@ describe("resumenDepartamento (SQL real)", () => {
     expect(destacados[0].tipoProyecto).toBe("ptar");
   });
 
-  it("trae lo que pide el semáforo: apertura y fecha de recepción", async () => {
-    const { destacados } = await resumenDepartamento("05");
-    expect(destacados[0].estadoApertura).toBe("Abierto");
-    expect(destacados[0].fechaRecepcion).toBeNull();
-  });
-
   it("un departamento sin procesos no devuelve destacados", async () => {
     const r = await resumenDepartamento("99");
     expect(r.destacados).toEqual([]);
-  });
-});
-
-describe("resumenNacional (SQL real)", () => {
-  it("los tres abiertos de mayor presupuesto del país, también sin geografía", async () => {
-    const { destacados } = await resumenNacional();
-    expect(destacados.map((d) => d.objeto)).toEqual([
-      "Sin geografía",
-      "Atlántico grande",
-      "Grande",
-    ]);
-    // El cerrado de 99.999 no entra: mismo criterio de abierto que el mapa.
-    expect(destacados.map((d) => d.valorEstimado)).not.toContain(99999);
-    expect(destacados[0].departamento).toBeNull();
-    expect(destacados[0].fechaRecepcion).toBe("2026-10-15");
   });
 });
 

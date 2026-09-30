@@ -25,10 +25,6 @@ export interface ProcesoResumen {
   url: string | null;
   /** Uno de `TIPOS_PROYECTO`, o `null` si no está clasificado. */
   tipoProyecto: string | null;
-  /** Ventana de recepción ('Abierto' | 'Cerrado'): la compuerta de plazo del semáforo. */
-  estadoApertura: string | null;
-  /** Fecha de recepción de ofertas, cuando la fuente la publica (~31% de filas). */
-  fechaRecepcion: string | null;
   /**
    * Ruta de la ficha pública. `mapRowToResumen` no la inventa: la añade quien
    * lee la fila, que sabe que el proceso está ingerido.
@@ -60,8 +56,6 @@ export interface RecienteRow {
   municipio: string | null;
   urlRaw: unknown;
   tipoProyecto?: string | null;
-  estadoApertura?: string | null;
-  fechaRecepcion?: string | null;
 }
 
 export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
@@ -81,8 +75,6 @@ export function mapRowToResumen(r: RecienteRow): ProcesoResumen {
     fechaPublicacion: r.fechaPublicacion,
     url: extractUrlProceso(r.urlRaw),
     tipoProyecto: r.tipoProyecto ?? null,
-    estadoApertura: r.estadoApertura ?? null,
-    fechaRecepcion: r.fechaRecepcion ?? null,
     ficha: null,
   };
 }

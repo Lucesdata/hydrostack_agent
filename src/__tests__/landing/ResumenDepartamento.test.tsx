@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import ResumenDepartamento from "@/src/components/landing/hero-territorial/ResumenDepartamento";
+import ResumenDepartamento, {
+  ListaDestacados,
+} from "@/src/components/landing/hero-territorial/ResumenDepartamento";
+import { mapApiItem } from "@/src/components/landing/proceso-resumen";
 
 const destacado = {
   id: "CO1.REQ.1",
@@ -10,8 +13,6 @@ const destacado = {
   departamento: "CÓRDOBA",
   municipio: "CHINÚ",
   valorEstimado: 4_280_000_000,
-  estadoApertura: "Abierto",
-  fechaRecepcion: null,
   ficha: "/licitaciones/optimizacion-de-la-ptar--CO1.REQ.1",
 };
 
@@ -34,34 +35,34 @@ describe("ResumenDepartamento", () => {
     expect(html).not.toContain("aqSpark");
   });
 
-  it("sin departamento habla del país; sin destacados dice «—»", () => {
-    const html = renderToStaticMarkup(<ResumenDepartamento departamento={null} />);
-    expect(html).toContain("Procesos abiertos de mayor presupuesto en Colombia");
-    expect(html).toContain('<p class="aqResumenNota">—</p>');
-    expect(html).not.toContain("Cargando…");
+  it("sin departamento (vista país) no pinta nada: no hay consulta nacional", () => {
+    expect(renderToStaticMarkup(<ResumenDepartamento departamento={null} />)).toBe("");
   });
+});
 
-  it("vista país sin procesos abiertos lo dice", () => {
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={null} destacadosPais={[]} />
-    );
-    expect(html).toContain("Sin procesos abiertos");
-    expect(html).not.toContain("aqGancho");
-  });
+/** Como llega de /api/departamento/[dpto]/resumen, pasado por mapApiItem. */
+const pintar = (filas: (typeof destacado)[]) =>
+  renderToStaticMarkup(<ListaDestacados destacados={filas.map(mapApiItem)} />);
 
+describe("ListaDestacados", () => {
   it("cada destacado lleva el semáforo absoluto y ya no el importe (v2)", () => {
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={null} destacadosPais={[destacado]} />
-    );
+    const html = pintar([destacado]);
     expect(html).toContain("Optimización de la PTAR municipal");
     expect(html).toContain("Municipio de Chinu · Chinú");
     // El importe lo enuncia la compuerta Cuantía, no una columna aparte.
     expect(html).not.toContain("aqDestValor");
     expect(html).toContain("Cuantía");
-    expect(html.match(/\$4\.280 M|\$\s?4\.280/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
-    expect(html.match(/sf-punto--dato/g)).toHaveLength(4);
-    expect(html).not.toMatch(/sf-punto--(pass|warn|fail)/);
+    expect(html).toMatch(/\$4\.280 M|\$\s?4\.280/);
     expect(html).toContain("Córdoba");
+    expect(html).not.toMatch(/sf-punto--(pass|warn|fail)/);
+  });
+
+  it("la API no trae plazo: la compuerta sale «sin datos», no se deduce", () => {
+    const html = pintar([destacado]);
+    // Sector, Cuantía y Zona con dato; Plazo sin él.
+    expect(html.match(/sf-punto--dato/g)).toHaveLength(3);
+    expect(html.match(/sf-punto--unknown/g)).toHaveLength(1);
+    expect(html).toMatch(/Plazo<\/span><span class="sf-palabra">sin datos/);
   });
 
   it("en el hero, dos filas y sin Habilitación, que aquí siempre dice «sin datos» (1366×768)", () => {
@@ -71,19 +72,15 @@ describe("ResumenDepartamento", () => {
       objeto: `OBRA NÚMERO ${i}`,
       ficha: `/licitaciones/obra--CO1.REQ.${i}`,
     }));
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={null} destacadosPais={tres} />
-    );
+    const html = pintar(tres);
     expect(html.match(/<li>/g)).toHaveLength(2);
     expect(html).not.toContain("CO1.REQ.3");
     expect(html).not.toContain("Habilitación");
     expect(html.match(/class="sf-item"/g)).toHaveLength(8);
   });
 
-  it("con destacados invita a crear perfil", () => {
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={null} destacadosPais={[destacado]} />
-    );
+  it("invita a crear perfil", () => {
+    const html = pintar([destacado]);
     expect(html).toContain('class="aqGancho"');
     expect(html).toContain('<a href="/registro">Crea tu perfil</a>');
   });

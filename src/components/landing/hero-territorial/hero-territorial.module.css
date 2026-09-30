@@ -459,22 +459,6 @@
   align-items: flex-end;
   gap: 4px;
 }
-.actualizado {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font:
-    12.5px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-  white-space: nowrap;
-}
-.actualizado span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--aq-cyan);
-}
 .opciones summary,
 .lista summary {
   cursor: pointer;

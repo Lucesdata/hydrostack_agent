@@ -31,15 +31,11 @@ import styles from "./hero-territorial.module.css";
  * Hero v2 (2026-09-28): se llega a la vista país (Colombia), no al primer
  * departamento; el único botón es el del resultado, y cada destacado lleva el
  * semáforo en su lectura absoluta. La cabecera del mapa dice qué es la base
- * territorial (la sede de la entidad) y cuándo se actualizó.
+ * territorial (la sede de la entidad). Sin cambios de backend (2026-09-30): la
+ * vista país no trae destacados —aparecen al elegir un departamento— y no hay
+ * línea de «actualizado el …».
  */
-export default function HeroTerritorial({
-  mapa = null,
-  departamentos = [],
-  totalAbiertos = null,
-  destacadosPais = null,
-  actualizado = null,
-}) {
+export default function HeroTerritorial({ mapa = null, departamentos = [], totalAbiertos = null }) {
   const [elegido, setElegido] = useState(null);
   const datosDisponibles = totalAbiertos != null;
   // Sin elección, la vista país: `FichaDepartamento` ya habla de Colombia
@@ -123,7 +119,6 @@ export default function HeroTerritorial({
                 se previsualiza otro, se atenúa. */}
             <ResumenDepartamento
               departamento={seleccionado}
-              destacadosPais={datosDisponibles ? destacadosPais : null}
               atenuado={previa != null && previa.clave !== seleccionado?.clave}
             />
             {vista ? (
@@ -163,13 +158,6 @@ export default function HeroTerritorial({
               </p>
             </div>
             <div className={styles.mapaCabDer}>
-              {/* Sin fecha registrada la línea no sale: no se inventa. */}
-              {actualizado ? (
-                <p className={styles.actualizado}>
-                  <span aria-hidden="true" />
-                  SECOP II · actualizado el {actualizado}
-                </p>
-              ) : null}
               {hayDetalle && datosDisponibles ? (
                 <details className={styles.opciones}>
                   <summary>Opciones del mapa</summary>

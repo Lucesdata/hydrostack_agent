@@ -51,6 +51,14 @@ describe("HeroTerritorial", () => {
     expect(html.toLowerCase()).not.toContain("alerta");
   });
 
+  it("sin backend nuevo: la vista país no trae destacados ni fecha de actualización", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(html).not.toContain("Mayor presupuesto abierto");
+    expect(html).not.toContain("actualizado el");
+  });
+
   it("se llega a la vista país, no al primer departamento", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
@@ -78,41 +86,6 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Elige un departamento");
   });
 
-  it("la vista país pinta los destacados nacionales que llegan del servidor", () => {
-    const html = renderToStaticMarkup(
-      <HeroTerritorial
-        departamentos={departamentos}
-        totalAbiertos={10000}
-        destacadosPais={[
-          {
-            id: "CO1.REQ.9",
-            objeto: "CONSTRUCCIÓN DE LA PTAR",
-            entidad: "MUNICIPIO DE CHINU",
-            municipio: "CHINÚ",
-            departamento: "CÓRDOBA",
-            valorEstimado: 4_280_000_000,
-            tipoProyecto: "ptar",
-            estadoApertura: "Abierto",
-            fechaRecepcion: null,
-            ficha: "/licitaciones/construccion-de-la-ptar--CO1.REQ.9",
-          },
-        ]}
-      />
-    );
-    expect(html).toContain("Procesos abiertos de mayor presupuesto en Colombia");
-    expect(html).toContain('href="/licitaciones/construccion-de-la-ptar--CO1.REQ.9"');
-    expect(html).toContain('class="sf sf--linea"');
-    // Los estilos del semáforo viajan con el hero: la portada no los inyectaba.
-    expect(html).toContain(".sf-punto--dato");
-  });
-
-  it("sin datos no pinta destacados aunque lleguen", () => {
-    const html = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} destacadosPais={[]} />
-    );
-    expect(html).toContain('<p class="aqResumenNota">—</p>');
-  });
-
   it("el resultado no trae extras del hero anterior", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
@@ -129,21 +102,6 @@ describe("HeroTerritorial", () => {
     expect(html).toContain("Dónde están las entidades que contratan");
     expect(html).toContain("según la sede de la entidad contratante, no el lugar de la obra.");
     expect(html).toContain('aria-label="Procesos abiertos por departamento"');
-  });
-
-  it("la fecha de actualización sale solo si llega", () => {
-    const con = renderToStaticMarkup(
-      <HeroTerritorial
-        departamentos={departamentos}
-        totalAbiertos={10000}
-        actualizado="26 sep 2026"
-      />
-    );
-    expect(con).toContain("SECOP II · actualizado el 26 sep 2026");
-    const sin = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
-    );
-    expect(sin).not.toContain("actualizado el");
   });
 
   it("las opciones del mapa van plegadas y solo si hay detalle", () => {
