@@ -40,4 +40,26 @@ describe("CierreFicha", () => {
     const html = renderToStaticMarkup(<CierreFicha urlSecop={null} estadoApertura={null} />);
     expect(html).toContain("No consta aquí si el proceso recibe ofertas");
   });
+
+  it("con pliego procesado no dice que falten los requisitos: están arriba", () => {
+    const html = renderToStaticMarkup(
+      <CierreFicha urlSecop={null} estadoApertura="Abierto" conPliego />
+    );
+    expect(html).not.toContain("aún no los tiene extraídos");
+    expect(html).toContain("Qué te exige el pliego");
+    expect(html).toContain("no emite un veredicto individual");
+  });
+
+  it("sin pliego sigue diciendo que faltan", () => {
+    const html = renderToStaticMarkup(<CierreFicha urlSecop={null} estadoApertura="Abierto" />);
+    expect(html).toContain("aún no los tiene extraídos");
+  });
+
+  it("con pliego y sin estado de apertura, remite al pliego y pide el estado al expediente", () => {
+    const html = renderToStaticMarkup(
+      <CierreFicha urlSecop={null} estadoApertura={null} conPliego />
+    );
+    expect(html).toContain("Los requisitos del pliego están arriba");
+    expect(html).toContain("No consta aquí si el proceso recibe ofertas");
+  });
 });

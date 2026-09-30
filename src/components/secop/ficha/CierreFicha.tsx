@@ -11,13 +11,20 @@ import Link from "next/link";
  * al oferente con las condiciones particulares de este proceso.
  *
  * Al resolver el §0, la alerta puede volver aquí (PENDIENTES §44).
+ *
+ * Con pliego procesado (`conPliego`), no dice «aún no los tiene extraídos»: los
+ * requisitos ya están arriba, en «Qué te exige el pliego». Lo vio la vista previa
+ * del bloque de decisión (2026-09-29): el cierre contradecía a la ficha.
  */
 export default function CierreFicha({
   urlSecop,
   estadoApertura,
+  conPliego = false,
 }: {
   urlSecop: string | null;
   estadoApertura: string | null;
+  /** Hay un pliego procesado para este proceso. */
+  conPliego?: boolean;
 }) {
   const cerrado = estadoApertura === "Cerrado";
   const abierto = estadoApertura === "Abierto";
@@ -29,8 +36,12 @@ export default function CierreFicha({
         {cerrado
           ? "Esta ficha registra el proceso como cerrado. Confirma el estado actual en el expediente y explora otros procesos abiertos."
           : abierto
-            ? "Para saber si puedes participar, comprueba primero los requisitos en el pliego. Esta ficha aún no los tiene extraídos y no puede emitir un veredicto individual."
-            : "No consta aquí si el proceso recibe ofertas. Comprueba el estado y los requisitos en el expediente antes de decidir si puedes participar."}{" "}
+            ? conPliego
+              ? "Los requisitos del pliego ya están leídos arriba, en «Qué te exige el pliego». Contrástalos con tu empresa y confírmalos en el expediente antes de ofertar: esta ficha no emite un veredicto individual."
+              : "Para saber si puedes participar, comprueba primero los requisitos en el pliego. Esta ficha aún no los tiene extraídos y no puede emitir un veredicto individual."
+            : conPliego
+              ? "No consta aquí si el proceso recibe ofertas. Los requisitos del pliego están arriba; comprueba en el expediente el estado antes de decidir si puedes participar."
+              : "No consta aquí si el proceso recibe ofertas. Comprueba el estado y los requisitos en el expediente antes de decidir si puedes participar."}{" "}
         El diagnóstico orienta sobre tu preparación general; no verifica este pliego.
       </p>
       <div className="fi-cierre">

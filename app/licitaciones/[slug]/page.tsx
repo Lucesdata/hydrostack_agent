@@ -283,7 +283,11 @@ export default async function FichaPage({ params }: Props) {
 
         {/* 7 — Cierre */}
         <section className="fi-sec">
-          <CierreFicha urlSecop={p.url} estadoApertura={p.estadoApertura} />
+          <CierreFicha
+            urlSecop={p.url}
+            estadoApertura={p.estadoApertura}
+            conPliego={pliego !== null}
+          />
         </section>
       </article>
     </div>
