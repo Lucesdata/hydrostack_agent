@@ -160,17 +160,35 @@ export default function BloqueDecision(props: DatosDecision) {
     ahora === null ? null : ventanaDeOfertas(props.fechaPublicacion, props.fechaRecepcion, ahora);
   const queEs = explicacionModalidad(props.modalidad);
 
-  const href: Record<Exclude<DestinoPaso, "definir-perfil">, string | null> = {
+  const href: Record<Exclude<DestinoPaso, "definir-perfil" | "ver-porque">, string | null> = {
     "subir-pliego": "#pliego",
     "requisitos-pliego": "#pliego",
     "completar-perfil": "/perfil",
-    "ver-porque": "#fd-porque",
     "ofertar-secop": urlSecop,
     "expediente-secop": urlSecop,
     explorar: props.hrefExplorar,
   };
 
   function accion(destino: DestinoPaso, texto: string, clase: string) {
+    // «Ver por qué» no toca el hash: la ficha interactiva lee el hash para elegir
+    // sección, y `#fd-porque` la habría devuelto al Resumen.
+    if (destino === "ver-porque") {
+      return (
+        <button
+          type="button"
+          className={clase}
+          onClick={() => {
+            const porque = document.getElementById("fd-porque") as HTMLDetailsElement | null;
+            if (porque) {
+              porque.open = true;
+              porque.scrollIntoView({ block: "start" });
+            }
+          }}
+        >
+          {texto}
+        </button>
+      );
+    }
     if (destino === "definir-perfil") {
       return (
         <button type="button" className={clase} onClick={() => setCreandoPerfil(true)}>

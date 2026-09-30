@@ -143,8 +143,6 @@ function Extraccion({ pliego }: { pliego: Pliego }) {
         )}
       </p>
 
-      <Capitulos pliego={pliego} />
-
       <h3 className="fi-pl-h3">Causales de rechazo y techos del presupuesto</h3>
       <p className="fi-pl-origen">{ORIGEN[pliego.origen.causales]}</p>
       {pliego.causales.length > 0 ? (
@@ -172,44 +170,6 @@ function Extraccion({ pliego }: { pliego: Pliego }) {
         </>
       )}
     </div>
-  );
-}
-
-/**
- * El presupuesto por capítulo. Vivía en una sección aparte, «Análisis de oferta»,
- * junto a dos filas que no se calculan para ningún proceso; ahora va con el resto
- * de lo que el pliego dice (paso 3 del plan).
- */
-function Capitulos({ pliego }: { pliego: Pliego }) {
-  const capitulos = pliego.capitulos.filter((c) => c.items > 0);
-  if (capitulos.length === 0) return null;
-  return (
-    <>
-      <h3 className="fi-pl-h3">Presupuesto por capítulo</h3>
-      <p className="fi-pl-origen">
-        {pliego.origen.capitulos === "reglas"
-          ? "Leído del Formulario 1 con reglas deterministas."
-          : "Leído por el modelo; compruébalo en el pliego."}
-      </p>
-      <table className="fi-tabla">
-        <thead>
-          <tr>
-            <th>Capítulo</th>
-            <th className="num">Ítems</th>
-            <th className="num fi-tabla-total">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {capitulos.map((c, i) => (
-            <tr key={i}>
-              <td>{c.nombre}</td>
-              <td className="num">{c.items}</td>
-              <td className="num fi-tabla-total">{formatCopFull(c.total)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
   );
 }
 

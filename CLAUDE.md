@@ -325,12 +325,11 @@ salió: la vista previa la hace el resultado. Las facetas siguen con
 **Destacados y tendencia del departamento (2026-09-26).** El resultado muestra los
 tres abiertos de mayor presupuesto (objeto, valor, entidad · municipio). La
 sparkline de **publicados por semana** salió el 2026-09-28 por decisión del
-usuario; la API la sigue devolviendo sin que nadie la lea (PENDIENTES §50). No van en `detallePorDepartamento()`:
+usuario; la consulta semanal de la API se retiró después (PENDIENTES §50). No van en `detallePorDepartamento()`:
 salen de `/api/departamento/[dpto]/resumen` (`src/lib/secop/resumen-departamento.ts`),
 cacheado 6 h en el CDN, y se piden al **elegir** un departamento, no al pasar el
-puntero. La serie cuenta **todos** los publicados, no solo los abiertos: los
-abiertos se concentran en las semanas recientes y la curva subiría siempre. Sus
-consultas se prueban contra PGlite con las migraciones reales.
+puntero. La consulta de los destacados se prueba contra PGlite con las
+migraciones reales.
 
 El hero usa colores propios en `hero-territorial.module.css` (tema oscuro) y no
 los tokens de `globals.css`, así que `contraste.test.ts` no los cubre: los mide
@@ -450,31 +449,43 @@ agrupa ya por `proveedor_key`, no por nombre. Salieron `/competidores`,
 `getCifrasSector` (`cifras.ts` solo exporta `getProcesosVigilados`). Con esto el
 plan queda completo.
 
-**Bloque de decisión (2026-09-28).** Arriba de cada ficha, en lugar de «Cómo te
-queda a ti» y «Cifras»: `BloqueDecision.tsx` (isla de cliente que sustituye a
-`SemaforoConPerfil`, con su misma regla: el HTML cacheado lleva la lectura
+**Bloque de decisión (2026-09-28).** Vive en «Quiero participar» de la ficha
+interactiva (así lo pide su spec del 2026-09-29, que conserva los seis accesos
+públicos): `BloqueDecision.tsx`, isla de cliente que sustituye a
+`SemaforoConPerfil` con su misma regla (el HTML cacheado lleva la lectura
 absoluta y nada del perfil). Veredicto en una frase, tres datos (cuánto, hasta
 cuándo, cómo se contrata), las cinco compuertas dibujadas como **canal**
 (`CanalCompuertas.tsx`: la forma dice el estado además de la palabra y el color;
 el agua se corta en la primera que no cumple) y **un único siguiente paso**.
 Frase y paso salen de funciones puras de `semaforo.ts` (`fraseVeredicto`,
-`siguientePaso`, `ventanaDeOfertas`, `explicacionModalidad`): la frase se deriva
-del conteo de compuertas, nunca es un juicio aparte. «Quedan N días» se calcula
-en el navegador (la ficha revalida cada 12 h). **Sin cuenta se define el perfil
-ahí mismo** con `OferenteWizard` (localStorage); la cuenta se pide al subir el
-pliego, y `sincronizarPerfilConCuenta()` (`clientStore.ts`, compartida con el
-explorador) sube el perfil local a la cuenta nueva. `habilitacionGate` devuelve
-`faltanEnPerfil` y `verdict-publico.ts` lo redacta con el `reason`. La banda va
-en `--accent-ocean` con `--on-ocean-muted` y `--accent-river`; las pastillas del
-canal, al 6 % de su color (al 10 % el verde y el ámbar no llegaban a AA: lo midió
-`contraste.test.ts`). En móvil la barra de acción es `sticky` y solo lleva los
-botones. Debajo del bloque, en orden de decisión (paso 3, 2026-09-28): «Qué te
-exige el pliego» → «Quién suele competir aquí» → «Fechas» → «Detalle del
-proceso» (plegado: tipo de contrato, UNSPSC, acceso a documentos) → cierre.
-«Análisis de oferta» salió: el presupuesto por capítulo va con el pliego y las
-dos filas grises (rango de la oferta ganadora, probabilidad de adjudicación) se
-quitaron, porque no se calculan para ningún proceso. Sin pliego, un solo aviso
-«lo que se desbloquea al subirlo» lista solo lo que el extractor saca. Spec y
-plan: `docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`.
+`siguientePaso`, `ventanaDeOfertas`, `explicacionModalidad`, `fechaCortaDeDia`):
+la frase se deriva del conteo de compuertas, nunca es un juicio aparte. «Quedan
+N días» se calcula en el navegador. **Sin cuenta se define el perfil ahí mismo**
+con `OferenteWizard` (localStorage); la cuenta se pide al subir el pliego, y
+`sincronizarPerfilConCuenta()` (`clientStore.ts`, compartida con el explorador)
+sube el perfil local a la cuenta nueva. `habilitacionGate` devuelve
+`faltanEnPerfil` y `verdict-publico.ts` lo redacta con el `reason`. «Ver por
+qué» es un botón y no un enlace `#…`: `ExploradorFicha` elige sección por el
+hash y un ancla desconocida la devuelve al Resumen. La banda va en
+`--accent-ocean` con `--on-ocean-muted` y `--accent-river`; las pastillas del
+canal, al 6 % de su color (al 10 % el verde y el ámbar no llegaban a AA). Sin
+pliego, `PliegoFicha` dice «lo que se desbloquea al subirlo» (solo lo que el
+extractor saca). Spec y plan:
+`docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`; el paso 3
+de ese plan (orden de secciones) quedó sustituido por las seis preguntas.
 
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
+
+**Ficha interactiva móvil (2026-09-29).** `/licitaciones/[slug]` se organiza
+en seis preguntas: Resumen, ¿Para qué?, Dinero, Plazos, Responsables y Metas.
+`ExploradorFicha.tsx` solo selecciona contenido construido en el servidor;
+sin JavaScript todas las secciones se pueden leer. Los controles guardan la
+sección en el hash y permiten Atrás. `#pliego` y `#pliego=…` abren «Participar»,
+que conserva el semáforo, `PliegoFicha` y `RivalesFicha`. Las fuentes se despliegan
+por sección. Sigue la misma URL, las mismas consultas y el ISR de 12 horas.
+Las fechas de publicación/recepción son columnas DATE: conservar su día de
+calendario, sin convertir medianoche UTC al día anterior en Colombia.
+Necesidad, financiación y metas permanecen por verificar cuando no hay datos;
+no deducir avance de obra del estado de contratación ni sitio de ejecución de
+la ubicación de la entidad. Diseño aprobado y alcance en
+`docs/superpowers/specs/2026-09-29-ficha-interactiva-movil.md`.

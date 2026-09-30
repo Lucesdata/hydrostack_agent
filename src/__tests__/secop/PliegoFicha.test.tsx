@@ -58,32 +58,6 @@ describe("PliegoFicha (§4 de la ficha)", () => {
     expect(html).not.toMatch(/anticipo|plazo de ejecución|oferta ganadora|probabilidad/i);
   });
 
-  it("con pliego: el presupuesto por capítulo va aquí, con su origen", () => {
-    const html = renderToStaticMarkup(
-      <PliegoFicha
-        pliego={{
-          ...PLIEGO,
-          capitulos: [
-            { nombre: "Preliminares", items: 4, total: 120_000_000 },
-            { nombre: "Vacío", items: 0, total: 0 },
-          ],
-          origen: { ...PLIEGO.origen, capitulos: "reglas" },
-        }}
-        slug={SLUG}
-        urlSecop={null}
-      />
-    );
-    expect(html).toContain("Presupuesto por capítulo");
-    expect(html).toContain("Preliminares");
-    expect(html).not.toContain("Vacío");
-    expect(html).toContain("Leído del Formulario 1 con reglas deterministas.");
-  });
-
-  it("con pliego sin capítulos no pinta una tabla vacía", () => {
-    const html = renderToStaticMarkup(<PliegoFicha pliego={PLIEGO} slug={SLUG} urlSecop={null} />);
-    expect(html).not.toContain("Presupuesto por capítulo");
-  });
-
   it("con pliego: lo no declarado se dice, no se inventa, y cada bloque dice su origen", () => {
     const html = renderToStaticMarkup(<PliegoFicha pliego={PLIEGO} slug={SLUG} urlSecop={null} />);
     expect(html).toContain("Dos contratos");
