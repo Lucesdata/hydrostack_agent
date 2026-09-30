@@ -23,6 +23,6 @@ describe(".sr-only", () => {
     const usos = execSync('grep -rl "sr-only" app src --include=*.tsx --include=*.jsx', {
       encoding: "utf8",
     });
-    expect(usos).toContain("app/licitaciones/[slug]/page.tsx");
+    expect(usos).toContain("src/components/secop/ficha/ExploradorFicha.tsx");
   });
 });
