@@ -3,20 +3,20 @@ import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 
 describe("PortadaCliente", () => {
-  it("ofrece la faceta y el conteo del departamento recibido, sin cifras de demostración", () => {
+  it("pinta el conteo del departamento recibido y arranca en Colombia, sin cifras de demostración", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
         departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
         totalAbiertos={6000}
       />
     );
-    expect(html).toContain('href="/licitaciones/departamento/antioquia"');
+    // La lista plegada lleva el conteo del departamento; la faceta, el mapa.
     expect(html).toContain("5.155");
-    // El total nacional ya no se pinta como KPI (2026-09-26): sigue siendo la
-    // base del porcentaje de la ficha, 5.155 / 6.000.
-    expect(html).toContain("85,9");
+    // Se llega a la vista país (hero v2, 2026-09-28): el total nacional es la
+    // cifra del resultado y ningún departamento sale elegido.
+    expect(html).toContain("6.000");
     expect(html).not.toContain("Procesos abiertos · Colombia");
-    expect(html).toContain('aria-pressed="true"');
+    expect(html).not.toContain('aria-pressed="true"');
   });
 
   it("distingue agregados no disponibles de un conteo real en cero", () => {
@@ -50,9 +50,9 @@ describe("PortadaCliente", () => {
 
   it("usa el copy del hero y ya no muestra el CTA secundario del diagnóstico", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain("Explora el mercado de agua y saneamiento de");
-    expect(html).toContain("Colombia.");
-    expect(html).toContain("Ver fichas de procesos");
+    expect(html).toContain("Descubre en qué procesos de agua puedes");
+    expect(html).toContain("participar.");
+    expect(html).not.toContain("Ver fichas de procesos");
     // La banda "El mercado ahora" salió de la portada (2026-09-26).
     expect(html).not.toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");

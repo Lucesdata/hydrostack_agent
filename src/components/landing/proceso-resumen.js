@@ -6,7 +6,7 @@
 // "use client": lo importa un componente de cliente y lo prueban los tests.
 
 import { colorDeTipo } from "@/src/lib/classify/tipo-color";
-import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { frase, titulo } from "./texto";
 
 /** 4_850_000_000 → "$4.850 M" (millones COP). */
@@ -32,5 +32,16 @@ export function mapApiItem(p) {
     estado: titulo(p.estado) || "Publicado",
     href: p.ficha || "/licitaciones",
     fecha: p.fechaPublicacion ?? null,
+    // Lo que pide `compuertasAbsolutas()` (ProcesoParaSemaforo): la lectura sin
+    // perfil del semáforo en los destacados del hero. Lugares en título, como
+    // la línea de la entidad; un tipo fuera de los cinco no se hace pasar por uno.
+    semaforo: {
+      tipoProyecto: TIPOS_PROYECTO.includes(p.tipoProyecto) ? p.tipoProyecto : null,
+      valorEstimado: p.valorEstimado ?? null,
+      departamento: titulo(p.departamento, false) || null,
+      municipio: titulo(p.municipio, false) || null,
+      estadoApertura: p.estadoApertura ?? null,
+      fechaRecepcion: p.fechaRecepcion ?? null,
+    },
   };
 }
