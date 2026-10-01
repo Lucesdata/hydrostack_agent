@@ -89,6 +89,13 @@ export interface GateResult {
   resolvedBy: "metadata" | "document";
   /** CRÍTICO: declara si la compuerta necesita el pliego para resolverse de verdad. */
   requiredLevel: ResolutionLevel;
+  /**
+   * Solo habilitación: los indicadores que el pliego exige y el perfil no
+   * declara (etiquetas de `INDICADOR_LABEL`). Es lo que la ficha convierte en
+   * «completa ese dato»; sin él habría que leerlo del texto de `reason`.
+   * Revela tanto como `reason`, así que `verdict-publico.ts` lo redacta con él.
+   */
+  faltanEnPerfil?: string[];
 }
 
 // ===========================================================================
@@ -328,7 +335,13 @@ export const cuantiaGate: CuantiaGate = (p, proc, cfg) => {
  */
 export const plazoGate: PlazoGate = (proc, now) => {
   if (proc.fechaCierre != null) {
-    const t = new Date(proc.fechaCierre).getTime();
+    // Una fecha sin hora (columna DATE) cierra al final de ese día en Colombia,
+    // no a la medianoche UTC, que allí es la tarde del día anterior.
+    const t = new Date(
+      /^\d{4}-\d{2}-\d{2}$/.test(proc.fechaCierre)
+        ? `${proc.fechaCierre}T23:59:59-05:00`
+        : proc.fechaCierre
+    ).getTime();
     if (Number.isNaN(t)) {
       return {
         status: "UNKNOWN",
@@ -338,10 +351,10 @@ export const plazoGate: PlazoGate = (proc, now) => {
       };
     }
     const dias = Math.ceil((t - now.getTime()) / 86_400_000);
-    if (dias < 0)
+    if (t < now.getTime())
       return {
         status: "FAIL",
-        reason: `cierre vencido hace ${-dias} día(s)`,
+        reason: `cierre vencido hace ${Math.max(1, -dias)} día(s)`,
         resolvedBy: "document",
         requiredLevel: 2,
       };
@@ -384,11 +397,18 @@ export const plazoGate: PlazoGate = (proc, now) => {
 };
 
 /**
- * Ubicación (L0): la ubicación del proceso ∈ cobertura del perfil (DIVIPOLA).
- * Matchea por departamento O por municipio (la cobertura puede declararse a
- * cualquier granularidad). Resuelve nombre→código vía el crosswalk DANE estático
- * (parcial, best-effort); el depto desambigua el municipio. UNKNOWN si no resuelve
- * ni depto ni municipio.
+ * Ubicación (L0): la ubicación de la ENTIDAD contratante ∈ cobertura del perfil
+ * (DIVIPOLA). Matchea por departamento O por municipio (la cobertura puede
+ * declararse a cualquier granularidad). Resuelve nombre→código vía el crosswalk
+ * DANE estático (parcial, best-effort); el depto desambigua el municipio. UNKNOWN
+ * si no resuelve ni depto ni municipio.
+ *
+ * Fuera de cobertura es WARN, no FAIL (2026-09-28, spec
+ * `2026-09-28-ficha-bloque-decision.md` D2): el SECOP publica la sede de la
+ * entidad, no el lugar de ejecución, así que un "no cumple" afirmaría algo que no
+ * sabemos. Quien necesite seguir excluyendo esos procesos —el matching de
+ * /mis-coincidencias y de las alertas— lo hace con `fueraDeCobertura()`, no
+ * mirando el `overall`.
  */
 export const ubicacionGate: UbicacionGate = (p, proc) => {
   const deptKey = normalizeGeoText(proc.departamento);
@@ -404,7 +424,7 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
   if (deptHit || muniHit) {
     return {
       status: "PASS",
-      reason: `el proceso está en tu cobertura (${lugar})`,
+      reason: `la entidad está en tu cobertura (${lugar})`,
       resolvedBy: "metadata",
       requiredLevel: 0,
     };
@@ -418,12 +438,21 @@ export const ubicacionGate: UbicacionGate = (p, proc) => {
     };
   }
   return {
-    status: "FAIL",
-    reason: `el proceso está en ${lugar}, fuera de tu cobertura`,
+    status: "WARN",
+    reason: `la entidad está en ${lugar}, fuera de tu cobertura; el lugar de ejecución no está confirmado`,
     resolvedBy: "metadata",
     requiredLevel: 0,
   };
 };
+
+/**
+ * ¿La compuerta de ubicación dice "fuera de tu cobertura"? Hoy es su único WARN,
+ * pero se pregunta aquí y no con `status === "WARN"` suelto para que el matching
+ * no dependa de esa coincidencia si la compuerta gana otro WARN.
+ */
+export function fueraDeCobertura(g: GateResult): boolean {
+  return g.status === "WARN";
+}
 
 /** Etiqueta legible de cada indicador financiero, para mensajes de brecha. */
 const INDICADOR_LABEL: Record<string, string> = {
@@ -479,6 +508,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
   }
 
   const razones: { status: GateStatus; texto: string }[] = [];
+  const faltanEnPerfil: string[] = [];
 
   // Experiencia
   if (req.experiencia.verificar_manual) {
@@ -535,6 +565,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
     }
     const valorPerfil = valorPerfilIndicador(p, ind.indicador);
     if (valorPerfil == null) {
+      faltanEnPerfil.push(label);
       razones.push({
         status: "WARN",
         texto: `${label}: no declaraste este dato en tu perfil (exigen ${ind.operador === "gte" ? "≥" : "≤"} ${ind.valor})`,
@@ -575,6 +606,7 @@ export const habilitacionGate: HabilitacionGate = (p, proc) => {
     reason: razones.map((r) => r.texto).join(" · "),
     resolvedBy: "document",
     requiredLevel: 2,
+    ...(faltanEnPerfil.length > 0 ? { faltanEnPerfil } : {}),
   };
 };
 
@@ -615,7 +647,8 @@ export function toVerdictInput(
   return {
     ...proceso,
     sectorAgua: extra.sectorAgua ?? null,
-    fechaCierre: extra.fechaCierre ?? null,
+    // Sin cronograma del pliego, la recepción de ofertas publicada es el cierre.
+    fechaCierre: extra.fechaCierre ?? proceso.fechaRecepcion ?? null,
     categoriaUnspscOrigen: extra.categoriaUnspscOrigen,
     requisitosHabilitantes: extra.requisitosHabilitantes ?? null,
   };

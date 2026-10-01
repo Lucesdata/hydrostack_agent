@@ -57,25 +57,44 @@ export default function ExploradorFicha({ secciones }: { secciones: SeccionFicha
 
   useEffect(() => {
     let frame: number;
-    const leerHash = () => {
+    const leerHash = (inicial: boolean) => {
       const hash = window.location.hash.slice(1);
       const pliego = hash === "pliego" || hash.startsWith("pliego=");
       const destino = pliego ? "participar" : hash.replace(/^ficha-/, "");
       const encontrada = secciones.find((s) => s.id === destino);
       setActiva(encontrada?.id ?? "resumen");
-      if (pliego) {
-        frame = requestAnimationFrame(() => {
-          raiz.current?.querySelector("#pliego")?.scrollIntoView({ block: "start" });
-        });
+      // En la carga, el navegador ya saltó al ancla con todas las secciones
+      // visibles; al ocultarse las demás, esa posición queda por debajo del
+      // contenido. Se vuelve a apuntar. Al ir Atrás entre preguntas no: la
+      // vista se queda donde está la navegación.
+      const ancla = pliego
+        ? "#pliego"
+        : inicial && encontrada && hash
+          ? `#ficha-${encontrada.id}`
+          : null;
+      if (ancla) {
+        // En la carga, al instante: el `scroll-behavior: smooth` de la página
+        // dejaría la corrección compitiendo con la animación del navegador.
+        const apuntar = () =>
+          raiz.current
+            ?.querySelector(ancla)
+            ?.scrollIntoView({ block: "start", behavior: inicial ? "instant" : "auto" });
+        frame = requestAnimationFrame(apuntar);
+        // Si la página aún carga, el navegador puede volver a saltar al ancla
+        // (o la maqueta seguir moviéndose) después de este cuadro.
+        if (inicial && document.readyState !== "complete") {
+          window.addEventListener("load", () => requestAnimationFrame(apuntar), { once: true });
+        }
       }
     };
-    leerHash();
-    window.addEventListener("hashchange", leerHash);
-    window.addEventListener("popstate", leerHash);
+    const alCambiar = () => leerHash(false);
+    leerHash(true);
+    window.addEventListener("hashchange", alCambiar);
+    window.addEventListener("popstate", alCambiar);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("hashchange", leerHash);
-      window.removeEventListener("popstate", leerHash);
+      window.removeEventListener("hashchange", alCambiar);
+      window.removeEventListener("popstate", alCambiar);
     };
   }, [secciones]);
 

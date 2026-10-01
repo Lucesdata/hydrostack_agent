@@ -51,27 +51,60 @@ export default function PliegoFicha({
   );
 }
 
+/**
+ * Sin pliego: «Lo que desbloquea el pliego». Junta lo que antes se repartía entre
+ * tres casillas «está en el pliego», las filas grises de «Análisis de oferta» y
+ * este párrafo (paso 3 del plan `2026-09-28-ficha-bloque-decision`). Sigue
+ * diciendo que falta, pero como algo que el usuario puede conseguir.
+ *
+ * La lista es exactamente lo que el extractor saca (`PliegoFicha` en
+ * `pliego-ficha.ts`): ni anticipo ni plazo de ejecución, que no extrae, ni el
+ * rango de la oferta ganadora o la probabilidad de adjudicación, que no se
+ * calculan para ningún proceso.
+ */
 function SinPliego({ urlSecop }: { urlSecop: string | null }) {
   return (
-    <p className="fi-vacio">
-      <strong>Todavía no hay pliego procesado para este proceso.</strong> Los requisitos
-      habilitantes —y si cada uno es subsanable o no— están en el pliego, no en los datos abiertos
-      del SECOP.{" "}
-      {urlSecop ? (
-        <>
-          Descarga el Documento Base desde el{" "}
-          <a href={urlSecop} target="_blank" rel="noopener noreferrer">
-            expediente en SECOP II
-          </a>{" "}
-          y súbelo aquí: queda disponible para cualquiera que abra esta ficha.
-        </>
-      ) : (
-        <>
-          Si tienes el Documento Base, súbelo aquí: queda disponible para cualquiera que abra esta
-          ficha.
-        </>
-      )}
-    </p>
+    <div className="fi-desbloquea">
+      <p className="fi-desbloquea-titulo">
+        <strong>Todavía no hay pliego procesado para este proceso.</strong> Esto es lo que se
+        desbloquea al subirlo:
+      </p>
+      <ul className="fi-desbloquea-lista">
+        <li>
+          <strong>Requisitos habilitantes</strong>: experiencia e indicadores financieros exigidos,
+          y cuáles se pueden subsanar. Con tu perfil, la compuerta de habilitación se resuelve sola.
+        </li>
+        <li>
+          <strong>Presupuesto oficial y por capítulo</strong>, con aviso si no cuadra ítem a ítem.
+        </li>
+        <li>
+          <strong>Causales de rechazo</strong> sobre el presupuesto.
+        </li>
+        <li>
+          <strong>El cronograma completo</strong>, no solo la fecha de cierre.
+        </li>
+        <li>
+          <strong>Lo que el propio pliego deja abierto</strong>, para preguntarlo a tiempo.
+        </li>
+      </ul>
+      <p className="fi-desbloquea-nota">
+        Los datos abiertos del SECOP no traen nada de esto: está en el pliego.{" "}
+        {urlSecop ? (
+          <>
+            Descarga el Documento Base desde el{" "}
+            <a href={urlSecop} target="_blank" rel="noopener noreferrer">
+              expediente en SECOP II
+            </a>{" "}
+            y súbelo aquí: queda disponible para cualquiera que abra esta ficha.
+          </>
+        ) : (
+          <>
+            Si tienes el Documento Base, súbelo aquí: queda disponible para cualquiera que abra esta
+            ficha.
+          </>
+        )}
+      </p>
+    </div>
   );
 }
 

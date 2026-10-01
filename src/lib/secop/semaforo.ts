@@ -82,6 +82,8 @@ export interface CompuertaVista {
   valorCorto: string;
   /** true si hay explicación pero pide cuenta para verla (verdict-publico). */
   redactada: boolean;
+  /** Solo habilitación: los indicadores del pliego que el perfil no declara. */
+  faltanEnPerfil?: string[];
 }
 
 /** Las cinco compuertas de un veredicto real, con o sin explicación redactada. */
@@ -96,6 +98,9 @@ export function compuertasDesdeVeredicto(v: Verdict | VerdictRespuesta): Compuer
       explicacion: redactada ? null : ((g as { reason: string }).reason ?? null),
       valorCorto: PALABRA_ESTADO[g.status],
       redactada,
+      ...(!redactada && "faltanEnPerfil" in g && g.faltanEnPerfil
+        ? { faltanEnPerfil: g.faltanEnPerfil }
+        : {}),
     };
   });
 }
@@ -161,15 +166,20 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
     dato(
       "plazo",
       p.fechaRecepcion
-        ? new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "short" })
+        ? new Date(p.fechaRecepcion).toLocaleDateString("es-CO", {
+            day: "2-digit",
+            month: "short",
+            timeZone: "UTC",
+          })
         : p.estadoApertura === "Abierto"
           ? "abierto"
           : null,
       // El dataset del SECOP no trae fecha de cierre: solo la ventana binaria de
       // apertura y, en un 31% de las filas, una fecha de recepción. Se dice lo
-      // que hay, no se deduce un plazo que nadie publicó.
+      // que hay, no se deduce un plazo que nadie publicó. Es una columna DATE:
+      // se formatea en UTC para no pintar el día anterior en Colombia.
       p.fechaRecepcion
-        ? `Recepción de ofertas hasta el ${new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}.`
+        ? `Recepción de ofertas hasta el ${new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })}.`
         : p.estadoApertura === "Abierto"
           ? "Abierto a ofertas. El SECOP no publica la fecha de cierre en este dataset."
           : null
@@ -189,4 +199,258 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
       null
     ),
   ];
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  El bloque de decisión de la ficha
+//  Spec: docs/superpowers/specs/2026-09-28-ficha-bloque-decision.md
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Cada compuerta con su artículo, para escribir frases y no listas de rótulos. */
+const NOMBRE_EN_FRASE: Record<ClaveCompuerta, string> = {
+  sectorial: "el sector",
+  cuantia: "la cuantía",
+  plazo: "el plazo",
+  ubicacion: "la zona",
+  habilitacion: "la habilitación",
+};
+
+/** "la zona", "la zona y el plazo", "la zona, el plazo y la cuantía". */
+function enumerar(compuertas: CompuertaVista[]): string {
+  const nombres = compuertas.map((c) => NOMBRE_EN_FRASE[c.clave]);
+  if (nombres.length <= 1) return nombres.join("");
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+}
+
+export interface FraseVeredicto {
+  titulo: string;
+  bajada: string;
+}
+
+/**
+ * La frase del veredicto: una línea que resume las cinco compuertas.
+ *
+ * Sale SOLO del conteo de estados y de qué compuertas faltan: no es un juicio
+ * aparte (`CONDUCTA.md` §6, el `overall` se agrega, nunca se emite por su
+ * cuenta). Con los mismos estados, la misma frase.
+ *
+ * Sin perfil (`relativo === false`) no hay nada que contar: se dice lo que hay —
+ * lecturas del proceso— y qué haría falta para convertirlas en un veredicto.
+ */
+export function fraseVeredicto(compuertas: CompuertaVista[], relativo: boolean): FraseVeredicto {
+  if (!relativo) {
+    return {
+      titulo: "Esto exige el proceso. Si te sirve, depende de tu empresa.",
+      bajada:
+        "Con tu perfil de oferente, cada compuerta se abre o se cierra según tu especialidad, tu capacidad y tu zona.",
+    };
+  }
+
+  const con = (e: EstadoCompuerta) => compuertas.filter((c) => c.estado === e);
+  const fallan = con("FAIL");
+  const revisar = con("WARN");
+  const sinDato = con("UNKNOWN");
+  const cumplen = con("PASS").length;
+  const pliegoDecide = "Es una lectura, no un dictamen: quien decide si calificas es el pliego.";
+
+  if (fallan.length > 0) {
+    return {
+      titulo: `Hoy no cumples en ${enumerar(fallan)}.`,
+      bajada: `Mira el porqué antes de descartarlo: ${fallan.length === 1 ? "esa compuerta es" : "esas compuertas son"} lo que te deja fuera.`,
+    };
+  }
+
+  if (cumplen === compuertas.length) {
+    return {
+      titulo: `Cumples en las ${compuertas.length} compuertas.`,
+      bajada: `${pliegoDecide} Revísalo antes de preparar la oferta.`,
+    };
+  }
+
+  const resto = [
+    revisar.length > 0 ? `revisa ${enumerar(revisar)}` : null,
+    sinDato.length > 0 ? `falta el dato de ${enumerar(sinDato)}` : null,
+  ]
+    .filter(Boolean)
+    .join("; ");
+  const inicio =
+    cumplen === 0
+      ? "Ninguna compuerta confirma todavía que encaje"
+      : `Encaja con tu empresa en ${cumplen} de ${compuertas.length}`;
+
+  const habilitacionSinDato = sinDato.some((c) => c.clave === "habilitacion");
+  return {
+    titulo: `${inicio}: ${resto}.`,
+    bajada: habilitacionSinDato
+      ? "La habilitación solo se sabe leyendo el pliego del proceso."
+      : pliegoDecide,
+  };
+}
+
+/** A dónde lleva cada botón. El componente lo traduce a una ruta o un ancla. */
+export type DestinoPaso =
+  | "definir-perfil"
+  | "subir-pliego"
+  | "completar-perfil"
+  | "ver-porque"
+  | "ofertar-secop"
+  | "expediente-secop"
+  | "requisitos-pliego"
+  | "explorar";
+
+export interface SiguientePaso {
+  /** 0 = tu perfil, 1 = el pliego, 2 = ofertar en SECOP II. */
+  paso: 0 | 1 | 2;
+  cta: string;
+  destino: DestinoPaso;
+  ayuda: string;
+  secundario: string;
+  destinoSecundario: DestinoPaso;
+}
+
+/**
+ * Un único siguiente paso según dónde está el usuario (tabla §2e del spec).
+ * Nunca promete lo que no existe: ni alertas, ni seguimiento, ni un dictamen.
+ */
+export function siguientePaso(e: {
+  relativo: boolean;
+  conCuenta: boolean;
+  conPliego: boolean;
+  compuertas: CompuertaVista[];
+}): SiguientePaso {
+  if (!e.relativo) {
+    return {
+      paso: 0,
+      cta: "Define tu perfil",
+      destino: "definir-perfil",
+      ayuda:
+        "Un minuto y sin crear cuenta: especialidad, departamentos donde trabajas y rango de valor.",
+      secundario: "Prefiero verlo en SECOP II",
+      destinoSecundario: "expediente-secop",
+    };
+  }
+
+  if (e.compuertas.some((c) => c.estado === "FAIL")) {
+    return {
+      paso: e.conPliego ? 2 : 1,
+      cta: "Ver por qué",
+      destino: "ver-porque",
+      ayuda: "Revisa qué compuerta no cumples y por qué antes de descartar el proceso.",
+      secundario: "Explorar procesos parecidos",
+      destinoSecundario: "explorar",
+    };
+  }
+
+  if (!e.conPliego) {
+    return {
+      paso: 1,
+      cta: "Sube el pliego",
+      destino: "subir-pliego",
+      ayuda: e.conCuenta
+        ? "Es el PDF que ya descargaste del SECOP II. Lo leemos y comparamos sus requisitos con tu perfil. Hasta 5 pliegos cada 24 horas."
+        : "Es el PDF que ya descargaste del SECOP II. Para leerlo necesitas una cuenta gratuita; tu perfil pasa a ella.",
+      secundario: "Abrir el expediente en SECOP II",
+      destinoSecundario: "expediente-secop",
+    };
+  }
+
+  const faltan = e.compuertas.find((c) => c.clave === "habilitacion")?.faltanEnPerfil ?? [];
+  if (faltan.length > 0) {
+    return {
+      paso: 1,
+      cta:
+        faltan.length === 1
+          ? `Completa tu ${faltan[0]}`
+          : `Completa ${faltan.length} datos de tu perfil`,
+      destino: "completar-perfil",
+      ayuda: `El pliego lo exige y tu perfil no lo declara (${faltan.join(", ")}). Con ese dato la habilitación se resuelve sola.`,
+      secundario: "Ver los requisitos del pliego",
+      destinoSecundario: "requisitos-pliego",
+    };
+  }
+
+  return {
+    paso: 2,
+    cta: "Preparar la oferta en SECOP II",
+    destino: "ofertar-secop",
+    ayuda: "La oferta se presenta en SECOP II. Aquí tienes los requisitos a mano para armarla.",
+    secundario: "Ver los requisitos del pliego",
+    destinoSecundario: "requisitos-pliego",
+  };
+}
+
+const DIA_MS = 86_400_000;
+
+/**
+ * La ventana de ofertas: cuántos días quedan hasta la fecha de recepción y qué
+ * parte del plazo (desde la publicación) ya pasó. `null` si falta cualquiera
+ * de las dos fechas: el dataset solo trae la de recepción en un 31% de las
+ * filas, y un plazo que nadie publicó no se deduce.
+ *
+ * Recibe `ahora` para ser pura: la ficha revalida cada 12 h, así que la cuenta
+ * se hace en el navegador y no en el HTML cacheado (criterio 7 del spec).
+ */
+export function ventanaDeOfertas(
+  publicacion: string | null,
+  recepcion: string | null,
+  ahora: number
+): { diasRestantes: number; transcurrido: number } | null {
+  if (!publicacion || !recepcion) return null;
+  const inicio = Date.parse(publicacion);
+  const fin = Date.parse(recepcion);
+  if (Number.isNaN(inicio) || Number.isNaN(fin) || fin <= inicio) return null;
+  const transcurrido = Math.min(1, Math.max(0, (ahora - inicio) / (fin - inicio)));
+  return { diasRestantes: Math.ceil((fin - ahora) / DIA_MS), transcurrido };
+}
+
+/** "quedan 16 días", "queda 1 día", "cierra hoy", "plazo vencido". */
+export function textoDiasRestantes(dias: number): string {
+  if (dias > 1) return `quedan ${dias} días`;
+  if (dias === 1) return "queda 1 día";
+  if (dias === 0) return "cierra hoy";
+  return "plazo vencido";
+}
+
+/**
+ * Una línea para quien no sabe qué es cada modalidad (el «¿Qué significa?» de
+ * la ficha). Solo las que el dataset trae con frecuencia; para el resto no se
+ * inventa: `null` y la ficha no ofrece la explicación.
+ */
+export function explicacionModalidad(modalidad: string | null): string | null {
+  const m = (modalidad ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (m.startsWith("licitacion publica"))
+    return "Convocatoria abierta a cualquier oferente que cumpla el pliego. Es la regla general para los contratos de mayor valor.";
+  if (m.startsWith("seleccion abreviada"))
+    return "Un procedimiento más corto que la licitación, para los casos que fija la ley: menor cuantía, bienes de características uniformes y otros.";
+  if (m.startsWith("minima cuantia"))
+    return "Para contratos de valor bajo. El trámite es corto y se adjudica a la oferta de menor precio que cumpla.";
+  if (m.startsWith("concurso de meritos"))
+    return "Para consultorías e interventorías: se elige por experiencia y calidad del equipo, no por precio.";
+  if (m.startsWith("contratacion directa"))
+    return "La entidad elige al contratista sin convocatoria abierta, en los casos que permite la ley.";
+  if (m.startsWith("contratacion regimen especial"))
+    return "La entidad contrata con su propio manual y no con el Estatuto General, como hacen muchas empresas de servicios públicos.";
+  return null;
+}
+
+/**
+ * «15 oct 2026» a partir de una fecha de día («2026-10-15», columna `date`).
+ *
+ * Se formatea en UTC y no en hora de Colombia a propósito: `new Date("2026-10-15")`
+ * es la medianoche UTC, y pasada a Bogotá (UTC−5) cae el 14. Así salió en la
+ * primera versión del bloque, un día antes que las compuertas y que «Fechas».
+ */
+export function fechaCortaDeDia(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d
+    .toLocaleDateString("es-CO", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+    .replace(/\./g, "")
+    .replace(/ de /g, " ");
 }

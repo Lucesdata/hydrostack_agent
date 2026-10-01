@@ -185,6 +185,13 @@ Entidades y flujos principales:
   `overall === "FAIL"` (quien no puede participar merece saber por qué) y las
   compuertas `UNKNOWN` (no hay nada que ocultar). La redacción es del servidor;
   hacerla en el render dejaría los `reason` en la pestaña de red.
+- **La zona fuera de cobertura es `WARN`, no `FAIL`** (2026-09-28, D2 de
+  `docs/superpowers/specs/2026-09-28-ficha-bloque-decision.md`): la fuente
+  publica la sede de la entidad, no el lugar de ejecución. Consecuencias: un
+  proceso que solo fallaba por zona ya no es `overall === "FAIL"`, así que su
+  razón se redacta sin cuenta; y el matching (/mis-coincidencias, alertas, vista
+  previa del perfil) sigue excluyéndolo con `fueraDeCobertura()`, no por el
+  `overall`. No devolver la zona a `FAIL` para "arreglar" el filtro.
 - `usuario.plan` (`text`, default `'gratis'`) existe pero **ningún handler la
   lee todavía**, y hoy no hace falta: **ninguna capacidad es `pro`**. El
   análisis de pliego (`pliego_extraer`) pasó a `gratis` el 2026-09-27 por
@@ -219,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-09-28 (hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-01 (bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -433,8 +440,9 @@ URL retirada redirige con un 308 (permanente) desde `next.config.js`. Las tablas
 quedan: soltarlas es un `DROP` sobre la base viva.
 PR 2 hecho: el pliego vive en la §4 de la ficha (`PliegoFicha.tsx`,
 `src/lib/secop/pliego-ficha.ts`): con pliego subido muestra requisitos,
-presupuesto y causales con su origen (reglas o modelo), y su cronograma y
-capítulos llenan la §5 y la §8; sin pliego, ofrece subirlo ahí mismo. La ficha
+presupuesto (también por capítulo, desde el 2026-09-28) y causales con su
+origen (reglas o modelo), y su cronograma llena «Fechas»; sin pliego, dice lo
+que se desbloquea al subirlo y ofrece subirlo ahí mismo. La ficha
 sigue estática: el formulario se pinta para todos, la acción de servidor
 (`subirPliegoDesdeFichaAction`) exige sesión, revalida la ficha y devuelve el
 resultado en el hash (`#pliego=ok`), que lee `AvisoPliego`. Salieron `/pliego`,
@@ -454,17 +462,46 @@ agrupa ya por `proveedor_key`, no por nombre. Salieron `/competidores`,
 `getCifrasSector` (`cifras.ts` solo exporta `getProcesosVigilados`). Con esto el
 plan queda completo.
 
+**Bloque de decisión (2026-09-28).** Vive en «Quiero participar» de la ficha
+interactiva (así lo pide su spec del 2026-09-29, que conserva los seis accesos
+públicos): `BloqueDecision.tsx`, isla de cliente que sustituye a
+`SemaforoConPerfil` con su misma regla (el HTML cacheado lleva la lectura
+absoluta y nada del perfil). Veredicto en una frase, tres datos (cuánto, hasta
+cuándo, cómo se contrata), las cinco compuertas dibujadas como **canal**
+(`CanalCompuertas.tsx`: la forma dice el estado además de la palabra y el color;
+el agua se corta en la primera que no cumple) y **un único siguiente paso**.
+Frase y paso salen de funciones puras de `semaforo.ts` (`fraseVeredicto`,
+`siguientePaso`, `ventanaDeOfertas`, `explicacionModalidad`, `fechaCortaDeDia`):
+la frase se deriva del conteo de compuertas, nunca es un juicio aparte. «Quedan
+N días» se calcula en el navegador. **Sin cuenta se define el perfil ahí mismo**
+con `OferenteWizard` (localStorage); la cuenta se pide al subir el pliego, y
+`sincronizarPerfilConCuenta()` (`clientStore.ts`, compartida con el explorador)
+sube el perfil local a la cuenta nueva. `habilitacionGate` devuelve
+`faltanEnPerfil` y `verdict-publico.ts` lo redacta con el `reason`. «Ver por
+qué» es un botón y no un enlace `#…`: `ExploradorFicha` elige sección por el
+hash y un ancla desconocida la devuelve al Resumen. La banda va en
+`--accent-ocean` con `--on-ocean-muted` y `--accent-river`; las pastillas del
+canal, al 6 % de su color (al 10 % el verde y el ámbar no llegaban a AA). Sin
+pliego, `PliegoFicha` dice «lo que se desbloquea al subirlo» (solo lo que el
+extractor saca). Spec y plan:
+`docs/superpowers/{specs,plans}/2026-09-28-ficha-bloque-decision.md`; el paso 3
+de ese plan (orden de secciones) quedó sustituido por las seis preguntas.
+
 Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/plans/2026-09-24-landing-hero-kpis.md).
 
 **Ficha interactiva móvil (2026-09-29).** `/licitaciones/[slug]` se organiza
 en seis preguntas: Resumen, ¿Para qué?, Dinero, Plazos, Responsables y Metas.
 `ExploradorFicha.tsx` solo selecciona contenido construido en el servidor;
 sin JavaScript todas las secciones se pueden leer. Los controles guardan la
-sección en el hash y permiten Atrás. `#pliego` y `#pliego=…` abren «Participar»,
+sección en el hash y permiten Atrás. Un enlace directo a una sección (`#ficha-participar`)
+se vuelve a apuntar al cargar, sin animación: el navegador salta con las siete
+visibles y el `scroll-behavior: smooth` competiría. `#pliego` y `#pliego=…` abren «Participar»,
 que conserva el semáforo, `PliegoFicha` y `RivalesFicha`. Las fuentes se despliegan
 por sección. Sigue la misma URL, las mismas consultas y el ISR de 12 horas.
 Las fechas de publicación/recepción son columnas DATE: conservar su día de
 calendario, sin convertir medianoche UTC al día anterior en Colombia.
+La compuerta de plazo toma `fecha_recepcion` cuando no hay cronograma del pliego
+(`toVerdictInput`), y esa fecha cierra al final del día en Colombia.
 Necesidad, financiación y metas permanecen por verificar cuando no hay datos;
 no deducir avance de obra del estado de contratación ni sitio de ejecución de
 la ubicación de la entidad. Diseño aprobado y alcance en

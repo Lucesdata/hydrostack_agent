@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import SemaforoConPerfil from "@/src/components/secop/ficha/SemaforoConPerfil";
+import BloqueDecision from "@/src/components/secop/ficha/BloqueDecision";
 import ExploradorFicha from "@/src/components/secop/ficha/ExploradorFicha";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
-import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
-import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
+import { compuertasAbsolutas, fechaCortaDeDia } from "@/src/lib/secop/semaforo";
 import {
   aSecopProceso,
   competidoresComparables,
@@ -357,10 +356,27 @@ export default async function FichaPage({ params }: Props) {
               )}
             </div>
           )}
-          <SemaforoConPerfil
+          {/* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
+              en «Quiero participar» como pide el spec de la ficha interactiva
+              (2026-09-29): los seis accesos públicos se conservan. */}
+          <BloqueDecision
             proceso={aSecopProceso(p)}
             absolutas={compuertasAbsolutas(p)}
-            nota="Consulta lo que exige el proceso. Define tu perfil para compararlo; confirma siempre los requisitos en el pliego."
+            conPliego={pliego !== null}
+            urlSecop={urlSecop}
+            presupuesto={valor !== null ? formatCopFull(valor) : "Sin presupuesto publicado"}
+            conPresupuesto={valor !== null}
+            fechaPublicacion={p.fechaPublicacion}
+            fechaRecepcion={p.fechaRecepcion}
+            fechaPublicacionTexto={fechaCortaDeDia(p.fechaPublicacion)}
+            fechaRecepcionTexto={fechaCortaDeDia(p.fechaRecepcion)}
+            estadoApertura={p.estadoApertura}
+            modalidad={p.modalidad}
+            hrefExplorar={
+              p.tipoProyecto
+                ? `/licitaciones/tipo/${TIPO_PROYECTO[p.tipoProyecto].slug}`
+                : "/licitaciones/explorar"
+            }
           />
           <section id="pliego" className="fi-sec">
             <h3 className="fi-h2">Requisitos y pliego</h3>
@@ -385,7 +401,7 @@ export default async function FichaPage({ params }: Props) {
 
   return (
     <div className="clr-page fi-pagina">
-      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA + ESTILOS_SEMAFORO }} />
+      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(schema) }}

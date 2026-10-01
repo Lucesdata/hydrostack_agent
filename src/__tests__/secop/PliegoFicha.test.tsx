@@ -43,6 +43,21 @@ describe("PliegoFicha (§4 de la ficha)", () => {
     expect(html).not.toContain("<details");
   });
 
+  it("sin pliego: lo que se desbloquea es exactamente lo que el extractor saca", () => {
+    const html = renderToStaticMarkup(<PliegoFicha pliego={null} slug={SLUG} urlSecop={null} />);
+    for (const texto of [
+      "Requisitos habilitantes",
+      "Presupuesto oficial y por capítulo",
+      "Causales de rechazo",
+      "El cronograma completo",
+      "Lo que el propio pliego deja abierto",
+    ]) {
+      expect(html).toContain(texto);
+    }
+    // Nada que el extractor no saque ni nada que no se calcule.
+    expect(html).not.toMatch(/anticipo|plazo de ejecución|oferta ganadora|probabilidad/i);
+  });
+
   it("con pliego: lo no declarado se dice, no se inventa, y cada bloque dice su origen", () => {
     const html = renderToStaticMarkup(<PliegoFicha pliego={PLIEGO} slug={SLUG} urlSecop={null} />);
     expect(html).toContain("Dos contratos");

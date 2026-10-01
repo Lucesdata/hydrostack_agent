@@ -4,6 +4,7 @@ import {
   cuantiaGate,
   plazoGate,
   ubicacionGate,
+  fueraDeCobertura,
   habilitacionGate,
   aggregateVerdict,
   buildVerdict,
@@ -214,6 +215,15 @@ describe("plazoGate (L0 parcial, D1)", () => {
     expect(plazoGate(proc({ fechaCierre: iso(-1) }), NOW).status).toBe("FAIL");
   });
 
+  it("una fecha sin hora cierra al final de ese día en Colombia, no a medianoche UTC", () => {
+    // NOW = 2026-06-27T00:00Z, que en Bogotá es la tarde del 26: el 26 sigue abierto.
+    const r = plazoGate(proc({ fechaCierre: "2026-06-26" }), NOW);
+    expect(r.status).toBe("WARN");
+    expect(r.reason).toBe("cierra en 1 día(s)");
+    expect(plazoGate(proc({ fechaCierre: "2026-06-25" }), NOW).status).toBe("FAIL");
+    expect(plazoGate(proc({ fechaCierre: "2026-07-20" }), NOW).status).toBe("PASS");
+  });
+
   it("#1 fechaCierre inválida → UNKNOWN (no PASS con NaN)", () => {
     expect(plazoGate(proc({ fechaCierre: "no-es-fecha" }), NOW).status).toBe("UNKNOWN");
   });
@@ -224,8 +234,24 @@ describe("ubicacionGate (L0 — DIVIPOLA depto)", () => {
     expect(ubicacionGate(profile, proc({ departamento: "Valle del Cauca" })).status).toBe("PASS");
   });
 
-  it("departamento fuera de la cobertura → FAIL", () => {
-    expect(ubicacionGate(profile, proc({ departamento: "Antioquia" })).status).toBe("FAIL");
+  it("departamento fuera de la cobertura → WARN, hablando de la entidad (D2, 2026-09-28)", () => {
+    const g = ubicacionGate(profile, proc({ departamento: "Antioquia", ciudad: "" }));
+    expect(g.status).toBe("WARN");
+    expect(g.reason).toBe(
+      "la entidad está en Antioquia, fuera de tu cobertura; el lugar de ejecución no está confirmado"
+    );
+    expect(fueraDeCobertura(g)).toBe(true);
+  });
+
+  it("dentro de la cobertura habla de la entidad, no del proceso", () => {
+    const g = ubicacionGate(profile, proc());
+    expect(g.reason).toBe("la entidad está en tu cobertura (Cali, Valle del Cauca)");
+    expect(fueraDeCobertura(g)).toBe(false);
+  });
+
+  it("ubicación no reconocida no cuenta como fuera de cobertura", () => {
+    const g = ubicacionGate(profile, proc({ departamento: "Tierra del Nunca" }));
+    expect(fueraDeCobertura(g)).toBe(false);
   });
 
   it("departamento no reconocido → UNKNOWN", () => {
@@ -241,11 +267,11 @@ describe("ubicacionGate (L0 — DIVIPOLA depto)", () => {
     ).toBe("PASS");
   });
 
-  it("#2 cobertura solo por municipio → FAIL si el municipio no coincide", () => {
+  it("#2 cobertura solo por municipio → WARN si el municipio no coincide", () => {
     const soloMuni = { ...profile, cobertura: { departamentos: [], municipios: ["76001"] } };
     expect(
       ubicacionGate(soloMuni, proc({ departamento: "Valle del Cauca", ciudad: "Palmira" })).status
-    ).toBe("FAIL");
+    ).toBe("WARN");
   });
 
   it("ubicacionGate acepta un PerfilMinimo", () => {
@@ -370,6 +396,19 @@ describe("toVerdictInput (adaptador SecopProceso → VerdictProcessInput)", () =
     expect(vi.fechaCierre).toBeNull();
   });
 
+  it("sin cronograma del pliego, la recepción de ofertas publicada es el cierre", () => {
+    const vi = toVerdictInput({ ...baseProceso, fechaRecepcion: "2026-07-20" });
+    expect(vi.fechaCierre).toBe("2026-07-20");
+    expect(plazoGate(vi, NOW).status).toBe("PASS");
+    // El cronograma del pliego, si llega, manda sobre el dato publicado.
+    expect(
+      toVerdictInput(
+        { ...baseProceso, fechaRecepcion: "2026-07-20" },
+        { fechaCierre: "2026-07-01" }
+      ).fechaCierre
+    ).toBe("2026-07-01");
+  });
+
   it("aplica los extras cuando se proveen", () => {
     const vi = toVerdictInput(baseProceso, { sectorAgua: true, fechaCierre: "2026-07-01" });
     expect(vi.sectorAgua).toBe(true);
@@ -393,6 +432,12 @@ describe("buildVerdict (orquestador)", () => {
     expect(v.gates.habilitacion.status).toBe("UNKNOWN");
     // proc por defecto: sectorial PASS, cuantia PASS, plazo WARN (abierto), ubicacion PASS → overall WARN
     expect(v.overall).toBe("WARN");
+  });
+
+  it("la zona fuera de cobertura ya no hace FAIL el veredicto", () => {
+    const v = buildVerdict(profile, proc({ departamento: "Antioquia", ciudad: "" }), NOW);
+    expect(v.gates.ubicacion.status).toBe("WARN");
+    expect(v.overall).not.toBe("FAIL");
   });
 });
 
@@ -434,6 +479,48 @@ describe("habilitacionGate (L2 — con requisitos estructurados)", () => {
     const r = habilitacionGate(perfilConRup, p);
     expect(r.status).toBe("PASS");
     expect(r.requiredLevel).toBe(2);
+  });
+
+  it("indicador exigido que el perfil no declara → WARN y faltanEnPerfil con su etiqueta", () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: {
+          valor_min_smmlv: 3000,
+          unspsc_exigidos: ["83101500"],
+          max_contratos_aportables: null,
+          verificar_manual: false,
+          cita_textual: "x",
+        },
+        indicadores_financieros: [
+          {
+            indicador: "patrimonio_smmlv",
+            operador: "gte",
+            valor: 1000,
+            verificar_manual: false,
+            cita_textual: "y",
+          },
+        ],
+      },
+    });
+    const r = habilitacionGate(perfilConRup, p);
+    expect(r.status).toBe("WARN");
+    expect(r.faltanEnPerfil).toEqual(["patrimonio (SMMLV)"]);
+  });
+
+  it("sin datos que falten en el perfil no hay faltanEnPerfil", () => {
+    const p = proc({
+      requisitosHabilitantes: {
+        experiencia: {
+          valor_min_smmlv: 3000,
+          unspsc_exigidos: ["83101500"],
+          max_contratos_aportables: null,
+          verificar_manual: false,
+          cita_textual: "x",
+        },
+        indicadores_financieros: [],
+      },
+    });
+    expect(habilitacionGate(perfilConRup, p)).not.toHaveProperty("faltanEnPerfil");
   });
 
   it("brecha de experiencia cuantificada exacta", () => {

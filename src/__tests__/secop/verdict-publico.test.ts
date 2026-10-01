@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { redactarVerdict, razonDe } from "@/src/lib/secop/verdict-publico";
-import type { GateResult, GateStatus, Verdict } from "@/src/lib/secop/verdict";
+import {
+  aggregateVerdict,
+  type GateResult,
+  type GateStatus,
+  type Verdict,
+} from "@/src/lib/secop/verdict";
 
 /**
  * Centinelas: cadenas improbables y distinguibles entre sí. La prueba de fuga
@@ -114,6 +119,69 @@ describe("redactarVerdict — excepción overall FAIL", () => {
       "WARN" // overall inconsistente a propósito: la excepción mira `overall`
     );
     expect(JSON.stringify(redactarVerdict(soloUna))).not.toContain(CENTINELA.cuantia);
+  });
+});
+
+describe("redactarVerdict — zona fuera de cobertura (D2, 2026-09-28)", () => {
+  // La zona fuera de cobertura dejó de ser FAIL: con las demás favorables, el
+  // overall agregado ya no es FAIL y su razón se redacta como cualquier "revisar".
+  const base = verdict(
+    {
+      sectorial: "PASS",
+      cuantia: "PASS",
+      plazo: "PASS",
+      ubicacion: "WARN",
+      habilitacion: "PASS",
+    },
+    "PASS"
+  );
+  const soloZona: Verdict = { ...base, overall: aggregateVerdict(base.gates) };
+
+  it("el overall agregado es WARN, no FAIL", () => {
+    expect(soloZona.overall).toBe("WARN");
+  });
+
+  it("sin cuenta, la razón de la zona se redacta", () => {
+    expect(JSON.stringify(redactarVerdict(soloZona))).not.toContain(CENTINELA.ubicacion);
+  });
+});
+
+describe("redactarVerdict — faltanEnPerfil", () => {
+  const CENTINELA_FALTA = "CENTINELA-FALTA-9f30";
+  const base = verdict(
+    {
+      sectorial: "PASS",
+      cuantia: "PASS",
+      plazo: "PASS",
+      ubicacion: "PASS",
+      habilitacion: "WARN",
+    },
+    "WARN"
+  );
+  const conFalta: Verdict = {
+    ...base,
+    gates: {
+      ...base.gates,
+      habilitacion: { ...base.gates.habilitacion, faltanEnPerfil: [CENTINELA_FALTA] },
+    },
+  };
+
+  it("sin cuenta se redacta junto con la razón", () => {
+    const json = JSON.stringify(redactarVerdict(conFalta));
+    expect(json).not.toContain(CENTINELA_FALTA);
+    expect(json).not.toContain(CENTINELA.habilitacion);
+  });
+
+  it("cuando la razón se conserva, faltanEnPerfil viaja con ella", () => {
+    const fail: Verdict = {
+      ...conFalta,
+      overall: "FAIL",
+      gates: {
+        ...conFalta.gates,
+        habilitacion: { ...conFalta.gates.habilitacion, status: "FAIL" },
+      },
+    };
+    expect(JSON.stringify(redactarVerdict(fail))).toContain(CENTINELA_FALTA);
   });
 });
 

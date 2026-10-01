@@ -84,7 +84,9 @@ describe("Ficha pública para explorar desde el celular", () => {
       expect(salida).toContain(`id="ficha-${id}"`);
     }
     expect(salida).toContain("Quiero participar");
-    expect(salida).toContain("Define tu perfil y compara");
+    // El bloque de decisión (PR #95) sustituye al semáforo dentro de Participar.
+    expect(salida).toContain("¿Es para ti?");
+    expect(salida).toMatch(/<button[^>]*class="fd-cta"[^>]*>Define tu perfil<\/button>/);
     expect(salida).toContain('name="file"');
     expect(salida).toContain('id="pliego"');
   });
