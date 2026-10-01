@@ -99,8 +99,9 @@ export function ruta(id) {
  * `competidores` se quedaron, pero apuntan a las fichas: sus páginas también
  * salieron y viven en la §4 y la §7 de cada una.
  *
- * Una sección sin entrada aquí no se lista en ningún índice. Hoy la única es
- * `veredicto`, que no es una página aparte sino una parte de /licitaciones.
+ * Una sección sin entrada aquí no se lista en ningún índice. Hoy son
+ * `veredicto`, que no es una página aparte sino una parte de /licitaciones, y
+ * `diagnostico-historial`, que se abre desde el propio diagnóstico.
  */
 export const NOMBRE_POR_ID = {
   diagnostico: "Diagnóstico",
@@ -126,7 +127,9 @@ export const NOMBRE_POR_ID = {
   alertas: "Alertas",
   precios: "Precios y acceso",
   perfil: "Mi perfil RUP",
-  "diagnostico-historial": "Historial de diagnóstico",
+  // "diagnostico-historial" no lleva nombre desde el 2026-10-01: salió del menú
+  // de usuario y su puerta es el resultado de /diagnostico («Compáralo con los
+  // anteriores») y el panel de /mis-coincidencias, no un índice.
   pliego: "Análisis de pliego en cada ficha",
 };
 
@@ -167,14 +170,15 @@ export const COLUMNAS_PIE = [
  * única que enlazaba /perfil y /diagnostico/historial — dos rutas que ni
  * siquiera estaban en este catálogo, así que `enlaces.test.ts` nunca comprobó
  * que existieran. Ahora salen de aquí como las demás.
+ *
+ * Desde el 2026-10-01 solo lleva lo que se lee en una ficha: el perfil (con él
+ * se calcula el semáforo de «Quiero participar») y las coincidencias (las
+ * fichas que encajan con él). Salieron «Alertas», que ya está en el nav a un
+ * palmo del avatar; «Mis filtros», que configura el correo diario y sigue en el
+ * pie («Tu cuenta»); e «Historial de diagnóstico», que no
+ * alimenta la ficha (CLAUDE.md §2) y se abre desde el resultado del diagnóstico.
  */
-export const MENU_CUENTA = [
-  "perfil",
-  "coincidencias",
-  "filtros",
-  "diagnostico-historial",
-  "alertas",
-];
+export const MENU_CUENTA = ["perfil", "coincidencias"];
 
 /**
  * Las secciones nombrables agrupadas por nivel de acceso, en el orden de

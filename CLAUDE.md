@@ -320,6 +320,10 @@ camino lleva `data-dpto` y el hero escucha por delegación. El contorno del
 elegido se dibuja en una capa aparte encima de todos (`.clr-mapa__marca`, prop
 `capaSeleccion`): el cliente le copia el `d`, **no reordena el SVG**, que es de
 React. El clic del mapa **sigue navegando** a la faceta (decisión D).
+El menú del avatar (`MENU_CUENTA`) lleva desde el 2026-10-01 solo lo que se lee
+en una ficha: «Mi perfil RUP» (calcula el semáforo) y «Mis coincidencias».
+«Alertas» ya está en el nav, «Mis filtros» en el pie y el historial de
+diagnóstico se abre desde el propio diagnóstico.
 
 **Ficha del departamento y tooltip (2026-09-26).** La portada ya no usa
 `procesosPorDepartamento()` sino `detallePorDepartamento()` (misma consulta,
