@@ -166,15 +166,20 @@ export function compuertasAbsolutas(p: ProcesoParaSemaforo): CompuertaVista[] {
     dato(
       "plazo",
       p.fechaRecepcion
-        ? new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "short" })
+        ? new Date(p.fechaRecepcion).toLocaleDateString("es-CO", {
+            day: "2-digit",
+            month: "short",
+            timeZone: "UTC",
+          })
         : p.estadoApertura === "Abierto"
           ? "abierto"
           : null,
       // El dataset del SECOP no trae fecha de cierre: solo la ventana binaria de
       // apertura y, en un 31% de las filas, una fecha de recepción. Se dice lo
-      // que hay, no se deduce un plazo que nadie publicó.
+      // que hay, no se deduce un plazo que nadie publicó. Es una columna DATE:
+      // se formatea en UTC para no pintar el día anterior en Colombia.
       p.fechaRecepcion
-        ? `Recepción de ofertas hasta el ${new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}.`
+        ? `Recepción de ofertas hasta el ${new Date(p.fechaRecepcion).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })}.`
         : p.estadoApertura === "Abierto"
           ? "Abierto a ofertas. El SECOP no publica la fecha de cierre en este dataset."
           : null

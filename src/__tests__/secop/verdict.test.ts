@@ -215,6 +215,15 @@ describe("plazoGate (L0 parcial, D1)", () => {
     expect(plazoGate(proc({ fechaCierre: iso(-1) }), NOW).status).toBe("FAIL");
   });
 
+  it("una fecha sin hora cierra al final de ese día en Colombia, no a medianoche UTC", () => {
+    // NOW = 2026-06-27T00:00Z, que en Bogotá es la tarde del 26: el 26 sigue abierto.
+    const r = plazoGate(proc({ fechaCierre: "2026-06-26" }), NOW);
+    expect(r.status).toBe("WARN");
+    expect(r.reason).toBe("cierra en 1 día(s)");
+    expect(plazoGate(proc({ fechaCierre: "2026-06-25" }), NOW).status).toBe("FAIL");
+    expect(plazoGate(proc({ fechaCierre: "2026-07-20" }), NOW).status).toBe("PASS");
+  });
+
   it("#1 fechaCierre inválida → UNKNOWN (no PASS con NaN)", () => {
     expect(plazoGate(proc({ fechaCierre: "no-es-fecha" }), NOW).status).toBe("UNKNOWN");
   });
@@ -385,6 +394,19 @@ describe("toVerdictInput (adaptador SecopProceso → VerdictProcessInput)", () =
     expect(vi.estadoApertura).toBe("Abierto");
     expect(vi.sectorAgua).toBeNull();
     expect(vi.fechaCierre).toBeNull();
+  });
+
+  it("sin cronograma del pliego, la recepción de ofertas publicada es el cierre", () => {
+    const vi = toVerdictInput({ ...baseProceso, fechaRecepcion: "2026-07-20" });
+    expect(vi.fechaCierre).toBe("2026-07-20");
+    expect(plazoGate(vi, NOW).status).toBe("PASS");
+    // El cronograma del pliego, si llega, manda sobre el dato publicado.
+    expect(
+      toVerdictInput(
+        { ...baseProceso, fechaRecepcion: "2026-07-20" },
+        { fechaCierre: "2026-07-01" }
+      ).fechaCierre
+    ).toBe("2026-07-01");
   });
 
   it("aplica los extras cuando se proveen", () => {

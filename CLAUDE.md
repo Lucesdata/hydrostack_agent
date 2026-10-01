@@ -480,11 +480,15 @@ Antecedente (primera etapa, 2026-09-24): [plan de la etapa](docs/superpowers/pla
 en seis preguntas: Resumen, ¿Para qué?, Dinero, Plazos, Responsables y Metas.
 `ExploradorFicha.tsx` solo selecciona contenido construido en el servidor;
 sin JavaScript todas las secciones se pueden leer. Los controles guardan la
-sección en el hash y permiten Atrás. `#pliego` y `#pliego=…` abren «Participar»,
+sección en el hash y permiten Atrás. Un enlace directo a una sección (`#ficha-participar`)
+se vuelve a apuntar al cargar, sin animación: el navegador salta con las siete
+visibles y el `scroll-behavior: smooth` competiría. `#pliego` y `#pliego=…` abren «Participar»,
 que conserva el semáforo, `PliegoFicha` y `RivalesFicha`. Las fuentes se despliegan
 por sección. Sigue la misma URL, las mismas consultas y el ISR de 12 horas.
 Las fechas de publicación/recepción son columnas DATE: conservar su día de
 calendario, sin convertir medianoche UTC al día anterior en Colombia.
+La compuerta de plazo toma `fecha_recepcion` cuando no hay cronograma del pliego
+(`toVerdictInput`), y esa fecha cierra al final del día en Colombia.
 Necesidad, financiación y metas permanecen por verificar cuando no hay datos;
 no deducir avance de obra del estado de contratación ni sitio de ejecución de
 la ubicación de la entidad. Diseño aprobado y alcance en

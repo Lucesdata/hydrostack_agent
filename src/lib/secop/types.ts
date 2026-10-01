@@ -36,6 +36,9 @@ export interface SecopProceso {
   url: string | null;
   /** Apertura del proceso (Abierto/Cerrado). null si la fuente no lo trae. */
   estadoApertura: EstadoApertura | null;
+  /** Último día de recepción de ofertas (columna DATE, `YYYY-MM-DD`). Opcional:
+   *  solo lo trae quien lo lee de `proceso.fecha_recepcion` (la ficha). */
+  fechaRecepcion?: string | null;
   /** Gate de acceso documental (Fase B2/C). Preliminar vía preclassify; se
    *  refina con el probe on-demand. */
   documentAccess: DocumentAccess;

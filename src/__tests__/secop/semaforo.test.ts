@@ -105,6 +105,15 @@ describe("lectura absoluta (sin perfil)", () => {
     const abierto = compuertasAbsolutas({ ...base, estadoApertura: "Abierto" });
     expect(abierto.find((x) => x.clave === "plazo")!.explicacion).toContain("no publica la fecha");
   });
+
+  it("la fecha de recepción (DATE) conserva su día de calendario", () => {
+    const plazo = compuertasAbsolutas({ ...base, fechaRecepcion: "2026-10-15" }).find(
+      (x) => x.clave === "plazo"
+    )!;
+    expect(plazo.valorCorto).toContain("15");
+    expect(plazo.explicacion).toContain("15");
+    expect(plazo.explicacion).not.toContain("14");
+  });
 });
 
 describe("lectura relativa (con veredicto)", () => {

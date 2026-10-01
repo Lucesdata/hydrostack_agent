@@ -122,6 +122,7 @@ export function aSecopProceso(p: ProcesoFicha): SecopProceso {
     adjudicatario: null,
     url: p.url,
     estadoApertura: (p.estadoApertura as SecopProceso["estadoApertura"]) ?? null,
+    fechaRecepcion: p.fechaRecepcion,
     documentAccess: (p.documentAccess as SecopProceso["documentAccess"]) ?? "UNKNOWN",
     accessMessage: "",
   };

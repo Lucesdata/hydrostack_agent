@@ -335,7 +335,13 @@ export const cuantiaGate: CuantiaGate = (p, proc, cfg) => {
  */
 export const plazoGate: PlazoGate = (proc, now) => {
   if (proc.fechaCierre != null) {
-    const t = new Date(proc.fechaCierre).getTime();
+    // Una fecha sin hora (columna DATE) cierra al final de ese día en Colombia,
+    // no a la medianoche UTC, que allí es la tarde del día anterior.
+    const t = new Date(
+      /^\d{4}-\d{2}-\d{2}$/.test(proc.fechaCierre)
+        ? `${proc.fechaCierre}T23:59:59-05:00`
+        : proc.fechaCierre
+    ).getTime();
     if (Number.isNaN(t)) {
       return {
         status: "UNKNOWN",
@@ -345,10 +351,10 @@ export const plazoGate: PlazoGate = (proc, now) => {
       };
     }
     const dias = Math.ceil((t - now.getTime()) / 86_400_000);
-    if (dias < 0)
+    if (t < now.getTime())
       return {
         status: "FAIL",
-        reason: `cierre vencido hace ${-dias} día(s)`,
+        reason: `cierre vencido hace ${Math.max(1, -dias)} día(s)`,
         resolvedBy: "document",
         requiredLevel: 2,
       };
@@ -641,7 +647,8 @@ export function toVerdictInput(
   return {
     ...proceso,
     sectorAgua: extra.sectorAgua ?? null,
-    fechaCierre: extra.fechaCierre ?? null,
+    // Sin cronograma del pliego, la recepción de ofertas publicada es el cierre.
+    fechaCierre: extra.fechaCierre ?? proceso.fechaRecepcion ?? null,
     categoriaUnspscOrigen: extra.categoriaUnspscOrigen,
     requisitosHabilitantes: extra.requisitosHabilitantes ?? null,
   };
