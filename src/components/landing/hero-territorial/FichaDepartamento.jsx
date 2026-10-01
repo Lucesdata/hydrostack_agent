@@ -23,8 +23,17 @@ export function porcentajeNacional(n, totalAbiertos) {
  * portada-esencial): los publicados en 7 días, el monto en juego y las
  * entidades siguen en /licitaciones/comparar; la nota de la sede va en la
  * cabecera del mapa, que es donde define lo que se ve.
+ *
+ * `onVolver`, si llega, pinta «← Colombia» en la cabecera: la vista país es la
+ * inicial (2026-09-28, hero v2) y elegir un departamento no debe ser un viaje
+ * sin vuelta.
  */
-export default function FichaDepartamento({ departamento, totalAbiertos, vistaPrevia = false }) {
+export default function FichaDepartamento({
+  departamento,
+  totalAbiertos,
+  vistaPrevia = false,
+  onVolver = undefined,
+}) {
   // Sin departamento (ninguno tiene procesos o no hay datos) habla del país:
   // su total, que distingue un cero real (0) de un dato ausente (—).
   const esPais = !departamento;
@@ -44,7 +53,18 @@ export default function FichaDepartamento({ departamento, totalAbiertos, vistaPr
     >
       <div className="aqFichaCab">
         <h2>{departamento?.label ?? "Colombia"}</h2>
-        {vistaPrevia ? <span className="aqFichaPrevia">Vista previa</span> : null}
+        {vistaPrevia ? (
+          <span className="aqFichaPrevia">Vista previa</span>
+        ) : onVolver ? (
+          <button
+            type="button"
+            className="aqFichaVolver"
+            onClick={onVolver}
+            aria-label="Volver a la vista de Colombia"
+          >
+            <span aria-hidden="true">← </span>Colombia
+          </button>
+        ) : null}
       </div>
       <p className="aqFichaCifra">
         <strong>{formatConteo(n)}</strong> {n === 1 ? "proceso abierto" : "procesos abiertos"}

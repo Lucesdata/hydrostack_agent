@@ -976,3 +976,32 @@ cambio visual:
   («100–499», «1.500–2.999»…), que suman 9. La maqueta que fijó el criterio
   pintaba solo los extremos; se prefirió que la escala se pudiera leer.
 
+
+### 51. Hero v2: lo que queda abierto (2026-09-28)
+Traspaso «Hero de la portada v2»: vista país al llegar, un solo botón (el del
+resultado), cabecera del mapa con la sede de la entidad y semáforo absoluto en
+los destacados.
+
+- ✅ **No cabía en 1366×768.** Con tres destacados y cinco compuertas el
+  resultado terminaba a 892 px (124 px bajo el pliegue). Tras el primer recorte
+  del traspaso (`.lead` a 15px, `.resultado` con `margin-top: 16px`), el usuario
+  eligió el 2026-09-29 **dos destacados y sin Habilitación** en el semáforo del
+  hero (siempre «sin datos» ahí; la ficha conserva las cinco). Medido con un
+  departamento elegido: 762 px en 1366×768 y 765 px en 1440×900.
+- **Se hizo sin tocar el backend** (decisión del usuario, 2026-09-30). El
+  traspaso pedía tres cosas que lo necesitan y quedaron fuera; cada una es una
+  lectura, sin esquema ni migración:
+  - **Destacados en la vista país.** Una variante sin departamento de
+    `resumenDepartamento()` (mismo criterio, `leftJoin` a `geografia` para
+    contar los procesos sin geografía), calculada en `app/page.js`.
+  - **Compuerta Plazo con dato.** Añadir `estado_apertura` y `fecha_recepcion`
+    a la consulta de destacados y a `ProcesoResumen`; `mapApiItem` ya los lee.
+  - **«SECOP II · actualizado el …».** `max(finished_at)` de `sync_log` para
+    `secop_ii_procesos` con estado `ok`/`partial`.
+  Si se retoma: sin base, el cliente de Neon dejaba colgadas en frío las
+  consultas lanzadas en paralelo y el prerender de `/` agotaba los 60 s. No
+  esperarlas si fallan los agregados (que usan `Promise.all` y rechazan en el
+  primer error). La versión completa está en el commit `10a15bc` (PR #98).
+- **Con perfil, el semáforo sigue siendo absoluto y el gancho «Crea tu perfil»
+  se sigue viendo.** Debería pasar a relativo y ocultarse el gancho, como hace
+  `SemaforoConPerfil` en la ficha. Fuera de alcance.

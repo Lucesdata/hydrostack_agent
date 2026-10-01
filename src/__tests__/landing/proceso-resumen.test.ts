@@ -38,6 +38,27 @@ describe("mapApiItem", () => {
     expect(mapApiItem({ ...base, tipoProyecto: null }).tipo).toBeNull();
   });
 
+  it("trae lo que pide el semáforo absoluto, con los lugares en título", () => {
+    const { semaforo } = mapApiItem({
+      ...base,
+      estadoApertura: "Abierto",
+      fechaRecepcion: "2026-10-15",
+    });
+    expect(semaforo).toEqual({
+      tipoProyecto: "ptar",
+      valorEstimado: 4_280_000_000,
+      departamento: "Córdoba",
+      municipio: "Chinú",
+      estadoApertura: "Abierto",
+      fechaRecepcion: "2026-10-15",
+    });
+    // Sin los campos de plazo (una respuesta de caché anterior) no inventa nada.
+    expect(mapApiItem(base).semaforo.fechaRecepcion).toBeNull();
+    expect(mapApiItem(base).semaforo.estadoApertura).toBeNull();
+    // Un tipo fuera de los cinco no se hace pasar por uno.
+    expect(mapApiItem({ ...base, tipoProyecto: "constructor" }).semaforo.tipoProyecto).toBeNull();
+  });
+
   it("dice quién contrata, en título; sin entidad no la inventa", () => {
     expect(mapApiItem(base).entidad).toBe("Municipio de Chinu");
     expect(mapApiItem({ ...base, entidad: null }).entidad).toBeNull();

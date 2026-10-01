@@ -78,6 +78,28 @@ describe("resultado y opciones del mapa", () => {
   });
 });
 
+describe("semáforo de los destacados, en oscuro (hero v2)", () => {
+  // semaforo/estilos.ts pinta con los tokens de fondo claro; el hero los
+  // sobreescribe. Sin perfil solo hay DATO y UNKNOWN, que son los que se miden.
+  it("etiqueta y valor de cada compuerta llegan a AA", () => {
+    for (const color of ["#c3d3e0", "#d7edf8"]) {
+      pinta(css, color);
+      expect(contraste(color, fondo()), color).toBeGreaterThanOrEqual(AA.texto);
+    }
+    // El valor de una compuerta UNKNOWN baja a --aq-muted.
+    expect(css).toContain(".sf-item:has(.sf-punto--unknown) .sf-palabra");
+    expect(contraste(t["aq-muted"], fondo())).toBeGreaterThanOrEqual(AA.texto);
+  });
+
+  it("los puntos DATO y UNKNOWN se distinguen del fondo (no textual)", () => {
+    expect(css).toMatch(/\.sf-punto--dato\)\s*\{\s*background: var\(--aq-cyan\)/);
+    expect(css).toMatch(/\.sf-punto--unknown\)\s*\{\s*background: var\(--aq-muted\)/);
+    for (const token of ["aq-cyan", "aq-muted"]) {
+      expect(contraste(t[token], fondo()), `--${token}`).toBeGreaterThanOrEqual(AA.noTextual);
+    }
+  });
+});
+
 describe("botones azules con texto blanco", () => {
   it("se lee en los dos extremos del degradado del CTA principal", () => {
     expect(contraste("#ffffff", t["aq-cta"])).toBeGreaterThanOrEqual(AA.texto);
