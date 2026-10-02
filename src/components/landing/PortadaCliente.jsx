@@ -8,7 +8,11 @@
 // dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
 // hueco `semaforo` en `FilaProceso`.
 
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import { useMemo, useState } from "react";
+import HeroTerritorial, {
+  claveInicial,
+} from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import { useResumenDepartamento } from "@/src/components/landing/hero-territorial/ResumenDepartamento";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
@@ -39,6 +43,19 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  * sector» bajo el botón del hero salió con el resto de la carga.
  */
 export default function LandingPage({ mapa = null, departamentos = [], totalAbiertos = null }) {
+  // El departamento confirmado y su proceso destacado viven aquí, no en el
+  // hero: la tarjeta del hero y los cuatro accesos de la franja de abajo
+  // enlazan el mismo proceso, con una sola petición (spec
+  // 2026-10-02-hero-mapa-ficha §8 y §9).
+  const inicial = useMemo(
+    () => claveInicial(departamentos, totalAbiertos),
+    [departamentos, totalAbiertos]
+  );
+  const [elegido, setElegido] = useState(null);
+  const clave = inicial == null ? null : (elegido ?? inicial);
+  const resumen = useResumenDepartamento(clave);
+  const destacado = clave && resumen.status === "live" ? resumen.destacado : null;
+
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -53,11 +70,19 @@ export default function LandingPage({ mapa = null, departamentos = [], totalAbie
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial mapa={mapa} departamentos={departamentos} totalAbiertos={totalAbiertos} />
+        <HeroTerritorial
+          mapa={mapa}
+          departamentos={departamentos}
+          totalAbiertos={totalAbiertos}
+          clave={clave}
+          onElegir={setElegido}
+          resumen={resumen}
+        />
 
-        {/* La Ficha Viva: qué se encuentra al llegar a una ficha. Va justo
-            después del hero porque el hero existe para llevar a una ficha. */}
-        <FichaViva />
+        {/* La franja de la ficha: los cuatro accesos al proceso de la tarjeta.
+            Va justo después del hero porque el hero existe para llevar a una
+            ficha. */}
+        <FichaViva destacado={destacado} />
       </div>
     </div>
   );

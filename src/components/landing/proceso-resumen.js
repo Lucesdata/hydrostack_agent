@@ -1,47 +1,60 @@
-// De un `ProcesoResumen` (src/lib/secop/recientes.ts) a lo que pinta una fila de
-// proceso en la portada: los destacados del departamento.
+// De un `ProcesoResumen` (src/lib/secop/recientes.ts), tal como lo sirve
+// /api/departamento/[dpto]/resumen, al proceso que pinta la tarjeta del hero.
 //
-// Vivía dentro de ProcesosTicker.jsx, que salió de la portada el 2026-09-27
-// (docs/superpowers/plans/2026-09-27-portada-esencial.md). Es puro y sin
-// "use client": lo importa un componente de cliente y lo prueban los tests.
+// Es puro y sin "use client": lo importa un componente de cliente y lo prueban
+// los tests.
+//
+// Hasta el 2026-10-02 aquí vivía `mapApiItem`, que pintaba las filas de los
+// destacados con su semáforo y caía al listado si el proceso no traía ficha.
+// La tarjeta del hero (spec 2026-10-02-hero-mapa-ficha §7.4) no puede caer a
+// nada: su botón se llama «Ver ficha», y un enlace al listado con ese nombre
+// sería una promesa falsa. Su estado previo está en git.
 
-import { colorDeTipo } from "@/src/lib/classify/tipo-color";
-import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+import { idDesdeSlug } from "@/src/lib/secop/slug";
 import { frase, titulo } from "./texto";
 
-/** 4_850_000_000 → "$4.850 M" (millones COP). */
-function fmtValor(n) {
-  if (n == null || !Number.isFinite(n)) return null;
-  const m = Math.round(n / 1e6);
-  if (m < 1) return "< $1 M";
-  return `$${m.toLocaleString("es-CO")} M`;
+export const SIN_OBJETO = "Proceso sin objeto publicado";
+
+/** `/licitaciones/<slug>`, sin esquema, sin `//`, sin otra ruta debajo. */
+const RUTA_FICHA = /^\/licitaciones\/[A-Za-z0-9.-]+$/;
+
+const texto = (v) => (typeof v === "string" && v.trim() ? v : null);
+
+/**
+ * El proceso de la tarjeta, o `null` si no se puede enlazar a su ficha.
+ *
+ * La ruta tiene que ser la de una ficha y llevar el mismo id que el proceso:
+ * nada de URLs externas, `javascript:`, rutas de cuenta ni la faceta del
+ * departamento. Sin objeto se dice que no lo hay; no se pone la entidad en su
+ * lugar, que se leería como lo que se contrata.
+ */
+export function destacadoDeApi(p) {
+  if (!p || typeof p !== "object") return null;
+  const id = texto(p.id);
+  const ficha = texto(p.ficha);
+  if (!id || !ficha || !RUTA_FICHA.test(ficha)) return null;
+  if (idDesdeSlug(ficha.slice("/licitaciones/".length)) !== id.toUpperCase()) return null;
+  return {
+    id,
+    href: ficha,
+    objeto: frase(texto(p.objeto)) || SIN_OBJETO,
+    // Solo para el nombre accesible del botón: distingue dos objetos iguales.
+    entidad: titulo(texto(p.entidad)) || null,
+  };
 }
 
-export function mapApiItem(p) {
-  const color = colorDeTipo(p.tipoProyecto);
+/**
+ * Los cinco destinos de un mismo proceso: el botón de la tarjeta y los cuatro
+ * accesos de la franja. Salen de aquí juntos para que no puedan apuntar a
+ * fichas distintas. Los anclajes son los de `ExploradorFicha.tsx`.
+ */
+export function enlacesDeFicha(href) {
+  if (!href) return null;
   return {
-    id: p.id,
-    // Lo primero que se lee es qué se va a construir, no quién lo contrata.
-    objeto: frase(p.objeto) || titulo(p.entidad) || "Proceso sin objeto publicado",
-    tipo: color ? { label: TIPO_PROYECTO[p.tipoProyecto].label, color } : null,
-    // Quién contrata: sin ella, un objeto como «Suministro» no dice nada.
-    entidad: titulo(p.entidad) || null,
-    valor: fmtValor(p.valorEstimado),
-    ciudad: titulo(p.municipio, false),
-    departamento: titulo(p.departamento, false),
-    estado: titulo(p.estado) || "Publicado",
-    href: p.ficha || "/licitaciones",
-    fecha: p.fechaPublicacion ?? null,
-    // Lo que pide `compuertasAbsolutas()` (ProcesoParaSemaforo): la lectura sin
-    // perfil del semáforo en los destacados del hero. Lugares en título, como
-    // la línea de la entidad; un tipo fuera de los cinco no se hace pasar por uno.
-    semaforo: {
-      tipoProyecto: TIPOS_PROYECTO.includes(p.tipoProyecto) ? p.tipoProyecto : null,
-      valorEstimado: p.valorEstimado ?? null,
-      departamento: titulo(p.departamento, false) || null,
-      municipio: titulo(p.municipio, false) || null,
-      estadoApertura: p.estadoApertura ?? null,
-      fechaRecepcion: p.fechaRecepcion ?? null,
-    },
+    ficha: href,
+    resumen: `${href}#ficha-resumen`,
+    dinero: `${href}#ficha-dinero`,
+    plazos: `${href}#ficha-plazos`,
+    pliego: `${href}#pliego`,
   };
 }

@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-01 (bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-02 (hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -258,7 +258,8 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   segundo buscador, tipos por departamento, serie semanal ni enlaces a
   diagnóstico, precios o comparar en el hero: siguen en su página y en el pie.
   La columna del mensaje mide como mucho 380 px: con fracciones la tierra del
-  mapa bajaba a 454 px a 1280.
+  mapa bajaba a 454 px a 1280. *(Sustituido el 2026-10-02 por el hero «Explora
+  el mapa», abajo: columnas casi iguales, una tarjeta y sin conteo ni %.)*
 - `agregadosPortada()` (`src/lib/secop/agregados.ts`) sigue alimentando el mapa,
   la lista y la ficha, calculado en el servidor en `app/page.js` con
   `revalidate` de 6 h y "abierto" según `condicionAbierto()`. `totalAbiertos`
@@ -271,7 +272,45 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
   esa línea y con `src/lib/landing/cifras.ts`.
 
-**Hero v2 (2026-09-28).** Se llega a la **vista país** (Colombia), no al
+**Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
+referencia visual aprobada por el usuario
+(`docs/superpowers/specs/2026-10-02-hero-mapa-ficha.md`, imagen al lado; plan en
+`docs/superpowers/plans/`). Sustituye en parte al hero v2 de abajo, con tres
+decisiones del usuario del mismo día: **se llega al primer departamento con
+procesos** (`claveInicial()`: el primero con `n > 0` del orden del servidor), no
+a la vista país, y sale «← Colombia»; la tarjeta **no lleva semáforo ni el gancho
+«Crea tu perfil»** (el semáforo sigue en la ficha); el titular y el botón son los
+de la imagen. Lo que hay ahora:
+- Dos columnas casi iguales (rejilla de 1320 px, la misma de la franja de abajo);
+  el H1 mide ≈55 px a 1440 para que «Entiende cada proceso.» quepa en su línea.
+- A la izquierda, bajo el buscador: el nombre del departamento **confirmado** y
+  **una** tarjeta (`TarjetaProceso` en `ResumenDepartamento.jsx`) con el primer
+  destacado de `/api/departamento/[dpto]/resumen` —chip «PROCESO SECOP II»,
+  objeto real, «Objeto · Presupuesto · Plazos · Requisitos» y «Ver ficha»—, más
+  «Ver todos los procesos de X →» a la faceta. Ni conteo ni % nacional.
+- **El destacado tiene un solo dueño, `PortadaCliente`**: tiene la clave
+  confirmada y llama a `useResumenDepartamento`, y pasa el resultado al hero y a
+  la franja. Ningún otro componente pide el resumen (lo vigila un test).
+- `useResumenDepartamento` distingue `loading | live | empty | invalido | error`
+  con la clave en cada resultado, aborta la petición al cambiar de departamento
+  y solo guarda en caché las respuestas válidas; «Reintentar» no duplica
+  peticiones. `destacadoDeApi()` (`proceso-resumen.js`) solo acepta una ruta
+  `/licitaciones/<slug>` cuyo id coincide con el del proceso; si el primero no
+  la tiene, no hay «Ver ficha» (no se cae al listado). `mapApiItem` salió con
+  las filas del semáforo.
+- Pasar el puntero solo resalta y escribe una línea en el panel del mapa
+  («Caldas: 500 procesos abiertos»), sin región viva; nombre y tarjeta no
+  cambian ni se atenúan. La lista elige; **el clic del mapa sigue navegando a la
+  faceta** (decisión D). Con un tipo elegido, una ayuda dice que el tipo pinta el
+  mapa y no filtra la tarjeta.
+- Sin `overflow: clip` en `.hero`: recortaba el panel del buscador. Lo recorta
+  `.map`, solo bajo 600 px, que es donde el SVG se ensancha.
+- Debajo de 900 px el orden visual es mensaje, mapa, resultado (como antes),
+  pero el orden del DOM sigue siendo mensaje, resultado, mapa: así el teclado en
+  escritorio no cruza 33 enlaces del mapa antes de «Ver ficha».
+
+**Hero v2 (2026-09-28).** *(Vista país, semáforo en los destacados y botón «Ver
+las N fichas»: sustituidos el 2026-10-02, arriba.)* Se llega a la **vista país** (Colombia), no al
 primer departamento; «← Colombia» vuelve a ella. Un solo botón, el del
 resultado («Ver las N fichas», o las del departamento). La cabecera del mapa dice
 que la base es la **sede de la entidad**, no el lugar de la obra. Cada destacado
@@ -283,6 +322,14 @@ pinta **dos** destacados y el semáforo **sin Habilitación** (decisión del
 no trae destacados —aparecen al elegir un departamento—, la compuerta Plazo sale
 «sin datos» porque la API no trae fecha de recepción ni apertura, y no hay línea
 de «actualizado el …». Lo que haría falta para recuperarlo, en PENDIENTES §51.
+
+**Franja de la ficha (2026-10-02).** `FichaViva.jsx` ya no lleva las cuatro
+preguntas: «Del territorio a los detalles que necesitas.» y un panel
+`.tema-claro` «Ficha del proceso» con cuatro accesos —Qué se contrata, Presupuesto,
+Plazos, Qué falta verificar— a `#ficha-resumen`, `#ficha-dinero`,
+`#ficha-plazos` y `#pliego` de **la ficha de la tarjeta del hero**
+(`enlacesDeFicha()`). Sin destacado válido los cuatro títulos quedan como texto,
+sin `href`. Lo que sigue del párrafo de abajo vale para «Cómo razona la ficha».
 
 **La Ficha Viva (2026-09-26).** La ficha es el centro del producto; la portada
 existe para llegar a una. Justo después del hero va la sección
@@ -388,8 +435,8 @@ territorial (mapa, lista, ficha del departamento y buscador) y la Ficha Viva.
 **El ticker de fichas recientes salió el 2026-09-27** con `/api/procesos/recientes`
 y el fondo animado "blueprint", por quejas de portada cargada (había 15
 animaciones en el primer pliegue): plan de tres PR en
-`docs/superpowers/plans/2026-09-27-portada-esencial.md`. `mapApiItem` vive ahora
-en `src/components/landing/proceso-resumen.js`. Salieron las rutas de intención ("¿En qué
+`docs/superpowers/plans/2026-09-27-portada-esencial.md`. `mapApiItem` vivió
+en `src/components/landing/proceso-resumen.js` hasta el 2026-10-02. Salieron las rutas de intención ("¿En qué
 momento estás?"), `S3Motor`, `S2Diagnostico`, `S7Acceso`, las preguntas
 frecuentes (con su JSON-LD `FAQPage`), `S5DarkClosing` y la banda "El mercado ahora": repetían lo que ya dicen
 el hero y la ficha, o tienen su propia página. `S7Acceso` sigue en `/precios` y

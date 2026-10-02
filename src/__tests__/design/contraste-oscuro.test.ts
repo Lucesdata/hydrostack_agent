@@ -58,7 +58,7 @@ describe("texto sobre el fondo oscuro", () => {
   it("colores escritos a mano en el hero llegan a AA", () => {
     for (const [color, sobre] of [
       ["#c3d3e0", fondo()], // párrafo del hero
-      ["#7d93a6", panel()], // placeholder del buscador
+      ["#8ea3b5", componer([4, 16, 28], 0.75, fondo())], // placeholder, en su campo
     ] as const) {
       pinta(css, color);
       expect(contraste(color, sobre), `${color}`).toBeGreaterThanOrEqual(AA.texto);
@@ -78,25 +78,55 @@ describe("resultado y opciones del mapa", () => {
   });
 });
 
-describe("semáforo de los destacados, en oscuro (hero v2)", () => {
-  // semaforo/estilos.ts pinta con los tokens de fondo claro; el hero los
-  // sobreescribe. Sin perfil solo hay DATO y UNKNOWN, que son los que se miden.
-  it("etiqueta y valor de cada compuerta llegan a AA", () => {
-    for (const color of ["#c3d3e0", "#d7edf8"]) {
-      pinta(css, color);
-      expect(contraste(color, fondo()), color).toBeGreaterThanOrEqual(AA.texto);
+describe("tarjeta del proceso destacado (2026-10-02)", () => {
+  // Sustituye a las filas con semáforo del hero v2. Fondo propio, un punto más
+  // claro que el del hero.
+  const tarjeta = "#0a1d30";
+
+  it("objeto, temas, notas y reintentar llegan a AA sobre la tarjeta", () => {
+    pinta(css, tarjeta);
+    for (const token of ["aq-text", "aq-muted", "aq-cyan"]) {
+      expect(contraste(t[token], tarjeta), `--${token}`).toBeGreaterThanOrEqual(AA.texto);
     }
-    // El valor de una compuerta UNKNOWN baja a --aq-muted.
-    expect(css).toContain(".sf-item:has(.sf-punto--unknown) .sf-palabra");
-    expect(contraste(t["aq-muted"], fondo())).toBeGreaterThanOrEqual(AA.texto);
+    pinta(css, "#c3d3e0");
+    expect(contraste("#c3d3e0", tarjeta)).toBeGreaterThanOrEqual(AA.texto);
   });
 
-  it("los puntos DATO y UNKNOWN se distinguen del fondo (no textual)", () => {
-    expect(css).toMatch(/\.sf-punto--dato\)\s*\{\s*background: var\(--aq-cyan\)/);
-    expect(css).toMatch(/\.sf-punto--unknown\)\s*\{\s*background: var\(--aq-muted\)/);
-    for (const token of ["aq-cyan", "aq-muted"]) {
-      expect(contraste(t[token], fondo()), `--${token}`).toBeGreaterThanOrEqual(AA.noTextual);
+  it("el chip «PROCESO SECOP II» se lee sobre su tinte", () => {
+    expect(css).toContain("background: rgba(76, 201, 255, 0.14)");
+    pinta(css, "#d7edf8");
+    const tinte = componer([76, 201, 255], 0.14, tarjeta);
+    expect(contraste("#d7edf8", tinte)).toBeGreaterThanOrEqual(AA.texto);
+  });
+
+  it("el borde del buscador se distingue del fondo (control, 3:1)", () => {
+    expect(css).toContain("border: 1px solid rgba(140, 190, 225, 0.6)");
+    const borde = componer([140, 190, 225], 0.6, fondo());
+    expect(contraste(borde, fondo())).toBeGreaterThanOrEqual(AA.noTextual);
+  });
+});
+
+describe("franja de la ficha: panel claro (2026-10-02)", () => {
+  // El panel lleva .tema-claro: se miden los tokens claros que pinta.
+  const claro = leerTokensHex(
+    leer("app/globals.css").slice(leer("app/globals.css").indexOf(".tema-claro {"))
+  );
+
+  it("usa los tokens del tema claro, no colores sueltos", () => {
+    expect(fichaViva).toContain("background: var(--surface)");
+    expect(fichaViva).toContain("color: var(--accent)");
+    expect(fichaViva).toContain("color: var(--accent-deep)");
+  });
+
+  it("títulos, explicaciones y enlaces llegan a AA sobre blanco", () => {
+    for (const token of ["text-primary", "text-muted", "accent", "accent-deep"]) {
+      expect(contraste(claro[token], claro.surface), `--${token}`).toBeGreaterThanOrEqual(AA.texto);
     }
+  });
+
+  it("el chip «QUÉ ENCONTRARÁS» se lee sobre su tinte", () => {
+    const tinte = componer([3, 105, 161], 0.13, claro.surface);
+    expect(contraste(claro["accent-deep"], tinte)).toBeGreaterThanOrEqual(AA.texto);
   });
 });
 

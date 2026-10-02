@@ -107,8 +107,8 @@ export default function BuscadorFichas({ className = "" }) {
           value={q}
           maxLength={120}
           autoComplete="off"
-          aria-label="Buscar fichas de procesos abiertos"
-          placeholder="Busca por entidad u objeto del contrato…"
+          aria-label="Buscar fichas de procesos abiertos por entidad u objeto"
+          placeholder="Busca por entidad u objeto"
           aria-controls="aq-buscador-resultados"
           aria-expanded={mostrar}
           onChange={(e) => {

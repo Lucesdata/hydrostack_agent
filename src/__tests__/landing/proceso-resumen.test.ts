@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { mapApiItem } from "@/src/components/landing/proceso-resumen";
+import {
+  SIN_OBJETO,
+  destacadoDeApi,
+  enlacesDeFicha,
+} from "@/src/components/landing/proceso-resumen";
 import { frase, titulo } from "@/src/components/landing/texto";
-
-// Casos que vivían en ProcesosTicker.test.tsx: el ticker salió de la portada
-// (2026-09-27) y estas funciones siguen en uso en los destacados y el buscador.
 
 const base = {
   id: "CO1.REQ.1",
@@ -14,7 +15,7 @@ const base = {
   municipio: "CHINÚ",
   valorEstimado: 4_280_000_000,
   estado: "Publicado",
-  ficha: "/licitaciones/optimizacion-de-la-ptar--CO1.REQ.1",
+  ficha: "/licitaciones/optimizacion-de-la-ptar-municipal--CO1.REQ.1",
 };
 
 describe("frase", () => {
@@ -24,53 +25,91 @@ describe("frase", () => {
   });
 });
 
-describe("mapApiItem", () => {
-  it("cada elemento enlaza su ficha, y la lista solo si no hay ficha", () => {
-    expect(mapApiItem(base).href).toBe(base.ficha);
-    expect(mapApiItem({ ...base, ficha: null }).href).toBe("/licitaciones");
-  });
-
-  it("lleva tipo con color y monto; sin tipo no inventa uno", () => {
-    const item = mapApiItem(base);
-    expect(item.tipo.label).toBe("PTAR");
-    expect(item.tipo.color.familia).toBe("residual");
-    expect(item.valor).toBe("$4.280 M");
-    expect(mapApiItem({ ...base, tipoProyecto: null }).tipo).toBeNull();
-  });
-
-  it("trae lo que pide el semáforo absoluto, con los lugares en título", () => {
-    const { semaforo } = mapApiItem({
-      ...base,
-      estadoApertura: "Abierto",
-      fechaRecepcion: "2026-10-15",
+describe("destacadoDeApi", () => {
+  it("toma id, ficha, objeto en frase y la entidad para el nombre accesible", () => {
+    expect(destacadoDeApi(base)).toEqual({
+      id: "CO1.REQ.1",
+      href: base.ficha,
+      objeto: "Optimización de la PTAR municipal",
+      entidad: "Municipio de Chinu",
     });
-    expect(semaforo).toEqual({
-      tipoProyecto: "ptar",
-      valorEstimado: 4_280_000_000,
-      departamento: "Córdoba",
-      municipio: "Chinú",
-      estadoApertura: "Abierto",
-      fechaRecepcion: "2026-10-15",
-    });
-    // Sin los campos de plazo (una respuesta de caché anterior) no inventa nada.
-    expect(mapApiItem(base).semaforo.fechaRecepcion).toBeNull();
-    expect(mapApiItem(base).semaforo.estadoApertura).toBeNull();
-    // Un tipo fuera de los cinco no se hace pasar por uno.
-    expect(mapApiItem({ ...base, tipoProyecto: "constructor" }).semaforo.tipoProyecto).toBeNull();
   });
 
-  it("dice quién contrata, en título; sin entidad no la inventa", () => {
-    expect(mapApiItem(base).entidad).toBe("Municipio de Chinu");
-    expect(mapApiItem({ ...base, entidad: null }).entidad).toBeNull();
+  it("acepta la ficha sin texto, solo con el id", () => {
+    expect(destacadoDeApi({ ...base, ficha: "/licitaciones/CO1.REQ.1" })?.href).toBe(
+      "/licitaciones/CO1.REQ.1"
+    );
+  });
+
+  it("sin objeto lo dice: no pone la entidad en su lugar", () => {
+    const sinObjeto = destacadoDeApi({ ...base, objeto: null, ficha: "/licitaciones/CO1.REQ.1" });
+    expect(sinObjeto?.objeto).toBe(SIN_OBJETO);
+    expect(sinObjeto?.objeto).not.toContain("Chinu");
+    expect(destacadoDeApi({ ...base, objeto: "   " })?.objeto).toBe(SIN_OBJETO);
+  });
+
+  it("sin ficha no cae al listado: no hay destacado", () => {
+    expect(destacadoDeApi({ ...base, ficha: null })).toBeNull();
+    expect(destacadoDeApi({ ...base, ficha: "/licitaciones" })).toBeNull();
+  });
+
+  it("rechaza destinos que no son la ficha de ese proceso", () => {
+    for (const ficha of [
+      "https://evil.example/licitaciones/x--CO1.REQ.1",
+      "//evil.example/licitaciones/x--CO1.REQ.1",
+      "javascript:alert(1)",
+      "/cuenta",
+      "/licitaciones/departamento/antioquia",
+      "/licitaciones/explorar",
+      "/licitaciones/x--CO1.REQ.1/../../cuenta",
+      "/licitaciones/x--CO1.REQ.1?y=1",
+      "/licitaciones/x--CO1.REQ.2", // otro proceso
+    ]) {
+      expect(destacadoDeApi({ ...base, ficha }), ficha).toBeNull();
+    }
+  });
+
+  it("rechaza lo que no es un proceso", () => {
+    expect(destacadoDeApi(null)).toBeNull();
+    expect(destacadoDeApi("CO1.REQ.1")).toBeNull();
+    expect(destacadoDeApi({ ...base, id: null })).toBeNull();
+    expect(destacadoDeApi({ ...base, id: 7 })).toBeNull();
+  });
+});
+
+describe("enlacesDeFicha", () => {
+  it("los cinco destinos salen de la misma ficha, con los anclajes de ExploradorFicha", () => {
+    const e = enlacesDeFicha(base.ficha);
+    expect(e).toEqual({
+      ficha: base.ficha,
+      resumen: `${base.ficha}#ficha-resumen`,
+      dinero: `${base.ficha}#ficha-dinero`,
+      plazos: `${base.ficha}#ficha-plazos`,
+      pliego: `${base.ficha}#pliego`,
+    });
+  });
+
+  it("sin ficha no hay enlaces", () => {
+    expect(enlacesDeFicha(null)).toBeNull();
+    expect(enlacesDeFicha(undefined)).toBeNull();
+  });
+
+  it("los anclajes existen en la ficha", async () => {
+    const { readFileSync } = await import("node:fs");
+    const pagina = readFileSync("app/licitaciones/[slug]/page.tsx", "utf8");
+    for (const id of ["resumen", "dinero", "plazos", "participar"]) {
+      expect(pagina).toContain(`id: "${id}"`);
+    }
+    const explorador = readFileSync("src/components/secop/ficha/ExploradorFicha.tsx", "utf8");
+    expect(explorador).toContain('hash === "pliego"');
+    expect(explorador).toContain('hash.replace(/^ficha-/, "")');
   });
 });
 
 describe("titulo", () => {
   it("en nombres de lugar no ve siglas", () => {
     expect(titulo("META", false)).toBe("Meta");
-    expect(mapApiItem({ ...base, municipio: "CALI", departamento: "VALLE DEL CAUCA" }).ciudad).toBe(
-      "Cali"
-    );
+    expect(titulo("CALI", false)).toBe("Cali");
   });
 
   it("baja los conectores y conserva las siglas", () => {

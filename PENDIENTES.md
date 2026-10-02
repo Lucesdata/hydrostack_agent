@@ -1002,6 +1002,24 @@ los destacados.
   consultas lanzadas en paralelo y el prerender de `/` agotaba los 60 s. No
   esperarlas si fallan los agregados (que usan `Promise.all` y rechazan en el
   primer error). La versión completa está en el commit `10a15bc` (PR #98).
-- **Con perfil, el semáforo sigue siendo absoluto y el gancho «Crea tu perfil»
+- ✅ *(Obsoleto el 2026-10-02: el semáforo y el gancho salieron del hero, §52.)*
+  **Con perfil, el semáforo sigue siendo absoluto y el gancho «Crea tu perfil»
   se sigue viendo.** Debería pasar a relativo y ocultarse el gancho, como hace
   `SemaforoConPerfil` en la ficha. Fuera de alcance.
+
+### 52. Hero «Explora el mapa»: lo que queda abierto (2026-10-02)
+Spec y plan: `docs/superpowers/{specs,plans}/2026-10-02-hero-mapa-ficha.md`. El
+§51 de arriba (vista país, Plazo con dato, «actualizado el …») ya no aplica tal
+cual: la portada llega a un departamento y la tarjeta no pinta compuertas.
+
+- **Orden del foco en móvil.** Debajo de 900 px se ve mensaje → mapa →
+  resultado, pero el DOM va mensaje → resultado → mapa (como desde el
+  2026-09-27). Se dejó así a propósito: en escritorio el teclado llega a «Ver
+  ficha» sin cruzar los 33 enlaces del mapa. Si se cambia, medirlo en los dos
+  anchos.
+- **Comparación con datos reales.** La verificación en navegador del
+  2026-10-02 se hizo con cifras ficticias sobre la geometría real (sin base en
+  el entorno). Revisar el preview del PR con la Supabase viva: alto real de los
+  objetos más largos y el departamento inicial.
+- **Peso.** El JS de primera carga de `/` bajó de 113,0 a 109,1 kB gzip al
+  salir el semáforo del hero (`npm run presupuesto`).
