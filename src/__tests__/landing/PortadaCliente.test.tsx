@@ -2,36 +2,42 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 
+const antioquia = { clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 };
+
 describe("PortadaCliente", () => {
-  it("pinta el conteo del departamento recibido y arranca en Colombia, sin cifras de demostración", () => {
+  it("llega al primer departamento con procesos, sin cifras de demostración", () => {
     const html = renderToStaticMarkup(
-      <PortadaCliente
-        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
-        totalAbiertos={6000}
-      />
+      <PortadaCliente departamentos={[antioquia]} totalAbiertos={6000} />
     );
-    // La lista plegada lleva el conteo del departamento; la faceta, el mapa.
+    expect(html).toContain("<h2>Antioquia</h2>");
+    expect(html).toContain('aria-pressed="true"');
+    // La lista plegada lleva el conteo; el total nacional ya no se pinta.
     expect(html).toContain("5.155");
-    // Se llega a la vista país (hero v2, 2026-09-28): el total nacional es la
-    // cifra del resultado y ningún departamento sale elegido.
-    expect(html).toContain("6.000");
-    expect(html).not.toContain("Procesos abiertos · Colombia");
-    expect(html).not.toContain('aria-pressed="true"');
+    expect(html).not.toContain("6.000");
+  });
+
+  it("en el HTML inicial ni la tarjeta ni la franja enlazan un proceso", () => {
+    const html = renderToStaticMarkup(
+      <PortadaCliente departamentos={[antioquia]} totalAbiertos={6000} />
+    );
+    expect(html).toContain("Cargando proceso…");
+    expect(html).toContain("Los accesos se habilitan cuando hay un proceso disponible.");
+    expect(html).not.toMatch(/href="\/licitaciones\/[^"]*(#ficha-|#pliego)/);
   });
 
   it("distingue agregados no disponibles de un conteo real en cero", () => {
     const sinDatos = renderToStaticMarkup(<PortadaCliente />);
     const cero = renderToStaticMarkup(<PortadaCliente totalAbiertos={0} />);
-    expect(sinDatos).toContain("—");
-    expect(cero).toContain(">0<");
+    expect(sinDatos).toContain("No hay datos territoriales disponibles en este momento.");
+    expect(cero).toContain("No hay procesos abiertos disponibles.");
     expect(sinDatos).not.toContain('href="/licitaciones/departamento/');
   });
 
-  it("renderiza el mapa del servidor una sola vez dentro del Hero Territorial", () => {
+  it("renderiza el mapa del servidor una sola vez dentro del hero", () => {
     const html = renderToStaticMarkup(
       <PortadaCliente
         mapa={<div data-testid="mapa-departamental">Mapa departamental</div>}
-        departamentos={[{ clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 }]}
+        departamentos={[antioquia]}
         totalAbiertos={6000}
       />
     );
@@ -48,12 +54,11 @@ describe("PortadaCliente", () => {
     expect(conDatos).not.toContain("El mapa no tiene datos disponibles");
   });
 
-  it("usa el copy del hero y ya no muestra el CTA secundario del diagnóstico", () => {
+  it("usa el copy de la referencia aprobada (2026-10-02)", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain("Descubre en qué procesos de agua puedes");
-    expect(html).toContain("participar.");
-    expect(html).not.toContain("Ver fichas de procesos");
-    // La banda "El mercado ahora" salió de la portada (2026-09-26).
+    expect(html).toContain("Explora el mapa.");
+    expect(html).toContain("Entiende cada proceso.");
+    expect(html).toContain("Del territorio a los detalles que necesitas.");
     expect(html).not.toContain("El mercado ahora");
     expect(html).not.toContain("o mira antes si estás listo");
   });
@@ -64,14 +69,22 @@ describe("PortadaCliente", () => {
     expect(html).not.toContain("ptr-");
     expect(html).not.toContain("bp-fondo");
     expect(html).not.toContain("@keyframes");
-    // La regla de los enlaces, que vivía en el CSS del fondo, se queda.
     expect(html).toContain(".bp-page a");
   });
 
-  it("la portada no escucha el scroll ni pide las fichas recientes", async () => {
+  it("una sola fuente del destacado: el resumen se pide desde la portada, no desde cada sección", async () => {
     const { readFileSync } = await import("node:fs");
-    const fuente = readFileSync("src/components/landing/PortadaCliente.jsx", "utf8");
-    expect(fuente).not.toMatch(/addEventListener\(\s*["']scroll/);
-    expect(fuente).not.toContain("procesos/recientes");
+    const portada = readFileSync("src/components/landing/PortadaCliente.jsx", "utf8");
+    expect(portada).not.toMatch(/addEventListener\(\s*["']scroll/);
+    expect(portada).not.toContain("procesos/recientes");
+    expect(portada.match(/useResumenDepartamento\(/g)).toHaveLength(1);
+    for (const ruta of [
+      "src/components/landing/hero-territorial/HeroTerritorial.jsx",
+      "src/components/landing/ficha-viva/FichaViva.jsx",
+    ]) {
+      const fuente = readFileSync(ruta, "utf8");
+      expect(fuente, ruta).not.toContain("useResumenDepartamento");
+      expect(fuente, ruta).not.toContain("fetch(");
+    }
   });
 });

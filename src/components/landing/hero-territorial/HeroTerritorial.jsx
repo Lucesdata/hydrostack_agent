@@ -3,56 +3,68 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatConteo } from "@/src/components/secop/format";
-import { ruta } from "@/src/components/landing/seccionesHome";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import ListaTerritorios from "./ListaTerritorios";
 import FichaDepartamento from "./FichaDepartamento";
-import ResumenDepartamento from "./ResumenDepartamento";
+import TarjetaProceso from "./ResumenDepartamento";
 import BuscadorFichas from "./BuscadorFichas";
 import { dptoDesdeObjetivo, indicesDeModo, useMarcasEnMapa, usePinturaEnMapa } from "./sincronia";
 import { ESCALONES_MONTO, escalonDe, escalonMontoDe } from "@/src/lib/mapa/escala";
-import { ESTILOS_SEMAFORO } from "@/src/components/secop/semaforo/estilos";
 import styles from "./hero-territorial.module.css";
 
+const CARGANDO = { status: "loading", destacado: null, reintentar: () => {} };
+
 /**
- * El hero de la portada: dos zonas (2026-09-27, plan portada-esencial).
- *
- * A la izquierda, el mensaje, el buscador de fichas y el resultado de elegir en
- * el mapa: nombre, procesos abiertos, los tres de mayor presupuesto y el enlace
- * a sus fichas. A la derecha, el mapa. Las opciones del mapa y la lista de
- * departamentos van plegadas.
- *
- * Salió lo que había hecho decir a los usuarios que la portada estaba muy
- * cargada: tercera columna, tipos por departamento, tooltip de seis líneas,
- * segundo botón, enlace a precios, línea de procesos del sector y un segundo
- * buscador. Lo que salió y sigue existiendo vive en su página (comparar,
- * facetas de tipo, /diagnostico, /precios), enlazada desde el pie.
- *
- * Hero v2 (2026-09-28): se llega a la vista país (Colombia), no al primer
- * departamento; el único botón es el del resultado, y cada destacado lleva el
- * semáforo en su lectura absoluta. La cabecera del mapa dice qué es la base
- * territorial (la sede de la entidad). Sin cambios de backend (2026-09-30): la
- * vista país no trae destacados —aparecen al elegir un departamento— y no hay
- * línea de «actualizado el …».
+ * El departamento al que llega la portada: el primero con procesos en el orden
+ * del servidor (hoy, de más a menos). Sin datos o sin ninguno con procesos, no
+ * hay elección y no se pide nada (spec 2026-10-02-hero-mapa-ficha §7.1).
  */
-export default function HeroTerritorial({ mapa = null, departamentos = [], totalAbiertos = null }) {
-  const [elegido, setElegido] = useState(null);
+export function claveInicial(departamentos = [], totalAbiertos = null) {
+  if (totalAbiertos == null) return null;
+  return departamentos.find((d) => d.n > 0)?.clave ?? null;
+}
+
+const procesos = (n) => `${formatConteo(n)} ${n === 1 ? "proceso abierto" : "procesos abiertos"}`;
+
+/**
+ * El hero de la portada: «Explora el mapa. Entiende cada proceso.» (spec
+ * 2026-10-02-hero-mapa-ficha, sobre la referencia aprobada).
+ *
+ * Dos columnas casi iguales. A la izquierda el titular, una frase, el buscador
+ * y, bajo un filete, el departamento confirmado con la tarjeta de su proceso
+ * destacado y «Ver ficha». A la derecha el mapa, con las opciones y la lista
+ * plegadas. Debajo de 900 px: mensaje, mapa y resultado.
+ *
+ * Controlado desde `PortadaCliente`: la clave confirmada y el estado del
+ * destacado viven allí porque la franja de abajo enlaza el mismo proceso, y
+ * dos componentes no deben pedir el mismo resumen cada uno por su lado.
+ *
+ * Se llega a un departamento (ya no a la vista país, hero v2) y se cambia con
+ * la lista. El clic del mapa sigue navegando a la faceta (decisión D). Pasar el
+ * puntero solo resalta y escribe una línea en el panel del mapa: el nombre y la
+ * tarjeta de la izquierda no cambian, ni se atenúan.
+ */
+export default function HeroTerritorial({
+  mapa = null,
+  departamentos = [],
+  totalAbiertos = null,
+  clave: claveProp,
+  onElegir = () => {},
+  resumen = CARGANDO,
+}) {
   const datosDisponibles = totalAbiertos != null;
-  // Sin elección, la vista país: `FichaDepartamento` ya habla de Colombia
-  // cuando no recibe departamento.
+  const clave = claveProp === undefined ? claveInicial(departamentos, totalAbiertos) : claveProp;
   const seleccionado = useMemo(
-    () => (elegido ? (departamentos.find((d) => d.clave === elegido) ?? null) : null),
-    [departamentos, elegido]
+    () => (clave ? (departamentos.find((d) => d.clave === clave) ?? null) : null),
+    [departamentos, clave]
   );
-  // Lo que el puntero o el foco señalan en el mapa o en la lista. Mientras
-  // existe, el resultado lo muestra de vista previa; al soltarlo vuelve al
-  // elegido. Hace de tooltip: el mapa ya no lleva uno propio.
+  // Lo que el puntero o el foco señalan en el mapa o en la lista: solo la línea
+  // de vista previa del mapa y el resaltado. Nunca pide nada a la API.
   const [resaltado, setResaltado] = useState(null);
   const previa = useMemo(
     () => (resaltado ? (departamentos.find((d) => d.clave === resaltado) ?? null) : null),
     [departamentos, resaltado]
   );
-  const vista = previa ?? seleccionado;
   const mapaRef = useRef(null);
   useMarcasEnMapa(mapaRef, resaltado, seleccionado?.clave ?? null);
   // Cómo se colorea el mapa: por procesos (lo que pinta el servidor), por monto
@@ -85,77 +97,61 @@ export default function HeroTerritorial({ mapa = null, departamentos = [], total
   };
   const alSenalarMapa = (e) => setResaltado(dptoDesdeObjetivo(e.target));
   const alSoltarMapa = () => setResaltado(null);
-  const explorar = ruta("explorar");
+  const hayLista = datosDisponibles && departamentos.length > 0;
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
-      {/* El semáforo de los destacados. Sus colores son de fondo claro: el tema
-          oscuro los sobreescribe dentro de .hero (hero-territorial.module.css). */}
-      <style dangerouslySetInnerHTML={{ __html: ESTILOS_SEMAFORO }} />
       <div className={styles.grid}>
         <div className={styles.colIzq}>
           <div className={styles.copy}>
             <h1 id="aq-hero-title">
-              Descubre en qué procesos de agua puedes <span>participar.</span>
+              <span>Explora el mapa.</span> <span>Entiende cada proceso.</span>
             </h1>
             <p className={styles.lead}>
-              Cada proceso de acueducto, alcantarillado y tratamiento del SECOP II tiene su ficha:
-              qué se contrata y qué te falta para presentarte.
+              Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha.
             </p>
-            {/* La entrada general: con Enter lleva al explorador. El botón
-                principal es el del resultado, más abajo. */}
             <BuscadorFichas />
           </div>
 
           <div className={styles.resultado}>
-            <FichaDepartamento
-              departamento={vista}
-              totalAbiertos={totalAbiertos}
-              vistaPrevia={previa != null}
-              onVolver={elegido != null && resaltado == null ? () => setElegido(null) : undefined}
-            />
-            {/* Del departamento elegido, no del señalado: pedirlo al pasar el
-                puntero sería una petición por cada departamento cruzado. Mientras
-                se previsualiza otro, se atenúa. */}
-            <ResumenDepartamento
-              departamento={seleccionado}
-              atenuado={previa != null && previa.clave !== seleccionado?.clave}
-            />
-            {vista ? (
-              vista.n > 0 ? (
-                <Link
-                  className={styles.primaryCta}
-                  href={`/licitaciones/departamento/${vista.slug}`}
-                >
-                  Ver {vista.n === 1 ? "la ficha" : `las ${formatConteo(vista.n)} fichas`} de{" "}
-                  {vista.label} <span aria-hidden="true">→</span>
-                </Link>
-              ) : null
-            ) : totalAbiertos > 0 ? (
+            {seleccionado ? (
               <>
-                <Link className={styles.primaryCta} href={explorar.href}>
-                  Ver{" "}
-                  {totalAbiertos === 1 ? "la ficha" : `las ${formatConteo(totalAbiertos)} fichas`}{" "}
-                  <span aria-hidden="true">→</span>
+                <FichaDepartamento titulo={seleccionado.label} />
+                <TarjetaProceso estado={resumen} />
+                {/* Se anuncia una vez, al llegar el proceso; el puntero no. */}
+                <p className="sr-only" role="status">
+                  {resumen.status === "live" ? `Proceso disponible de ${seleccionado.label}` : ""}
+                </p>
+                <Link
+                  className={styles.enlaceTodos}
+                  href={`/licitaciones/departamento/${seleccionado.slug}`}
+                >
+                  Ver todos los procesos de {seleccionado.label} <span aria-hidden="true">→</span>
                 </Link>
-                {departamentos.length > 0 ? (
-                  <p className={styles.notaPais}>
-                    Elige un departamento en el mapa para ver sus procesos.
-                  </p>
-                ) : null}
               </>
-            ) : null}
+            ) : (
+              <>
+                {totalAbiertos === 0 ? <FichaDepartamento titulo="Colombia" /> : null}
+                <p className={styles.notaResultado}>
+                  {!datosDisponibles
+                    ? "No hay datos territoriales disponibles en este momento."
+                    : totalAbiertos === 0
+                      ? "No hay procesos abiertos disponibles."
+                      : "No hay procesos con ubicación resuelta para mostrar aquí."}
+                </p>
+                <Link className={styles.enlaceTodos} href="/licitaciones">
+                  Explorar todos los procesos <span aria-hidden="true">→</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
         <div className={styles.mapPanel} aria-label="Procesos abiertos por departamento">
           <div className={styles.mapaCab}>
             <div className={styles.mapaTitulo}>
-              <p className={styles.mapaH}>Dónde están las entidades que contratan</p>
-              <p>
-                Procesos abiertos por departamento, según la sede de la entidad contratante, no el
-                lugar de la obra.
-              </p>
+              <p className={styles.mapaH}>Explora por departamento</p>
+              <p>Ubicación de la entidad contratante, no de la obra.</p>
             </div>
             <div className={styles.mapaCabDer}>
               {hayDetalle && datosDisponibles ? (
@@ -198,6 +194,19 @@ export default function HeroTerritorial({ mapa = null, departamentos = [], total
           >
             {mapa}
           </div>
+          {/* La vista previa del puntero: una línea reservada, sin región viva
+              (el nombre accesible de cada departamento ya lo dice al enfocarlo). */}
+          {hayLista ? (
+            <p className={styles.previa}>
+              {previa ? (
+                <>
+                  <strong>{previa.label}:</strong> {procesos(previa.n)}
+                </>
+              ) : (
+                "Señala un departamento para ver cuántos procesos tiene abiertos."
+              )}
+            </p>
+          ) : null}
           {modoEfectivo === "monto" ? (
             // La leyenda del servidor es la de procesos: con monto se oculta por
             // CSS (data-metrica) y se pinta esta en el mismo sitio, bajo el mapa,
@@ -211,24 +220,38 @@ export default function HeroTerritorial({ mapa = null, departamentos = [], total
               ))}
             </ul>
           ) : null}
-          {mapa && totalAbiertos == null ? (
+          {tipoFiltro ? (
+            <p className={styles.ayuda}>
+              El tipo cambia el mapa. La ficha mostrada corresponde al destacado general del
+              departamento.
+            </p>
+          ) : null}
+          {!mapa ? (
+            <p className={styles.noData}>El mapa no está disponible en este momento.</p>
+          ) : totalAbiertos == null ? (
             <p className={styles.noData}>El mapa no tiene datos disponibles en este momento.</p>
           ) : null}
-          {datosDisponibles && departamentos.length > 0 ? (
-            <details className={styles.lista} id="aq-lista-departamentos">
-              <summary>
-                {departamentos.length === 1
-                  ? "Ver el departamento como lista"
-                  : `Ver los ${formatConteo(departamentos.length)} departamentos como lista`}
-              </summary>
-              <ListaTerritorios
-                departamentos={departamentos}
-                seleccionado={seleccionado}
-                onSeleccionar={setElegido}
-                resaltado={resaltado}
-                onResaltar={setResaltado}
-              />
-            </details>
+          {hayLista ? (
+            <>
+              <details className={styles.lista} id="aq-lista-departamentos">
+                <summary>
+                  {departamentos.length === 1
+                    ? "Ver el departamento como lista"
+                    : `Ver los ${formatConteo(departamentos.length)} departamentos como lista`}
+                </summary>
+                <ListaTerritorios
+                  departamentos={departamentos}
+                  seleccionado={seleccionado}
+                  onSeleccionar={onElegir}
+                  resaltado={resaltado}
+                  onResaltar={setResaltado}
+                />
+              </details>
+              <p className={styles.ayuda}>
+                Elige en la lista para ver una ficha aquí; abre un departamento del mapa para ver
+                todos sus procesos.
+              </p>
+            </>
           ) : null}
         </div>
       </div>

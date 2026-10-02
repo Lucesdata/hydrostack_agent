@@ -1,11 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import ResumenDepartamento, {
-  ListaDestacados,
+import TarjetaProceso, {
+  estadoDesdeRespuesta,
 } from "@/src/components/landing/hero-territorial/ResumenDepartamento";
-import { mapApiItem } from "@/src/components/landing/proceso-resumen";
 
-const destacado = {
+const fila = {
   id: "CO1.REQ.1",
   objeto: "OPTIMIZACIÓN DE LA PTAR MUNICIPAL",
   entidad: "MUNICIPIO DE CHINU",
@@ -16,72 +15,86 @@ const destacado = {
   ficha: "/licitaciones/optimizacion-de-la-ptar--CO1.REQ.1",
 };
 
-describe("ResumenDepartamento", () => {
-  it("antes de cargar dice que carga, sin filas ficticias", () => {
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={{ clave: "05", label: "Antioquia" }} />
-    );
-    expect(html).toContain("Mayor presupuesto abierto");
-    expect(html).toContain("Procesos abiertos de mayor presupuesto en Antioquia");
-    expect(html).toContain("Cargando…");
-    expect(html).not.toContain("aqDestacados");
+const nada = () => {};
+const pintar = (estado: Parameters<typeof TarjetaProceso>[0]["estado"]) =>
+  renderToStaticMarkup(<TarjetaProceso estado={estado} />);
+
+describe("estadoDesdeRespuesta", () => {
+  it("con destacados, el primero y solo el primero", () => {
+    const r = estadoDesdeRespuesta({
+      destacados: [fila, { ...fila, id: "CO1.REQ.2", ficha: "/licitaciones/x--CO1.REQ.2" }],
+    });
+    expect(r.status).toBe("live");
+    expect(r.destacado?.id).toBe("CO1.REQ.1");
   });
 
-  it("ya no pinta la serie de publicados por semana (2026-09-28)", () => {
-    const html = renderToStaticMarkup(
-      <ResumenDepartamento departamento={{ clave: "05", label: "Antioquia" }} />
-    );
-    expect(html).not.toContain("Publicados por semana");
-    expect(html).not.toContain("aqSpark");
+  it("una lista vacía es «vacío», no error", () => {
+    expect(estadoDesdeRespuesta({ destacados: [] })).toEqual({ status: "empty", destacado: null });
   });
 
-  it("sin departamento (vista país) no pinta nada: no hay consulta nacional", () => {
-    expect(renderToStaticMarkup(<ResumenDepartamento departamento={null} />)).toBe("");
+  it("shape inválido es error, no «sin procesos»", () => {
+    for (const d of [null, undefined, "x", {}, { destacados: null }, { error: "no" }]) {
+      expect(estadoDesdeRespuesta(d).status, JSON.stringify(d)).toBe("error");
+    }
+  });
+
+  it("un primer elemento sin ficha válida deja el destacado no disponible, sin probar el segundo", () => {
+    const r = estadoDesdeRespuesta({
+      destacados: [{ ...fila, ficha: "https://evil.example" }, fila],
+    });
+    expect(r).toEqual({ status: "invalido", destacado: null });
   });
 });
 
-/** Como llega de /api/departamento/[dpto]/resumen, pasado por mapApiItem. */
-const pintar = (filas: (typeof destacado)[]) =>
-  renderToStaticMarkup(<ListaDestacados destacados={filas.map(mapApiItem)} />);
+describe("TarjetaProceso", () => {
+  it("cargando: lo dice, reserva el sitio y no inventa un proceso", () => {
+    const html = pintar({ status: "loading", destacado: null, reintentar: nada });
+    expect(html).toContain("Cargando proceso…");
+    expect(html).toContain('aria-busy="true"');
+    expect(html).not.toContain("href=");
+    // Sin JS el destacado no llega nunca: se explica qué hacer.
+    expect(html).toContain("<noscript>");
+    expect(html).toContain("Abre un departamento del mapa o utiliza el buscador");
+  });
 
-describe("ListaDestacados", () => {
-  it("cada destacado lleva el semáforo absoluto y ya no el importe (v2)", () => {
-    const html = pintar([destacado]);
+  it("con destacado: chip, objeto real, temas de la ficha y «Ver ficha» a su ficha", () => {
+    const { destacado } = estadoDesdeRespuesta({ destacados: [fila] });
+    const html = pintar({ status: "live", destacado, reintentar: nada });
+    expect(html).toContain("PROCESO SECOP II");
     expect(html).toContain("Optimización de la PTAR municipal");
-    expect(html).toContain("Municipio de Chinu · Chinú");
-    // El importe lo enuncia la compuerta Cuantía, no una columna aparte.
-    expect(html).not.toContain("aqDestValor");
-    expect(html).toContain("Cuantía");
-    expect(html).toMatch(/\$4\.280 M|\$\s?4\.280/);
-    expect(html).toContain("Córdoba");
-    expect(html).not.toMatch(/sf-punto--(pass|warn|fail)/);
+    expect(html).toContain("Objeto · Presupuesto · Plazos · Requisitos");
+    expect(html).toMatch(
+      /href="\/licitaciones\/optimizacion-de-la-ptar--CO1\.REQ\.1"[^>]*>Ver ficha/
+    );
+    expect(html).toContain(
+      'aria-label="Ver ficha: Optimización de la PTAR municipal, de Municipio de Chinu"'
+    );
+    // Una sola acción y un solo destino.
+    expect(html.match(/href=/g)).toHaveLength(1);
   });
 
-  it("la API no trae plazo: la compuerta sale «sin datos», no se deduce", () => {
-    const html = pintar([destacado]);
-    // Sector, Cuantía y Zona con dato; Plazo sin él.
-    expect(html.match(/sf-punto--dato/g)).toHaveLength(3);
-    expect(html.match(/sf-punto--unknown/g)).toHaveLength(1);
-    expect(html).toMatch(/Plazo<\/span><span class="sf-palabra">sin datos/);
+  it("no pinta cuantía, fecha ni semáforo: la tarjeta no rellena con datos (spec §6)", () => {
+    const { destacado } = estadoDesdeRespuesta({ destacados: [fila] });
+    const html = pintar({ status: "live", destacado, reintentar: nada });
+    expect(html).not.toMatch(/\$\s?4\.280/);
+    expect(html).not.toContain("sf-");
+    expect(html).not.toContain("Crea tu perfil");
+    expect(html).not.toContain("EJEMPLO ILUSTRATIVO");
   });
 
-  it("en el hero, dos filas y sin Habilitación, que aquí siempre dice «sin datos» (1366×768)", () => {
-    const tres = [1, 2, 3].map((i) => ({
-      ...destacado,
-      id: `CO1.REQ.${i}`,
-      objeto: `OBRA NÚMERO ${i}`,
-      ficha: `/licitaciones/obra--CO1.REQ.${i}`,
-    }));
-    const html = pintar(tres);
-    expect(html.match(/<li>/g)).toHaveLength(2);
-    expect(html).not.toContain("CO1.REQ.3");
-    expect(html).not.toContain("Habilitación");
-    expect(html.match(/class="sf-item"/g)).toHaveLength(8);
+  it("vacío y destacado no válido: sin enlace a una ficha", () => {
+    for (const status of ["empty", "invalido"] as const) {
+      const html = pintar({ status, destacado: null, reintentar: nada });
+      expect(html).toContain("No hay un proceso destacado disponible en este departamento.");
+      expect(html).not.toContain("href=");
+    }
   });
 
-  it("invita a crear perfil", () => {
-    const html = pintar([destacado]);
-    expect(html).toContain('class="aqGancho"');
-    expect(html).toContain('<a href="/registro">Crea tu perfil</a>');
+  it("error: lo dice y ofrece reintentar, distinto de vacío", () => {
+    const html = pintar({ status: "error", destacado: null, reintentar: nada });
+    expect(html).toContain("No pudimos cargar el proceso. Inténtalo de nuevo.");
+    expect(html).toContain('<button type="button" class="aqReintentar">Reintentar</button>');
+    expect(html).not.toContain("No hay un proceso destacado");
+    expect(html).not.toContain("href=");
   });
 });

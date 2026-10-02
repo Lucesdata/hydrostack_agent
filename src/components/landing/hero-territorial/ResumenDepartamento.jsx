@@ -1,126 +1,154 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { mapApiItem } from "@/src/components/landing/proceso-resumen";
-import Semaforo from "@/src/components/secop/semaforo/Semaforo";
-import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { destacadoDeApi } from "@/src/components/landing/proceso-resumen";
 
 /**
- * Los tres procesos abiertos de mayor presupuesto bajo el resultado del hero.
+ * El proceso destacado del departamento elegido: la tarjeta del hero y, por
+ * `PortadaCliente`, los cuatro accesos de la franja de abajo (spec
+ * 2026-10-02-hero-mapa-ficha §7.4, §8 y §9).
  *
- * Del departamento elegido: se piden al elegirlo —no al pasar el puntero, que
- * dispararía una petición por cada departamento cruzado— y se guardan en
- * memoria para no volver a pedir el mismo. Sin departamento (la vista país, la
- * inicial) no se pinta: no hay consulta nacional sin tocar el backend
- * (decisión del 2026-09-30).
+ * Sale de /api/departamento/[dpto]/resumen, que sirve tres procesos abiertos
+ * ordenados por presupuesto. Se pinta solo el primero: es una muestra en ese
+ * orden, no una recomendación. Se pide al elegir un departamento —nunca al
+ * pasar el puntero— y una sola vez por departamento y visita.
  *
- * La API no trae la fecha de recepción ni el estado de apertura, así que la
- * compuerta Plazo sale «sin datos» (`UNKNOWN`): se dice que falta, no se deduce.
- *
- * Cada fila lleva el semáforo en su lectura absoluta (`DATO`): qué exige el
- * proceso, sin juzgar a nadie. Por eso ya no pinta el importe a la derecha: la
- * compuerta Cuantía lo enuncia y la fila lo diría dos veces (TRASPASO §4.9).
- * Con perfil el semáforo debería pasar a relativo y el gancho ocultarse, como
- * hace `SemaforoConPerfil` en la ficha: pendiente, fuera de este cambio.
- *
- * Solo datos reales: cargando dice que carga, y si falla muestra "—".
- *
- * Dos filas y cuatro compuertas, no tres y cinco (2026-09-29): con el semáforo
- * cada fila ocupa 2–3 líneas en la columna de 380 px, y el hero se pasaba 124 px
- * del primer pantallazo en 1366×768, con el botón principal debajo. Habilitación
- * sale del hero porque aquí siempre dice «sin datos»: vive en el pliego. La
- * ficha sigue mostrando las cinco. La API sigue sirviendo tres.
+ * Hasta el 2026-10-02 pintaba dos filas con el semáforo absoluto y el gancho
+ * «Crea tu perfil». La referencia aprobada lleva una tarjeta sin semáforo: el
+ * semáforo sigue en la ficha, en «Quiero participar».
  */
 
-const FILAS_HERO = 2;
-const sinHabilitacion = (c) => c.clave !== "habilitacion";
+/**
+ * Estados de una respuesta. `empty` y `invalido` son respuestas válidas (no
+ * hay destacado, o el primero no se puede enlazar) y se guardan; `error` no,
+ * para que reintentar vuelva a pedir.
+ *
+ * @returns {{ status: "live", destacado: object } | { status: "empty" | "invalido" | "error", destacado: null }}
+ */
+export function estadoDesdeRespuesta(d) {
+  if (!d || typeof d !== "object" || !Array.isArray(d.destacados)) {
+    return { status: "error", destacado: null };
+  }
+  if (d.destacados.length === 0) return { status: "empty", destacado: null };
+  const destacado = destacadoDeApi(d.destacados[0]);
+  return destacado ? { status: "live", destacado } : { status: "invalido", destacado: null };
+}
 
 const cache = new Map();
+const CARGANDO = { status: "loading", destacado: null };
 
+/**
+ * El estado del destacado de `clave`. Cada resultado lleva la clave que lo
+ * pidió y se devuelve `loading` para cualquier otra: una respuesta tardía de A
+ * nunca se pinta con B elegido. Al cambiar de clave la petición anterior se
+ * aborta.
+ */
 export function useResumenDepartamento(clave) {
-  const [estado, setEstado] = useState({ clave: null, status: "loading", datos: null });
+  const [estado, setEstado] = useState({ clave: null, ...CARGANDO });
+  const [intento, setIntento] = useState(0);
+  const enVuelo = useRef(false);
 
   useEffect(() => {
     if (!clave) return undefined;
     if (cache.has(clave)) {
-      setEstado({ clave, status: "live", datos: cache.get(clave) });
+      setEstado({ clave, ...cache.get(clave) });
       return undefined;
     }
-    let vivo = true;
-    setEstado({ clave, status: "loading", datos: null });
-    fetch(`/api/departamento/${clave}/resumen`)
+    const ctrl = new AbortController();
+    enVuelo.current = true;
+    setEstado({ clave, ...CARGANDO });
+    fetch(`/api/departamento/${clave}/resumen`, { signal: ctrl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((d) => {
-        if (!vivo) return;
-        if (!Array.isArray(d?.destacados)) {
-          setEstado({ clave, status: "empty", datos: null });
-          return;
-        }
-        const datos = { destacados: d.destacados.map(mapApiItem) };
-        cache.set(clave, datos);
-        setEstado({ clave, status: "live", datos });
+        if (ctrl.signal.aborted) return;
+        const resultado = estadoDesdeRespuesta(d);
+        if (resultado.status !== "error") cache.set(clave, resultado);
+        setEstado({ clave, ...resultado });
       })
-      .catch(() => {
-        if (vivo) setEstado({ clave, status: "empty", datos: null });
+      .catch((e) => {
+        if (ctrl.signal.aborted) return;
+        // Sin volcar la respuesta: basta con saber qué departamento y por qué.
+        console.warn(`[resumen ${clave}]`, e instanceof Error ? e.message : "respuesta inválida");
+        setEstado({ clave, status: "error", destacado: null });
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) enVuelo.current = false;
       });
     return () => {
-      vivo = false;
+      ctrl.abort();
+      enVuelo.current = false;
     };
-  }, [clave]);
+  }, [clave, intento]);
 
-  return estado.clave === clave ? estado : { clave, status: "loading", datos: null };
+  const reintentar = useCallback(() => {
+    if (enVuelo.current) return;
+    setIntento((i) => i + 1);
+  }, []);
+
+  const actual = estado.clave === clave ? estado : { clave, ...CARGANDO };
+  return { ...actual, reintentar };
 }
 
-/** Las filas con su semáforo. Separada del componente para probarla sin red. */
-export function ListaDestacados({ destacados }) {
-  return (
-    <>
-      <ol className="aqDestacados">
-        {destacados.slice(0, FILAS_HERO).map((p) => (
-          <li key={p.id}>
-            <Link href={p.href} title={p.objeto}>
-              <span className="aqDestObjeto">{p.objeto}</span>
-              <span className="aqDestMeta">
-                {[p.entidad, p.ciudad].filter(Boolean).join(" · ")}
-              </span>
-              {/* Un div: el semáforo es una lista, y un span no puede contenerla. */}
-              <div className="aqDestSemaforo">
-                <Semaforo
-                  compuertas={compuertasAbsolutas(p.semaforo).filter(sinHabilitacion)}
-                  disposicion="linea"
-                />
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ol>
-      <p className="aqGancho">
-        Así ves qué exige cada proceso. <Link href="/registro">Crea tu perfil</Link> para saber si
-        cumples.
-      </p>
-    </>
-  );
-}
+/**
+ * La tarjeta según el estado del destacado. Sin red: se prueba con estados
+ * fijos.
+ */
+export default function TarjetaProceso({ estado }) {
+  const { status, destacado, reintentar } = estado;
 
-export default function ResumenDepartamento({ departamento, atenuado = false }) {
-  const { status, datos } = useResumenDepartamento(departamento?.clave ?? null);
-  if (!departamento) return null;
+  if (status === "live") {
+    const nombre = destacado.entidad
+      ? `Ver ficha: ${destacado.objeto}, de ${destacado.entidad}`
+      : `Ver ficha: ${destacado.objeto}`;
+    return (
+      <article className="aqTarjeta" aria-labelledby="aq-tarjeta-objeto">
+        <span className="aqChip">PROCESO SECOP II</span>
+        <div className="aqTarjetaCuerpo">
+          <div className="aqTarjetaTexto">
+            <h3 id="aq-tarjeta-objeto" className="aqTarjetaObjeto" title={destacado.objeto}>
+              {destacado.objeto}
+            </h3>
+            <p className="aqTarjetaTemas">Objeto · Presupuesto · Plazos · Requisitos</p>
+          </div>
+          <Link className="aqVerFicha" href={destacado.href} aria-label={nombre}>
+            Ver ficha <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </article>
+    );
+  }
 
-  return (
-    <section
-      className="aqResumen"
-      aria-label={`Procesos abiertos de mayor presupuesto en ${departamento.label}`}
-      data-atenuado={atenuado || undefined}
-    >
-      <h3>Mayor presupuesto abierto</h3>
-      {status === "live" && datos.destacados.length > 0 ? (
-        <ListaDestacados destacados={datos.destacados} />
-      ) : (
-        <p className="aqResumenNota">
-          {status === "loading" ? "Cargando…" : status === "live" ? "Sin procesos abiertos" : "—"}
+  if (status === "error") {
+    return (
+      <div className="aqTarjeta aqTarjeta--nota">
+        <p className="aqTarjetaNota">No pudimos cargar el proceso. Inténtalo de nuevo.</p>
+        <button type="button" className="aqReintentar" onClick={reintentar}>
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "empty" || status === "invalido") {
+    return (
+      <div className="aqTarjeta aqTarjeta--nota">
+        <p className="aqTarjetaNota">
+          No hay un proceso destacado disponible en este departamento.
         </p>
-      )}
-    </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="aqTarjeta aqTarjeta--nota" aria-busy="true">
+      <p className="aqTarjetaNota">Cargando proceso…</p>
+      {/* El destacado se pide desde el navegador: sin JS no llega nunca. */}
+      <noscript>
+        <p className="aqTarjetaNota">
+          Abre un departamento del mapa o utiliza el buscador para consultar sus fichas.
+        </p>
+      </noscript>
+    </div>
   );
 }

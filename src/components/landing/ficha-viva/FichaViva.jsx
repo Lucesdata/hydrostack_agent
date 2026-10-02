@@ -1,89 +1,139 @@
 import Link from "next/link";
+import { enlacesDeFicha } from "@/src/components/landing/proceso-resumen";
 import styles from "./ficha-viva.module.css";
 
 /**
- * "La Ficha Viva": qué preguntas responde una ficha. La portada y el mapa
- * sirven para llegar a una ficha; esta sección dice qué se encuentra al llegar.
+ * La franja de la ficha, bajo el hero: «Del territorio a los detalles que
+ * necesitas.» y un panel claro con cuatro accesos a secciones reales de la
+ * ficha del proceso que muestra la tarjeta del hero (spec
+ * 2026-10-02-hero-mapa-ficha §8).
  *
- * Desde el 2026-09-28 (PR 3 del plan portada-esencial) es solo el titular, las
- * cuatro preguntas con su estado real y un botón. El esquema ilustrativo, el
- * árbol de decisiones, la leyenda de color y el aviso de «Seguir sus cambios»
- * se mudaron a /licitaciones/como-participar (`ComoRazonaFicha.jsx`), enlazada
- * desde aquí.
+ * No es una captura ni un segundo proceso: describe qué se revisa en la ficha
+ * y, con un destacado válido, enlaza esas secciones de **ese** proceso. Sin él
+ * (cargando, vacío, error o sin datos) los cuatro títulos se quedan, pero sin
+ * enlace: nunca un `href` al proceso anterior ni un `#` decorativo.
  *
- * Cada promesa lleva su estado real ("Disponible", "Depende del pliego"): si la
- * sección prometiera algo que la ficha no hace, quien abra una ficha y no lo
- * vea tendría razón en no creerse nada más.
+ * Sustituye a las cuatro preguntas que había desde el 2026-09-28. El esquema y
+ * el árbol siguen en /licitaciones/como-participar (`ComoRazonaFicha.jsx`).
  */
 
-const PREGUNTAS = [
+const ACCESOS = [
   {
-    n: 1,
-    q: "¿Puedo participar?",
-    a: "Un semáforo de cinco compuertas — sector, cuantía, plazo, zona y habilitación — que ves sin cuenta. Con tus datos, cada compuerta pasa a decir cómo te queda a ti.",
-    estado: "disponible",
+    clave: "resumen",
+    titulo: "Qué se contrata",
+    enlace: "Consultar detalle",
+    sinDestino: "Objeto del proceso",
+    icono: (
+      <>
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+        <path d="M14 3v5h5M9 13h6M9 17h6" />
+      </>
+    ),
   },
   {
-    n: 2,
-    q: "¿Qué me falta?",
-    a: "Los requisitos habilitantes están en el pliego. Si el pliego de ese proceso aún no se ha procesado, la ficha dice «todavía no puedo determinarlo» y qué falta, en vez de adivinar.",
-    estado: "pliego",
+    clave: "dinero",
+    titulo: "Presupuesto",
+    enlace: "Ver fuente",
+    sinDestino: "Valor y fuentes disponibles",
+    icono: (
+      <>
+        <ellipse cx="12" cy="6" rx="7" ry="3" />
+        <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
+        <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+      </>
+    ),
   },
   {
-    n: 3,
-    q: "¿Dónde consta?",
-    a: "La ficha separa lo que viene de los datos abiertos del SECOP II de lo que solo está en el pliego, y enlaza el expediente original.",
-    estado: "disponible",
+    clave: "plazos",
+    titulo: "Plazos",
+    enlace: "Consultar fechas",
+    sinDestino: "Fechas publicadas",
+    icono: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M8 3v4M16 3v4M3 10h18" />
+      </>
+    ),
   },
   {
-    n: 4,
-    q: "¿Qué hago ahora?",
-    a: "Un siguiente paso concreto: ir al expediente del SECOP II, o dar tus datos con el diagnóstico para que el semáforo se lea contra ti.",
-    estado: "disponible",
+    clave: "pliego",
+    titulo: "Qué falta verificar",
+    enlace: "Revisar pliego",
+    sinDestino: "Requisitos según el pliego",
+    icono: (
+      <>
+        <circle cx="5" cy="6" r="1.5" />
+        <circle cx="5" cy="12" r="1.5" />
+        <circle cx="5" cy="18" r="1.5" />
+        <path d="M10 6h10M10 12h10M10 18h10" />
+      </>
+    ),
   },
 ];
 
-const ESTADO = {
-  disponible: "Disponible",
-  pliego: "Depende del pliego",
-};
+/**
+ * @param {{ destacado?: { href: string, objeto: string } | null }} props — el
+ * proceso de la tarjeta del hero, ya validado (`destacadoDeApi`), o `null`.
+ */
+export default function FichaViva({ destacado = null }) {
+  const enlaces = enlacesDeFicha(destacado?.href);
 
-function Pin({ n }) {
-  return (
-    <span className={styles.pin} aria-hidden="true">
-      {n}
-    </span>
-  );
-}
-
-export default function FichaViva() {
   return (
     <section className={styles.seccion} id="ficha-viva" aria-labelledby="ficha-viva-titulo">
       <div className={styles.contenedor}>
-        <p className={styles.eyebrow}>LA FICHA VIVA</p>
-        <h2 id="ficha-viva-titulo">Cada proceso tiene una ficha. Ahí es donde decides.</h2>
-        <ol className={`${styles.preguntas} ${styles.preguntasFila}`}>
-          {PREGUNTAS.map((p) => (
-            <li key={p.n}>
-              <Pin n={p.n} />
-              <div>
-                <h3>{p.q}</h3>
-                <p>{p.a}</p>
-                <span className={styles.estado} data-estado={p.estado}>
-                  {ESTADO[p.estado]}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className={styles.ctas}>
-          <Link className={styles.ctaPrimario} href="/licitaciones">
-            Abrir fichas de procesos <span aria-hidden="true">→</span>
-          </Link>
+        <h2 id="ficha-viva-titulo">Del territorio a los detalles que necesitas.</h2>
+        <div className={`tema-claro ${styles.panel}`}>
+          <div className={styles.panelCab}>
+            <h3>Ficha del proceso</h3>
+            <span className={styles.chip}>QUÉ ENCONTRARÁS</span>
+          </div>
+          <ul className={styles.accesos}>
+            {ACCESOS.map((a) => (
+              <li key={a.clave}>
+                <svg
+                  className={styles.icono}
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  {a.icono}
+                </svg>
+                <div>
+                  <h4>{a.titulo}</h4>
+                  {enlaces ? (
+                    <Link
+                      className={styles.acceso}
+                      href={enlaces[a.clave]}
+                      aria-label={`${a.enlace} de ${destacado.objeto}`}
+                    >
+                      {a.enlace} <span aria-hidden="true">→</span>
+                    </Link>
+                  ) : (
+                    <p className={styles.sinDestino}>{a.sinDestino}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          {enlaces ? null : (
+            <p className={styles.panelEstado}>
+              Los accesos se habilitan cuando hay un proceso disponible.
+            </p>
+          )}
+        </div>
+        <p className={styles.ayuda}>
+          La disponibilidad de presupuesto, fechas y requisitos depende de las fuentes de cada
+          proceso.{" "}
           <Link className={styles.enlaceRazona} href="/licitaciones/como-participar#como-razona">
             Cómo razona la ficha <span aria-hidden="true">→</span>
           </Link>
-        </div>
+        </p>
       </div>
     </section>
   );

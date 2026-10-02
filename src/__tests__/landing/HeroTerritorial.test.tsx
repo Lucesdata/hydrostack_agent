@@ -1,10 +1,13 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
-import FichaDepartamento, {
+import HeroTerritorial, {
+  claveInicial,
+} from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import {
   formatPorcentaje,
   porcentajeNacional,
 } from "@/src/components/landing/hero-territorial/FichaDepartamento";
+import { estadoDesdeRespuesta } from "@/src/components/landing/hero-territorial/ResumenDepartamento";
 
 const departamentos = [
   { clave: "05", label: "Antioquia", slug: "antioquia", n: 5155 },
@@ -19,9 +22,44 @@ const conDetalle = departamentos.map((d) => ({
   nEntidades: 40,
   tipos: { acueducto: 1, alcantarillado: 1, ptap: 1, ptar: 1, otros: 1 },
 }));
+const fila = {
+  id: "CO1.REQ.9",
+  objeto: "CONSTRUCCIÓN DEL ACUEDUCTO VEREDAL",
+  entidad: "MUNICIPIO DE CHÍA",
+  ficha: "/licitaciones/construccion-del-acueducto-veredal--CO1.REQ.9",
+};
+const vivo = { ...estadoDesdeRespuesta({ destacados: [fila] }), reintentar: () => {} };
+
+describe("claveInicial", () => {
+  it("el primer departamento con procesos, en el orden del servidor", () => {
+    expect(claveInicial(departamentos, 10000)).toBe("05");
+    expect(claveInicial([{ ...departamentos[0], n: 0 }, departamentos[1]], 10000)).toBe("11");
+  });
+
+  it("sin datos o sin ninguno con procesos, ninguno: no se pide nada", () => {
+    expect(claveInicial(departamentos, null)).toBeNull();
+    expect(claveInicial([], 10000)).toBeNull();
+    expect(claveInicial([{ ...departamentos[0], n: 0 }], 0)).toBeNull();
+  });
+});
 
 describe("HeroTerritorial", () => {
-  it("renderiza el mapa una sola vez y usa departamentos reales", () => {
+  it("copy de la referencia aprobada", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(html).toContain("<span>Explora el mapa.</span> <span>Entiende cada proceso.</span>");
+    expect(html).toContain(
+      "Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha."
+    );
+    expect(html).toContain('placeholder="Busca por entidad u objeto"');
+    expect(html).toContain('aria-label="Buscar fichas de procesos abiertos por entidad u objeto"');
+    expect(html).toContain("Explora por departamento");
+    expect(html).toContain("Ubicación de la entidad contratante, no de la obra.");
+    expect(html).not.toContain("Descubre en qué procesos");
+  });
+
+  it("renderiza el mapa una sola vez", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial
         mapa={<div data-testid="mapa-departamental">Mapa</div>}
@@ -30,81 +68,92 @@ describe("HeroTerritorial", () => {
       />
     );
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
-    expect(html).toContain("Antioquia");
-    expect(html).toContain("Bogotá D.C.");
-    expect(html).toContain("5.155");
+    expect(html).not.toContain("El mapa no está disponible");
   });
 
-  it("un solo botón, el del resultado: ni diagnóstico, ni precios, ni alertas (v2, 2026-09-28)", () => {
+  it("llega al primer departamento con procesos, no a la vista país ni a uno fijo", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain("Descubre en qué procesos de agua puedes <span>participar.</span>");
-    // La píldora del mensaje salió: el buscador es la entrada general.
-    expect(html).not.toContain("Ver fichas de procesos");
-    expect(html.match(/class="_primaryCta_/g) ?? html.match(/primaryCta/g)).toHaveLength(1);
-    // Salieron del hero; siguen en el pie y en su página.
+    expect(html).toContain("<h2>Antioquia</h2>");
+    expect(html).not.toContain("<h2>Colombia</h2>");
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).not.toContain("Volver a la vista de Colombia");
+    const bogotaPrimero = renderToStaticMarkup(
+      <HeroTerritorial departamentos={[departamentos[1], departamentos[0]]} totalAbiertos={10000} />
+    );
+    expect(bogotaPrimero).toContain("<h2>Bogotá D.C.</h2>");
+  });
+
+  it("antes de llegar el proceso dice que carga y no enlaza ninguna ficha", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(html).toContain("Cargando proceso…");
+    expect(html).not.toMatch(/href="\/licitaciones\/[^"]*--CO1/);
+    expect(html).not.toContain("Mejoramiento de acueducto");
+  });
+
+  it("con el proceso, una tarjeta y el enlace a todos los del departamento", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial
+        departamentos={departamentos}
+        totalAbiertos={10000}
+        clave="11"
+        resumen={vivo}
+      />
+    );
+    expect(html).toContain("<h2>Bogotá D.C.</h2>");
+    expect(html).toContain("Construcción del acueducto veredal");
+    expect(html).toMatch(
+      /href="\/licitaciones\/construccion-del-acueducto-veredal--CO1\.REQ\.9"[^>]*>Ver ficha/
+    );
+    expect(html.match(/class="aqTarjeta"/g)).toHaveLength(1);
+    expect(html).toMatch(
+      /href="\/licitaciones\/departamento\/bogota-d-c"[^>]*>Ver todos los procesos de Bogotá D\.C\./
+    );
+    expect(html).toContain('role="status">Proceso disponible de Bogotá D.C.</p>');
+  });
+
+  it("ni conteo ni % nacional como protagonistas del resultado", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} resumen={vivo} />
+    );
+    expect(html).not.toContain("del total nacional");
+    expect(html).not.toContain("aqFichaCifra");
+    expect(html).not.toContain("Ver las 5.155 fichas");
+  });
+
+  it("un solo botón lleno, el de la ficha; nada de diagnóstico, precios ni alertas", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} resumen={vivo} />
+    );
+    expect(html.match(/class="aqVerFicha"/g)).toHaveLength(1);
+    expect(html).not.toContain("primaryCta");
     expect(html).not.toContain('href="/diagnostico"');
     expect(html).not.toContain('href="/precios"');
-    expect(html).not.toContain("INTELIGENCIA DE CONTRATACIÓN PÚBLICA");
-    // Las alertas no se entregan en producción (PENDIENTES §0).
     expect(html.toLowerCase()).not.toContain("alerta");
   });
 
-  it("sin backend nuevo: la vista país no trae destacados ni fecha de actualización", () => {
+  it("sin semáforo ni gancho de perfil en el hero (2026-10-02)", () => {
     const html = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} resumen={vivo} />
     );
+    expect(html).not.toContain("sf-");
+    expect(html).not.toContain("Crea tu perfil");
     expect(html).not.toContain("Mayor presupuesto abierto");
-    expect(html).not.toContain("actualizado el");
   });
 
-  it("se llega a la vista país, no al primer departamento", () => {
+  it("la vista previa va en una línea del mapa, no en el resultado", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain("<h2>Colombia</h2>");
-    expect(html).toContain("10.000");
-    expect(html).not.toContain("del total nacional");
-    expect(html).not.toContain('aria-pressed="true"');
-    // Sin elección no hay a dónde volver.
-    expect(html).not.toContain("aqFichaVolver");
+    expect(html).toContain("Señala un departamento para ver cuántos procesos tiene abiertos.");
+    expect(html).not.toContain("Vista previa");
+    expect(html).not.toContain("data-atenuado");
   });
 
-  it("en vista país el botón lleva a todas las fichas, con su número y la nota", () => {
-    const html = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
-    );
-    expect(html).toMatch(/href="\/licitaciones"[^>]*>Ver las 10\.000 fichas/);
-    expect(html).toContain("Elige un departamento en el mapa para ver sus procesos.");
-    expect(html).not.toContain('href="/licitaciones/departamento/antioquia"');
-  });
-
-  it("sin datos no hay botón ni nota", () => {
-    const html = renderToStaticMarkup(<HeroTerritorial departamentos={departamentos} />);
-    expect(html).not.toContain("fichas <span");
-    expect(html).not.toContain("Elige un departamento");
-  });
-
-  it("el resultado no trae extras del hero anterior", () => {
-    const html = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
-    );
-    // Fuera de la portada: tipos por departamento, comparar y el tooltip.
-    expect(html).not.toContain("Tipos de proyecto ·");
-    expect(html).not.toContain("Comparar");
-  });
-
-  it("la base territorial es el titular del mapa", () => {
-    const html = renderToStaticMarkup(
-      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
-    );
-    expect(html).toContain("Dónde están las entidades que contratan");
-    expect(html).toContain("según la sede de la entidad contratante, no el lugar de la obra.");
-    expect(html).toContain('aria-label="Procesos abiertos por departamento"');
-  });
-
-  it("las opciones del mapa van plegadas y solo si hay detalle", () => {
+  it("las opciones del mapa van plegadas, solo con detalle, y no filtran la tarjeta", () => {
     const sin = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
@@ -114,18 +163,58 @@ describe("HeroTerritorial", () => {
     );
     expect(con).toContain("<summary>Opciones del mapa</summary>");
     expect(con).toContain('<option value="monto">Monto en juego</option>');
-    // Los cinco tipos, desde TIPOS_PROYECTO, y «Todos».
     expect(con.match(/<option value="(acueducto|alcantarillado|ptap|ptar|otros)"/g)).toHaveLength(
       5
     );
+    // La ayuda del tipo solo sale con un tipo elegido (estado de cliente).
+    expect(con).not.toContain("El tipo cambia el mapa");
   });
 
-  it("distingue cero real de dato no disponible", () => {
-    const cero = renderToStaticMarkup(<HeroTerritorial totalAbiertos={0} />);
-    const sinDato = renderToStaticMarkup(<HeroTerritorial />);
-    expect(cero).toContain(">0<");
-    expect(cero).not.toContain("El mapa no tiene datos disponibles");
-    expect(sinDato).toContain("—");
+  it("la ayuda de la lista dice qué hace cada camino", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
+    );
+    expect(html).toContain(
+      "Elige en la lista para ver una ficha aquí; abre un departamento del mapa para ver todos sus procesos."
+    );
+    expect(renderToStaticMarkup(<HeroTerritorial />)).not.toContain("Elige en la lista");
+  });
+});
+
+describe("estados sin departamento (spec §9)", () => {
+  it("fallo de agregados: lo dice, sin selección ni cifras de demostración", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial mapa={<div>Mapa</div>} departamentos={departamentos} />
+    );
+    expect(html).toContain("No hay datos territoriales disponibles en este momento.");
+    expect(html).toContain("El mapa no tiene datos disponibles en este momento.");
+    expect(html).not.toContain('aria-pressed="true"');
+    expect(html).not.toContain("Cargando proceso");
+    expect(html).toMatch(/href="\/licitaciones"[^>]*>Explorar todos los procesos/);
+    // El buscador usa otra ruta: sigue.
+    expect(html).toContain('name="q"');
+  });
+
+  it("total nacional cero: Colombia y sin procesos, no un error", () => {
+    const html = renderToStaticMarkup(<HeroTerritorial mapa={<div>Mapa</div>} totalAbiertos={0} />);
+    expect(html).toContain("<h2>Colombia</h2>");
+    expect(html).toContain("No hay procesos abiertos disponibles.");
+    expect(html).not.toContain("El mapa no tiene datos disponibles");
+  });
+
+  it("hay total pero ninguna geografía: no se asigna a ningún departamento", () => {
+    const html = renderToStaticMarkup(<HeroTerritorial totalAbiertos={120} departamentos={[]} />);
+    expect(html).toContain("No hay procesos con ubicación resuelta para mostrar aquí.");
+    expect(html).not.toContain("Antioquia");
+  });
+
+  it("sin mapa lo dice; la lista y la tarjeta siguen", () => {
+    const html = renderToStaticMarkup(
+      <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} resumen={vivo} />
+    );
+    expect(html).toContain("El mapa no está disponible en este momento.");
+    expect(html).toContain("Ver ficha");
+    expect(html).toContain("como lista");
   });
 
   it("no contiene cifras demo", () => {
@@ -136,92 +225,17 @@ describe("HeroTerritorial", () => {
   });
 });
 
-describe("resultado del departamento", () => {
-  it("cambia con el departamento seleccionado", () => {
-    const antioquia = renderToStaticMarkup(
-      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} />
-    );
-    const bogota = renderToStaticMarkup(
-      <FichaDepartamento departamento={departamentos[1]} totalAbiertos={10000} />
-    );
-    expect(antioquia).toContain("Antioquia");
-    expect(antioquia).toContain("51,6 % del total nacional");
-    expect(bogota).toContain("Bogotá D.C.");
-    expect(bogota).toContain("48,2 % del total nacional");
-  });
-
-  it("solo dice nombre, procesos y porcentaje: lo demás está en /licitaciones/comparar", () => {
-    const html = renderToStaticMarkup(
-      <FichaDepartamento departamento={conDetalle[0]} totalAbiertos={10000} />
-    );
-    expect(html).not.toContain("últimos 7 días");
-    expect(html).not.toContain("en juego");
-    expect(html).not.toContain("entidades contratan");
-  });
-
-  it("concuerda el singular", () => {
-    const uno = renderToStaticMarkup(
-      <FichaDepartamento departamento={{ ...departamentos[0], n: 1 }} totalAbiertos={10000} />
-    );
-    expect(uno).toContain("proceso abierto");
-    expect(uno).not.toContain("procesos abiertos");
-  });
-
-  it("elegido, ofrece volver a Colombia; en vista previa, no", () => {
-    const volver = () => {};
-    const elegido = renderToStaticMarkup(
-      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} onVolver={volver} />
-    );
-    expect(elegido).toContain('aria-label="Volver a la vista de Colombia"');
-    expect(elegido).toContain("Colombia</button>");
-    const previa = renderToStaticMarkup(
-      <FichaDepartamento
-        departamento={departamentos[0]}
-        totalAbiertos={10000}
-        vistaPrevia
-        onVolver={volver}
-      />
-    );
-    expect(previa).not.toContain("Volver a la vista de Colombia");
-    expect(previa).toContain("Vista previa");
-  });
-
-  it("la vista previa se marca y no se anuncia", () => {
-    const html = renderToStaticMarkup(
-      <FichaDepartamento departamento={departamentos[0]} totalAbiertos={10000} vistaPrevia />
-    );
-    expect(html).toContain("Vista previa");
-    expect(html).toContain('aria-live="off"');
-  });
-
-  it("solo calcula porcentaje con total nacional positivo", () => {
-    expect(porcentajeNacional(10, 100)).toBe(10);
-    expect(porcentajeNacional(0, 100)).toBe(0);
-    expect(porcentajeNacional(0, 0)).toBeNull();
-    expect(porcentajeNacional(10, null)).toBeNull();
-  });
-});
-
-describe("formatPorcentaje", () => {
-  it("no dice 0,0 % cuando hay procesos", () => {
-    expect(formatPorcentaje(0.014)).toBe("< 0,1 %");
-    expect(formatPorcentaje(0)).toBe("0,0 %");
-    expect(formatPorcentaje(14.52)).toBe("14,5 %");
-    expect(formatPorcentaje(null)).toBe("—");
-  });
-});
-
 describe("alternativa en texto al mapa", () => {
   it("la lista de departamentos va plegada bajo el mapa", () => {
     const html = renderToStaticMarkup(
       <HeroTerritorial departamentos={departamentos} totalAbiertos={10000} />
     );
-    expect(html).toContain('<details class="');
     expect(html).toContain('id="aq-lista-departamentos"');
     expect(html).toContain("Ver los 2 departamentos como lista");
+    expect(html).toContain("5.155");
+    // La lista controla el encabezado del territorio, que existe.
     expect(html).toContain('aria-controls="aq-ficha-territorial"');
-    // Un solo buscador en el hero: la lista ya no trae el suyo.
-    expect(html).not.toContain("Buscar departamento");
+    expect(html).toContain('id="aq-ficha-territorial"');
   });
 
   it("con un departamento no dice «los 1»", () => {
@@ -233,5 +247,21 @@ describe("alternativa en texto al mapa", () => {
 
   it("sin datos no ofrece una lista vacía", () => {
     expect(renderToStaticMarkup(<HeroTerritorial />)).not.toContain("como lista");
+  });
+});
+
+describe("helpers del comparador", () => {
+  it("solo calcula porcentaje con total nacional positivo", () => {
+    expect(porcentajeNacional(10, 100)).toBe(10);
+    expect(porcentajeNacional(0, 100)).toBe(0);
+    expect(porcentajeNacional(0, 0)).toBeNull();
+    expect(porcentajeNacional(10, null)).toBeNull();
+  });
+
+  it("no dice 0,0 % cuando hay procesos", () => {
+    expect(formatPorcentaje(0.014)).toBe("< 0,1 %");
+    expect(formatPorcentaje(0)).toBe("0,0 %");
+    expect(formatPorcentaje(14.52)).toBe("14,5 %");
+    expect(formatPorcentaje(null)).toBe("—");
   });
 });
