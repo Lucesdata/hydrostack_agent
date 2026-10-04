@@ -83,6 +83,7 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
         <h2 id={`aq-mini-${p.id}`} className="aqMiniObjeto" title={objeto}>
           {objeto}
         </h2>
+        {p.contextoTipo ? <p className="aqMiniNumero">{p.contextoTipo}</p> : null}
         <p className="aqMiniNumero">
           Proceso: <span translate="no">{p.numeroProceso}</span>
         </p>

@@ -8,7 +8,12 @@
  */
 
 import { COLOR_TIPO, type FamiliaTipo } from "../classify/tipo-color";
-import { TIPOS_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
+import {
+  clasificarTipoProyecto,
+  TIPOS_PROYECTO,
+  TIPO_PROYECTO,
+  type TipoProyecto,
+} from "../classify/tipo-proyecto";
 import { ESTADOS_ABIERTO } from "../secop/estados-abierto";
 import { montoConDato } from "../secop/monto";
 import { idDesdeSlug, slugDeProceso } from "../secop/slug";
@@ -28,6 +33,8 @@ export interface ProcesoPortada {
   /** El estado del trámite tal como lo publica la fuente (`estado_actual`). */
   estado: string | null;
   tipoProyecto: TipoProyecto | null;
+  /** Aclara la evidencia que está en la descripción y no en el objeto abreviado. */
+  contextoTipo?: string | null;
   /** Presupuesto oficial (`valor_estimado`) en pesos; `null` si no se publicó. */
   presupuesto: number | null;
   moneda: "COP";
@@ -49,6 +56,7 @@ export interface FilaProcesoPortada {
   secopProcesoId: string | null;
   referencia: string | null;
   objeto: string | null;
+  descripcion?: string | null;
   entidadNombre: string | null;
   estadoActual: string | null;
   estadoApertura: string | null;
@@ -92,6 +100,24 @@ export function procesoPortadaDesdeFila(f: FilaProcesoPortada): ProcesoPortada |
   const municipio = texto(f.municipioNombre);
   const tipo = texto(f.tipoProyecto);
   const estado = texto(f.estadoActual);
+  const tipoProyecto =
+    tipo && (TIPOS_PROYECTO as readonly string[]).includes(tipo) ? (tipo as TipoProyecto) : null;
+  let contextoTipo: string | null = null;
+  if (tipoProyecto && tipoProyecto !== "otros" && texto(f.descripcion)) {
+    // La clasificación persistida usa objeto + descripción, pero la minificha
+    // solo enseña el objeto. Reutilizamos la evidencia y la poda de razón social
+    // del clasificador; no cambiamos su regla ni reclasificamos la fila.
+    const delObjeto = clasificarTipoProyecto({ objeto, entidadNombre: f.entidadNombre });
+    if (!delObjeto.evidencia[tipoProyecto]?.length) {
+      const deDescripcion = clasificarTipoProyecto({
+        objeto: f.descripcion ?? null,
+        entidadNombre: f.entidadNombre,
+      });
+      if (deDescripcion.evidencia[tipoProyecto]?.length) {
+        contextoTipo = `Tipo según descripción: ${TIPO_PROYECTO[tipoProyecto].label}.`;
+      }
+    }
+  }
   return {
     id,
     numeroProceso,
@@ -102,8 +128,8 @@ export function procesoPortadaDesdeFila(f: FilaProcesoPortada): ProcesoPortada |
       !!estado &&
       (ESTADOS_ABIERTO as readonly string[]).includes(estado),
     estado,
-    tipoProyecto:
-      tipo && (TIPOS_PROYECTO as readonly string[]).includes(tipo) ? (tipo as TipoProyecto) : null,
+    tipoProyecto,
+    contextoTipo,
     presupuesto: montoConDato(f.valorEstimado),
     moneda: "COP",
     departamentoCodigo,

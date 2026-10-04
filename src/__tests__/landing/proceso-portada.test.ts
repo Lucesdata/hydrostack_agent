@@ -51,6 +51,72 @@ describe("procesoPortadaDesdeFila", () => {
     }
   });
 
+  it("explica el acueducto de Chipatá cuando solo la descripción lo menciona", () => {
+    const p = procesoPortadaDesdeFila({
+      ...fila,
+      secopProcesoId: "CO1.REQ.5720221",
+      objeto: "CONSTRUCCION DE PAVIMENTO RIGIDO EN CHIPATA SANTANDER",
+      descripcion:
+        "MEJORAMIENTO DE VÍA MEDIANTE LA CONSTRUCCIÓN DE PAVIMENTO RÍGIDO Y RED DE ACUEDUCTO EN LA CALLE 4 ENTRE CARRERAS 4 Y 5 DEL MUNICIPIO DE CHIPATÁ, SANTANDER",
+      tipoProyecto: "acueducto",
+    })!;
+    expect(p.contextoTipo).toBe("Tipo según descripción: Acueducto.");
+    expect(p.objeto).toBe("CONSTRUCCION DE PAVIMENTO RIGIDO EN CHIPATA SANTANDER");
+    expect(p.href).toBe(
+      "/licitaciones/construccion-de-pavimento-rigido-en-chipata-santander--CO1.REQ.5720221"
+    );
+    expect(p.tipoProyecto).toBe("acueducto");
+  });
+
+  it("no añade contexto si el objeto ya respalda el tipo", () => {
+    expect(
+      procesoPortadaDesdeFila({ ...fila, descripcion: "Construcción de PTAR" })!.contextoTipo
+    ).toBeNull();
+  });
+
+  it("no inventa respaldo con descripción ausente o ajena al subsistema", () => {
+    for (const descripcion of [
+      null,
+      "",
+      "Construcción de pavimento rígido",
+      "Construcción de alcantarillado",
+    ]) {
+      expect(
+        procesoPortadaDesdeFila({
+          ...fila,
+          objeto: "Pavimentación",
+          descripcion,
+          tipoProyecto: "acueducto",
+        })!.contextoTipo
+      ).toBeNull();
+    }
+  });
+
+  it("no usa la razón social como evidencia del tipo en la descripción", () => {
+    expect(
+      procesoPortadaDesdeFila({
+        ...fila,
+        objeto: "Imprimir facturas",
+        descripcion: "Imprimir facturas para EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE CALI",
+        entidadNombre: "EMPRESA DE ACUEDUCTO Y ALCANTARILLADO DE CALI",
+        tipoProyecto: "acueducto",
+      })!.contextoTipo
+    ).toBeNull();
+  });
+
+  it("sin tipo conocido o con otros no afirma un subsistema en la descripción", () => {
+    for (const tipoProyecto of [null, "otros", "riego"]) {
+      expect(
+        procesoPortadaDesdeFila({
+          ...fila,
+          objeto: "Obra",
+          descripcion: "Red de acueducto",
+          tipoProyecto,
+        })!.contextoTipo
+      ).toBeNull();
+    }
+  });
+
   it("presupuesto 0 o ausente no es un valor", () => {
     expect(procesoPortadaDesdeFila({ ...fila, valorEstimado: "0" })!.presupuesto).toBeNull();
     expect(procesoPortadaDesdeFila({ ...fila, valorEstimado: null })!.presupuesto).toBeNull();

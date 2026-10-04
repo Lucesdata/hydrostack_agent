@@ -138,3 +138,9 @@ describe("HeroTerritorial", () => {
     }
   });
 });
+
+it("muestra el contexto del subsistema en la tarjeta sin exigir interacción", () => {
+  const p = { ...cinco[0], contextoTipo: "Tipo según descripción: Acueducto." };
+  const con = renderToStaticMarkup(<HeroTerritorial procesos={[p]} />);
+  expect(con).toContain("Tipo según descripción: Acueducto.");
+});

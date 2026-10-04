@@ -42,6 +42,7 @@ export async function muestraPortada(n = N_PROCESOS_PORTADA): Promise<ProcesoPor
       secopProcesoId: proceso.secopProcesoId,
       referencia: proceso.referencia,
       objeto: proceso.objeto,
+      descripcion: proceso.descripcion,
       entidadNombre: entidad.nombre,
       estadoActual: proceso.estadoActual,
       estadoApertura: proceso.estadoApertura,
