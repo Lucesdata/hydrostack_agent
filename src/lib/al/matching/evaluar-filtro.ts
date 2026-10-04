@@ -99,6 +99,19 @@ export function evaluarFiltro(
     }
   }
 
+  // 4b. Tipo de obra (v2, 2026-10-04). Un proceso sin tipo no se descarta, por
+  // la misma razón que la cuantía de abajo: el hueco es del clasificador, no
+  // del proceso, y ante la duda se muestra. `otros` sí es un tipo: un filtro de
+  // PTAR no trae lo que el clasificador dejó sin subsistema.
+  if (!sinRestriccion(filtro.tiposProyecto) && proceso.tipoProyecto !== null) {
+    if (!filtro.tiposProyecto.includes(proceso.tipoProyecto)) {
+      return {
+        motivo: "tipo_fuera",
+        evidencia: { tipoProceso: proceso.tipoProyecto, listados: filtro.tiposProyecto },
+      };
+    }
+  }
+
   // 5. Modalidad.
   if (!sinRestriccion(filtro.modalidades)) {
     const m = proceso.modalidad === null ? null : normalizar(proceso.modalidad);

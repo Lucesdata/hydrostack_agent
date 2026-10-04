@@ -681,5 +681,7 @@ del perfil o de un filtro el cron lo traería de vuelta). Las consultas van por
 «★ Siguiendo» (`seguir/BotonSeguir.tsx`, estilos aparte en `seguir/estilos.ts`)
 en la tarjeta de la vitrina (fuera del enlace, sobre el pie), en el panel del
 Radar y en la cabecera de la ficha. Un `GET /api/seguir` por página de la
-vitrina; sin sesión lleva a `/registro?next=`.
+vitrina; sin sesión lleva a `/registro?next=`. Tarea 4 hecha: los filtros guardados aceptan
+`tiposProyecto` y el motor descarta con `tipo_fuera` (`filtro-v2`); un proceso
+sin tipo no se descarta. `/mis-filtros` lo pide con casillas.
 

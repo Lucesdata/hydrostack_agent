@@ -75,6 +75,7 @@ export async function buscarCandidatos(opts: OpcionesBusqueda = {}): Promise<Res
       nombre: proceso.objeto,
       descripcion: proceso.descripcion,
       unspscRaw: proceso.unspsc,
+      tipoProyecto: proceso.tipoProyecto,
     })
     .from(proceso)
     .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
@@ -91,6 +92,7 @@ export async function buscarCandidatos(opts: OpcionesBusqueda = {}): Promise<Res
     divipola: r.divipola,
     modalidad: r.modalidad,
     valorEstimado: r.valorEstimado,
+    tipoProyecto: r.tipoProyecto,
   }));
 
   return { items, truncado: rows.length >= limite };

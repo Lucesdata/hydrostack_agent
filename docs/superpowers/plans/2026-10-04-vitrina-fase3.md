@@ -150,6 +150,12 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
    ayuda y no se puede dejar desde ahí. Medido `--accent-ocean` sobre
    `--surface-alt`.
 4. `tipos_proyecto` en el filtro: validar, evaluar (`tipo_fuera`), `/mis-filtros`.
+   **Hecha.** `validarFiltro` acepta `tiposProyecto` (los cinco de
+   `TIPOS_PROYECTO`); `evaluarFiltro` descarta con `tipo_fuera` y deja pasar los
+   procesos sin tipo (el hueco es del clasificador, como la cuantía); `otros` sí
+   cuenta como tipo. `VERSION_FILTRO` sube a `filtro-v2`. `/mis-filtros` lo crea
+   con casillas, lo muestra en el resumen y lo conserva al pausar (el PUT
+   reemplaza el filtro entero). Prueba de punta a punta en PGlite.
 5. «Avisarme de procesos nuevos así» en la vitrina + `filtroDesdeVitrina` probado.
 6. Estante «Para ti».
 7. Documentación (CLAUDE.md, PENDIENTES) y PR.
