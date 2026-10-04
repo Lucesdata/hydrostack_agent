@@ -17,6 +17,11 @@
  *   ?orden=fecha|valor         (default: fecha)
  *   ?soloAgua=false            (default: true)
  *   ?page=1&pageSize=25
+ *   ?modo=tema&sistema=potable|residual|<tipo>&actividad=<actividad>
+ *   ?modo=numero&numero=<identificador SECOP o referencia de la entidad>
+ *
+ * Buscador guiado: solo procesos ingeridos. Criterios inválidos → 400;
+ * fallo de base → 503 sin caída a Socrata ni detalles internos.
  *
  * Fase 2 (elegibilidad diferida): esta lista NO adjunta veredicto. El
  * semáforo se computa on-demand en POST /api/secop/verdict, solo cuando el

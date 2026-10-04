@@ -64,6 +64,8 @@ describe("consulta del buscador guiado", () => {
     { modo: "tema", valorMin: "NaN" },
     { modo: "tema", desde: "2026-02-30" },
     { modo: "tema", desde: "2026-13-01" },
+    { modo: "tema", apertura: "abiertto" },
+    { modo: "tema", orden: "inventado" },
   ])("rechaza criterios guiados inválidos: %j", (params) => {
     expect(() => parse(params as Record<string, string>)).toThrow();
   });

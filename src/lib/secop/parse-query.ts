@@ -7,7 +7,11 @@
  */
 
 import type { SecopQuery, EstadoApertura } from "./types";
-import { parseBusquedaGuiada, validarConsultaGuiada } from "./busqueda-guiada";
+import {
+  ConsultaGuiadaInvalida,
+  parseBusquedaGuiada,
+  validarConsultaGuiada,
+} from "./busqueda-guiada";
 
 export function parseQuery(sp: URLSearchParams): SecopQuery {
   const num = (k: string) => {
@@ -32,6 +36,12 @@ export function parseQuery(sp: URLSearchParams): SecopQuery {
     pageSize: num("pageSize"),
     ...parseBusquedaGuiada(sp),
   };
+  if (query.modo === "tema" && apertura && query.apertura === undefined) {
+    throw new ConsultaGuiadaInvalida("El estado de apertura debe ser Abierto o Cerrado");
+  }
+  if (query.modo && orden && query.orden === undefined) {
+    throw new ConsultaGuiadaInvalida("El orden debe ser fecha o valor");
+  }
   validarConsultaGuiada(query);
   if (query.modo === "numero") {
     query.apertura = undefined;

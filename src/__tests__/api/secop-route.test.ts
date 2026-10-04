@@ -125,6 +125,8 @@ describe("GET /api/secop — buscador guiado", () => {
     "modo=numero",
     "modo=numero&numero=R42&sistema=ptar",
     "modo=tema&pageSize=0",
+    "modo=tema&apertura=abiertto",
+    "modo=tema&orden=inventado",
     "tipo=contratos&modo=tema&actividad=muestreo",
   ])("criterios inválidos responden 400 sin consultar datos: %s", async (query) => {
     const res = await GET(req(query));
