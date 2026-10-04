@@ -27,6 +27,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchProcesos, searchContratos, countProcesos } from "@/src/lib/secop/client";
 import { searchProcesosDbCached, countProcesosDbCached } from "@/src/lib/secop/cached-db-search";
 import { parseQuery } from "@/src/lib/secop/parse-query";
+import { ConsultaGuiadaInvalida } from "@/src/lib/secop/busqueda-guiada";
 import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
 
 export const runtime = "nodejs";
@@ -46,7 +47,12 @@ async function searchProcesosConFallback(
       countProcesosDbCached(query),
     ]);
     return { result, total };
-  } catch {
+  } catch (err) {
+    if (query.modo) throw err;
+    console.error(
+      "[secop] Falló Postgres; se usa la fuente alternativa del buscador anterior",
+      err
+    );
     const [result, total] = await Promise.all([searchProcesos(query), countProcesos(query)]);
     return { result, total };
   }
@@ -55,15 +61,29 @@ async function searchProcesosConFallback(
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const tipo = sp.get("tipo") ?? "procesos";
-  const query = parseQuery(sp);
+  let query: SecopQuery | undefined;
 
   try {
+    query = parseQuery(sp);
+    if (query.modo && tipo !== "procesos") {
+      throw new ConsultaGuiadaInvalida("El buscador guiado solo admite procesos");
+    }
     if (tipo === "contratos") {
       return NextResponse.json(await searchContratos(query));
     }
     const { result, total } = await searchProcesosConFallback(query);
     return NextResponse.json({ ...result, total });
   } catch (err) {
+    if (err instanceof ConsultaGuiadaInvalida) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+    if (query?.modo) {
+      console.error("[secop] No se pudo consultar el buscador guiado", err);
+      return NextResponse.json(
+        { error: "No se pudo consultar AquaLicita. Vuelve a intentarlo." },
+        { status: 503 }
+      );
+    }
     const message = err instanceof Error ? err.message : "Error desconocido";
     return NextResponse.json(
       { error: "No se pudo consultar SECOP", detail: message },

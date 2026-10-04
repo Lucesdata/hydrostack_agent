@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import type { SecopProceso } from "@/src/lib/secop/types";
 
@@ -16,7 +16,7 @@ vi.mock("@/src/lib/secop/cached-db-search", () => ({
 }));
 
 import { GET } from "@/app/api/secop/route";
-import { searchProcesos, countProcesos } from "@/src/lib/secop/client";
+import { searchProcesos, countProcesos, searchContratos } from "@/src/lib/secop/client";
 import { searchProcesosDbCached, countProcesosDbCached } from "@/src/lib/secop/cached-db-search";
 
 const mockedSearch = vi.mocked(searchProcesos);
@@ -50,7 +50,11 @@ const sampleProceso: SecopProceso = {
 
 const req = (qs = "tipo=procesos") => new NextRequest(`http://localhost/api/secop?${qs}`);
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(console, "error").mockImplementation(() => {});
+});
+afterEach(() => vi.restoreAllMocks());
 
 describe("GET /api/secop — Postgres primero, Socrata como fallback (Fase 3)", () => {
   it("usa Postgres cuando responde bien, sin tocar Socrata", async () => {
@@ -92,6 +96,96 @@ describe("GET /api/secop — Postgres primero, Socrata como fallback (Fase 3)", 
     const body = await res.json();
     expect(body.total).toBe(0);
     expect(body.items).toHaveLength(0);
+    expect(mockedSearch).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/secop — buscador guiado", () => {
+  it("transmite sistema y actividad sin el filtro textual sectorial antiguo", async () => {
+    mockedSearchDb.mockResolvedValue({ items: [sampleProceso], page: 1, pageSize: 25 });
+    mockedCountDb.mockResolvedValue(1);
+    const res = await GET(req("modo=tema&sistema=ptar&actividad=consultoria&apertura=Abierto"));
+    expect(res.status).toBe(200);
+    expect((await res.json()).total).toBe(1);
+    expect(mockedSearchDb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        modo: "tema",
+        sistema: "ptar",
+        actividad: "consultoria",
+        apertura: "Abierto",
+        soloAgua: false,
+      })
+    );
+  });
+
+  it.each([
+    "modo=inventado",
+    "modo=tema&sistema=inventado",
+    "modo=tema&actividad=inventada",
+    "modo=numero",
+    "modo=numero&numero=R42&sistema=ptar",
+    "modo=tema&pageSize=0",
+    "tipo=contratos&modo=tema&actividad=muestreo",
+  ])("criterios inválidos responden 400 sin consultar datos: %s", async (query) => {
+    const res = await GET(req(query));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toHaveProperty("error");
+    expect(mockedSearchDb).not.toHaveBeenCalled();
+    expect(mockedSearch).not.toHaveBeenCalled();
+    expect(searchContratos).not.toHaveBeenCalled();
+  });
+
+  it("el número elimina el límite de abiertos y preserva las coincidencias", async () => {
+    mockedSearchDb.mockResolvedValue({
+      items: [{ ...sampleProceso, estadoApertura: "Cerrado", coincidencia: "exacta" }],
+      page: 1,
+      pageSize: 25,
+    });
+    mockedCountDb.mockResolvedValue(1);
+    const res = await GET(req("modo=numero&numero=CO1.REQ.42&apertura=Abierto"));
+    expect(res.status).toBe(200);
+    expect((await res.json()).items[0]).toMatchObject({
+      estadoApertura: "Cerrado",
+      coincidencia: "exacta",
+    });
+    expect(mockedSearchDb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        modo: "numero",
+        numero: "CO1.REQ.42",
+        apertura: undefined,
+        soloAgua: false,
+      })
+    );
+  });
+
+  it.each(["listado", "conteo"])(
+    "si falla %s devuelve 503 sin buscar en vivo ni revelar detalles",
+    async (parte) => {
+      const failure = new Error("postgres://usuario:secreto@host/privado");
+      mockedSearchDb.mockResolvedValue({ items: [sampleProceso], page: 1, pageSize: 25 });
+      mockedCountDb.mockResolvedValue(1);
+      if (parte === "listado") mockedSearchDb.mockRejectedValue(failure);
+      else mockedCountDb.mockRejectedValue(failure);
+      mockedSearch.mockResolvedValue({ items: [sampleProceso], page: 1, pageSize: 25 });
+      mockedCount.mockResolvedValue(7);
+      const res = await GET(req("modo=tema&actividad=consultoria"));
+      expect(res.status).toBe(503);
+      const body = await res.json();
+      expect(body).toHaveProperty("error");
+      expect(JSON.stringify(body)).not.toContain("secreto");
+      expect(body.detail).toBeUndefined();
+      expect(body.items).toBeUndefined();
+      expect(mockedSearch).not.toHaveBeenCalled();
+      expect(mockedCount).not.toHaveBeenCalled();
+    }
+  );
+
+  it("un vacío guiado es una respuesta válida sin caída a la red", async () => {
+    mockedSearchDb.mockResolvedValue({ items: [], page: 1, pageSize: 25 });
+    mockedCountDb.mockResolvedValue(0);
+    const res = await GET(req("modo=numero&numero=NO-EXISTE"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ items: [], total: 0 });
     expect(mockedSearch).not.toHaveBeenCalled();
   });
 });
