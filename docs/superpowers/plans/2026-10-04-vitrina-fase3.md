@@ -1,0 +1,155 @@
+# Vitrina, fase 3 — ganchos de vuelta (spec y plan, 2026-10-04)
+
+Continúa `2026-10-04-vitrina-radar.md`. Pide aprobación antes de escribir código
+porque **toca el esquema** (una migración) y añade una capacidad
+(`docs/CONDUCTA.md` §4).
+
+## 1. Reconocimiento: lo que ya existe
+
+Casi todo lo que pedía la fase 3 ya está construido para las alertas; faltaba
+ponerlo donde está la intención, en la vitrina.
+
+| Pieza | Dónde | Qué hace hoy |
+|---|---|---|
+| Procesos que sigue una cuenta | tabla `coincidencia` (`schema/cuentas.ts`) | La llenan el perfil (`recordCoincidencias`, cron de alertas) y los filtros (`correrFiltrosActivos`, cron `tick`). **Nunca se borran** (`onConflictDoNothing`). |
+| Correo con cambios de lo que sigues | `src/lib/al/notificacion/recopilar.ts` + `digest-agregado.ts` | El correo diario empieza por «Cambios en procesos que sigues» (adendas y adjudicaciones), con un `JOIN coincidencia`. |
+| Búsquedas guardadas | tabla `al_filtros_usuario`, `POST /api/al/filtros`, `/mis-filtros` | Criterios por cuenta: palabras clave, UNSPSC, `divipola` (por prefijo), modalidad y valor mín./máx. El cron convierte lo que casa en `coincidencia` y avisa por correo. |
+| Coincidencias con el perfil | `getMatchesForPerfil()` | Hasta 25 abiertos con veredicto no `FAIL`, dentro de la cobertura. Lo usa `/mis-coincidencias`. |
+| Capacidad | `acceso/politica.ts` | `filtros` y `perfil_guardar` son `gratis`. |
+
+Lo que **no** existe:
+- marcar un proceso a mano;
+- distinguir una coincidencia guardada a mano de una que vino del perfil o de un filtro;
+- filtrar por tipo de obra en un filtro guardado.
+
+## 2. Spec: qué se construye
+
+**G1 · Seguir un proceso.** En la tarjeta de la vitrina, en el panel del Radar y
+en la ficha: «☆ Seguir» / «★ Siguiendo». Seguir un proceso lo mete en «lo que
+sigues»: aparece en `/mis-coincidencias` y sus adendas y su adjudicación llegan
+en el correo diario. Es el «Guardar» del plan, con un nombre que dice lo que
+hace.
+- Sin cuenta: el botón lleva a `/registro?next=<la misma página>`. Seguir pide
+  cuenta porque el aviso es por correo.
+- Dejar de seguir quita la marca. Si el proceso también casa con el perfil o
+  con un filtro, el cron puede volver a traerlo: se dice en la ayuda del botón.
+
+**G2 · Guardar la búsqueda como alerta.** Junto a los filtros activos de la
+vitrina: «🔔 Avisarme de procesos nuevos así». Crea un filtro en
+`al_filtros_usuario` con los criterios de la vitrina y lleva a `/mis-filtros`,
+donde se ve y se edita.
+- `q` pasa a `palabrasClave` [q], `departamento` a `divipola` [código del
+  departamento], `presupuesto` a `valorMin` y `tipo` a la columna nueva
+  `tipos_proyecto` (§3).
+- El nombre por defecto se compone de los filtros: «PTAR · Boyacá · desde $500 M».
+- **Diferencia que hay que decir en pantalla:** en la vitrina `q` busca también
+  en la entidad y el municipio; en la alerta, la palabra clave se busca en el
+  texto del proceso. Antes de guardar se enseña un resumen de lo que va a
+  vigilar.
+- Sin filtros activos no hay botón: una alerta de «todo» sería un correo de
+  cientos de procesos.
+
+**G3 · Estante «Para ti».** Con sesión y perfil completo, encima de los
+resultados de `/licitaciones` (sin filtros, primera página): una franja plegable
+con los 4 primeros de `getMatchesForPerfil()` y «Ver los N →» a
+`/mis-coincidencias`. Sin sesión o sin perfil no se pinta nada: el aviso «Define
+tu perfil» de la fase 1b ya ocupa ese sitio.
+
+### Criterios de aceptación
+
+1. Seguir un proceso desde la vitrina lo hace aparecer en `/mis-coincidencias`
+   y en «Cambios en procesos que sigues» del siguiente correo, si cambia.
+2. «Siguiendo» se ve en las tres superficies tras recargar, y en ninguna para
+   otra cuenta. Toda consulta va por cuenta, nunca por un id que mande el cliente.
+3. Una alerta creada desde `/licitaciones?tipo=ptar&departamento=boyaca&presupuesto=500`
+   aparece en `/mis-filtros` con esos tres criterios. El cron solo trae PTAR de
+   Boyacá desde $500 M, y lo que descarta queda en `al_descartes` con su motivo
+   (también `tipo_fuera`).
+4. Las páginas ISR de la vitrina siguen siendo ISR: el estado «Siguiendo» y el
+   estante se piden en el navegador o solo en la base dinámica.
+5. La tabla tocada sigue con RLS; las pruebas de PGlite corren con la migración
+   nueva.
+
+## 3. Plan técnico
+
+### Esquema: una migración aditiva (`drizzle/0025`)
+
+- `coincidencia.origen text` nullable: `'manual'` para lo seguido a mano. NULL
+  sigue significando «perfil o filtro», como hoy, y **ninguna consulta actual
+  cambia**.
+- `al_filtros_usuario.tipos_proyecto text[]` nullable: NULL o vacío = sin
+  restricción, igual que las demás listas del filtro.
+
+No se crea ninguna tabla. Las dos tablas ya tienen `.enableRLS()`. Se genera con
+`npm run db:generate` y se prueba en PGlite; **aplicarla en la Supabase viva es
+un paso tuyo** (`npm run db:migrate` con `DATABASE_URL`): desde la sesión no hay
+acceso a la base. El código nuevo se despliega después de aplicarla.
+
+### G1 · Seguir
+
+- `src/lib/seguir/store.ts`: `seguir(cuenta, usuarioId, procesoId)` inserta con
+  `origen 'manual'` y `veredicto_overall 'UNKNOWN'`; si ya existe (por perfil o
+  filtro), no hace nada. `dejarDeSeguir` borra solo si `origen = 'manual'`.
+  `seguidos(cuenta, ids[])` devuelve cuáles de esas ids sigue la cuenta. Todo
+  filtra por `usuario_id` de la sesión, como el resto de `coincidencia`.
+- `POST/DELETE /api/seguir` y `GET /api/seguir?ids=` (máx. 25), con
+  `autorizar("seguir")`. Capacidad nueva `seguir: "gratis"` en `politica.ts`.
+- `BotonSeguir.tsx`, isla de cliente. En la tarjeta va fuera del `<Link>` (un
+  enlace no puede llevar un botón dentro): la tarjeta pasa a tener una capa de
+  enlace y el botón encima. Un solo `GET` por página para el estado.
+- Ficha y panel: el mismo botón en la cabecera.
+
+### G2 · Alerta desde la vitrina
+
+- `filtroDesdeVitrina(filtros, departamentoCodigo)` (puro) → el cuerpo de
+  `POST /api/al/filtros`; `validarFiltro` acepta `tiposProyecto`.
+- `evaluar-filtro.ts`: una regla más, `tipo_fuera`, sobre `proceso.tipo_proyecto`,
+  que hay que añadir a la selección de `buscar-candidatos.ts` (hoy no lo trae).
+  Va con su prueba de descarte.
+- `/mis-filtros` muestra y edita el tipo de obra.
+- En la vitrina, un `<details>` con el resumen de lo que se va a vigilar y el
+  botón; sin sesión, a `/registro?next=`.
+
+### G3 · Para ti
+
+- En `app/licitaciones/page.js`, solo sin filtros y en la página 1: si hay
+  sesión con perfil completo, `getMatchesForPerfil()` en paralelo con la
+  página. La ruta ya es dinámica.
+- `EstanteParaTi.tsx` (servidor): cuatro minitarjetas y «Ver los N →».
+
+### Riesgos
+
+- **Orden de despliegue:** si el código llega antes que la migración, las
+  consultas que nombran `origen` o `tipos_proyecto` fallan. Se mitiga aplicando
+  la migración primero; las lecturas nuevas van envueltas para degradar a «sin
+  seguir» en vez de romper la página.
+- **Recursión del «dejar de seguir»:** un proceso que casa con el perfil vuelve
+  al día siguiente. Se dice en la ayuda del botón; no se añade una lista de
+  «descartados» en esta fase.
+- **Coste de `getMatchesForPerfil` por visita** a `/licitaciones` con sesión:
+  una consulta de 25 filas. Si pesa, se cachea por usuario unos minutos.
+
+## 4. Tareas, en orden y verificables por separado
+
+1. Migración `0025` + esquema + prueba de PGlite (columnas nulas, RLS intacto).
+2. Capacidad `seguir` + `store` + `/api/seguir` + pruebas (aislamiento por cuenta,
+   no borra lo que no es manual).
+3. `BotonSeguir` en tarjeta, panel y ficha + render sin JS + contraste.
+4. `tipos_proyecto` en el filtro: validar, evaluar (`tipo_fuera`), `/mis-filtros`.
+5. «Avisarme de procesos nuevos así» en la vitrina + `filtroDesdeVitrina` probado.
+6. Estante «Para ti».
+7. Documentación (CLAUDE.md, PENDIENTES) y PR.
+
+## 5. Decisiones que necesito
+
+- **D1.** ¿«Guardar» es **«Seguir»** (reutiliza `coincidencia` y trae los avisos
+  por correo), o prefieres una lista de guardados aparte, sin correo?
+  Recomiendo seguir.
+- **D2.** ¿Añadimos el **tipo de obra a los filtros guardados** (columna nueva), o
+  la alerta guarda solo texto, departamento y presupuesto? Recomiendo añadirlo:
+  es el filtro que más usa la vitrina.
+- **D3.** ¿El estante «Para ti» solo para **cuentas con perfil** (servidor), o también
+  para el perfil del navegador sin cuenta (cliente, con una petición más)?
+  Recomiendo solo cuentas en esta fase.
+- **D4.** ¿Quién aplica la migración en Supabase y cuándo? Hace falta antes de
+  desplegar G1 y G2.
