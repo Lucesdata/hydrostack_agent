@@ -1,4 +1,10 @@
 import Link from "next/link";
+import AlertaVitrina from "./AlertaVitrina";
+import {
+  criteriosDeAlerta,
+  filtroDesdeVitrina,
+  hayCriteriosDeAlerta,
+} from "@/src/lib/secop/alerta-vitrina";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import {
   ETIQUETA_ORDEN,
@@ -14,6 +20,8 @@ import {
 
 export interface OpcionDepartamento {
   slug: string;
+  /** Código DIVIPOLA de 2 dígitos, para la alerta (`al_filtros_usuario.divipola`). */
+  clave: string;
   label: string;
   /** Procesos abiertos del departamento, para la lista. */
   n: number;
@@ -37,7 +45,9 @@ export default function FiltrosVitrina({
 }) {
   const con = (cambio: Partial<Filtros>) =>
     `/licitaciones${queryDeFiltros({ ...filtros, ...cambio })}`;
-  const nombreDpto = departamentos.find((d) => d.slug === filtros.departamento)?.label;
+  const dpto = departamentos.find((d) => d.slug === filtros.departamento);
+  const nombreDpto = dpto?.label;
+  const dptoAlerta = dpto ? { codigo: dpto.clave, label: dpto.label } : null;
 
   const activos: { clave: string; label: string; href: string }[] = [];
   if (filtros.q) activos.push({ clave: "q", label: `«${filtros.q}»`, href: con({ q: null }) });
@@ -176,6 +186,13 @@ export default function FiltrosVitrina({
             </span>
           )}
         </div>
+      )}
+      {hayCriteriosDeAlerta(filtros) && (
+        <AlertaVitrina
+          cuerpo={filtroDesdeVitrina(filtros, dptoAlerta)}
+          criterios={criteriosDeAlerta(filtros, dptoAlerta)}
+          conBusqueda={!!filtros.q}
+        />
       )}
     </section>
   );

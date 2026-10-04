@@ -254,6 +254,21 @@ describe("tarjeta de la vitrina, fase 1b (2026-10-04)", () => {
   });
 });
 
+describe("«★ Siguiendo» y los chips activos de la vitrina (2026-10-04, fase 3)", () => {
+  // `.sg-boton--on` y `.vf-chip--activo` pintan --accent-deep (alias de
+  // --accent-ocean) a 600 12-13px sobre --surface-alt: texto normal, 4,5:1.
+  it("--accent-ocean se lee sobre --surface-alt", () => {
+    expect(t["surface-alt"]).toBeTruthy();
+    expect(contraste(t["accent-ocean"], t["surface-alt"])).toBeGreaterThanOrEqual(AA.texto);
+  });
+
+  // «Faltan datos» en el estante «Para ti»: --text-muted (alias de --ink-600) a
+  // 600 11px sobre --surface-alt.
+  it("--ink-600 se lee sobre --surface-alt", () => {
+    expect(contraste(t["ink-600"], t["surface-alt"])).toBeGreaterThanOrEqual(AA.texto);
+  });
+});
+
 describe("excepciones conocidas (no deben empeorar)", () => {
   const conocidas: Array<[string, string, string, number, string]> = [
     [

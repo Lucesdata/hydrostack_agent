@@ -9,6 +9,10 @@ import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 import { ProveedorEncaje } from "./EncajeVitrina";
 import RadarVitrina from "./RadarVitrina";
+import EstanteParaTi from "./EstanteParaTi";
+import type { EstanteParaTi as Estante } from "@/src/lib/secop/para-ti";
+import BotonSeguir, { ProveedorSeguir } from "../seguir/BotonSeguir";
+import { ESTILOS_SEGUIR } from "../seguir/estilos";
 import { ESTILOS_FICHA } from "../ficha/estilos";
 import type { DetalleRadar } from "@/src/lib/secop/radar";
 
@@ -43,11 +47,14 @@ export default function Vitrina({
   pagina,
   departamentos = [],
   detalles = [],
+  paraTi = null,
 }: {
   pagina: PaginaDeVitrina;
   departamentos?: OpcionDepartamento[];
   /** El panel del Radar; sin detalles (adjudicados, o si su consulta falló), solo la rejilla. */
   detalles?: DetalleRadar[];
+  /** Coincidencias con el perfil de la cuenta; `null` sin sesión, sin perfil o con filtros. */
+  paraTi?: Estante | null;
 }) {
   const conRadar = pagina.pestana === "abiertos" && detalles.length > 0;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
@@ -65,6 +72,12 @@ export default function Vitrina({
       {pagina.items.map((p) => (
         <li key={p.id}>
           <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
+          {/* Fuera del enlace de la tarjeta: un botón no puede ir dentro de un <a>. */}
+          {pagina.pestana === "abiertos" && (
+            <span className="vt-seguir">
+              <BotonSeguir id={p.secopProcesoId} variante="tarjeta" />
+            </span>
+          )}
         </li>
       ))}
     </ul>
@@ -75,7 +88,8 @@ export default function Vitrina({
       <style
         dangerouslySetInnerHTML={{
           // Los de la ficha solo con Radar: su panel aloja el bloque de decisión.
-          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD + (conRadar ? ESTILOS_FICHA : ""),
+          __html:
+            ESTILOS_VITRINA + ESTILOS_FICHA_CARD + ESTILOS_SEGUIR + (conRadar ? ESTILOS_FICHA : ""),
         }}
       />
       <div className="clr-container">
@@ -112,6 +126,8 @@ export default function Vitrina({
           <FiltrosVitrina filtros={pagina.filtros} departamentos={departamentos} />
         )}
 
+        {paraTi && <EstanteParaTi estante={paraTi} />}
+
         {pagina.items.length === 0 ? (
           <div className="vt-vacio">
             <p style={{ margin: 0 }}>{vacio.texto}</p>
@@ -120,9 +136,11 @@ export default function Vitrina({
             </Link>
           </div>
         ) : (
-          <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
-            {conRadar ? <RadarVitrina detalles={detalles}>{rejilla}</RadarVitrina> : rejilla}
-          </ProveedorEncaje>
+          <ProveedorSeguir ids={pagina.items.map((p) => p.secopProcesoId)}>
+            <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
+              {conRadar ? <RadarVitrina detalles={detalles}>{rejilla}</RadarVitrina> : rejilla}
+            </ProveedorEncaje>
+          </ProveedorSeguir>
         )}
 
         {totalPaginas > 1 && (

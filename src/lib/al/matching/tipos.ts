@@ -22,6 +22,7 @@ export const MOTIVOS = [
   "fuera_de_zona",
   "entidad_no_listada",
   "modalidad_no_listada",
+  "tipo_fuera",
 ] as const;
 
 export type MotivoDescarte = (typeof MOTIVOS)[number];
@@ -38,6 +39,8 @@ export interface ProcesoEvaluable {
   divipola: string | null;
   modalidad: string | null;
   valorEstimado: string | null;
+  /** `proceso.tipo_proyecto`; null si el clasificador aún no lo puntuó. */
+  tipoProyecto: string | null;
 }
 
 /**
@@ -57,7 +60,7 @@ export interface ResultadoEvaluacion {
  * la red vieja" de "lo descartamos con la nueva" y deja de ser auditoría: se
  * convierte en un montón de filas sin contexto.
  */
-export const VERSION_FILTRO = "filtro-v1";
+export const VERSION_FILTRO = "filtro-v2";
 
 /**
  * Versión de la red sectorial de ingesta. Cambia cuando cambian

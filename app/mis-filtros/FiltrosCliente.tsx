@@ -27,13 +27,21 @@ export interface Filtro {
   entidadesNit: string[];
   divipola: string[];
   modalidades: string[];
+  tiposProyecto: string[];
   valorMin: string | null;
   valorMax: string | null;
   eventosNotificables: string[];
 }
 
+/** Un tipo de obra para las casillas; la lista llega del servidor (`TIPOS_PROYECTO`). */
+export interface OpcionTipo {
+  valor: string;
+  label: string;
+}
+
 const VACIO = {
   nombre: "",
+  tiposProyecto: [] as string[],
   palabrasClave: "",
   palabrasExcluidas: "",
   unspsc: "",
@@ -50,8 +58,13 @@ function lista(s: string): string[] {
     .filter(Boolean);
 }
 
-function resumen(f: Filtro): string {
+function resumen(f: Filtro, tipos: OpcionTipo[]): string {
   const partes: string[] = [];
+  if (f.tiposProyecto?.length) {
+    partes.push(
+      f.tiposProyecto.map((t) => tipos.find((o) => o.valor === t)?.label ?? t).join(", ")
+    );
+  }
   if (f.palabrasClave.length) partes.push(f.palabrasClave.join(", "));
   if (f.unspsc.length) partes.push(`UNSPSC ${f.unspsc.join(", ")}`);
   if (f.divipola.length) partes.push(`zona ${f.divipola.join(", ")}`);
@@ -62,7 +75,7 @@ function resumen(f: Filtro): string {
   return partes.length ? partes.join(" · ") : "sin criterios — trae el sector entero";
 }
 
-export function FiltrosCliente({ inicial }: { inicial: Filtro[] }) {
+export function FiltrosCliente({ inicial, tipos }: { inicial: Filtro[]; tipos: OpcionTipo[] }) {
   const router = useRouter();
   const [filtros, setFiltros] = useState(inicial);
   const [form, setForm] = useState(VACIO);
@@ -90,6 +103,7 @@ export function FiltrosCliente({ inicial }: { inicial: Filtro[] }) {
           palabrasExcluidas: lista(form.palabrasExcluidas),
           unspsc: lista(form.unspsc),
           divipola: lista(form.divipola),
+          tiposProyecto: form.tiposProyecto,
           entidadesNit: lista(form.entidadesNit),
           valorMin: form.valorMin ? Number(form.valorMin) : null,
           valorMax: form.valorMax ? Number(form.valorMax) : null,
@@ -123,6 +137,9 @@ export function FiltrosCliente({ inicial }: { inicial: Filtro[] }) {
           divipola: f.divipola,
           entidadesNit: f.entidadesNit,
           modalidades: f.modalidades,
+          // Sin esto, pausar un filtro le borraría el tipo de obra: el PUT
+          // reemplaza el filtro entero y una lista que no llega queda vacía.
+          tiposProyecto: f.tiposProyecto ?? [],
           valorMin: f.valorMin ? Number(f.valorMin) : null,
           valorMax: f.valorMax ? Number(f.valorMax) : null,
           eventosNotificables: f.eventosNotificables,
@@ -175,6 +192,29 @@ export function FiltrosCliente({ inicial }: { inicial: Filtro[] }) {
               placeholder="ptap, acueducto, alcantarillado"
             />
           </label>
+
+          <fieldset className="clr-flt-label clr-flt-tipos">
+            <legend>
+              Tipo de obra <span className="clr-flt-hint">ninguno marcado = todos</span>
+            </legend>
+            {tipos.map((t) => (
+              <label key={t.valor} className="clr-flt-tipo">
+                <input
+                  type="checkbox"
+                  checked={form.tiposProyecto.includes(t.valor)}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      tiposProyecto: e.target.checked
+                        ? [...form.tiposProyecto, t.valor]
+                        : form.tiposProyecto.filter((x) => x !== t.valor),
+                    })
+                  }
+                />
+                {t.label}
+              </label>
+            ))}
+          </fieldset>
 
           <label className="clr-flt-label">
             Excluir si contiene <span className="clr-flt-hint">opcional</span>
@@ -271,7 +311,7 @@ export function FiltrosCliente({ inicial }: { inicial: Filtro[] }) {
                   </button>
                 </div>
               </div>
-              <p className="clr-flt-card-crit">{resumen(f)}</p>
+              <p className="clr-flt-card-crit">{resumen(f, tipos)}</p>
               <p className="clr-flt-card-ev">
                 Avisa de: {f.eventosNotificables.length ? f.eventosNotificables.join(", ") : "nada"}
               </p>

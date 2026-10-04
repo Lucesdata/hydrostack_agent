@@ -12,6 +12,8 @@
  * producto (SDD §6.2) y empieza aquí.
  */
 
+import { TIPOS_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+
 /** Transiciones notificables — las demás son ruido (SDD, decisiones técnicas). */
 export const EVENTOS_NOTIFICABLES = ["apertura", "adenda", "adjudicacion"] as const;
 export type EventoNotificable = (typeof EVENTOS_NOTIFICABLES)[number];
@@ -25,6 +27,11 @@ export interface FiltroEntrada {
   entidadesNit?: string[];
   divipola?: string[];
   modalidades?: string[];
+  /**
+   * Tipos de obra (`TIPOS_PROYECTO`): `acueducto`, `ptar`… Lo escribe la alerta
+   * que se guarda desde la vitrina (fase 3, migración 0025).
+   */
+  tiposProyecto?: string[];
   valorMin?: number | null;
   valorMax?: number | null;
   eventosNotificables?: EventoNotificable[];
@@ -70,6 +77,9 @@ const DIVIPOLA = /^(\d{2}|\d{5})$/;
  * rechazaba justo los códigos que el resto del sistema usa.
  */
 const UNSPSC = /^\d{2,10}$/;
+
+/** Los cinco tipos de obra; la fuente única es `classify/tipo-proyecto.ts`. */
+const TIPOS = new Set<string>(TIPOS_PROYECTO);
 
 const MAX_ITEMS = 100;
 const MAX_LARGO = 120;
@@ -138,6 +148,7 @@ export function validarFiltro(body: unknown): ResultadoValidacion {
     ["entidadesNit", (s) => s.replace(/\D/g, ""), (s) => SOLO_DIGITOS.test(s)],
     ["divipola", (s) => s, (s) => DIVIPOLA.test(s)],
     ["modalidades", (s) => s, undefined],
+    ["tiposProyecto", (s) => s.toLowerCase(), (s) => TIPOS.has(s)],
   ];
 
   const out: Record<string, unknown> = { nombre, activo: o.activo ?? true };

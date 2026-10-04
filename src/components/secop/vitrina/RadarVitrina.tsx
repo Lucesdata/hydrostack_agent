@@ -10,6 +10,7 @@ import {
 } from "react";
 import Link from "next/link";
 import BloqueDecision from "../ficha/BloqueDecision";
+import BotonSeguir from "../seguir/BotonSeguir";
 import { ANCHO_RADAR, clicDelPanel, vecino } from "@/src/lib/secop/radar-navegacion";
 import type { DetalleRadar } from "@/src/lib/secop/radar";
 
@@ -132,6 +133,7 @@ export default function RadarVitrina({
               {detalle.entidad} · <span className="vr-id">{detalle.id}</span>
             </p>
             <div className="vr-acciones">
+              <BotonSeguir id={detalle.id} variante="panel" />
               <Link className="vr-abrir" href={detalle.href}>
                 Abrir la ficha completa →
               </Link>

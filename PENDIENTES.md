@@ -1078,14 +1078,6 @@ enlaces del mapa a las facetas.
   documentos de `document-access.ts` (`probeDocument`, `classifyProbeResponse`,
   `canExtract`), que ya no tenía consumidor; `preclassify` y `accessMessage`
   siguen (ingesta y búsqueda en Postgres).
-- **Fase 3 de la vitrina en espera** (2026-10-04). Seguir, la alerta desde la
-  vitrina, el tipo de obra en los filtros guardados y «Para ti» viven en la
-  rama `claude/vitrina-fase3`, separada del PR de las fases 0–2. Necesitan la
-  migración `0025` (dos columnas nulas en `coincidencia` y
-  `al_filtros_usuario`), y la Supabase viva está al límite del plan. **No
-  fusionar esa rama sin aplicar antes la migración**: Drizzle lee e inserta
-  todas las columnas del esquema, así que sin ellas fallarían también el cron
-  de filtros y el registro de coincidencias que ya existen.
 - **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
   `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
   perfil. Si el tráfico crece, se puede calcular en el navegador con los
@@ -1093,4 +1085,9 @@ enlaces del mapa a las facetas.
 - **«Cierre en N días» en las páginas ISR de la vitrina** (`/licitaciones/pagina/N`)
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
+- **Migración `0025` sin aplicar en la Supabase viva** (2026-10-04, fase 3 de la
+  vitrina). Dos columnas nulas y sin default: `coincidencia.origen` y
+  `al_filtros_usuario.tipos_proyecto`. La aplica el usuario con `npm run
+  db:migrate` **antes** de fusionar el PR que las usa: el código de las tareas
+  2–5 las nombra en sus consultas.
 

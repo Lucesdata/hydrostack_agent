@@ -27,6 +27,7 @@ const COLUMNAS = {
   entidadesNit: alFiltrosUsuario.entidadesNit,
   divipola: alFiltrosUsuario.divipola,
   modalidades: alFiltrosUsuario.modalidades,
+  tiposProyecto: alFiltrosUsuario.tiposProyecto,
   valorMin: alFiltrosUsuario.valorMin,
   valorMax: alFiltrosUsuario.valorMax,
   eventosNotificables: alFiltrosUsuario.eventosNotificables,
@@ -43,6 +44,7 @@ function normalizar(row: Record<string, unknown>): FiltroUsuario {
     "entidadesNit",
     "divipola",
     "modalidades",
+    "tiposProyecto",
     "eventosNotificables",
   ] as const;
   const out = { ...row };
@@ -71,6 +73,7 @@ export async function crearFiltro(
     entidadesNit: string[];
     divipola: string[];
     modalidades: string[];
+    tiposProyecto: string[];
     valorMin: string | null;
     valorMax: string | null;
     eventosNotificables: string[];
