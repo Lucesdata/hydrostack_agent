@@ -1,99 +1,99 @@
 import { describe, expect, it } from "vitest";
 import {
-  contornoSeleccionado,
-  dptoDesdeObjetivo,
-  indicesDeModo,
+  aplicarActivo,
+  marcasDeActivo,
+  procesoDesdeObjetivo,
 } from "@/src/components/landing/hero-territorial/sincronia";
-import { escalonDe, escalonMontoDe } from "@/src/lib/mapa/escala";
 
-/** Un nodo mínimo con la API de DOM que usa la función. */
-function nodo({
-  dpto = null,
-  enlace = false,
-  ancestro = null,
-  hijo = null,
-}: {
-  dpto?: string | null;
-  enlace?: boolean;
-  ancestro?: ReturnType<typeof nodo> | null;
-  hijo?: ReturnType<typeof nodo> | null;
-}): any {
-  const self: any = {
-    getAttribute: (n: string) => (n === "data-dpto" ? dpto : null),
-    closest: () => (dpto ? self : (ancestro?.closest() ?? null)),
-    matches: () => enlace,
-    querySelector: () => hijo,
+describe("procesoDesdeObjetivo", () => {
+  it("lee el id del proceso de la señal bajo el puntero o el foco", () => {
+    const etiqueta = { getAttribute: (n: string) => (n === "data-proceso" ? "CO1.REQ.1" : null) };
+    expect(procesoDesdeObjetivo({ closest: () => etiqueta })).toBe("CO1.REQ.1");
+  });
+
+  it("sobre un departamento o el hueco del mapa, ninguno", () => {
+    expect(procesoDesdeObjetivo({ closest: () => null })).toBeNull();
+    expect(procesoDesdeObjetivo(null)).toBeNull();
+  });
+});
+
+describe("marcasDeActivo", () => {
+  const anclas = [
+    { dpto: "76", ids: ["a", "b"] },
+    { dpto: "11", ids: ["c"] },
+  ];
+  const familias = new Map([
+    ["a", "potable"],
+    ["b", "residual"],
+    ["c", "redes"],
+  ]);
+
+  it("un anclaje compartido toma la familia del proceso activo, no una sola para todos", () => {
+    expect(marcasDeActivo("a", anclas, familias)).toEqual({ dpto: "76", familia: "potable" });
+    expect(marcasDeActivo("b", anclas, familias)).toEqual({ dpto: "76", familia: "residual" });
+    expect(marcasDeActivo("c", anclas, familias)).toEqual({ dpto: "11", familia: "redes" });
+  });
+
+  it("sin activo, o con uno que el mapa no tiene, no marca nada", () => {
+    expect(marcasDeActivo(null, anclas, familias)).toEqual({ dpto: null, familia: null });
+    expect(marcasDeActivo("z", anclas, familias)).toEqual({ dpto: null, familia: null });
+  });
+});
+
+/** Un DOM mínimo: lo justo que usa `aplicarActivo`. */
+function elemento(attrs: Record<string, string>, tag = "g") {
+  const a = { ...attrs };
+  const clases = new Set<string>();
+  return {
+    tag,
+    attrs: a,
+    clases,
+    getAttribute: (n: string) => a[n] ?? null,
+    setAttribute: (n: string, v: string) => {
+      a[n] = v;
+    },
+    removeAttribute: (n: string) => {
+      delete a[n];
+    },
+    classList: { toggle: (c: string, on: boolean) => (on ? clases.add(c) : clases.delete(c)) },
   };
-  return self;
 }
 
-describe("dptoDesdeObjetivo", () => {
-  it("lee el código del departamento bajo el puntero", () => {
-    expect(dptoDesdeObjetivo(nodo({ dpto: "05" }))).toBe("05");
+describe("aplicarActivo", () => {
+  const etqA = elemento({ "data-proceso": "a" });
+  const etqB = elemento({ "data-proceso": "b" });
+  const ancla = elemento({ "data-ancla": "76", "data-procesos": "a b", "data-familia": "mixta" });
+  const valle = elemento({ "data-dpto": "76" }, "path");
+  const narino = elemento({ "data-dpto": "52" }, "path");
+  const raiz = elemento({});
+  const dom = Object.assign(raiz, {
+    querySelectorAll: (sel: string) =>
+      sel === "[data-procesos]"
+        ? [ancla]
+        : sel === "[data-proceso]"
+          ? [etqA, etqB]
+          : [valle, narino],
+  });
+  const familias = new Map([
+    ["a", "potable"],
+    ["b", "residual"],
+  ]);
+
+  it("resalta la señal, el anclaje con su familia y el departamento; atenúa el resto", () => {
+    aplicarActivo(dom, "b", familias);
+    expect([...etqB.clases]).toEqual(["is-activo"]);
+    expect(etqA.clases.size).toBe(0);
+    expect(ancla.attrs["data-activa"]).toBe("residual");
+    expect([...valle.clases]).toEqual(["is-resaltado"]);
+    expect(narino.clases.size).toBe(0);
+    expect(raiz.attrs["data-activo"]).toBe("");
   });
 
-  it("con foco de teclado, lo lee del camino dentro del enlace", () => {
-    expect(dptoDesdeObjetivo(nodo({ enlace: true, hijo: nodo({ dpto: "76" }) }))).toBe("76");
-  });
-
-  it("en el hueco entre departamentos no inventa uno", () => {
-    // El <svg>: no es un departamento ni un enlace, aunque contenga caminos.
-    expect(dptoDesdeObjetivo(nodo({ hijo: nodo({ dpto: "05" }) }))).toBeNull();
-    expect(dptoDesdeObjetivo(null)).toBeNull();
-  });
-});
-
-describe("indicesDeModo", () => {
-  const departamentos = [
-    { clave: "05", n: 5000, montoAbierto: 2e12, tipos: { acueducto: 1200, ptar: 40 } },
-    { clave: "99", n: 1, montoAbierto: 0, tipos: { acueducto: 0, ptar: 1 } },
-  ];
-  const base = { departamentos, escalonDe, escalonMontoDe };
-
-  it("en «procesos» no repinta: manda el servidor", () => {
-    expect(indicesDeModo({ ...base, modo: "procesos", tipo: null })).toBeNull();
-  });
-
-  it("en «monto» usa la escala del monto; sin presupuesto va a 0", () => {
-    const m = indicesDeModo({ ...base, modo: "monto", tipo: null })!;
-    expect(m.get("05")).toBe(4);
-    expect(m.get("99")).toBe(0);
-  });
-
-  it("en «tipo» cuenta solo ese tipo, con la escala de procesos", () => {
-    const m = indicesDeModo({ ...base, modo: "tipo", tipo: "ptar" })!;
-    expect(m.get("05")).toBe(escalonDe(40).indice);
-    expect(m.get("99")).toBe(escalonDe(1).indice);
-    expect(indicesDeModo({ ...base, modo: "tipo", tipo: "acueducto" })!.get("99")).toBe(0);
-  });
-});
-
-describe("contornoSeleccionado", () => {
-  /** Una raíz mínima: los caminos por código, cada uno con su `d` y si va en el recuadro. */
-  function raiz(caminos: Record<string, { d: string; recuadro?: boolean }>): any {
-    return {
-      querySelector: (sel: string) => {
-        const codigo = sel.match(/data-dpto="(\d+)"/)?.[1];
-        const c = codigo ? caminos[codigo] : undefined;
-        if (!c) return null;
-        return {
-          getAttribute: (n: string) => (n === "d" ? c.d : null),
-          closest: (s: string) => (s === "g[transform]" && c.recuadro ? {} : null),
-        };
-      },
-    };
-  }
-
-  it("copia el contorno del departamento elegido", () => {
-    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), "05")).toBe("M1 1Z");
-  });
-
-  it("sin elección, o con un código que no está en el mapa, no pinta nada", () => {
-    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), null)).toBeNull();
-    expect(contornoSeleccionado(raiz({ "05": { d: "M1 1Z" } }), "99")).toBeNull();
-  });
-
-  it("San Andrés no: va en su recuadro, con otra transformación", () => {
-    expect(contornoSeleccionado(raiz({ "88": { d: "M2 2Z", recuadro: true } }), "88")).toBeNull();
+  it("al soltar vuelve al estado normal", () => {
+    aplicarActivo(dom, null, familias);
+    expect(etqB.clases.size).toBe(0);
+    expect(ancla.attrs["data-activa"]).toBeUndefined();
+    expect(valle.clases.size).toBe(0);
+    expect(raiz.attrs["data-activo"]).toBeUndefined();
   });
 });

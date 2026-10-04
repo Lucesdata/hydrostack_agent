@@ -33,6 +33,11 @@ const pinta = (fuente: string, color: string) =>
   );
 
 const fondo = () => t["aq-bg"];
+const rgb = (hex: string): [number, number, number] => [
+  parseInt(hex.slice(1, 3), 16),
+  parseInt(hex.slice(3, 5), 16),
+  parseInt(hex.slice(5, 7), 16),
+];
 const panel = () => componer([12, 32, 52], 0.72, fondo());
 
 describe("tokens del hero", () => {
@@ -58,7 +63,6 @@ describe("texto sobre el fondo oscuro", () => {
   it("colores escritos a mano en el hero llegan a AA", () => {
     for (const [color, sobre] of [
       ["#c3d3e0", fondo()], // párrafo del hero
-      ["#8ea3b5", componer([4, 16, 28], 0.75, fondo())], // placeholder, en su campo
     ] as const) {
       pinta(css, color);
       expect(contraste(color, sobre), `${color}`).toBeGreaterThanOrEqual(AA.texto);
@@ -66,43 +70,67 @@ describe("texto sobre el fondo oscuro", () => {
   });
 });
 
-describe("resultado y opciones del mapa", () => {
-  // El resultado del departamento dejó de ser una tarjeta blanca (2026-09-27):
-  // va sobre el fondo, con los colores de texto de arriba. Lo nuevo es el panel
-  // flotante de «Opciones del mapa».
-  it("etiquetas y valores del panel de opciones llegan a AA", () => {
-    pinta(css, "#0a1d30");
-    for (const token of ["aq-text", "aq-muted", "aq-cyan"]) {
-      expect(contraste(t[token], "#0a1d30"), `--${token}`).toBeGreaterThanOrEqual(AA.texto);
+describe("minifichas del hero (2026-10-04)", () => {
+  // Las cinco tarjetas y las etiquetas del mapa van sobre --aq-card; la tarjeta
+  // activa, sobre --aq-card-activa.
+  const tarjetas = () => [t["aq-card"], t["aq-card-activa"]];
+
+  it("define los colores de tarjeta, base del mapa y familias", () => {
+    const requeridos = ["aq-card", "aq-card-activa", "aq-base", "aq-abierto"];
+    expect(requeridos.filter((k) => !t[k])).toEqual([]);
+  });
+
+  it("objeto, número, lugar, entidad, estado y «Ver ficha» llegan a AA", () => {
+    for (const sobre of tarjetas()) {
+      for (const color of [
+        t["aq-text"],
+        t["aq-muted"],
+        t["aq-cyan"],
+        "#c3d3e0",
+        "#d7e4ee",
+        "#ffffff",
+      ]) {
+        pinta(css, color);
+        expect(contraste(color, sobre), `${color} sobre ${sobre}`).toBeGreaterThanOrEqual(AA.texto);
+      }
+    }
+  });
+
+  it("la categoría se lee sobre el tinte de su familia", () => {
+    pinta(css, "#e6f2fa");
+    expect(css).toContain("background: color-mix(in srgb, var(--fam) 18%, transparent)");
+    for (const f of FAMILIAS) {
+      for (const sobre of tarjetas()) {
+        const tinte = componer(rgb(f.oscuro), 0.18, sobre);
+        expect(contraste("#e6f2fa", tinte), f.label).toBeGreaterThanOrEqual(AA.texto);
+      }
+    }
+  });
+
+  it("el punto de «Abierto» se distingue de la tarjeta (no textual, 3:1)", () => {
+    for (const sobre of tarjetas()) {
+      expect(contraste(t["aq-abierto"], sobre)).toBeGreaterThanOrEqual(AA.noTextual);
     }
   });
 });
 
-describe("tarjeta del proceso destacado (2026-10-02)", () => {
-  // Sustituye a las filas con semáforo del hero v2. Fondo propio, un punto más
-  // claro que el del hero.
-  const tarjeta = "#0a1d30";
-
-  it("objeto, temas, notas y reintentar llegan a AA sobre la tarjeta", () => {
-    pinta(css, tarjeta);
-    for (const token of ["aq-text", "aq-muted", "aq-cyan"]) {
-      expect(contraste(t[token], tarjeta), `--${token}`).toBeGreaterThanOrEqual(AA.texto);
+describe("mapa de los procesos elegidos (2026-10-04)", () => {
+  it("los colores de familia son los `oscuro` de tipo-color.ts", () => {
+    for (const f of FAMILIAS) {
+      expect(t[`aq-${f.familia}`]?.toLowerCase(), f.label).toBe(f.oscuro.toLowerCase());
     }
-    pinta(css, "#c3d3e0");
-    expect(contraste("#c3d3e0", tarjeta)).toBeGreaterThanOrEqual(AA.texto);
   });
 
-  it("el chip «PROCESO SECOP II» se lee sobre su tinte", () => {
-    expect(css).toContain("background: rgba(76, 201, 255, 0.14)");
-    pinta(css, "#d7edf8");
-    const tinte = componer([76, 201, 255], 0.14, tarjeta);
-    expect(contraste("#d7edf8", tinte)).toBeGreaterThanOrEqual(AA.texto);
+  it("cada familia se distingue de la tarjeta y del departamento base (3:1)", () => {
+    for (const f of FAMILIAS) {
+      expect(contraste(f.oscuro, t["aq-card"]), f.label).toBeGreaterThanOrEqual(AA.noTextual);
+      expect(contraste(f.oscuro, t["aq-base"]), f.label).toBeGreaterThanOrEqual(AA.noTextual);
+    }
   });
 
-  it("el borde del buscador se distingue del fondo (control, 3:1)", () => {
-    expect(css).toContain("border: 1px solid rgba(140, 190, 225, 0.6)");
-    const borde = componer([140, 190, 225], 0.6, fondo());
-    expect(contraste(borde, fondo())).toBeGreaterThanOrEqual(AA.noTextual);
+  it("el departamento base se distingue poco del fondo, a propósito, pero se ve", () => {
+    // Discreto (spec §7.2), no invisible: el contorno del país tiene que leerse.
+    expect(contraste(t["aq-base"], fondo())).toBeGreaterThanOrEqual(1.3);
   });
 });
 
@@ -169,35 +197,5 @@ describe("tipos de la ficha del departamento", () => {
     for (const f of FAMILIAS) {
       expect(contraste(f.oscuro, panel()), f.label).toBeGreaterThanOrEqual(AA.texto);
     }
-  });
-});
-
-describe("rampa del mapa", () => {
-  const rampa = [0, 1, 2, 3, 4, 5].map((i) => t[`aq-e${i}`]);
-
-  it("cada escalón se distingue del anterior", () => {
-    // No lleva texto encima, así que no se mide contra AA. Lo que no puede
-    // pasar es que dos escalones vecinos se confundan: el más cercano de los
-    // de siempre (--aq-e3 → --aq-e4) está en 1,45:1.
-    expect(rampa.every(Boolean)).toBe(true);
-    for (let i = 1; i < rampa.length; i++) {
-      expect(contraste(rampa[i - 1], rampa[i]), `e${i - 1} → e${i}`).toBeGreaterThanOrEqual(1.4);
-    }
-  });
-
-  it("el anillo del seleccionado se ve sobre el escalón más claro y junto al más oscuro", () => {
-    // Trazo --aq-bg y halo claro (2026-09-27). Un trazo solo blanco daba 1,29:1
-    // sobre --aq-e5. Componente no textual: 3:1 (WCAG 1.4.11).
-    const regla = css.slice(css.indexOf(".clr-mapa__dpto.is-seleccionado"));
-    const bloque = regla.slice(0, regla.indexOf("}"));
-    expect(bloque).toContain("stroke: var(--aq-bg)");
-    expect(bloque).toContain("#f3f8fc");
-    expect(contraste(t["aq-bg"], t["aq-e5"])).toBeGreaterThanOrEqual(AA.noTextual);
-    expect(contraste("#f3f8fc", t["aq-e0"])).toBeGreaterThanOrEqual(AA.noTextual);
-  });
-
-  it("la imagen para compartir usa la misma rampa", () => {
-    const og = leer("app/opengraph-image.js");
-    for (const color of rampa) pinta(og, color);
   });
 });

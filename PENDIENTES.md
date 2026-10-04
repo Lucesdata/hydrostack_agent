@@ -1023,3 +1023,31 @@ cual: la portada llega a un departamento y la tarjeta no pinta compuertas.
   objetos más largos y el departamento inicial.
 - **Peso.** El JS de primera carga de `/` bajó de 113,0 a 109,1 kB gzip al
   salir el semáforo del hero (`npm run presupuesto`).
+
+### 53. Hero con cinco minifichas: lo que queda abierto (2026-10-04)
+Spec: `docs/superpowers/specs/2026-10-04-hero-cinco-minifichas.md`. El §52 de
+arriba queda sustituido: ya no hay tarjeta única, lista de departamentos ni
+enlaces del mapa a las facetas.
+
+- **`/api/departamento/[dpto]/resumen` se quedó sin consumidor.** Lo pedía la
+  tarjeta única del hero. Se conserva (ruta pública, y su consulta se prueba
+  contra PGlite) hasta decidir si se retira con un 308 o lo reusa otra página.
+  Lo mismo el componente por defecto de `FichaDepartamento.jsx`: el comparador
+  solo usa sus dos helpers.
+- **Un fallo de la base se cachea 6 h.** Si `muestraPortada()` falla al
+  regenerar la portada, el HTML con «No pudimos cargar los procesos» vive hasta
+  la siguiente regeneración, igual que el mapa gris de antes. No hay botón de
+  reintento porque la selección viaja en el HTML y no hay endpoint que volver a
+  pedir; añadir uno sería una ruta pública nueva.
+- **Ubicación solo departamental en el mapa.** La base guarda el municipio de
+  la entidad, pero no sus coordenadas: el mapa ancla en el departamento y la
+  etiqueta dice el departamento; el municipio solo sale en la tarjeta. Pintar
+  ciudades exigiría una tabla de coordenadas DIVIPOLA (fuente nueva, fuera de
+  alcance).
+- **Comparación con datos reales.** La verificación en navegador se hizo con
+  procesos ficticios sobre la geometría real (sin base en el entorno). Revisar
+  el preview del PR con la Supabase viva: proporción de procesos con
+  `referencia`, objetos y entidades más largos, y que el sorteo sobre ~35 mil
+  abiertos no pese (`ORDER BY random()` con top-N; una consulta cada 6 h).
+- **Peso.** El JS de primera carga de `/` quedó en 105,6 kB gzip
+  (`npm run presupuesto`), desde 109,1: salieron el buscador y el resumen.

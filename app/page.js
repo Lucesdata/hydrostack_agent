@@ -3,7 +3,7 @@ import { ESTILOS_MAPA } from "@/src/components/mapa/estilos";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
-import { agregadosPortada } from "@/src/lib/secop/agregados";
+import { muestraPortada } from "@/src/lib/secop/muestra-portada";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -24,19 +24,20 @@ import { agregadosPortada } from "@/src/lib/secop/agregados";
 export const revalidate = 21600;
 
 export default async function Page() {
-  // Si la base no responde, la portada sale con el mapa en gris en vez de
-  // caerse. Importa más de lo que parece: el CI corre `npm run build`, que
-  // prerenderiza esta ruta, y las rutas facetadas ya evitaron a propósito atar
-  // el despliegue a que la base conteste. Se degrada a "—", sin inventar
-  // cifras.
-  let departamentos = [];
-  let totalAbiertos;
+  // Los procesos del hero: hasta cinco abiertos, al azar, en UNA consulta. La
+  // misma lista dibuja el mapa (servidor) y las minifichas (cliente), así que
+  // no pueden enseñar procesos distintos. Como la página es ISR, la selección
+  // queda fija en el HTML hasta la siguiente regeneración: estable durante la
+  // visita y sin sorteo en el navegador (sin desajustes de hidratación).
+  //
+  // Si la base no responde, la portada sale con el mapa base y el aviso de
+  // error en lugar de caerse: el CI corre `npm run build`, que prerenderiza
+  // esta ruta, y el despliegue no se ata a que la base conteste.
+  let procesos = null;
   try {
-    const agregados = await agregadosPortada();
-    departamentos = agregados.departamentos;
-    totalAbiertos = agregados.totalAbiertos;
+    procesos = await muestraPortada();
   } catch (error) {
-    console.error("[portada] agregados no disponibles, el mapa sale vacío:", error);
+    console.error("[portada] procesos del hero no disponibles:", error);
   }
 
   return (
@@ -47,20 +48,11 @@ export default async function Page() {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(datasetJsonLd(appUrl())) }}
       />
       <PortadaCliente
-        departamentos={departamentos}
-        totalAbiertos={totalAbiertos}
+        procesos={procesos}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
-            <ColombiaChoropleth
-              filas={departamentos}
-              totalAbiertos={totalAbiertos}
-              etiquetas
-              tooltipExterno
-              capaSeleccion
-              maxRotulos={5}
-              datosDisponibles={totalAbiertos != null}
-            />
+            <ColombiaChoropleth filas={[]} seleccion={procesos ?? []} />
           </>
         }
       />

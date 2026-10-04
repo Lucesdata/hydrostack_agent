@@ -3,11 +3,26 @@ import {
   ALTO_MAPA,
   ANCHO_MAPA,
   LADO_RECUADRO,
+  RECUADRO_X,
+  RECUADRO_Y,
   construirModeloMapa,
   type EntradaMapa,
 } from "@/src/lib/mapa/modelo";
 import { ALTO_ROTULO, ANCHO_ROTULO, MARGEN_ROTULOS, colocarRotulos } from "@/src/lib/mapa/rotulos";
+import {
+  ALTO_ETIQUETA,
+  ANCHO_ETIQUETA,
+  MARGEN_ETIQUETAS,
+  colocarEtiquetas,
+} from "@/src/lib/mapa/etiquetas-procesos";
+import {
+  departamentoCorto,
+  familiaDe,
+  presupuestoCorto,
+  type ProcesoPortada,
+} from "@/src/lib/landing/proceso-portada";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
+import { frase } from "@/src/components/landing/texto";
 
 /**
  * El mapa de procesos abiertos por departamento.
@@ -37,10 +52,6 @@ import type { FilaAgregado } from "@/src/lib/secop/agregados";
 
 const numero = new Intl.NumberFormat("es-CO");
 
-/** Arriba a la izquierda, sobre el Pacífico, que es donde el mapa tiene hueco. */
-const RECUADRO_X = 6;
-const RECUADRO_Y = 10;
-
 function etiquetaDe(e: EntradaMapa): string {
   if (e.n === 0) return `${e.nombre}, sin procesos abiertos`;
   // Vichada tiene 1. "1 procesos abiertos" es lo que lee en voz alta un lector
@@ -53,11 +64,31 @@ function Departamento({
   entrada,
   disponible = true,
   tooltipExterno = false,
+  familia,
 }: {
   entrada: EntradaMapa;
   disponible?: boolean;
   tooltipExterno?: boolean;
+  /**
+   * Solo en el modo selección: `undefined` para un departamento sin procesos
+   * elegidos, la familia de color si todos los suyos la comparten, o "mixta".
+   * En ese modo el departamento no es enlace ni lleva conteo: el fondo no
+   * navega, navegan las etiquetas de cada proceso (spec §8).
+   */
+  familia?: string | null;
 }) {
+  if (familia !== undefined) {
+    return (
+      <path
+        d={entrada.d}
+        className={`clr-mapa__dpto clr-mapa__dpto--base${familia ? " clr-mapa__dpto--sel" : ""}`}
+        data-dpto={entrada.dpto}
+        data-familia={familia ?? undefined}
+      >
+        <title>{entrada.nombre}</title>
+      </path>
+    );
+  }
   const enlazado = disponible && !!entrada.href;
   // Con tooltip propio (el hero), el <title> de un departamento enlazado solo
   // añadiría el tooltip nativo del navegador encima: su nombre accesible ya lo
@@ -110,6 +141,14 @@ export interface ColombiaChoroplethProps {
   capaSeleccion?: boolean;
   /** Cuántos rótulos como mucho. La portada pide 5 (plan portada-esencial). */
   maxRotulos?: number;
+  /**
+   * Modo selección (hero de la portada, spec 2026-10-04): el mapa deja de ser
+   * coroplético y marca **estos** procesos —los mismos objetos que pintan las
+   * minifichas—, con un anclaje por departamento y una etiqueta enlazada por
+   * proceso. Sin escala de conteos, sin rótulos de departamento y sin enlaces
+   * a facetas. Un array vacío es un mapa base sin señales.
+   */
+  seleccion?: ProcesoPortada[];
 }
 
 export default function ColombiaChoropleth({
@@ -120,7 +159,9 @@ export default function ColombiaChoropleth({
   tooltipExterno = false,
   capaSeleccion = false,
   maxRotulos,
+  seleccion,
 }: ColombiaChoroplethProps) {
+  if (seleccion) return <MapaSeleccion procesos={seleccion} />;
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
   const rotulos = etiquetas && datosDisponibles ? colocarRotulos(continente, maxRotulos) : [];
@@ -245,6 +286,151 @@ export default function ColombiaChoropleth({
           en el mapa.
         </p>
       )}
+    </figure>
+  );
+}
+
+/**
+ * La familia de color de cada departamento con procesos elegidos: la de todos
+ * ellos si coinciden, "mixta" si no (resaltado neutro, spec §7.6).
+ */
+export function familiasPorDepartamento(procesos: ProcesoPortada[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const p of procesos) {
+    const f = familiaDe(p.tipoProyecto);
+    const previa = out.get(p.departamentoCodigo);
+    out.set(p.departamentoCodigo, previa && previa !== f ? "mixta" : f);
+  }
+  return out;
+}
+
+/** Ancho aproximado de un texto de Inter, para no salirse de la caja. */
+const anchoTexto = (t: string, cuerpo: number) => t.length * cuerpo * 0.56;
+const TEXTO_X = 21;
+const TEXTO_UTIL = ANCHO_ETIQUETA - TEXTO_X - 8;
+
+function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
+  const { continente, sanAndres } = construirModeloMapa([]);
+  const familias = familiasPorDepartamento(procesos);
+  const etiquetas = colocarEtiquetas(
+    procesos.map((p) => ({ id: p.id, dpto: p.departamentoCodigo }))
+  );
+  const porId = new Map(procesos.map((p) => [p.id, p]));
+  // Un anclaje por departamento, con los ids que comparte.
+  const anclas = new Map<string, { x: number; y: number; ids: string[] }>();
+  for (const e of etiquetas) {
+    const a = anclas.get(e.dpto) ?? { x: e.anclaX, y: e.anclaY, ids: [] };
+    a.ids.push(e.id);
+    anclas.set(e.dpto, a);
+  }
+  // El nombre del departamento sale de la fila del proceso, no del archivo
+  // del DANE: así la etiqueta dice lo mismo que la tarjeta.
+  const nombreDe = new Map(procesos.map((p) => [p.departamentoCodigo, p.departamento]));
+  const familiaDept = (dpto: string) => familias.get(dpto) ?? undefined;
+  const conFamilia = (e: EntradaMapa) => (familias.has(e.dpto) ? familiaDept(e.dpto) : null);
+
+  return (
+    <figure className="clr-mapa clr-mapa--seleccion">
+      <svg
+        className="clr-mapa__svg"
+        viewBox={`${-MARGEN_ETIQUETAS} 0 ${ANCHO_MAPA + 2 * MARGEN_ETIQUETAS} ${ALTO_MAPA}`}
+        role="group"
+        aria-labelledby="clr-mapa-titulo"
+        aria-describedby="clr-mapa-desc"
+      >
+        <title id="clr-mapa-titulo">Mapa de Colombia con los procesos para explorar</title>
+        <desc id="clr-mapa-desc">
+          {procesos.length === 0
+            ? "No hay procesos marcados en el mapa."
+            : `${procesos.length === 1 ? "Un proceso marcado" : `${procesos.length} procesos marcados`} en el departamento de su entidad contratante, no en el lugar de la obra. La lista de procesos debajo del mapa tiene la misma información.`}
+        </desc>
+        {continente.map((e) => (
+          <Departamento key={e.dpto} entrada={e} familia={conFamilia(e)} />
+        ))}
+        {sanAndres && (
+          <g transform={`translate(${RECUADRO_X} ${RECUADRO_Y})`}>
+            <rect
+              className="clr-mapa__recuadro"
+              x={-4}
+              y={-4}
+              width={LADO_RECUADRO + 8}
+              height={LADO_RECUADRO + 8}
+            />
+            <Departamento entrada={sanAndres} familia={conFamilia(sanAndres)} />
+            <text className="clr-mapa__recuadro-txt" x={-4} y={LADO_RECUADRO + 16}>
+              San Andrés
+            </text>
+          </g>
+        )}
+        <g aria-hidden="true" pointerEvents="none">
+          {etiquetas.map((e) => (
+            <line
+              key={e.id}
+              className="clr-mapa__guia"
+              data-proceso={e.id}
+              x1={e.guiaX}
+              y1={e.y}
+              x2={e.anclaX}
+              y2={e.anclaY}
+            />
+          ))}
+          {[...anclas].map(([dpto, a]) => (
+            <circle
+              key={dpto}
+              className="clr-mapa__ancla"
+              data-ancla={dpto}
+              data-procesos={a.ids.join(" ")}
+              data-familia={familiaDept(dpto)}
+              cx={a.x}
+              cy={a.y}
+              r={4.2}
+            />
+          ))}
+        </g>
+        {etiquetas.map((e) => {
+          const p = porId.get(e.id)!;
+          const lugar = departamentoCorto(nombreDe.get(e.dpto) ?? p.departamento);
+          const valor = presupuestoCorto(p.presupuesto);
+          const x0 = e.x - ANCHO_ETIQUETA / 2;
+          const y0 = e.y - ALTO_ETIQUETA / 2;
+          // Un nombre que no cabe se comprime un poco en vez de salirse.
+          const ajuste = (t: string, cuerpo: number) =>
+            anchoTexto(t, cuerpo) > TEXTO_UTIL
+              ? { textLength: TEXTO_UTIL, lengthAdjust: "spacingAndGlyphs" as const }
+              : {};
+          return (
+            <a
+              key={e.id}
+              href={p.href}
+              className="clr-mapa__etq"
+              data-proceso={p.id}
+              data-familia={familiaDe(p.tipoProyecto)}
+              // El mismo nombre accesible que el enlace de su tarjeta.
+              aria-label={`Ver ficha del proceso ${p.numeroProceso}: ${frase(p.objeto)}`}
+            >
+              <rect x={x0} y={y0} width={ANCHO_ETIQUETA} height={ALTO_ETIQUETA} rx={7} />
+              <circle className="clr-mapa__etq-punto" cx={x0 + 11} cy={y0 + 14} r={4.4} />
+              <text
+                className="clr-mapa__etq-lugar"
+                x={x0 + TEXTO_X}
+                y={y0 + 18}
+                {...ajuste(lugar, 13)}
+              >
+                {lugar}
+              </text>
+              <text
+                className="clr-mapa__etq-valor"
+                x={x0 + TEXTO_X}
+                y={y0 + 36}
+                {...ajuste(valor, 14.5)}
+              >
+                {valor}
+              </text>
+            </a>
+          );
+        })}
+      </svg>
+      <figcaption className="clr-mapa__nota">Según ubicación de la entidad contratante</figcaption>
     </figure>
   );
 }
