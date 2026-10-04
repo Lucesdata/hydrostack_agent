@@ -191,19 +191,42 @@ describe("botones azules con texto blanco", () => {
     expect(contraste(t["aq-cta"], fondo())).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
-  it("la barra de navegación usa el mismo azul, no el que no se leía", () => {
-    pinta(navbar, t["aq-cta"]);
+  it("la barra de navegación no vuelve al azul que no se leía", () => {
     expect(navbar.toLowerCase()).not.toContain("background: #1a9be0");
   });
 });
 
+describe("horizonte de luz del hero", () => {
+  // La leyenda y el pie de las tarjetas pueden caer sobre el resplandor del
+  // horizonte (.procesos::before). Peor caso: el resplandor a su opacidad
+  // máxima (la sombra difuminada nunca llega a ella) más el halo radial, sobre
+  // el fondo del hero.
+  it("el texto secundario y el cian se leen sobre su punto más claro", () => {
+    pinta(css, "--aq-horizonte-luz: rgba(76, 201, 255, 0.2)");
+    pinta(css, "rgba(76, 201, 255, 0.07)");
+    const luz = componer([76, 201, 255], 0.07, componer([76, 201, 255], 0.2, fondo()));
+    for (const nombre of ["aq-text", "aq-muted", "aq-cyan"]) {
+      expect(contraste(t[nombre], luz), nombre).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
+});
+
 describe("barra y árbol de la Ficha Viva", () => {
-  const barra = componer([6, 20, 35], 0.94, "#061423");
+  // La píldora de la barra oscura (2026-10-04): su fondo translúcido sobre el
+  // de la portada.
+  const barra = componer([12, 32, 52], 0.8, "#061423");
   it("enlaces y texto secundario de la barra oscura", () => {
-    for (const color of ["#c3d3e0", "#9fb4c6"]) {
+    pinta(navbar, "rgba(12, 32, 52, 0.8)");
+    for (const color of ["#c3d3e0", "#9fb4c6", "#4cc9ff"]) {
       pinta(navbar, color);
       expect(contraste(color, barra)).toBeGreaterThanOrEqual(AA.texto);
     }
+  });
+
+  it("el botón blanco de la barra: texto noche y se distingue de la píldora", () => {
+    pinta(navbar, "color: #061423; background: #f3f8fc");
+    expect(contraste("#061423", "#f3f8fc")).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste("#f3f8fc", barra)).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
   it("texto del árbol de decisiones", () => {

@@ -1,0 +1,259 @@
+.buscador {
+  --bs-bg: #061423;
+  --bs-campo: #0a1d30;
+  --bs-texto: #f3f8fc;
+  --bs-suave: #9fb4c6;
+  --bs-borde: #5c819d;
+  --bs-enlace: #4cc9ff;
+  --bs-boton: #0272b0;
+  margin-top: 28px;
+  min-width: 0;
+  color: var(--bs-texto);
+  font-family: var(--font-inter), sans-serif;
+}
+.claro {
+  --bs-bg: var(--bg);
+  --bs-campo: var(--surface-elevated);
+  --bs-texto: var(--text-primary);
+  --bs-suave: var(--text-muted);
+  --bs-borde: var(--ink-500);
+  --bs-enlace: var(--accent);
+  --bs-boton: var(--accent-fill);
+  margin-top: 20px;
+}
+.selector {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0 8px;
+  min-width: 0;
+}
+.radioTema,
+.radioNumero {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.pestana {
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  text-align: center;
+  border-bottom: 2px solid var(--bs-borde);
+  padding: 10px 8px;
+  font-size: 14px;
+  color: var(--bs-suave);
+  font-weight: 600;
+}
+.radioTema:checked + .pestana,
+.radioNumero:checked + .pestana {
+  color: var(--bs-enlace);
+  border-color: var(--bs-enlace);
+}
+.radioTema:focus-visible + .pestana,
+.radioNumero:focus-visible + .pestana {
+  outline: 2px solid var(--bs-enlace);
+  outline-offset: 3px;
+}
+.formularios {
+  grid-column: 1 / -1;
+  padding-top: 18px;
+  min-width: 0;
+}
+.formTema,
+.formNumero {
+  display: none;
+  gap: 12px;
+  min-width: 0;
+}
+.radioTema:checked ~ .formularios .formTema,
+.radioNumero:checked ~ .formularios .formNumero {
+  display: grid;
+}
+.campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.buscador label:not(.pestana) {
+  display: block;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.buscador input:not([type="radio"]):not([type="hidden"]),
+.buscador select {
+  display: block;
+  margin-top: 6px;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--bs-borde);
+  border-radius: 7px;
+  padding: 11px 10px;
+  min-height: 44px;
+  background: var(--bs-campo);
+  color: var(--bs-texto);
+  font:
+    400 14px var(--font-inter),
+    sans-serif;
+  color-scheme: dark;
+}
+.claro input,
+.claro select {
+  color-scheme: light !important;
+}
+.buscador input::placeholder {
+  color: var(--bs-suave);
+  opacity: 1;
+}
+.buscador :is(input, select, button, a):focus-visible {
+  outline: 2px solid var(--bs-enlace);
+  outline-offset: 3px;
+}
+.opcional,
+.ayuda {
+  color: var(--bs-suave);
+  font-weight: 400;
+}
+.ayuda {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.acciones span {
+  color: var(--bs-suave);
+  font-size: 12px;
+}
+.buscar {
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--bs-boton);
+  color: #fff;
+  font:
+    600 14px var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+  justify-self: start;
+}
+.buscar:hover {
+  filter: brightness(1.08);
+}
+.estado {
+  color: var(--bs-suave);
+  font-size: 12px;
+  margin: 14px 0 0;
+  min-height: 1.5em;
+}
+.estado:empty {
+  margin: 0;
+  min-height: 0;
+}
+.error,
+.aviso {
+  margin: 14px 0 0;
+  padding: 12px;
+  border: 1px solid var(--bs-borde);
+  border-radius: 7px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.error p {
+  margin: 0 0 8px;
+}
+.buscador a {
+  color: var(--bs-enlace);
+}
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+.lista li {
+  border-top: 1px solid var(--bs-borde);
+  padding: 16px 0;
+}
+.lista h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.lista h2 a {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.lista p {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.entidad,
+.referencia {
+  font-size: 12px;
+  color: var(--bs-suave);
+  line-height: 1.5;
+}
+.datos {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.datos span {
+  color: var(--bs-suave);
+}
+.compacta {
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.compacta li {
+  padding: 12px 0;
+}
+.compacta h2 {
+  font-size: 14px;
+}
+.todos {
+  display: inline-block;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.paginacion {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 0;
+  font-size: 14px;
+}
+.paginacion span {
+  color: var(--bs-suave);
+}
+@media (max-width: 600px) {
+  .campos {
+    grid-template-columns: 1fr;
+  }
+  .buscar {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .acciones {
+    display: grid;
+  }
+  .buscador {
+    margin-top: 24px;
+  }
+}

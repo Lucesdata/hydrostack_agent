@@ -1,5 +1,38 @@
 # AquaLicita — Instrucciones del Proyecto
 
+**Buscador guiado (2026-10-04, secciones 1 y 2 implementadas localmente).** El usuario
+eligió la alternativa 1 y guardar explícitamente con cuenta gratuita, con
+recientes separados. Diseño en
+`docs/superpowers/specs/2026-10-04-buscador-guiado-design.md`; plan de primera
+entrega (tema y número) en
+`docs/superpowers/plans/2026-10-04-buscador-guiado.md`. La portada vigente ya
+no tiene el buscador antiguo: el nuevo se integra bajo la frase del hero.
+Guardados/Recientes requiere un segundo plan de datos de cuenta. La sección 1
+incorpora modo, sistema, actividad y numero en `/api/secop`; combina filtros
+sobre la base ingerida y prioriza coincidencias exactas por referencia/id sin
+excluir cerrados. Actividad filtra menciones en objeto/descripción y puede
+solaparse; no modifica los cinco tipos ni su clasificador. Criterios inválidos
+devuelven 400; en modo guiado un fallo de base devuelve 503 sin Socrata.
+La sección 2 añade formulario GET Por tema/Por número, vista previa de cinco
+resultados en el hero y explorador guiado con resultados iniciales del servidor,
+paginación y Atrás. `/licitaciones/explorar` pasa a render dinámico para leer
+criterios; portada y facetas conservan su render. Las consultas sin modo
+mantienen el explorador avanzado. Cuentas y despliegue siguen sin ejecutar.
+Evidencia y punto de continuación de la interfaz en
+`docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-2-traspaso.md`.
+La siguiente sección tiene plan técnico preparado para revisión en
+`docs/superpowers/plans/2026-10-04-guardados-recientes.md`: el usuario pidió
+**sin migraciones**. Propone reutilizar `senal_usuario` con prefijos privados
+versionados de guardado/visita, bloqueo transaccional por usuario y diez visitas;
+sin tablas, columnas, índices ni cambios en Drizzle. Este módulo personal filtra
+por el `usuario_id` existente de la sesión, excepción documentada a R8 para no
+alterar el esquema. No mezclar esos prefijos con intención ni cuota de pliegos.
+Todavía no implementado; revisar las consultas privadas conforme a
+`docs/CONDUCTA.md` §4.
+Evidencia y punto de
+continuación en
+`docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-1-traspaso.md`.
+
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
 pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto
@@ -226,7 +259,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (minificha con estructura de tarjeta; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (minificha con estructura de tarjeta; barra de la portada en píldora flotante y horizonte de luz en el hero; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -428,7 +461,21 @@ en el expediente si todavía se reciben ofertas.
 
 **Cabecera y sincronía (2026-09-26).** En `/` la barra de navegación va en
 oscuro (`.clr-nav--oscuro`, en `Navbar.js`), sin el «En línea» desde el
-2026-09-27; en el resto del sitio la barra sigue clara y lo conserva. Mapa, lista
+2026-09-27; en el resto del sitio la barra sigue clara y lo conserva.
+Desde el 2026-10-04 la barra oscura es una **píldora flotante**: el `<nav>` pinta
+el fondo de la portada y `.clr-nav-inner` es la píldora (borde tenue, resplandor
+azul debajo, enlaces al centro, «Crear cuenta» y «Fichas» en blanco con texto
+noche). Mide `--nav-h` + 16 px. Todo vive bajo `.clr-nav--oscuro` en `Navbar.js`;
+la barra clara no cambia. Contrastes contra el fondo de la píldora en
+`contraste-oscuro.test.ts`.
+Detrás de las tarjetas del hero hay un **horizonte de luz** (2026-10-04,
+`.procesos::before` en `hero-territorial.module.css`): un arco enorme, estático,
+con su vértice 10 px sobre la fila de tarjetas (bajo la leyenda del mapa, sin
+cruzarla en ningún ancho), sombra algo más oscura que el
+fondo debajo y resplandor cian bajo encima. Va anclado a las tarjetas, no al alto
+del hero, y `.hero` lleva `overflow: clip` para que no abra scroll lateral ni se
+pinte sobre la franja de la ficha. El texto sobre el resplandor se mide en
+`contraste-oscuro.test.ts` contra su punto más claro. Mapa, lista
 y ficha del hero están sincronizados al pasar el puntero o el foco
 (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de servidor, cada
 camino lleva `data-dpto` y el hero escucha por delegación. El contorno del
@@ -632,3 +679,16 @@ tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
 `CO1.REQ.5720221`, cuyo objeto menciona pavimento en Chipatá, tiene red de
 acueducto en la descripción oficial. Sin descripción o evidencia no se inventa
 respaldo. Pruebas puras, render de minificha y consulta contra PGlite.
+
+
+**Guardados y Recientes (2026-10-04, implementación local).** El buscador y la
+ficha enlazan a `/mis-procesos`, privada y dinámica. Guardar exige cuenta gratuita
+y confirmación explícita tras el retorno de login; las diez últimas visitas
+son una lista separada. Se reutiliza `senal_usuario` con prefijos
+`personal:guardado:v1:` y `personal:visita:v1:`: sin migraciones, sin alterar
+la cuota del extractor. Toda operación filtra por usuario de sesión y las
+mutaciones serializan por cuenta; las APIs son `private, no-store`. No almacenar
+listas en el navegador ni incorporar estado personal al ISR de la ficha.
+Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
+y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
+No se ha desplegado esta sección.

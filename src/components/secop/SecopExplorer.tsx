@@ -13,7 +13,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SecopResult } from "@/src/lib/secop/types";
+import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
+import BuscadorGuiado from "../landing/hero-territorial/BuscadorGuiado";
 import type { DocumentAccess } from "@/src/lib/secop/document-access";
 import type { VerdictRespuesta } from "@/src/lib/secop/verdict-publico";
 import type { OferenteProfile } from "@/src/lib/oferente/types";
@@ -55,7 +56,39 @@ interface Filters {
 
 type ProbeState = { state: DocumentAccess; message: string };
 
-export default function SecopExplorer() {
+export default function SecopExplorer({
+  consultaInicial,
+  resultadoInicial,
+  errorInicial,
+}: {
+  consultaInicial?: SecopQuery;
+  resultadoInicial?: SecopResult<SecopProceso> | null;
+  errorInicial?: string | null;
+} = {}) {
+  if (consultaInicial?.modo)
+    return (
+      <div className="clr-page">
+        <div className="clr-container">
+          <LicitacionesTabs />
+          <header>
+            <h1 className="clr-h1">Encuentra tu proceso</h1>
+            <p className="clr-sub">
+              Busca por sistema y actividad, o por el número que ya conoces.
+            </p>
+          </header>
+          <BuscadorGuiado
+            variante="explorador"
+            consultaInicial={consultaInicial}
+            resultadoInicial={resultadoInicial}
+            errorInicial={errorInicial}
+          />
+        </div>
+      </div>
+    );
+  return <ExploradorAvanzado />;
+}
+
+function ExploradorAvanzado() {
   const router = useRouter();
   const [filters, setFilters] = useState<Filters>({
     q: "",

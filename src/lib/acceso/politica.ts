@@ -36,6 +36,8 @@ export type Capacidad =
   | "alertas"
   | "filtros"
   | "competidores"
+  | "procesos_guardar"
+  | "procesos_recientes"
   | "pliego_extraer";
 
 /**
@@ -81,6 +83,8 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   alertas: "gratis",
   filtros: "gratis",
   competidores: "gratis",
+  procesos_guardar: "gratis",
+  procesos_recientes: "gratis",
   pliego_extraer: "gratis",
 };
 

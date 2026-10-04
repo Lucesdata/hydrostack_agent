@@ -1,0 +1,93 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  margin: 6px 0;
+}
+.boton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.boton:focus-visible,
+.acceso a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.acceso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.acceso a {
+  color: var(--accent);
+}
+.lista {
+  list-style: none;
+  margin: 18px 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.lista li {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+  background: var(--surface-elevated);
+}
+.lista h3 {
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+.lista h3 a {
+  color: var(--accent);
+}
+.lista p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.panel {
+  margin: 24px 0 32px;
+}
+.panel h2 {
+  font-size: 22px;
+}
+.acciones {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.confirmar {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-elevated);
+}
+.personal {
+  max-width: 850px;
+}
+.privado {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .lista li {
+    padding: 14px;
+  }
+  .acciones {
+    gap: 8px;
+  }
+}
