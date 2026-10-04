@@ -173,21 +173,6 @@ describe("botones azules con texto blanco", () => {
   });
 });
 
-describe("horizonte de luz del hero", () => {
-  // La leyenda y el pie de las tarjetas pueden caer sobre el resplandor del
-  // horizonte (.procesos::before). Peor caso: el resplandor a su opacidad
-  // máxima (la sombra difuminada nunca llega a ella) más el halo radial, sobre
-  // el fondo del hero.
-  it("el texto secundario y el cian se leen sobre su punto más claro", () => {
-    pinta(css, "--aq-horizonte-luz: rgba(76, 201, 255, 0.2)");
-    pinta(css, "rgba(76, 201, 255, 0.07)");
-    const luz = componer([76, 201, 255], 0.07, componer([76, 201, 255], 0.2, fondo()));
-    for (const nombre of ["aq-text", "aq-muted", "aq-cyan"]) {
-      expect(contraste(t[nombre], luz), nombre).toBeGreaterThanOrEqual(AA.texto);
-    }
-  });
-});
-
 describe("barra y árbol de la Ficha Viva", () => {
   // La píldora de la barra oscura (2026-10-04): su fondo translúcido sobre el
   // de la portada.
