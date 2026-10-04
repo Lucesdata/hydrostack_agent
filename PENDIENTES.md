@@ -1051,3 +1051,19 @@ enlaces del mapa a las facetas.
   abiertos no pese (`ORDER BY random()` con top-N; una consulta cada 6 h).
 - **Peso.** El JS de primera carga de `/` quedó en 105,6 kB gzip
   (`npm run presupuesto`), desde 109,1: salieron el buscador y el resumen.
+
+### 54. Vitrina, fase 0: lo que queda abierto (2026-10-04)
+
+- **El conteo «N procesos abiertos» incluye los de recepción vencida.** Es
+  `condicionAbierto()`, la definición común, y no se cambió: esos procesos solo
+  bajan al final del orden y su tarjeta dice «CERRADO A OFERTAS». Medir cuántos
+  son antes de decidir si la definición común debe mirar `fecha_recepcion`.
+- **Sin medir qué parte de los abiertos es `otros` o sin tipo.** La fase 0 los
+  ordena detrás; si son muchos, la fase 1 puede ofrecer un filtro.
+- **El clasificador marca PTAR un contrato de ingeniería química** de la
+  Universidad Nacional (`CO1.REQ.11144709`, visto en la vitrina). Revisar con el
+  plan propio que exige tocar el clasificador.
+- **Los nombres propios que no son el municipio o el departamento del proceso**
+  quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
+  («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
+  gritaba.

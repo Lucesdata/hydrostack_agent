@@ -71,6 +71,15 @@ export const ESTILOS_FICHA_CARD = `
 .fc--compacta .fc-objeto { font-size: 13px; margin-bottom: 8px; }
 .fc-cuantia { font: 600 13px var(--mono); color: var(--text-primary); }
 
+/* vitrina: presupuesto en grande, y tipo de obra y lugar debajo. */
+.fc-datos { display: grid; gap: 6px; }
+.fc-cuantia--grande { font: 700 20px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+.fc-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 12px var(--sans); color: var(--text-muted); }
+.fc-tipo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-primary); }
+.fc-tipo-punto { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.fc-tipo-punto--otros { border: 1.5px dashed var(--text-muted); }
+.fc-lugar { min-width: 0; }
+
 @media (max-width: 640px) {
   .fc { padding: 14px 16px; }
   .fc-cab { flex-wrap: wrap; }

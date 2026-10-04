@@ -13,7 +13,14 @@
 import { formatCopCompact } from "@/src/components/secop/format";
 
 export type ClaveEtapa =
-  "abierto" | "evaluacion" | "adjudicado" | "cancelado" | "suspendido" | "borrador" | "desconocido";
+  | "abierto"
+  | "cerrado"
+  | "evaluacion"
+  | "adjudicado"
+  | "cancelado"
+  | "suspendido"
+  | "borrador"
+  | "desconocido";
 
 export interface EtapaVista {
   clave: ClaveEtapa;
@@ -40,6 +47,15 @@ export const ETAPA_POR_ESTADO: Record<string, EtapaVista> = {
 
 const ETAPA_DESCONOCIDA: EtapaVista = { clave: "desconocido", label: "SIN ESTADO" };
 
+/**
+ * Para un proceso que `estado_actual` da por abierto pero que ya no recibe
+ * ofertas. La pastilla y la línea del plazo salen de campos distintos
+ * (`estado_actual` y `fecha_recepcion`), y antes la tarjeta decía ABIERTO justo
+ * encima de «Recepción cerrada el 03 oct 2026» (CO1.REQ.11144872, visto en
+ * producción el 2026-10-04). Gana el dato más concreto: la fecha.
+ */
+const ETAPA_CERRADA: EtapaVista = { clave: "cerrado", label: "CERRADO A OFERTAS" };
+
 export interface ProcesoParaCard {
   secopProcesoId: string;
   objeto: string | null;
@@ -60,8 +76,12 @@ export interface FichaCardVista {
   etapa: EtapaVista;
   entidad: string;
   objeto: string;
+  /** El objeto tal como lo publica SECOP, para el `title` de la tarjeta. */
+  objetoOriginal: string | null;
   /** Solo la pinta la variante `compacta`: donde hay semáforo, lo dice su compuerta. */
   cuantia: string;
+  /** `false` cuando `cuantia` es el texto de ausencia: no se pinta en grande. */
+  cuantiaPublicada: boolean;
   ubicacion: string;
   plazo: string;
   /** Sustituye al plazo cuando el proceso ya se adjudicó. `null` si no aplica. */
@@ -104,8 +124,17 @@ function diasHasta(iso: string, hoy: Date): number | null {
   const dia = 24 * 60 * 60 * 1000;
   const a = Date.parse(`${iso}T12:00:00Z`);
   if (Number.isNaN(a)) return null;
-  const b = Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate(), 12);
+  const b = Date.parse(`${diaEnColombia(hoy)}T12:00:00Z`);
   return Math.round((a - b) / dia);
+}
+
+/**
+ * El día de calendario de `hoy` en Colombia (UTC−5, sin horario de verano).
+ * La recepción cierra al final del día en Colombia: con el día UTC, de 7 p. m.
+ * a medianoche la tarjeta daba por cerrado un proceso que aún recibía ofertas.
+ */
+function diaEnColombia(hoy: Date): string {
+  return new Date(hoy.getTime() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function numero(v: string | number | null | undefined): number | null {
@@ -151,6 +180,71 @@ function adjudicacionDe(p: ProcesoParaCard): string | null {
   return cuanto === null ? texto : `${texto} por ${formatCopCompact(cuanto)}`;
 }
 
+/**
+ * Paréntesis de trámite que SECOP pega al objeto: «(Manifestación de interés
+ * (Menor Cuantía)) (Presentación de oferta)». Describen el procedimiento, no la
+ * obra, y la modalidad ya tiene su sitio en la ficha. Solo se quitan los
+ * paréntesis cuyo texto es de trámite: «(PTAR)» o «(Fase II)» se quedan.
+ */
+const TRAMITE =
+  /^\s*$|manifestaci[oó]n|presentaci[oó]n|oferta|cuant[ií]a|invitaci[oó]n|convocatoria|licitaci[oó]n|selecci[oó]n|concurso|contrataci[oó]n directa|r[eé]gimen especial/i;
+
+/** Siglas que siguen en mayúscula al pasar el objeto a minúscula de oración. */
+const SIGLAS = new Set([
+  "PTAR", "PTAP", "PTARD", "PSMV", "PMAA", "PDA", "PUEAA", "ESP", "SAS", "EPM", "EAAB",
+  "RUP", "SECOP", "UNSPSC", "GPS", "GNSS", "PVC", "HDPE", "PEAD", "GRP", "TIC", "SGP",
+  "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII",
+]);
+
+/** Cuántas letras tiene que tener un objeto para tratarlo como descriptivo. */
+const MIN_LETRAS = 4;
+
+/**
+ * El objeto, legible en una tarjeta. La ficha conserva el texto oficial.
+ *
+ * - Quita los paréntesis de trámite, de dentro afuera para los anidados.
+ * - Si viene en MAYÚSCULAS (lo más común en SECOP), lo pasa a minúscula de
+ *   oración y respeta las siglas de `SIGLAS` y los nombres de `propios` (el
+ *   municipio y el departamento del proceso). Los demás nombres propios quedan en
+ *   minúscula: es un límite conocido y preferible a una tarjeta que grita.
+ * - Un objeto sin texto («2026000088») no describe nada, y la tarjeta lo dice.
+ */
+export function objetoLegible(raw: string | null, propios: (string | null)[] = []): string {
+  if (!raw || !raw.trim()) return "Objeto no publicado";
+  const letras = raw.match(/\p{L}/gu) ?? [];
+  if (letras.length < MIN_LETRAS) return "Objeto sin descripción publicada";
+
+  let t = raw;
+  for (;;) {
+    const sig = t.replace(/\(([^()]*)\)/g, (todo, dentro: string) =>
+      TRAMITE.test(dentro) ? "" : `\u0000${dentro}\u0001`
+    );
+    if (sig === t) break;
+    t = sig;
+  }
+  t = t.replace(/\u0000/g, "(").replace(/\u0001/g, ")");
+  t = t.replace(/\s+/g, " ").replace(/\s+([,.;:)])/g, "$1").replace(/[\s\-–—:,;]+$/, "").trim();
+  if ((t.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) t = raw.trim();
+
+  const mayusculas = (t.match(/\p{Lu}/gu) ?? []).length;
+  const total = (t.match(/\p{L}/gu) ?? []).length;
+  if (mayusculas / total < 0.7) return t;
+
+  const nombres = propios
+    .filter((n): n is string => !!n)
+    .flatMap((n) => n.split(/[\s,.]+/))
+    .filter((w) => w.length > 2)
+    .map((w) => w.toLocaleLowerCase("es-CO"));
+  const nombresSet = new Set(nombres);
+
+  const bajo = t.toLocaleLowerCase("es-CO").replace(/[\p{L}\p{N}]+/gu, (w) => {
+    if (SIGLAS.has(w.toLocaleUpperCase("es-CO"))) return w.toLocaleUpperCase("es-CO");
+    if (nombresSet.has(w)) return w.charAt(0).toLocaleUpperCase("es-CO") + w.slice(1);
+    return w;
+  });
+  return bajo.replace(/\p{L}/u, (c) => c.toLocaleUpperCase("es-CO"));
+}
+
 export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
   const valor = numero(p.valorEstimado);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
@@ -159,18 +253,35 @@ export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
   // recientes llevan un estado_actual que no es "Seleccionado" (4 "Abierto", 1
   // "Evaluación"), y la tarjeta no puede decir "Adjudicado a X" bajo una
   // pastilla que dice ABIERTO.
-  const etapa: EtapaVista = p.fechaAdjudicacion
+  const etapaEstado: EtapaVista = p.fechaAdjudicacion
     ? ETAPA_POR_ESTADO["Seleccionado"]
     : (p.estadoActual && ETAPA_POR_ESTADO[p.estadoActual]) || ETAPA_DESCONOCIDA;
+  const etapa =
+    etapaEstado.clave === "abierto" && !recibeOfertas(p, hoy) ? ETAPA_CERRADA : etapaEstado;
 
   return {
     id: p.secopProcesoId,
     etapa,
     entidad: p.entidadNombre ?? "Entidad no informada",
-    objeto: p.objeto ?? "Objeto no publicado",
+    objeto: objetoLegible(p.objeto, [p.municipio, p.departamento]),
+    objetoOriginal: p.objeto,
     cuantia: valor === null ? "Cuantía no publicada" : formatCopCompact(valor),
+    cuantiaPublicada: valor !== null,
     ubicacion: lugar || "Ubicación no informada",
     plazo: plazoDe(p, hoy),
     adjudicacion: adjudicacionDe(p),
   };
+}
+
+/**
+ * ¿Sigue recibiendo ofertas? La fecha de recepción manda cuando existe y es
+ * válida; sin ella, `estado_apertura`. Es la misma regla que `plazoDe`, así que
+ * la pastilla y la línea del plazo ya no pueden contradecirse.
+ */
+function recibeOfertas(p: ProcesoParaCard, hoy: Date): boolean {
+  if (p.fechaRecepcion) {
+    const dias = diasHasta(p.fechaRecepcion, hoy);
+    if (dias !== null) return dias >= 0;
+  }
+  return p.estadoApertura !== "Cerrado";
 }

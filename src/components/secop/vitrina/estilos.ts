@@ -14,9 +14,12 @@ export const ESTILOS_VITRINA = `
 }
 .vt-tab[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
 
-.vt-rejilla { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; list-style: none; margin: 0; padding: 0; }
-.vt-rejilla > li { display: flex; }
-.vt-rejilla > li > a { flex: 1; }
+/* minmax(0, 1fr) y min-width: 0: con 1fr a secas, una entidad larga (que va en
+   una línea con elipsis) ensanchaba su columna y la rejilla se salía por la
+   derecha. */
+.vt-rejilla { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
+.vt-rejilla > li { display: flex; min-width: 0; }
+.vt-rejilla > li > a { flex: 1; min-width: 0; }
 
 .vt-vacio { font: 14px var(--sans); color: var(--text-muted); padding: 32px 0; }
 .vt-vacio-accion { display: inline-block; margin-top: 10px; font: 600 13px var(--mono); color: var(--accent); }
@@ -25,6 +28,6 @@ export const ESTILOS_VITRINA = `
 .vt-pag-info { font: 12px var(--mono); color: var(--text-muted); }
 .vt-pag-link { font: 600 13px var(--mono); color: var(--accent); }
 
-@media (max-width: 1023px) { .vt-rejilla { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .vt-rejilla { grid-template-columns: 1fr; } .vt-tabs { overflow-x: auto; } }
+@media (max-width: 1023px) { .vt-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .vt-rejilla { grid-template-columns: minmax(0, 1fr); } .vt-tabs { overflow-x: auto; } }
 `;

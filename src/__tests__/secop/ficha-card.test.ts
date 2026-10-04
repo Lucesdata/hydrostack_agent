@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { ETAPA_POR_ESTADO, vistaFichaCard, type ProcesoParaCard } from "@/src/lib/secop/ficha-card";
+import {
+  ETAPA_POR_ESTADO,
+  objetoLegible,
+  vistaFichaCard,
+  type ProcesoParaCard,
+} from "@/src/lib/secop/ficha-card";
 
 const HOY = new Date("2026-09-21T12:00:00Z");
 
@@ -170,5 +175,91 @@ describe("una fecha inválida no revienta el plazo", () => {
 describe("el id", () => {
   it("se muestra tal cual, porque es la clave y nunca falta", () => {
     expect(vistaFichaCard(base, HOY).id).toBe("CO1.REQ.1234567");
+  });
+});
+
+describe("la pastilla no contradice al plazo", () => {
+  // CO1.REQ.11144872, en producción el 2026-10-04: ABIERTO encima de
+  // «Recepción cerrada el 03 oct 2026».
+  it("con la recepción vencida, un estado abierto pasa a CERRADO A OFERTAS", () => {
+    const v = vistaFichaCard({ ...base, fechaRecepcion: "2026-09-20" }, HOY);
+    expect(v.plazo).toBe("Recepción cerrada el 20 sept 2026");
+    expect(v.etapa).toEqual({ clave: "cerrado", label: "CERRADO A OFERTAS" });
+  });
+
+  it("el último día sigue abierto", () => {
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-21" }, HOY).etapa.label).toBe(
+      "ABIERTO"
+    );
+  });
+
+  it("sin fecha, manda estado_apertura", () => {
+    expect(vistaFichaCard({ ...base, estadoApertura: "Cerrado" }, HOY).etapa.label).toBe(
+      "CERRADO A OFERTAS"
+    );
+    expect(vistaFichaCard(base, HOY).etapa.label).toBe("ABIERTO");
+  });
+
+  it("no toca las demás etapas", () => {
+    const v = vistaFichaCard(
+      { ...base, estadoActual: "Evaluación", fechaRecepcion: "2026-09-01" },
+      HOY
+    );
+    expect(v.etapa.label).toBe("EN EVALUACIÓN");
+  });
+
+  it("cuenta el día en Colombia: a las 9 p. m. del 21 aún es el 21", () => {
+    // 2026-09-22T02:00Z es el 21 a las 9 p. m. en Bogotá.
+    const noche = new Date("2026-09-22T02:00:00Z");
+    const v = vistaFichaCard({ ...base, fechaRecepcion: "2026-09-21" }, noche);
+    expect(v.plazo).toBe("Recepción hasta el 21 sept 2026 · último día");
+    expect(v.etapa.label).toBe("ABIERTO");
+  });
+});
+
+describe("el objeto, legible en la tarjeta", () => {
+  it("quita los paréntesis de trámite, también los anidados", () => {
+    expect(
+      objetoLegible(
+        "ALCANTARILLADO - SAN JERONIMO (Manifestación de interés (Menor Cuantía)) (Presentación de oferta)"
+      )
+    ).toBe("Alcantarillado - san jeronimo");
+  });
+
+  it("conserva los paréntesis que dicen algo de la obra", () => {
+    expect(objetoLegible("Construcción de la planta de tratamiento (PTAR) fase II")).toBe(
+      "Construcción de la planta de tratamiento (PTAR) fase II"
+    );
+  });
+
+  it("pasa las MAYÚSCULAS a minúscula de oración, con siglas y lugares del proceso", () => {
+    expect(
+      objetoLegible("OPTIMIZACIÓN DE LA PTAP DEL MUNICIPIO DE COVARACHÍA, BOYACÁ", [
+        "Covarachía",
+        "Boyacá",
+      ])
+    ).toBe("Optimización de la PTAP del municipio de Covarachía, Boyacá");
+  });
+
+  it("deja tal cual un objeto ya escrito en minúscula de oración", () => {
+    expect(objetoLegible("Definir los tramos intervenidos de espacio público")).toBe(
+      "Definir los tramos intervenidos de espacio público"
+    );
+  });
+
+  it("un objeto sin texto no se presenta como si describiera algo", () => {
+    expect(objetoLegible("2026000088")).toBe("Objeto sin descripción publicada");
+    expect(objetoLegible(null)).toBe("Objeto no publicado");
+    expect(objetoLegible("   ")).toBe("Objeto no publicado");
+  });
+
+  it("si quitar trámite lo dejaría vacío, se queda el original", () => {
+    expect(objetoLegible("(Presentación de oferta)")).toBe("(Presentación de oferta)");
+  });
+
+  it("la vista guarda el original para el title", () => {
+    const v = vistaFichaCard({ ...base, objeto: "OBRA DE ACUEDUCTO EN CALI" }, HOY);
+    expect(v.objeto).toBe("Obra de acueducto en Cali");
+    expect(v.objetoOriginal).toBe("OBRA DE ACUEDUCTO EN CALI");
   });
 });

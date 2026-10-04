@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (vitrina, fase 0; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -622,3 +622,16 @@ tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
 `CO1.REQ.5720221`, cuyo objeto menciona pavimento en Chipatá, tiene red de
 acueducto en la descripción oficial. Sin descripción o evidencia no se inventa
 respaldo. Pruebas puras, render de minificha y consulta contra PGlite.
+
+**Vitrina `/licitaciones`, fase 0 (2026-10-04).** Plan en
+`docs/superpowers/plans/2026-10-04-vitrina-radar.md` (decisión: Radar de lista y
+detalle más un estante «Para ti»). La tarjeta de la vitrina ya no lleva el
+semáforo absoluto (cinco puntos azules iguales): pinta presupuesto, tipo de obra
+y ubicación; el semáforo queda en la variante `destacada` y en la ficha. La
+pastilla ABIERTO pasa a «CERRADO A OFERTAS» cuando la recepción venció (día en
+Colombia): no puede contradecir la línea del plazo. El objeto se limpia solo en
+la tarjeta (`objetoLegible()`). Los abiertos se ordenan por
+`tramoDeRelevancia()` —agua que recibe ofertas, luego `otros`/sin tipo, luego
+recepción vencida— sin filtrar: el total sigue siendo `condicionAbierto()`.
+Lo que queda abierto, en PENDIENTES §54.
+

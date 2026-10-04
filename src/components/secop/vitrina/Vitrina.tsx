@@ -1,7 +1,6 @@
 import Link from "next/link";
 import FichaCard from "../ficha-card/FichaCard";
 import { ESTILOS_FICHA_CARD } from "../ficha-card/estilos";
-import { ESTILOS_SEMAFORO } from "../semaforo/estilos";
 import { ESTILOS_VITRINA } from "./estilos";
 import { hrefDeProceso } from "../lista/PaginaFaceta";
 import LicitacionesTabs from "../LicitacionesTabs";
@@ -42,7 +41,7 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
     <div className="clr-page">
       <style
         dangerouslySetInnerHTML={{
-          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD + ESTILOS_SEMAFORO,
+          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD,
         }}
       />
       <div className="clr-container">

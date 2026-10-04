@@ -12,11 +12,11 @@
  * mismo hecho.
  */
 
-import { and, asc, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, sql, type SQL } from "drizzle-orm";
 import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import { condicionAbierto } from "./agregados";
-import type { TipoProyecto } from "../classify/tipo-proyecto";
+import { TIPOS_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
 export type PestanaVitrina = (typeof PESTANAS_VITRINA)[number];
@@ -110,6 +110,35 @@ function condicionDe(pestana: PestanaVitrina) {
   );
 }
 
+/** Los cuatro tipos que afirman un subsistema de agua: todos menos `otros`. */
+const TIPOS_DE_AGUA = TIPOS_PROYECTO.filter((t) => t !== "otros");
+
+/**
+ * Tramo de relevancia de un abierto, de 0 (primero) a 2 (al final).
+ *
+ * 0 · tiene uno de los cuatro tipos de agua y sigue recibiendo ofertas.
+ * 1 · tipo `otros` o sin clasificar: entró por el filtro de la ingesta, pero el
+ *     clasificador no le encuentra subsistema. En la vitrina del 2026-10-04 la
+ *     primera fila eran unos GPS para una empresa de energía y el estudio de
+ *     tramos de espacio público de EPM.
+ * 2 · su `fecha_recepcion` ya pasó (el día en Colombia). Sigue en el conteo
+ *     porque `condicionAbierto()` es la definición común y no se reescribe
+ *     aquí; solo deja de ocupar la primera página.
+ *
+ * Ordena, no filtra: el total no cambia y nada desaparece de la vitrina.
+ */
+export function tramoDeRelevancia(): SQL<number> {
+  const tiposDeAgua = sql.join(
+    TIPOS_DE_AGUA.map((t) => sql`${t}`),
+    sql`, `
+  );
+  return sql<number>`case
+    when ${proceso.fechaRecepcion} < (now() at time zone 'America/Bogota')::date then 2
+    when ${proceso.tipoProyecto} in (${tiposDeAgua}) then 0
+    else 1
+  end`;
+}
+
 export async function procesosDeVitrina(
   pestana: PestanaVitrina,
   pagina = 1
@@ -122,7 +151,7 @@ export async function procesosDeVitrina(
   // o saltárselo.
   const orden =
     pestana === "abiertos"
-      ? [desc(proceso.fechaPublicacion), asc(proceso.id)]
+      ? [asc(tramoDeRelevancia()), desc(proceso.fechaPublicacion), asc(proceso.id)]
       : [desc(proceso.fechaAdjudicacion), asc(proceso.id)];
 
   const [filas, [{ total }]] = await Promise.all([
