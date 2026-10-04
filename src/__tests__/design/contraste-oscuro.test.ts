@@ -80,16 +80,9 @@ describe("minifichas del hero (2026-10-04)", () => {
     expect(requeridos.filter((k) => !t[k])).toEqual([]);
   });
 
-  it("objeto, número, lugar, entidad, estado y «Ver ficha» llegan a AA", () => {
+  it("objeto, número, entidad y estado llegan a AA sobre la tarjeta", () => {
     for (const sobre of tarjetas()) {
-      for (const color of [
-        t["aq-text"],
-        t["aq-muted"],
-        t["aq-cyan"],
-        "#c3d3e0",
-        "#d7e4ee",
-        "#ffffff",
-      ]) {
+      for (const color of [t["aq-text"], t["aq-muted"], t["aq-cyan"], "#c3d3e0", "#ffffff"]) {
         pinta(css, color);
         expect(contraste(color, sobre), `${color} sobre ${sobre}`).toBeGreaterThanOrEqual(AA.texto);
       }
@@ -105,6 +98,36 @@ describe("minifichas del hero (2026-10-04)", () => {
         expect(contraste("#e6f2fa", tinte), f.label).toBeGreaterThanOrEqual(AA.texto);
       }
     }
+  });
+
+  // Panel de lugar y presupuesto: un velo sobre la tarjeta (opción B, 2026-10-04).
+  const VELO_PANEL: [number, number, number] = [140, 190, 225];
+  const paneles = () => tarjetas().map((sobre) => componer(VELO_PANEL, 0.08, sobre));
+
+  it("lugar, presupuesto y su contexto se leen sobre el panel", () => {
+    expect(css).toContain("background: rgba(140, 190, 225, 0.08)");
+    for (const sobre of paneles()) {
+      for (const color of ["#c3d3e0", "#ffffff", t["aq-muted"]]) {
+        expect(contraste(color, sobre), `${color} sobre ${sobre}`).toBeGreaterThanOrEqual(AA.texto);
+      }
+    }
+  });
+
+  it("las pastillas de estado se leen sobre su tinte", () => {
+    expect(css).toContain("background: rgba(74, 222, 128, 0.12)");
+    expect(css).toContain("background: rgba(159, 180, 198, 0.12)");
+    for (const sobre of tarjetas()) {
+      const abierto = componer([74, 222, 128], 0.12, sobre);
+      const otro = componer([159, 180, 198], 0.12, sobre);
+      expect(contraste(t["aq-abierto"], abierto)).toBeGreaterThanOrEqual(AA.texto);
+      expect(contraste("#c3d3e0", otro)).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
+
+  it("«Ver ficha» es texto blanco sobre el azul de los CTA", () => {
+    expect(css).toMatch(/\.aqMiniVer\) \{[^}]*background: var\(--aq-cta\);[^}]*color: #ffffff;/);
+    expect(contraste("#ffffff", t["aq-cta"])).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste("#ffffff", t["aq-cta-2"])).toBeGreaterThanOrEqual(AA.texto);
   });
 
   it("el punto de «Abierto» se distingue de la tarjeta (no textual, 3:1)", () => {
