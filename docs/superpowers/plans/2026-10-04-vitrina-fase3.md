@@ -136,7 +136,11 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
    `src/__tests__/db/migracion-0025.db.test.ts`). Pendiente de aplicar en la base
    viva (D4).
 2. Capacidad `seguir` + `store` + `/api/seguir` + pruebas (aislamiento por cuenta,
-   no borra lo que no es manual).
+   no borra lo que no es manual). **Hecha** (`src/lib/seguir/store.ts`,
+   `app/api/seguir/route.ts`). Aislamiento por `COALESCE(account_id, usuario_id)`,
+   el criterio de `recopilar.ts`, porque las filas del perfil no traen
+   `account_id`. Un id que no es un proceso vivo no crea fila. Las escrituras
+   exigen `Content-Type: application/json`.
 3. `BotonSeguir` en tarjeta, panel y ficha + render sin JS + contraste.
 4. `tipos_proyecto` en el filtro: validar, evaluar (`tipo_fuera`), `/mis-filtros`.
 5. «Avisarme de procesos nuevos así» en la vitrina + `filtroDesdeVitrina` probado.

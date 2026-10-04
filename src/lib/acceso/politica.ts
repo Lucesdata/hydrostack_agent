@@ -36,7 +36,8 @@ export type Capacidad =
   | "alertas"
   | "filtros"
   | "competidores"
-  | "pliego_extraer";
+  | "pliego_extraer"
+  | "seguir";
 
 /**
  * La tabla. `veredicto_resumen` es el semáforo agregado y el estado de cada
@@ -63,6 +64,10 @@ export type Capacidad =
  * de búsqueda propios exige cuenta porque las filas cuelgan de una cuenta, pero
  * no es una frontera de pago. Explorar y ver el semáforo siguen siendo anónimos.
  *
+ * `seguir` (fase 3 de la vitrina, 2026-10-04) es `gratis`: seguir un proceso lo
+ * mete en lo que sigue la cuenta y trae sus cambios en el correo diario, así
+ * que hace falta a quién atribuirlo y a dónde escribir.
+ *
  * `diagnostico` es anónimo pero `diagnostico_historial` no: responder no pide
  * cuenta, comparar tus respuestas en el tiempo sí — no hay historial sin a
  * quién atribuirlo. La ruta ya está en `PROTECTED_PREFIXES`; esta fila es lo
@@ -82,6 +87,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   filtros: "gratis",
   competidores: "gratis",
   pliego_extraer: "gratis",
+  seguir: "gratis",
 };
 
 /** Todas las capacidades, para iterarlas sin repetir la lista a mano. */

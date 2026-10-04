@@ -673,5 +673,9 @@ filtro en `al_filtros_usuario` (columna `tipos_proyecto`) y «Para ti» sale de
 `getMatchesForPerfil()` para cuentas con perfil. La migración `0025` añade esas
 dos columnas, nulas y sin default; **en la Supabase viva la aplica el usuario
 antes de fusionar** (PENDIENTES §54). Con ella el repo tiene 26 migraciones
-(`0000`–`0025`).
+(`0000`–`0025`). Tarea 2 hecha: capacidad `seguir` (`gratis`), `src/lib/seguir/store.ts` y
+`GET/POST/DELETE /api/seguir`. Seguir escribe en `coincidencia` con
+`origen = 'manual'` y `account_id`; «dejar de seguir» solo borra lo manual (lo
+del perfil o de un filtro el cron lo traería de vuelta). Las consultas van por
+`COALESCE(account_id, usuario_id)`, como `recopilar.ts`.
 
