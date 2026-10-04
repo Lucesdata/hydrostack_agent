@@ -655,3 +655,16 @@ tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
 `CO1.REQ.5720221`, cuyo objeto menciona pavimento en Chipatá, tiene red de
 acueducto en la descripción oficial. Sin descripción o evidencia no se inventa
 respaldo. Pruebas puras, render de minificha y consulta contra PGlite.
+
+
+**Guardados y Recientes (2026-10-04, implementación local).** El buscador y la
+ficha enlazan a `/mis-procesos`, privada y dinámica. Guardar exige cuenta gratuita
+y confirmación explícita tras el retorno de login; las diez últimas visitas
+son una lista separada. Se reutiliza `senal_usuario` con prefijos
+`personal:guardado:v1:` y `personal:visita:v1:`: sin migraciones, sin alterar
+la cuota del extractor. Toda operación filtra por usuario de sesión y las
+mutaciones serializan por cuenta; las APIs son `private, no-store`. No almacenar
+listas en el navegador ni incorporar estado personal al ISR de la ficha.
+Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
+y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
+No se ha desplegado esta sección.

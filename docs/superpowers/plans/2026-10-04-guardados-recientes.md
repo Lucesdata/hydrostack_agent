@@ -213,3 +213,19 @@ expect(retorno).toContain("guardar=CO1.REQ.42");
 Cobertura: guardado explícito y retorno (tarea 3); listas persistentes, cerrados/retirados e idempotencia (1/2/4); recientes y borrado independiente (1/3/4); aislamiento y logout (2/4); errores y accesibilidad (3/4/5); conservación del buscador/mapa/ISR (3/5). Todos los focos anteriores tienen pruebas asignadas. Se reutilizan login, callback, política, slug, la tabla `senal_usuario` y los patrones de base existentes. Revisión adicional: ningún DELETE personal puede borrar intención o uso del extractor; todos incluyen usuario autenticado y prefijo/clave exacta definidos por servidor. No hay cambios de esquema.
 
 Este plan no incluye corregir los dos menores diferidos de sección 2: referencia/id en la búsqueda y mensaje de página fuera de rango. Las filas nuevas de Mis procesos sí incluyen ambos identificadores, como exige su contrato.
+
+
+## Cierre de ejecución (2026-10-04)
+
+Tareas 1–4 implementadas y verificadas. Tarea 5 cerrada con commits, revisión
+independiente única y traspaso; no se despliega. Las casillas anteriores son
+el contrato original, no una afirmación de QA manual completa. La suite final
+pasa 1401 pruebas en 162 archivos; construcción y lint finalizan correctamente,
+con advertencias previas y fallback por DNS de Supabase. Presupuesto: JS114,2
+KiB/125 y fuentes89,1KiB/100. Graphify actualizado. Sin cambios de esquema.
+
+Desviaciones y comprobaciones pendientes de navegador con Auth real, dos cuentas
+y restauración del historial están explícitas en
+`docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`. Las mutaciones
+admiten solo el origen de la petición, más restrictivo que el contrato inicial.
+La confirmación conserva intención y regreso también tras fallo del servicio.

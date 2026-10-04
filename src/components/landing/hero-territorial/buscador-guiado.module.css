@@ -26,7 +26,7 @@
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0 8px;
   min-width: 0;
 }
@@ -38,6 +38,7 @@
   opacity: 0;
 }
 .pestana {
+  text-decoration: none;
   display: block;
   cursor: pointer;
   text-align: center;

@@ -27,15 +27,13 @@ beforeAll(async () => {
     { id: A.usuarioId, email: "personal-a@test.co" },
     { id: B.usuarioId, email: "personal-b@test.co" },
   ]);
-  await db
-    .insert(proceso)
-    .values(
-      Array.from({ length: 14 }, (_, i) => ({
-        secopProcesoId: `CO1.REQ.${i + 1}`,
-        objeto: `Objeto ${i + 1}`,
-        estadoApertura: i === 0 ? "Cerrado" : "Abierto",
-      }))
-    );
+  await db.insert(proceso).values(
+    Array.from({ length: 14 }, (_, i) => ({
+      secopProcesoId: `CO1.REQ.${i + 1}`,
+      objeto: `Objeto ${i + 1}`,
+      estadoApertura: i === 0 ? "Cerrado" : "Abierto",
+    }))
+  );
   await db.insert(senalUsuario).values([
     { usuarioId: A.usuarioId, senal: "operador" },
     { usuarioId: A.usuarioId, senal: "uso:extractor_pliego" },

@@ -3,6 +3,8 @@ import { enlaceBusqueda } from "@/src/lib/secop/busqueda-navegacion";
 import { slugDeProceso } from "@/src/lib/secop/slug";
 import { formatValorProceso, sentenceCaseTitle } from "./format";
 import styles from "../landing/hero-territorial/buscador-guiado.module.css";
+import ProcesosCuenta from "../mis-procesos/ProcesosCuenta";
+import BotonGuardar from "../mis-procesos/BotonGuardar";
 
 /** Presentación pura: el mismo HTML sirve con y sin JavaScript. */
 export default function ResultadosBusquedaServidor({
@@ -44,54 +46,61 @@ export default function ResultadosBusquedaServidor({
     </a>
   );
   return (
-    <div className={styles.resultados}>
-      <ul
-        className={`${styles.lista} ${compacto ? styles.compacta : ""}`}
-        aria-label="Resultados de búsqueda"
-      >
-        {resultado.items.map((p) => (
-          <li key={p.id}>
-            <article>
-              <h2>
-                <a href={`/licitaciones/${slugDeProceso(p.nombre, p.id)}`}>
-                  {sentenceCaseTitle(p.nombre || p.referencia || p.id)}
-                </a>
-              </h2>
-              <p className={styles.entidad}>{p.entidad || "Entidad no publicada"}</p>
-              <p className={styles.referencia}>
-                <span translate="no">{p.referencia || p.id}</span>
-                {p.coincidencia && <span> · Coincidencia {p.coincidencia}</span>}
-              </p>
-              <div className={styles.datos}>
-                <strong>{formatValorProceso(p)}</strong>
-                <span>{p.estadoApertura ?? "Apertura por verificar"}</span>
-              </div>
-            </article>
-          </li>
-        ))}
-      </ul>
-      {compacto ? (
-        <a className={styles.todos} href={enlaceBusqueda({ ...consulta, page: 1, pageSize: 25 })}>
-          Ver todos los resultados →
-        </a>
-      ) : (
-        <nav className={styles.paginacion} aria-label="Páginas de resultados">
-          {resultado.page > 1 ? pagina(resultado.page - 1, "← Anterior") : <span>← Anterior</span>}
-          <span>
-            Página {resultado.page}
-            {totalPaginas ? ` de ${totalPaginas}` : ""}
-          </span>
-          {(
-            totalPaginas
-              ? resultado.page < totalPaginas
-              : resultado.items.length === resultado.pageSize
-          ) ? (
-            pagina(resultado.page + 1, "Siguiente →")
-          ) : (
-            <span>Siguiente →</span>
-          )}
-        </nav>
-      )}
-    </div>
+    <ProcesosCuenta ids={resultado.items.map((p) => p.id)}>
+      <div className={styles.resultados}>
+        <ul
+          className={`${styles.lista} ${compacto ? styles.compacta : ""}`}
+          aria-label="Resultados de búsqueda"
+        >
+          {resultado.items.map((p) => (
+            <li key={p.id}>
+              <article>
+                <h2>
+                  <a href={`/licitaciones/${slugDeProceso(p.nombre, p.id)}`}>
+                    {sentenceCaseTitle(p.nombre || p.referencia || p.id)}
+                  </a>
+                </h2>
+                <p className={styles.entidad}>{p.entidad || "Entidad no publicada"}</p>
+                <p className={styles.referencia}>
+                  <span translate="no">{p.referencia || p.id}</span>
+                  {p.coincidencia && <span> · Coincidencia {p.coincidencia}</span>}
+                </p>
+                <div className={styles.datos}>
+                  <strong>{formatValorProceso(p)}</strong>
+                  <span>{p.estadoApertura ?? "Apertura por verificar"}</span>
+                </div>
+                <BotonGuardar procesoId={p.id} volver={enlaceBusqueda(consulta)} />
+              </article>
+            </li>
+          ))}
+        </ul>
+        {compacto ? (
+          <a className={styles.todos} href={enlaceBusqueda({ ...consulta, page: 1, pageSize: 25 })}>
+            Ver todos los resultados →
+          </a>
+        ) : (
+          <nav className={styles.paginacion} aria-label="Páginas de resultados">
+            {resultado.page > 1 ? (
+              pagina(resultado.page - 1, "← Anterior")
+            ) : (
+              <span>← Anterior</span>
+            )}
+            <span>
+              Página {resultado.page}
+              {totalPaginas ? ` de ${totalPaginas}` : ""}
+            </span>
+            {(
+              totalPaginas
+                ? resultado.page < totalPaginas
+                : resultado.items.length === resultado.pageSize
+            ) ? (
+              pagina(resultado.page + 1, "Siguiente →")
+            ) : (
+              <span>Siguiente →</span>
+            )}
+          </nav>
+        )}
+      </div>
+    </ProcesosCuenta>
   );
 }

@@ -129,6 +129,9 @@ export default function BuscadorGuiado({
         <label className={styles.pestana} htmlFor={`${uid}-numero`}>
           Por número
         </label>
+        <a className={styles.pestana} href="/mis-procesos">
+          Mis procesos
+        </a>
         <div className={styles.formularios}>
           <form
             className={styles.formTema}
