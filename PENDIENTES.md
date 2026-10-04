@@ -1074,9 +1074,10 @@ enlaces del mapa a las facetas.
   búsqueda en vivo contra Socrata de `client.ts` (`searchProcesos`,
   `countProcesos`, `searchContratos`; `sodaFetch` y `buildAguaWhere` siguen para
   `landingStats.ts`). `/api/secop/verdict` **se queda**: lo usan el bloque de
-  decisión de la ficha y el panel del Radar. Queda sin consumidor de producción
-  `probeDocument()` (`document-access.ts`, con sus pruebas): es el sondeo de
-  documentos que la ficha podría volver a usar; no se borró.
+  decisión de la ficha y el panel del Radar. Después salió también el sondeo de
+  documentos de `document-access.ts` (`probeDocument`, `classifyProbeResponse`,
+  `canExtract`), que ya no tenía consumidor; `preclassify` y `accessMessage`
+  siguen (ingesta y búsqueda en Postgres).
 - **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
   `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
   perfil. Si el tráfico crece, se puede calcular en el navegador con los
