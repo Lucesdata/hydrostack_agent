@@ -107,7 +107,8 @@ retirada) y el panel de detalle con sondeo de documentos (vuelve en la fase 2).
   navegador confirma el ancho, para no pedir el veredicto en un celular que no
   lo enseña.
 - Lo que faltaba del sondeo de documentos de Explorar no se trajo:
-  `/api/secop/probe` queda sin consumidor (PENDIENTES §54).
+  `/api/secop/probe` quedó sin consumidor y se retiró el 2026-10-04 junto con
+  `GET /api/secop` (PENDIENTES §54).
 
 ## Fase 3 — ganchos de vuelta
 

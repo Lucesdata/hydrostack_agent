@@ -643,7 +643,9 @@ el servidor sobre la consulta de la vitrina. Es un formulario GET sin
 JavaScript. Sin filtros, la paginación sigue en el camino (ISR); con filtros va
 en `?pagina=` y la página lleva `noindex`. `/licitaciones/explorar` y
 `/licitaciones/descubrir` redirigen con 308 (la query pasa), y salieron
-`SecopExplorer`, `ProcessList`, `ProcessDetail`, `RupWizard` y `discovery`. El
+`SecopExplorer`, `ProcessList`, `ProcessDetail`, `RupWizard` y `discovery`;
+después, `GET /api/secop` y `POST /api/secop/probe`, que se quedaron sin
+consumidor (`/api/secop/verdict` sigue). El
 perfil RUP se edita en `/perfil`. Lo que no se trajo y las APIs que quedaron sin
 consumidor, en el plan y en PENDIENTES §54.
 

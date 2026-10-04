@@ -1067,13 +1067,16 @@ enlaces del mapa a las facetas.
   quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
   («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
   gritaba.
-- **Rutas de API sin consumidor tras fundir Explorar** (2026-10-04, corregido
-  en la fase 2): `/api/secop/verdict` **sí** tiene consumidor, el bloque de
-  decisión de la ficha y ahora también el panel del Radar. Las que quedaron
-  sin nadie que las llame son `GET /api/secop` (con otra definición de
-  «abierto» que `condicionAbierto()`) y `POST /api/secop/probe` (el sondeo de
-  documentos). Retirarlas es borrar una ruta pública: pide la decisión del
-  usuario. Sus pruebas siguen en verde.
+- **Rutas de API sin consumidor tras fundir Explorar** — CERRADO el 2026-10-04
+  por decisión del usuario. Salieron `GET /api/secop` (con otra definición de
+  «abierto» que `condicionAbierto()`) y `POST /api/secop/probe`, con lo que solo
+  ellas usaban: `parse-query.ts`, `cached-db-search.ts`, `countProcesosDb` y la
+  búsqueda en vivo contra Socrata de `client.ts` (`searchProcesos`,
+  `countProcesos`, `searchContratos`; `sodaFetch` y `buildAguaWhere` siguen para
+  `landingStats.ts`). `/api/secop/verdict` **se queda**: lo usan el bloque de
+  decisión de la ficha y el panel del Radar. Queda sin consumidor de producción
+  `probeDocument()` (`document-access.ts`, con sus pruebas): es el sondeo de
+  documentos que la ficha podría volver a usar; no se borró.
 - **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
   `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
   perfil. Si el tráfico crece, se puede calcular en el navegador con los

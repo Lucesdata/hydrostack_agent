@@ -1,7 +1,7 @@
 /**
- * Búsqueda de PROCESOS contra Postgres (Neon, ingesta cron) — Fase 3: el
- * workbench pasa a leer de aquí primero; Socrata live queda como fallback si
- * la base falla (ver `app/api/secop/route.ts`) y como fuente de `probe`.
+ * Búsqueda de PROCESOS contra Postgres (ingesta cron). La usan el matching
+ * (`getMatchesForPerfil`), el encaje de la vitrina y el estado del pliego; el
+ * workbench que la servía por `GET /api/secop` salió el 2026-10-04.
  *
  * `proceso` (tabla hechos) ya tiene columna propia para descripción, fase,
  * unspsc, adjudicado, valor de adjudicación, adjudicatario, url y estado de
@@ -116,9 +116,9 @@ export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
 
 /**
  * Import perezoso de `db`/`schema`/`drizzle-orm` (igual que `recientes.ts`):
- * si no hay `DATABASE_URL`, el error queda contenido en el caller, que cae a
- * Socrata. Devuelve las tablas + operadores + el WHERE ya armado, listos para
- * que `searchProcesosDb`/`countProcesosDb` monten su propio SELECT.
+ * si no hay `DATABASE_URL`, el error queda contenido en el caller. Devuelve las
+ * tablas + operadores + el WHERE ya armado, listos para que `searchProcesosDb`
+ * monte su SELECT.
  */
 async function prepare(query: SecopQuery) {
   const [{ db, schema }, ops] = await Promise.all([
@@ -258,19 +258,6 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
     .offset((page - 1) * pageSize);
 
   return { items: rows.map((r) => mapDbRowToProceso(r as DbProcesoRow)), page, pageSize };
-}
-
-/** Total de PROCESOS que matchean el query en Postgres — barato (índices propios, no SODA). */
-export async function countProcesosDb(query: SecopQuery = {}): Promise<number> {
-  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord } = await prepare(query);
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(proceso)
-    .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
-    .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
-    .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
-    .where(where);
-  return count;
 }
 
 export { KEYWORDS_AGUA };
