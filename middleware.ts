@@ -31,6 +31,7 @@ const PROTECTED_PREFIXES = [
   // porque responder sin cuenta es el flujo principal del módulo.
   "/diagnostico/historial",
   "/cuenta",
+  "/mis-procesos",
 ];
 
 export async function middleware(request: NextRequest) {

@@ -30,6 +30,7 @@ export default function FormCerrarSesion({
       method="POST"
       onSubmit={(e) => {
         clearOferentePerfil();
+        window.dispatchEvent(new Event("aqualicita:logout"));
         onSubmit?.(e);
       }}
     >

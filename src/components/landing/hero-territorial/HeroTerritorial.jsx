@@ -9,6 +9,7 @@ import { procesoDesdeObjetivo, useActivoEnMapa, useGrupoEnMapa } from "./sincron
 import { usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
 import { familiasPorDepartamento, gruposDe } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
+import BuscadorGuiado from "./BuscadorGuiado";
 
 /**
  * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con cinco
@@ -103,6 +104,7 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
             <p className={styles.lead}>
               Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha.
             </p>
+            <BuscadorGuiado />
           </div>
 
           <div className={styles.mapPanel} {...pausaAlInteractuar}>

@@ -7,6 +7,11 @@
  */
 
 import type { SecopQuery, EstadoApertura } from "./types";
+import {
+  ConsultaGuiadaInvalida,
+  parseBusquedaGuiada,
+  validarConsultaGuiada,
+} from "./busqueda-guiada";
 
 export function parseQuery(sp: URLSearchParams): SecopQuery {
   const num = (k: string) => {
@@ -15,7 +20,7 @@ export function parseQuery(sp: URLSearchParams): SecopQuery {
   };
   const apertura = sp.get("apertura") as EstadoApertura | null;
   const orden = sp.get("orden");
-  return {
+  const query: SecopQuery = {
     q: sp.get("q") ?? undefined,
     departamento: sp.get("departamento") ?? undefined,
     estado: sp.get("estado") ?? undefined,
@@ -29,5 +34,21 @@ export function parseQuery(sp: URLSearchParams): SecopQuery {
     soloAgua: sp.get("soloAgua") === "false" ? false : true,
     page: num("page"),
     pageSize: num("pageSize"),
+    ...parseBusquedaGuiada(sp),
   };
+  if (query.modo === "tema" && apertura && query.apertura === undefined) {
+    throw new ConsultaGuiadaInvalida("El estado de apertura debe ser Abierto o Cerrado");
+  }
+  if (query.modo && orden && query.orden === undefined) {
+    throw new ConsultaGuiadaInvalida("El orden debe ser fecha o valor");
+  }
+  validarConsultaGuiada(query);
+  if (query.modo === "numero") {
+    query.apertura = undefined;
+    query.departamento = undefined;
+    query.estado = undefined;
+    query.valorMin = undefined;
+    query.desde = undefined;
+  }
+  return query;
 }
