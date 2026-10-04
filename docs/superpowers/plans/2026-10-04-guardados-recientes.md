@@ -4,24 +4,24 @@
 
 **Objetivo:** conservar procesos elegidos explícitamente y las últimas diez fichas visitadas con cuenta gratuita, sin confundir guardar con recibir alertas.
 
-**Arquitectura:** dos relaciones de cuenta separadas para guardados y visitas. Servicio transaccional, rutas privadas con sesión y una interfaz compartida entre resultados, ficha y Mis procesos. El contenido de la ficha permanece estático; la personalización se solicita desde cliente.
+**Arquitectura:** dos grupos de registros privados en la tabla existente `senal_usuario`, separados por prefijos versionados para guardados y visitas. No se crean tablas, columnas, índices ni migraciones. Servicio transaccional, rutas privadas con sesión y una interfaz compartida entre resultados, ficha y Mis procesos. El contenido de la ficha permanece estático; la personalización se solicita desde cliente.
 
 **Tecnologías:** Next.js 14.2.3, React 18, Drizzle, PostgreSQL/Supabase y Vitest/PGlite; sin dependencias nuevas.
 
 **Diseño aprobado:** `docs/superpowers/specs/2026-10-04-buscador-guiado-design.md`, apartado Mis procesos. Antecedente de implementación: `2026-10-04-buscador-guiado-seccion-2-traspaso.md`.
 
-**Estado:** plan listo para revisión, sin cambios de producto ni migración aplicada. El usuario autorizó continuar la siguiente sección. La aprobación de este plan debe preceder cambios de esquema, sesión o consultas de cuenta, según `docs/CONDUCTA.md` §4.
+**Estado:** plan revisado tras la instrucción explícita del usuario «no quiero migraciones». Sin cambios de producto ni de base. Se elimina por completo la propuesta anterior de tablas nuevas; queda para revisión el uso de datos de cuenta existente, conforme a `docs/CONDUCTA.md` §4.
 
 ## Reconocimiento del repositorio
 
-- No hay tabla de favoritos, guardados o historial de fichas del usuario. `coincidencia` registra matching; `senal_usuario` registra señales y cuota del extractor. Ninguna representa esta función.
+- No hay tabla de favoritos, guardados o historial de fichas del usuario. `coincidencia` registra matching; `senal_usuario` registra señales y cuota del extractor. Los registros personales se añadirán con prefijos nuevos, sin reinterpretar sus señales actuales.
 - `al_filtros_usuario` guarda criterios de alerta; se conserva intacta.
 - `usuario.id` refleja Supabase Auth. `getSessionUser()` verifica la sesión; `nivelDe()` y `puede()` son la política central.
 - Login, registro, Google y verificación por correo ya transportan `next`. Se reutiliza ese retorno sin guardar desde el callback de autenticación.
 - La ficha en `app/licitaciones/[slug]/page.tsx` tiene ISR de 43.200 segundos. No consultar cookies ni datos privados durante su render.
 - `FormCerrarSesion` y `/logout` borran almacenamiento del navegador y vuelven a `/`. Esta función no crea nuevas copias persistentes allí.
-- Drizzle termina hoy en `0024_long_kitty_pryde`. Generar la siguiente migración disponible; no sobrescribir una aplicada.
-- `docs/sdd/00-esqueleto.md` es el contrato del esquema. R8 exige `account_id` y filtrado por ese campo en código nuevo; en esta versión coincide con el usuario de sesión. `usuario_id` se conserva como FK de borrado en cascada, no como selector de acceso.
+- Drizzle y sus migraciones se conservan exactamente como están. No ejecutar generación, push ni aplicación de migraciones.
+- `senal_usuario` ya tiene RLS, FK de borrado en cascada e índice por `usuario_id`. No tiene `account_id`: para respetar la instrucción del usuario, este módulo personal filtra por el `usuario_id` existente derivado de sesión. Es una excepción documentada a R8 del SDD para esta reutilización, sin equipos ni cambio de esquema.
 
 ## Restricciones globales
 
@@ -29,12 +29,12 @@
 - Recientes son diez fichas distintas, ordenadas por última visita; borrar recientes no borra guardados.
 - Guardados conserva procesos cerrados, y procesos no disponibles que se pueden quitar.
 - No crear suscripciones ni prometer correos o seguimiento de cambios.
-- Cada tabla nace con `.enableRLS()`, sin políticas públicas permisivas.
+- No crear tablas, columnas, índices, restricciones ni políticas. Reutilizar la RLS existente de `senal_usuario`.
 - Ninguna petición acepta un usuario o cuenta elegido por el cliente.
 - Respuestas personales: `Cache-Control: private, no-store`; sin caché pública de cuenta.
 - No usar localStorage, sessionStorage, cookies nuevas de negocio ni APIs de SECOP en vivo.
 - Mantener paleta, Inter, mapa, cinco tipos de proyecto y búsqueda pública.
-- La ejecución termina con código y migración comprobados localmente. Aplicar DDL a Supabase viva y desplegar son pasos posteriores que requieren autorización concreta.
+- La ejecución termina con código comprobado localmente, sin DDL. Desplegar sigue siendo un paso posterior; no requiere una migración para esta función.
 
 ## Cinco focos de revisión
 
@@ -49,7 +49,7 @@
 Crear `src/lib/mis-procesos/types.ts`:
 
 ```ts
-export interface CuentaProcesos { accountId: string; usuarioId: string }
+export interface CuentaProcesos { usuarioId: string }
 export interface ProcesoPersonal {
   procesoId: string; // identificador nativo, no UUID interno
   objeto: string | null;
@@ -69,17 +69,17 @@ export interface ListasProcesos {
 }
 ```
 
-`CuentaProcesos` se construye únicamente después de verificar sesión: ambos campos valen `user.id` en v1. No introducir equipos ni resolución de planes pro.
+`CuentaProcesos` se construye únicamente después de verificar sesión: `usuarioId = user.id`. No introducir equipos, identificadores de cuenta del cliente ni resolución de planes pro.
 
 Servicio en `src/lib/mis-procesos/store.ts`:
 
 ```ts
 guardarProceso(cuenta: CuentaProcesos, procesoId: string): Promise<void>
-quitarProceso(accountId: string, procesoId: string): Promise<void>
+quitarProceso(usuarioId: string, procesoId: string): Promise<void>
 registrarVisita(cuenta: CuentaProcesos, procesoId: string): Promise<void>
-borrarRecientes(accountId: string): Promise<void>
-listarMisProcesos(accountId: string, pagina: number): Promise<ListasProcesos>
-estadoGuardados(accountId: string, ids: string[]): Promise<string[]>
+borrarRecientes(usuarioId: string): Promise<void>
+listarMisProcesos(usuarioId: string, pagina: number): Promise<ListasProcesos>
+estadoGuardados(usuarioId: string, ids: string[]): Promise<string[]>
 ```
 
 Validar identificadores completos como `CO1.REQ.<dígitos>`; normalizar mayúsculas y limitar a 32 caracteres. No aceptar slugs, referencias o entradas parciales como clave. Página positiva, máximo 1.000.000; 25 guardados por página, recientes siempre máximo diez. La consulta de estado admite hasta 25 identificadores distintos; resultados del explorador con más filas dividen en lotes.
@@ -88,8 +88,8 @@ Helper de tarea 3: `retornoDeGuardado(procesoId: string, volver: string): string
 
 ## Tarea 1 — Persistencia de listas personales
 
-**Crear:** `src/lib/db/schema/mis-procesos.ts`, `src/lib/mis-procesos/types.ts`, `src/lib/mis-procesos/store.ts`, `src/__tests__/mis-procesos/store.db.test.ts`.
-**Modificar:** `src/lib/db/schema/index.ts`, `docs/sdd/00-esqueleto.md`; añadir la nueva migración y sus metadatos.
+**Crear:** `src/lib/mis-procesos/types.ts`, `src/lib/mis-procesos/store.ts`, `src/__tests__/mis-procesos/store.db.test.ts`.
+**Documentar:** contrato de reutilización en `CLAUDE.md`; no modificar archivos del esquema, el esqueleto ni `drizzle/`.
 
 **Consume:** tablas reales `usuario`, `proceso`, `entidad`; patrón PGlite de `src/__tests__/pliego/cuota.db.test.ts`.
 **Produce:** los seis métodos y contratos anteriores.
@@ -99,29 +99,37 @@ Helper de tarea 3: `retornoDeGuardado(procesoId: string, volver: string): string
 ```ts
 await guardarProceso(A, "CO1.REQ.1");
 await guardarProceso(A, "CO1.REQ.1");
-expect((await listarMisProcesos(A.accountId, 1)).totalGuardados).toBe(1);
-await quitarProceso(B.accountId, "CO1.REQ.1");
-expect((await listarMisProcesos(A.accountId, 1)).guardados).toHaveLength(1);
+expect((await listarMisProcesos(A.usuarioId, 1)).totalGuardados).toBe(1);
+await quitarProceso(B.usuarioId, "CO1.REQ.1");
+expect((await listarMisProcesos(A.usuarioId, 1)).guardados).toHaveLength(1);
 ```
 
 - [ ] Ejecutar `npx vitest run src/__tests__/mis-procesos/store.db.test.ts` y registrar RED.
-- [ ] Documentar DDL en el esqueleto antes del esquema. Crear `proceso_guardado` y `proceso_visita`: `account_id text NOT NULL`, `usuario_id text NOT NULL REFERENCES usuario(id) ON DELETE CASCADE`, `proceso_id text NOT NULL`, fecha `timestamptz NOT NULL DEFAULT now()`, PK `(account_id, proceso_id)` e índice `(account_id, fecha)`. Ambas con RLS. Sin FK al proceso: perder esa fila no debe borrar el registro de la cuenta ni impedir quitarlo.
-- [ ] Generar migración aditiva con `npm run db:generate`, revisar SQL y aplicarlo solo al PGlite de pruebas. Sin DDL sobre la base viva ni `DATABASE_URL_UNPOOLED`.
-- [ ] Guardar valida que el proceso exista y no tenga `deleted_at`; insertar con conflicto ignorado, sin cambiar fecha del guardado previo. Quitar hace DELETE por cuenta e id y acepta ausencia. Lectura usa LEFT JOIN por id nativo; `deleted_at` o ausencia produce `disponible=false`, no un enlace que prometa una ficha existente.
-- [ ] Registrar visita en transacción: bloquear la fila existente del usuario con `SELECT ... FOR UPDATE`, validar proceso activo, upsert por cuenta/id con hora del servidor, borrar visitas de esa cuenta fuera del top diez. Desempate por id estable. No usar timestamps del navegador.
+- [ ] Declarar constantes versionadas: `personal:guardado:v1:` y `personal:visita:v1:`. La señal es el prefijo seguido del id SECOP validado; `creado_en` representa fecha de guardado o última visita según prefijo. La cuota usa igualdad exacta con `uso:extractor_pliego`, por lo que estas filas no consumen cuota. No llamar `recordUserSignal` para estado personal: ese helper oculta errores y no permite garantizar guardado confirmado.
+- [ ] Usar las migraciones **existentes** para inicializar PGlite de pruebas, sin generarlas ni aplicarlas a Supabase viva. Probar RLS existente, cascada y que no aparecen nuevas tablas.
+- [ ] Toda mutación personal bloquea la fila del usuario en una transacción. Sin UNIQUE nuevo, el bloqueo por usuario serializa comprobar/inserir y garantiza una fila por prefijo/id para todos los escritores de este módulo. Si falta la fila del usuario, fallar sin escribir; el login existente es responsable de sincronizarla.
+- [ ] Guardar valida proceso activo, busca señal exacta y solo inserta si falta; guardar repetido conserva fecha. Quitar elimina todas las filas del prefijo/id de ese usuario y acepta ausencia, incluso si se retiró el proceso. Lecturas se agrupan por id para tolerar duplicados externos y usan LEFT JOIN con el proceso actual: ausencia o `deleted_at` implica `disponible=false`.
+- [ ] Visitar elimina la señal exacta anterior e inserta una nueva con hora de base tras obtener el bloqueo. Poda solo señales de visitas de ese usuario, ordenadas por fecha e id, hasta diez. No usar timestamps del navegador ni borrar registros de guardados/cuota/intención.
 
 ```sql
 SELECT id FROM usuario WHERE id = $usuarioId FOR UPDATE;
--- Dentro de la misma transacción: upsert de visita.
-DELETE FROM proceso_visita
-WHERE account_id = $accountId AND proceso_id NOT IN (
-  SELECT proceso_id FROM proceso_visita WHERE account_id = $accountId
-  ORDER BY visitado_en DESC, proceso_id ASC LIMIT 10
+-- Parámetros construidos en servidor, usando siempre la misma transacción.
+DELETE FROM senal_usuario
+WHERE usuario_id = $usuarioId AND senal = $senalVisita;
+INSERT INTO senal_usuario (usuario_id, senal, creado_en)
+VALUES ($usuarioId, $senalVisita, clock_timestamp());
+DELETE FROM senal_usuario
+WHERE usuario_id = $usuarioId AND senal LIKE 'personal:visita:v1:%'
+AND id NOT IN (
+  SELECT id FROM senal_usuario
+  WHERE usuario_id = $usuarioId AND senal LIKE 'personal:visita:v1:%'
+  ORDER BY creado_en DESC, senal ASC, id ASC LIMIT 10
 );
 ```
 
-- [ ] Borrar recientes toma el mismo bloqueo en transacción, evitando que el borrado intercale una poda parcial. Una visita completada después del borrado puede crear un nuevo reciente; la interfaz lo refleja al recargar.
-- [ ] Comprobar con PGlite migraciones, cascadas, `relrowsecurity` y transacciones. Añadir dos registros simultáneos y confirmar top diez; documentar que PGlite serializa conexiones y no sustituye una prueba multi-conexión de PostgreSQL en staging.
+- [ ] Borrar recientes toma el mismo bloqueo y elimina exclusivamente `personal:visita:v1:%` de ese usuario. Una visita completada después puede crear un nuevo reciente. Quitar guardado utiliza igualdad exacta, no un prefijo suministrado por el cliente.
+- [ ] Sembrar señales de intención y `uso:extractor_pliego` junto a once visitas y dos guardados; demostrar que ambas permanecen sin cambios y que el extractor conserva su cuota de cinco. Añadir visitas simultáneas y guardado duplicado; documentar que PGlite serializa conexiones y no sustituye prueba multi-conexión de PostgreSQL en staging.
+- [ ] Documentar que los prefijos `personal:*` no son señales analíticas y deben excluirse de cualquier análisis futuro de intención. Guardados permanece entre dispositivos con cuenta; no introducir persistencia en el navegador como reemplazo.
 - [ ] Verificar GREEN y suite completa. Commit: `feat: persistir procesos guardados y visitas por cuenta`.
 
 ## Tarea 2 — Acceso privado y operaciones idempotentes
@@ -189,19 +197,19 @@ expect(retorno).toContain("guardar=CO1.REQ.42");
 - [ ] Verificación de dos cuentas con dobles de sesión en pruebas y UI: salir limpia listas y botones, entrar como B muestra solo B. Revalidación antes de confirmar intención impide guardar en una sesión que ya expiró.
 - [ ] Ejecutar GREEN y suite; commit `feat: añadir mis procesos con guardados y recientes separados`.
 
-## Tarea 5 — Cierre completo, sin migración viva ni despliegue
+## Tarea 5 — Cierre completo, sin migraciones ni despliegue
 
 **Modificar:** `CLAUDE.md`/`AGENTS.md` enlazado, plan y traspaso de esta sección; graphify. Registrar hallazgos menores en `PENDIENTES.md`.
 
-- [ ] Pruebas completas con migraciones reales en PGlite; revisión manual de cada WHERE de cuenta y de la seguridad de retorno. No crear cuentas reales ni usar credenciales del usuario para la QA sin su autorización.
+- [ ] Pruebas completas con las migraciones existentes en PGlite; revisión manual de cada WHERE de cuenta y de la seguridad de retorno. No crear cuentas reales ni usar credenciales del usuario para la QA sin su autorización.
 - [ ] Navegador local con datos de prueba: Guardar, Quitar, Guardar doble, anónimo → login/registro → Confirmar, proceso cerrado/retirado, once visitas, Borrar recientes, expiración, error de red, dos cuentas, Atrás tras logout y móvil. Documentar claramente qué se verificó con dobles y qué requiere entorno de prueba con Auth real.
 - [ ] Preview parado: `npm test`, `npm run build`, `npm run lint`, Prettier sobre código compatible y `npm run presupuesto`. JS de portada ≤125 KiB gzip; fuentes ≤100 KiB. Si el nuevo módulo supera presupuesto, cargar personalización bajo demanda, sin retirar funcionalidad.
 - [ ] `graphify update .`; revisión independiente única del conjunto por el skill de ejecución. Corregir hallazgos importantes con RED→GREEN y suite posterior.
-- [ ] Guardar commits y traspaso con DDL literal, comandos de verificación, alcance y limitaciones. Preparar integración por PR a main cuando se autorice publicar; no duplicar PR106, ya fusionado por squash.
-- [ ] Detenerse al final de esta sección. Supabase viva aún no tiene las tablas: no afirmar que los usuarios pueden guardar en producción. La migración nueva se aplica y verifica antes del despliegue, en una autorización posterior sobre el SQL ya revisable.
+- [ ] Guardar commits y traspaso con prefijos personales, transacciones, comandos de verificación, alcance y limitaciones. Verificar diff: cero cambios en esquema y en `drizzle/`. Preparar integración por PR a main cuando se autorice publicar; no duplicar PR106, ya fusionado por squash.
+- [ ] Detenerse al final de esta sección, antes de desplegar. La tabla necesaria ya existe en Supabase; no aplicar migraciones ni afirmar que la función está publicada hasta el despliegue autorizado.
 
 ## Revisión del plan
 
-Cobertura: guardado explícito y retorno (tarea 3); listas persistentes, cerrados/retirados e idempotencia (1/2/4); recientes y borrado independiente (1/3/4); aislamiento y logout (2/4); errores y accesibilidad (3/4/5); conservación del buscador/mapa/ISR (3/5). Todos los focos anteriores tienen pruebas asignadas. Se reutilizan login, callback, política, slug y los patrones de base existentes.
+Cobertura: guardado explícito y retorno (tarea 3); listas persistentes, cerrados/retirados e idempotencia (1/2/4); recientes y borrado independiente (1/3/4); aislamiento y logout (2/4); errores y accesibilidad (3/4/5); conservación del buscador/mapa/ISR (3/5). Todos los focos anteriores tienen pruebas asignadas. Se reutilizan login, callback, política, slug, la tabla `senal_usuario` y los patrones de base existentes. Revisión adicional: ningún DELETE personal puede borrar intención o uso del extractor; todos incluyen usuario autenticado y prefijo/clave exacta definidos por servidor. No hay cambios de esquema.
 
 Este plan no incluye corregir los dos menores diferidos de sección 2: referencia/id en la búsqueda y mensaje de página fuera de rango. Las filas nuevas de Mis procesos sí incluyen ambos identificadores, como exige su contrato.

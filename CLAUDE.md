@@ -21,10 +21,14 @@ mantienen el explorador avanzado. Cuentas y despliegue siguen sin ejecutar.
 Evidencia y punto de continuación de la interfaz en
 `docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-2-traspaso.md`.
 La siguiente sección tiene plan técnico preparado para revisión en
-`docs/superpowers/plans/2026-10-04-guardados-recientes.md`: relaciones separadas
-de cuenta, guardado explícito, diez visitas, intención tras login y aislamiento.
-Todavía no implementado ni aplicado a la base; revisar el plan antes de cambios
-de esquema o consultas privadas, conforme a `docs/CONDUCTA.md` §4.
+`docs/superpowers/plans/2026-10-04-guardados-recientes.md`: el usuario pidió
+**sin migraciones**. Propone reutilizar `senal_usuario` con prefijos privados
+versionados de guardado/visita, bloqueo transaccional por usuario y diez visitas;
+sin tablas, columnas, índices ni cambios en Drizzle. Este módulo personal filtra
+por el `usuario_id` existente de la sesión, excepción documentada a R8 para no
+alterar el esquema. No mezclar esos prefijos con intención ni cuota de pliegos.
+Todavía no implementado; revisar las consultas privadas conforme a
+`docs/CONDUCTA.md` §4.
 Evidencia y punto de
 continuación en
 `docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-1-traspaso.md`.
