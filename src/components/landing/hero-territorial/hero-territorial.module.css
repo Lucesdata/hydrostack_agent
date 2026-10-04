@@ -358,7 +358,9 @@
   content: "";
   position: absolute;
   z-index: -1;
-  top: clamp(-64px, -4vw, -36px);
+  /* El vértice, en el hueco entre la leyenda del mapa y las tarjetas (16–24 px
+     según el ancho): a -10 px no cruza el texto de la leyenda en ningún ancho. */
+  top: -10px;
   left: 50%;
   width: max(1500px, 150vw);
   height: max(760px, 62vw);

@@ -427,7 +427,8 @@ la barra clara no cambia. Contrastes contra el fondo de la píldora en
 `contraste-oscuro.test.ts`.
 Detrás de las tarjetas del hero hay un **horizonte de luz** (2026-10-04,
 `.procesos::before` en `hero-territorial.module.css`): un arco enorme, estático,
-con su vértice justo encima de la fila de tarjetas, sombra algo más oscura que el
+con su vértice 10 px sobre la fila de tarjetas (bajo la leyenda del mapa, sin
+cruzarla en ningún ancho), sombra algo más oscura que el
 fondo debajo y resplandor cian bajo encima. Va anclado a las tarjetas, no al alto
 del hero, y `.hero` lleva `overflow: clip` para que no abra scroll lateral ni se
 pinte sobre la franja de la ficha. El texto sobre el resplandor se mide en
