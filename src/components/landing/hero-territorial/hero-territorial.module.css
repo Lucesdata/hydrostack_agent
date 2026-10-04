@@ -166,18 +166,16 @@
 .map :global(.clr-mapa__recuadro-txt) {
   fill: var(--aq-muted);
 }
-/* El recuadro de San Andrés y Providencia: un marco continuo y un fondo apenas
-   distinto del mar, no la línea de puntos que parecía un hueco por rellenar. */
+/* San Andrés y Providencia, discretas (2026-10-04): sin marco ni fondo; el
+   rectángulo solo reserva el hueco en el SVG. */
 .map :global(.clr-mapa__recuadro--islas) {
-  fill: rgba(140, 190, 225, 0.05);
-  stroke: rgba(140, 190, 225, 0.35);
-  stroke-width: 1;
-  stroke-dasharray: none;
+  fill: none;
+  stroke: none;
 }
 .map :global(.clr-mapa__islas-txt) {
-  fill: #c3d3e0;
+  fill: var(--aq-muted);
   font:
-    500 9.5px var(--font-inter),
+    500 7.5px var(--font-inter),
     sans-serif;
   letter-spacing: 0.01em;
 }
