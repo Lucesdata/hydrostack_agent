@@ -7,6 +7,7 @@ import LicitacionesTabs from "../LicitacionesTabs";
 import { rutaVitrina, type PaginaDeVitrina, type PestanaVitrina } from "@/src/lib/secop/vitrina";
 import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros-vitrina";
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
+import { ProveedorEncaje } from "./EncajeVitrina";
 
 /**
  * La vitrina: cabecera con conteo, pestañas, buscador y filtros (solo en
@@ -102,13 +103,15 @@ export default function Vitrina({
             </Link>
           </div>
         ) : (
-          <ul className="vt-rejilla">
-            {pagina.items.map((p) => (
-              <li key={p.id}>
-                <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
-              </li>
-            ))}
-          </ul>
+          <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
+            <ul className="vt-rejilla">
+              {pagina.items.map((p) => (
+                <li key={p.id}>
+                  <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
+                </li>
+              ))}
+            </ul>
+          </ProveedorEncaje>
         )}
 
         {totalPaginas > 1 && (

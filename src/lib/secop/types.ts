@@ -82,6 +82,11 @@ export interface SecopQuery {
   orden?: "fecha" | "valor";
   /** Si true, aplica el filtro de palabras clave del sector agua. */
   soloAgua?: boolean;
+  /**
+   * Solo Postgres: limita a estos `secop_proceso_id`. Lo usa el encaje de la
+   * vitrina, que pide el veredicto de las tarjetas que ya están en pantalla.
+   */
+  ids?: string[];
   page?: number;
   pageSize?: number;
 }

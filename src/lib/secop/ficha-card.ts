@@ -66,6 +66,8 @@ export interface ProcesoParaCard {
   estadoActual: string | null;
   estadoApertura: string | null;
   fechaRecepcion: string | null;
+  /** Para la etiqueta «Nuevo». Opcional: solo la vitrina la trae. */
+  fechaPublicacion?: string | null;
   adjudicatario?: string | null;
   valorAdjudicacion?: string | number | null;
   fechaAdjudicacion?: string | null;
@@ -86,6 +88,10 @@ export interface FichaCardVista {
   plazo: string;
   /** Sustituye al plazo cuando el proceso ya se adjudicó. `null` si no aplica. */
   adjudicacion: string | null;
+  /** La columna «Cierre de ofertas» de la vitrina. */
+  cierre: CierreVista;
+  /** Publicado hoy o ayer (día en Colombia). */
+  nuevo: boolean;
 }
 
 /**
@@ -150,6 +156,48 @@ function numero(v: string | number | null | undefined): number | null {
  * `fecha_recepcion`. La señal fiable es `estado_apertura`, que es binaria y está
  * en el 100 % de las filas. La cuenta atrás solo aparece donde hay fecha.
  */
+export interface CierreVista {
+  /** Lo que va en grande: «En 5 días», «Hoy», «Cerrada», «Sin fecha». */
+  valor: string;
+  /** La línea de debajo: la fecha, o por qué no la hay. */
+  detalle: string | null;
+  /** Quedan 3 días o menos: se pinta en ámbar. */
+  urgente: boolean;
+  /** Sin fecha publicada, o ya cerrada: se pinta pequeño y en gris. */
+  apagado: boolean;
+}
+
+/** Días que se considera «Nuevo» un proceso: publicado hoy o ayer. */
+const DIAS_NUEVO = 1;
+
+/**
+ * La cuenta atrás en grande. Solo con fecha de recepción hay cuenta; sin ella
+ * se dice que no se publicó, nunca se inventa urgencia (242 de 35.518 abiertos
+ * traen fecha, decisión A del 2026-09-21).
+ */
+function cierreDe(p: ProcesoParaCard, hoy: Date): CierreVista {
+  if (p.fechaRecepcion) {
+    const dias = diasHasta(p.fechaRecepcion, hoy);
+    const cuando = fechaCorta(p.fechaRecepcion);
+    if (dias !== null && cuando !== null) {
+      const base = { urgente: false, apagado: false };
+      if (dias < 0) return { ...base, valor: "Cerrada", detalle: `el ${cuando}`, apagado: true };
+      if (dias === 0) return { ...base, valor: "Hoy", detalle: "último día", urgente: true };
+      if (dias === 1) return { ...base, valor: "Mañana", detalle: cuando, urgente: true };
+      return { ...base, valor: `En ${dias} días`, detalle: cuando, urgente: dias <= 3 };
+    }
+  }
+  return p.estadoApertura === "Cerrado"
+    ? { valor: "Cerrada", detalle: null, urgente: false, apagado: true }
+    : { valor: "Sin fecha", detalle: "no se publicó el cierre", urgente: false, apagado: true };
+}
+
+function esNuevo(p: ProcesoParaCard, hoy: Date): boolean {
+  if (!p.fechaPublicacion) return false;
+  const dias = diasHasta(p.fechaPublicacion, hoy);
+  return dias !== null && dias <= 0 && dias >= -DIAS_NUEVO;
+}
+
 function plazoDe(p: ProcesoParaCard, hoy: Date): string {
   if (p.fechaRecepcion) {
     const dias = diasHasta(p.fechaRecepcion, hoy);
@@ -262,6 +310,8 @@ export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
     cuantiaPublicada: valor !== null,
     ubicacion: lugar || "Ubicación no informada",
     plazo: plazoDe(p, hoy),
+    cierre: cierreDe(p, hoy),
+    nuevo: esNuevo(p, hoy),
     adjudicacion: adjudicacionDe(p),
   };
 }

@@ -28,6 +28,38 @@ export const ESTILOS_VITRINA = `
 .vt-pag-info { font: 12px var(--mono); color: var(--text-muted); }
 .vt-pag-link { font: 600 13px var(--mono); color: var(--accent); }
 
+/* Encaje con el perfil (EncajeVitrina). Tinte al 6 %, como las pastillas del
+   canal de la ficha: al 10 % el verde y el ámbar no llegaban a AA. */
+.ve-linea {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font: 600 12.5px var(--sans);
+  border-radius: 6px;
+  padding: 6px 10px;
+  min-height: 30px;
+}
+.ve-linea--si { color: var(--success); background: color-mix(in srgb, var(--success) 6%, transparent); }
+.ve-linea--revisar { color: var(--warning); background: color-mix(in srgb, var(--warning) 6%, transparent); }
+.ve-linea--no { color: var(--danger); background: color-mix(in srgb, var(--danger) 6%, transparent); }
+.ve-linea--cargando { background: var(--surface-alt); }
+.ve-barras { display: inline-flex; gap: 3px; flex: none; }
+.ve-barras i { width: 12px; height: 5px; border-radius: 2px; background: currentColor; opacity: .22; }
+.ve-barras i.ve-on { opacity: 1; }
+.ve-aviso {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.ve-aviso-texto { margin: 0; font: 14px/1.45 var(--sans); color: var(--text-primary); max-width: 64ch; }
+.ve-aviso-boton {
+  font: 600 14px var(--sans); color: #fff; background: var(--accent-fill);
+  border: 0; border-radius: var(--radius-md); padding: 9px 16px; cursor: pointer;
+}
+.ve-aviso-boton:hover { background: var(--accent-fill-hover); }
+.ve-aviso-boton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 /* Buscador y filtros (FiltrosVitrina): lo que antes eran Explorar y Descubrir. */
 .vf { margin: 0 0 18px; display: grid; gap: 12px; }
 .vf-form {

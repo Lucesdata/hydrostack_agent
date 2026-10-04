@@ -4,6 +4,7 @@ import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
 import Semaforo from "../semaforo/Semaforo";
 import { TIPO_PROYECTO, type TipoProyecto } from "@/src/lib/classify/tipo-proyecto";
 import { colorDeTipo } from "@/src/lib/classify/tipo-color";
+import { EncajeTarjeta } from "../vitrina/EncajeVitrina";
 
 /**
  * La tarjeta de un proceso. Es el componente central del producto: lo usan la
@@ -51,7 +52,10 @@ export default function FichaCard({
   return (
     <Link href={href} className={`fc fc--${variante}`}>
       <div className="fc-cab">
-        <span className="fc-id">{v.id}</span>
+        <span className="fc-id">
+          {v.id}
+          {v.nuevo && variante === "vitrina" && <span className="fc-nuevo">Nuevo</span>}
+        </span>
         <span className={`fc-etapa fc-etapa--${v.etapa.clave}`}>{v.etapa.label}</span>
       </div>
 
@@ -63,8 +67,11 @@ export default function FichaCard({
       </p>
 
       {/* La adjudicación manda sobre el plazo: en un proceso ya resuelto, la
-          ventana de ofertas no informa de nada. */}
-      <p className="fc-plazo">{v.adjudicacion ?? v.plazo}</p>
+          ventana de ofertas no informa de nada. En la vitrina, sin adjudicación,
+          el plazo va en grande en la columna «Cierre de ofertas». */}
+      {(variante !== "vitrina" || v.adjudicacion) && (
+        <p className="fc-plazo">{v.adjudicacion ?? v.plazo}</p>
+      )}
 
       {conSemaforo ? (
         <>
@@ -75,9 +82,27 @@ export default function FichaCard({
         <>
           <div className="fc-sep" />
           <div className="fc-datos">
-            <span className={v.cuantiaPublicada ? "fc-cuantia fc-cuantia--grande" : "fc-cuantia"}>
-              {v.cuantia}
-            </span>
+            <div className="fc-cifras">
+              <div className="fc-cifra">
+                <span className="fc-cifra-k">Presupuesto</span>
+                <span className={v.cuantiaPublicada ? "fc-cifra-v" : "fc-cifra-v fc-cifra-v--sin"}>
+                  {v.cuantiaPublicada ? v.cuantia : "No publicado"}
+                </span>
+              </div>
+              {!v.adjudicacion && (
+                <div className="fc-cifra">
+                  <span className="fc-cifra-k">Cierre de ofertas</span>
+                  <span
+                    className={`fc-cifra-v${v.cierre.urgente ? " fc-cifra-v--urgente" : ""}${
+                      v.cierre.apagado ? " fc-cifra-v--sin" : ""
+                    }`}
+                  >
+                    {v.cierre.valor}
+                  </span>
+                  {v.cierre.detalle && <span className="fc-cifra-d">{v.cierre.detalle}</span>}
+                </div>
+              )}
+            </div>
             <span className="fc-meta">
               <span className="fc-tipo">
                 {/* El color nunca va solo: el nombre del tipo va al lado (tipo-color.ts). */}
@@ -92,6 +117,7 @@ export default function FichaCard({
               </span>
               <span className="fc-lugar">{v.ubicacion}</span>
             </span>
+            <EncajeTarjeta id={v.id} />
           </div>
         </>
       ) : (

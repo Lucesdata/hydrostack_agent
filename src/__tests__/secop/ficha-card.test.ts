@@ -263,3 +263,54 @@ describe("el objeto, legible en la tarjeta", () => {
     expect(v.objetoOriginal).toBe("OBRA DE ACUEDUCTO EN CALI");
   });
 });
+
+describe("la columna «Cierre de ofertas» de la vitrina", () => {
+  it("cuenta los días en grande y marca urgente a 3 o menos", () => {
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-29" }, HOY).cierre).toEqual({
+      valor: "En 8 días",
+      detalle: "29 sept 2026",
+      urgente: false,
+      apagado: false,
+    });
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-24" }, HOY).cierre.urgente).toBe(
+      true
+    );
+  });
+
+  it("hoy y mañana se dicen con palabras", () => {
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-21" }, HOY).cierre.valor).toBe("Hoy");
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-22" }, HOY).cierre.valor).toBe(
+      "Mañana"
+    );
+  });
+
+  it("vencida dice cerrada, con la fecha", () => {
+    expect(vistaFichaCard({ ...base, fechaRecepcion: "2026-09-01" }, HOY).cierre).toMatchObject({
+      valor: "Cerrada",
+      detalle: "el 01 sept 2026",
+      apagado: true,
+    });
+  });
+
+  it("sin fecha no inventa urgencia", () => {
+    expect(vistaFichaCard(base, HOY).cierre).toEqual({
+      valor: "Sin fecha",
+      detalle: "no se publicó el cierre",
+      urgente: false,
+      apagado: true,
+    });
+  });
+});
+
+describe("«Nuevo»", () => {
+  it("publicado hoy o ayer, en Colombia", () => {
+    expect(vistaFichaCard({ ...base, fechaPublicacion: "2026-09-21" }, HOY).nuevo).toBe(true);
+    expect(vistaFichaCard({ ...base, fechaPublicacion: "2026-09-20" }, HOY).nuevo).toBe(true);
+    expect(vistaFichaCard({ ...base, fechaPublicacion: "2026-09-19" }, HOY).nuevo).toBe(false);
+  });
+
+  it("sin fecha de publicación, o con una futura corrupta, no es nuevo", () => {
+    expect(vistaFichaCard(base, HOY).nuevo).toBe(false);
+    expect(vistaFichaCard({ ...base, fechaPublicacion: "2027-01-01" }, HOY).nuevo).toBe(false);
+  });
+});

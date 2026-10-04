@@ -234,6 +234,26 @@ describe("bloque de decisión de la ficha (2026-09-28)", () => {
   });
 });
 
+describe("tarjeta de la vitrina, fase 1b (2026-10-04)", () => {
+  /**
+   * La línea de encaje («Cumples 4 de 5») va a 600 12,5px sobre su propio color
+   * al 6 %, la misma receta que las palabras del canal de la ficha; «Nuevo» va a
+   * 600 10px en --success sobre la tarjeta, y el cierre urgente en --warning.
+   * Todo es texto normal: 4,5:1. La tarjeta pinta --card, alias de --surface.
+   */
+  for (const token of ["success", "warning", "danger"]) {
+    it(`la línea de encaje en --${token} se lee sobre su tinte al 6%`, () => {
+      const fondo = componer(parseHex(t[token]), 0.06, t["surface"]);
+      expect(contraste(t[token], fondo)).toBeGreaterThanOrEqual(AA.texto);
+    });
+  }
+
+  it("«Nuevo» (--success) y el cierre urgente (--warning) se leen sobre la tarjeta", () => {
+    expect(contraste(t["success"], t["surface"])).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste(t["warning"], t["surface"])).toBeGreaterThanOrEqual(AA.texto);
+  });
+});
+
 describe("excepciones conocidas (no deben empeorar)", () => {
   const conocidas: Array<[string, string, string, number, string]> = [
     [

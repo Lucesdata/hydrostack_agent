@@ -65,10 +65,27 @@ vitrina es de abiertos; los adjudicados tienen su pestaña), el valor mínimo
 libre (sustituido por pisos), «Listos para extraer» (apuntaba a una ruta
 retirada) y el panel de detalle con sondeo de documentos (vuelve en la fase 2).
 
-### 1b. Tarjeta nueva (pendiente)
+### 1b. Tarjeta nueva (hecha, salvo Guardar)
 
-Cierre en días en grande, «Nuevo», encaje con el perfil («Cumples 4 de 5»),
-Guardar.
+- Dos columnas en grande: **Presupuesto** y **Cierre de ofertas** («En 5 días»,
+  «Hoy», «Mañana»; ámbar a 3 días o menos). Sin fecha publicada, o ya cerrada, va
+  pequeño y en gris: nunca se inventa urgencia. La línea del plazo solo queda
+  para la adjudicación.
+- «Nuevo» junto al id si se publicó hoy o ayer (día en Colombia).
+- **Encaje con el perfil**: «Cumples 4 de 5 · revisa el resto», con cinco
+  barras. Isla de cliente (`EncajeVitrina.tsx`): un proveedor pide de una vez el
+  encaje de las tarjetas en pantalla a `POST /api/vitrina/encaje`
+  (`src/lib/secop/encaje-vitrina.ts`), que lee los procesos por id desde la base
+  y corre el mismo `buildVerdict` que la ficha, con los requisitos cacheados del
+  pliego. Solo devuelve conteos y el agregado, nunca los `reason`. Sin perfil,
+  encima de la rejilla se ofrece definirlo ahí mismo con `OferenteWizard`, sin
+  cuenta.
+- `searchProcesosDb` trae ahora `fecha_recepcion` (y acepta `ids`). Antes la
+  compuerta de plazo del matching salía siempre sin datos; ahora un proceso con
+  la recepción vencida falla el plazo también en `/mis-coincidencias` y en las
+  alertas, como ya pasaba en la ficha.
+- **Guardar** se mueve a la fase 3: necesita una tabla nueva (con
+  `.enableRLS()` y migración), y eso pide plan propio según `docs/CONDUCTA.md`.
 
 ## Fase 2 — Radar
 

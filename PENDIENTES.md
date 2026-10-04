@@ -1073,4 +1073,11 @@ enlaces del mapa a las facetas.
   la fase 2 las reutiliza (el sondeo de documentos y el veredicto con perfil) o
   si se retiran. `/api/secop` tiene además otra definición de «abierto» que
   `condicionAbierto()`.
+- **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
+  `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
+  perfil. Si el tráfico crece, se puede calcular en el navegador con los
+  requisitos públicos, pero hoy el veredicto vive en el servidor.
+- **«Cierre en N días» en las páginas ISR de la vitrina** (`/licitaciones/pagina/N`)
+  se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
+  ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
 

@@ -45,6 +45,7 @@ export interface ProcesoDeVitrina {
   estadoActual: string | null;
   estadoApertura: string | null;
   fechaRecepcion: string | null;
+  fechaPublicacion: string | null;
   tipoProyecto: TipoProyecto | null;
   adjudicatario: string | null;
   valorAdjudicacion: string | null;
@@ -107,6 +108,7 @@ const CAMPOS = {
   estadoActual: proceso.estadoActual,
   estadoApertura: proceso.estadoApertura,
   fechaRecepcion: proceso.fechaRecepcion,
+  fechaPublicacion: proceso.fechaPublicacion,
   // `proceso.tipo_proyecto` es `text` en el esquema: sin este tipado explícito
   // Drizzle infiere `string | null` y el `as ProcesoDeVitrina[]` de más abajo
   // tapaba el único TypeError real —`TIPO_PROYECTO[p.tipoProyecto]` en

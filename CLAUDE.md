@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (vitrina: fase 0 y fusión de Explorar y Descubrir; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (vitrina: fase 0, fusión de Explorar y Descubrir y tarjeta con encaje; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -646,4 +646,14 @@ en `?pagina=` y la página lleva `noindex`. `/licitaciones/explorar` y
 `SecopExplorer`, `ProcessList`, `ProcessDetail`, `RupWizard` y `discovery`. El
 perfil RUP se edita en `/perfil`. Lo que no se trajo y las APIs que quedaron sin
 consumidor, en el plan y en PENDIENTES §54.
+
+**Tarjeta de la vitrina con cierre y encaje (2026-10-04, fase 1b).** Presupuesto y
+«Cierre de ofertas» en grande (`cierreDe()` en `ficha-card.ts`: cuenta atrás solo
+con `fecha_recepcion`; sin ella o cerrada, en gris), «Nuevo» si se publicó hoy o
+ayer, y «Cumples N de 5» con el perfil del navegador o de la cuenta
+(`EncajeVitrina.tsx` → `POST /api/vitrina/encaje` → `encajeDeProcesos()`, mismo
+`buildVerdict` y requisitos que la ficha; solo conteos, sin `reason`, así que no
+hay nada que redactar). Sin perfil se define encima de la rejilla, sin cuenta.
+`searchProcesosDb` trae `fecha_recepcion`: el plazo del matching ya no sale
+siempre sin datos. Guardar pasa a la fase 3 (tabla nueva).
 

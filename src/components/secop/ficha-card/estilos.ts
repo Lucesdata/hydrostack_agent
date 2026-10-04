@@ -71,8 +71,23 @@ export const ESTILOS_FICHA_CARD = `
 .fc--compacta .fc-objeto { font-size: 13px; margin-bottom: 8px; }
 .fc-cuantia { font: 600 13px var(--mono); color: var(--text-primary); }
 
-/* vitrina: presupuesto en grande, y tipo de obra y lugar debajo. */
-.fc-datos { display: grid; gap: 6px; }
+/* vitrina: presupuesto y cierre en grande, tipo de obra y lugar debajo, y el
+   encaje con el perfil (EncajeVitrina) al final. */
+.fc-datos { display: grid; gap: 10px; }
+.fc-cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fc-cifra { display: grid; gap: 2px; align-content: start; min-width: 0; }
+.fc-cifra-k { font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.fc-cifra-v { font: 700 20px/1.15 var(--sans); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.fc-cifra-v--sin { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+.fc-cifra-v--urgente { color: var(--warning); }
+.fc-cifra-d { font: 12px var(--sans); color: var(--text-muted); }
+.fc-nuevo {
+  margin-left: 8px;
+  font: 600 10px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--success);
+}
 .fc-cuantia--grande { font: 700 20px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
 .fc-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 12px var(--sans); color: var(--text-muted); }
 .fc-tipo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-primary); }
