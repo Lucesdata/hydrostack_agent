@@ -87,11 +87,11 @@ const PASO = ALTO_ETIQUETA + SEPARACION;
 
 /**
  * El lado de la columna de un departamento: el más cercano a su anclaje,
- * salvo en la costa caribe. Desde la columna oeste, la guía hasta Atlántico,
- * Magdalena o Cesar cruzaría el recuadro de las islas, que está justo ahí;
+ * salvo en la costa caribe. Desde la columna oeste, la guía hasta Atlántico o
+ * Magdalena cruzaría el recuadro de las islas, que está justo ahí;
  * por eso un anclaje a la altura del recuadro va al este, y su guía cruza
- * tierra firme en vez de las islas. Sucre, Bolívar y Córdoba quedan por debajo
- * y siguen al oeste.
+ * tierra firme en vez de las islas. Cesar, Sucre, Bolívar y Córdoba quedan por
+ * debajo y siguen al oeste.
  */
 function ladoDe(dpto: string, ax: number, ay: number): LadoEtiqueta {
   if (dpto === "88") return "oeste";

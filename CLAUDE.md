@@ -300,8 +300,9 @@ coroplético del hero. Spec y reconocimiento:
 - La franja de la ficha enlaza el **primer** proceso del hero.
 - **Recuadro de islas y país más grande (2026-10-04, segundo PR).** San Andrés y
   Providencia se dibujan con costas en detalle (`data/geo/san-andres-providencia.geo.json`,
-  geoBoundaries CC BY 4.0, atribuido bajo la leyenda) a la misma escala, en un
-  recuadro de borde continuo sobre el Caribe (`src/lib/mapa/recuadro-islas.ts`,
+  geoBoundaries CC BY 4.0, atribuido bajo la leyenda) a la misma escala, sobre
+  el Caribe y **discretas**: sin marco ni fondo, pequeñas y con rótulo chico
+  (el usuario pidió no remarcarlas, ocupaban mucho en el celular) (`src/lib/mapa/recuadro-islas.ts`,
   solo en el modo `seleccion`; los otros mapas siguen con su recuadro). Las
   etiquetas de la costa caribe van a la columna este para que su guía no cruce
   el recuadro. El mapa toma `100vh − 400 px` (360–620): ≈489 px de alto a

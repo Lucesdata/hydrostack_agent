@@ -183,8 +183,8 @@ describe("recuadro de San Andrés y Providencia", () => {
   });
 
   it("la costa caribe va a la columna este: su guía no cruza el recuadro", () => {
-    const e = colocarEtiquetas(["08", "47", "20"].map((dpto) => ({ id: dpto, dpto })));
-    expect(e.map((x) => x.lado)).toEqual(["este", "este", "este"]);
+    const e = colocarEtiquetas(["08", "47"].map((dpto) => ({ id: dpto, dpto })));
+    expect(e.map((x) => x.lado)).toEqual(["este", "este"]);
   });
 
   it("ninguna etiqueta del oeste tapa el recuadro", () => {

@@ -11,18 +11,23 @@ import { mercatorY, pathDe, type Geometria } from "./proyeccion";
  * misma escala**, con Providencia al noreste de San Andrés como en la
  * realidad; lo único que se acorta es la distancia entre ellas (90 km de mar).
  *
- * Va sobre el Caribe, arriba a la izquierda, en un hueco medido: la costa más
- * cercana (golfo de Morrosquillo) queda a 7 unidades del borde derecho, y
- * `recuadro-islas.test` lo vigila contra la geometría real.
+ * Va sobre el Caribe, arriba a la izquierda, en un hueco medido: ningún punto
+ * de la costa cae dentro, y `etiquetas-procesos.test` lo vigila contra la
+ * geometría real.
  */
 
-export const RECUADRO_ISLAS = { x: 6, y: 4, ancho: 94, alto: 104 } as const;
+/**
+ * Discreto desde el 2026-10-04 (pedido del usuario: ocupaba mucho, sobre todo
+ * en el celular): sin marco visible, islas más pequeñas y rótulo más chico. El
+ * rectángulo sigue en el SVG como zona reservada, pero no se pinta.
+ */
+export const RECUADRO_ISLAS = { x: 8, y: 6, ancho: 70, alto: 76 } as const;
 
 /** Margen interior y lo que ocupa el rótulo de dos líneas, abajo. */
-const PAD = 6;
-const ALTO_ROTULO = 26;
+const PAD = 4;
+const ALTO_ROTULO = 20;
 /** Alto de San Andrés en unidades del mapa: fija la escala de las dos islas. */
-const ALTO_SAN_ANDRES = 46;
+const ALTO_SAN_ANDRES = 30;
 
 interface Feature {
   properties: { dane: string; nombre: string };
@@ -153,7 +158,7 @@ function construir(): RecuadroIslas {
       { nombre: "San Andrés", x0: saX0, y0: saY0, x1: saX0 + anchoSa, y1: saY0 + ALTO_SAN_ANDRES },
       { nombre: "Providencia", x0: prX0, y0: prY0, x1: prX0 + anchoPr, y1: prY0 + altoPr },
     ],
-    rotulo: { x: x + ancho / 2, y1: y + alto - 15, y2: y + alto - 5 },
+    rotulo: { x: x + ancho / 2, y1: y + alto - 11, y2: y + alto - 3 },
   };
 }
 
