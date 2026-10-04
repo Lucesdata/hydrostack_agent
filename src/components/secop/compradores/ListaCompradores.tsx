@@ -46,7 +46,7 @@ export default function ListaCompradores({ datos }: { datos: Compradores | null 
             </p>
             <Link
               className="lc-ver"
-              href={`/licitaciones/explorar?q=${encodeURIComponent(e.nombre)}`}
+              href={`/licitaciones?q=${encodeURIComponent(e.nombre)}`}
               aria-label={`Ver los procesos de ${titulo(e.nombre)}`}
             >
               Ver sus procesos <span aria-hidden="true">→</span>

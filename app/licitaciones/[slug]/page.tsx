@@ -375,7 +375,7 @@ export default async function FichaPage({ params }: Props) {
             hrefExplorar={
               p.tipoProyecto
                 ? `/licitaciones/tipo/${TIPO_PROYECTO[p.tipoProyecto].slug}`
-                : "/licitaciones/explorar"
+                : "/licitaciones"
             }
           />
           <section id="pliego" className="fi-sec">

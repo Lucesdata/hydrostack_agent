@@ -5,10 +5,12 @@ import { ESTILOS_VITRINA } from "./estilos";
 import { hrefDeProceso } from "../lista/PaginaFaceta";
 import LicitacionesTabs from "../LicitacionesTabs";
 import { rutaVitrina, type PaginaDeVitrina, type PestanaVitrina } from "@/src/lib/secop/vitrina";
+import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros-vitrina";
+import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 
 /**
- * La vitrina: cabecera con conteo, pestañas, rejilla de nueve fichas y
- * paginación por camino.
+ * La vitrina: cabecera con conteo, pestañas, buscador y filtros (solo en
+ * abiertos), rejilla de nueve fichas y paginación.
  *
  * Las pestañas son enlaces, no estado de cliente: cada una tiene su URL, se
  * comparte, se indexa y no obliga a que la página lea `searchParams` —que es lo
@@ -33,9 +35,23 @@ const VACIO: Record<PestanaVitrina, { texto: string; accion: string; href: strin
   },
 };
 
-export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
+export default function Vitrina({
+  pagina,
+  departamentos = [],
+}: {
+  pagina: PaginaDeVitrina;
+  departamentos?: OpcionDepartamento[];
+}) {
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
-  const vacio = VACIO[pagina.pestana];
+  const filtrado = pagina.pestana === "abiertos" && hayFiltros(pagina.filtros);
+  const vacio = filtrado
+    ? {
+        texto: "Ningún proceso abierto coincide con estos filtros.",
+        accion: "Quitar los filtros",
+        href: `/licitaciones${queryDeFiltros(SIN_FILTROS)}`,
+      }
+    : VACIO[pagina.pestana];
+  const ruta = (n: number) => rutaVitrina(pagina.pestana, n, pagina.filtros);
 
   return (
     <div className="clr-page">
@@ -53,8 +69,8 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
             {pagina.total.toLocaleString("es-CO")}{" "}
             {pagina.pestana === "abiertos"
               ? pagina.total === 1
-                ? "proceso abierto"
-                : "procesos abiertos"
+                ? `proceso abierto${filtrado ? " con estos filtros" : ""}`
+                : `procesos abiertos${filtrado ? " con estos filtros" : ""}`
               : pagina.total === 1
                 ? "adjudicación en los últimos 30 días"
                 : "adjudicaciones en los últimos 30 días"}
@@ -73,6 +89,10 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
             </Link>
           ))}
         </nav>
+
+        {pagina.pestana === "abiertos" && (
+          <FiltrosVitrina filtros={pagina.filtros} departamentos={departamentos} />
+        )}
 
         {pagina.items.length === 0 ? (
           <div className="vt-vacio">
@@ -98,12 +118,12 @@ export default function Vitrina({ pagina }: { pagina: PaginaDeVitrina }) {
             </span>
             <span style={{ display: "flex", gap: 16 }}>
               {pagina.pagina > 1 && (
-                <Link className="vt-pag-link" href={rutaVitrina(pagina.pestana, pagina.pagina - 1)}>
+                <Link className="vt-pag-link" href={ruta(pagina.pagina - 1)}>
                   ← Anterior
                 </Link>
               )}
               {pagina.pagina < totalPaginas && (
-                <Link className="vt-pag-link" href={rutaVitrina(pagina.pestana, pagina.pagina + 1)}>
+                <Link className="vt-pag-link" href={ruta(pagina.pagina + 1)}>
                   Siguiente →
                 </Link>
               )}

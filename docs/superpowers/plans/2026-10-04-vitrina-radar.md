@@ -35,11 +35,40 @@ diagnóstico, maquetas y referentes, se publicó como página aparte para decidi
 
 ## Fase 1 — tarjeta nueva y control
 
+### 1a. Buscador en la vitrina y fusión de Explorar y Descubrir (hecha)
+
+Decisión del usuario del 2026-10-04: fundirlas. Reconocimiento: «Explorar» ya
+era una lista con panel de detalle (`SecopExplorer`) sobre `/api/secop`, con otra
+definición de «abierto» (solo `estado_apertura` más un filtro de palabras clave)
+y una lista fija de 11 departamentos; «Descubrir» eran tres colecciones (Abiertos,
+Alto valor ≥ $500 M y «Listos para extraer», que mandaba a `/pliego`, ya
+retirado) más un parser de palabras clave.
+
+- Filtros en la query de `/licitaciones` (`src/lib/secop/filtros-vitrina.ts`):
+  `q` (objeto, entidad o municipio), `tipo`, `departamento` (slug, como las
+  facetas), `presupuesto` (pisos de 100, 500 y 1.000 millones) y `orden`
+  (relevancia, recientes, presupuesto). Se aplican en el servidor sobre la
+  misma consulta de la vitrina: `condicionAbierto()` y `tramoDeRelevancia()`.
+- `FiltrosVitrina.tsx`: `<form method="get">` sin JavaScript, chips para quitar
+  cada filtro y atajos (los cuatro tipos de agua y «Alto valor»).
+- Sin filtros, la paginación sigue en el camino (rutas ISR); con filtros va en
+  `?pagina=`. Una búsqueda filtrada lleva `noindex` y canónica a `/licitaciones`.
+- `/licitaciones/explorar` y `/licitaciones/descubrir` redirigen con 308 (la
+  query pasa, así que `?q=` sigue buscando). Salieron `SecopExplorer`,
+  `ProcessList`, `ProcessDetail`, `RupWizard`, `discovery/*` y
+  `src/lib/secop/discovery.ts`. El perfil RUP con experiencia se edita en
+  `/perfil` (`PerfilForm`); los enlaces que mandaban a Explorar para eso ahora
+  van ahí.
+
+Lo que no se trajo, a propósito: el estado concreto y «incluir cerrados» (la
+vitrina es de abiertos; los adjudicados tienen su pestaña), el valor mínimo
+libre (sustituido por pisos), «Listos para extraer» (apuntaba a una ruta
+retirada) y el panel de detalle con sondeo de documentos (vuelve en la fase 2).
+
+### 1b. Tarjeta nueva (pendiente)
+
 Cierre en días en grande, «Nuevo», encaje con el perfil («Cumples 4 de 5»),
-Guardar. Buscador y filtros (tipo, departamento, presupuesto, cierre, modalidad)
-con estado en la URL —la ruta ya es `force-dynamic`, leer la URL no cambia el
-coste— y tres órdenes. Fundir «Explorar» y «Descubrir» queda **pendiente de
-decisión del usuario**.
+Guardar.
 
 ## Fase 2 — Radar
 

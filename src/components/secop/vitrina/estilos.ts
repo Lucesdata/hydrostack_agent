@@ -28,6 +28,49 @@ export const ESTILOS_VITRINA = `
 .vt-pag-info { font: 12px var(--mono); color: var(--text-muted); }
 .vt-pag-link { font: 600 13px var(--mono); color: var(--accent); }
 
+/* Buscador y filtros (FiltrosVitrina): lo que antes eran Explorar y Descubrir. */
+.vf { margin: 0 0 18px; display: grid; gap: 12px; }
+.vf-form {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+}
+.vf-campo { display: grid; gap: 4px; min-width: 0; }
+.vf-campo .clr-input, .vf-campo .clr-select { width: 100%; min-width: 0; }
+.vf-etiqueta { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.vf-buscar {
+  font: 600 14px var(--sans);
+  color: #fff;
+  background: var(--accent-fill);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 9px 18px;
+  cursor: pointer;
+}
+.vf-buscar:hover { background: var(--accent-fill-hover); }
+.vf-buscar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vf-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.vf-atajos { display: contents; }
+.vf-chip {
+  font: 13px var(--sans);
+  color: var(--text-primary);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+.vf-chip:hover { border-color: var(--accent); color: var(--accent); }
+.vf-chip--activo { border-color: var(--accent); color: var(--accent-deep, var(--accent)); font-weight: 600; background: var(--surface-alt); }
+.vf-limpiar { font: 600 12px var(--mono); color: var(--accent); margin-right: 6px; }
+.vf-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Bajo 1024: búsqueda y botón a lo ancho, los cuatro selectores de dos en dos
+   (en una columna el formulario ocupaba casi toda la pantalla del celular). */
+@media (max-width: 1023px) {
+  .vf-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .vf-campo--q, .vf-buscar { grid-column: 1 / -1; }
+}
+
 @media (max-width: 1023px) { .vt-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .vt-rejilla { grid-template-columns: minmax(0, 1fr); } .vt-tabs { overflow-x: auto; } }
 `;

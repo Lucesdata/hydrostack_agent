@@ -1067,3 +1067,10 @@ enlaces del mapa a las facetas.
   quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
   («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
   gritaba.
+- **Rutas de API que quedaron sin consumidor al fundir Explorar** (2026-10-04):
+  `/api/secop`, `/api/secop/probe` y `/api/secop/verdict` solo las llamaba
+  `SecopExplorer`. Se dejaron con sus pruebas: decidir si el panel de detalle de
+  la fase 2 las reutiliza (el sondeo de documentos y el veredicto con perfil) o
+  si se retiran. `/api/secop` tiene además otra definición de «abierto» que
+  `condicionAbierto()`.
+

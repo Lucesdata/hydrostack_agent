@@ -30,7 +30,7 @@ describe("ListaCompradores", () => {
     expect(html).toContain("412");
     expect(html).toContain("390 de 412 con presupuesto");
     expect(html).toContain(
-      `href="/licitaciones/explorar?q=${encodeURIComponent(epm.nombre).replace(/&/g, "&amp;")}"`
+      `href="/licitaciones?q=${encodeURIComponent(epm.nombre).replace(/&/g, "&amp;")}"`
     );
   });
 

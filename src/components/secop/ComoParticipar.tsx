@@ -60,8 +60,8 @@ export default function ComoParticipar() {
           <p>
             No todos los procesos publicados aplican para ti — importa el sector, la ubicación y el
             rango de valor del contrato. En{" "}
-            <Link href="/licitaciones/explorar">Búsqueda avanzada</Link> puedes filtrar los procesos
-            de agua y saneamiento por departamento, estado y valor, y cuando cuentas quién eres
+            <Link href="/licitaciones">Fichas de procesos</Link> puedes buscar y filtrar los procesos
+            de agua y saneamiento por tipo de obra, departamento y presupuesto, y cuando cuentas quién eres
             (sectores en los que trabajas, dónde puedes operar, qué rango de cuantía te interesa) te
             decimos en cuáles procesos tienes más chance antes de que inviertas tiempo leyendo el
             pliego completo.
@@ -119,12 +119,12 @@ export default function ComoParticipar() {
 
         <aside className="clr-cp-cta">
           <p>
-            <strong>¿Listo para buscar un proceso?</strong> En la búsqueda avanzada puedes filtrar
-            por sector agua y saneamiento y, cuando quieras, contarnos de ti para ver tu
-            elegibilidad en cada uno.
+            <strong>¿Listo para buscar un proceso?</strong> En las fichas de procesos puedes
+            filtrar por tipo de obra, departamento y presupuesto y, cuando quieras, contarnos de ti
+            para ver tu elegibilidad en cada uno.
           </p>
           <TrackedCtaLink
-            href="/licitaciones/explorar"
+            href="/licitaciones"
             event="como_participar_cta_buscar"
             className="clr-cp-cta-link"
           >

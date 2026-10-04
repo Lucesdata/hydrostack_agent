@@ -10,7 +10,7 @@
  * así que cada hueco dice por qué lo es en vez de quedarse en blanco.
  */
 
-import { formatCopCompact } from "@/src/components/secop/format";
+import { formatCopCompact, sentenceCaseTitle } from "@/src/components/secop/format";
 
 export type ClaveEtapa =
   | "abierto"
@@ -189,13 +189,6 @@ function adjudicacionDe(p: ProcesoParaCard): string | null {
 const TRAMITE =
   /^\s*$|manifestaci[oó]n|presentaci[oó]n|oferta|cuant[ií]a|invitaci[oó]n|convocatoria|licitaci[oó]n|selecci[oó]n|concurso|contrataci[oó]n directa|r[eé]gimen especial/i;
 
-/** Siglas que siguen en mayúscula al pasar el objeto a minúscula de oración. */
-const SIGLAS = new Set([
-  "PTAR", "PTAP", "PTARD", "PSMV", "PMAA", "PDA", "PUEAA", "ESP", "SAS", "EPM", "EAAB",
-  "RUP", "SECOP", "UNSPSC", "GPS", "GNSS", "PVC", "HDPE", "PEAD", "GRP", "TIC", "SGP",
-  "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII",
-]);
-
 /** Cuántas letras tiene que tener un objeto para tratarlo como descriptivo. */
 const MIN_LETRAS = 4;
 
@@ -203,20 +196,20 @@ const MIN_LETRAS = 4;
  * El objeto, legible en una tarjeta. La ficha conserva el texto oficial.
  *
  * - Quita los paréntesis de trámite, de dentro afuera para los anidados.
- * - Si viene en MAYÚSCULAS (lo más común en SECOP), lo pasa a minúscula de
- *   oración y respeta las siglas de `SIGLAS` y los nombres de `propios` (el
- *   municipio y el departamento del proceso). Los demás nombres propios quedan en
- *   minúscula: es un límite conocido y preferible a una tarjeta que grita.
+ * - Si viene en MAYÚSCULAS (lo común en SECOP), lo baja con `sentenceCaseTitle`
+ *   —la misma de la ficha, con sus siglas— y devuelve la mayúscula a los nombres
+ *   de `propios` (el municipio y el departamento del proceso). Los demás nombres
+ *   propios quedan en minúscula: límite conocido, preferible a una tarjeta que
+ *   grita.
  * - Un objeto sin texto («2026000088») no describe nada, y la tarjeta lo dice.
  */
 export function objetoLegible(raw: string | null, propios: (string | null)[] = []): string {
   if (!raw || !raw.trim()) return "Objeto no publicado";
-  const letras = raw.match(/\p{L}/gu) ?? [];
-  if (letras.length < MIN_LETRAS) return "Objeto sin descripción publicada";
+  if ((raw.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) return "Objeto sin descripción publicada";
 
   let t = raw;
   for (;;) {
-    const sig = t.replace(/\(([^()]*)\)/g, (todo, dentro: string) =>
+    const sig = t.replace(/\(([^()]*)\)/g, (_todo, dentro: string) =>
       TRAMITE.test(dentro) ? "" : `\u0000${dentro}\u0001`
     );
     if (sig === t) break;
@@ -226,23 +219,19 @@ export function objetoLegible(raw: string | null, propios: (string | null)[] = [
   t = t.replace(/\s+/g, " ").replace(/\s+([,.;:)])/g, "$1").replace(/[\s\-–—:,;]+$/, "").trim();
   if ((t.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) t = raw.trim();
 
-  const mayusculas = (t.match(/\p{Lu}/gu) ?? []).length;
-  const total = (t.match(/\p{L}/gu) ?? []).length;
-  if (mayusculas / total < 0.7) return t;
+  const bajado = sentenceCaseTitle(t);
+  if (bajado === t) return t;
 
-  const nombres = propios
-    .filter((n): n is string => !!n)
-    .flatMap((n) => n.split(/[\s,.]+/))
-    .filter((w) => w.length > 2)
-    .map((w) => w.toLocaleLowerCase("es-CO"));
-  const nombresSet = new Set(nombres);
-
-  const bajo = t.toLocaleLowerCase("es-CO").replace(/[\p{L}\p{N}]+/gu, (w) => {
-    if (SIGLAS.has(w.toLocaleUpperCase("es-CO"))) return w.toLocaleUpperCase("es-CO");
-    if (nombresSet.has(w)) return w.charAt(0).toLocaleUpperCase("es-CO") + w.slice(1);
-    return w;
-  });
-  return bajo.replace(/\p{L}/u, (c) => c.toLocaleUpperCase("es-CO"));
+  const nombres = new Set(
+    propios
+      .filter((n): n is string => !!n)
+      .flatMap((n) => n.split(/[\s,.]+/))
+      .filter((w) => w.length > 2)
+      .map((w) => w.toLocaleLowerCase("es-CO"))
+  );
+  return bajado.replace(/\p{L}+/gu, (w) =>
+    nombres.has(w) ? w.charAt(0).toLocaleUpperCase("es-CO") + w.slice(1) : w
+  );
 }
 
 export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {

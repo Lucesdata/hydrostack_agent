@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (vitrina, fase 0; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (vitrina: fase 0 y fusión de Explorar y Descubrir; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -634,4 +634,16 @@ la tarjeta (`objetoLegible()`). Los abiertos se ordenan por
 `tramoDeRelevancia()` —agua que recibe ofertas, luego `otros`/sin tipo, luego
 recepción vencida— sin filtrar: el total sigue siendo `condicionAbierto()`.
 Lo que queda abierto, en PENDIENTES §54.
+
+**Vitrina con buscador; Explorar y Descubrir fundidas (2026-10-04, fase 1a).**
+`/licitaciones` busca y filtra: `q` (objeto, entidad o municipio), `tipo`,
+`departamento` (slug), `presupuesto` (100/500/1.000 millones) y `orden`, todos en
+la query (`src/lib/secop/filtros-vitrina.ts`, `FiltrosVitrina.tsx`) y aplicados en
+el servidor sobre la consulta de la vitrina. Es un formulario GET sin
+JavaScript. Sin filtros, la paginación sigue en el camino (ISR); con filtros va
+en `?pagina=` y la página lleva `noindex`. `/licitaciones/explorar` y
+`/licitaciones/descubrir` redirigen con 308 (la query pasa), y salieron
+`SecopExplorer`, `ProcessList`, `ProcessDetail`, `RupWizard` y `discovery`. El
+perfil RUP se edita en `/perfil`. Lo que no se trajo y las APIs que quedaron sin
+consumidor, en el plan y en PENDIENTES §54.
 
