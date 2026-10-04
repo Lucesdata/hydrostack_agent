@@ -666,3 +666,12 @@ el panel con `detallesDeRadar()` y `datosDecisionDe()`, que ahora también usa l
 ficha. `BloqueDecision` acepta `hrefFicha` para que sus pasos al pliego vayan a
 la ficha. El bloque se monta solo cuando el navegador confirma el ancho.
 
+**Vitrina, fase 3 (2026-10-04, en curso).** Plan y decisiones en
+`docs/superpowers/plans/2026-10-04-vitrina-fase3.md`: «Seguir» reutiliza
+`coincidencia` (columna `origen = 'manual'`), la alerta desde la vitrina crea un
+filtro en `al_filtros_usuario` (columna `tipos_proyecto`) y «Para ti» sale de
+`getMatchesForPerfil()` para cuentas con perfil. La migración `0025` añade esas
+dos columnas, nulas y sin default; **en la Supabase viva la aplica el usuario
+antes de fusionar** (PENDIENTES §54). Con ella el repo tiene 26 migraciones
+(`0000`–`0025`).
+

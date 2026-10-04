@@ -132,6 +132,9 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
 ## 4. Tareas, en orden y verificables por separado
 
 1. Migración `0025` + esquema + prueba de PGlite (columnas nulas, RLS intacto).
+   **Hecha** (`drizzle/0025_seguir_y_tipos_en_filtros.sql`,
+   `src/__tests__/db/migracion-0025.db.test.ts`). Pendiente de aplicar en la base
+   viva (D4).
 2. Capacidad `seguir` + `store` + `/api/seguir` + pruebas (aislamiento por cuenta,
    no borra lo que no es manual).
 3. `BotonSeguir` en tarjeta, panel y ficha + render sin JS + contraste.

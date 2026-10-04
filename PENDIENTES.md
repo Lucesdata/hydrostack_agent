@@ -1081,4 +1081,9 @@ enlaces del mapa a las facetas.
 - **«Cierre en N días» en las páginas ISR de la vitrina** (`/licitaciones/pagina/N`)
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
+- **Migración `0025` sin aplicar en la Supabase viva** (2026-10-04, fase 3 de la
+  vitrina). Dos columnas nulas y sin default: `coincidencia.origen` y
+  `al_filtros_usuario.tipos_proyecto`. La aplica el usuario con `npm run
+  db:migrate` **antes** de fusionar el PR que las usa: el código de las tareas
+  2–5 las nombra en sus consultas.
 

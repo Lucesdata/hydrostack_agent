@@ -176,6 +176,13 @@
       "when": 1789444140705,
       "tag": "0024_long_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791137035096,
+      "tag": "0025_seguir_y_tipos_en_filtros",
+      "breakpoints": true
     }
   ]
 }
