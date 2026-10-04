@@ -31,8 +31,11 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("<h3");
   });
 
-  it("sin buscador ni ficha individual ni lista de departamentos", () => {
-    expect(html).not.toContain("<input");
+  it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {
+    expect(html).toContain('action="/licitaciones/explorar"');
+    expect(html).toContain('name="sistema"');
+    expect(html).toContain('name="actividad"');
+    expect(html).toContain('name="numero"');
     expect(html).not.toContain("Busca por entidad u objeto");
     expect(html).not.toContain("PROCESO SECOP II");
     expect(html).not.toContain("Objeto · Presupuesto · Plazos · Requisitos");

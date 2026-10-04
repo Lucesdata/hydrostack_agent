@@ -144,20 +144,20 @@ con la misma propiedad opcional en `SecopProceso`.
 `resultadoInicial?: SecopResult<SecopProceso>`. El componente de servidor
 recibe el resultado y la consulta para construir fichas y paginación.
 
-- [ ] Escribir pruebas con consulta inicial tema y número, y con proceso sin
+- [x] Escribir pruebas con consulta inicial tema y número, y con proceso sin
   presupuesto; la URL de ficha se genera con `slugDeProceso` existente.
-- [ ] Leer y validar `searchParams` en la página. Las consultas guiadas tienen
+- [x] Leer y validar `searchParams` en la página. Las consultas guiadas tienen
   respuesta en servidor; no leer sesión ni mezclar datos personales. Documentar
   el cambio de render de esta ruta en el PR, manteniendo estática la portada.
-- [ ] Renderizar un formulario GET y resultados en la alternativa sin
+- [x] Renderizar un formulario GET y resultados en la alternativa sin
   JavaScript, con enlaces paginados que preserven criterios. En caso de fallo,
   mostrar mensaje y enlace para reintentar; no dejar caer la página completa.
-- [ ] Inicializar el explorador con la consulta y resultado del servidor y
+- [x] Inicializar el explorador con la consulta y resultado del servidor y
   extender sus filtros; la búsqueda por número no añade apertura=Abierto.
-- [ ] Sincronizar envíos y paginación con URL y `popstate`; Atrás restaura
+- [x] Sincronizar envíos y paginación con URL y `popstate`; Atrás restaura
   modo, criterios y página. AbortController y un identificador de solicitud
   impiden que respuestas viejas sustituyan resultados actuales.
-- [ ] Probar Atrás, recarga con filtros, número cerrado y respuesta fuera de
+- [x] Probar Atrás, recarga con filtros, número cerrado y respuesta fuera de
   orden; ejecutar pruebas y guardar commit.
 
 ## Tarea 4 — Buscador dentro del hero
@@ -171,19 +171,19 @@ recibe el resultado y la consulta para construir fichas y paginación.
 `busqueda-guiada.ts`, consulta `/api/secop` y genera enlaces al explorador.
 No cambia procesos del mapa ni las minifichas existentes.
 
-- [ ] Escribir pruebas de envío explícito, cambio de entrada que conserva lo
+- [x] Escribir pruebas de envío explícito, cambio de entrada que conserva lo
   escrito y enlace «Ver todos los resultados» con criterios completos.
-- [ ] Añadir Por tema/Por número, etiquetas persistentes, dos desplegables,
+- [x] Añadir Por tema/Por número, etiquetas persistentes, dos desplegables,
   texto opcional y botón «Buscar procesos». Usar formulario GET hacia el
   explorador como comportamiento base; JavaScript añade vista previa.
-- [ ] La vista previa solicita cinco resultados. Cada fila presenta objeto,
+- [x] La vista previa solicita cinco resultados. Cada fila presenta objeto,
   entidad, estado, presupuesto con `formatValorProceso`, coincidencia por
   número y enlace a ficha; no simular Guardar en esta entrega.
-- [ ] Distinguir carga, vacío y error; anunciar resultados sin mover el foco.
+- [x] Distinguir carga, vacío y error; anunciar resultados sin mover el foco.
   Una respuesta de una entrada inactiva no debe aparecer en la activa.
-- [ ] Adaptar a móvil con campos apilados y ancho completo del botón; medir
+- [x] Adaptar a móvil con campos apilados y ancho completo del botón; medir
   contraste real del tema oscuro y verificar teclado y lector de pantalla.
-- [ ] Ejecutar pruebas, verificar sin JavaScript y guardar commit.
+- [x] Ejecutar pruebas, verificar sin JavaScript y guardar commit.
 
 ## Tarea 5 — Validación y revisión de la primera entrega
 
