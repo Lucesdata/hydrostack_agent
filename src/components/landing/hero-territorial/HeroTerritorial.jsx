@@ -104,6 +104,15 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
             <p className={styles.nota}>
               Valores en COP · Ubicación de la entidad contratante, no de la obra.
             </p>
+            {/* Atribución de la geometría: el DANE lo pide y geoBoundaries
+                (CC BY 4.0) lo exige (data/geo/README.md). */}
+            <p className={styles.nota}>
+              Mapa: DANE, MGN 2025 · Islas:{" "}
+              <a href="https://www.geoboundaries.org" rel="noopener noreferrer">
+                geoBoundaries
+              </a>{" "}
+              (CC BY 4.0)
+            </p>
           </div>
 
           <h2 id="aq-procesos-titulo" className={styles.procesosTitulo}>

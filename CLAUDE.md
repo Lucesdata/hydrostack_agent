@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (hero con cinco minifichas; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -298,6 +298,15 @@ coroplético del hero. Spec y reconocimiento:
   estado compartido, el id activo (`sincronia.js`): tarjeta ↔ etiqueta,
   anclaje y departamento. En táctil, la tarjeta a la vista es la activa.
 - La franja de la ficha enlaza el **primer** proceso del hero.
+- **Recuadro de islas y país más grande (2026-10-04, segundo PR).** San Andrés y
+  Providencia se dibujan con costas en detalle (`data/geo/san-andres-providencia.geo.json`,
+  geoBoundaries CC BY 4.0, atribuido bajo la leyenda) a la misma escala, en un
+  recuadro de borde continuo sobre el Caribe (`src/lib/mapa/recuadro-islas.ts`,
+  solo en el modo `seleccion`; los otros mapas siguen con su recuadro). Las
+  etiquetas de la costa caribe van a la columna este para que su guía no cruce
+  el recuadro. El mapa toma `100vh − 400 px` (360–620): ≈489 px de alto a
+  1440×900, por lo que la fila de tarjetas puede quedar unos píxeles bajo el
+  primer pantallazo (decisión del usuario: manda el mapa).
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario

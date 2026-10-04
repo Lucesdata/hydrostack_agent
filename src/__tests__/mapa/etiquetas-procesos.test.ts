@@ -8,20 +8,9 @@ import {
   anclaDe,
   colocarEtiquetas,
 } from "@/src/lib/mapa/etiquetas-procesos";
-import {
-  ALTO_MAPA,
-  ANCHO_MAPA,
-  LADO_RECUADRO,
-  RECUADRO_X,
-  RECUADRO_Y,
-} from "@/src/lib/mapa/modelo";
-import {
-  BBOX_CONTINENTAL,
-  BBOX_SAN_ANDRES,
-  crearProyeccion,
-  recortarA,
-  type Geometria,
-} from "@/src/lib/mapa/proyeccion";
+import { ALTO_MAPA, ANCHO_MAPA } from "@/src/lib/mapa/modelo";
+import { recuadroIslas, RECUADRO_ISLAS } from "@/src/lib/mapa/recuadro-islas";
+import { BBOX_CONTINENTAL, crearProyeccion, type Geometria } from "@/src/lib/mapa/proyeccion";
 
 type Punto = [number, number];
 
@@ -48,18 +37,24 @@ const features = (
   geo as unknown as { features: { properties: { dpto: string }; geometry: Geometria }[] }
 ).features;
 const proyectar = crearProyeccion(BBOX_CONTINENTAL, ANCHO_MAPA, ALTO_MAPA);
-const proyectarIsla = crearProyeccion(BBOX_SAN_ANDRES, LADO_RECUADRO, LADO_RECUADRO);
+
+/** Los anillos de un `d` "M x yLx y…Z" ya proyectado. */
+function anillosDeD(d: string): Punto[][] {
+  return d
+    .split("M")
+    .filter(Boolean)
+    .map((sub) =>
+      sub
+        .replace("Z", "")
+        .split("L")
+        .map((p) => p.trim().split(" ").map(Number) as Punto)
+    );
+}
 
 function poligonosDe(dpto: string): Punto[][] {
   const f = features.find((x) => x.properties.dpto === dpto)!;
-  if (dpto === "88") {
-    return anillos(recortarA(f.geometry, BBOX_SAN_ANDRES)).map((a) =>
-      a.map(([lon, lat]) => {
-        const [x, y] = proyectarIsla(lon, lat);
-        return [x + RECUADRO_X, y + RECUADRO_Y] as Punto;
-      })
-    );
-  }
+  // San Andrés va en su recuadro de islas, con su propia geometría.
+  if (dpto === "88") return anillosDeD(recuadroIslas.d);
   return anillos(f.geometry).map((a) => a.map(([lon, lat]) => proyectar(lon, lat) as Punto));
 }
 
@@ -140,10 +135,7 @@ describe("colocarEtiquetas", () => {
 
   it("San Andrés se ancla en su recuadro", () => {
     const [e] = colocarEtiquetas([{ id: "x", dpto: "88" }]);
-    expect([e.anclaX, e.anclaY]).toEqual([
-      RECUADRO_X + LADO_RECUADRO / 2,
-      RECUADRO_Y + LADO_RECUADRO / 2,
-    ]);
+    expect([e.anclaX, e.anclaY]).toEqual(recuadroIslas.ancla);
     expect(e.lado).toBe("oeste");
   });
 
@@ -155,5 +147,52 @@ describe("colocarEtiquetas", () => {
     ];
     expect(colocarEtiquetas(entradas)).toEqual(colocarEtiquetas(entradas));
     expect(colocarEtiquetas(entradas).map((e) => e.id)).toEqual(["a", "c"]);
+  });
+});
+
+describe("recuadro de San Andrés y Providencia", () => {
+  const r = RECUADRO_ISLAS;
+  const dentroDeCaja = ([x, y]: Punto) =>
+    x >= r.x && x <= r.x + r.ancho && y >= r.y && y <= r.y + r.alto;
+
+  it("no pisa la costa: ningún punto del continente cae dentro del recuadro", () => {
+    for (const f of features) {
+      if (f.properties.dpto === "88") continue;
+      for (const anillo of poligonosDe(f.properties.dpto)) {
+        for (const p of anillo) expect(dentroDeCaja(p), `${f.properties.dpto} ${p}`).toBe(false);
+      }
+    }
+  });
+
+  it("las dos islas caben dentro, con Providencia al noreste de San Andrés", () => {
+    const [sa, pr] = recuadroIslas.cajas;
+    for (const c of [sa, pr]) {
+      expect(dentroDeCaja([c.x0, c.y0]) && dentroDeCaja([c.x1, c.y1]), c.nombre).toBe(true);
+    }
+    // Providencia más arriba y más a la derecha, sin tocarse.
+    expect((pr.x0 + pr.x1) / 2).toBeGreaterThan((sa.x0 + sa.x1) / 2);
+    expect((pr.y0 + pr.y1) / 2).toBeLessThan((sa.y0 + sa.y1) / 2);
+    expect(pr.x0).toBeGreaterThan(sa.x1);
+    // A la misma escala: Providencia es más pequeña que San Andrés.
+    expect(pr.y1 - pr.y0).toBeLessThan(sa.y1 - sa.y0);
+  });
+
+  it("el anclaje del 88 cae dentro de la isla de San Andrés", () => {
+    const sa = anillosDeD(recuadroIslas.d).slice(0, 1);
+    expect(dentro(recuadroIslas.ancla, sa)).toBe(true);
+  });
+
+  it("la costa caribe va a la columna este: su guía no cruza el recuadro", () => {
+    const e = colocarEtiquetas(["08", "47", "20"].map((dpto) => ({ id: dpto, dpto })));
+    expect(e.map((x) => x.lado)).toEqual(["este", "este", "este"]);
+  });
+
+  it("ninguna etiqueta del oeste tapa el recuadro", () => {
+    const e = colocarEtiquetas(
+      ["88", "88", "27", "05", "23", "70", "13"].map((dpto, i) => ({ id: `p${i}`, dpto }))
+    );
+    for (const a of e.filter((x) => x.lado === "oeste")) {
+      expect(a.x + ANCHO_ETIQUETA / 2).toBeLessThanOrEqual(r.x);
+    }
   });
 });
