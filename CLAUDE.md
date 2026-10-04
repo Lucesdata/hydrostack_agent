@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (barra de la portada en píldora flotante; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -418,7 +418,13 @@ en el expediente si todavía se reciben ofertas.
 
 **Cabecera y sincronía (2026-09-26).** En `/` la barra de navegación va en
 oscuro (`.clr-nav--oscuro`, en `Navbar.js`), sin el «En línea» desde el
-2026-09-27; en el resto del sitio la barra sigue clara y lo conserva. Mapa, lista
+2026-09-27; en el resto del sitio la barra sigue clara y lo conserva.
+Desde el 2026-10-04 la barra oscura es una **píldora flotante**: el `<nav>` pinta
+el fondo de la portada y `.clr-nav-inner` es la píldora (borde tenue, resplandor
+azul debajo, enlaces al centro, «Crear cuenta» y «Fichas» en blanco con texto
+noche). Mide `--nav-h` + 16 px. Todo vive bajo `.clr-nav--oscuro` en `Navbar.js`;
+la barra clara no cambia. Contrastes contra el fondo de la píldora en
+`contraste-oscuro.test.ts`. Mapa, lista
 y ficha del hero están sincronizados al pasar el puntero o el foco
 (`hero-territorial/sincronia.js`): el mapa sigue siendo SVG de servidor, cada
 camino lleva `data-dpto` y el hero escucha por delegación. El contorno del
