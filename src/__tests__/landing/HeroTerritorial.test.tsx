@@ -92,11 +92,13 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Sin subsistema identificado");
   });
 
-  it("leyenda de categorías, valores en COP y el significado de la ubicación", () => {
+  it("solo la leyenda de colores bajo el mapa; sin notas ni créditos (2026-10-04)", () => {
     for (const t of ["Agua potable", "Aguas residuales", "Redes y alcantarillado"]) {
       expect(html).toContain(t);
     }
-    expect(html).toContain("Valores en COP · Ubicación de la entidad contratante, no de la obra.");
+    expect(html).toContain('aria-label="Categorías del proceso"');
+    expect(html).not.toContain("Valores en COP");
+    expect(html).not.toContain("geoBoundaries");
     expect(html).not.toMatch(/\b1 – 10\b|procesos abiertos por departamento/i);
   });
 

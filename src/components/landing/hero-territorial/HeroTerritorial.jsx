@@ -15,9 +15,8 @@ import styles from "./hero-territorial.module.css";
  * minifichas (spec 2026-10-04-hero-cinco-minifichas).
  *
  * Arriba, el mensaje a la izquierda y el mapa a la derecha; debajo, a todo el
- * ancho, «Procesos para explorar», con la leyenda del mapa en la misma franja
- * que su título (como la referencia). En el DOM la leyenda va justo después del
- * mapa: así se lee en móvil, donde las zonas se apilan. Mapa y tarjetas son **la misma selección**:
+ * ancho, «Procesos para explorar». La leyenda de colores va pequeña bajo el
+ * mapa, dentro de su panel. Mapa y tarjetas son **la misma selección**:
  * llegan en `procesos` desde el servidor (`muestraPortada()`), y el mapa del
  * servidor se dibujó con esos mismos objetos. Aquí no se sortea ni se pide nada.
  *
@@ -134,12 +133,10 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
                 )}
               </p>
             ) : null}
-            {!mapa ? (
-              <p className={styles.noData}>El mapa no está disponible en este momento.</p>
-            ) : null}
-          </div>
-
-          <div className={styles.leyendaFila}>
+            {/* Solo los colores, discretos, bajo el mapa (2026-10-04). Las notas
+                de moneda y ubicación salieron por decisión del usuario; la
+                ubicación sigue en la descripción accesible del mapa y los
+                créditos de la geometría, en el pie del sitio. */}
             <ul className={styles.leyenda} aria-label="Categorías del proceso">
               {leyenda.map((f) => (
                 <li key={f.familia} data-familia={f.familia}>
@@ -148,18 +145,9 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
                 </li>
               ))}
             </ul>
-            <p className={styles.nota}>
-              Valores en COP · Ubicación de la entidad contratante, no de la obra.
-            </p>
-            {/* Atribución de la geometría: el DANE lo pide y geoBoundaries
-                (CC BY 4.0) lo exige (data/geo/README.md). */}
-            <p className={styles.nota}>
-              Mapa: DANE, MGN 2025 · Islas:{" "}
-              <a href="https://www.geoboundaries.org" rel="noopener noreferrer">
-                geoBoundaries
-              </a>{" "}
-              (CC BY 4.0)
-            </p>
+            {!mapa ? (
+              <p className={styles.noData}>El mapa no está disponible en este momento.</p>
+            ) : null}
           </div>
 
           <h2 id="aq-procesos-titulo" className={styles.procesosTitulo}>

@@ -410,10 +410,11 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
         className="clr-mapa__svg"
         viewBox={`${-MARGEN_ETIQUETAS} 0 ${ANCHO_MAPA + 2 * MARGEN_ETIQUETAS} ${ALTO_MAPA}`}
         role="group"
-        aria-labelledby="clr-mapa-titulo"
+        // Nombre por aria-label y no por <title>: el <title> del SVG sale como
+        // cartel al pasar el cursor por cualquier hueco del mapa.
+        aria-label="Mapa de Colombia con los procesos para explorar"
         aria-describedby="clr-mapa-desc"
       >
-        <title id="clr-mapa-titulo">Mapa de Colombia con los procesos para explorar</title>
         <desc id="clr-mapa-desc">
           {primero.length === 0
             ? "No hay procesos marcados en el mapa."

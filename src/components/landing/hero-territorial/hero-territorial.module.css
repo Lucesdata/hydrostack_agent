@@ -55,14 +55,14 @@
 
 /* ── Nivel superior: mensaje · mapa ───────────────────────────────────────── */
 /* Cinco zonas. Arriba, mensaje y mapa (texto ≈46 %, mapa ≈51 %, spec §4.4; con el titular en dos líneas no cabe más mapa);
-   en medio, el título de las tarjetas y la leyenda del mapa en la misma franja,
-   como la referencia; abajo, las tarjetas a todo el ancho. */
+   en medio, el título de las tarjetas; abajo, las tarjetas a todo el ancho.
+   La leyenda va dentro del panel del mapa. */
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
   grid-template-areas:
     "copy mapa"
-    "titulo leyenda"
+    "titulo titulo"
     "tarjetas tarjetas";
   column-gap: clamp(20px, 3vw, 44px);
   align-items: center;
@@ -72,9 +72,6 @@
 }
 .mapPanel {
   grid-area: mapa;
-}
-.leyendaFila {
-  grid-area: leyenda;
 }
 .procesosTitulo {
   grid-area: titulo;
@@ -111,7 +108,6 @@
   min-width: 0;
 }
 .copy,
-.leyendaFila,
 .procesosTitulo,
 .procesos {
   min-width: 0;
@@ -135,7 +131,7 @@
   margin-inline: auto;
 }
 .map :global(.clr-mapa__nota) {
-  /* La aclaración va en la línea de la leyenda (.nota). */
+  /* El hero no pinta la aclaración: la lleva la descripción accesible del mapa. */
   display: none;
 }
 .map :global(.clr-mapa__dpto) {
@@ -301,55 +297,34 @@
   font-weight: 600;
 }
 
-/* Leyenda de categorías y aclaraciones, bajo el mapa. */
-.leyendaFila {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  margin-top: 6px;
-}
+/* Leyenda de colores: pequeña y discreta, bajo el mapa (2026-10-04). */
 .leyenda {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 0;
+  justify-content: flex-end;
+  gap: 4px 14px;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
 }
 .leyenda li {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font:
-    12.5px/1.3 var(--font-inter),
+    11.5px/1.3 var(--font-inter),
     sans-serif;
-  color: #c3d3e0;
+  color: var(--aq-muted);
 }
 .leyenda li span {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
   background: var(--fam);
 }
 .leyenda li[data-familia="otros"] span {
   background: none;
   border: 1.5px dashed var(--aq-otros);
-}
-.nota a {
-  color: inherit;
-  text-decoration: underline;
-}
-.nota a:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 2px;
-}
-.nota {
-  margin: 0;
-  font:
-    12px/1.4 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
 }
 .noData {
   margin: 8px 0 0;
@@ -656,11 +631,11 @@
   }
 }
 @media (max-width: 899px) {
-  /* Móvil y tablet: título, descripción, mapa, leyenda, encabezado y fila de
+  /* Móvil y tablet: título, descripción, mapa (con su leyenda), encabezado y fila de
      tarjetas (spec §9). */
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "copy" "mapa" "leyenda" "titulo" "tarjetas";
+    grid-template-areas: "copy" "mapa" "titulo" "tarjetas";
     align-items: start;
   }
   .copy {
@@ -672,8 +647,8 @@
   .map :global(.clr-mapa__svg) {
     max-height: none;
   }
-  .leyendaFila {
-    align-items: flex-start;
+  .leyenda {
+    justify-content: flex-start;
   }
   .procesosTitulo {
     margin-top: 22px;
