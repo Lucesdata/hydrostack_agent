@@ -95,4 +95,4 @@ costas, con detalle, para ese recuadro.
 | Contenido | San Andrés (DANE 88001, 74 puntos) y Providencia + Santa Catalina (88564, 60 + 18 puntos), lon/lat |
 | Tamaño | 3,4 kB; no es dependencia del repo, solo este archivo |
 
-CC BY 4.0 exige atribución: el hero la pinta bajo la leyenda del mapa.
+CC BY 4.0 exige atribución: va en el pie del sitio (`S6Footer.jsx`); hasta el 2026-10-04 iba bajo la leyenda del hero.

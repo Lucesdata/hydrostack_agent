@@ -89,6 +89,19 @@ export default function S6Footer() {
           />
           <span>Datos SECOP II · actualización diaria</span>
         </div>
+        {/* Créditos de la geometría del mapa de la portada: el DANE lo pide y
+            geoBoundaries (CC BY 4.0) lo exige (data/geo/README.md). */}
+        <p style={{ margin: "0 0 8px", fontSize: 11.5 }}>
+          Mapa: DANE, MGN 2025 · Islas:{" "}
+          <a
+            href="https://www.geoboundaries.org"
+            rel="noopener noreferrer"
+            style={{ color: "inherit" }}
+          >
+            geoBoundaries
+          </a>{" "}
+          (CC BY 4.0)
+        </p>
         <p style={{ margin: 0 }}>© 2026 AquaLicita. Todos los derechos reservados.</p>
       </div>
     </footer>

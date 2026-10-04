@@ -25,7 +25,10 @@ describe("HeroTerritorial", () => {
       "Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha."
     );
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).toMatch(/<h2 id="aq-procesos-titulo"[^>]*>Procesos para explorar<\/h2>/);
+    // Sin título visible sobre las tarjetas (2026-10-04): la lista se nombra sola.
+    expect(html).not.toContain("Procesos para explorar</h2>");
+    // Los objetos de las tarjetas son h2: no se salta nivel bajo el h1.
+    expect(html).not.toContain("<h3");
   });
 
   it("sin buscador ni ficha individual ni lista de departamentos", () => {
@@ -39,7 +42,7 @@ describe("HeroTerritorial", () => {
 
   it("cinco minifichas en una lista, cada una con su número y un solo enlace a su ficha", () => {
     expect(html).toContain(
-      '<ul class="aqMinifichas" data-n="5" aria-labelledby="aq-procesos-titulo">'
+      '<ul class="aqMinifichas" data-n="5" aria-label="Procesos para explorar">'
     );
     expect(html.match(/<li class="aqMini"/g)).toHaveLength(5);
     for (const p of cinco) {
@@ -92,11 +95,13 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Sin subsistema identificado");
   });
 
-  it("leyenda de categorías, valores en COP y el significado de la ubicación", () => {
+  it("solo la leyenda de colores bajo el mapa; sin notas ni créditos (2026-10-04)", () => {
     for (const t of ["Agua potable", "Aguas residuales", "Redes y alcantarillado"]) {
       expect(html).toContain(t);
     }
-    expect(html).toContain("Valores en COP · Ubicación de la entidad contratante, no de la obra.");
+    expect(html).toContain('aria-label="Categorías del proceso"');
+    expect(html).not.toContain("Valores en COP");
+    expect(html).not.toContain("geoBoundaries");
     expect(html).not.toMatch(/\b1 – 10\b|procesos abiertos por departamento/i);
   });
 

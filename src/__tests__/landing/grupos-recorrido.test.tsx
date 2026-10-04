@@ -113,8 +113,8 @@ describe("recorrido", () => {
     expect(siguienteIndice(0, 0)).toBe(-1);
   });
 
-  it("da tiempo a leer: no menos de 3 s por paso", () => {
-    expect(INTERVALO_RECORRIDO).toBeGreaterThanOrEqual(3000);
+  it("da tiempo a leer: 5 s por paso (decisión del usuario)", () => {
+    expect(INTERVALO_RECORRIDO).toBe(5000);
   });
 
   it("respeta reducir movimiento, la pestaña oculta y la pausa", () => {

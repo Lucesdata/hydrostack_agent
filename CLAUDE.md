@@ -300,7 +300,7 @@ coroplético del hero. Spec y reconocimiento:
 - La franja de la ficha enlaza el **primer** proceso del hero.
 - **Recuadro de islas y país más grande (2026-10-04, segundo PR).** San Andrés y
   Providencia se dibujan con costas en detalle (`data/geo/san-andres-providencia.geo.json`,
-  geoBoundaries CC BY 4.0, atribuido bajo la leyenda) a la misma escala, sobre
+  geoBoundaries CC BY 4.0, atribuido en el pie del sitio) a la misma escala, sobre
   el Caribe y **discretas**: sin marco ni fondo, pequeñas y con rótulo chico
   (el usuario pidió no remarcarlas, ocupaban mucho en el celular) (`src/lib/mapa/recuadro-islas.ts`,
   solo en el modo `seleccion`; los otros mapas siguen con su recuadro). Las
@@ -314,12 +314,21 @@ coroplético del hero. Spec y reconocimiento:
   del servidor dibuja las señales de **todos** los grupos en `<g data-grupo>` y
   el cliente enciende el visible y repinta el tinte (`aplicarGrupo`): cambiar de
   grupo no pide nada ni manda geometría. Un **recorrido** (`recorrido.js`)
-  resalta por turnos los cinco visibles cada 3 s; es resaltado, **no rotación
+  resalta por turnos los cinco visibles cada 5 s (era 3 s; el usuario lo pidió más pausado); es resaltado, **no rotación
   de contenido**: se detiene con el cursor o el foco sobre el mapa o las
   tarjetas, con «Pausar recorrido», con la pestaña oculta y si el sistema pide
   reducir el movimiento (WCAG 2.2.2). El usuario había pedido rotar los procesos
   cada 2 s; se descartó porque no da tiempo a leer una tarjeta y choca con la
   portada aligerada del 2026-09-27.
+- **Leyenda discreta (2026-10-04).** Bajo el mapa solo queda la leyenda de
+  colores, pequeña. Salieron, por decisión del usuario, las notas «Valores en
+  COP · Ubicación de la entidad contratante, no de la obra» y los créditos (que
+  pasaron al pie del sitio), y el `<title>` del SVG, que salía como cartel al
+  pasar el cursor (el nombre va en `aria-label`). La ubicación sigue en la
+  descripción accesible del mapa.
+- **Sin título sobre las tarjetas (2026-10-04, pedido del usuario).** Salió
+  «Procesos para explorar»: la lista se nombra con `aria-label` y el objeto de
+  cada tarjeta pasó de `h3` a `h2` para no saltar nivel bajo el `h1`.
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario

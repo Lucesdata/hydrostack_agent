@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
  * - nunca desplaza la página ni cambia la selección.
  */
 
-export const INTERVALO_RECORRIDO = 3000;
+export const INTERVALO_RECORRIDO = 5000;
 
 /** El índice siguiente del recorrido, dando la vuelta. */
 export function siguienteIndice(actual, total) {

@@ -81,7 +81,9 @@ describe("ColombiaChoropleth en modo selección", () => {
   });
 
   it("el SVG tiene nombre y descripción, y dice qué significa la ubicación", () => {
-    expect(html).toContain('aria-labelledby="clr-mapa-titulo"');
+    expect(html).toContain('aria-label="Mapa de Colombia con los procesos para explorar"');
+    // Sin <title> en el SVG: salía como cartel al pasar el cursor.
+    expect(html).not.toContain('id="clr-mapa-titulo"');
     expect(html).toContain('aria-describedby="clr-mapa-desc"');
     expect(html).toContain("5 procesos marcados en el departamento de su entidad contratante");
   });
