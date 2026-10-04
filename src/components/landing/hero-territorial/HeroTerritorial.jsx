@@ -5,7 +5,9 @@ import Link from "next/link";
 import { FAMILIAS } from "@/src/lib/classify/tipo-color";
 import { departamentoCorto, familiaDe, presupuestoCorto } from "@/src/lib/landing/proceso-portada";
 import Minifichas, { categoriaDe } from "./Minifichas";
-import { procesoDesdeObjetivo, useActivoEnMapa } from "./sincronia";
+import { procesoDesdeObjetivo, useActivoEnMapa, useGrupoEnMapa } from "./sincronia";
+import { usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
+import { familiasPorDepartamento, gruposDe } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
 
 /**
@@ -24,6 +26,13 @@ import styles from "./hero-territorial.module.css";
  * una etiqueta del mapa resalta su tarjeta. Nada de eso cambia la selección ni
  * mueve la página.
  *
+ * Desde el 2026-10-04 (opción D) `procesos` trae la muestra entera —hasta 30—
+ * y se ven de cinco en cinco: «Ver otros 5 procesos» enciende el grupo
+ * siguiente en las tarjetas y en el mapa a la vez (el mapa ya los trae
+ * dibujados todos). Un recorrido resalta por turnos los cinco visibles cada
+ * 3 s (`recorrido.js`); se detiene al señalar o enfocar algo del hero, con
+ * «Pausar recorrido» y si el sistema pide reducir el movimiento.
+ *
  * `procesos === null` es un error de carga (la consulta falló al regenerar la
  * portada); `[]`, que no hay candidatos. No hay estado «cargando»: la selección
  * viaja en el HTML.
@@ -32,12 +41,50 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
   const [activo, setActivo] = useState(null);
   const onActivar = useCallback((id) => setActivo(id), []);
   const mapaRef = useRef(null);
-  const lista = useMemo(() => procesos ?? [], [procesos]);
+  const muestra = useMemo(() => procesos ?? [], [procesos]);
+  const grupos = useMemo(() => gruposDe(muestra), [muestra]);
+  const [grupo, setGrupo] = useState(0);
+  const lista = grupos[grupo] ?? [];
   const familias = useMemo(
-    () => new Map(lista.map((p) => [p.id, familiaDe(p.tipoProyecto)])),
-    [lista]
+    () => new Map(muestra.map((p) => [p.id, familiaDe(p.tipoProyecto)])),
+    [muestra]
   );
+  const familiasDpto = useMemo(() => familiasPorDepartamento(lista), [lista]);
   useActivoEnMapa(mapaRef, activo, familias);
+  useGrupoEnMapa(mapaRef, grupo, familiasDpto);
+
+  // El recorrido: pausado por el botón, mientras se interactúa con el hero o
+  // si el sistema pide menos movimiento.
+  const [pausado, setPausado] = useState(false);
+  const [interactuando, setInteractuando] = useState(false);
+  const menosMovimiento = usePrefiereMenosMovimiento();
+  const ids = useMemo(() => lista.map((p) => p.id), [lista]);
+  const hayRecorrido = !menosMovimiento && ids.length > 1;
+  useRecorrido(ids, onActivar, hayRecorrido && !pausado && !interactuando);
+  const [aviso, setAviso] = useState("");
+  const verOtros = () => {
+    const siguiente = (grupo + 1) % grupos.length;
+    setGrupo(siguiente);
+    setActivo(null);
+    setAviso(
+      `Mostrando ${grupos[siguiente].length} procesos más (grupo ${siguiente + 1} de ${grupos.length}).`
+    );
+  };
+  // Se detiene solo sobre lo que se lee —el mapa y las tarjetas—, no en todo
+  // el hero: en escritorio ocupa casi la pantalla y no se vería nunca.
+  const pausaAlInteractuar = {
+    onPointerEnter: () => setInteractuando(true),
+    onPointerLeave: () => setInteractuando(false),
+    onFocus: () => setInteractuando(true),
+    onBlur: (e) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) setInteractuando(false);
+    },
+  };
+  const pausar = () => {
+    setPausado((p) => !p);
+    setActivo(null);
+  };
+  const siguienteTamano = grupos.length > 1 ? grupos[(grupo + 1) % grupos.length].length : 0;
   const alSenalarMapa = (e) => setActivo(procesoDesdeObjetivo(e.target));
   const alSoltarMapa = () => setActivo(null);
   const procesoActivo = lista.find((p) => p.id === activo) ?? null;
@@ -59,7 +106,7 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
             </p>
           </div>
 
-          <div className={styles.mapPanel}>
+          <div className={styles.mapPanel} {...pausaAlInteractuar}>
             <div
               ref={mapaRef}
               className={styles.map}
@@ -118,7 +165,7 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
           <h2 id="aq-procesos-titulo" className={styles.procesosTitulo}>
             Procesos para explorar
           </h2>
-          <div className={styles.procesos}>
+          <div className={styles.procesos} {...pausaAlInteractuar}>
             {procesos == null ? (
               <p className={styles.notaProcesos} role="status">
                 No pudimos cargar los procesos. Inténtalo de nuevo.
@@ -130,9 +177,25 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
             ) : (
               <Minifichas procesos={lista} activo={activo} onActivar={onActivar} />
             )}
-            <Link className={styles.enlaceTodos} href="/licitaciones">
-              Ver todas las fichas <span aria-hidden="true">→</span>
-            </Link>
+            <div className={styles.procesosPie}>
+              {grupos.length > 1 ? (
+                <button type="button" className={styles.botonOtros} onClick={verOtros}>
+                  <span aria-hidden="true">↻</span> Ver otros {siguienteTamano} procesos
+                </button>
+              ) : null}
+              {hayRecorrido ? (
+                <button type="button" className={styles.botonPausa} onClick={pausar}>
+                  {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
+                </button>
+              ) : null}
+              <Link className={styles.enlaceTodos} href="/licitaciones">
+                Ver todas las fichas <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+            {/* Solo al pulsar «Ver otros»: el recorrido no se anuncia. */}
+            <p className="sr-only" role="status">
+              {aviso}
+            </p>
           </div>
         </div>
       </div>

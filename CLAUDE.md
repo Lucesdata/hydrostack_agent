@@ -308,6 +308,18 @@ coroplético del hero. Spec y reconocimiento:
   el recuadro. El mapa toma `100vh − 400 px` (360–620): ≈489 px de alto a
   1440×900, por lo que la fila de tarjetas puede quedar unos píxeles bajo el
   primer pantallazo (decisión del usuario: manda el mapa).
+- **Recorrido y «Ver otros 5 procesos» (2026-10-04, opción D del usuario).**
+  `muestraPortada(TAMANO_MUESTRA)` trae hasta 30 en la misma consulta y el hero
+  los muestra de cinco en cinco (`src/lib/landing/grupos-portada.ts`). El mapa
+  del servidor dibuja las señales de **todos** los grupos en `<g data-grupo>` y
+  el cliente enciende el visible y repinta el tinte (`aplicarGrupo`): cambiar de
+  grupo no pide nada ni manda geometría. Un **recorrido** (`recorrido.js`)
+  resalta por turnos los cinco visibles cada 3 s; es resaltado, **no rotación
+  de contenido**: se detiene con el cursor o el foco sobre el mapa o las
+  tarjetas, con «Pausar recorrido», con la pestaña oculta y si el sistema pide
+  reducir el movimiento (WCAG 2.2.2). El usuario había pedido rotar los procesos
+  cada 2 s; se descartó porque no da tiempo a leer una tarjeta y choca con la
+  portada aligerada del 2026-09-27.
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario

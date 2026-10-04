@@ -70,3 +70,28 @@ export function useActivoEnMapa(contenedorRef, activo, familias) {
     aplicarActivo(contenedorRef.current, activo, familias);
   }, [contenedorRef, activo, familias]);
 }
+
+/**
+ * Enciende el grupo `grupo` de señales del mapa y repinta el tinte de los
+ * departamentos con las familias de ese grupo (`familiasDpto`: código →
+ * familia o "mixta"). El SVG trae todos los grupos dibujados desde el
+ * servidor; aquí solo se cambian clases y atributos, nunca nodos.
+ */
+export function aplicarGrupo(raiz, grupo, familiasDpto) {
+  if (!raiz) return;
+  for (const el of raiz.querySelectorAll("[data-grupo]")) {
+    el.classList.toggle("is-oculto", Number(el.getAttribute("data-grupo")) !== grupo);
+  }
+  for (const el of raiz.querySelectorAll("path[data-dpto]")) {
+    const familia = familiasDpto.get(el.getAttribute("data-dpto"));
+    el.classList.toggle("clr-mapa__dpto--sel", familia != null);
+    if (familia != null) el.setAttribute("data-familia", familia);
+    else el.removeAttribute("data-familia");
+  }
+}
+
+export function useGrupoEnMapa(contenedorRef, grupo, familiasDpto) {
+  useEffect(() => {
+    aplicarGrupo(contenedorRef.current, grupo, familiasDpto);
+  }, [contenedorRef, grupo, familiasDpto]);
+}
