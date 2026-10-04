@@ -30,7 +30,7 @@ import styles from "./hero-territorial.module.css";
  * y se ven de cinco en cinco: «Ver otros 5 procesos» enciende el grupo
  * siguiente en las tarjetas y en el mapa a la vez (el mapa ya los trae
  * dibujados todos). Un recorrido resalta por turnos los cinco visibles cada
- * 3 s (`recorrido.js`); se detiene al señalar o enfocar algo del hero, con
+ * 5 s (`recorrido.js`); se detiene al señalar o enfocar algo del hero, con
  * «Pausar recorrido» y si el sistema pide reducir el movimiento.
  *
  * `procesos === null` es un error de carga (la consulta falló al regenerar la

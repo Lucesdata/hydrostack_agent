@@ -314,7 +314,7 @@ coroplético del hero. Spec y reconocimiento:
   del servidor dibuja las señales de **todos** los grupos en `<g data-grupo>` y
   el cliente enciende el visible y repinta el tinte (`aplicarGrupo`): cambiar de
   grupo no pide nada ni manda geometría. Un **recorrido** (`recorrido.js`)
-  resalta por turnos los cinco visibles cada 3 s; es resaltado, **no rotación
+  resalta por turnos los cinco visibles cada 5 s (era 3 s; el usuario lo pidió más pausado); es resaltado, **no rotación
   de contenido**: se detiene con el cursor o el foco sobre el mapa o las
   tarjetas, con «Pausar recorrido», con la pestaña oculta y si el sistema pide
   reducir el movimiento (WCAG 2.2.2). El usuario había pedido rotar los procesos
