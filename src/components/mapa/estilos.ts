@@ -68,6 +68,7 @@ export const ESTILOS_MAPA = `
 /* Modo selección (hero de la portada): mapa base y etiquetas de proceso. Los
    colores del tema oscuro los pone el hero; esto es la base clara. */
 .clr-mapa__dpto--base{ fill: var(--surface-alt); }
+.clr-mapa__grupo.is-oculto{ display: none; }
 .clr-mapa__dpto--sel{ fill: rgba(3,105,161,.3); }
 .clr-mapa__guia{ stroke: var(--text-muted); stroke-width: .9; }
 .clr-mapa__ancla{ fill: var(--surface); stroke: var(--accent-deep); stroke-width: 1.4; }

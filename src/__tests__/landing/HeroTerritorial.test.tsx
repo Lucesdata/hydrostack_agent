@@ -127,6 +127,8 @@ describe("HeroTerritorial", () => {
       const fuente = readFileSync(ruta, "utf8");
       expect(fuente, ruta).not.toContain("Math.random");
       expect(fuente, ruta).not.toContain("fetch(");
+      // El único temporizador es el del recorrido (recorrido.js), que no
+      // cambia la selección: aquí no hay rotación de contenido.
       expect(fuente, ruta).not.toMatch(/setInterval|scrollIntoView/);
     }
   });

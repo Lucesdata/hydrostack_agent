@@ -4,6 +4,7 @@ import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { muestraPortada } from "@/src/lib/secop/muestra-portada";
+import { TAMANO_MUESTRA } from "@/src/lib/landing/grupos-portada";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -24,7 +25,8 @@ import { muestraPortada } from "@/src/lib/secop/muestra-portada";
 export const revalidate = 21600;
 
 export default async function Page() {
-  // Los procesos del hero: hasta cinco abiertos, al azar, en UNA consulta. La
+  // Los procesos del hero: hasta 30 abiertos, al azar, en UNA consulta; el
+  // hero los muestra de cinco en cinco («Ver otros 5 procesos», 2026-10-04). La
   // misma lista dibuja el mapa (servidor) y las minifichas (cliente), así que
   // no pueden enseñar procesos distintos. Como la página es ISR, la selección
   // queda fija en el HTML hasta la siguiente regeneración: estable durante la
@@ -35,7 +37,7 @@ export default async function Page() {
   // esta ruta, y el despliegue no se ata a que la base conteste.
   let procesos = null;
   try {
-    procesos = await muestraPortada();
+    procesos = await muestraPortada(TAMANO_MUESTRA);
   } catch (error) {
     console.error("[portada] procesos del hero no disponibles:", error);
   }

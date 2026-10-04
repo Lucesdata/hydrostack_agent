@@ -265,6 +265,19 @@
   stroke: var(--aq-cyan);
   stroke-width: 2.6;
 }
+/* Grupos de señales (opción D): solo el visible se pinta; al encenderse otro,
+   un fundido corto, el mismo de las tarjetas. */
+.map :global(.clr-mapa__grupo.is-oculto) {
+  display: none;
+}
+.map :global(.clr-mapa__grupo) {
+  animation: aqAparece 0.3s ease-out;
+}
+@keyframes aqAparece {
+  from {
+    opacity: 0;
+  }
+}
 /* Con un proceso activo, el resto se atenúa sin ocultarse. */
 .map[data-activo] :global(.clr-mapa__etq:not(.is-activo)),
 .map[data-activo] :global(.clr-mapa__guia:not(.is-activo)),
@@ -360,11 +373,54 @@
   display: flex;
   flex-direction: column;
 }
+/* Bajo las tarjetas: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
+   a todas las fichas (2026-10-04, opción D). */
+.procesosPie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin-top: 10px;
+}
+.botonOtros,
+.botonPausa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font:
+    600 14.5px var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+}
+.botonOtros {
+  border: 1px solid rgba(76, 201, 255, 0.55);
+  background: rgba(76, 201, 255, 0.1);
+  color: var(--aq-text);
+}
+.botonOtros:hover {
+  background: rgba(76, 201, 255, 0.18);
+}
+.botonPausa {
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--aq-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.botonOtros:focus-visible,
+.botonPausa:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
 /* En línea; el relleno da los 44 px de objetivo táctil. */
 .enlaceTodos {
-  align-self: flex-end;
+  margin-left: auto;
   display: inline-block;
-  padding: 11px 0 0;
+  padding: 11px 0;
   color: var(--aq-cyan);
   font:
     600 14.5px/1.35 var(--font-inter),
@@ -409,6 +465,9 @@
   transition:
     border-color 0.15s,
     background-color 0.15s;
+}
+.hero :global(.aqMini) {
+  animation: aqAparece 0.3s ease-out;
 }
 .hero :global(.aqMini[data-activo]) {
   border-color: color-mix(in srgb, var(--fam) 75%, #ffffff);
