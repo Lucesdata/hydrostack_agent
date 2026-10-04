@@ -3,6 +3,10 @@
 > **Para quien ejecute:** usar `superpowers:executing-plans` y ejecutar una tarea
 > por vez. No delegar en agentes sin autorización explícita del usuario.
 
+**Estado (2026-10-04):** sección 1 terminada (tareas 1 y 2). Interfaz y cuentas
+no iniciadas por instrucción del usuario. Evidencia en
+`2026-10-04-buscador-guiado-seccion-1-traspaso.md`.
+
 **Objetivo:** encontrar procesos por sistema y actividad o por número, desde
 el hero, con resultados reales y criterios conservados en el explorador.
 
@@ -76,19 +80,19 @@ type ActividadBusqueda = "obras" | "operacion" | "muestreo"
 PTAP; residual agrupa alcantarillado y PTAR. Las cuatro entradas específicas
 filtran por su tipo persistido. No añadir `otros` a las opciones iniciales.
 
-- [ ] Escribir pruebas que fallen: sistema desconocido, actividad desconocida,
+- [x] Escribir pruebas que fallen: sistema desconocido, actividad desconocida,
   tema+actividad combinados, número vacío y número de más de 120 caracteres.
-- [ ] Ejecutar `npx vitest run src/__tests__/secop/busqueda-guiada.test.ts src/__tests__/secop/route-parse.test.ts` y comprobar el fallo esperado.
-- [ ] Añadir el catálogo único y validación: valores desconocidos devuelven 400
+- [x] Ejecutar `npx vitest run src/__tests__/secop/busqueda-guiada.test.ts src/__tests__/secop/route-parse.test.ts` y comprobar el fallo esperado.
+- [x] Añadir el catálogo único y validación: valores desconocidos devuelven 400
   en consultas guiadas; número con `trim()`, máximo 120 caracteres; no mezclar
   número con filtros temáticos. No alterar el comportamiento de consultas viejas.
-- [ ] Revisar una muestra real de objetos y descripciones para estas raíces de
+- [x] Revisar una muestra real de objetos y descripciones para estas raíces de
   actividad: obras (`construcci`, `rehabilit`, `mejoramiento`), operación
   (`operaci`, `mantenim`), muestreo (`muestreo`, `laboratorio`, `calidad del agua`),
   consultoría (`consultor`, `estudios`, `diseños`, `disenos`), interventoría
   (`interventor`), suministros (`suministr`, `adquisici`). Conservar ejemplos
   sanitizados y registrar aciertos y falsos positivos antes de fijar las reglas.
-- [ ] Probar variantes con tildes/mayúsculas y equivalencias finales mediante
+- [x] Probar variantes con tildes/mayúsculas y equivalencias finales mediante
   fixtures reales sanitizados; ejecutar pruebas y guardar el primer commit.
 
 ## Tarea 2 — Consultas temáticas y por número
@@ -103,15 +107,15 @@ sus firmas; los parámetros nuevos se incorporan en `prepare()`. Se añade al
 resultado opcional `coincidencia?: "exacta" | "parcial"` cuando modo=numero,
 con la misma propiedad opcional en `SecopProceso`.
 
-- [ ] Crear fixtures PGlite con migraciones reales: PTAR consultoría,
+- [x] Crear fixtures PGlite con migraciones reales: PTAR consultoría,
   PTAR obra, PTAP consultoría, dos entidades con igual referencia y un proceso
   cerrado cuyo identificador no contiene palabras del sector.
-- [ ] Escribir pruebas y comprobar que fallan antes de extender la consulta.
-- [ ] En tema, combinar tipo persistido y actividad por objeto/descripción;
+- [x] Escribir pruebas y comprobar que fallan antes de extender la consulta.
+- [x] En tema, combinar tipo persistido y actividad por objeto/descripción;
   `q` mantiene la búsqueda por objeto/entidad. El hero envía apertura=Abierto.
   Las búsquedas guiadas se apoyan en el universo ya ingerido y no excluyen
   adicionalmente procesos válidos mediante el antiguo filtro sectorial textual.
-- [ ] En número, buscar identificador y referencia, con igualdad sin distinguir
+- [x] En número, buscar identificador y referencia, con igualdad sin distinguir
   mayúsculas primero y coincidencia parcial literal después. No filtrar por
   apertura ni por palabras sectoriales. Escapar los patrones:
 
@@ -119,15 +123,15 @@ con la misma propiedad opcional en `SecopProceso`.
   const literalLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
   ```
 
-- [ ] Ordenar exactas antes de parciales y usar identificador como desempate
+- [x] Ordenar exactas antes de parciales y usar identificador como desempate
   estable; respetar paginación y contar todo el mismo conjunto. Nunca convertir
   una referencia compartida en una selección automática.
-- [ ] Añadir a la API la salida 400 por criterios inválidos y 503 por fallo de
+- [x] Añadir a la API la salida 400 por criterios inválidos y 503 por fallo de
   base en modo guiado. Registrar el error en servidor sin publicar detalles
   internos. Mantener la compatibilidad del modo antiguo fuera de este alcance.
-- [ ] Probar que la API no llama a Socrata en modo guiado, ni ante resultados
+- [x] Probar que la API no llama a Socrata en modo guiado, ni ante resultados
   vacíos ni ante error, y que cada combinación tiene clave de caché distinta.
-- [ ] Ejecutar los tests anteriores y de búsqueda existentes; guardar commit.
+- [x] Ejecutar los tests anteriores y de búsqueda existentes; guardar commit.
 
 ## Tarea 3 — Resultados del explorador y alternativa sin JavaScript
 
