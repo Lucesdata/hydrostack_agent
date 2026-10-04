@@ -52,7 +52,7 @@ export interface Geometria {
 }
 
 /** La y de Mercator, en grados, para que comparta unidad con la longitud. */
-function mercatorY(lat: number): number {
+export function mercatorY(lat: number): number {
   return (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
 }
 

@@ -54,7 +54,7 @@
 }
 
 /* ── Nivel superior: mensaje · mapa ───────────────────────────────────────── */
-/* Cinco zonas. Arriba, mensaje y mapa (texto ≈46 %, mapa ≈51 %, spec §4.4);
+/* Cinco zonas. Arriba, mensaje y mapa (texto ≈46 %, mapa ≈51 %, spec §4.4; con el titular en dos líneas no cabe más mapa);
    en medio, el título de las tarjetas y la leyenda del mapa en la misma franja,
    como la referencia; abajo, las tarjetas a todo el ancho. */
 .grid {
@@ -123,12 +123,14 @@
   gap: 0;
   color: var(--aq-text);
 }
-/* Alto ligado al viewport: a 1440×900 caben mensaje, mapa y las cinco
-   tarjetas en el primer pantallazo (spec §4.4); los ≈455 px que se restan son
-   la barra, los márgenes, la franja del título y una fila de tarjetas (con un número de proceso de tres líneas). En
-   ventanas bajas manda el suelo: se desplaza antes que encoger las etiquetas. */
+/* Alto ligado al viewport. Hasta el 2026-10-04 se restaban ≈455 px para que a
+   1440×900 cupieran las cinco tarjetas enteras; el país quedaba en 445 px de
+   alto y se veía pequeño. Ahora manda el mapa (decisión del usuario): ≈500 px
+   a 1440×900, y la fila de tarjetas asoma en el primer pantallazo y se termina
+   de ver al bajar. En ventanas bajas manda el suelo: se desplaza antes que
+   encoger las etiquetas. */
 .map :global(.clr-mapa__svg) {
-  max-height: clamp(330px, calc(100vh - 455px), 560px);
+  max-height: clamp(360px, calc(100vh - 400px), 620px);
   width: 100%;
   margin-inline: auto;
 }
@@ -163,6 +165,21 @@
 }
 .map :global(.clr-mapa__recuadro-txt) {
   fill: var(--aq-muted);
+}
+/* El recuadro de San Andrés y Providencia: un marco continuo y un fondo apenas
+   distinto del mar, no la línea de puntos que parecía un hueco por rellenar. */
+.map :global(.clr-mapa__recuadro--islas) {
+  fill: rgba(140, 190, 225, 0.05);
+  stroke: rgba(140, 190, 225, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: none;
+}
+.map :global(.clr-mapa__islas-txt) {
+  fill: #c3d3e0;
+  font:
+    500 9.5px var(--font-inter),
+    sans-serif;
+  letter-spacing: 0.01em;
 }
 .map :global(.clr-mapa__guia) {
   stroke: rgba(234, 248, 255, 0.5);
@@ -307,6 +324,14 @@
 .leyenda li[data-familia="otros"] span {
   background: none;
   border: 1.5px dashed var(--aq-otros);
+}
+.nota a {
+  color: inherit;
+  text-decoration: underline;
+}
+.nota a:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
 }
 .nota {
   margin: 0;
@@ -607,16 +632,16 @@
   .previa {
     display: block;
   }
-  /* Sin etiquetas, el hueco lateral del viewBox (MARGEN_ETIQUETAS = 158 a
+  /* Sin etiquetas, el hueco lateral del viewBox (MARGEN_ETIQUETAS = 150 a
      cada lado de un mapa de 420, etiquetas-procesos.ts) solo encogería el
      país: se ensancha el SVG y ese hueco queda fuera de la vista. */
   .map {
     overflow-x: clip;
   }
   .map :global(.clr-mapa__svg) {
-    width: calc(100% * 736 / 420);
+    width: calc(100% * 720 / 420);
     max-width: none;
-    margin-inline: calc(-100% * 158 / 420);
+    margin-inline: calc(-100% * 150 / 420);
   }
   .map :global(.clr-mapa__ancla) {
     stroke-width: 2.4;

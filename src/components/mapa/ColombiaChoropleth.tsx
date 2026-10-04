@@ -21,6 +21,7 @@ import {
   presupuestoCorto,
   type ProcesoPortada,
 } from "@/src/lib/landing/proceso-portada";
+import { recuadroIslas } from "@/src/lib/mapa/recuadro-islas";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
 import { frase } from "@/src/components/landing/texto";
 
@@ -347,18 +348,38 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
         {continente.map((e) => (
           <Departamento key={e.dpto} entrada={e} familia={conFamilia(e)} />
         ))}
+        {/* San Andrés y Providencia, con sus costas en detalle y a la misma
+            escala (recuadro-islas.ts). Sin transform: el anclaje y las guías
+            usan las mismas coordenadas que el resto del mapa. */}
         {sanAndres && (
-          <g transform={`translate(${RECUADRO_X} ${RECUADRO_Y})`}>
+          <g className="clr-mapa__islas">
             <rect
-              className="clr-mapa__recuadro"
-              x={-4}
-              y={-4}
-              width={LADO_RECUADRO + 8}
-              height={LADO_RECUADRO + 8}
+              className="clr-mapa__recuadro clr-mapa__recuadro--islas"
+              x={recuadroIslas.x}
+              y={recuadroIslas.y}
+              width={recuadroIslas.ancho}
+              height={recuadroIslas.alto}
+              rx={8}
             />
-            <Departamento entrada={sanAndres} familia={conFamilia(sanAndres)} />
-            <text className="clr-mapa__recuadro-txt" x={-4} y={LADO_RECUADRO + 16}>
+            <Departamento
+              entrada={{ ...sanAndres, d: recuadroIslas.d }}
+              familia={conFamilia(sanAndres)}
+            />
+            <text
+              className="clr-mapa__recuadro-txt clr-mapa__islas-txt"
+              x={recuadroIslas.rotulo.x}
+              y={recuadroIslas.rotulo.y1}
+              textAnchor="middle"
+            >
               San Andrés
+            </text>
+            <text
+              className="clr-mapa__recuadro-txt clr-mapa__islas-txt"
+              x={recuadroIslas.rotulo.x}
+              y={recuadroIslas.rotulo.y2}
+              textAnchor="middle"
+            >
+              y Providencia
             </text>
           </g>
         )}

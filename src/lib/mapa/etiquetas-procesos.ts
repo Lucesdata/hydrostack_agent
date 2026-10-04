@@ -1,4 +1,5 @@
-import { ALTO_MAPA, ANCHO_MAPA, LADO_RECUADRO, RECUADRO_X, RECUADRO_Y } from "./modelo";
+import { ALTO_MAPA, ANCHO_MAPA } from "./modelo";
+import { RECUADRO_ISLAS, recuadroIslas } from "./recuadro-islas";
 import { ANCLAS } from "./rotulos";
 
 /**
@@ -21,8 +22,8 @@ import { ANCLAS } from "./rotulos";
  */
 
 /** Hueco a cada lado del mapa para las columnas de etiquetas. */
-export const MARGEN_ETIQUETAS = 158;
-export const ANCHO_ETIQUETA = 150;
+export const MARGEN_ETIQUETAS = 150;
+export const ANCHO_ETIQUETA = 146;
 export const ALTO_ETIQUETA = 44;
 const SEPARACION = 8;
 /** Distancia entre la etiqueta y el borde del lienzo del mapa. */
@@ -49,15 +50,10 @@ const ANCLAS_INTERIORES: Record<string, [number, number]> = {
   "70": [149, 116],
 };
 
-/** El centro del recuadro de San Andrés, en el viewBox del mapa. */
-const ANCLA_SAN_ANDRES: [number, number] = [
-  RECUADRO_X + LADO_RECUADRO / 2,
-  RECUADRO_Y + LADO_RECUADRO / 2,
-];
-
 /** El anclaje de un departamento, o `null` si el mapa no sabe dónde ponerlo. */
 export function anclaDe(dpto: string): [number, number] | null {
-  if (dpto === "88") return ANCLA_SAN_ANDRES;
+  // San Andrés: el centro de la isla en su recuadro (recuadro-islas.ts).
+  if (dpto === "88") return recuadroIslas.ancla;
   return ANCLAS_INTERIORES[dpto] ?? ANCLAS[dpto] ?? null;
 }
 
@@ -88,6 +84,20 @@ export const X_COLUMNA: Record<LadoEtiqueta, number> = {
 const Y_MIN = ALTO_ETIQUETA / 2 + 2;
 const Y_MAX = ALTO_MAPA - ALTO_ETIQUETA / 2 - 2;
 const PASO = ALTO_ETIQUETA + SEPARACION;
+
+/**
+ * El lado de la columna de un departamento: el más cercano a su anclaje,
+ * salvo en la costa caribe. Desde la columna oeste, la guía hasta Atlántico,
+ * Magdalena o Cesar cruzaría el recuadro de las islas, que está justo ahí;
+ * por eso un anclaje a la altura del recuadro va al este, y su guía cruza
+ * tierra firme en vez de las islas. Sucre, Bolívar y Córdoba quedan por debajo
+ * y siguen al oeste.
+ */
+function ladoDe(dpto: string, ax: number, ay: number): LadoEtiqueta {
+  if (dpto === "88") return "oeste";
+  if (ax >= ANCHO_MAPA / 2) return "este";
+  return ay < RECUADRO_ISLAS.y + RECUADRO_ISLAS.alto + 4 ? "este" : "oeste";
+}
 
 /**
  * Apila una columna: cada caja tan cerca de su altura deseada como permita la
@@ -122,7 +132,7 @@ export function colocarEtiquetas(entradas: { id: string; dpto: string }[]): Etiq
   };
   for (const [dpto, ids] of grupos) {
     const [ax, ay] = anclaDe(dpto)!;
-    const lado: LadoEtiqueta = ax < ANCHO_MAPA / 2 ? "oeste" : "este";
+    const lado: LadoEtiqueta = ladoDe(dpto, ax, ay);
     ids.forEach((id, i) => {
       porLado[lado].push({ id, dpto, deseada: ay + (i - (ids.length - 1) / 2) * PASO });
     });

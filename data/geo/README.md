@@ -80,3 +80,19 @@ Roncador, Quitasueño), ni Malpelo: el MGN departamental ya no los incluye, así
 que el encuadre sale limpio. Comprobado — bbox continental
 `lon [-79,007, -66,854]`, `lat [-4,220, 12,440]`; con San Andrés, `lon` baja a
 `-81,736` y `lat` sube a `13,378`.
+
+## San Andrés y Providencia en detalle (`san-andres-providencia.geo.json`)
+
+La simplificación de arriba deja San Andrés en 5 puntos y Providencia en una
+línea sin área: a escala del país no se ven, pero en el recuadro de islas del
+hero (2026-10-04) se veían como una astilla. Este archivo trae solo las dos
+costas, con detalle, para ese recuadro.
+
+| | |
+|---|---|
+| Fuente | geoBoundaries, COL ADM2 (CC BY 4.0), simplificado |
+| Tomado de | `@john-guerra/geo-colombia@0.1.0` (MIT), `src/sanAndresProvidencia.json` |
+| Contenido | San Andrés (DANE 88001, 74 puntos) y Providencia + Santa Catalina (88564, 60 + 18 puntos), lon/lat |
+| Tamaño | 3,4 kB; no es dependencia del repo, solo este archivo |
+
+CC BY 4.0 exige atribución: el hero la pinta bajo la leyenda del mapa.
