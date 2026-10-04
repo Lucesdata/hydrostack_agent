@@ -677,5 +677,9 @@ antes de fusionar** (PENDIENTES §54). Con ella el repo tiene 26 migraciones
 `GET/POST/DELETE /api/seguir`. Seguir escribe en `coincidencia` con
 `origen = 'manual'` y `account_id`; «dejar de seguir» solo borra lo manual (lo
 del perfil o de un filtro el cron lo traería de vuelta). Las consultas van por
-`COALESCE(account_id, usuario_id)`, como `recopilar.ts`.
+`COALESCE(account_id, usuario_id)`, como `recopilar.ts`. Tarea 3 hecha: «☆ Seguir» /
+«★ Siguiendo» (`seguir/BotonSeguir.tsx`, estilos aparte en `seguir/estilos.ts`)
+en la tarjeta de la vitrina (fuera del enlace, sobre el pie), en el panel del
+Radar y en la cabecera de la ficha. Un `GET /api/seguir` por página de la
+vitrina; sin sesión lleva a `/registro?next=`.
 

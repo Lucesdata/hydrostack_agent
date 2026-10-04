@@ -142,6 +142,13 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
    `account_id`. Un id que no es un proceso vivo no crea fila. Las escrituras
    exigen `Content-Type: application/json`.
 3. `BotonSeguir` en tarjeta, panel y ficha + render sin JS + contraste.
+   **Hecha** (`src/components/secop/seguir/BotonSeguir.tsx`). En la vitrina,
+   `ProveedorSeguir` pide el estado de las nueve tarjetas en un solo
+   `GET /api/seguir`; la ficha (ISR) pide el suyo. En la tarjeta el botón va
+   fuera del `<a>`, posicionado sobre el pie. Sin sesión (401) lleva a
+   `/registro?next=`. Lo seguido por perfil o filtro sale «★ Siguiendo» con una
+   ayuda y no se puede dejar desde ahí. Medido `--accent-ocean` sobre
+   `--surface-alt`.
 4. `tipos_proyecto` en el filtro: validar, evaluar (`tipo_fuera`), `/mis-filtros`.
 5. «Avisarme de procesos nuevos así» en la vitrina + `filtroDesdeVitrina` probado.
 6. Estante «Para ti».
