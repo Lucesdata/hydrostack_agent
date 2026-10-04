@@ -611,3 +611,14 @@ Necesidad, financiación y metas permanecen por verificar cuando no hay datos;
 no deducir avance de obra del estado de contratación ni sitio de ejecución de
 la ubicación de la entidad. Diseño aprobado y alcance en
 `docs/superpowers/specs/2026-09-29-ficha-interactiva-movil.md`.
+
+
+**Contexto sectorial del hero (2026-10-04).** La minificha conserva el objeto
+publicado y el tipo persistido. Si el objeto abreviado no contiene evidencia del
+tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
+`procesoPortadaDesdeFila` reutiliza la evidencia y la poda de razón social de
+`clasificarTipoProyecto`; no cambia el clasificador ni escribe en la base.
+`muestraPortada` trae la descripción en la misma consulta. Caso verificado:
+`CO1.REQ.5720221`, cuyo objeto menciona pavimento en Chipatá, tiene red de
+acueducto en la descripción oficial. Sin descripción o evidencia no se inventa
+respaldo. Pruebas puras, render de minificha y consulta contra PGlite.

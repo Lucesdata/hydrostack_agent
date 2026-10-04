@@ -28,6 +28,7 @@ async function unProceso(v: {
   estadoActual?: string;
   referencia?: string | null;
   objeto?: string | null;
+  descripcion?: string | null;
   valor?: string | null;
   entidadId?: string | null;
   tipo?: string | null;
@@ -38,6 +39,7 @@ async function unProceso(v: {
     secopProcesoId: id,
     referencia: v.referencia === undefined ? `00${n}-LP-2026` : v.referencia,
     objeto: v.objeto === undefined ? `Obra ${n}` : v.objeto,
+    descripcion: v.descripcion ?? null,
     geografiaId: v.geo === undefined ? "76001" : v.geo,
     entidadId: v.entidadId ?? null,
     valorEstimado: v.valor ?? null,
@@ -83,7 +85,14 @@ beforeAll(async () => {
 
   // Elegibles: valle (con municipio), Bogotá, Nariño (solo departamento), uno
   // sin presupuesto y uno sin tipo. Cinco y uno más para que haya sorteo.
-  validos.push(await unProceso({ entidadId: ent.id, valor: "2450000000" }));
+  validos.push(
+    await unProceso({
+      entidadId: ent.id,
+      valor: "2450000000",
+      objeto: "Pavimentación",
+      descripcion: "Pavimentación y red de acueducto",
+    })
+  );
   validos.push(await unProceso({ geo: "11001", valor: "0", tipo: "alcantarillado" }));
   validos.push(await unProceso({ geo: "52000", tipo: "ptar", valor: "980000000" }));
   validos.push(await unProceso({ valor: null, tipo: null }));
@@ -131,6 +140,7 @@ describe("muestraPortada", () => {
     const cali = m.find((p) => p.id === validos[0])!;
     expect(cali).toMatchObject({
       numeroProceso: "001-LP-2026",
+      contextoTipo: "Tipo según descripción: Acueducto.",
       entidad: "MUNICIPIO DE CALI",
       presupuesto: 2_450_000_000,
       departamentoCodigo: "76",
