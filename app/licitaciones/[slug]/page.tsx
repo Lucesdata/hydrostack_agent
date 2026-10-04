@@ -8,8 +8,6 @@ import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
 import { datosDecisionDe, urlSecopDe } from "@/src/lib/secop/datos-decision";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
-import BotonSeguir from "@/src/components/secop/seguir/BotonSeguir";
-import { ESTILOS_SEGUIR } from "@/src/components/secop/seguir/estilos";
 import { competidoresComparables, procesoPorSlug, slugDeProceso } from "@/src/lib/secop/ficha";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
@@ -380,7 +378,7 @@ export default async function FichaPage({ params }: Props) {
 
   return (
     <div className="clr-page fi-pagina">
-      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA + ESTILOS_SEGUIR }} />
+      <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(schema) }}
@@ -409,9 +407,6 @@ export default async function FichaPage({ params }: Props) {
             <span aria-hidden="true">◷</span> {apertura}
             <span className="fi-estado-nota">Según SECOP II</span>
           </p>
-          <div className="fi-seguir">
-            <BotonSeguir id={p.secopProcesoId} variante="ficha" />
-          </div>
           <details className="fi-identificacion">
             <summary>Leer objeto completo y datos del proceso</summary>
             <p>{p.objeto ?? "Objeto no informado"}</p>

@@ -142,12 +142,6 @@ export const coincidencia = pgTable(
      */
     accountId: text("account_id"),
     filtroId: uuid("filtro_id").references(() => alFiltrosUsuario.id, { onDelete: "set null" }),
-    /**
-     * `'manual'` cuando la cuenta siguió el proceso a mano («Seguir», fase 3 de
-     * la vitrina, migración 0025). NULL = vino del perfil o de un filtro, como
-     * todas las filas anteriores. «Dejar de seguir» solo borra las manuales.
-     */
-    origen: text("origen"),
   },
   (t) => [
     uniqueIndex("coincidencia_usuario_proceso_uq").on(t.usuarioId, t.procesoId),

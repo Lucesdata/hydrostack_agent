@@ -13,7 +13,6 @@ import { cuentaDe } from "@/src/lib/al/cuenta";
 import { listarFiltros } from "@/src/lib/al/filtros/store";
 import { FiltrosCliente, type Filtro } from "./FiltrosCliente";
 import { STYLE } from "./estilos";
-import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +38,7 @@ export default async function MisFiltrosPage() {
           </Link>
         </p>
 
-        <FiltrosCliente
-          inicial={filtros}
-          tipos={TIPOS_PROYECTO.map((t) => ({ valor: t, label: TIPO_PROYECTO[t].label }))}
-        />
+        <FiltrosCliente inicial={filtros} />
 
         <p className="clr-flt-nota">
           El motor es determinista: mismos criterios, mismo resultado, sin IA y sin coste por

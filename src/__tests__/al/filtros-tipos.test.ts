@@ -89,19 +89,3 @@ describe("validarFiltro", () => {
     );
   });
 });
-
-describe("validarFiltro — tipo de obra (2026-10-04)", () => {
-  it("sin tipos no restringe", () => {
-    expect(validarFiltro({ nombre: "x" }).valor.tiposProyecto).toEqual([]);
-  });
-
-  it("acepta los cinco tipos, en minúscula y sin repetir", () => {
-    const r = validarFiltro({ nombre: "x", tiposProyecto: ["PTAR", "ptar", "acueducto"] });
-    expect(r.error).toBeNull();
-    expect(r.valor.tiposProyecto).toEqual(["ptar", "acueducto"]);
-  });
-
-  it("rechaza lo que no es uno de los cinco tipos", () => {
-    expect(validarFiltro({ nombre: "x", tiposProyecto: ["riego"] }).error).not.toBeNull();
-  });
-});

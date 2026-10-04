@@ -22,9 +22,6 @@ export const STYLE = `
   .clr-flt-row{ display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 620px){ .clr-flt-row{ grid-template-columns: 1fr 1fr; } }
   .clr-flt-label{ display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--ink-900); font-weight: 500; }
-  .clr-flt-tipos{ flex-direction: row; flex-wrap: wrap; gap: 6px 16px; border: 0; padding: 0; margin: 0; }
-  .clr-flt-tipos legend{ width: 100%; margin-bottom: 4px; padding: 0; }
-  .clr-flt-tipo{ display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
   .clr-flt-hint{ font-weight: 400; color: var(--ink-600); font-size: 11.5px; }
   .clr-flt-input{
     background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md);

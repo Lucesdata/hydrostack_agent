@@ -657,7 +657,9 @@ ayer, y «Cumples N de 5» con el perfil del navegador o de la cuenta
 `buildVerdict` y requisitos que la ficha; solo conteos, sin `reason`, así que no
 hay nada que redactar). Sin perfil se define encima de la rejilla, sin cuenta.
 `searchProcesosDb` trae `fecha_recepcion`: el plazo del matching ya no sale
-siempre sin datos. Guardar pasa a la fase 3 (tabla nueva).
+siempre sin datos. Seguir, la alerta desde la vitrina y «Para ti» son la fase 3,
+en la rama `claude/vitrina-fase3` y un PR aparte: necesitan la migración `0025`,
+que no se puede aplicar mientras la Supabase viva esté al límite del plan.
 
 **Radar de la vitrina (2026-10-04, fase 2).** Desde 1100 px, `/licitaciones` es
 lista y detalle (`RadarVitrina.tsx`): las tarjetas siguen siendo enlaces del
@@ -667,28 +669,4 @@ la ficha. Debajo de 1100 px no hay panel: la ficha es el detalle. El servidor ar
 el panel con `detallesDeRadar()` y `datosDecisionDe()`, que ahora también usa la
 ficha. `BloqueDecision` acepta `hrefFicha` para que sus pasos al pliego vayan a
 la ficha. El bloque se monta solo cuando el navegador confirma el ancho.
-
-**Vitrina, fase 3 (2026-10-04, en curso).** Plan y decisiones en
-`docs/superpowers/plans/2026-10-04-vitrina-fase3.md`: «Seguir» reutiliza
-`coincidencia` (columna `origen = 'manual'`), la alerta desde la vitrina crea un
-filtro en `al_filtros_usuario` (columna `tipos_proyecto`) y «Para ti» sale de
-`getMatchesForPerfil()` para cuentas con perfil. La migración `0025` añade esas
-dos columnas, nulas y sin default; **en la Supabase viva la aplica el usuario
-antes de fusionar** (PENDIENTES §54). Con ella el repo tiene 26 migraciones
-(`0000`–`0025`). Tarea 2 hecha: capacidad `seguir` (`gratis`), `src/lib/seguir/store.ts` y
-`GET/POST/DELETE /api/seguir`. Seguir escribe en `coincidencia` con
-`origen = 'manual'` y `account_id`; «dejar de seguir» solo borra lo manual (lo
-del perfil o de un filtro el cron lo traería de vuelta). Las consultas van por
-`COALESCE(account_id, usuario_id)`, como `recopilar.ts`. Tarea 3 hecha: «☆ Seguir» /
-«★ Siguiendo» (`seguir/BotonSeguir.tsx`, estilos aparte en `seguir/estilos.ts`)
-en la tarjeta de la vitrina (fuera del enlace, sobre el pie), en el panel del
-Radar y en la cabecera de la ficha. Un `GET /api/seguir` por página de la
-vitrina; sin sesión lleva a `/registro?next=`. Tarea 4 hecha: los filtros guardados aceptan
-`tiposProyecto` y el motor descarta con `tipo_fuera` (`filtro-v2`); un proceso
-sin tipo no se descarta. `/mis-filtros` lo pide con casillas. Tarea 5 hecha: con algún criterio activo, la vitrina ofrece
-«🔔 Avisarme de procesos nuevos así» (`AlertaVitrina.tsx` +
-`alerta-vitrina.ts`), que crea un filtro de `/mis-filtros` con el tipo, el
-departamento, el presupuesto y el texto buscado. Tarea 6 hecha: estante «Para ti» (`EstanteParaTi.tsx` +
-`para-ti.ts`) encima de los resultados, solo sin filtros, en la primera página
-y para cuentas con perfil, con la misma regla de `/mis-coincidencias`.
 

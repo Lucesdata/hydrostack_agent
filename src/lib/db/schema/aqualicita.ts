@@ -76,12 +76,6 @@ export const alFiltrosUsuario = pgTable(
     /** DIVIPOLA de 5 dígitos, o de 2 para un departamento completo. */
     divipola: text("divipola").array(),
     modalidades: text("modalidades").array(),
-    /**
-     * Tipos de obra (`TIPOS_PROYECTO`) que acepta el filtro; NULL o vacío = sin
-     * restricción, como las demás listas. Lo escribe la alerta que se guarda
-     * desde la vitrina (migración 0025, fase 3 de la vitrina).
-     */
-    tiposProyecto: text("tipos_proyecto").array(),
     valorMin: money("valor_min"),
     valorMax: money("valor_max"),
 

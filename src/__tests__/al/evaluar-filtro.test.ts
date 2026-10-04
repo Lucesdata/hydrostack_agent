@@ -25,7 +25,6 @@ const FILTRO_VACIO: FiltroValidado = {
   entidadesNit: [],
   divipola: [],
   modalidades: [],
-  tiposProyecto: [],
   valorMin: null,
   valorMax: null,
   eventosNotificables: ["apertura", "adenda", "adjudicacion"],
@@ -41,7 +40,6 @@ const PROCESO: ProcesoEvaluable = {
   divipola: "05001",
   modalidad: "Licitación pública",
   valorEstimado: "800000000.00",
-  tipoProyecto: "acueducto",
 };
 
 const f = (over: Partial<FiltroValidado>): FiltroValidado => ({ ...FILTRO_VACIO, ...over });
@@ -62,7 +60,6 @@ describe("evaluarFiltro — semántica del vacío", () => {
       divipola: null,
       modalidad: null,
       valorEstimado: null,
-      tipoProyecto: null,
     };
     expect(evaluarFiltro(FILTRO_VACIO, vacio).motivo).toBeNull();
   });
@@ -123,11 +120,6 @@ describe("evaluarFiltro — un caso por motivo", () => {
       expect(r.motivo).toBe("fuera_de_cuantia");
       expect(r.evidencia.valor).toBe("800000000.00");
     },
-    tipo_fuera: () => {
-      const r = evaluarFiltro(f({ tiposProyecto: ["ptar", "ptap"] }), PROCESO);
-      expect(r.motivo).toBe("tipo_fuera");
-      expect(r.evidencia).toEqual({ tipoProceso: "acueducto", listados: ["ptar", "ptap"] });
-    },
   };
 
   for (const [motivo, caso] of Object.entries(casos)) {
@@ -165,21 +157,5 @@ describe("evaluarFiltro — decisiones conservadoras", () => {
       PROCESO
     );
     expect(r.motivo).toBe("palabra_excluida");
-  });
-});
-
-describe("evaluarFiltro — tipo de obra (filtro-v2)", () => {
-  it("un tipo listado pasa", () => {
-    expect(evaluarFiltro(f({ tiposProyecto: ["acueducto"] }), PROCESO).motivo).toBeNull();
-  });
-
-  it("un proceso sin tipo no se descarta: el hueco es del clasificador", () => {
-    const sinTipo = { ...PROCESO, tipoProyecto: null };
-    expect(evaluarFiltro(f({ tiposProyecto: ["ptar"] }), sinTipo).motivo).toBeNull();
-  });
-
-  it("«otros» es un tipo: un filtro de PTAR no lo trae", () => {
-    const otros = { ...PROCESO, tipoProyecto: "otros" };
-    expect(evaluarFiltro(f({ tiposProyecto: ["ptar"] }), otros).motivo).toBe("tipo_fuera");
   });
 });
