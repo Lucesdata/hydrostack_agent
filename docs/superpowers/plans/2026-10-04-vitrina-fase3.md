@@ -157,6 +157,14 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
    con casillas, lo muestra en el resumen y lo conserva al pausar (el PUT
    reemplaza el filtro entero). Prueba de punta a punta en PGlite.
 5. «Avisarme de procesos nuevos así» en la vitrina + `filtroDesdeVitrina` probado.
+   **Hecha.** `src/lib/secop/alerta-vitrina.ts` (puro) traduce los filtros:
+   `q` → `palabrasClave`, `tipo` → `tiposProyecto`, departamento → `divipola`
+   (código de 2 dígitos, que la lista de departamentos ahora trae) y
+   `presupuesto` → `valorMin`. El orden solo no ofrece alerta. `AlertaVitrina.tsx`
+   es un `<details>` bajo los filtros: enseña lo que va a vigilar, avisa de que
+   la palabra se busca en el texto del proceso y no en la entidad, deja cambiar
+   el nombre y manda a `POST /api/al/filtros`; sin sesión, al registro. Probado
+   que el cuerpo pasa `validarFiltro` tal cual.
 6. Estante «Para ti».
 7. Documentación (CLAUDE.md, PENDIENTES) y PR.
 

@@ -683,5 +683,8 @@ en la tarjeta de la vitrina (fuera del enlace, sobre el pie), en el panel del
 Radar y en la cabecera de la ficha. Un `GET /api/seguir` por página de la
 vitrina; sin sesión lleva a `/registro?next=`. Tarea 4 hecha: los filtros guardados aceptan
 `tiposProyecto` y el motor descarta con `tipo_fuera` (`filtro-v2`); un proceso
-sin tipo no se descarta. `/mis-filtros` lo pide con casillas.
+sin tipo no se descarta. `/mis-filtros` lo pide con casillas. Tarea 5 hecha: con algún criterio activo, la vitrina ofrece
+«🔔 Avisarme de procesos nuevos así» (`AlertaVitrina.tsx` +
+`alerta-vitrina.ts`), que crea un filtro de `/mis-filtros` con el tipo, el
+departamento, el presupuesto y el texto buscado.
 

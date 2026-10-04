@@ -87,7 +87,12 @@ export default async function LicitacionesPage({ searchParams }) {
   return (
     <Vitrina
       pagina={datos}
-      departamentos={departamentos.map((d) => ({ slug: d.slug, label: d.label, n: d.n }))}
+      departamentos={departamentos.map((d) => ({
+        slug: d.slug,
+        clave: d.clave,
+        label: d.label,
+        n: d.n,
+      }))}
       detalles={detalles}
     />
   );

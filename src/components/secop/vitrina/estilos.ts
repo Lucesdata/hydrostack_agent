@@ -104,6 +104,24 @@ export const ESTILOS_VITRINA = `
 .ve-aviso-boton:hover { background: var(--accent-fill-hover); }
 .ve-aviso-boton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* «Avisarme de procesos nuevos así» (AlertaVitrina). */
+.va { border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.va-resumen { cursor: pointer; padding: 10px 14px; font: 600 14px var(--sans); color: var(--accent); }
+.va-resumen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.va-form, .va-hecho { padding: 0 14px 14px; margin: 0; display: grid; gap: 8px; font: 14px/1.5 var(--sans); color: var(--text-primary); }
+.va-texto, .va-nota { margin: 0; }
+.va-nota, .va-ayuda { font-size: 13px; color: var(--text-muted); }
+.va-lista { margin: 0; padding-left: 20px; display: grid; gap: 2px; }
+.va-nombre { display: grid; gap: 4px; font: 600 12px var(--sans); color: var(--text-muted); max-width: 420px; }
+.va-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.va-boton {
+  font: 600 14px var(--sans); color: #fff; background: var(--accent-fill);
+  border: 0; border-radius: var(--radius-md); padding: 8px 16px; cursor: pointer;
+}
+.va-boton:hover { background: var(--accent-fill-hover); }
+.va-boton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.va-error { margin: 0; font-size: 13px; color: var(--danger); }
+
 /* Buscador y filtros (FiltrosVitrina): lo que antes eran Explorar y Descubrir. */
 .vf { margin: 0 0 18px; display: grid; gap: 12px; }
 .vf-form {
