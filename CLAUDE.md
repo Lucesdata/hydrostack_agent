@@ -20,6 +20,11 @@ criterios; portada y facetas conservan su render. Las consultas sin modo
 mantienen el explorador avanzado. Cuentas y despliegue siguen sin ejecutar.
 Evidencia y punto de continuación de la interfaz en
 `docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-2-traspaso.md`.
+La siguiente sección tiene plan técnico preparado para revisión en
+`docs/superpowers/plans/2026-10-04-guardados-recientes.md`: relaciones separadas
+de cuenta, guardado explícito, diez visitas, intención tras login y aislamiento.
+Todavía no implementado ni aplicado a la base; revisar el plan antes de cambios
+de esquema o consultas privadas, conforme a `docs/CONDUCTA.md` §4.
 Evidencia y punto de
 continuación en
 `docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-1-traspaso.md`.
