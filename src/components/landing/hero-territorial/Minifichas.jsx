@@ -80,9 +80,9 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
           <IconoLugar />
           <span>{ubicacionDe(p)}</span>
         </p>
-        <h3 id={`aq-mini-${p.id}`} className="aqMiniObjeto" title={objeto}>
+        <h2 id={`aq-mini-${p.id}`} className="aqMiniObjeto" title={objeto}>
           {objeto}
-        </h3>
+        </h2>
         <p className="aqMiniNumero">
           Proceso: <span translate="no">{p.numeroProceso}</span>
         </p>
@@ -152,7 +152,8 @@ export default function Minifichas({ procesos, activo = null, onActivar = () => 
       ref={listaRef}
       className="aqMinifichas"
       data-n={procesos.length}
-      aria-labelledby="aq-procesos-titulo"
+      // Sin título visible: el nombre de la lista va en aria-label.
+      aria-label="Procesos para explorar"
     >
       {procesos.map((p) => (
         <Minificha key={p.id} proceso={p} activo={activo === p.id} onActivar={onActivar} />

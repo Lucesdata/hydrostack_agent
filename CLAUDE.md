@@ -326,6 +326,9 @@ coroplético del hero. Spec y reconocimiento:
   pasaron al pie del sitio), y el `<title>` del SVG, que salía como cartel al
   pasar el cursor (el nombre va en `aria-label`). La ubicación sigue en la
   descripción accesible del mapa.
+- **Sin título sobre las tarjetas (2026-10-04, pedido del usuario).** Salió
+  «Procesos para explorar»: la lista se nombra con `aria-label` y el objeto de
+  cada tarjeta pasó de `h3` a `h2` para no saltar nivel bajo el `h1`.
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario

@@ -55,14 +55,13 @@
 
 /* ── Nivel superior: mensaje · mapa ───────────────────────────────────────── */
 /* Cinco zonas. Arriba, mensaje y mapa (texto ≈46 %, mapa ≈51 %, spec §4.4; con el titular en dos líneas no cabe más mapa);
-   en medio, el título de las tarjetas; abajo, las tarjetas a todo el ancho.
+   abajo, las tarjetas a todo el ancho (sin título desde el 2026-10-04).
    La leyenda va dentro del panel del mapa. */
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
   grid-template-areas:
     "copy mapa"
-    "titulo titulo"
     "tarjetas tarjetas";
   column-gap: clamp(20px, 3vw, 44px);
   align-items: center;
@@ -72,9 +71,6 @@
 }
 .mapPanel {
   grid-area: mapa;
-}
-.procesosTitulo {
-  grid-area: titulo;
 }
 .procesos {
   grid-area: tarjetas;
@@ -108,7 +104,6 @@
   min-width: 0;
 }
 .copy,
-.procesosTitulo,
 .procesos {
   min-width: 0;
 }
@@ -336,17 +331,10 @@
 }
 
 /* ── Nivel inferior: procesos para explorar ───────────────────────────────── */
-.procesosTitulo {
-  margin: clamp(10px, 1.2vw, 16px) 0 12px;
-  font:
-    700 clamp(22px, 1rem + 0.9vw, 30px)/1.2 var(--font-inter),
-    sans-serif;
-  letter-spacing: -0.016em;
-  align-self: end;
-}
 .procesos {
   display: flex;
   flex-direction: column;
+  margin-top: clamp(16px, 1.8vw, 24px);
 }
 /* Bajo las tarjetas: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
    a todas las fichas (2026-10-04, opción D). */
@@ -631,11 +619,11 @@
   }
 }
 @media (max-width: 899px) {
-  /* Móvil y tablet: título, descripción, mapa (con su leyenda), encabezado y fila de
+  /* Móvil y tablet: título, descripción, mapa (con su leyenda) y fila de
      tarjetas (spec §9). */
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "copy" "mapa" "titulo" "tarjetas";
+    grid-template-areas: "copy" "mapa" "tarjetas";
     align-items: start;
   }
   .copy {
@@ -649,9 +637,6 @@
   }
   .leyenda {
     justify-content: flex-start;
-  }
-  .procesosTitulo {
-    margin-top: 22px;
   }
 }
 @media (max-width: 599px) {

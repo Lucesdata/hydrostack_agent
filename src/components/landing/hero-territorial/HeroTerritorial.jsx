@@ -15,7 +15,7 @@ import styles from "./hero-territorial.module.css";
  * minifichas (spec 2026-10-04-hero-cinco-minifichas).
  *
  * Arriba, el mensaje a la izquierda y el mapa a la derecha; debajo, a todo el
- * ancho, «Procesos para explorar». La leyenda de colores va pequeña bajo el
+ * ancho, sin título (2026-10-04; la lista se nombra con aria-label). La leyenda de colores va pequeña bajo el
  * mapa, dentro de su panel. Mapa y tarjetas son **la misma selección**:
  * llegan en `procesos` desde el servidor (`muestraPortada()`), y el mapa del
  * servidor se dibujó con esos mismos objetos. Aquí no se sortea ni se pide nada.
@@ -149,10 +149,6 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
               <p className={styles.noData}>El mapa no está disponible en este momento.</p>
             ) : null}
           </div>
-
-          <h2 id="aq-procesos-titulo" className={styles.procesosTitulo}>
-            Procesos para explorar
-          </h2>
           <div className={styles.procesos} {...pausaAlInteractuar}>
             {procesos == null ? (
               <p className={styles.notaProcesos} role="status">

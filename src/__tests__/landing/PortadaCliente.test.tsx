@@ -32,7 +32,8 @@ describe("PortadaCliente", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
     expect(html).toContain("Explora el mapa.");
     expect(html).toContain("Entiende cada proceso.");
-    expect(html).toContain("Procesos para explorar");
+    // «Procesos para explorar» ya no es un título visible (2026-10-04).
+    expect(html).not.toContain("Procesos para explorar</h2>");
     expect(html).toContain("Del territorio a los detalles que necesitas.");
   });
 
