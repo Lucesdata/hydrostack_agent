@@ -140,16 +140,13 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
 6. Estante «Para ti».
 7. Documentación (CLAUDE.md, PENDIENTES) y PR.
 
-## 5. Decisiones que necesito
+## 5. Decisiones del usuario (2026-10-04)
 
-- **D1.** ¿«Guardar» es **«Seguir»** (reutiliza `coincidencia` y trae los avisos
-  por correo), o prefieres una lista de guardados aparte, sin correo?
-  Recomiendo seguir.
-- **D2.** ¿Añadimos el **tipo de obra a los filtros guardados** (columna nueva), o
-  la alerta guarda solo texto, departamento y presupuesto? Recomiendo añadirlo:
-  es el filtro que más usa la vitrina.
-- **D3.** ¿El estante «Para ti» solo para **cuentas con perfil** (servidor), o también
-  para el perfil del navegador sin cuenta (cliente, con una petición más)?
-  Recomiendo solo cuentas en esta fase.
-- **D4.** ¿Quién aplica la migración en Supabase y cuándo? Hace falta antes de
-  desplegar G1 y G2.
+- **D1. «Guardar» es «Seguir»:** reutiliza `coincidencia` (columna `origen`) y trae
+  los avisos por correo. No hay lista de guardados aparte.
+- **D2. El tipo de obra entra en los filtros guardados:** columna
+  `al_filtros_usuario.tipos_proyecto` y regla `tipo_fuera` en el motor.
+- **D3. «Para ti» solo para cuentas con perfil**, calculado en el servidor.
+- **D4. La migración la aplica el usuario** en la Supabase viva
+  (`npm run db:migrate`) antes de fusionar. El PR la trae generada y probada en
+  PGlite.
