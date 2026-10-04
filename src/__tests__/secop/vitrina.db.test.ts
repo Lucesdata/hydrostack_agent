@@ -53,19 +53,51 @@ async function unProceso(
 beforeAll(async () => {
   await migrate(db as never, { migrationsFolder: path.resolve(__dirname, "../../../drizzle") });
   await db.insert(geografia).values([
-    { codigoDivipola: "05001", departamentoCodigo: "05", departamentoNombre: "Antioquia", municipioCodigo: "001", municipioNombre: "Medellín" },
-    { codigoDivipola: "15215", departamentoCodigo: "15", departamentoNombre: "Boyacá", municipioCodigo: "215", municipioNombre: "Covarachía" },
+    {
+      codigoDivipola: "05001",
+      departamentoCodigo: "05",
+      departamentoNombre: "Antioquia",
+      municipioCodigo: "001",
+      municipioNombre: "Medellín",
+    },
+    {
+      codigoDivipola: "15215",
+      departamentoCodigo: "15",
+      departamentoNombre: "Boyacá",
+      municipioCodigo: "215",
+      municipioNombre: "Covarachía",
+    },
   ]);
   const [ent] = await db
     .insert(entidad)
     .values({ nitCanonico: "9", nombre: "EMPRESAS PUBLICAS DE MEDELLIN" })
     .returning({ id: entidad.id });
   // El más reciente de todos es «otros»; el siguiente, de agua pero vencido.
-  await unProceso("CO1.REQ.OTROS", { tipo: "otros", publicado: dia(0), geo: "05001", entidadId: ent.id, valor: "413000000" });
+  await unProceso("CO1.REQ.OTROS", {
+    tipo: "otros",
+    publicado: dia(0),
+    geo: "05001",
+    entidadId: ent.id,
+    valor: "413000000",
+  });
   await unProceso("CO1.REQ.VENCIDO", { tipo: "ptar", publicado: dia(0), recepcion: dia(-10) });
-  await unProceso("CO1.REQ.SINTIPO", { tipo: null, publicado: dia(-1), objeto: "Compra de 100% insumos" });
-  await unProceso("CO1.REQ.ACUEDUCTO", { tipo: "acueducto", publicado: dia(-3), geo: "15215", valor: "260000000" });
-  await unProceso("CO1.REQ.PTAR", { tipo: "ptar", publicado: dia(-2), recepcion: dia(20), valor: "1200000000" });
+  await unProceso("CO1.REQ.SINTIPO", {
+    tipo: null,
+    publicado: dia(-1),
+    objeto: "Compra de 100% insumos",
+  });
+  await unProceso("CO1.REQ.ACUEDUCTO", {
+    tipo: "acueducto",
+    publicado: dia(-3),
+    geo: "15215",
+    valor: "260000000",
+  });
+  await unProceso("CO1.REQ.PTAR", {
+    tipo: "ptar",
+    publicado: dia(-2),
+    recepcion: dia(20),
+    valor: "1200000000",
+  });
 });
 
 describe("el orden de los abiertos", () => {

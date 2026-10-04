@@ -86,14 +86,18 @@ export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagin
   return {
     filtros: {
       q: q ? q.slice(0, MAX_Q) : null,
-      tipo: tipo && (TIPOS_PROYECTO as readonly string[]).includes(tipo) ? (tipo as TipoProyecto) : null,
+      tipo:
+        tipo && (TIPOS_PROYECTO as readonly string[]).includes(tipo)
+          ? (tipo as TipoProyecto)
+          : null,
       departamento: dep && /^[a-z0-9-]{2,60}$/.test(dep) ? dep : null,
       presupuestoMin: (PRESUPUESTOS_MIN as readonly number[]).includes(pres)
         ? (pres as PresupuestoMin)
         : null,
-      orden: orden && (ORDENES_VITRINA as readonly string[]).includes(orden)
-        ? (orden as OrdenVitrina)
-        : "relevancia",
+      orden:
+        orden && (ORDENES_VITRINA as readonly string[]).includes(orden)
+          ? (orden as OrdenVitrina)
+          : "relevancia",
     },
     pagina: n <= PAGINA_MAXIMA ? n : 1,
   };

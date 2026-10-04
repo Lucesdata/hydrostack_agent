@@ -35,13 +35,18 @@ export default function FiltrosVitrina({
   filtros: Filtros;
   departamentos: OpcionDepartamento[];
 }) {
-  const con = (cambio: Partial<Filtros>) => `/licitaciones${queryDeFiltros({ ...filtros, ...cambio })}`;
+  const con = (cambio: Partial<Filtros>) =>
+    `/licitaciones${queryDeFiltros({ ...filtros, ...cambio })}`;
   const nombreDpto = departamentos.find((d) => d.slug === filtros.departamento)?.label;
 
   const activos: { clave: string; label: string; href: string }[] = [];
   if (filtros.q) activos.push({ clave: "q", label: `«${filtros.q}»`, href: con({ q: null }) });
   if (filtros.tipo)
-    activos.push({ clave: "tipo", label: TIPO_PROYECTO[filtros.tipo].label, href: con({ tipo: null }) });
+    activos.push({
+      clave: "tipo",
+      label: TIPO_PROYECTO[filtros.tipo].label,
+      href: con({ tipo: null }),
+    });
   if (filtros.departamento && nombreDpto)
     activos.push({ clave: "departamento", label: nombreDpto, href: con({ departamento: null }) });
   if (filtros.presupuestoMin)
@@ -51,7 +56,11 @@ export default function FiltrosVitrina({
       href: con({ presupuestoMin: null }),
     });
   if (filtros.orden !== "relevancia")
-    activos.push({ clave: "orden", label: ETIQUETA_ORDEN[filtros.orden], href: con({ orden: "relevancia" }) });
+    activos.push({
+      clave: "orden",
+      label: ETIQUETA_ORDEN[filtros.orden],
+      href: con({ orden: "relevancia" }),
+    });
 
   // Atajos: la colección «Alto valor» de Descubrir y los cuatro tipos de agua.
   const atajos = [
@@ -62,7 +71,13 @@ export default function FiltrosVitrina({
     })),
     ...(filtros.presupuestoMin
       ? []
-      : [{ clave: "alto-valor", label: "Alto valor · desde $500 M", href: con({ presupuestoMin: 500 }) }]),
+      : [
+          {
+            clave: "alto-valor",
+            label: "Alto valor · desde $500 M",
+            href: con({ presupuestoMin: 500 }),
+          },
+        ]),
   ];
 
   return (

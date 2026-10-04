@@ -256,8 +256,8 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <h1 className="clr-mc-title">Mis coincidencias</h1>
         <p className="clr-mc-sub" style={{ margin: "0 0 24px" }}>
           {matches.length} proceso{matches.length === 1 ? "" : "s"} del sector agua que calzan con
-          tu perfil. <Link href="/perfil">Completa tu perfil RUP</Link> para ver
-          también tu semáforo de elegibilidad y recibir alertas por correo.
+          tu perfil. <Link href="/perfil">Completa tu perfil RUP</Link> para ver también tu semáforo
+          de elegibilidad y recibir alertas por correo.
         </p>
         <PanelBloqueantes diagnostico={diagnostico} />
         {hayRegimenPrivado(matches, diagnostico) && (

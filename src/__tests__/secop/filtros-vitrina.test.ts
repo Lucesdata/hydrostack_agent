@@ -15,7 +15,9 @@ describe("los filtros salen de la URL", () => {
 
   it("lee los cinco filtros y la página", () => {
     const { filtros, pagina } = filtrosDesdeParams(
-      new URLSearchParams("q=  PTAR  &tipo=ptar&departamento=antioquia&presupuesto=500&orden=valor&pagina=3")
+      new URLSearchParams(
+        "q=  PTAR  &tipo=ptar&departamento=antioquia&presupuesto=500&orden=valor&pagina=3"
+      )
     );
     expect(filtros).toEqual({
       q: "PTAR",
@@ -64,7 +66,13 @@ describe("la URL de unos filtros", () => {
   });
 
   it("ida y vuelta: leer lo escrito da los mismos filtros", () => {
-    const f = { q: "Covarachía", tipo: "acueducto" as const, departamento: "boyaca", presupuestoMin: 100 as const, orden: "recientes" as const };
+    const f = {
+      q: "Covarachía",
+      tipo: "acueducto" as const,
+      departamento: "boyaca",
+      presupuestoMin: 100 as const,
+      orden: "recientes" as const,
+    };
     expect(filtrosDesdeParams(new URLSearchParams(queryDeFiltros(f, 4).slice(1)))).toEqual({
       filtros: f,
       pagina: 4,

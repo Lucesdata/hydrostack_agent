@@ -44,7 +44,8 @@ export default function FichaCard({
 }: FichaCardProps) {
   const v = vistaFichaCard(proceso, hoy);
   const conSemaforo = variante === "destacada";
-  const tipo = proceso.tipoProyecto && TIPO_PROYECTO[proceso.tipoProyecto] ? proceso.tipoProyecto : null;
+  const tipo =
+    proceso.tipoProyecto && TIPO_PROYECTO[proceso.tipoProyecto] ? proceso.tipoProyecto : null;
   const color = colorDeTipo(tipo);
 
   return (
@@ -82,7 +83,9 @@ export default function FichaCard({
                 {/* El color nunca va solo: el nombre del tipo va al lado (tipo-color.ts). */}
                 <span
                   className={`fc-tipo-punto${color?.familia === "otros" || !color ? " fc-tipo-punto--otros" : ""}`}
-                  style={color && color.familia !== "otros" ? { background: color.claro } : undefined}
+                  style={
+                    color && color.familia !== "otros" ? { background: color.claro } : undefined
+                  }
                   aria-hidden="true"
                 />
                 {tipo ? TIPO_PROYECTO[tipo].label : "Tipo sin clasificar"}

@@ -174,9 +174,7 @@ function condicionesDeFiltros(f: FiltrosVitrina, departamentoCodigo: string | nu
       : undefined,
     f.tipo ? eq(proceso.tipoProyecto, f.tipo) : undefined,
     departamentoCodigo ? eq(geografia.departamentoCodigo, departamentoCodigo) : undefined,
-    f.presupuestoMin
-      ? gte(proceso.valorEstimado, String(f.presupuestoMin * 1_000_000))
-      : undefined,
+    f.presupuestoMin ? gte(proceso.valorEstimado, String(f.presupuestoMin * 1_000_000)) : undefined,
   ];
 }
 

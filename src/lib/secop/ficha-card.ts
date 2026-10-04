@@ -216,7 +216,11 @@ export function objetoLegible(raw: string | null, propios: (string | null)[] = [
     t = sig;
   }
   t = t.replace(/\u0000/g, "(").replace(/\u0001/g, ")");
-  t = t.replace(/\s+/g, " ").replace(/\s+([,.;:)])/g, "$1").replace(/[\s\-–—:,;]+$/, "").trim();
+  t = t
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.;:)])/g, "$1")
+    .replace(/[\s\-–—:,;]+$/, "")
+    .trim();
   if ((t.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) t = raw.trim();
 
   const bajado = sentenceCaseTitle(t);
