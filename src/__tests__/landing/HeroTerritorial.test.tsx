@@ -46,23 +46,25 @@ describe("HeroTerritorial", () => {
     );
     expect(html.match(/<li class="aqMini"/g)).toHaveLength(5);
     for (const p of cinco) {
-      expect(html).toContain(`Proceso: <span translate="no">${p.numeroProceso}</span>`);
+      expect(html).toContain(
+        `<span class="sr-only">Proceso: </span><span translate="no">${p.numeroProceso}</span>`
+      );
       expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
       expect(html).toContain(`aria-label="Ver ficha del proceso ${p.numeroProceso}: ${p.objeto}"`);
     }
   });
 
-  it("orden de la minificha: categoría, lugar, objeto, número, entidad, presupuesto, estado, acceso", () => {
+  it("orden de la minificha (opción B): objeto, entidad, estado, categoría, lugar, presupuesto, número, acceso", () => {
     const inicio = html.indexOf('<li class="aqMini"');
     const tarjeta = html.slice(inicio, html.indexOf("</li>", inicio));
     const orden = [
+      "Obra de prueba",
+      "Municipio de Prueba",
+      "Abierto",
       "Agua potable",
       "Cali · Valle del Cauca",
-      "Obra de prueba",
-      "Proceso:",
-      "Municipio de Prueba",
       "$2.450 millones",
-      "Abierto",
+      "Proceso:",
       "Ver ficha",
     ].map((t) => tarjeta.indexOf(t));
     expect(orden.every((i) => i >= 0)).toBe(true);
