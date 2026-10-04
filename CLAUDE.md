@@ -1,5 +1,15 @@
 # AquaLicita — Instrucciones del Proyecto
 
+**Buscador guiado (2026-10-04, diseño pendiente de ejecución).** El usuario
+eligió la alternativa 1 y guardar explícitamente con cuenta gratuita, con
+recientes separados. Diseño en
+`docs/superpowers/specs/2026-10-04-buscador-guiado-design.md`; plan de primera
+entrega (tema y número) en
+`docs/superpowers/plans/2026-10-04-buscador-guiado.md`. La portada vigente ya
+no tiene el buscador antiguo: el nuevo se propone bajo la frase del hero.
+Guardados/Recientes requiere un segundo plan de datos de cuenta. Esta nota
+documenta el acuerdo; no cambia el producto ni autoriza despliegue.
+
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
 pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto
