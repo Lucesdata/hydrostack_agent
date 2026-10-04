@@ -65,6 +65,19 @@ export const ESTILOS_MAPA = `
 .atlas-map-label-ancla{ fill: var(--surface); stroke: var(--accent-deep); stroke-width: 1.2; }
 .atlas-map-label text{ font-size: 7.5px; fill: var(--text-muted); font-family: inherit; }
 .atlas-map-label text.atlas-map-label-count{ font-size: 10.5px; font-weight: 700; fill: var(--text-primary); }
+/* Modo selección (hero de la portada): mapa base y etiquetas de proceso. Los
+   colores del tema oscuro los pone el hero; esto es la base clara. */
+.clr-mapa__dpto--base{ fill: var(--surface-alt); }
+.clr-mapa__dpto--sel{ fill: rgba(3,105,161,.3); }
+.clr-mapa__guia{ stroke: var(--text-muted); stroke-width: .9; }
+.clr-mapa__ancla{ fill: var(--surface); stroke: var(--accent-deep); stroke-width: 1.4; }
+.clr-mapa__etq rect{ fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+.clr-mapa__etq-punto{ fill: var(--accent); }
+.clr-mapa__etq text{ font-family: inherit; fill: var(--text-primary); }
+.clr-mapa__etq-lugar{ font-size: 11.5px; font-weight: 500; }
+.clr-mapa__etq-valor{ font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.clr-mapa__etq:focus{ outline: none; }
+.clr-mapa__etq:focus-visible rect{ stroke: var(--accent-deep); stroke-width: 2.4; }
 @media (max-width: 640px){
   .clr-mapa__leyenda{ gap: 4px 10px; }
   .clr-mapa__leyenda li{ font-size: 11.5px; }

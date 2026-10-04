@@ -26,6 +26,9 @@ import {
 export const ANCHO_MAPA = 420;
 export const ALTO_MAPA = 520;
 export const LADO_RECUADRO = 58;
+/** Esquina del recuadro de San Andrés: arriba a la izquierda, sobre el Pacífico. */
+export const RECUADRO_X = 6;
+export const RECUADRO_Y = 10;
 
 export interface EntradaMapa {
   /** Código DIVIPOLA de dos dígitos. */

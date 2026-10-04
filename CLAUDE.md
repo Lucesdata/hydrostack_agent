@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-02 (hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (hero con cinco minifichas; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -272,7 +272,34 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
   esa línea y con `src/lib/landing/cifras.ts`.
 
-**Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
+**Hero con cinco minifichas (2026-10-04).** Sustituye la tarjeta única, el
+buscador, la lista de departamentos, las «Opciones del mapa» y el mapa
+coroplético del hero. Spec y reconocimiento:
+`docs/superpowers/specs/2026-10-04-hero-cinco-minifichas.md`. Lo que hay:
+- `muestraPortada()` (`src/lib/secop/muestra-portada.ts`): **una** consulta,
+  `ORDER BY random() LIMIT 5` sobre todos los abiertos (`condicionAbierto()`)
+  con `referencia` y objeto publicados, id `CO1.<X>.<n>` y departamento
+  anclable. La llama `app/page.js` (ISR 6 h): la selección viaja en el HTML,
+  así que es estable en la visita y sin sorteo en el navegador. Ya no se llama
+  `agregadosPortada()` desde la portada (la imagen OG sigue usándola).
+- Un contrato, `ProcesoPortada` (`src/lib/landing/proceso-portada.ts`), que
+  pintan **a la vez** el mapa (servidor, `ColombiaChoropleth` con la prop
+  `seleccion`) y las minifichas (cliente). Número de proceso =
+  `proceso.referencia` (texto), identidad = `secop_proceso_id`, presupuesto =
+  `valor_estimado` vía `montoConDato`, ubicación = sede de la entidad.
+- Mapa en modo selección: departamentos en tono base, sin enlaces a facetas ni
+  conteos; un anclaje **departamental** compartido por los procesos de un mismo
+  departamento (no hay coordenadas de municipio) y una etiqueta enlazada por
+  proceso en dos columnas laterales (`src/lib/mapa/etiquetas-procesos.ts`).
+  Esos anclajes corrigen ocho de `ANCLAS` que caían fuera o pegados al borde
+  (Risaralda, Cundinamarca…); un test lo exige. Bajo 600 px las etiquetas se
+  ocultan y una línea dice el proceso activo.
+- Color = familia de `tipo-color.ts` (sin tipo → neutro, nunca «redes»). Un
+  estado compartido, el id activo (`sincronia.js`): tarjeta ↔ etiqueta,
+  anclaje y departamento. En táctil, la tarjeta a la vista es la activa.
+- La franja de la ficha enlaza el **primer** proceso del hero.
+
+*(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario
 (`docs/superpowers/specs/2026-10-02-hero-mapa-ficha.md`, imagen al lado; plan en
 `docs/superpowers/plans/`). Sustituye en parte al hero v2 de abajo, con tres

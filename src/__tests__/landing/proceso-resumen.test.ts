@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  SIN_OBJETO,
-  destacadoDeApi,
-  enlacesDeFicha,
-} from "@/src/components/landing/proceso-resumen";
+import { enlacesDeFicha } from "@/src/components/landing/proceso-resumen";
 import { frase, titulo } from "@/src/components/landing/texto";
 
 const base = {
@@ -22,58 +18,6 @@ describe("frase", () => {
   it("el objeto en mayúsculas pasa a frase y conserva las siglas del sector", () => {
     expect(frase("OPTIMIZACIÓN DE LA PTAR MUNICIPAL")).toBe("Optimización de la PTAR municipal");
     expect(frase("Ampliación de la PTAR El Salitre")).toBe("Ampliación de la PTAR El Salitre");
-  });
-});
-
-describe("destacadoDeApi", () => {
-  it("toma id, ficha, objeto en frase y la entidad para el nombre accesible", () => {
-    expect(destacadoDeApi(base)).toEqual({
-      id: "CO1.REQ.1",
-      href: base.ficha,
-      objeto: "Optimización de la PTAR municipal",
-      entidad: "Municipio de Chinu",
-    });
-  });
-
-  it("acepta la ficha sin texto, solo con el id", () => {
-    expect(destacadoDeApi({ ...base, ficha: "/licitaciones/CO1.REQ.1" })?.href).toBe(
-      "/licitaciones/CO1.REQ.1"
-    );
-  });
-
-  it("sin objeto lo dice: no pone la entidad en su lugar", () => {
-    const sinObjeto = destacadoDeApi({ ...base, objeto: null, ficha: "/licitaciones/CO1.REQ.1" });
-    expect(sinObjeto?.objeto).toBe(SIN_OBJETO);
-    expect(sinObjeto?.objeto).not.toContain("Chinu");
-    expect(destacadoDeApi({ ...base, objeto: "   " })?.objeto).toBe(SIN_OBJETO);
-  });
-
-  it("sin ficha no cae al listado: no hay destacado", () => {
-    expect(destacadoDeApi({ ...base, ficha: null })).toBeNull();
-    expect(destacadoDeApi({ ...base, ficha: "/licitaciones" })).toBeNull();
-  });
-
-  it("rechaza destinos que no son la ficha de ese proceso", () => {
-    for (const ficha of [
-      "https://evil.example/licitaciones/x--CO1.REQ.1",
-      "//evil.example/licitaciones/x--CO1.REQ.1",
-      "javascript:alert(1)",
-      "/cuenta",
-      "/licitaciones/departamento/antioquia",
-      "/licitaciones/explorar",
-      "/licitaciones/x--CO1.REQ.1/../../cuenta",
-      "/licitaciones/x--CO1.REQ.1?y=1",
-      "/licitaciones/x--CO1.REQ.2", // otro proceso
-    ]) {
-      expect(destacadoDeApi({ ...base, ficha }), ficha).toBeNull();
-    }
-  });
-
-  it("rechaza lo que no es un proceso", () => {
-    expect(destacadoDeApi(null)).toBeNull();
-    expect(destacadoDeApi("CO1.REQ.1")).toBeNull();
-    expect(destacadoDeApi({ ...base, id: null })).toBeNull();
-    expect(destacadoDeApi({ ...base, id: 7 })).toBeNull();
   });
 });
 

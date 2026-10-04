@@ -3,106 +3,70 @@
 import { useEffect } from "react";
 
 /**
- * Sincronía mapa ↔ lista ↔ ficha del hero.
+ * Sincronía mapa ↔ minifichas del hero (spec 2026-10-04-hero-cinco-minifichas §8).
  *
- * El mapa es SVG de servidor y no lleva JS: cada departamento trae su código en
- * `data-dpto`. El hero escucha por delegación sobre el contenedor y marca con
- * clases los caminos que toca resaltar. El clic del mapa sigue navegando a la
- * faceta (decisión D del 2026-09-21); esto solo añade el resaltado.
- */
-
-/** Código DIVIPOLA del departamento bajo el puntero o el foco, o `null`. */
-export function dptoDesdeObjetivo(objetivo) {
-  const el = objetivo?.closest?.("[data-dpto]");
-  if (el) return el.getAttribute("data-dpto");
-  // El foco de teclado cae en el <a> que envuelve al camino, no en el camino.
-  // Solo en el <a>: sobre el hueco entre departamentos el objetivo es el
-  // <svg>, y buscar dentro devolvería el primer departamento del mapa.
-  if (objetivo?.matches?.("a.clr-mapa__link")) {
-    const hijo = objetivo.querySelector("[data-dpto]");
-    return hijo ? hijo.getAttribute("data-dpto") : null;
-  }
-  return null;
-}
-
-/**
- * El contorno que la capa de selección (`.clr-mapa__marca`) copia del
- * departamento elegido: su `d`, o `null` si no hay que pintar nada. San Andrés
- * va en un recuadro con su propia transformación y la capa no la comparte: ahí
- * basta la clase `is-seleccionado`, porque en el recuadro no tiene vecinos.
- */
-export function contornoSeleccionado(raiz, seleccionado) {
-  if (!seleccionado) return null;
-  const camino = raiz.querySelector(`path[data-dpto="${seleccionado}"]`);
-  if (!camino || camino.closest("g[transform]")) return null;
-  return camino.getAttribute("d");
-}
-
-/**
- * Aplica `is-resaltado` y `is-seleccionado` a los caminos del mapa, y copia el
- * contorno del elegido a la capa de selección, que va encima de todos. No se
+ * El mapa es SVG de servidor y no lleva JS: cada etiqueta y cada guía llevan el
+ * id del proceso en `data-proceso`, cada anclaje los ids que comparte en
+ * `data-procesos` y cada departamento su código en `data-dpto`. El hero escucha
+ * por delegación y marca con clases y atributos lo que toca resaltar. Nunca
  * reordena el SVG: lo pinta React y moverle nodos rompería la reconciliación.
+ *
+ * Hasta el 2026-10-04 esto sincronizaba departamentos (mapa, lista y ficha del
+ * departamento); su estado previo está en git.
  */
-export function useMarcasEnMapa(contenedorRef, resaltado, seleccionado) {
-  useEffect(() => {
-    const raiz = contenedorRef.current;
-    if (!raiz) return;
-    for (const camino of raiz.querySelectorAll("[data-dpto]")) {
-      const codigo = camino.getAttribute("data-dpto");
-      camino.classList.toggle("is-resaltado", codigo === resaltado);
-      camino.classList.toggle("is-seleccionado", codigo === seleccionado);
-    }
-    raiz.toggleAttribute("data-resaltando", resaltado != null);
-    const marca = raiz.querySelector(".clr-mapa__marca");
-    if (marca) {
-      const d = contornoSeleccionado(raiz, seleccionado);
-      if (d) marca.setAttribute("d", d);
-      else marca.removeAttribute("d");
-    }
-  }, [contenedorRef, resaltado, seleccionado]);
+
+/** El id del proceso bajo el puntero o el foco, o `null`. */
+export function procesoDesdeObjetivo(objetivo) {
+  const el = objetivo?.closest?.("[data-proceso]");
+  return el ? el.getAttribute("data-proceso") : null;
 }
 
 /**
- * El escalón de color de cada departamento según el modo del mapa. `null` en
- * "procesos": es lo que ya pinta el servidor y no hay nada que cambiar.
- *
- * - "monto": escalón del monto en juego (sin presupuesto publicado → 0).
- * - "tipo": escalón de los abiertos de ese tipo, con la escala de procesos.
- *
- * Puro, para probarlo. Las escalas llegan por parámetro para que este archivo
- * no dependa de ellas.
+ * Qué marcar para un proceso activo, sin DOM: el departamento de su anclaje y
+ * la familia que toma ese anclaje. `anclas` son los anclajes del mapa con los
+ * ids que comparten; `familias`, id → familia, del mismo contrato que pinta las
+ * tarjetas. Un id que el mapa no conoce no marca nada.
  */
-export function indicesDeModo({ modo, tipo, departamentos, escalonDe, escalonMontoDe }) {
-  if (modo === "monto") {
-    return new Map(departamentos.map((d) => [d.clave, escalonMontoDe(d.montoAbierto ?? 0).indice]));
-  }
-  if (modo === "tipo" && tipo) {
-    return new Map(departamentos.map((d) => [d.clave, escalonDe(d.tipos?.[tipo] ?? 0).indice]));
-  }
-  return null;
+export function marcasDeActivo(activo, anclas, familias) {
+  if (activo == null) return { dpto: null, familia: null };
+  const ancla = anclas.find((a) => a.ids.includes(activo));
+  if (!ancla) return { dpto: null, familia: null };
+  return { dpto: ancla.dpto, familia: familias.get(activo) ?? "otros" };
 }
 
-const ESCALON = /clr-mapa__dpto--e\d/;
-
 /**
- * Pinta el mapa con los escalones dados cambiando la clase `clr-mapa__dpto--eN`
- * de cada camino, no con un color en línea: así el CSS del mapa —incluido el
- * rayado de "sin procesos"— se aplica igual en todos los modos. La clase del
- * servidor se guarda en `data-e-orig` y se restaura con `indices === null`.
- * Los departamentos que no están en `indices` (sin procesos abiertos) van a 0.
+ * Aplica el proceso activo al mapa:
+ * - `is-activo` en su etiqueta y su guía;
+ * - `data-activa` en su anclaje, con su familia: un anclaje compartido por
+ *   categorías distintas toma la del activo mientras dure (spec §7.6);
+ * - `is-resaltado` en su departamento;
+ * - `data-activo` en la raíz, que atenúa el resto sin ocultarlo.
  */
-export function usePinturaEnMapa(contenedorRef, modo, indices) {
+export function aplicarActivo(raiz, activo, familias) {
+  if (!raiz) return;
+  const nodosAncla = [...raiz.querySelectorAll("[data-procesos]")];
+  const anclas = nodosAncla.map((el) => ({
+    el,
+    dpto: el.getAttribute("data-ancla"),
+    ids: (el.getAttribute("data-procesos") ?? "").split(" ").filter(Boolean),
+  }));
+  const { dpto, familia } = marcasDeActivo(activo, anclas, familias);
+  for (const el of raiz.querySelectorAll("[data-proceso]")) {
+    el.classList.toggle("is-activo", dpto != null && el.getAttribute("data-proceso") === activo);
+  }
+  for (const a of anclas) {
+    if (dpto != null && a.ids.includes(activo)) a.el.setAttribute("data-activa", familia);
+    else a.el.removeAttribute("data-activa");
+  }
+  for (const el of raiz.querySelectorAll("path[data-dpto]")) {
+    el.classList.toggle("is-resaltado", dpto != null && el.getAttribute("data-dpto") === dpto);
+  }
+  if (dpto != null) raiz.setAttribute("data-activo", "");
+  else raiz.removeAttribute("data-activo");
+}
+
+export function useActivoEnMapa(contenedorRef, activo, familias) {
   useEffect(() => {
-    const raiz = contenedorRef.current;
-    if (!raiz) return;
-    for (const camino of raiz.querySelectorAll("[data-dpto]")) {
-      const actual = camino.getAttribute("class") ?? "";
-      if (camino.dataset.eOrig == null) camino.dataset.eOrig = actual.match(ESCALON)?.[0] ?? "";
-      const destino = indices
-        ? `clr-mapa__dpto--e${indices.get(camino.getAttribute("data-dpto")) ?? 0}`
-        : camino.dataset.eOrig;
-      camino.setAttribute("class", actual.replace(ESCALON, destino).trim());
-    }
-    raiz.setAttribute("data-metrica", modo);
-  }, [contenedorRef, modo, indices]);
+    aplicarActivo(contenedorRef.current, activo, familias);
+  }, [contenedorRef, activo, familias]);
 }

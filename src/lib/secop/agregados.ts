@@ -18,6 +18,7 @@ import { TIPOS_PROYECTO, TIPO_PROYECTO, type TipoProyecto } from "../classify/ti
 import { CLASES_ENTIDAD, CLASE_ENTIDAD, sqlClaseEntidad, type ClaseEntidad } from "./clase-entidad";
 // Pura y sin base: vive en ./slug para que el navegador pueda importarla.
 import { slugificar } from "./slug";
+import { ESTADOS_ABIERTO } from "./estados-abierto";
 
 export { slugificar };
 
@@ -34,7 +35,7 @@ export { slugificar };
  * tienen que contar EXACTAMENTE lo mismo: si cada uno define "abierto" a su
  * manera, la portada enseña cuatro cifras distintas del mismo hecho.
  */
-export const ESTADOS_ABIERTO = ["Publicado", "Abierto"] as const;
+export { ESTADOS_ABIERTO };
 
 export function condicionAbierto() {
   return and(

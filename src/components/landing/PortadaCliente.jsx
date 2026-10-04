@@ -8,11 +8,8 @@
 // dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
 // hueco `semaforo` en `FilaProceso`.
 
-import { useMemo, useState } from "react";
-import HeroTerritorial, {
-  claveInicial,
-} from "@/src/components/landing/hero-territorial/HeroTerritorial";
-import { useResumenDepartamento } from "@/src/components/landing/hero-territorial/ResumenDepartamento";
+import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import { frase } from "@/src/components/landing/texto";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
@@ -34,27 +31,22 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
 /**
  * @param {{
  *   mapa?: import("react").ReactNode,
- *   departamentos?: import("@/src/lib/secop/agregados").FilaAgregado[],
- *   totalAbiertos?: number | null,
+ *   procesos?: import("@/src/lib/landing/proceso-portada").ProcesoPortada[] | null,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
- * import: importarlo aquí lo arrastraría al bundle del navegador.
+ * import: importarlo aquí lo arrastraría al bundle del navegador. `procesos` es
+ * la selección de `muestraPortada()` con la que el servidor dibujó ese mapa;
+ * `null` si la consulta falló.
  *
- * Ya no pide `/api/landing-stats` (2026-09-27): la línea «N procesos del
- * sector» bajo el botón del hero salió con el resto de la carga.
+ * Desde el 2026-10-04 la portada ya no recibe los agregados por departamento:
+ * el mapa del hero marca los procesos elegidos en vez de contar por territorio
+ * (spec 2026-10-04-hero-cinco-minifichas §7.2).
  */
-export default function LandingPage({ mapa = null, departamentos = [], totalAbiertos = null }) {
-  // El departamento confirmado y su proceso destacado viven aquí, no en el
-  // hero: la tarjeta del hero y los cuatro accesos de la franja de abajo
-  // enlazan el mismo proceso, con una sola petición (spec
-  // 2026-10-02-hero-mapa-ficha §8 y §9).
-  const inicial = useMemo(
-    () => claveInicial(departamentos, totalAbiertos),
-    [departamentos, totalAbiertos]
-  );
-  const [elegido, setElegido] = useState(null);
-  const clave = inicial == null ? null : (elegido ?? inicial);
-  const resumen = useResumenDepartamento(clave);
-  const destacado = clave && resumen.status === "live" ? resumen.destacado : null;
+export default function LandingPage({ mapa = null, procesos = null }) {
+  // La franja de la ficha enlaza las secciones del primer proceso del hero:
+  // uno fijo, no el que esté bajo el puntero, para que sus cuatro enlaces no
+  // cambien de destino mientras se mira el hero.
+  const primero = procesos?.[0];
+  const destacado = primero ? { href: primero.href, objeto: frase(primero.objeto) } : null;
 
   return (
     <div
@@ -70,18 +62,11 @@ export default function LandingPage({ mapa = null, departamentos = [], totalAbie
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial
-          mapa={mapa}
-          departamentos={departamentos}
-          totalAbiertos={totalAbiertos}
-          clave={clave}
-          onElegir={setElegido}
-          resumen={resumen}
-        />
+        <HeroTerritorial mapa={mapa} procesos={procesos} />
 
-        {/* La franja de la ficha: los cuatro accesos al proceso de la tarjeta.
-            Va justo después del hero porque el hero existe para llevar a una
-            ficha. */}
+        {/* La franja de la ficha: los cuatro accesos al primer proceso del
+            hero. Va justo después del hero porque el hero existe para llevar a
+            una ficha. */}
         <FichaViva destacado={destacado} />
       </div>
     </div>

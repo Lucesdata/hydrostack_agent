@@ -5,8 +5,8 @@ import styles from "./ficha-viva.module.css";
 /**
  * La franja de la ficha, bajo el hero: «Del territorio a los detalles que
  * necesitas.» y un panel claro con cuatro accesos a secciones reales de la
- * ficha del proceso que muestra la tarjeta del hero (spec
- * 2026-10-02-hero-mapa-ficha §8).
+ * ficha del primer proceso del hero (spec 2026-10-02-hero-mapa-ficha §8; desde
+ * el 2026-10-04 el hero lleva cinco minifichas y la franja toma la primera).
  *
  * No es una captura ni un segundo proceso: describe qué se revisa en la ficha
  * y, con un destacado válido, enlaza esas secciones de **ese** proceso. Sin él
@@ -73,7 +73,7 @@ const ACCESOS = [
 
 /**
  * @param {{ destacado?: { href: string, objeto: string } | null }} props — el
- * proceso de la tarjeta del hero, ya validado (`destacadoDeApi`), o `null`.
+ * primer proceso del hero (`ProcesoPortada`, ruta ya validada), o `null`.
  */
 export default function FichaViva({ destacado = null }) {
   const enlaces = enlacesDeFicha(destacado?.href);

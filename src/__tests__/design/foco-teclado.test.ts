@@ -28,10 +28,17 @@ describe("foco y orden de tabulación", () => {
     expect(layout).toMatch(/<main\s+id="contenido"\s+tabIndex=\{-1\}/);
   });
 
-  it("el foco de un departamento del mapa es un anillo de dos tonos", () => {
+  it("el foco de una etiqueta del mapa y de una minificha se ve (2026-10-04)", () => {
+    // El hero ya no enlaza departamentos: enlaza procesos, en el mapa y en las
+    // tarjetas. El foco se pinta en la caja de la etiqueta, no con outline
+    // (un outline rectangular en SVG señala la caja del grupo), y en la
+    // tarjeta entera, que es lo que cubre el enlace estirado.
     const css = leer("src/components/landing/hero-territorial/hero-territorial.module.css");
-    const foco = bloque(css, ".map :global(.clr-mapa__link:focus-visible .clr-mapa__dpto)");
-    expect(foco).toMatch(/stroke:\s*var\(--aq-bg\)/);
-    expect(foco).toMatch(/drop-shadow/);
+    expect(bloque(css, ".map :global(.clr-mapa__etq:focus-visible rect)")).toMatch(
+      /stroke:\s*var\(--aq-cyan\)/
+    );
+    expect(bloque(css, ".hero :global(.aqMiniVer:focus-visible::after)")).toMatch(
+      /outline:\s*2px solid var\(--aq-cyan\)/
+    );
   });
 });
