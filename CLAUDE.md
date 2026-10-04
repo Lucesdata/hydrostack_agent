@@ -226,7 +226,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (vitrina: fase 0, fusión de Explorar y Descubrir y tarjeta con encaje; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (vitrina: fase 0, fusión de Explorar y Descubrir, tarjeta con encaje y Radar; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -656,4 +656,13 @@ ayer, y «Cumples N de 5» con el perfil del navegador o de la cuenta
 hay nada que redactar). Sin perfil se define encima de la rejilla, sin cuenta.
 `searchProcesosDb` trae `fecha_recepcion`: el plazo del matching ya no sale
 siempre sin datos. Guardar pasa a la fase 3 (tabla nueva).
+
+**Radar de la vitrina (2026-10-04, fase 2).** Desde 1100 px, `/licitaciones` es
+lista y detalle (`RadarVitrina.tsx`): las tarjetas siguen siendo enlaces del
+servidor y, con JavaScript, un clic principal las elige y pinta su detalle en un
+panel fijo con el mismo `BloqueDecision` de la ficha; Ctrl/Cmd-clic y Enter abren
+la ficha. Debajo de 1100 px no hay panel: la ficha es el detalle. El servidor arma
+el panel con `detallesDeRadar()` y `datosDecisionDe()`, que ahora también usa la
+ficha. `BloqueDecision` acepta `hrefFicha` para que sus pasos al pliego vayan a
+la ficha. El bloque se monta solo cuando el navegador confirma el ancho.
 

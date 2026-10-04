@@ -8,6 +8,9 @@ import { rutaVitrina, type PaginaDeVitrina, type PestanaVitrina } from "@/src/li
 import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros-vitrina";
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 import { ProveedorEncaje } from "./EncajeVitrina";
+import RadarVitrina from "./RadarVitrina";
+import { ESTILOS_FICHA } from "../ficha/estilos";
+import type { DetalleRadar } from "@/src/lib/secop/radar";
 
 /**
  * La vitrina: cabecera con conteo, pestañas, buscador y filtros (solo en
@@ -39,10 +42,14 @@ const VACIO: Record<PestanaVitrina, { texto: string; accion: string; href: strin
 export default function Vitrina({
   pagina,
   departamentos = [],
+  detalles = [],
 }: {
   pagina: PaginaDeVitrina;
   departamentos?: OpcionDepartamento[];
+  /** El panel del Radar; sin detalles (adjudicados, o si su consulta falló), solo la rejilla. */
+  detalles?: DetalleRadar[];
 }) {
+  const conRadar = pagina.pestana === "abiertos" && detalles.length > 0;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
   const filtrado = pagina.pestana === "abiertos" && hayFiltros(pagina.filtros);
   const vacio = filtrado
@@ -53,12 +60,22 @@ export default function Vitrina({
       }
     : VACIO[pagina.pestana];
   const ruta = (n: number) => rutaVitrina(pagina.pestana, n, pagina.filtros);
+  const rejilla = (
+    <ul className="vt-rejilla">
+      {pagina.items.map((p) => (
+        <li key={p.id}>
+          <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div className="clr-page">
       <style
         dangerouslySetInnerHTML={{
-          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD,
+          // Los de la ficha solo con Radar: su panel aloja el bloque de decisión.
+          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD + (conRadar ? ESTILOS_FICHA : ""),
         }}
       />
       <div className="clr-container">
@@ -104,13 +121,7 @@ export default function Vitrina({
           </div>
         ) : (
           <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
-            <ul className="vt-rejilla">
-              {pagina.items.map((p) => (
-                <li key={p.id}>
-                  <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
-                </li>
-              ))}
-            </ul>
+            {conRadar ? <RadarVitrina detalles={detalles}>{rejilla}</RadarVitrina> : rejilla}
           </ProveedorEncaje>
         )}
 

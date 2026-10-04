@@ -87,11 +87,27 @@ retirada) y el panel de detalle con sondeo de documentos (vuelve en la fase 2).
 - **Guardar** se mueve a la fase 3: necesita una tabla nueva (con
   `.enableRLS()` y migración), y eso pide plan propio según `docs/CONDUCTA.md`.
 
-## Fase 2 — Radar
+## Fase 2 — Radar (hecha)
 
-Lista densa con panel de detalle en escritorio; en móvil, dos pantallas.
-Teclado ↑/↓ y Enter. El detalle reutiliza el semáforo con perfil y el
-«siguiente paso» de `BloqueDecision`.
+- Desde 1100 px la vitrina es **lista y detalle**: las tarjetas en una columna a
+  la izquierda y un panel fijo a la derecha con el proceso elegido
+  (`RadarVitrina.tsx`). Debajo de 1100 px no hay panel: la tarjeta lleva a la
+  ficha, que es la pantalla de detalle del celular.
+- **Mejora progresiva:** las tarjetas siguen siendo enlaces del servidor. Con
+  JavaScript, un clic principal elige; Ctrl, Cmd, Mayúsculas o el botón central
+  abren la ficha como siempre. ↑/↓ recorren y eligen; Enter abre la ficha.
+- **El panel aloja el mismo `BloqueDecision` de la ficha** (veredicto con el
+  perfil, las cinco compuertas, el siguiente paso y el asistente de perfil),
+  más «Abrir la ficha completa» y «Ver en SECOP II». Sus datos los arma el
+  servidor con `detallesDeRadar()` (`src/lib/secop/radar.ts`: dos consultas por
+  página, la ficha y si tiene pliego) y `datosDecisionDe()`
+  (`src/lib/secop/datos-decision.ts`), el helper que ahora usa también la
+  ficha. Los pasos al pliego van a `<ficha>#pliego` (`hrefFicha`).
+- El bloque de decisión no va en el HTML del servidor: se monta cuando el
+  navegador confirma el ancho, para no pedir el veredicto en un celular que no
+  lo enseña.
+- Lo que faltaba del sondeo de documentos de Explorar no se trajo:
+  `/api/secop/probe` queda sin consumidor (PENDIENTES §54).
 
 ## Fase 3 — ganchos de vuelta
 

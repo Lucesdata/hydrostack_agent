@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Vitrina from "@/src/components/secop/vitrina/Vitrina";
 import { paginaValida, procesosDeVitrina } from "@/src/lib/secop/vitrina";
 import { procesosPorDepartamento } from "@/src/lib/secop/agregados";
+import { detallesDeRadar } from "@/src/lib/secop/radar";
+import { hrefDeProceso } from "@/src/components/secop/lista/PaginaFaceta";
 
 export const revalidate = 21600;
 
@@ -37,10 +39,15 @@ export default async function PaginaAbiertos({ params }: Props) {
     procesosPorDepartamento().catch(() => []),
   ]);
   if (datos.items.length === 0) notFound();
+  // El panel del Radar es una mejora: si su consulta falla, la página sale sin él.
+  const detalles = await detallesDeRadar(
+    datos.items.map((p) => ({ secopProcesoId: p.secopProcesoId, href: hrefDeProceso(p) }))
+  ).catch(() => []);
   return (
     <Vitrina
       pagina={datos}
       departamentos={departamentos.map((d) => ({ slug: d.slug, label: d.label, n: d.n }))}
+      detalles={detalles}
     />
   );
 }

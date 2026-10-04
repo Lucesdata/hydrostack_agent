@@ -2,6 +2,15 @@ import Vitrina from "@/src/components/secop/vitrina/Vitrina";
 import { procesosDeVitrina } from "@/src/lib/secop/vitrina";
 import { filtrosDesdeParams, hayFiltros } from "@/src/lib/secop/filtros-vitrina";
 import { procesosPorDepartamento } from "@/src/lib/secop/agregados";
+import { detallesDeRadar } from "@/src/lib/secop/radar";
+import { hrefDeProceso } from "@/src/components/secop/lista/PaginaFaceta";
+
+/** El panel del Radar es una mejora: si su consulta falla, la vitrina sale sin él. */
+function detallesDe(items) {
+  return detallesDeRadar(
+    items.map((p) => ({ secopProcesoId: p.secopProcesoId, href: hrefDeProceso(p) }))
+  ).catch(() => []);
+}
 
 const METADATA = {
   title: "Fichas de procesos · agua y saneamiento en SECOP II",
@@ -73,10 +82,13 @@ export default async function LicitacionesPage({ searchParams }) {
     ]);
   }
 
+  const detalles = await detallesDe(datos.items);
+
   return (
     <Vitrina
       pagina={datos}
       departamentos={departamentos.map((d) => ({ slug: d.slug, label: d.label, n: d.n }))}
+      detalles={detalles}
     />
   );
 }

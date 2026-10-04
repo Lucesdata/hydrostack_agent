@@ -50,7 +50,7 @@ export default function FichaCard({
   const color = colorDeTipo(tipo);
 
   return (
-    <Link href={href} className={`fc fc--${variante}`}>
+    <Link href={href} className={`fc fc--${variante}`} data-id={v.id}>
       <div className="fc-cab">
         <span className="fc-id">
           {v.id}

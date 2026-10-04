@@ -6,14 +6,9 @@ import ExploradorFicha from "@/src/components/secop/ficha/ExploradorFicha";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
+import { datosDecisionDe, urlSecopDe } from "@/src/lib/secop/datos-decision";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
-import { compuertasAbsolutas, fechaCortaDeDia } from "@/src/lib/secop/semaforo";
-import {
-  aSecopProceso,
-  competidoresComparables,
-  procesoPorSlug,
-  slugDeProceso,
-} from "@/src/lib/secop/ficha";
+import { competidoresComparables, procesoPorSlug, slugDeProceso } from "@/src/lib/secop/ficha";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import { formatCopFull, sentenceCaseTitle } from "@/src/components/secop/format";
@@ -104,7 +99,7 @@ export default async function FichaPage({ params }: Props) {
         : "Recepción de ofertas por confirmar";
   // Solo se acorta la presentación; el objeto oficial completo sigue accesible.
   const tituloCorto = titulo.length > 180 ? `${titulo.slice(0, 177).trimEnd()}…` : titulo;
-  const urlSecop = p.url && /^https?:\/\//i.test(p.url) ? p.url : null;
+  const urlSecop = urlSecopDe(p.url);
   const schema = {
     "@context": "https://schema.org",
     "@type": "GovernmentService",
@@ -359,25 +354,7 @@ export default async function FichaPage({ params }: Props) {
           {/* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
               en «Quiero participar» como pide el spec de la ficha interactiva
               (2026-09-29): los seis accesos públicos se conservan. */}
-          <BloqueDecision
-            proceso={aSecopProceso(p)}
-            absolutas={compuertasAbsolutas(p)}
-            conPliego={pliego !== null}
-            urlSecop={urlSecop}
-            presupuesto={valor !== null ? formatCopFull(valor) : "Sin presupuesto publicado"}
-            conPresupuesto={valor !== null}
-            fechaPublicacion={p.fechaPublicacion}
-            fechaRecepcion={p.fechaRecepcion}
-            fechaPublicacionTexto={fechaCortaDeDia(p.fechaPublicacion)}
-            fechaRecepcionTexto={fechaCortaDeDia(p.fechaRecepcion)}
-            estadoApertura={p.estadoApertura}
-            modalidad={p.modalidad}
-            hrefExplorar={
-              p.tipoProyecto
-                ? `/licitaciones/tipo/${TIPO_PROYECTO[p.tipoProyecto].slug}`
-                : "/licitaciones"
-            }
-          />
+          <BloqueDecision {...datosDecisionDe(p, { conPliego: pliego !== null })} />
           <section id="pliego" className="fi-sec">
             <h3 className="fi-h2">Requisitos y pliego</h3>
             <PliegoFicha pliego={pliego} slug={canonico} urlSecop={urlSecop} />

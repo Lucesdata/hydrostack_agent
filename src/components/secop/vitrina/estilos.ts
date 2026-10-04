@@ -28,6 +28,45 @@ export const ESTILOS_VITRINA = `
 .vt-pag-info { font: 12px var(--mono); color: var(--text-muted); }
 .vt-pag-link { font: 600 13px var(--mono); color: var(--accent); }
 
+/* Radar (RadarVitrina): desde 1100 px, lista a la izquierda y detalle fijo a la
+   derecha. Debajo, el panel no existe y la rejilla es la de siempre. */
+.vr-panel { display: none; }
+.vr-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (min-width: 1100px) {
+  .vr { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; }
+  .vr .vt-rejilla { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .vr .fc { padding: 14px 18px; }
+  .vr .fc:hover { transform: none; }
+  .vr .fc[data-elegida] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+  /* Aquí un clic elige, no abre: «Ver ficha →» mentiría. Abrir está en el panel. */
+  .vr .fc-pie { display: none; }
+  .vr-panel {
+    display: block;
+    position: sticky;
+    top: calc(var(--nav-h) + 12px);
+    max-height: calc(100vh - var(--nav-h) - 24px);
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+  }
+}
+.vr-cab { padding: 18px 20px 14px; display: grid; gap: 6px; border-bottom: 1px solid var(--border); }
+.vr-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font: 12px var(--sans); color: var(--text-muted); }
+.vr-tipo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-primary); }
+.vr-punto { width: 9px; height: 9px; border-radius: 50%; }
+.vr-punto--otros { border: 1.5px dashed var(--text-muted); }
+.vr-titulo { margin: 0; font: 700 19px/1.3 var(--sans); color: var(--text-primary); text-wrap: balance; }
+.vr-entidad { margin: 0; font: 13px var(--sans); color: var(--text-muted); }
+.vr-id { font-family: var(--mono); font-size: 12px; }
+.vr-acciones { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-top: 6px; }
+.vr-abrir {
+  font: 600 14px var(--sans); color: #fff; background: var(--accent-fill);
+  border-radius: var(--radius-md); padding: 8px 14px;
+}
+.vr-abrir:hover { background: var(--accent-fill-hover); }
+.vr-secop { font: 600 13px var(--sans); color: var(--accent); }
+
 /* Encaje con el perfil (EncajeVitrina). Tinte al 6 %, como las pastillas del
    canal de la ficha: al 10 % el verde y el ámbar no llegaban a AA. */
 .ve-linea {
