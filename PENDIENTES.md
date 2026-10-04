@@ -1051,3 +1051,26 @@ enlaces del mapa a las facetas.
   abiertos no pese (`ORDER BY random()` con top-N; una consulta cada 6 h).
 - **Peso.** El JS de primera carga de `/` quedó en 105,6 kB gzip
   (`npm run presupuesto`), desde 109,1: salieron el buscador y el resumen.
+
+### 54. Guardados y Recientes: prueba con cuentas reales (2026-10-04)
+
+**Pendiente por decisión del usuario:** probar después; no ejecutar ahora ni
+crear cuentas o datos de prueba en producción. El buscador y Mis procesos se
+publicaron mediante PR #109, commit `3895bf3`, sin migraciones.
+
+- Con una cuenta real: guardar desde resultados y ficha, quitar, comprobar que
+  guardar dos veces no duplica y que entrar o registrarse conserva la intención
+  y exige confirmación explícita.
+- Visitar más de diez fichas y comprobar las diez más recientes, su orden y que
+  borrar recientes conserva los guardados. Revisar procesos cerrados y retirados.
+- Con dos cuentas: verificar aislamiento, cierre y expiración de sesión,
+  cambio de cuenta y Atrás tras salir; no mostrar datos de la cuenta anterior.
+- Recorrer el flujo en móvil y comprobar errores de red y recuperación. Sin
+  JavaScript verificar enlaces y formularios; no dar por comprobada la limpieza
+  de imágenes del historial. Probar con lector de pantalla real.
+
+Ya verificado: 1401 pruebas locales con PGlite y sesiones simuladas, cinco
+checks aprobados antes del merge, despliegue de producción correcto, búsqueda
+pública por número y API personal anónima con 401 y `private, no-store`.
+Eso no sustituye esta prueba con Auth real. Traspaso:
+`docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
