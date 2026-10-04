@@ -165,7 +165,13 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
    la palabra se busca en el texto del proceso y no en la entidad, deja cambiar
    el nombre y manda a `POST /api/al/filtros`; sin sesión, al registro. Probado
    que el cuerpo pasa `validarFiltro` tal cual.
-6. Estante «Para ti».
+6. Estante «Para ti». **Hecha.** `src/lib/secop/para-ti.ts` usa la misma regla
+   que `/mis-coincidencias` (perfil completo → `getMatchesForPerfil`; mínimo →
+   `getMatchesForPerfilMinimo`) y `EstanteParaTi.tsx` pinta las 4 primeras con su
+   estado (Encaja, Revisar, Faltan datos) y «Ver las N en Mis coincidencias».
+   Solo en `/licitaciones` sin filtros y en la página 1, con sesión y perfil
+   guardado; un fallo deja la vitrina sin estante. Las páginas ISR
+   (`/licitaciones/pagina/N`) no lo llevan: no leen la sesión.
 7. Documentación (CLAUDE.md, PENDIENTES) y PR.
 
 ## 5. Decisiones del usuario (2026-10-04)

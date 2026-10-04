@@ -9,6 +9,8 @@ import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 import { ProveedorEncaje } from "./EncajeVitrina";
 import RadarVitrina from "./RadarVitrina";
+import EstanteParaTi from "./EstanteParaTi";
+import type { EstanteParaTi as Estante } from "@/src/lib/secop/para-ti";
 import BotonSeguir, { ProveedorSeguir } from "../seguir/BotonSeguir";
 import { ESTILOS_SEGUIR } from "../seguir/estilos";
 import { ESTILOS_FICHA } from "../ficha/estilos";
@@ -45,11 +47,14 @@ export default function Vitrina({
   pagina,
   departamentos = [],
   detalles = [],
+  paraTi = null,
 }: {
   pagina: PaginaDeVitrina;
   departamentos?: OpcionDepartamento[];
   /** El panel del Radar; sin detalles (adjudicados, o si su consulta falló), solo la rejilla. */
   detalles?: DetalleRadar[];
+  /** Coincidencias con el perfil de la cuenta; `null` sin sesión, sin perfil o con filtros. */
+  paraTi?: Estante | null;
 }) {
   const conRadar = pagina.pestana === "abiertos" && detalles.length > 0;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
@@ -120,6 +125,8 @@ export default function Vitrina({
         {pagina.pestana === "abiertos" && (
           <FiltrosVitrina filtros={pagina.filtros} departamentos={departamentos} />
         )}
+
+        {paraTi && <EstanteParaTi estante={paraTi} />}
 
         {pagina.items.length === 0 ? (
           <div className="vt-vacio">

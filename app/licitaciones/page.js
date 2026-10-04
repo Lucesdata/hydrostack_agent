@@ -4,6 +4,25 @@ import { filtrosDesdeParams, hayFiltros } from "@/src/lib/secop/filtros-vitrina"
 import { procesosPorDepartamento } from "@/src/lib/secop/agregados";
 import { detallesDeRadar } from "@/src/lib/secop/radar";
 import { hrefDeProceso } from "@/src/components/secop/lista/PaginaFaceta";
+import { estanteParaTi } from "@/src/lib/secop/para-ti";
+import { getSessionUser } from "@/src/lib/supabase/get-session-user";
+import { nivelDe, puede } from "@/src/lib/acceso/politica";
+
+/**
+ * «Para ti» (fase 3 de la vitrina): solo sin filtros y en la primera página,
+ * donde la vitrina es «lo que hay»; con filtros, el usuario ya dijo qué busca.
+ * Pide cuenta (`coincidencias`). Un fallo deja la vitrina sin estante, no rota.
+ */
+async function paraTiDe(filtros, pagina) {
+  if (hayFiltros(filtros) || pagina > 1) return null;
+  try {
+    const user = await getSessionUser();
+    if (!user || !puede(nivelDe(user, null), "coincidencias")) return null;
+    return await estanteParaTi(user.id);
+  } catch {
+    return null;
+  }
+}
 
 /** El panel del Radar es una mejora: si su consulta falla, la vitrina sale sin él. */
 function detallesDe(items) {
@@ -65,6 +84,7 @@ export const dynamic = "force-dynamic";
 export default async function LicitacionesPage({ searchParams }) {
   const { filtros, pagina } = filtrosDesdeParams((await searchParams) ?? {});
   const departamentosP = procesosPorDepartamento().catch(() => []);
+  const paraTiP = paraTiDe(filtros, pagina);
 
   let datos;
   let departamentos;
@@ -82,7 +102,7 @@ export default async function LicitacionesPage({ searchParams }) {
     ]);
   }
 
-  const detalles = await detallesDe(datos.items);
+  const [detalles, paraTi] = await Promise.all([detallesDe(datos.items), paraTiP]);
 
   return (
     <Vitrina
@@ -94,6 +114,7 @@ export default async function LicitacionesPage({ searchParams }) {
         n: d.n,
       }))}
       detalles={detalles}
+      paraTi={paraTi}
     />
   );
 }

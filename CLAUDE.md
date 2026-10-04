@@ -686,5 +686,7 @@ vitrina; sin sesión lleva a `/registro?next=`. Tarea 4 hecha: los filtros guard
 sin tipo no se descarta. `/mis-filtros` lo pide con casillas. Tarea 5 hecha: con algún criterio activo, la vitrina ofrece
 «🔔 Avisarme de procesos nuevos así» (`AlertaVitrina.tsx` +
 `alerta-vitrina.ts`), que crea un filtro de `/mis-filtros` con el tipo, el
-departamento, el presupuesto y el texto buscado.
+departamento, el presupuesto y el texto buscado. Tarea 6 hecha: estante «Para ti» (`EstanteParaTi.tsx` +
+`para-ti.ts`) encima de los resultados, solo sin filtros, en la primera página
+y para cuentas con perfil, con la misma regla de `/mis-coincidencias`.
 

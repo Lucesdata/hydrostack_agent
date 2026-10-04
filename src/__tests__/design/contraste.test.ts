@@ -261,6 +261,12 @@ describe("«★ Siguiendo» y los chips activos de la vitrina (2026-10-04, fase 
     expect(t["surface-alt"]).toBeTruthy();
     expect(contraste(t["accent-ocean"], t["surface-alt"])).toBeGreaterThanOrEqual(AA.texto);
   });
+
+  // «Faltan datos» en el estante «Para ti»: --text-muted (alias de --ink-600) a
+  // 600 11px sobre --surface-alt.
+  it("--ink-600 se lee sobre --surface-alt", () => {
+    expect(contraste(t["ink-600"], t["surface-alt"])).toBeGreaterThanOrEqual(AA.texto);
+  });
 });
 
 describe("excepciones conocidas (no deben empeorar)", () => {
