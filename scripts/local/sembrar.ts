@@ -7,7 +7,10 @@
  *    cuenta atrás de cierre ni recepciones vencidas. Cada proceso recibe un
  *    desfase fijo derivado de su id (`hashtext`), así que dos corridas el mismo
  *    día dan la misma base.
- * 2. Los usuarios de prueba de `src/lib/sesion-local/sesion-local.ts`, y un
+ * 2. Limpia lo que los usuarios de prueba hicieron en corridas anteriores
+ *    (guardados, recientes, filtros, coincidencias, diagnóstico), para que cada
+ *    `preparar` empiece igual.
+ * 3. Los usuarios de prueba de `src/lib/sesion-local/sesion-local.ts`, y un
  *    perfil de oferente completo para el que lo pide (Ana), hecho con los
  *    UNSPSC y departamentos que más abiertos tienen en la muestra.
  *
@@ -65,6 +68,27 @@ async function masFrecuentes(columna: "unspsc" | "depto", n: number): Promise<st
   return (r as unknown as { rows: { v: string }[] }).rows.map((f) => f.v);
 }
 
+/** Tablas con datos de cuenta; `usuario` y `oferente_perfil` se rehacen abajo. */
+const TABLAS_DE_CUENTA: [string, "usuario_id" | "account_id"][] = [
+  ["al_descartes", "account_id"],
+  ["al_reportes", "account_id"],
+  ["al_filtros_usuario", "account_id"],
+  ["coincidencia", "usuario_id"],
+  ["envio_log", "usuario_id"],
+  ["alerta_preferencias", "usuario_id"],
+  ["senal_usuario", "usuario_id"],
+  ["diagnostico", "usuario_id"],
+];
+
+async function limpiarUsuariosDePrueba() {
+  const ids = USUARIOS_LOCALES.map((u) => u.id);
+  for (const [tabla, columna] of TABLAS_DE_CUENTA) {
+    await db.execute(
+      sql`delete from ${sql.identifier(tabla)} where ${sql.identifier(columna)} in ${ids}`
+    );
+  }
+}
+
 async function usuariosYPerfil() {
   for (const u of USUARIOS_LOCALES) {
     await db
@@ -108,6 +132,7 @@ async function usuariosYPerfil() {
 async function main() {
   exigirBaseLocal();
   await fechasRelativasAHoy();
+  await limpiarUsuariosDePrueba();
   await usuariosYPerfil();
   const r = await db.execute(sql`
     select count(*) filter (where estado_apertura = 'Abierto' and estado_actual in ('Publicado','Abierto')) as abiertos,

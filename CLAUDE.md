@@ -125,6 +125,14 @@ Entidades y flujos principales:
   Neon, que es un residuo y hoy responde `exceeded the data transfer quota` —
   no usarlo. El mismo proyecto de Supabase sirve Auth y datos.
 - **Auth**: Supabase Auth (`@supabase/ssr` + `@supabase/supabase-js`) — email/password y Google OAuth
+- **Entorno local sin Supabase** (2026-10-05, `docs/entorno-local.md`):
+  `npm run local:preparar` levanta un Postgres en `.local/pg` con las migraciones
+  reales y la muestra de SECOP; `npm run local:dev` corre la app contra él con
+  una **sesión local** (usuarios de prueba en `/dev/sesion`) y
+  `npm run local:recorrido` prueba la vitrina con Playwright. Es la forma de
+  probar un PR con migraciones sin tocar la Supabase viva. La sesión local solo
+  existe con `next dev` + `AQ_SESION_LOCAL=1` (`src/lib/sesion-local/`): en un
+  build `NODE_ENV` es `production` y queda apagada. No relajar esa condición.
 - **LLM**: Gemini (extractor de pliegos, `GEMINI_API_KEY`)
 - **Diseño**: tokens en `app/globals.css` — `--bg:#FAFAF7`,
   `--accent:#0369A1`. Esos dos valores **se conservan por decisión medida del
