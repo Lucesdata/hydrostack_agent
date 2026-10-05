@@ -4,6 +4,8 @@ import { GoogleButton } from "@/src/components/auth/GoogleButton";
 import { ResendConfirmation } from "@/src/components/auth/ResendConfirmation";
 import { signInWithPasswordAction } from "@/src/lib/supabase/actions";
 import { authErrorMessage, authNoticeMessage } from "@/src/lib/supabase/auth-messages";
+import { redirect } from "next/navigation";
+import { sesionLocalActiva } from "@/src/lib/sesion-local/sesion-local";
 
 /** Situaciones en las que lo que le falta al usuario es el correo, no la clave. */
 const ESPERANDO_VERIFICACION = new Set([
@@ -19,6 +21,8 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const next = params.next && params.next.startsWith("/") ? params.next : "/";
+  // Entorno local sin Supabase: se entra eligiendo un usuario de prueba.
+  if (sesionLocalActiva()) redirect(`/dev/sesion?next=${encodeURIComponent(next)}`);
   const error = authErrorMessage(params.error);
   const notice = authNoticeMessage(params.notice);
   const mostrarReenvio =
