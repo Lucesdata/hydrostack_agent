@@ -391,3 +391,104 @@
     padding: 16px 18px 24px;
   }
 }
+
+
+/* Categorías rápidas del buscador: controles compactos, con color e icono. */
+.categorias {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.categorias legend {
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--bs-texto);
+  font: 600 12px/1.4 var(--font-inter), sans-serif;
+}
+.categoriasGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+.categoria {
+  --fam: #9fb4c6;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 82px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 8px;
+  border: 1px solid rgba(140, 190, 225, 0.28);
+  border-radius: 9px;
+  background: #0a1d30;
+  color: #dce9f2;
+  font: 600 11.5px/1.25 var(--font-inter), sans-serif;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
+}
+.categoria[data-familia="potable"] { --fam: #4cc9ff; }
+.categoria[data-familia="residual"] { --fam: #d39a62; }
+.categoria[data-familia="redes"] { --fam: #a3b1c2; }
+.categoria svg {
+  width: 25px;
+  height: 25px;
+  flex: none;
+  color: var(--fam);
+}
+.categoria:hover {
+  border-color: color-mix(in srgb, var(--fam) 72%, transparent);
+  background: color-mix(in srgb, var(--fam) 9%, #0a1d30);
+}
+.categoria[aria-pressed="true"] {
+  border-color: var(--fam);
+  background: color-mix(in srgb, var(--fam) 13%, #0a1d30);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fam) 30%, transparent);
+}
+.categoriaCheck {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fam);
+  color: #061423;
+  font: 800 11px/1 var(--font-inter), sans-serif;
+}
+.categoria:focus-visible {
+  outline: 2px solid #4cc9ff;
+  outline-offset: 2px;
+}
+.masSistemas {
+  color: var(--bs-suave);
+  font-size: 12px;
+}
+.masSistemas summary {
+  width: fit-content;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.masSistemas label {
+  margin-top: 10px;
+}
+@media (max-width: 600px) {
+  .categoriasGrid {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 2px 2px 8px;
+  }
+  .categoria {
+    flex: 0 0 132px;
+    min-height: 78px;
+  }
+}
