@@ -1,11 +1,25 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { SISTEMAS_BUSQUEDA, ACTIVIDADES_BUSQUEDA } from "@/src/lib/secop/busqueda-guiada";
-import { consultaDesdeParametros, enlaceBusqueda } from "@/src/lib/secop/busqueda-navegacion";
-import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
+import {
+  SISTEMAS_BUSQUEDA,
+  ACTIVIDADES_BUSQUEDA,
+} from "@/src/lib/secop/busqueda-guiada";
+import {
+  consultaDesdeParametros,
+  enlaceBusqueda,
+} from "@/src/lib/secop/busqueda-navegacion";
+import type {
+  SecopProceso,
+  SecopQuery,
+  SecopResult,
+} from "@/src/lib/secop/types";
 import ResultadosBusquedaServidor from "@/src/components/secop/ResultadosBusquedaServidor";
-import { crearCargaBusqueda, rechazoDeConsulta, type EstadoBusqueda } from "./carga-busqueda";
+import {
+  crearCargaBusqueda,
+  rechazoDeConsulta,
+  type EstadoBusqueda,
+} from "./carga-busqueda";
 import styles from "./buscador-guiado.module.css";
 
 interface Props {
@@ -14,7 +28,12 @@ interface Props {
   resultadoInicial?: SecopResult<SecopProceso> | null;
   errorInicial?: string | null;
 }
-const inicial: SecopQuery = { modo: "tema", apertura: "Abierto", page: 1, pageSize: 25 };
+const inicial: SecopQuery = {
+  modo: "tema",
+  apertura: "Abierto",
+  page: 1,
+  pageSize: 25,
+};
 const temaDesde = (query: SecopQuery) => ({
   sistema: query.sistema ?? "",
   actividad: query.actividad ?? "",
@@ -47,7 +66,9 @@ export default function BuscadorGuiado({
     if (compacto) return;
     const volver = () => {
       try {
-        const query = consultaDesdeParametros(new URLSearchParams(window.location.search));
+        const query = consultaDesdeParametros(
+          new URLSearchParams(window.location.search),
+        );
         if (!query.modo) {
           window.location.reload();
           return;
@@ -77,7 +98,7 @@ export default function BuscadorGuiado({
     event.preventDefault();
     const params = new URLSearchParams();
     new FormData(event.currentTarget).forEach((value, key) =>
-      params.set(key, String(value).trim())
+      params.set(key, String(value).trim()),
     );
     try {
       const query = consultaDesdeParametros(params);
@@ -90,10 +111,16 @@ export default function BuscadorGuiado({
   const cambiarModo = (nuevo: "tema" | "numero") => {
     carga.cancelar();
     setModo(nuevo);
-    setEstado({ consulta: { modo: nuevo }, resultado: null, error: null, cargando: false });
+    setEstado({
+      consulta: { modo: nuevo },
+      resultado: null,
+      error: null,
+      cargando: false,
+    });
   };
   const campo =
-    (key: keyof typeof tema) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    (key: keyof typeof tema) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setTema((actual) => ({ ...actual, [key]: event.target.value }));
   const estadoTexto = estado.cargando
     ? "Buscando procesos…"
@@ -182,17 +209,19 @@ export default function BuscadorGuiado({
                   name="pageSize"
                   value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
                 />
-                {compacto && <input type="hidden" name="apertura" value="Abierto" />}
+                {compacto && (
+                  <input type="hidden" name="apertura" value="Abierto" />
+                )}
                 <fieldset className={styles.categorias}>
                   <legend>Tipo de obra</legend>
                   <div className={styles.categoriasGrid}>
                     {[
                       {
-                    value: "potable",
-                    label: "Agua potable",
-                    familia: "potable",
-                    icono: "gota",
-                  },
+                        value: "potable",
+                        label: "Agua potable",
+                        familia: "potable",
+                        icono: "gota",
+                      },
                       {
                         value: "residual",
                         label: "Aguas residuales",
@@ -209,8 +238,10 @@ export default function BuscadorGuiado({
                       const seleccionada =
                         tema.sistema === opcion.value ||
                         (opcion.value === "potable" &&
-                          (tema.sistema === "acueducto" || tema.sistema === "ptap")) ||
-                        (opcion.value === "residual" && tema.sistema === "ptar");
+                          (tema.sistema === "acueducto" ||
+                            tema.sistema === "ptap")) ||
+                        (opcion.value === "residual" &&
+                          tema.sistema === "ptar");
                       return (
                         <button
                           key={opcion.value}
@@ -221,11 +252,18 @@ export default function BuscadorGuiado({
                           onClick={() =>
                             setTema((actual) => ({
                               ...actual,
-                              sistema: actual.sistema === opcion.value ? "" : opcion.value,
+                              sistema:
+                                actual.sistema === opcion.value
+                                  ? ""
+                                  : opcion.value,
                             }))
                           }
                         >
-                          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                          <svg
+                            viewBox="0 0 32 32"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
                             {opcion.icono === "gota" ? (
                               <path
                                 d="M16 3.5S7.5 14 7.5 20.5a8.5 8.5 0 0 0 17 0C24.5 14 16 3.5 16 3.5Z"
@@ -264,9 +302,12 @@ export default function BuscadorGuiado({
                           </svg>
                           <span>{opcion.label}</span>
                           {seleccionada ? (
-                            <span className={styles.categoriaCheck} aria-hidden="true">
-                          ✓
-                        </span>
+                            <span
+                              className={styles.categoriaCheck}
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
                           ) : null}
                         </button>
                       );
@@ -309,7 +350,8 @@ export default function BuscadorGuiado({
                   </select>
                 </label>
                 <label htmlFor={`${uid}-q`}>
-                  Palabra o entidad <span className={styles.opcional}>· opcional</span>
+                  Palabra o entidad{" "}
+                  <span className={styles.opcional}>· opcional</span>
                   <input
                     id={`${uid}-q`}
                     name="q"
@@ -384,8 +426,8 @@ export default function BuscadorGuiado({
                   />
                 </label>
                 <p id={`${uid}-ayuda`} className={styles.ayuda}>
-                  Identificador SECOP II o referencia de la entidad. Incluye procesos abiertos y
-                  cerrados.
+                  Identificador SECOP II o referencia de la entidad. Incluye
+                  procesos abiertos y cerrados.
                 </p>
                 <button className={styles.buscar} type="submit">
                   Buscar proceso
