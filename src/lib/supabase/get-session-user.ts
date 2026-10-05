@@ -1,4 +1,10 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
+import {
+  COOKIE_SESION_LOCAL,
+  sesionLocalActiva,
+  usuarioLocal,
+} from "@/src/lib/sesion-local/sesion-local";
 
 export interface SessionUser {
   id: string;
@@ -38,6 +44,10 @@ function esSenalDeNext(e: unknown): boolean {
  * `src/lib/supabase/middleware.ts`.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
+  if (sesionLocalActiva()) {
+    const local = usuarioLocal(cookies().get(COOKIE_SESION_LOCAL)?.value);
+    return local ? { id: local.id, email: local.email } : null;
+  }
   try {
     const supabase = await createClient();
     const {
@@ -61,6 +71,12 @@ export interface DisplayUser {
 
 /** Para el Navbar: id + nombre + foto a mostrar (con fallback a correo/iniciales). */
 export async function getSessionDisplayUser(): Promise<DisplayUser | null> {
+  if (sesionLocalActiva()) {
+    const local = usuarioLocal(cookies().get(COOKIE_SESION_LOCAL)?.value);
+    return local
+      ? { id: local.id, email: local.email, fullName: local.nombre, avatarUrl: null }
+      : null;
+  }
   try {
     const supabase = await createClient();
     const {

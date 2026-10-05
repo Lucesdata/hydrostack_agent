@@ -66,7 +66,12 @@ async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("Falta DATABASE_URL");
 
-  const c = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+  // El Postgres local del entorno de pruebas (docs/entorno-local.md) no habla SSL.
+  const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+  const c = new pg.Client({
+    connectionString: url,
+    ssl: local ? false : { rejectUnauthorized: false },
+  });
   await c.connect();
 
   const inicial = await tamanoMb(c);
