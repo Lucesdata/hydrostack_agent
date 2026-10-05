@@ -29,7 +29,7 @@ export function categoriaDe(tipo) {
 
 function IconoLugar() {
   return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
       <path
         d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"
         fill="none"
@@ -41,25 +41,73 @@ function IconoLugar() {
   );
 }
 
-function IconoEntidad() {
+function IconoDinero() {
   return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <path
-        d="M3 9.5 12 4l9 5.5M5 10v8M9.7 10v8M14.3 10v8M19 10v8M3.5 20.5h17"
+        d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.1 1.7 2.8 2.1 2.9.9 2.9 2.1-1.3 2-2.9 2c-1.3 0-2.4-.5-2.9-1.4M12 6.2v1.6M12 16.6v1.6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth="1.6"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
 }
 
+/**
+ * El icono de la familia, en el círculo de la cabecera. Decorativo: el nombre
+ * de la familia va escrito en la pastilla (tipo-color.ts, regla 1).
+ */
+const TRAZO_FAMILIA = {
+  potable: <path d="M12 3.5s-6 6.6-6 11a6 6 0 0 0 12 0c0-4.4-6-11-6-11z" />,
+  residual: (
+    <>
+      <circle cx="12" cy="12" r="7.5" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 4.5v4.5M12 15v4.5M4.5 12H9M15 12h4.5" />
+    </>
+  ),
+  redes: <path d="M3 9h11a4 4 0 0 1 4 4v8M3 15h8a1 1 0 0 1 1 1v5" />,
+  otros: (
+    <>
+      <circle cx="6" cy="12" r="1.2" />
+      <circle cx="12" cy="12" r="1.2" />
+      <circle cx="18" cy="12" r="1.2" />
+    </>
+  ),
+};
+
+function IconoFamilia({ familia }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {TRAZO_FAMILIA[familia] ?? TRAZO_FAMILIA.otros}
+    </svg>
+  );
+}
+
+/**
+ * Estructura (2026-10-04, opción B del usuario): cabecera con el icono de la
+ * familia, objeto y entidad; pastillas de estado y categoría; un panel con
+ * lugar y presupuesto; y un pie con el número de proceso y «Ver ficha →».
+ */
 export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) {
   const familia = familiaDe(p.tipoProyecto);
   const objeto = frase(p.objeto);
   const entidad = titulo(p.entidad) || "Entidad no disponible";
+  const estado = estadoVisible(p);
   return (
     <li
       className="aqMini"
@@ -72,33 +120,47 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
       onBlur={() => onActivar(null)}
     >
       <article aria-labelledby={`aq-mini-${p.id}`}>
-        <span className="aqMiniCategoria">
-          <span className="aqMiniPunto" aria-hidden="true" />
-          {categoriaDe(p.tipoProyecto)}
-        </span>
-        <p className="aqMiniLugar">
-          <IconoLugar />
-          <span>{ubicacionDe(p)}</span>
-        </p>
-        <h2 id={`aq-mini-${p.id}`} className="aqMiniObjeto" title={objeto}>
-          {objeto}
-        </h2>
-        {p.contextoTipo ? <p className="aqMiniNumero">{p.contextoTipo}</p> : null}
-        <p className="aqMiniNumero">
-          Proceso: <span translate="no">{p.numeroProceso}</span>
-        </p>
-        <p className="aqMiniEntidad" title={entidad}>
-          <IconoEntidad />
-          <span>{entidad}</span>
-        </p>
-        <p className={`aqMiniValor${p.presupuesto == null ? " aqMiniValor--sin" : ""}`}>
-          {presupuestoLargo(p.presupuesto)}
-        </p>
-        <div className="aqMiniPie">
-          <span className={`aqMiniEstado${p.abierto ? " aqMiniEstado--abierto" : ""}`}>
-            <span aria-hidden="true" />
-            {estadoVisible(p)}
+        <div className="aqMiniCab">
+          <span className="aqMiniAvatar" aria-hidden="true">
+            <IconoFamilia familia={familia} />
           </span>
+          <div className="aqMiniTitulos">
+            <h2 id={`aq-mini-${p.id}`} className="aqMiniObjeto" title={objeto}>
+              {objeto}
+            </h2>
+            <p className="aqMiniEntidad" title={entidad}>
+              {entidad}
+            </p>
+          </div>
+        </div>
+        <div className="aqMiniPastillas">
+          <span
+            className={`aqMiniEstado${p.abierto ? " aqMiniEstado--abierto" : ""}`}
+            title={estado}
+          >
+            <span aria-hidden="true" />
+            {estado}
+          </span>
+          <span className="aqMiniCategoria">{categoriaDe(p.tipoProyecto)}</span>
+        </div>
+        <div className="aqMiniPanel">
+          <p className="aqMiniLugar">
+            <IconoLugar />
+            <span>{ubicacionDe(p)}</span>
+          </p>
+          <p className={`aqMiniValor${p.presupuesto == null ? " aqMiniValor--sin" : ""}`}>
+            <IconoDinero />
+            <span>{presupuestoLargo(p.presupuesto)}</span>
+          </p>
+          {p.contextoTipo ? <p className="aqMiniContexto">{p.contextoTipo}</p> : null}
+        </div>
+        <div className="aqMiniPie">
+          {/* «Proceso:» se oye pero no se ve: en 250 px de tarjeta no caben
+              el rótulo, el número entero y el botón. */}
+          <p className="aqMiniNumero">
+            <span className="sr-only">Proceso: </span>
+            <span translate="no">{p.numeroProceso}</span>
+          </p>
           <Link
             className="aqMiniVer"
             href={p.href}

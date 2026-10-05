@@ -259,7 +259,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-04 (minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -362,6 +362,16 @@ coroplético del hero. Spec y reconocimiento:
 - **Sin título sobre las tarjetas (2026-10-04, pedido del usuario).** Salió
   «Procesos para explorar»: la lista se nombra con `aria-label` y el objeto de
   cada tarjeta pasó de `h3` a `h2` para no saltar nivel bajo el `h1`.
+
+- **Minificha con estructura de tarjeta (2026-10-04, opción B del usuario).**
+  Cabecera con el icono de la familia en un círculo, objeto (dos líneas) y
+  entidad; pastillas de estado y categoría; un panel con lugar y presupuesto (un
+  velo `rgba`, no un color: la tarjeta activa `#0f2a44` casi coincidía con un
+  panel opaco); pie con el número de proceso («Proceso:» solo para lector de
+  pantalla) y la píldora «Ver ficha →» en `--aq-cta`, cuyo `::after` sigue
+  cubriendo la tarjeta. Sigue oscura: el usuario descartó la versión blanca.
+  Mide 236 px a 1440 (antes 268); 257 cuando en el grupo hay una de «Sin
+  subsistema identificado», porque sus pastillas pasan a dos filas.
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario
