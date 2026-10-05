@@ -8,7 +8,10 @@ como oportunidad. Siete etapas con una regla de precedencia (contrato >
 adjudicación > apertura > estado) y un bloque «Revisa antes de confiar» (C1–C7).
 Decisiones: filtro de etapa apagado por defecto, solo procesos publicados desde
 2026 (la etapa sí se calcula para todos) y la etapa final se llama «Plazo
-cumplido», no «Terminado». Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
+cumplido», no «Terminado», aunque la fuente diga «terminado»; los contratos de
+personas naturales (CC/CE/pasaporte o sin dato) se excluyen. Medido en la base
+viva: de 36.088 procesos que `condicionAbierto()` cuenta como abiertos, el 81 %
+es anterior a 2026 y solo 128 tienen recepción vigente. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
 `adjudicado: false`). Spec y mediciones pendientes en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 

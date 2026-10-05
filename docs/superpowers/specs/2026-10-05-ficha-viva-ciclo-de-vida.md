@@ -208,6 +208,19 @@ fechas, y la aparición en el filtro de etapa— se ofrece para los procesos con
 **fecha de publicación desde el 1 de enero de 2026**. Es el año que menos
 historia arrastra y el que más sirve a quien va a ofertar ahora.
 
+### Personas naturales: fuera de las fichas de ciclo de vida
+
+**Decisión del usuario (2026-10-05).** Un contrato cuyo contratista es una
+**persona natural** —proveedor con cédula de ciudadanía, cédula de extranjería o
+pasaporte (`proveedor.tipo_documento` CC, CE o PASAPORTE)— no se amplía con el
+contenido de ciclo de vida: la ficha no nombra al contratista, no aparece en el
+filtro de etapa y no se publica como ficha «en ejecución» o «plazo cumplido».
+Son, sobre todo, contratos de prestación de servicios y apoyo a la gestión de
+una persona; no informan del sector y exponen a un particular. La ficha del
+proceso sigue existiendo y la etapa se sigue calculando (no puede figurar como
+abierta). Si el tipo de documento falta, se trata como persona natural: ante la
+duda, no se expone. Su volumen se mide en la parte 5 (M10).
+
 Lo que **no** se recorta por año, porque es seguridad y no alcance: la etapa se
 calcula para toda ficha que exista. Una ficha de 2023 con contrato firmado deja
 de mostrarse como abierta igual que una de 2026; solo que no se amplía con el
@@ -273,6 +286,9 @@ mismas características y se anota aquí.
     lo mismo que hoy (salvo los procesos que dejan de ser oportunidad por C1).
 12. Las fichas de ciclo de vida y el filtro cubren solo procesos publicados
     desde el 1 de enero de 2026; el cálculo de la etapa cubre todos.
+13. Ningún contrato de persona natural (o sin tipo de documento) aparece como
+    ficha de ciclo de vida, en el filtro de etapa ni con el nombre del
+    contratista.
 
 ## Reconocimiento: lo que ya existe (CONDUCTA §1)
 
@@ -428,7 +444,8 @@ enseñan:
   gestión cuyo objeto es un cargo («TECNICO GRADO 2») o el **nombre de una
   persona**. Una ficha pública e indexable «en ejecución» sobre el contrato de
   trabajo de una persona no es información del sector y expone a un particular.
-  Pendiente de decisión del usuario: excluirlos de las fichas de ciclo de vida.
+  **Decisión del usuario (2026-10-05): se excluyen** (ver «Personas
+  naturales»).
 
 **M7. El hallazgo más grave: «abierto» hoy casi nunca significa que recibe
 ofertas.** Los procesos que cumplen `condicionAbierto()` son **36.088**, y por
@@ -479,8 +496,11 @@ expediente (R6).
 3. **Un contrato sin firma no es «Contratado»**: es «En firma» o se queda en
    Adjudicado (decisión del plan).
 4. **Varios contratos por proceso** se listan (M1c).
-5. Pendiente de decisión del usuario: cómo nombrar la etapa final cuando **la
-   fuente** dice «terminado» o «Cerrado» (ver abajo).
+5. La etapa final es **«Plazo cumplido»** también cuando la fuente dice
+   «terminado» o «Cerrado» (decisión del usuario, 2026-10-05): no se adopta
+   «Terminado según el SECOP». El estado del contrato sí se usa como señal y se
+   cita en la línea de la etapa («El SECOP lo marca como terminado»), pero el
+   nombre de la etapa no cambia.
 
 ## Fuera de alcance
 
@@ -501,7 +521,11 @@ expediente (R6).
    vitrina, **apagado por defecto**.
 2. **Antigüedad:** se empieza **solo con 2026** (procesos publicados desde el
    1 de enero de 2026). Ver «Alcance temporal».
-3. **Nombre de la etapa final:** **«Plazo cumplido»**, no «Terminado».
+3. **Nombre de la etapa final:** **«Plazo cumplido»**, no «Terminado», y se
+   mantiene aunque la fuente marque el contrato como «terminado» o «Cerrado»
+   (reconfirmado con los datos de M2d).
+4. **Personas naturales:** sus contratos se excluyen de las fichas de ciclo de
+   vida (ver «Personas naturales»).
 
 No quedan preguntas abiertas en el spec. Lo siguiente son las mediciones y, con
 ellas, el plan.
