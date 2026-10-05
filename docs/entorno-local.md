@@ -72,13 +72,16 @@ configurar. `.env.local` puede seguir apuntando a Supabase: `entorno.sh` define
 una captura por paso en `.local/recorrido/`:
 
 1. Sin sesión: la vitrina carga, no hay «Para ti» y «Guardar» pide entrar.
-2. Ana: «Para ti» con tarjetas; guardar desde una tarjeta y desde el Radar;
+2. El buscador (uno solo desde el 2026-10-05): el modal del hero lleva a la
+   vitrina con sus filtros, la búsqueda por número encuentra también cerrados y
+   `/licitaciones/explorar` redirige traduciendo sus parámetros.
+3. Ana: «Para ti» con tarjetas; guardar desde una tarjeta y desde el Radar;
    lo guardado aparece en `/mis-procesos`; «Avisarme» con tipo y departamento
    crea el filtro, y `/mis-filtros` conserva el tipo al pausar y reactivar.
-3. Beto: sin perfil no hay «Para ti».
-4. A 390 px, «Guardar» no se monta sobre la tarjeta.
+4. Beto: sin perfil no hay «Para ti».
+5. A 390 px, «Guardar» no se monta sobre la tarjeta.
 
 Los pasos de «Para ti», «Avisarme» y el tipo de obra en `/mis-filtros` prueban
-la fase 3 de la vitrina (#112): sin ella fallan, y es lo esperado. Termina con
-código 1 si algún paso falla. `AQ_URL` cambia el servidor;
+la fase 3 de la vitrina (#112): en una rama sin ella se omiten, avisándolo.
+Termina con código 1 si algún paso falla. `AQ_URL` cambia el servidor;
 `PLAYWRIGHT_CHROMIUM` usa un Chromium ya instalado.

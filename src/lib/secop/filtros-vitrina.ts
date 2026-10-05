@@ -14,9 +14,20 @@
  * Puro: sin base, para que el componente y las pruebas lo usen sin conexión.
  * Lo que no se reconoce se ignora en vez de dar error: una URL vieja o mal
  * escrita enseña la vitrina sin ese filtro, no un 404.
+ *
+ * Desde el 2026-10-05 también es el único buscador: absorbe los criterios del
+ * buscador guiado de #109 —el tipo agrupado por sistema (`potable`,
+ * `residual`), la actividad y la búsqueda por número— y `/licitaciones/explorar`
+ * redirige aquí (`desdeExplorar`).
  */
 
-import { TIPOS_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
+import {
+  esActividad,
+  esSistema,
+  type ActividadBusqueda,
+  type SistemaBusqueda,
+} from "./busqueda-guiada";
+import { slugificar } from "./slug";
 
 export const ORDENES_VITRINA = ["relevancia", "recientes", "valor"] as const;
 export type OrdenVitrina = (typeof ORDENES_VITRINA)[number];
@@ -44,7 +55,16 @@ export function etiquetaPresupuesto(m: PresupuestoMin): string {
 export interface FiltrosVitrina {
   /** Texto libre: objeto, entidad o municipio. */
   q: string | null;
-  tipo: TipoProyecto | null;
+  /** Uno de los cinco tipos, o un sistema que agrupa dos (`potable`, `residual`). */
+  tipo: SistemaBusqueda | null;
+  /** Menciones en el objeto o la descripción (`ACTIVIDADES_BUSQUEDA`). */
+  actividad: ActividadBusqueda | null;
+  /**
+   * Número de proceso: id SECOP II o referencia de la entidad. Cuando viene,
+   * manda sobre todo lo demás: busca también entre los cerrados y pone
+   * primero las coincidencias exactas (`procesosDeVitrina`).
+   */
+  numero: string | null;
   /** Slug del departamento (`slugificar` del nombre), como las facetas. */
   departamento: string | null;
   presupuestoMin: PresupuestoMin | null;
@@ -54,6 +74,8 @@ export interface FiltrosVitrina {
 export const SIN_FILTROS: FiltrosVitrina = {
   q: null,
   tipo: null,
+  actividad: null,
+  numero: null,
   departamento: null,
   presupuestoMin: null,
   orden: "relevancia",
@@ -77,6 +99,8 @@ function leer(sp: Params, k: string): string | null {
 export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagina: number } {
   const q = leer(sp, "q");
   const tipo = leer(sp, "tipo");
+  const actividad = leer(sp, "actividad");
+  const numero = leer(sp, "numero");
   const dep = leer(sp, "departamento");
   const pres = Number(leer(sp, "presupuesto"));
   const orden = leer(sp, "orden");
@@ -86,10 +110,9 @@ export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagin
   return {
     filtros: {
       q: q ? q.slice(0, MAX_Q) : null,
-      tipo:
-        tipo && (TIPOS_PROYECTO as readonly string[]).includes(tipo)
-          ? (tipo as TipoProyecto)
-          : null,
+      tipo: tipo && esSistema(tipo) ? tipo : null,
+      actividad: actividad && esActividad(actividad) ? actividad : null,
+      numero: numero ? numero.slice(0, MAX_Q) : null,
       departamento: dep && /^[a-z0-9-]{2,60}$/.test(dep) ? dep : null,
       presupuestoMin: (PRESUPUESTOS_MIN as readonly number[]).includes(pres)
         ? (pres as PresupuestoMin)
@@ -105,7 +128,15 @@ export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagin
 
 /** ¿Recorta o reordena algo? El orden por defecto no cuenta. */
 export function hayFiltros(f: FiltrosVitrina): boolean {
-  return !!(f.q || f.tipo || f.departamento || f.presupuestoMin || f.orden !== "relevancia");
+  return !!(
+    f.q ||
+    f.tipo ||
+    f.actividad ||
+    f.numero ||
+    f.departamento ||
+    f.presupuestoMin ||
+    f.orden !== "relevancia"
+  );
 }
 
 /**
@@ -116,7 +147,9 @@ export function hayFiltros(f: FiltrosVitrina): boolean {
 export function queryDeFiltros(f: FiltrosVitrina, pagina = 1): string {
   const sp = new URLSearchParams();
   if (f.q) sp.set("q", f.q);
+  if (f.numero) sp.set("numero", f.numero);
   if (f.tipo) sp.set("tipo", f.tipo);
+  if (f.actividad) sp.set("actividad", f.actividad);
   if (f.departamento) sp.set("departamento", f.departamento);
   if (f.presupuestoMin) sp.set("presupuesto", String(f.presupuestoMin));
   if (f.orden !== "relevancia") sp.set("orden", f.orden);
@@ -128,4 +161,32 @@ export function queryDeFiltros(f: FiltrosVitrina, pagina = 1): string {
 /** `%texto%` para `ilike`, con los comodines del usuario escapados. */
 export function patronIlike(q: string): string {
   return `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
+
+/**
+ * Los parámetros del explorador guiado (`/licitaciones/explorar`, #109) en
+ * filtros de la vitrina, para redirigir sus enlaces viejos sin perder la
+ * búsqueda. `sistema` pasa a `tipo`; `departamento` era un nombre y pasa a
+ * slug (`slugificar`, como las facetas); `valorMin` (pesos) se redondea al piso de presupuesto más alto que no lo
+ * supera; `orden=fecha` es «Más recientes». `apertura`, `page` y `pageSize` no
+ * tienen equivalente y se descartan.
+ */
+export function desdeExplorar(sp: Params): FiltrosVitrina {
+  const numero = leer(sp, "numero");
+  const sistema = leer(sp, "sistema");
+  const actividad = leer(sp, "actividad");
+  const q = leer(sp, "q");
+  const dep = leer(sp, "departamento");
+  const valorMin = Number(leer(sp, "valorMin"));
+  const orden = leer(sp, "orden");
+  const piso = [...PRESUPUESTOS_MIN].reverse().find((m) => valorMin >= m * 1_000_000) ?? null;
+  return {
+    q: q ? q.slice(0, MAX_Q) : null,
+    tipo: sistema && esSistema(sistema) ? sistema : null,
+    actividad: actividad && esActividad(actividad) ? actividad : null,
+    numero: numero ? numero.slice(0, MAX_Q) : null,
+    departamento: dep && /^[a-z0-9-]{2,60}$/.test(slugificar(dep)) ? slugificar(dep) : null,
+    presupuestoMin: piso,
+    orden: orden === "fecha" ? "recientes" : orden === "valor" ? "valor" : "relevancia",
+  };
 }

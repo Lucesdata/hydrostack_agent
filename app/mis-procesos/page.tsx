@@ -46,7 +46,7 @@ export default async function MisProcesosPage({
       <div className={`clr-container ${styles.personal}`}>
         <h1 className="clr-h1">Mis procesos</h1>
         <p className="clr-sub">Guardados y últimas fichas visitadas, con tu cuenta gratuita.</p>
-        <a href="/licitaciones/explorar">Buscar otros procesos</a>
+        <a href="/licitaciones">Buscar otros procesos</a>
         {!intencion && searchParams.volver && <a href={volver}>Volver a la búsqueda</a>}
         {aviso && <p role="alert">{aviso}</p>}
         {searchParams.aviso === "ok" && <p role="status">Cambio confirmado.</p>}

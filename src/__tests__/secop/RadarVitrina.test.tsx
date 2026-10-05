@@ -25,6 +25,7 @@ function detalle(id: string, titulo: string, urlSecop: string | null): DetalleRa
 
 const html = renderToStaticMarkup(
   <RadarVitrina
+    volver="/licitaciones"
     detalles={[
       detalle("CO1.REQ.1", "Alcantarillado de San Jerónimo", "https://community.secop.gov.co/1"),
       detalle("CO1.REQ.2", "Planta de Covarachía", null),

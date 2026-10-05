@@ -3,7 +3,7 @@
  * Mis coincidencias — dos calidades de perfil, ambas reales (sin mock):
  * - PerfilMinimo (sector+zona, setup inline): matchProcesosMinimo, sin
  *   semáforo de elegibilidad completo.
- * - OferenteProfile completo (wizard en /licitaciones/explorar): el veredicto
+ * - OferenteProfile completo (se edita en /perfil): el veredicto
  *   Nivel 0 de siempre (src/lib/secop/verdict.ts vía src/lib/matching/match.ts).
  * Server component puro. Ver docs/superpowers/plans/2026-08-17-mis-coincidencias-refinamiento.md.
  */
