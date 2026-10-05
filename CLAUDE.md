@@ -259,7 +259,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-05 (vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -674,6 +674,52 @@ tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
 acueducto en la descripción oficial. Sin descripción o evidencia no se inventa
 respaldo. Pruebas puras, render de minificha y consulta contra PGlite.
 
+**Vitrina `/licitaciones`, fase 0 (2026-10-04).** Plan en
+`docs/superpowers/plans/2026-10-04-vitrina-radar.md` (decisión: Radar de lista y
+detalle más un estante «Para ti»). La tarjeta de la vitrina ya no lleva el
+semáforo absoluto (cinco puntos azules iguales): pinta presupuesto, tipo de obra
+y ubicación; el semáforo queda en la variante `destacada` y en la ficha. La
+pastilla ABIERTO pasa a «CERRADO A OFERTAS» cuando la recepción venció (día en
+Colombia): no puede contradecir la línea del plazo. El objeto se limpia solo en
+la tarjeta (`objetoLegible()`). Los abiertos se ordenan por
+`tramoDeRelevancia()` —agua que recibe ofertas, luego `otros`/sin tipo, luego
+recepción vencida— sin filtrar: el total sigue siendo `condicionAbierto()`.
+Lo que queda abierto, en PENDIENTES §54.
+
+**Vitrina con buscador; Explorar y Descubrir fundidas (2026-10-04, fase 1a).**
+`/licitaciones` busca y filtra: `q` (objeto, entidad o municipio), `tipo`,
+`departamento` (slug), `presupuesto` (100/500/1.000 millones) y `orden`, todos en
+la query (`src/lib/secop/filtros-vitrina.ts`, `FiltrosVitrina.tsx`) y aplicados en
+el servidor sobre la consulta de la vitrina. Es un formulario GET sin
+JavaScript. Sin filtros, la paginación sigue en el camino (ISR); con filtros va
+en `?pagina=` y la página lleva `noindex`. `/licitaciones/descubrir` redirige con
+308 (la query pasa) y salió `discovery`. **`/licitaciones/explorar` se queda**
+(decisión del usuario del 2026-10-05): el buscador guiado del hero (PR #109) la
+usa con `SecopExplorer`, `/api/secop` y `/api/secop/probe`, que este trabajo
+había retirado antes de que #109 llegara a `main`. Hoy conviven dos buscadores
+—el de la vitrina y el guiado— con dos definiciones de «abierto»; unificarlos es
+PENDIENTES §54.
+
+**Tarjeta de la vitrina con cierre y encaje (2026-10-04, fase 1b).** Presupuesto y
+«Cierre de ofertas» en grande (`cierreDe()` en `ficha-card.ts`: cuenta atrás solo
+con `fecha_recepcion`; sin ella o cerrada, en gris), «Nuevo» si se publicó hoy o
+ayer, y «Cumples N de 5» con el perfil del navegador o de la cuenta
+(`EncajeVitrina.tsx` → `POST /api/vitrina/encaje` → `encajeDeProcesos()`, mismo
+`buildVerdict` y requisitos que la ficha; solo conteos, sin `reason`, así que no
+hay nada que redactar). Sin perfil se define encima de la rejilla, sin cuenta.
+`searchProcesosDb` trae `fecha_recepcion`: el plazo del matching ya no sale
+siempre sin datos. Seguir, la alerta desde la vitrina y «Para ti» son la fase 3,
+en la rama `claude/vitrina-fase3` y un PR aparte: necesitan la migración `0025`,
+que no se puede aplicar mientras la Supabase viva esté al límite del plan.
+
+**Radar de la vitrina (2026-10-04, fase 2).** Desde 1100 px, `/licitaciones` es
+lista y detalle (`RadarVitrina.tsx`): las tarjetas siguen siendo enlaces del
+servidor y, con JavaScript, un clic principal las elige y pinta su detalle en un
+panel fijo con el mismo `BloqueDecision` de la ficha; Ctrl/Cmd-clic y Enter abren
+la ficha. Debajo de 1100 px no hay panel: la ficha es el detalle. El servidor arma
+el panel con `detallesDeRadar()` y `datosDecisionDe()`, que ahora también usa la
+ficha. `BloqueDecision` acepta `hrefFicha` para que sus pasos al pliego vayan a
+la ficha. El bloque se monta solo cuando el navegador confirma el ancho.
 
 **Guardados y Recientes (2026-10-04, implementación local).** El buscador y la
 ficha enlazan a `/mis-procesos`, privada y dinámica. Guardar exige cuenta gratuita

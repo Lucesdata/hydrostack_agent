@@ -61,7 +61,7 @@ describe("enviarDigestAhora", () => {
     mockGetPerfilDb.mockResolvedValue(perfilMinimo);
     const r = await enviarDigestAhora("u1");
     expect(r.estado).toBe("error");
-    expect(r.error).toMatch(/licitaciones\/explorar/);
+    expect(r.error).toMatch(/\/perfil/);
     expect(mockGetMatches).not.toHaveBeenCalled();
     expect(mockSelectLimit).not.toHaveBeenCalled();
   });

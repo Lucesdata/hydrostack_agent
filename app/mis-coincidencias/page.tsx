@@ -256,8 +256,8 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <h1 className="clr-mc-title">Mis coincidencias</h1>
         <p className="clr-mc-sub" style={{ margin: "0 0 24px" }}>
           {matches.length} proceso{matches.length === 1 ? "" : "s"} del sector agua que calzan con
-          tu perfil. <Link href="/licitaciones/explorar">Completa tu perfil RUP</Link> para ver
-          también tu semáforo de elegibilidad y recibir alertas por correo.
+          tu perfil. <Link href="/perfil">Completa tu perfil RUP</Link> para ver también tu semáforo
+          de elegibilidad y recibir alertas por correo.
         </p>
         <PanelBloqueantes diagnostico={diagnostico} />
         {hayRegimenPrivado(matches, diagnostico) && (
@@ -267,7 +267,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         {matches.length === 0 ? (
           <div className="clr-mc-empty">
             Sin coincidencias por ahora. Revisa tu sector y zona en{" "}
-            <Link href="/licitaciones/explorar">Licitaciones</Link>.
+            <Link href="/perfil">tu perfil</Link>.
           </div>
         ) : (
           <div className="clr-mc-list">
@@ -367,7 +367,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
       {matches.length === 0 ? (
         <div className="clr-mc-empty">
           Sin coincidencias por ahora con tu perfil actual. Revisa tu cobertura y sectores en{" "}
-          <Link href="/licitaciones/explorar">Licitaciones</Link>.
+          <Link href="/perfil">tu perfil</Link>.
         </div>
       ) : (
         <div className="clr-mc-list">

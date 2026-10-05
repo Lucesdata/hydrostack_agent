@@ -67,6 +67,12 @@ export interface DatosDecision {
   estadoApertura: string | null;
   modalidad: string | null;
   hrefExplorar: string;
+  /**
+   * Dónde está la ficha, para los pasos que llevan a su pliego (`#pliego`).
+   * Vacío en la propia ficha; la ruta de la ficha en el panel del Radar de la
+   * vitrina, que no tiene pliego propio.
+   */
+  hrefFicha?: string;
 }
 
 const PLURAL: Partial<Record<EstadoCompuerta, [string, string]>> = {
@@ -91,8 +97,27 @@ function resumenCanal(compuertas: CompuertaVista[], relativo: boolean): string {
 
 const PASOS = ["Tu perfil", "El pliego", "Ofertar en SECOP II"] as const;
 
+/**
+ * A dónde lleva cada paso que es un enlace. Los del pliego van a `#pliego` de
+ * la ficha: en la propia ficha `hrefFicha` es vacío, y en el panel del Radar de
+ * la vitrina es la ruta de la ficha, que es donde está el pliego.
+ */
+export function hrefsDePaso(
+  props: Pick<DatosDecision, "urlSecop" | "hrefExplorar" | "hrefFicha">
+): Record<Exclude<DestinoPaso, "definir-perfil" | "ver-porque">, string | null> {
+  const pliego = `${props.hrefFicha ?? ""}#pliego`;
+  return {
+    "subir-pliego": pliego,
+    "requisitos-pliego": pliego,
+    "completar-perfil": "/perfil",
+    "ofertar-secop": props.urlSecop,
+    "expediente-secop": props.urlSecop,
+    explorar: props.hrefExplorar,
+  };
+}
+
 export default function BloqueDecision(props: DatosDecision) {
-  const { proceso, absolutas, conPliego, urlSecop } = props;
+  const { proceso, absolutas, conPliego } = props;
   const [compuertas, setCompuertas] = useState<CompuertaVista[]>(absolutas);
   const [relativo, setRelativo] = useState(false);
   const [conCuenta, setConCuenta] = useState(false);
@@ -160,14 +185,7 @@ export default function BloqueDecision(props: DatosDecision) {
     ahora === null ? null : ventanaDeOfertas(props.fechaPublicacion, props.fechaRecepcion, ahora);
   const queEs = explicacionModalidad(props.modalidad);
 
-  const href: Record<Exclude<DestinoPaso, "definir-perfil" | "ver-porque">, string | null> = {
-    "subir-pliego": "#pliego",
-    "requisitos-pliego": "#pliego",
-    "completar-perfil": "/perfil",
-    "ofertar-secop": urlSecop,
-    "expediente-secop": urlSecop,
-    explorar: props.hrefExplorar,
-  };
+  const href = hrefsDePaso(props);
 
   function accion(destino: DestinoPaso, texto: string, clase: string) {
     // «Ver por qué» no toca el hash: la ficha interactiva lee el hash para elegir

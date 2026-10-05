@@ -2,8 +2,9 @@
 "use client";
 
 /**
- * Pestañas compartidas entre las páginas de Licitaciones (Recientes,
- * Explorar, Cómo participar, Descubrir). Componente de navegación puro:
+ * Pestañas compartidas entre las páginas de Licitaciones (Fichas de procesos,
+ * Explorar y Cómo participar; Descubrir se fundió en la primera el
+ * 2026-10-04). Componente de navegación puro:
  * no toca el estado ni la lógica de cada página, solo se monta arriba.
  */
 
@@ -14,7 +15,6 @@ const TABS = [
   { href: "/licitaciones", label: "Fichas de procesos" },
   { href: "/licitaciones/explorar", label: "Explorar" },
   { href: "/licitaciones/como-participar", label: "Cómo participar" },
-  { href: "/licitaciones/descubrir", label: "Descubrir" },
 ];
 
 export default function LicitacionesTabs() {
