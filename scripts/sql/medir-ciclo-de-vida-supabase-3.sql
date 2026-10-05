@@ -1,21 +1,26 @@
--- Mediciones de la Ficha Viva con ciclo de vida — versión para el SQL Editor de Supabase.
--- Misma lógica que scripts/sql/medir-ciclo-de-vida.sql, en UNA sola consulta de
--- lectura (el editor solo muestra el resultado de la última sentencia).
--- Devuelve una fila por medición: columna `medicion` y columna `resultado` (JSON).
--- No crea, borra ni modifica nada.
+-- Mediciones de la Ficha Viva con ciclo de vida — PARTE 3 de 3, para el SQL
+-- Editor de Supabase (caso OPA-ST-07-2023 y candidatos de 2026). Solo lectura: no crea, borra ni modifica nada.
+-- Spec: docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md.
+-- Se divide en tres porque el plan Nano corta las consultas largas
+-- («upstream timeout»). Las CTE que una parte no usa no se ejecutan.
 
 WITH
 p AS (SELECT * FROM proceso WHERE deleted_at IS NULL),
 c AS (SELECT * FROM contrato WHERE deleted_at IS NULL),
+ult AS (
+  -- Un contrato por proceso (el de firma más reciente), leyendo contrato UNA vez:
+  -- contrato no tiene índice por proceso_id y un LATERAL por proceso lo recorre
+  -- entero ~90.000 veces.
+  SELECT DISTINCT ON (proceso_id) proceso_id, id, fecha_firma, fecha_inicio,
+         fecha_fin_actual, valor_actual, estado_actual
+  FROM c WHERE proceso_id IS NOT NULL
+  ORDER BY proceso_id, fecha_firma DESC NULLS LAST
+),
 pc AS (
   SELECT p.*, u.fecha_firma, u.fecha_inicio, u.fecha_fin_actual,
          u.valor_actual, u.estado_actual AS estado_contrato,
          u.id IS NOT NULL AS tiene_contrato
-  FROM p
-  LEFT JOIN LATERAL (
-    SELECT * FROM c WHERE c.proceso_id = p.id
-    ORDER BY c.fecha_firma DESC NULLS LAST LIMIT 1
-  ) u ON true
+  FROM p LEFT JOIN ult u ON u.proceso_id = p.id
 ),
 m1a AS (
   SELECT jsonb_build_object(
@@ -141,15 +146,5 @@ m6 AS (
     LIMIT 10
   ) t
 )
-SELECT 'M1a procesos con contrato' AS medicion, r AS resultado FROM m1a
-UNION ALL SELECT 'M1b contratos sin proceso', r FROM m1b
-UNION ALL SELECT 'M1c procesos por numero de contratos', r FROM m1c
-UNION ALL SELECT 'M2a estado x apertura (proceso)', r FROM m2a
-UNION ALL SELECT 'M2b fase (proceso)', r FROM m2b
-UNION ALL SELECT 'M2c adjudicacion (proceso)', r FROM m2c
-UNION ALL SELECT 'M2d estado (contrato)', r FROM m2d
-UNION ALL SELECT 'M2e fechas y pagos (contrato)', r FROM m2e
-UNION ALL SELECT 'M3 contradicciones C1-C7', r FROM m3
-UNION ALL SELECT 'M4 caso OPA-ST-07-2023', r FROM m4
-UNION ALL SELECT 'M5 etapas desde 2026', r FROM m5
-UNION ALL SELECT 'M6 candidatos 2026 con contrato', r FROM m6;
+SELECT 'M4 caso OPA-ST-07-2023' AS medicion, r AS resultado FROM m4
+UNION ALL SELECT 'M6 candidatos 2026 con contrato' AS medicion, r AS resultado FROM m6;

@@ -95,11 +95,13 @@ WITH pc AS (
          c.fecha_firma, c.fecha_inicio, c.fecha_fin_actual,
          c.valor_actual, c.estado_actual AS estado_contrato
   FROM proceso p
-  LEFT JOIN LATERAL (
-    SELECT * FROM contrato c
-     WHERE c.proceso_id = p.id AND c.deleted_at IS NULL
-     ORDER BY c.fecha_firma DESC NULLS LAST LIMIT 1
-  ) c ON true
+  LEFT JOIN (
+    -- Un contrato por proceso, leyendo contrato una sola vez: no tiene índice
+    -- por proceso_id y un LATERAL lo recorrería entero por cada proceso.
+    SELECT DISTINCT ON (proceso_id) * FROM contrato
+     WHERE proceso_id IS NOT NULL AND deleted_at IS NULL
+     ORDER BY proceso_id, fecha_firma DESC NULLS LAST
+  ) c ON c.proceso_id = p.id
   WHERE p.deleted_at IS NULL
 ),
 marcas AS (
@@ -155,11 +157,13 @@ WHERE p.secop_proceso_id = 'CO1.REQ.5354189'
 WITH pc AS (
   SELECT p.*, c.fecha_firma, c.fecha_inicio, c.fecha_fin_actual
   FROM proceso p
-  LEFT JOIN LATERAL (
-    SELECT * FROM contrato c
-     WHERE c.proceso_id = p.id AND c.deleted_at IS NULL
-     ORDER BY c.fecha_firma DESC NULLS LAST LIMIT 1
-  ) c ON true
+  LEFT JOIN (
+    -- Un contrato por proceso, leyendo contrato una sola vez: no tiene índice
+    -- por proceso_id y un LATERAL lo recorrería entero por cada proceso.
+    SELECT DISTINCT ON (proceso_id) * FROM contrato
+     WHERE proceso_id IS NOT NULL AND deleted_at IS NULL
+     ORDER BY proceso_id, fecha_firma DESC NULLS LAST
+  ) c ON c.proceso_id = p.id
   WHERE p.deleted_at IS NULL AND p.fecha_publicacion >= DATE '2026-01-01'
 )
 SELECT etapa, count(*) AS n FROM (
