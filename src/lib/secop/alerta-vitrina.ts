@@ -12,9 +12,18 @@
  *   descripción). Buscar «Medellín» en la vitrina trae lo de la entidad de
  *   Medellín; como alerta, solo lo que diga Medellín en su texto.
  * - El orden no es un criterio: una alerta avisa de lo nuevo, no ordena.
+ * - La actividad tampoco: el filtro guardado no la tiene, así que la alerta
+ *   avisa de todo lo demás y la vitrina lo dice antes de guardar.
+ * - La búsqueda por número es una consulta puntual, no algo que vigilar.
  */
 
 import { TIPO_PROYECTO } from "../classify/tipo-proyecto";
+import {
+  ETIQUETA_SISTEMA,
+  SISTEMAS_AGRUPADOS,
+  tiposDeSistema,
+  type SistemaBusqueda,
+} from "./busqueda-guiada";
 import { etiquetaPresupuesto, type FiltrosVitrina } from "./filtros-vitrina";
 
 export interface DepartamentoAlerta {
@@ -31,9 +40,19 @@ export interface CuerpoAlerta {
   valorMin: number | null;
 }
 
-/** ¿Hay algo que vigilar? El orden solo no cuenta: sería una alerta de todo. */
+/**
+ * ¿Hay algo que vigilar? El orden y la actividad solos no cuentan: serían una
+ * alerta de todo. Con número de proceso, tampoco.
+ */
 export function hayCriteriosDeAlerta(f: FiltrosVitrina): boolean {
+  if (f.numero) return false;
   return !!(f.q || f.tipo || f.departamento || f.presupuestoMin);
+}
+
+function etiquetaTipo(tipo: SistemaBusqueda): string {
+  return (SISTEMAS_AGRUPADOS as readonly string[]).includes(tipo)
+    ? ETIQUETA_SISTEMA[tipo as keyof typeof ETIQUETA_SISTEMA]
+    : TIPO_PROYECTO[tipo as keyof typeof TIPO_PROYECTO].label;
 }
 
 /** Lo que va a vigilar la alerta, en frases cortas para el resumen. */
@@ -42,7 +61,7 @@ export function criteriosDeAlerta(
   departamento: DepartamentoAlerta | null
 ): string[] {
   const out: string[] = [];
-  if (f.tipo) out.push(`Tipo de obra: ${TIPO_PROYECTO[f.tipo].label}`);
+  if (f.tipo) out.push(`Tipo de obra: ${etiquetaTipo(f.tipo)}`);
   if (departamento) out.push(`Entidad en ${departamento.label}`);
   if (f.presupuestoMin) out.push(`Presupuesto ${etiquetaPresupuesto(f.presupuestoMin)}`);
   if (f.q) out.push(`Que el proceso mencione «${f.q}»`);
@@ -52,7 +71,7 @@ export function criteriosDeAlerta(
 /** «PTAR · Boyacá · desde $500 M · «colector»», recortado al largo que admite el filtro. */
 export function nombreDeAlerta(f: FiltrosVitrina, departamento: DepartamentoAlerta | null): string {
   const partes = [
-    f.tipo ? TIPO_PROYECTO[f.tipo].label : null,
+    f.tipo ? etiquetaTipo(f.tipo) : null,
     departamento?.label ?? null,
     f.presupuestoMin ? etiquetaPresupuesto(f.presupuestoMin) : null,
     f.q ? `«${f.q}»` : null,
@@ -73,7 +92,7 @@ export function filtroDesdeVitrina(
   return {
     nombre,
     palabrasClave: f.q ? [f.q] : [],
-    tiposProyecto: f.tipo ? [f.tipo] : [],
+    tiposProyecto: f.tipo ? [...tiposDeSistema(f.tipo)] : [],
     divipola: departamento ? [departamento.codigo] : [],
     valorMin: f.presupuestoMin ? f.presupuestoMin * 1_000_000 : null,
   };

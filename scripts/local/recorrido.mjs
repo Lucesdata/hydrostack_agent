@@ -10,6 +10,7 @@
  * instalado). Comprueba lo que una persona haría a mano y deja una captura de
  * cada paso; termina con código 1 si algún paso falla.
  */
+import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 
 const { chromium } = await import(process.env.AQ_PLAYWRIGHT ?? "playwright").catch(() => {
@@ -22,8 +23,17 @@ const SALIDA = ".local/recorrido";
 const ANA = "00000000-0000-4000-8000-00000000a001"; // con perfil
 const BETO = "00000000-0000-4000-8000-00000000a002"; // sin perfil
 
+// «Para ti», «Avisarme» y el tipo en /mis-filtros llegan con la fase 3 (#112):
+// en una rama sin ella esos pasos se omiten, avisando, en vez de fallar.
+const FASE3 = existsSync("src/components/secop/vitrina/EstanteParaTi.tsx");
+
 const resultados = [];
-async function paso(nombre, fn) {
+async function paso(nombre, fn, { fase3 = false } = {}) {
+  if (fase3 && !FASE3) {
+    resultados.push(["omitido", nombre]);
+    console.log(`– ${nombre} (omitido: llega con la fase 3, #112)`);
+    return;
+  }
   try {
     await fn();
     resultados.push(["ok", nombre]);
@@ -81,24 +91,65 @@ async function foto(page, nombre) {
   await ctx.close();
 }
 
+// 1b. Un solo buscador (2026-10-05): el modal del hero, el número y Explorar
+{
+  const { ctx, page } = await contexto(null);
+  await paso("buscador: el modal del hero lleva a la vitrina con los filtros", async () => {
+    await page.goto(`${BASE}/`);
+    await page.getByRole("button", { name: "Buscar procesos" }).first().click();
+    await page.getByRole("button", { name: /Aguas residuales/ }).click();
+    await page.locator("dialog select[name=actividad]").selectOption("obras");
+    await page.locator("dialog form[role=search] button[type=submit]").first().click();
+    await page.waitForURL(/\/licitaciones\?/);
+    const url = new URL(page.url());
+    exigir(url.pathname === "/licitaciones", `fue a ${url.pathname}`);
+    exigir(url.searchParams.get("tipo") === "residual", `tipo=${url.searchParams.get("tipo")}`);
+    exigir(url.searchParams.get("actividad") === "obras", "falta actividad");
+    await foto(page, "01b-hero-a-vitrina");
+  });
+  await paso("buscador: por número encuentra también cerrados", async () => {
+    // Un cerrado de la muestra, para que la prueba no dependa de un id fijo.
+    await page.goto(`${BASE}/licitaciones/adjudicados`);
+    const id = await page.locator(".vt-rejilla [data-id]").first().getAttribute("data-id");
+    exigir(id, "no hay adjudicados en la muestra");
+    await page.goto(`${BASE}/licitaciones?numero=${encodeURIComponent(id.toLowerCase())}`);
+    await page.locator(".vt-conteo", { hasText: "abiertos y cerrados" }).waitFor();
+    const primero = await page.locator(".vt-rejilla [data-id]").first().getAttribute("data-id");
+    exigir(primero === id, `primero ${primero}, esperaba ${id}`);
+    await foto(page, "01c-numero");
+  });
+  await paso("buscador: /licitaciones/explorar redirige traduciendo parámetros", async () => {
+    await page.goto(`${BASE}/licitaciones/explorar?modo=tema&sistema=ptar&orden=fecha`);
+    const url = new URL(page.url());
+    exigir(url.pathname === "/licitaciones", `quedó en ${url.pathname}`);
+    exigir(url.search === "?tipo=ptar&orden=recientes", `query ${url.search}`);
+  });
+  await ctx.close();
+}
+
 // 2. Ana, con perfil
 {
   const { ctx, page } = await contexto(ANA);
-  await paso("Ana: estante «Para ti» con tarjetas", async () => {
-    await page.goto(`${BASE}/licitaciones`);
-    await page.locator(".pt-resumen").waitFor();
-    const n = await page.locator(".pt-tarjeta").count();
-    exigir(
-      n > 0,
-      `«Para ti» sin tarjetas (${await page
-        .locator(".pt-vacio")
-        .textContent()
-        .catch(() => "")})`
-    );
-    await foto(page, "03-ana-para-ti");
-  });
+  await paso(
+    "Ana: estante «Para ti» con tarjetas",
+    async () => {
+      await page.goto(`${BASE}/licitaciones`);
+      await page.locator(".pt-resumen").waitFor();
+      const n = await page.locator(".pt-tarjeta").count();
+      exigir(
+        n > 0,
+        `«Para ti» sin tarjetas (${await page
+          .locator(".pt-vacio")
+          .textContent()
+          .catch(() => "")})`
+      );
+      await foto(page, "03-ana-para-ti");
+    },
+    { fase3: true }
+  );
   let guardadoId;
   await paso("Ana: «Guardar» en una tarjeta pasa a «Guardado · quitar»", async () => {
+    await page.goto(`${BASE}/licitaciones`);
     const boton = page.locator(".vt-guardar button", { hasText: /^Guardar$/ }).first();
     await boton.waitFor();
     guardadoId = (await boton.getAttribute("aria-label")).replace(/^Guardar /, "");
@@ -118,24 +169,32 @@ async function foto(page, nombre) {
     exigir(texto.includes(guardadoId), `no aparece ${guardadoId}`);
     await foto(page, "06-ana-mis-procesos");
   });
-  await paso("Ana: «Avisarme» con tipo y departamento crea el filtro", async () => {
-    await page.goto(`${BASE}/licitaciones?tipo=ptar&departamento=antioquia`);
-    await page.locator(".va-resumen").click();
-    await page.locator(".va-boton").click();
-    await page.locator(".va-hecho").waitFor();
-    await foto(page, "07-ana-alerta");
-  });
-  await paso("Ana: /mis-filtros muestra el filtro con PTAR y lo conserva al pausar", async () => {
-    await page.goto(`${BASE}/mis-filtros`);
-    await page.getByText("PTAR", { exact: false }).first().waitFor();
-    await page.getByRole("button", { name: "Pausar" }).first().click();
-    await page.getByRole("button", { name: "Activar" }).first().waitFor();
-    await page.getByRole("button", { name: "Activar" }).first().click();
-    await page.getByRole("button", { name: "Pausar" }).first().waitFor();
-    await page.reload();
-    await page.getByText("PTAR", { exact: false }).first().waitFor();
-    await foto(page, "08-ana-mis-filtros");
-  });
+  await paso(
+    "Ana: «Avisarme» con tipo y departamento crea el filtro",
+    async () => {
+      await page.goto(`${BASE}/licitaciones?tipo=ptar&departamento=antioquia`);
+      await page.locator(".va-resumen").click();
+      await page.locator(".va-boton").click();
+      await page.locator(".va-hecho").waitFor();
+      await foto(page, "07-ana-alerta");
+    },
+    { fase3: true }
+  );
+  await paso(
+    "Ana: /mis-filtros muestra el filtro con PTAR y lo conserva al pausar",
+    async () => {
+      await page.goto(`${BASE}/mis-filtros`);
+      await page.getByText("PTAR", { exact: false }).first().waitFor();
+      await page.getByRole("button", { name: "Pausar" }).first().click();
+      await page.getByRole("button", { name: "Activar" }).first().waitFor();
+      await page.getByRole("button", { name: "Activar" }).first().click();
+      await page.getByRole("button", { name: "Pausar" }).first().waitFor();
+      await page.reload();
+      await page.getByText("PTAR", { exact: false }).first().waitFor();
+      await foto(page, "08-ana-mis-filtros");
+    },
+    { fase3: true }
+  );
   await ctx.close();
 }
 
@@ -167,7 +226,11 @@ async function foto(page, nombre) {
 
 await navegador.close();
 const fallas = resultados.filter((r) => r[0] === "falla");
+const hechos = resultados.filter((r) => r[0] !== "omitido");
+const omitidos = resultados.length - hechos.length;
 console.log(
-  `\n${resultados.length - fallas.length}/${resultados.length} pasos bien · capturas en ${SALIDA}/`
+  `\n${hechos.length - fallas.length}/${hechos.length} pasos bien` +
+    (omitidos ? ` (${omitidos} omitidos)` : "") +
+    ` · capturas en ${SALIDA}/`
 );
 process.exitCode = fallas.length ? 1 : 0;

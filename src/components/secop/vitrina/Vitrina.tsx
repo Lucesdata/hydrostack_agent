@@ -9,11 +9,9 @@ import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 import { ProveedorEncaje } from "./EncajeVitrina";
 import RadarVitrina from "./RadarVitrina";
-import EstanteParaTi from "./EstanteParaTi";
-import type { EstanteParaTi as Estante } from "@/src/lib/secop/para-ti";
+import { ESTILOS_FICHA } from "../ficha/estilos";
 import ProcesosCuenta from "../../mis-procesos/ProcesosCuenta";
 import BotonGuardar from "../../mis-procesos/BotonGuardar";
-import { ESTILOS_FICHA } from "../ficha/estilos";
 import type { DetalleRadar } from "@/src/lib/secop/radar";
 
 /**
@@ -47,32 +45,37 @@ export default function Vitrina({
   pagina,
   departamentos = [],
   detalles = [],
-  paraTi = null,
 }: {
   pagina: PaginaDeVitrina;
   departamentos?: OpcionDepartamento[];
   /** El panel del Radar; sin detalles (adjudicados, o si su consulta falló), solo la rejilla. */
   detalles?: DetalleRadar[];
-  /** Coincidencias con el perfil de la cuenta; `null` sin sesión, sin perfil o con filtros. */
-  paraTi?: Estante | null;
 }) {
   const conRadar = pagina.pestana === "abiertos" && detalles.length > 0;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
   const filtrado = pagina.pestana === "abiertos" && hayFiltros(pagina.filtros);
-  const vacio = filtrado
+  const numero = pagina.pestana === "abiertos" ? pagina.filtros.numero : null;
+  const vacio = numero
     ? {
-        texto: "Ningún proceso abierto coincide con estos filtros.",
-        accion: "Quitar los filtros",
+        texto: `Ningún proceso tiene el número o la referencia «${numero}».`,
+        accion: "Volver a todos los abiertos",
         href: `/licitaciones${queryDeFiltros(SIN_FILTROS)}`,
       }
-    : VACIO[pagina.pestana];
+    : filtrado
+      ? {
+          texto: "Ningún proceso abierto coincide con estos filtros.",
+          accion: "Quitar los filtros",
+          href: `/licitaciones${queryDeFiltros(SIN_FILTROS)}`,
+        }
+      : VACIO[pagina.pestana];
   const ruta = (n: number) => rutaVitrina(pagina.pestana, n, pagina.filtros);
   const rejilla = (
     <ul className="vt-rejilla">
       {pagina.items.map((p) => (
         <li key={p.id}>
           <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
-          {/* Fuera del enlace de la tarjeta: un botón no puede ir dentro de un <a>. */}
+          {/* Fuera del enlace de la tarjeta: un botón no puede ir dentro de un <a>.
+              El mismo «Guardar» de la ficha (/mis-procesos). */}
           {pagina.pestana === "abiertos" && (
             <span className="vt-guardar">
               <BotonGuardar procesoId={p.secopProcesoId} volver={ruta(pagina.pagina)} />
@@ -98,13 +101,15 @@ export default function Vitrina({
           <p className="vt-apoyo">Abra cualquier ficha para ver requisitos, fechas y documentos.</p>
           <p className="vt-conteo">
             {pagina.total.toLocaleString("es-CO")}{" "}
-            {pagina.pestana === "abiertos"
-              ? pagina.total === 1
-                ? `proceso abierto${filtrado ? " con estos filtros" : ""}`
-                : `procesos abiertos${filtrado ? " con estos filtros" : ""}`
-              : pagina.total === 1
-                ? "adjudicación en los últimos 30 días"
-                : "adjudicaciones en los últimos 30 días"}
+            {numero
+              ? `${pagina.total === 1 ? "proceso" : "procesos"} con el número «${numero}» · abiertos y cerrados, los exactos primero`
+              : pagina.pestana === "abiertos"
+                ? pagina.total === 1
+                  ? `proceso abierto${filtrado ? " con estos filtros" : ""}`
+                  : `procesos abiertos${filtrado ? " con estos filtros" : ""}`
+                : pagina.total === 1
+                  ? "adjudicación en los últimos 30 días"
+                  : "adjudicaciones en los últimos 30 días"}
           </p>
         </header>
 
@@ -125,8 +130,6 @@ export default function Vitrina({
           <FiltrosVitrina filtros={pagina.filtros} departamentos={departamentos} />
         )}
 
-        {paraTi && <EstanteParaTi estante={paraTi} />}
-
         {pagina.items.length === 0 ? (
           <div className="vt-vacio">
             <p style={{ margin: 0 }}>{vacio.texto}</p>
@@ -135,7 +138,6 @@ export default function Vitrina({
             </Link>
           </div>
         ) : (
-          // El mismo «Guardar» de la ficha y del buscador guiado (/mis-procesos).
           <ProcesosCuenta ids={pagina.items.map((p) => p.secopProcesoId)}>
             <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
               {conRadar ? (

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   SIN_FILTROS,
+  desdeExplorar,
   filtrosDesdeParams,
   hayFiltros,
   patronIlike,
@@ -22,6 +23,8 @@ describe("los filtros salen de la URL", () => {
     expect(filtros).toEqual({
       q: "PTAR",
       tipo: "ptar",
+      actividad: null,
+      numero: null,
       departamento: "antioquia",
       presupuestoMin: 500,
       orden: "valor",
@@ -69,6 +72,8 @@ describe("la URL de unos filtros", () => {
     const f = {
       q: "Covarachía",
       tipo: "acueducto" as const,
+      actividad: null,
+      numero: null,
       departamento: "boyaca",
       presupuestoMin: 100 as const,
       orden: "recientes" as const,
@@ -101,5 +106,64 @@ describe("las rutas con filtros", () => {
 describe("el patrón de búsqueda", () => {
   it("escapa los comodines del usuario", () => {
     expect(patronIlike("100%_a\\b")).toBe("%100\\%\\_a\\\\b%");
+  });
+});
+
+describe("los criterios del buscador guiado en la vitrina (2026-10-05)", () => {
+  it("el tipo admite los sistemas agrupados y la actividad; lo inventado se ignora", () => {
+    const { filtros } = filtrosDesdeParams(
+      new URLSearchParams("tipo=potable&actividad=consultoria")
+    );
+    expect(filtros).toMatchObject({ tipo: "potable", actividad: "consultoria" });
+    expect(
+      filtrosDesdeParams(new URLSearchParams("tipo=inventado&actividad=hack")).filtros
+    ).toMatchObject({ tipo: null, actividad: null });
+  });
+
+  it("el número se recorta a 120 caracteres y cuenta como filtro", () => {
+    const { filtros } = filtrosDesdeParams({ numero: `  CO1.REQ.42  ` });
+    expect(filtros.numero).toBe("CO1.REQ.42");
+    expect(hayFiltros(filtros)).toBe(true);
+    expect(filtrosDesdeParams({ numero: "x".repeat(200) }).filtros.numero).toHaveLength(120);
+  });
+
+  it("ida y vuelta con sistema, actividad y número", () => {
+    const f = {
+      ...SIN_FILTROS,
+      tipo: "residual" as const,
+      actividad: "muestreo" as const,
+      numero: "OBR-081-2023",
+    };
+    const q = queryDeFiltros(f);
+    expect(q).toBe("?numero=OBR-081-2023&tipo=residual&actividad=muestreo");
+    expect(filtrosDesdeParams(new URLSearchParams(q.slice(1))).filtros).toEqual(f);
+  });
+});
+
+describe("los enlaces viejos de /licitaciones/explorar", () => {
+  it("traduce sistema, actividad, texto, departamento, valor y orden", () => {
+    expect(
+      desdeExplorar(
+        new URLSearchParams(
+          "modo=tema&sistema=ptar&actividad=consultoria&q=planta&departamento=Valle del Cauca&valorMin=750000000&orden=fecha&apertura=Abierto&page=3&pageSize=25"
+        )
+      )
+    ).toEqual({
+      ...SIN_FILTROS,
+      q: "planta",
+      tipo: "ptar",
+      actividad: "consultoria",
+      departamento: "valle-del-cauca",
+      presupuestoMin: 500,
+      orden: "recientes",
+    });
+  });
+
+  it("el número pasa tal cual; lo desconocido se descarta", () => {
+    expect(desdeExplorar({ modo: "numero", numero: "CO1.REQ.42" })).toEqual({
+      ...SIN_FILTROS,
+      numero: "CO1.REQ.42",
+    });
+    expect(desdeExplorar({ sistema: "inventado", valorMin: "5", orden: "x" })).toEqual(SIN_FILTROS);
   });
 });

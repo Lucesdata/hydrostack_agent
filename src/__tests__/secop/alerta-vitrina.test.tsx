@@ -29,6 +29,26 @@ describe("cuándo se ofrece la alerta", () => {
     expect(hayCriteriosDeAlerta({ ...SIN_FILTROS, tipo: "ptar" })).toBe(true);
     expect(hayCriteriosDeAlerta({ ...SIN_FILTROS, q: "x" })).toBe(true);
   });
+
+  it("la actividad sola no basta: el filtro guardado no la tiene", () => {
+    expect(hayCriteriosDeAlerta({ ...SIN_FILTROS, actividad: "obras" })).toBe(false);
+  });
+
+  it("con número de proceso no: es una consulta puntual", () => {
+    expect(hayCriteriosDeAlerta({ ...COMPLETO, numero: "CO1.REQ.1" })).toBe(false);
+  });
+});
+
+describe("tipo agrupado por sistema", () => {
+  const RESIDUAL = { ...SIN_FILTROS, tipo: "residual" as const };
+
+  it("guarda los dos tipos del sistema y nombra el grupo", () => {
+    const cuerpo = filtroDesdeVitrina(RESIDUAL, null);
+    expect(cuerpo.tiposProyecto).toEqual(["alcantarillado", "ptar"]);
+    expect(cuerpo.nombre).toMatch(/^Aguas residuales/);
+    expect(criteriosDeAlerta(RESIDUAL, null)[0]).toMatch(/^Tipo de obra: Aguas residuales/);
+    expect(validarFiltro(cuerpo).error).toBeNull();
+  });
 });
 
 describe("de la vitrina a un filtro guardado", () => {
@@ -90,6 +110,19 @@ describe("AlertaVitrina — HTML del servidor", () => {
     expect(h).toMatch(/^<details class="va"><summary class="va-resumen">🔔 Avisarme/);
     expect(h).toContain("<li>Entidad en Boyacá</li>");
     expect(h).toContain('value="PTAR · Boyacá · desde $500 M · «colector»"');
+  });
+
+  it("avisa de que la actividad no se guarda", () => {
+    const h = renderToStaticMarkup(
+      <AlertaVitrina
+        cuerpo={filtroDesdeVitrina(COMPLETO, BOYACA)}
+        criterios={criteriosDeAlerta(COMPLETO, BOYACA)}
+        conBusqueda={false}
+        conActividad
+      />
+    );
+    expect(h).toContain("La actividad no se guarda en la alerta");
+    expect(html(false)).not.toContain("La actividad no se guarda");
   });
 
   it("avisa de la diferencia solo si hay texto buscado", () => {

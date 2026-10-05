@@ -75,7 +75,7 @@ describe("semáforo de elegibilidad", () => {
     expect(Object.keys(glifos).sort()).toEqual(Object.keys(estados).sort());
   });
 
-  // La barra de /licitaciones/explorar pinta el glifo en blanco dentro del
+  // La barra del semáforo pinta el glifo en blanco dentro del
   // tramo relleno; UNKNOWN va sin relleno, con contorno y glifo en --ink-600,
   // que ya cubre la prueba de arriba (y un contorno solo exige 3:1).
   for (const token of ["success", "warning", "danger"]) {

@@ -20,11 +20,13 @@ export default function AlertaVitrina({
   cuerpo,
   criterios,
   conBusqueda,
+  conActividad = false,
 }: {
   cuerpo: CuerpoAlerta;
   criterios: string[];
   /** Hay texto buscado: se avisa de que la alerta lo busca solo en el proceso. */
   conBusqueda: boolean;
+  conActividad?: boolean;
 }) {
   const [nombre, setNombre] = useState(cuerpo.nombre);
   const [estado, setEstado] = useState<"quieto" | "guardando" | "hecho" | "error">("quieto");
@@ -78,6 +80,12 @@ export default function AlertaVitrina({
             <p className="va-nota">
               En la alerta, la palabra se busca en el objeto y la descripción del proceso, no en la
               entidad ni el municipio.
+            </p>
+          )}
+          {conActividad && (
+            <p className="va-nota">
+              La actividad no se guarda en la alerta: te avisará de los procesos nuevos con los
+              demás criterios, sea cual sea su actividad.
             </p>
           )}
           <label className="va-nombre">
