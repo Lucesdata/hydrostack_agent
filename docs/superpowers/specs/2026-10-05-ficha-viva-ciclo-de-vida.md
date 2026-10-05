@@ -212,7 +212,7 @@ historia arrastra y el que más sirve a quien va a ofertar ahora.
 
 **Decisión del usuario (2026-10-05).** Un contrato cuyo contratista es una
 **persona natural** —proveedor con cédula de ciudadanía, cédula de extranjería o
-pasaporte (`proveedor.tipo_documento` CC, CE o PASAPORTE)— no se amplía con el
+pasaporte (`proveedor.tipo_documento` CC, CE, PASAPORTE o «PERMISO POR PROTECCIÓN TEMPORAL»)— no se amplía con el
 contenido de ciclo de vida: la ficha no nombra al contratista, no aparece en el
 filtro de etapa y no se publica como ficha «en ejecución» o «plazo cumplido».
 Son, sobre todo, contratos de prestación de servicios y apoyo a la gestión de
@@ -352,7 +352,7 @@ Señales de la muestra que el plan tiene que confirmar en la base viva:
 ## Resultados de la base viva
 
 Medido por el usuario el 2026-10-05 en el SQL Editor de Supabase con
-`scripts/sql/medir-ciclo-de-vida-supabase-1.sql` a `-4.sql`. Parte 5 (modalidad y antigüedad de los abiertos) pendiente.
+`scripts/sql/medir-ciclo-de-vida-supabase-1.sql` a `-5.sql`. **Mediciones completas.**
 
 **M1. El vínculo proceso ↔ contrato existe y es usable.**
 
@@ -484,6 +484,37 @@ mismo) y uno de transporte de agua por 1.000 veces su presupuesto. **C4 se
 redefine** como «cifra dudosa en la fuente» para razones mayores que 10, y la
 ficha **no pinta esa cifra como dato**: la muestra marcada y remite al
 expediente (R6).
+
+**M9. Por qué hay 36.088 «abiertos»: son contratación de régimen especial.**
+De los 36.088, **35.453 (98 %) son «Contratación régimen especial»** —empresas de
+servicios públicos que contratan con su propio manual— y **ninguno trae fecha de
+recepción de ofertas**. El SECOP los deja en «Publicado / Abierto» para siempre.
+Las modalidades competitivas, en cambio, **siempre** la traen: selección
+abreviada de menor cuantía 156/156, mínima cuantía 100/100, concurso de méritos
+57/57, licitación pública de obra 39/39, subasta inversa 13/13, régimen
+especial «con ofertas» 11/11. Los únicos sin fecha son régimen especial,
+contratación directa (156), «Subasta de prueba» (12) y 2 sin modalidad.
+
+Con recepción vigente hay **128**: menor cuantía 64, concurso de méritos 15,
+licitación de obra 14, solicitud de información 12, mínima cuantía 9, subasta
+inversa 5, régimen especial con ofertas 5, licitación pública 4. Los de 2026
+sin fecha, por antigüedad: 161 de la última semana, 514 de 8 a 30 días, 1.419 de
+31 a 90 días y 4.377 de más de 90.
+
+**Consecuencia: no hace falta una regla de antigüedad.** La regla es simple y
+sale del dato: **«Recibe ofertas» exige una fecha de recepción de ofertas que no
+haya vencido.** Sin esa fecha la ficha no afirma que se pueda ofertar; para el
+régimen especial lo explica («La entidad contrata con su propio manual y no
+publicó en el SECOP una fecha para recibir ofertas»). La «Solicitud de
+información a los proveedores» (12) no es una convocatoria a ofertar: se
+etiqueta como lo que es.
+
+**M10. Personas naturales.** Por tipo de documento del contratista, en toda la
+base: NIT 23.309 · CC 14.076 · OTRO 284 · CE 13 · permiso por protección
+temporal 3 · sin dato 1.552. En 2026, de 4.716 contratos firmados, **1.909 son de
+personas naturales** y 145 no tienen dato: con la decisión del usuario quedan
+fuera **2.054 (44 %)** y quedan unos **2.660** para fichas de ciclo de vida. El
+«permiso por protección temporal» también es persona natural y se excluye.
 
 ### Lo que cambia en el spec por estos datos
 

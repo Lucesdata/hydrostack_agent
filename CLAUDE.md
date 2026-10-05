@@ -11,8 +11,9 @@ Decisiones: filtro de etapa apagado por defecto, solo procesos publicados desde
 cumplido», no «Terminado», aunque la fuente diga «terminado»; los contratos de
 personas naturales (CC/CE/pasaporte o sin dato) se excluyen. Medido en la base
 viva: de 36.088 procesos que `condicionAbierto()` cuenta como abiertos, el 81 %
-es anterior a 2026 y solo 128 tienen recepción vigente. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
-`adjudicado: false`). Spec y mediciones pendientes en
+es anterior a 2026 y solo 128 tienen recepción vigente: el 98 % es régimen
+especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vigente. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
+`adjudicado: false`). Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
 **Buscador guiado (2026-10-04, secciones 1 y 2 implementadas localmente).** El usuario
