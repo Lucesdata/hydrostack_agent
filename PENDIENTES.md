@@ -1115,3 +1115,19 @@ especial sin fecha). Queda:
 - **`landingStats.ts`** cuenta abiertos contra Socrata con `estado_apertura` a
   secas; no se usa en la portada desde el 2026-09-28, pero si vuelve, debe usar
   la regla nueva.
+
+### 56. Etapa del proceso en la ficha: lo que queda (2026-10-05)
+PR 2 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+La ficha calcula la etapa con `etapaDeProceso()` (`src/lib/secop/etapa.ts`) y
+pinta «Revisa antes de confiar» con las contradicciones C1–C7. Queda:
+- **`contrato` no tiene índice por `proceso_id`.** `contratosDeProceso()` barre
+  ~39.000 filas por ficha regenerada (ISR 12 h). Aceptable hoy; si la ficha pasa
+  a dinámica o el Radar la usa por página, crear el índice con una migración.
+- **La tarjeta de la vitrina, el Radar y la minificha** no usan aún la etapa.
+  En la pestaña «abiertos» no hace falta (solo hay procesos que reciben ofertas
+  desde el PR 1), pero sí en «adjudicados» y en la búsqueda por número, que
+  encuentra también cerrados.
+- **La descripción de la página (`generateMetadata`)** sigue citando el estado
+  del SECOP; no consulta contratos para no duplicar la consulta.
+- **Contratista, valor del contrato, prórrogas, adiciones y pagos** son el PR 3
+  («Cómo se contrató»), con la exclusión de personas naturales.

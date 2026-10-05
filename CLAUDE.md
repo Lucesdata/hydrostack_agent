@@ -17,8 +17,15 @@ especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vig
 en Colombia, y su espejo de cliente es `recibeOfertas()` (`estados-abierto.ts`),
 que usa la minificha. Lo heredan mapa, imagen OG, facetas, vitrina, entidades,
 destacados y hero. Fuera: la ficha (PENDIENTES §55). Plan en
-`docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
-`adjudicado: false`). Spec y mediciones (completas) en
+`docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+**PR 2 (2026-10-05, rama `claude/ficha-etapa`):** la etapa vive en
+`etapaDeProceso()` (`src/lib/secop/etapa.ts`, puro): contrato firmado y sus
+fechas > adjudicación o «Seleccionado» > recepción vigente > estado; la fase se
+ignora. La cabecera de la ficha pinta la etapa y «Revisa antes de confiar»;
+«Participar» solo muestra el bloque de decisión si recibe ofertas. La ficha lee
+los contratos con `contratosDeProceso()` (sin índice por `proceso_id`,
+PENDIENTES §56). `aSecopProceso` sigue fijando `adjudicado: false` para el
+veredicto. Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
 **Buscador guiado (2026-10-04). Unificado con la vitrina el 2026-10-05:** lo que
