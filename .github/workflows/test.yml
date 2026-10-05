@@ -32,6 +32,10 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         if: always()
+        # La subida de cobertura es informativa: si Codecov falla (desde el
+        # 2026-10-05 su acción v3 corta con un error TLS), los tests ya pasaron
+        # y el job no debe salir en rojo por eso.
+        continue-on-error: true
         with:
           files: ./coverage/coverage-final.json
           flags: unittests
