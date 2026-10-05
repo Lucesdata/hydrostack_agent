@@ -18,7 +18,10 @@ export const ESTILOS_VITRINA = `
    una línea con elipsis) ensanchaba su columna y la rejilla se salía por la
    derecha. */
 .vt-rejilla { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
-.vt-rejilla > li { display: flex; min-width: 0; }
+.vt-rejilla > li { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* «Guardar» (/mis-procesos) va debajo de la tarjeta y no encima: el botón mide
+   44 px y, sin sesión, suma «Crear cuenta gratuita». */
+.vt-guardar { display: flex; align-items: center; font-size: 13px; }
 .vt-rejilla > li > a { flex: 1; min-width: 0; }
 
 .vt-vacio { font: 14px var(--sans); color: var(--text-muted); padding: 32px 0; }
@@ -103,7 +106,7 @@ export const ESTILOS_VITRINA = `
 .vf { margin: 0 0 18px; display: grid; gap: 12px; }
 .vf-form {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)) auto;
+  grid-template-columns: minmax(0, 2fr) repeat(5, minmax(0, 1fr)) auto;
   gap: 10px;
   align-items: end;
 }
@@ -134,12 +137,17 @@ export const ESTILOS_VITRINA = `
 .vf-chip:hover { border-color: var(--accent); color: var(--accent); }
 .vf-chip--activo { border-color: var(--accent); color: var(--accent-deep, var(--accent)); font-weight: 600; background: var(--surface-alt); }
 .vf-limpiar { font: 600 12px var(--mono); color: var(--accent); margin-right: 6px; }
+/* Búsqueda por número (2026-10-05, la del buscador guiado): aparte, plegada. */
+.vf-numero > summary { font: 600 13px var(--sans); color: var(--accent); cursor: pointer; width: max-content; }
+.vf-numero-form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-top: 8px; }
+.vf-numero-form .vf-campo { flex: 1 1 280px; max-width: 420px; }
+.vf-numero-ayuda { font: 12px var(--sans); color: var(--text-muted); }
 .vf-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-/* Bajo 1024: búsqueda y botón a lo ancho, los cuatro selectores de dos en dos
+/* Bajo 1024: búsqueda y botón a lo ancho, los selectores de dos en dos
    (en una columna el formulario ocupaba casi toda la pantalla del celular). */
 @media (max-width: 1023px) {
   .vf-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .vf-campo--q, .vf-buscar { grid-column: 1 / -1; }
+  .vf-campo--q, .vf-form .vf-buscar { grid-column: 1 / -1; }
 }
 
 @media (max-width: 1023px) { .vt-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

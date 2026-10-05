@@ -12,7 +12,7 @@
  * mismo hecho.
  */
 
-import { and, asc, desc, eq, gte, ilike, isNull, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import { condicionAbierto } from "./agregados";
@@ -24,6 +24,7 @@ import {
   queryDeFiltros,
   type FiltrosVitrina,
 } from "./filtros-vitrina";
+import { patronDeActividad, tiposDeSistema } from "./busqueda-guiada";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
 export type PestanaVitrina = (typeof PESTANAS_VITRINA)[number];
@@ -175,7 +176,12 @@ function condicionesDeFiltros(f: FiltrosVitrina, departamentoCodigo: string | nu
           ilike(geografia.municipioNombre, patronIlike(f.q))
         )
       : undefined,
-    f.tipo ? eq(proceso.tipoProyecto, f.tipo) : undefined,
+    f.tipo ? inArray(proceso.tipoProyecto, [...tiposDeSistema(f.tipo)]) : undefined,
+    // Menciones en objeto o descripción, sin tildes ni mayúsculas: el mismo
+    // criterio del buscador guiado de #109, que la vitrina absorbió.
+    f.actividad
+      ? sql`translate(lower(concat_ws(' ', ${proceso.objeto}, ${proceso.descripcion})), 'áéíóúüñ', 'aeiouun') ~ ${patronDeActividad(f.actividad)}`
+      : undefined,
     departamentoCodigo ? eq(geografia.departamentoCodigo, departamentoCodigo) : undefined,
     f.presupuestoMin ? gte(proceso.valorEstimado, String(f.presupuestoMin * 1_000_000)) : undefined,
   ];
@@ -188,8 +194,33 @@ function ordenDeAbiertos(orden: FiltrosVitrina["orden"]) {
 }
 
 /**
+ * La búsqueda por número: id SECOP II o referencia, en abiertos **y cerrados**
+ * (quien tiene el número busca ese proceso, esté como esté) y sin los demás
+ * filtros. Primero las coincidencias exactas, sin distinguir mayúsculas; luego
+ * las parciales. `%`, `_` y `\` se buscan como caracteres (`patronIlike`).
+ */
+function busquedaPorNumero(numero: string) {
+  const exacta = sql`(lower(${proceso.secopProcesoId}) = lower(${numero}) or lower(${proceso.referencia}) = lower(${numero}))`;
+  return {
+    where: and(
+      isNull(proceso.deletedAt),
+      or(
+        ilike(proceso.secopProcesoId, patronIlike(numero)),
+        ilike(proceso.referencia, patronIlike(numero))
+      )
+    ),
+    orden: [
+      sql`case when ${exacta} then 0 else 1 end`,
+      desc(proceso.fechaPublicacion),
+      asc(proceso.id),
+    ],
+  };
+}
+
+/**
  * Los filtros solo se aplican a los abiertos: es la pestaña de trabajo. Los
- * adjudicados recientes son ~190 y se leen enteros.
+ * adjudicados recientes son ~190 y se leen enteros. Con `numero`, la búsqueda
+ * es otra (`busquedaPorNumero`).
  */
 export async function procesosDeVitrina(
   pestana: PestanaVitrina,
@@ -197,19 +228,23 @@ export async function procesosDeVitrina(
   opciones: { filtros?: FiltrosVitrina; departamentoCodigo?: string | null } = {}
 ): Promise<PaginaDeVitrina> {
   const filtros = pestana === "abiertos" ? (opciones.filtros ?? SIN_FILTROS) : SIN_FILTROS;
-  const where = and(
-    condicionDe(pestana),
-    ...condicionesDeFiltros(filtros, opciones.departamentoCodigo ?? null)
-  );
+  const porNumero = filtros.numero ? busquedaPorNumero(filtros.numero) : null;
+  const where =
+    porNumero?.where ??
+    and(
+      condicionDe(pestana),
+      ...condicionesDeFiltros(filtros, opciones.departamentoCodigo ?? null)
+    );
   // `proceso.id` como segunda clave: Postgres no garantiza orden estable entre
   // empates de `fecha_publicacion`/`fecha_adjudicacion` (columna `date`, con
   // empates masivos), y cada página es una entrada ISR generada en momentos
   // distintos — sin desempate, dos páginas contiguas pueden repetir un proceso
   // o saltárselo.
   const orden =
-    pestana === "abiertos"
+    porNumero?.orden ??
+    (pestana === "abiertos"
       ? ordenDeAbiertos(filtros.orden)
-      : [desc(proceso.fechaAdjudicacion), asc(proceso.id)];
+      : [desc(proceso.fechaAdjudicacion), asc(proceso.id)]);
 
   const [filas, [{ total }]] = await Promise.all([
     db

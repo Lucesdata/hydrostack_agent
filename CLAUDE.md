@@ -16,12 +16,15 @@ especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vig
 **PR 1 aplicado (2026-10-05):** `condicionAbierto()` exige `fecha_recepcion >=` hoy
 en Colombia, y su espejo de cliente es `recibeOfertas()` (`estados-abierto.ts`),
 que usa la minificha. Lo heredan mapa, imagen OG, facetas, vitrina, entidades,
-destacados y hero. Fuera: `/api/secop` y la ficha (PENDIENTES §55). Plan en
+destacados y hero. Fuera: la ficha (PENDIENTES §55). Plan en
 `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
 `adjudicado: false`). Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
-**Buscador guiado (2026-10-04, secciones 1 y 2 implementadas localmente).** El usuario
+**Buscador guiado (2026-10-04). Unificado con la vitrina el 2026-10-05:** lo que
+sigue describe #109 tal como entró; hoy `/api/secop` y el explorador ya no
+existen y sus criterios viven en `/licitaciones` (ver «Un solo buscador», más
+abajo). **Texto original:** El usuario
 eligió la alternativa 1 y guardar explícitamente con cuenta gratuita, con
 recientes separados. Diseño en
 `docs/superpowers/specs/2026-10-04-buscador-guiado-design.md`; plan de primera
@@ -730,12 +733,21 @@ la query (`src/lib/secop/filtros-vitrina.ts`, `FiltrosVitrina.tsx`) y aplicados 
 el servidor sobre la consulta de la vitrina. Es un formulario GET sin
 JavaScript. Sin filtros, la paginación sigue en el camino (ISR); con filtros va
 en `?pagina=` y la página lleva `noindex`. `/licitaciones/descubrir` redirige con
-308 (la query pasa) y salió `discovery`. **`/licitaciones/explorar` se queda**
-(decisión del usuario del 2026-10-05): el buscador guiado del hero (PR #109) la
-usa con `SecopExplorer`, `/api/secop` y `/api/secop/probe`, que este trabajo
-había retirado antes de que #109 llegara a `main`. Hoy conviven dos buscadores
-—el de la vitrina y el guiado— con dos definiciones de «abierto»; unificarlos es
-PENDIENTES §54.
+308 (la query pasa) y salió `discovery`.
+**Un solo buscador (2026-10-05, decisión del usuario).** La vitrina absorbió el
+buscador guiado de #109: `tipo` admite además `potable` y `residual` (agrupan
+acueducto + PTAP y alcantarillado + PTAR, `tiposDeSistema`), `actividad` busca
+menciones en objeto y descripción sin tildes (`ACTIVIDADES_BUSQUEDA`,
+`patronDeActividad` en `busqueda-guiada.ts`) y `numero` busca por id SECOP II o
+referencia **también entre los cerrados**, exactos primero, sin combinarse con
+los demás filtros (`busquedaPorNumero` en `vitrina.ts`, formulario aparte en
+`FiltrosVitrina`). Todo usa `condicionAbierto()`. El modal «Buscar procesos» del
+hero (`BuscadorGuiado.tsx`) conserva su interfaz pero ya solo envía por GET a
+`/licitaciones`, sin vista previa ni `fetch`. `/licitaciones/explorar` redirige
+con 308 traduciendo los parámetros viejos (`desdeExplorar`). Salieron
+`/api/secop`, `/api/secop/probe`, `SecopExplorer` y lo que solo él usaba
+(PENDIENTES §54). La tarjeta y el panel del Radar llevan el «Guardar» de
+`/mis-procesos`, debajo de la tarjeta.
 
 **Tarjeta de la vitrina con cierre y encaje (2026-10-04, fase 1b).** Presupuesto y
 «Cierre de ofertas» en grande (`cierreDe()` en `ficha-card.ts`: cuenta atrás solo
