@@ -1,22 +1,50 @@
 /**
  * Cliente SODA (Socrata) para SECOP.
  *
- * Se ejecuta SIEMPRE en servidor para no exponer el app token y poder
- * cachear. Lo usan las cifras de la portada (`landingStats.ts`); la búsqueda
- * en vivo contra Socrata salió el 2026-10-04 con `GET /api/secop`, su único
- * consumidor: la vitrina lee de Postgres.
+ * Se ejecuta SIEMPRE en servidor (route handler / agent tool) para:
+ *   - evitar CORS,
+ *   - ocultar el app token,
+ *   - poder cachear.
  *
  * App token opcional → sube el rate limit. Ponlo en .env.local:
  *   SECOP_APP_TOKEN=xxxxxxxxxxxxx
  */
 
-import { SOCRATA_DOMAIN, FIELDS_PROCESOS, KEYWORDS_AGUA, REVALIDATE_SEARCH } from "./config";
+import {
+  SOCRATA_DOMAIN,
+  FIELDS_PROCESOS,
+  FIELDS_CONTRATOS,
+  KEYWORDS_AGUA,
+  PAGE_SIZE_DEFAULT,
+  PAGE_SIZE_MAX,
+  REVALIDATE_SEARCH,
+  REVALIDATE_COUNT,
+} from "./config";
+import { resolveDatasetId } from "./datasetResolver";
+import { preclassify, accessMessage } from "./document-access";
+import type { SecopProceso, SecopContrato, SecopQuery, SecopResult } from "./types";
 
 const F = FIELDS_PROCESOS;
 
 /** Escapa comillas simples para SoQL (evita romper el $where). */
 function soqlEscape(value: string): string {
   return value.replace(/'/g, "''");
+}
+
+function toNumber(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** El campo URL de Socrata a veces es objeto { url }, a veces string. */
+function extractUrl(v: unknown): string | null {
+  if (!v) return null;
+  if (typeof v === "string") return v;
+  if (typeof v === "object" && v !== null && "url" in v) {
+    return (v as { url?: string }).url ?? null;
+  }
+  return null;
 }
 
 /** Construye la cláusula $where del sector agua (OR de palabras clave). */
@@ -27,6 +55,11 @@ export function buildAguaWhere(): string {
     return `(upper(${F.nombre}) like '%${k}%' OR upper(${F.descripcion}) like '%${k}%')`;
   });
   return `(${clauses.join(" OR ")})`;
+}
+
+/** Une condiciones $where con AND, ignorando vacías. */
+function andWhere(...parts: (string | null | undefined)[]): string {
+  return parts.filter(Boolean).join(" AND ");
 }
 
 interface SodaParams {
@@ -67,4 +100,183 @@ export async function sodaFetch<T>(
     throw new Error(`SECOP/Socrata ${res.status}: ${body.slice(0, 300)}`);
   }
   return res.json() as Promise<T[]>;
+}
+
+/** Normaliza una fila cruda de PROCESOS al tipo limpio. */
+function normalizeProceso(row: Record<string, unknown>): SecopProceso {
+  // Gate de acceso documental preliminar (B2): preclassify sobre la fila cruda,
+  // sin HTTP ni DB. El probe on-demand (C) lo refina luego desde la UI.
+  const access = preclassify(row);
+  const apertura = row[F.estadoApertura];
+  return {
+    id: String(row[F.id] ?? ""),
+    referencia: String(row[F.referencia] ?? ""),
+    nombre: String(row[F.nombre] ?? ""),
+    descripcion: String(row[F.descripcion] ?? ""),
+    entidad: String(row[F.entidad] ?? ""),
+    departamento: String(row[F.departamento] ?? ""),
+    ciudad: String(row[F.ciudad] ?? ""),
+    estado: String(row[F.estado] ?? ""),
+    fase: String(row[F.fase] ?? ""),
+    modalidad: String(row[F.modalidad] ?? ""),
+    tipoContrato: String(row[F.tipoContrato] ?? ""),
+    fechaPublicacion: (row[F.fechaPublicacion] as string) ?? null,
+    precioBase: toNumber(row[F.precioBase]),
+    adjudicado: String(row[F.adjudicado] ?? "").toLowerCase() === "si",
+    valorAdjudicacion: toNumber(row[F.valorAdjudicacion]),
+    adjudicatario: (row[F.adjudicatario] as string) ?? null,
+    unspsc: (row[F.unspsc] as string) ?? null,
+    url: extractUrl(row[F.url]),
+    estadoApertura: apertura === "Abierto" || apertura === "Cerrado" ? apertura : null,
+    documentAccess: access.state,
+    accessMessage: accessMessage(access.state),
+  };
+}
+
+/** Orden SoQL soportado, mapeado desde SecopQuery.orden. */
+export const ORDER_SOQL = {
+  fecha: `${F.fechaPublicacion} DESC`,
+  valor: `${F.precioBase} DESC`,
+} as const;
+
+/**
+ * Construye el $where de PROCESOS a partir del query normalizado.
+ * Pura (sin red) para poder testearla; searchProcesos y countProcesos la comparten.
+ */
+export function buildProcesosWhere(query: SecopQuery): string {
+  return andWhere(
+    query.soloAgua !== false ? buildAguaWhere() : null, // por defecto, solo agua
+    query.departamento
+      ? `upper(${F.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
+      : null,
+    query.estado ? `${F.estado} = '${soqlEscape(query.estado)}'` : null,
+    query.valorMin != null ? `${F.precioBase} >= ${query.valorMin}` : null,
+    query.desde ? `${F.fechaPublicacion} >= '${soqlEscape(query.desde)}'` : null,
+    query.apertura ? `${F.estadoApertura} = '${soqlEscape(query.apertura)}'` : null
+  );
+}
+
+/**
+ * Total de PROCESOS que matchean el query (para "Página X de Y" y el contador).
+ * Best-effort: si SODA falla, devuelve undefined y la UI degrada sin total.
+ */
+export async function countProcesos(
+  query: SecopQuery = {},
+  signal?: AbortSignal
+): Promise<number | undefined> {
+  try {
+    const where = buildProcesosWhere(query);
+    const rows = await sodaFetch<{ count?: string }>(
+      await resolveDatasetId("procesos"),
+      {
+        $select: "count(*) as count",
+        $where: where || undefined,
+        $q: query.q ? soqlEscape(query.q) : undefined,
+        $limit: 1,
+        $offset: 0,
+      },
+      { signal, revalidate: REVALIDATE_COUNT }
+    );
+    const n = Number(rows[0]?.count);
+    if (!Number.isFinite(n)) {
+      console.warn(
+        `[countProcesos] count no numérico en la respuesta SODA (${String(rows[0]?.count)}), se omite el total`
+      );
+      return undefined;
+    }
+    return n;
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") return undefined;
+    console.warn(
+      `[countProcesos] falló la consulta count (${
+        err instanceof Error ? err.message : String(err)
+      }), se omite el total`
+    );
+    return undefined;
+  }
+}
+
+/**
+ * Busca PROCESOS de contratación (licitaciones).
+ * Punto de entrada principal de la feature.
+ */
+export async function searchProcesos(
+  query: SecopQuery = {},
+  signal?: AbortSignal
+): Promise<SecopResult<SecopProceso>> {
+  const page = Math.max(1, query.page ?? 1);
+  const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
+
+  const where = buildProcesosWhere(query);
+
+  const rows = await sodaFetch<Record<string, unknown>>(
+    await resolveDatasetId("procesos"),
+    {
+      $where: where || undefined,
+      $q: query.q ? soqlEscape(query.q) : undefined,
+      $order: ORDER_SOQL[query.orden ?? "fecha"],
+      $limit: pageSize,
+      $offset: (page - 1) * pageSize,
+    },
+    { signal }
+  );
+
+  return { items: rows.map(normalizeProceso), page, pageSize };
+}
+
+/** Normaliza una fila cruda de CONTRATOS al tipo limpio. */
+function normalizeContrato(row: Record<string, unknown>): SecopContrato {
+  const C = FIELDS_CONTRATOS;
+  return {
+    id: String(row[C.id] ?? ""),
+    referencia: String(row[C.referencia] ?? ""),
+    objeto: String(row[C.objeto] ?? ""),
+    entidad: String(row[C.entidad] ?? ""),
+    departamento: String(row[C.departamento] ?? ""),
+    ciudad: String(row[C.ciudad] ?? ""),
+    estado: String(row[C.estado] ?? ""),
+    proveedor: (row[C.proveedor] as string) ?? null,
+    fechaFirma: (row[C.fechaFirma] as string) ?? null,
+    valor: toNumber(row[C.valor]),
+    unspsc: (row[C.unspsc] as string) ?? null,
+    url: extractUrl(row[C.url]),
+  };
+}
+
+/** Busca CONTRATOS ya formalizados del sector agua. */
+export async function searchContratos(
+  query: SecopQuery = {},
+  signal?: AbortSignal
+): Promise<SecopResult<SecopContrato>> {
+  const C = FIELDS_CONTRATOS;
+  const page = Math.max(1, query.page ?? 1);
+  const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
+
+  const aguaWhere =
+    query.soloAgua !== false
+      ? `(${KEYWORDS_AGUA.map(
+          (kw) => `upper(${C.objeto}) like '%${soqlEscape(kw.toUpperCase())}%'`
+        ).join(" OR ")})`
+      : null;
+
+  const where = andWhere(
+    aguaWhere,
+    query.departamento
+      ? `upper(${C.departamento}) = '${soqlEscape(query.departamento.toUpperCase())}'`
+      : null,
+    query.valorMin != null ? `${C.valor} >= ${query.valorMin}` : null
+  );
+
+  const rows = await sodaFetch<Record<string, unknown>>(
+    await resolveDatasetId("contratos"),
+    {
+      $where: where || undefined,
+      $q: query.q ? soqlEscape(query.q) : undefined,
+      $limit: pageSize,
+      $offset: (page - 1) * pageSize,
+    },
+    { signal }
+  );
+
+  return { items: rows.map(normalizeContrato), page, pageSize };
 }

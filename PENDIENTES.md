@@ -1067,17 +1067,15 @@ enlaces del mapa a las facetas.
   quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
   («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
   gritaba.
-- **Rutas de API sin consumidor tras fundir Explorar** — CERRADO el 2026-10-04
-  por decisión del usuario. Salieron `GET /api/secop` (con otra definición de
-  «abierto» que `condicionAbierto()`) y `POST /api/secop/probe`, con lo que solo
-  ellas usaban: `parse-query.ts`, `cached-db-search.ts`, `countProcesosDb` y la
-  búsqueda en vivo contra Socrata de `client.ts` (`searchProcesos`,
-  `countProcesos`, `searchContratos`; `sodaFetch` y `buildAguaWhere` siguen para
-  `landingStats.ts`). `/api/secop/verdict` **se queda**: lo usan el bloque de
-  decisión de la ficha y el panel del Radar. Después salió también el sondeo de
-  documentos de `document-access.ts` (`probeDocument`, `classifyProbeResponse`,
-  `canExtract`), que ya no tenía consumidor; `preclassify` y `accessMessage`
-  siguen (ingesta y búsqueda en Postgres).
+- **Dos buscadores con dos definiciones de «abierto»** (2026-10-05). La vitrina
+  (`/licitaciones`, `condicionAbierto()`) y el buscador guiado de #109
+  (`/licitaciones/explorar` + `GET /api/secop`, con `estado_apertura`) conviven.
+  Este PR había retirado Explorar, `/api/secop`, `/api/secop/probe` y
+  `probeDocument()`, pero #109 llegó antes a `main` y los usa; por decisión del
+  usuario se conservan tal como están en `main`. Unificar es portar a la vitrina
+  los criterios del guiado (sistema, actividad, número de proceso) o llevar el
+  guiado a `condicionAbierto()`; hasta entonces un mismo proceso puede salir
+  abierto en uno y no en el otro.
 - **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
   `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
   perfil. Si el tráfico crece, se puede calcular en el navegador con los
@@ -1086,8 +1084,9 @@ enlaces del mapa a las facetas.
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
 - **Migración `0025` sin aplicar en la Supabase viva** (2026-10-04, fase 3 de la
-  vitrina). Dos columnas nulas y sin default: `coincidencia.origen` y
-  `al_filtros_usuario.tipos_proyecto`. La aplica el usuario con `npm run
-  db:migrate` **antes** de fusionar el PR que las usa: el código de las tareas
-  2–5 las nombra en sus consultas.
+  vitrina). Una columna nula y sin default, `al_filtros_usuario.tipos_proyecto`
+  (`coincidencia.origen` salió con «Seguir» el 2026-10-05). La aplica el usuario
+  con `npm run db:migrate` **antes** de fusionar el PR que la usa: Drizzle lee
+  todas las columnas de la tabla, así que sin ella falla también el cron de
+  filtros que ya existe. Hoy la base está al límite del plan.
 

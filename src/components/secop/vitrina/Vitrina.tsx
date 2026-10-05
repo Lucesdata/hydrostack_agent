@@ -11,8 +11,8 @@ import { ProveedorEncaje } from "./EncajeVitrina";
 import RadarVitrina from "./RadarVitrina";
 import EstanteParaTi from "./EstanteParaTi";
 import type { EstanteParaTi as Estante } from "@/src/lib/secop/para-ti";
-import BotonSeguir, { ProveedorSeguir } from "../seguir/BotonSeguir";
-import { ESTILOS_SEGUIR } from "../seguir/estilos";
+import ProcesosCuenta from "../../mis-procesos/ProcesosCuenta";
+import BotonGuardar from "../../mis-procesos/BotonGuardar";
 import { ESTILOS_FICHA } from "../ficha/estilos";
 import type { DetalleRadar } from "@/src/lib/secop/radar";
 
@@ -74,8 +74,8 @@ export default function Vitrina({
           <FichaCard proceso={p} href={hrefDeProceso(p)} variante="vitrina" />
           {/* Fuera del enlace de la tarjeta: un botón no puede ir dentro de un <a>. */}
           {pagina.pestana === "abiertos" && (
-            <span className="vt-seguir">
-              <BotonSeguir id={p.secopProcesoId} variante="tarjeta" />
+            <span className="vt-guardar">
+              <BotonGuardar procesoId={p.secopProcesoId} volver={ruta(pagina.pagina)} />
             </span>
           )}
         </li>
@@ -88,8 +88,7 @@ export default function Vitrina({
       <style
         dangerouslySetInnerHTML={{
           // Los de la ficha solo con Radar: su panel aloja el bloque de decisión.
-          __html:
-            ESTILOS_VITRINA + ESTILOS_FICHA_CARD + ESTILOS_SEGUIR + (conRadar ? ESTILOS_FICHA : ""),
+          __html: ESTILOS_VITRINA + ESTILOS_FICHA_CARD + (conRadar ? ESTILOS_FICHA : ""),
         }}
       />
       <div className="clr-container">
@@ -136,11 +135,18 @@ export default function Vitrina({
             </Link>
           </div>
         ) : (
-          <ProveedorSeguir ids={pagina.items.map((p) => p.secopProcesoId)}>
+          // El mismo «Guardar» de la ficha y del buscador guiado (/mis-procesos).
+          <ProcesosCuenta ids={pagina.items.map((p) => p.secopProcesoId)}>
             <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
-              {conRadar ? <RadarVitrina detalles={detalles}>{rejilla}</RadarVitrina> : rejilla}
+              {conRadar ? (
+                <RadarVitrina detalles={detalles} volver={ruta(pagina.pagina)}>
+                  {rejilla}
+                </RadarVitrina>
+              ) : (
+                rejilla
+              )}
             </ProveedorEncaje>
-          </ProveedorSeguir>
+          </ProcesosCuenta>
         )}
 
         {totalPaginas > 1 && (

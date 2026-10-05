@@ -13,13 +13,8 @@
  *     transform. Da una bandera PRELIMINAR: descarta lo que claramente no tiene
  *     documentos aún (`NOT_PUBLISHED`) y deja el resto en `UNKNOWN` pendiente de
  *     probe. NUNCA afirma `PUBLIC`: eso exige abrir el documento (Fase C).
- *   · El sondeo on-demand de la Fase C (`probeDocument()`, un GET que resolvía
- *     `UNKNOWN` → `PUBLIC | RESTRICTED`) salió el 2026-10-04 con
- *     `POST /api/secop/probe`, su único consumidor. Hallazgo que dejó: la URL
- *     pública de SECOP II redirige a un muro ReCaptcha para clientes que no son
- *     navegador, así que un sondeo desde el servidor casi siempre daba
- *     `RESTRICTED`. Su estado previo está en git. Las filas antiguas pueden
- *     conservar `method = 'probe'`.
+ *   · `probeDocument()` — C, on-demand (cuando el usuario abre/se suscribe). Hace
+ *     UN GET y resuelve `UNKNOWN` → `PUBLIC | RESTRICTED`. (Pendiente de Fase C.)
  *
  *  `NOT_PUBLISHED` y `UNKNOWN` se RE-EVALÚAN en cada corrida (B3): el estado
  *  cambia con la fase del proceso (un borrador hoy puede publicar mañana).
@@ -81,8 +76,8 @@ export function secopPortal(url: string): SecopPortal {
  * `fase`/`estado_del_procedimiento` + dominio de `urlproceso` + `modalidad`.
  *
  * Resultado: `NOT_PUBLISHED` (sin documentos aún) o `UNKNOWN` (publicado pero
- * requiere abrir el documento para confirmar PUBLIC vs RESTRICTED). Nunca
- * `PUBLIC`/`RESTRICTED` desde metadata.
+ * requiere probe para confirmar PUBLIC vs RESTRICTED). Nunca `PUBLIC`/`RESTRICTED`
+ * — eso lo decide `probeDocument` (Fase C).
  */
 export function preclassify(row: Record<string, unknown>): DocumentAccessResult {
   const fase = norm(row[FIELDS_PROCESOS.fase]);
@@ -128,7 +123,7 @@ export function preclassify(row: Record<string, unknown>): DocumentAccessResult 
   };
 }
 
-/** Mensaje para el usuario según el estado. */
+/** Mensaje para el usuario según el estado (SecopExplorer, Fase D). */
 export function accessMessage(state: DocumentAccess): string {
   switch (state) {
     case "PUBLIC":
@@ -140,4 +135,180 @@ export function accessMessage(state: DocumentAccess): string {
     case "UNKNOWN":
       return "Acceso a documentos por confirmar.";
   }
+}
+
+// ===========================================================================
+//  Fase C — probe on-demand + gate del extractor
+// ===========================================================================
+
+/**
+ * HALLAZGO VERIFICADO (2026-06-25): la URL pública de SECOP II
+ * (`community.secop.gov.co/Public/Tendering/OpportunityDetail`) **redirige a un
+ * muro de Google ReCaptcha** (`/Public/Common/GoogleReCaptcha/Index?previousUrl=…`)
+ * para clientes no-navegador. Probado en 3 procesos: todos redirigen al captcha.
+ *
+ * Implicación: un probe server-side NUNCA obtiene el contenido del detalle →
+ * cae en el muro → `RESTRICTED`. Eso ES el valor del gate: detectar que el
+ * documento no es accesible por máquina y mantenerlo FUERA del extractor (un
+ * HTML de captcha alimentado al extractor = presupuesto alucinado). `PUBLIC`
+ * solo es plausible para una URL de documento descargable directo (PDF), no para
+ * la página de detalle. Coherente con `gate-verdict.md` (descarga manual).
+ */
+const WALL_URL_PATTERNS = [
+  "/googlerecaptcha/",
+  "/account/login",
+  "/common/login",
+  "/account/signin",
+  "previousurl=", // SECOP II adjunta la url original al redirigir al captcha
+];
+
+/** Metadata de la respuesta HTTP del probe (desacoplada del fetch real). */
+export interface ProbeResponseInput {
+  /** Hubo respuesta (no error de red/timeout). */
+  ok: boolean;
+  status: number;
+  /** URL efectiva tras seguir redirects (clave para detectar el muro). */
+  finalUrl: string;
+  contentType: string | null;
+  /** Muestra del cuerpo (solo si es HTML), para marcadores de captcha/login. */
+  bodySample?: string | null;
+  error?: string;
+}
+
+/**
+ * Clasifica la respuesta del probe → estado (PURO, testeable). Centrado en el
+ * muro ReCaptcha (ver nota arriba): prioriza la URL final tras redirects.
+ */
+export function classifyProbeResponse(input: ProbeResponseInput): DocumentAccessResult {
+  if (!input.ok) {
+    return {
+      state: "UNKNOWN",
+      reason: `probe sin respuesta${input.error ? `: ${input.error}` : ""}`,
+      method: "probe",
+    };
+  }
+  const finalUrl = (input.finalUrl ?? "").toLowerCase();
+  const ctype = (input.contentType ?? "").toLowerCase();
+  const body = (input.bodySample ?? "").toLowerCase();
+
+  // Muro de captcha/login: la señal más fiable es la URL final tras redirects.
+  if (WALL_URL_PATTERNS.some((p) => finalUrl.includes(p)) || body.includes("recaptcha")) {
+    return {
+      state: "RESTRICTED",
+      reason: "muro ReCaptcha/login: documento no accesible por máquina",
+      method: "probe",
+    };
+  }
+  if (input.status === 404 || input.status === 410) {
+    return {
+      state: "NOT_PUBLISHED",
+      reason: `documento no encontrado (HTTP ${input.status})`,
+      method: "probe",
+    };
+  }
+  if (input.status === 401 || input.status === 403) {
+    return {
+      state: "RESTRICTED",
+      reason: `acceso denegado (HTTP ${input.status})`,
+      method: "probe",
+    };
+  }
+  if (input.status >= 500) {
+    return {
+      state: "UNKNOWN",
+      reason: `error de servidor (HTTP ${input.status})`,
+      method: "probe",
+    };
+  }
+  // Documento descargable directo (PDF/binario) sin muro → accesible por máquina.
+  if (
+    input.status === 200 &&
+    (ctype.includes("application/pdf") || ctype.includes("octet-stream"))
+  ) {
+    return {
+      state: "PUBLIC",
+      reason: `documento descargable (${input.contentType})`,
+      method: "probe",
+    };
+  }
+  if (input.status === 200) {
+    return {
+      state: "UNKNOWN",
+      reason: "respuesta 200 sin marcador claro de documento ni de muro",
+      method: "probe",
+    };
+  }
+  return {
+    state: "UNKNOWN",
+    reason: `respuesta inesperada (HTTP ${input.status})`,
+    method: "probe",
+  };
+}
+
+export interface ProbeDeps {
+  /** fetch inyectable (tests sin red). Default: fetch global. */
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+  bodySampleBytes?: number;
+}
+
+/**
+ * C1 — probe ON-DEMAND (jamás en batch nacional): un GET ligero que sigue
+ * redirects y clasifica el resultado. Solo lee el cuerpo si es HTML (para
+ * marcadores de muro); un PDF no se descarga entero.
+ */
+export async function probeDocument(
+  url: string | null,
+  deps: ProbeDeps = {}
+): Promise<DocumentAccessResult> {
+  if (!url) {
+    return { state: "NOT_PUBLISHED", reason: "sin url para probar", method: "probe" };
+  }
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), deps.timeoutMs ?? 15_000);
+  try {
+    const res = await fetchImpl(url, {
+      redirect: "follow",
+      signal: ctl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (AquaLicita probe)" },
+    });
+    const contentType = res.headers.get("content-type");
+    let bodySample: string | null = null;
+    if (contentType && contentType.toLowerCase().includes("text/html")) {
+      bodySample = (await res.text()).slice(0, deps.bodySampleBytes ?? 4000);
+    }
+    return classifyProbeResponse({
+      ok: true,
+      status: res.status,
+      finalUrl: res.url,
+      contentType,
+      bodySample,
+    });
+  } catch (e) {
+    // Surfacing de la causa real: undici envuelve el motivo en `cause`
+    // (p. ej. UNABLE_TO_VERIFY_LEAF_SIGNATURE en sitios .gov.co con cadena TLS
+    // incompleta, o ECONNRESET/ETIMEDOUT). Mucho más útil que "TypeError".
+    const err = e instanceof Error ? e : null;
+    const cause = err && "cause" in err ? (err.cause as { code?: string } | undefined) : undefined;
+    const detail = cause?.code ?? err?.name ?? "error";
+    return classifyProbeResponse({
+      ok: false,
+      status: 0,
+      finalUrl: url,
+      contentType: null,
+      error: detail,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * C2 — gate del extractor: SOLO `PUBLIC` puede llegar al extractor. Garantiza
+ * que el extractor jamás reciba un HTML de captcha/login → cero líneas de
+ * presupuesto alucinadas (parte del pass/fail de Fase 0).
+ */
+export function canExtract(state: DocumentAccess): boolean {
+  return state === "PUBLIC";
 }

@@ -1,10 +1,10 @@
 /**
- * Migración 0025 (fase 3 de la vitrina): `coincidencia.origen` y
- * `al_filtros_usuario.tipos_proyecto`, contra PGlite con todas las migraciones
- * reales. Lo que se exige es lo que hace segura la migración sobre la base viva:
- * columnas nulas y sin default (las filas existentes no cambian, ninguna
- * consulta actual las nombra), RLS intacto en las dos tablas y que el código
- * de siempre siga insertando sin conocerlas.
+ * Migración 0025 (fase 3 de la vitrina): `al_filtros_usuario.tipos_proyecto`,
+ * contra PGlite con todas las migraciones reales. Lo que se exige es lo que hace
+ * segura la migración sobre la base viva: columna nula y sin default (las filas
+ * existentes no cambian), RLS intacto y que el código de siempre siga
+ * insertando sin conocerla. `coincidencia.origen` salió con «Seguir» el
+ * 2026-10-05: «Guardar» usa `senal_usuario` y no necesita columna.
  */
 import path from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
@@ -20,7 +20,7 @@ vi.mock("@/src/lib/db/client", async () => {
 });
 
 import { db } from "@/src/lib/db/client";
-import { alFiltrosUsuario, coincidencia, usuario } from "@/src/lib/db/schema";
+import { alFiltrosUsuario, usuario } from "@/src/lib/db/schema";
 
 beforeAll(async () => {
   await migrate(db as never, { migrationsFolder: path.resolve(__dirname, "../../../drizzle") });
@@ -35,14 +35,6 @@ async function columna(tabla: string, nombre: string) {
 }
 
 describe("migración 0025", () => {
-  it("coincidencia.origen es text nulo y sin default", async () => {
-    expect(await columna("coincidencia", "origen")).toEqual({
-      is_nullable: "YES",
-      column_default: null,
-      data_type: "text",
-    });
-  });
-
   it("al_filtros_usuario.tipos_proyecto es text[] nulo y sin default", async () => {
     expect(await columna("al_filtros_usuario", "tipos_proyecto")).toEqual({
       is_nullable: "YES",
@@ -51,26 +43,18 @@ describe("migración 0025", () => {
     });
   });
 
-  it("las dos tablas siguen con RLS", async () => {
+  it("la tabla sigue con RLS, y coincidencia no gana columna", async () => {
     const r = await db.execute(sql`
       select relname, relrowsecurity from pg_class
-       where relname in ('coincidencia', 'al_filtros_usuario') order by relname`);
+       where relname = 'al_filtros_usuario'`);
     expect((r as unknown as { rows: unknown[] }).rows).toEqual([
       { relname: "al_filtros_usuario", relrowsecurity: true },
-      { relname: "coincidencia", relrowsecurity: true },
     ]);
+    expect(await columna("coincidencia", "origen")).toBeUndefined();
   });
 
-  it("el código de siempre inserta sin conocer las columnas nuevas, y quedan en NULL", async () => {
+  it("el código de siempre inserta sin conocer la columna nueva, y queda en NULL", async () => {
     await db.insert(usuario).values({ id: "u-0025", email: "u0025@example.com" });
-    await db.insert(coincidencia).values({
-      usuarioId: "u-0025",
-      procesoId: "CO1.REQ.1",
-      veredictoOverall: "PASS",
-    });
-    const [c] = await db.select({ origen: coincidencia.origen }).from(coincidencia);
-    expect(c.origen).toBeNull();
-
     await db.insert(alFiltrosUsuario).values({
       accountId: "u-0025",
       usuarioId: "u-0025",

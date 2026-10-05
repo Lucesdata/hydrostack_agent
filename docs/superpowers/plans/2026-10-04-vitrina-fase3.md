@@ -184,3 +184,19 @@ acceso a la base. El código nuevo se despliega después de aplicarla.
 - **D4. La migración la aplica el usuario** en la Supabase viva
   (`npm run db:migrate`) antes de fusionar. El PR la trae generada y probada en
   PGlite.
+
+## 6. Cambio del 2026-10-05: «Seguir» se sustituye por «Guardar»
+
+La Supabase viva está al límite del plan y no admite migraciones por ahora. En
+`main` entró el PR #109 con «Guardar» y `/mis-procesos`, guardado en
+`senal_usuario` y **sin migración**. Por decisión del usuario:
+
+- **D1 queda sustituida.** Salen `src/lib/seguir/`, `/api/seguir`,
+  `BotonSeguir`, la capacidad `seguir` y la columna `coincidencia.origen`. La
+  tarjeta de la vitrina y el panel del Radar usan `BotonGuardar` dentro de
+  `ProcesosCuenta`, igual que la ficha y el buscador guiado. Lo guardado no
+  genera avisos por correo: eso era lo que traía reutilizar `coincidencia`.
+- **La `0025` se reduce a `al_filtros_usuario.tipos_proyecto`**
+  (`drizzle/0025_tipos_proyecto_en_filtros.sql`). Sigue haciendo falta aplicarla
+  antes de fusionar, porque el cron de filtros lee todas las columnas de la tabla.
+- Las tareas 2 y 3 de arriba describen lo que hubo, no lo que hay.

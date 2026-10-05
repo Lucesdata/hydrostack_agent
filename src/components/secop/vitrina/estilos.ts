@@ -18,11 +18,10 @@ export const ESTILOS_VITRINA = `
    una línea con elipsis) ensanchaba su columna y la rejilla se salía por la
    derecha. */
 .vt-rejilla { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
-.vt-rejilla > li { display: flex; min-width: 0; position: relative; }
-/* «☆ Seguir», encima de la tarjeta en su esquina inferior izquierda, a la
-   altura del pie («Ver ficha →» va a la derecha). */
-.vt-seguir { position: absolute; left: 20px; bottom: 14px; }
-.vt-rejilla .fc-pie { min-height: 30px; }
+.vt-rejilla > li { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* «Guardar» (/mis-procesos) va debajo de la tarjeta y no encima: el botón del
+   #109 mide 44 px y, sin sesión, suma «Crear cuenta gratuita». */
+.vt-guardar { display: flex; align-items: center; font-size: 13px; }
 .vt-rejilla > li > a { flex: 1; min-width: 0; }
 
 .vt-vacio { font: 14px var(--sans); color: var(--text-muted); padding: 32px 0; }
@@ -44,7 +43,6 @@ export const ESTILOS_VITRINA = `
   .vr .fc[data-elegida] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
   /* Aquí un clic elige, no abre: «Ver ficha →» mentiría. Abrir está en el panel. */
   .vr .fc-pie { visibility: hidden; }
-  .vr .vt-seguir { left: 18px; bottom: 10px; }
   .vr-panel {
     display: block;
     position: sticky;
@@ -193,5 +191,5 @@ export const ESTILOS_VITRINA = `
 }
 
 @media (max-width: 1023px) { .vt-rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .vt-seguir { left: 16px; } .vt-rejilla { grid-template-columns: minmax(0, 1fr); } .vt-tabs { overflow-x: auto; } }
+@media (max-width: 640px) { .vt-rejilla { grid-template-columns: minmax(0, 1fr); } .vt-tabs { overflow-x: auto; } }
 `;

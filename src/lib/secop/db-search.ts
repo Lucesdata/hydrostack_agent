@@ -1,7 +1,7 @@
 /**
- * Búsqueda de PROCESOS contra Postgres (ingesta cron). La usan el matching
- * (`getMatchesForPerfil`), el encaje de la vitrina y el estado del pliego; el
- * workbench que la servía por `GET /api/secop` salió el 2026-10-04.
+ * Búsqueda de PROCESOS contra Postgres (Supabase, ingesta cron) — Fase 3: el
+ * workbench pasa a leer de aquí primero; Socrata live queda como fallback si
+ * la base falla (ver `app/api/secop/route.ts`) y como fuente de `probe`.
  *
  * `proceso` (tabla hechos) ya tiene columna propia para descripción, fase,
  * unspsc, adjudicado, valor de adjudicación, adjudicatario, url y estado de
@@ -22,6 +22,7 @@
 import { FIELDS_PROCESOS, KEYWORDS_AGUA, PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX } from "./config";
 import { accessMessage, type DocumentAccess } from "./document-access";
 import type { SecopProceso, SecopQuery, SecopResult } from "./types";
+import { patronDeActividad, tiposDeSistema, validarConsultaGuiada } from "./busqueda-guiada";
 
 const F = FIELDS_PROCESOS;
 
@@ -116,11 +117,12 @@ export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
 
 /**
  * Import perezoso de `db`/`schema`/`drizzle-orm` (igual que `recientes.ts`):
- * si no hay `DATABASE_URL`, el error queda contenido en el caller. Devuelve las
- * tablas + operadores + el WHERE ya armado, listos para que `searchProcesosDb`
- * monte su SELECT.
+ * si no hay `DATABASE_URL`, el error queda contenido en el caller, que cae a
+ * Socrata. Devuelve las tablas + operadores + el WHERE ya armado, listos para
+ * que `searchProcesosDb`/`countProcesosDb` monten su propio SELECT.
  */
 async function prepare(query: SecopQuery) {
+  validarConsultaGuiada(query);
   const [{ db, schema }, ops] = await Promise.all([
     import("@/src/lib/db/client"),
     import("drizzle-orm"),
@@ -145,8 +147,18 @@ async function prepare(query: SecopQuery) {
     string | null
   >`coalesce(${proceso.estadoApertura}, ${fromPayload(F.estadoApertura)})`;
 
+  const porNumero = query.modo === "numero";
+  const literalLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+  const numero = porNumero ? query.numero!.trim() : undefined;
+  const numeroExacto = numero
+    ? sql<boolean>`(lower(${proceso.secopProcesoId}) = lower(${numero}) or lower(${proceso.referencia}) = lower(${numero}))`
+    : undefined;
+  const patronNumero = numero ? `%${literalLike(numero)}%` : undefined;
+  const textoActividad = sql<string>`translate(lower(concat_ws(' ', ${nombreRaw}, ${descripcionRaw})), 'áéíóúüñ', 'aeiouun')`;
+  const patronTexto = query.q ? `%${query.modo ? literalLike(query.q) : query.q}%` : undefined;
+
   const aguaClauses =
-    query.soloAgua !== false
+    !query.modo && query.soloAgua !== false
       ? KEYWORDS_AGUA.flatMap((kw) => [
           ilike(nombreRaw, `%${kw}%`),
           ilike(descripcionRaw, `%${kw}%`),
@@ -156,9 +168,16 @@ async function prepare(query: SecopQuery) {
   const conditions = [
     isNull(proceso.deletedAt),
     aguaClauses.length > 0 ? or(...aguaClauses) : undefined,
-    query.departamento ? ilike(geografia.departamentoNombre, `%${query.departamento}%`) : undefined,
-    query.estado ? eq(proceso.estadoActual, query.estado) : undefined,
-    query.valorMin != null
+    query.sistema ? inArray(proceso.tipoProyecto, [...tiposDeSistema(query.sistema)]) : undefined,
+    query.actividad ? sql`${textoActividad} ~ ${patronDeActividad(query.actividad)}` : undefined,
+    patronNumero
+      ? or(ilike(proceso.secopProcesoId, patronNumero), ilike(proceso.referencia, patronNumero))
+      : undefined,
+    !porNumero && query.departamento
+      ? ilike(geografia.departamentoNombre, `%${query.departamento}%`)
+      : undefined,
+    !porNumero && query.estado ? eq(proceso.estadoActual, query.estado) : undefined,
+    !porNumero && query.valorMin != null
       ? query.incluirSinValor
         ? or(
             gte(proceso.valorEstimado, String(query.valorMin)),
@@ -167,10 +186,10 @@ async function prepare(query: SecopQuery) {
           )
         : gte(proceso.valorEstimado, String(query.valorMin))
       : undefined,
-    query.desde ? gte(proceso.fechaPublicacion, query.desde) : undefined,
-    query.apertura ? eq(aperturaRaw, query.apertura) : undefined,
-    query.q
-      ? or(ilike(proceso.objeto, `%${query.q}%`), ilike(entidad.nombre, `%${query.q}%`))
+    !porNumero && query.desde ? gte(proceso.fechaPublicacion, query.desde) : undefined,
+    !porNumero && query.apertura ? eq(aperturaRaw, query.apertura) : undefined,
+    !porNumero && patronTexto
+      ? or(ilike(proceso.objeto, patronTexto), ilike(entidad.nombre, patronTexto))
       : undefined,
     query.ids ? inArray(proceso.secopProcesoId, query.ids) : undefined,
   ].filter((c): c is NonNullable<typeof c> => c !== undefined);
@@ -186,6 +205,7 @@ async function prepare(query: SecopQuery) {
     rawRecord,
     payload,
     fromPayload,
+    numeroExacto,
   };
 }
 
@@ -196,13 +216,31 @@ async function prepare(query: SecopQuery) {
 export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopResult<SecopProceso>> {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = Math.min(query.pageSize ?? PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX);
-  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord, payload, fromPayload } =
-    await prepare(query);
+  const {
+    db,
+    eq,
+    sql,
+    where,
+    proceso,
+    entidad,
+    geografia,
+    rawRecord,
+    payload,
+    fromPayload,
+    numeroExacto,
+  } = await prepare(query);
 
   const orderCol = query.orden === "valor" ? proceso.valorEstimado : proceso.fechaPublicacion;
 
   const rows = await db
     .select({
+      ...(numeroExacto
+        ? {
+            coincidencia: sql<
+              "exacta" | "parcial"
+            >`case when ${numeroExacto} then 'exacta' else 'parcial' end`,
+          }
+        : {}),
       secopProcesoId: proceso.secopProcesoId,
       referencia: proceso.referencia,
       objeto: proceso.objeto,
@@ -248,16 +286,42 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
     .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
     .where(where)
     .orderBy(
+      ...(numeroExacto ? [sql`case when ${numeroExacto} then 0 else 1 end ASC`] : []),
       // Los sin presupuesto van detrás de los que cumplen el mínimo, no mezclados.
-      ...(query.valorMin != null && query.incluirSinValor
+      ...(query.modo !== "numero" && query.valorMin != null && query.incluirSinValor
         ? [sql`(${proceso.valorEstimado} > 0) DESC NULLS LAST`]
         : []),
-      sql`${orderCol} DESC NULLS LAST`
+      ...(numeroExacto
+        ? [sql`${proceso.secopProcesoId} ASC`]
+        : [
+            sql`${orderCol} DESC NULLS LAST`,
+            ...(query.modo ? [sql`${proceso.secopProcesoId} ASC`] : []),
+          ])
     )
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 
-  return { items: rows.map((r) => mapDbRowToProceso(r as DbProcesoRow)), page, pageSize };
+  return {
+    items: rows.map((r) => ({
+      ...mapDbRowToProceso(r as DbProcesoRow),
+      ...(r.coincidencia ? { coincidencia: r.coincidencia } : {}),
+    })),
+    page,
+    pageSize,
+  };
+}
+
+/** Total de PROCESOS que matchean el query en Postgres — barato (índices propios, no SODA). */
+export async function countProcesosDb(query: SecopQuery = {}): Promise<number> {
+  const { db, eq, sql, where, proceso, entidad, geografia, rawRecord } = await prepare(query);
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(proceso)
+    .leftJoin(entidad, eq(proceso.entidadId, entidad.id))
+    .leftJoin(geografia, eq(proceso.geografiaId, geografia.codigoDivipola))
+    .leftJoin(rawRecord, eq(proceso.rawRecordIdActual, rawRecord.id))
+    .where(where);
+  return count;
 }
 
 export { KEYWORDS_AGUA };

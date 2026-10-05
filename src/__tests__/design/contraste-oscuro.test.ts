@@ -80,16 +80,9 @@ describe("minifichas del hero (2026-10-04)", () => {
     expect(requeridos.filter((k) => !t[k])).toEqual([]);
   });
 
-  it("objeto, número, lugar, entidad, estado y «Ver ficha» llegan a AA", () => {
+  it("objeto, número, entidad y estado llegan a AA sobre la tarjeta", () => {
     for (const sobre of tarjetas()) {
-      for (const color of [
-        t["aq-text"],
-        t["aq-muted"],
-        t["aq-cyan"],
-        "#c3d3e0",
-        "#d7e4ee",
-        "#ffffff",
-      ]) {
+      for (const color of [t["aq-text"], t["aq-muted"], t["aq-cyan"], "#c3d3e0", "#ffffff"]) {
         pinta(css, color);
         expect(contraste(color, sobre), `${color} sobre ${sobre}`).toBeGreaterThanOrEqual(AA.texto);
       }
@@ -105,6 +98,36 @@ describe("minifichas del hero (2026-10-04)", () => {
         expect(contraste("#e6f2fa", tinte), f.label).toBeGreaterThanOrEqual(AA.texto);
       }
     }
+  });
+
+  // Panel de lugar y presupuesto: un velo sobre la tarjeta (opción B, 2026-10-04).
+  const VELO_PANEL: [number, number, number] = [140, 190, 225];
+  const paneles = () => tarjetas().map((sobre) => componer(VELO_PANEL, 0.08, sobre));
+
+  it("lugar, presupuesto y su contexto se leen sobre el panel", () => {
+    expect(css).toContain("background: rgba(140, 190, 225, 0.08)");
+    for (const sobre of paneles()) {
+      for (const color of ["#c3d3e0", "#ffffff", t["aq-muted"]]) {
+        expect(contraste(color, sobre), `${color} sobre ${sobre}`).toBeGreaterThanOrEqual(AA.texto);
+      }
+    }
+  });
+
+  it("las pastillas de estado se leen sobre su tinte", () => {
+    expect(css).toContain("background: rgba(74, 222, 128, 0.12)");
+    expect(css).toContain("background: rgba(159, 180, 198, 0.12)");
+    for (const sobre of tarjetas()) {
+      const abierto = componer([74, 222, 128], 0.12, sobre);
+      const otro = componer([159, 180, 198], 0.12, sobre);
+      expect(contraste(t["aq-abierto"], abierto)).toBeGreaterThanOrEqual(AA.texto);
+      expect(contraste("#c3d3e0", otro)).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
+
+  it("«Ver ficha» es texto blanco sobre el azul de los CTA", () => {
+    expect(css).toMatch(/\.aqMiniVer\) \{[^}]*background: var\(--aq-cta\);[^}]*color: #ffffff;/);
+    expect(contraste("#ffffff", t["aq-cta"])).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste("#ffffff", t["aq-cta-2"])).toBeGreaterThanOrEqual(AA.texto);
   });
 
   it("el punto de «Abierto» se distingue de la tarjeta (no textual, 3:1)", () => {
@@ -168,19 +191,42 @@ describe("botones azules con texto blanco", () => {
     expect(contraste(t["aq-cta"], fondo())).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
-  it("la barra de navegación usa el mismo azul, no el que no se leía", () => {
-    pinta(navbar, t["aq-cta"]);
+  it("la barra de navegación no vuelve al azul que no se leía", () => {
     expect(navbar.toLowerCase()).not.toContain("background: #1a9be0");
   });
 });
 
+describe("horizonte de luz del hero", () => {
+  // La leyenda y el pie de las tarjetas pueden caer sobre el resplandor del
+  // horizonte (.procesos::before). Peor caso: el resplandor a su opacidad
+  // máxima (la sombra difuminada nunca llega a ella) más el halo radial, sobre
+  // el fondo del hero.
+  it("el texto secundario y el cian se leen sobre su punto más claro", () => {
+    pinta(css, "--aq-horizonte-luz: rgba(76, 201, 255, 0.2)");
+    pinta(css, "rgba(76, 201, 255, 0.07)");
+    const luz = componer([76, 201, 255], 0.07, componer([76, 201, 255], 0.2, fondo()));
+    for (const nombre of ["aq-text", "aq-muted", "aq-cyan"]) {
+      expect(contraste(t[nombre], luz), nombre).toBeGreaterThanOrEqual(AA.texto);
+    }
+  });
+});
+
 describe("barra y árbol de la Ficha Viva", () => {
-  const barra = componer([6, 20, 35], 0.94, "#061423");
+  // La píldora de la barra oscura (2026-10-04): su fondo translúcido sobre el
+  // de la portada.
+  const barra = componer([12, 32, 52], 0.8, "#061423");
   it("enlaces y texto secundario de la barra oscura", () => {
-    for (const color of ["#c3d3e0", "#9fb4c6"]) {
+    pinta(navbar, "rgba(12, 32, 52, 0.8)");
+    for (const color of ["#c3d3e0", "#9fb4c6", "#4cc9ff"]) {
       pinta(navbar, color);
       expect(contraste(color, barra)).toBeGreaterThanOrEqual(AA.texto);
     }
+  });
+
+  it("el botón blanco de la barra: texto noche y se distingue de la píldora", () => {
+    pinta(navbar, "color: #061423; background: #f3f8fc");
+    expect(contraste("#061423", "#f3f8fc")).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste("#f3f8fc", barra)).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
   it("texto del árbol de decisiones", () => {

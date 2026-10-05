@@ -1526,12 +1526,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "origen": {
-          "name": "origen",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
