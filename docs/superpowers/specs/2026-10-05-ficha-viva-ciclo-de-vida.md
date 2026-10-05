@@ -333,6 +333,65 @@ Señales de la muestra que el plan tiene que confirmar en la base viva:
 `estado_actual = 'Seleccionado'` convive con `estado_apertura = 'Abierto'` en
 103 de 474 procesos, y 81 figuran abiertos con la recepción vencida (C3).
 
+## Resultados de la base viva
+
+Medido por el usuario el 2026-10-05 en el SQL Editor de Supabase con
+`scripts/sql/medir-ciclo-de-vida-supabase-1.sql`. Partes 2 y 3 pendientes.
+
+**M1. El vínculo proceso ↔ contrato existe y es usable.**
+
+| | Todos | Desde 2026 |
+|---|---:|---:|
+| Procesos | 92.063 | 13.666 |
+| … con contrato vinculado | 36.966 (40 %) | 4.429 (32 %) |
+| Contratos | 39.237 | 4.716 firmados |
+| … sin proceso | 1.098 (2,8 %) | 327 (6,9 %) |
+
+879 procesos tienen **más de un contrato** (728 con dos; uno llega a 13). Son
+lotes o contratos sucesivos: la ficha tiene que listarlos, no elegir uno.
+
+**M2a. Estado × apertura del proceso.** Publicado/Abierto 36.073 ·
+Seleccionado/Abierto 25.077 · Seleccionado/Cerrado 12.500 · Evaluación/Abierto
+8.195 · Evaluación/Cerrado 6.593 · Cancelado 2.813 (2.217 + 596) · Abierto/Cerrado
+542 · Publicado/Cerrado 171 · Suspendido 8 · resto < 70. No aparecen «Desierto»
+ni «Revocado» como estado del proceso.
+
+**M2b. La fase no sirve como señal.** El 87 % (79.963) dice «Presentación de
+oferta», aunque 37.000 procesos tienen contrato: la fuente no la actualiza. El
+ejemplo de Pereira era esto. **La fase sale de la regla de precedencia y no se
+pinta** (R3).
+
+**M2c. La adjudicación es de buena calidad pero minoritaria.** 13.852
+adjudicados, casi todos con adjudicatario (13.842), fecha (13.640) y valor
+(13.832). Hay 36.966 procesos con contrato, así que la mayoría de los
+contratados **no** figuran como adjudicados (contratación directa, régimen
+especial): el contrato tiene que mandar sobre la adjudicación, como dice la
+regla. 1.712 no adjudicados traen adjudicatario: se anota para el plan.
+
+**M2d. La fuente sí publica estado de ejecución del contrato** (corrige el
+supuesto D-012, que salía de una muestra de 500): En ejecución 9.850 ·
+terminado 7.610 · Modificado 7.004 · Cerrado 6.015 · enviado Proveedor 3.660 ·
+Aprobado 2.052 · Borrador 1.326 · En aprobación 797 · Cancelado 516 ·
+Suspendido 365 · cedido 42. Borrador, enviado Proveedor y En aprobación son
+contratos **sin firmar** (≈ 5.800, coherente con M2e).
+
+**M2e. Fechas y pagos.** Firma 32.946 (84 %) · inicio 36.211 · fin actual
+38.968 · con pagos 13.525 · prorrogados 872 · adicionados 283.
+
+### Lo que cambia en el spec por estos datos
+
+1. **La fase se ignora** (M2b): ni señal ni campo visible.
+2. **El estado del contrato entra en la regla**, junto a las fechas (M2d):
+   Cancelado → no se llevó a cabo; Suspendido → se dice; terminado/Cerrado →
+   etapa final según la fuente; si el estado y las fechas se contradicen (por
+   ejemplo «En ejecución» con el fin vencido hace meses), es una contradicción
+   nueva para «Revisa antes de confiar».
+3. **Un contrato sin firma no es «Contratado»**: es «En firma» o se queda en
+   Adjudicado (decisión del plan).
+4. **Varios contratos por proceso** se listan (M1c).
+5. Pendiente de decisión del usuario: cómo nombrar la etapa final cuando **la
+   fuente** dice «terminado» o «Cerrado» (ver abajo).
+
 ## Fuera de alcance
 
 - Datos que **no se ingieren hoy**: PAA, CDP, garantías, fuentes de recursos,
