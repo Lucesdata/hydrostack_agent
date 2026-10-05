@@ -271,9 +271,14 @@
   border-radius: 10px;
   background: rgba(10, 29, 48, 0.92);
   color: #f3f8fc;
-  font: 600 15px var(--font-inter), sans-serif;
+  font:
+    600 15px var(--font-inter),
+    sans-serif;
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    transform 0.15s;
 }
 .activador:hover {
   background: #0f2a44;
@@ -319,18 +324,24 @@
 .dialogEyebrow {
   margin: 0 0 7px;
   color: #4cc9ff;
-  font: 700 10px/1.3 var(--font-inter), sans-serif;
+  font:
+    700 10px/1.3 var(--font-inter),
+    sans-serif;
   letter-spacing: 0.12em;
 }
 .dialogCabecera h2 {
   margin: 0;
   color: #f3f8fc;
-  font: 650 23px/1.2 var(--font-inter), sans-serif;
+  font:
+    650 23px/1.2 var(--font-inter),
+    sans-serif;
 }
 .dialogCabecera p:last-child {
   margin: 7px 0 0;
   color: #9fb4c6;
-  font: 13px/1.45 var(--font-inter), sans-serif;
+  font:
+    13px/1.45 var(--font-inter),
+    sans-serif;
 }
 .cerrar {
   display: grid;
@@ -402,7 +413,9 @@
   margin-bottom: 8px;
   padding: 0;
   color: var(--bs-texto);
-  font: 600 12px/1.4 var(--font-inter), sans-serif;
+  font:
+    600 12px/1.4 var(--font-inter),
+    sans-serif;
 }
 .categoriasGrid {
   display: grid;
@@ -424,10 +437,15 @@
   border-radius: 9px;
   background: #0a1d30;
   color: #dce9f2;
-  font: 600 11.5px/1.25 var(--font-inter), sans-serif;
+  font:
+    600 11.5px/1.25 var(--font-inter),
+    sans-serif;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    transform 0.15s;
 }
 .categoria[data-familia="potable"] {
   --fam: #4cc9ff;
@@ -464,7 +482,9 @@
   border-radius: 50%;
   background: var(--fam);
   color: #061423;
-  font: 800 11px/1 var(--font-inter), sans-serif;
+  font:
+    800 11px/1 var(--font-inter),
+    sans-serif;
 }
 .categoria:focus-visible {
   outline: 2px solid #4cc9ff;
