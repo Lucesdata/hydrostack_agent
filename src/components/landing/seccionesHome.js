@@ -47,6 +47,12 @@ export const SECCIONES_HOME = [
   { id: "pliego", href: "/licitaciones", capacidad: "pliego_extraer", etiqueta: "cuenta gratuita" },
   { id: "filtros", href: "/mis-filtros", capacidad: "filtros", etiqueta: "cuenta gratuita" },
   {
+    id: "mis-procesos",
+    href: "/mis-procesos",
+    capacidad: "procesos_guardar",
+    etiqueta: "cuenta gratuita",
+  },
+  {
     id: "diagnostico-historial",
     href: "/diagnostico/historial",
     capacidad: "diagnostico_historial",
@@ -112,6 +118,7 @@ export const NOMBRE_POR_ID = {
   informe: "Informe mensual",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
+  "mis-procesos": "Mis procesos",
   competidores: "Competidores en cada ficha",
   // `alertas` estuvo sin nombre desde 2026-09-10 para que no apareciera en
   // ningún índice: el envío diario no se entrega (falta AUTH_RESEND_KEY en
@@ -169,6 +176,7 @@ export const COLUMNAS_PIE = [
  * que existieran. Ahora salen de aquí como las demás.
  */
 export const MENU_CUENTA = [
+  "mis-procesos",
   "perfil",
   "coincidencias",
   "filtros",

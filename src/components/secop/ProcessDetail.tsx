@@ -1,0 +1,270 @@
+// src/components/secop/ProcessDetail.tsx
+"use client";
+
+/**
+ * Panel de detalle del workbench: badges, datos clave, bloque de elegibilidad
+ * (compuertas con razones visibles), descripción y CTA a SECOP II.
+ * El padre lo monta con key={proceso.id} para resetear el estado interno.
+ */
+
+import { useState } from "react";
+import type { DocumentAccess } from "@/src/lib/secop/document-access";
+import type { Verdict, GateStatus } from "@/src/lib/secop/verdict";
+import { razonDe, type VerdictRespuesta } from "@/src/lib/secop/verdict-publico";
+import { avisoEscalon } from "@/src/lib/diagnostico/modalidad";
+import { avisoRegimenPrivado } from "@/src/lib/diagnostico/regimen-especial";
+import type { EscalonContratacion } from "@/src/lib/diagnostico/types";
+import { formatCopFull, sentenceCaseTitle, verdictScore } from "./format";
+import type { ProcesoVeredicto } from "./ProcessList";
+
+const ACCESS_LABEL: Record<DocumentAccess, string> = {
+  PUBLIC: "Documentos públicos",
+  RESTRICTED: "Documentos restringidos",
+  NOT_PUBLISHED: "Documentos sin publicar",
+  UNKNOWN: "Acceso por confirmar",
+};
+const ACCESS_CLASS: Record<DocumentAccess, string> = {
+  PUBLIC: "success",
+  RESTRICTED: "warning",
+  NOT_PUBLISHED: "warning",
+  UNKNOWN: "neutral",
+};
+
+const STATUS: Record<GateStatus, { cls: string; glyph: string }> = {
+  PASS: { cls: "pass", glyph: "✓" },
+  WARN: { cls: "warn", glyph: "!" },
+  FAIL: { cls: "fail", glyph: "✕" },
+  UNKNOWN: { cls: "unknown", glyph: "?" },
+};
+
+/** Lo que se muestra cuando la explicación está redactada. */
+const ESTADO_PALABRA: Record<GateStatus, string> = {
+  PASS: "Cumple",
+  WARN: "Revisar",
+  FAIL: "No cumple",
+  UNKNOWN: "Sin datos",
+};
+
+const GATE_LABEL: Array<[keyof Verdict["gates"], string]> = [
+  ["sectorial", "Sector"],
+  ["cuantia", "Cuantía"],
+  ["plazo", "Plazo"],
+  ["ubicacion", "Zona"],
+  ["habilitacion", "Habilitación"],
+];
+
+interface Props {
+  proceso: ProcesoVeredicto;
+  access: { state: DocumentAccess; message: string };
+  probing: boolean;
+  /** Solo móvil: cierra el overlay. */
+  onBack: () => void;
+  /** Veredicto Nivel 0, calculado on-demand vía POST /api/secop/verdict.
+   *  Puede venir redactado si no hay sesión — ver verdict-publico.ts. */
+  verdict?: VerdictRespuesta;
+  verdictLoading?: boolean;
+  /** Si no hay perfil de oferente guardado, se muestra el CTA del wizard en vez del semáforo. */
+  hasPerfil: boolean;
+  /**
+   * Escalón del diagnóstico, si lo hay. Solo sirve para anotar la modalidad:
+   * avisar cuando el proceso exige más de lo que el oferente alcanza hoy, o
+   * que la entidad contrata bajo derecho privado y su escalón no aplica ahí.
+   * `null` = sin diagnóstico, y entonces no se anota nada.
+   */
+  escalonOferente: EscalonContratacion | null;
+  /** Hay perfil base pero sin experiencia RUP cargada: el CTA abre RupWizard en vez de OferenteWizard. */
+  faltaExperiencia: boolean;
+  onRequestPerfil: () => void;
+}
+
+export default function ProcessDetail({
+  proceso: p,
+  access,
+  probing,
+  onBack,
+  verdict: v,
+  verdictLoading,
+  hasPerfil,
+  escalonOferente,
+  faltaExperiencia,
+  onRequestPerfil,
+}: Props) {
+  const [expanded, setExpanded] = useState(false);
+  // Dos anotaciones excluyentes sobre la modalidad, ambas solo con diagnóstico:
+  // el proceso exige más de lo que alcanzas, o la entidad no está en la
+  // escalera porque contrata bajo derecho privado (Ley 142).
+  const avisoNivel = escalonOferente ? avisoEscalon(escalonOferente, p.modalidad) : null;
+  const avisoPrivado = escalonOferente ? avisoRegimenPrivado(p.modalidad, p.entidad) : null;
+  const { pass: passCount, total: gateTotal } = v
+    ? verdictScore(v)
+    : { pass: 0, total: GATE_LABEL.length };
+
+  return (
+    <article className="clr-pdetail-card">
+      <button type="button" className="clr-pdetail-back" onClick={onBack}>
+        ← Volver a resultados
+      </button>
+
+      <div className="clr-pdetail-badges">
+        <span
+          className={`clr-badge clr-badge--${p.estadoApertura === "Abierto" ? "accent" : "neutral"}`}
+        >
+          {(p.estadoApertura ?? p.estado ?? "—").toUpperCase()}
+        </span>
+        {p.modalidad && <span className="clr-badge clr-badge--neutral">{p.modalidad}</span>}
+        {avisoNivel && <span className="clr-badge clr-badge--warning">{avisoNivel}</span>}
+        {avisoPrivado && <span className="clr-badge clr-badge--neutral">{avisoPrivado}</span>}
+        {p.tipoContrato && <span className="clr-badge clr-badge--neutral">{p.tipoContrato}</span>}
+      </div>
+
+      <h2 className="clr-pdetail-title">{sentenceCaseTitle(p.nombre || p.referencia)}</h2>
+      <p className="clr-secop-entity">{p.entidad}</p>
+
+      <div className="clr-pdetail-facts">
+        <div>
+          <span className="clr-pdetail-label">Valor base</span>
+          <span className="clr-pdetail-val">
+            {formatCopFull(p.valorAdjudicacion ?? p.precioBase)}
+          </span>
+        </div>
+        <div>
+          <span className="clr-pdetail-label">Publicado</span>
+          <span>
+            {p.fechaPublicacion ? new Date(p.fechaPublicacion).toLocaleDateString("es-CO") : "—"}
+          </span>
+        </div>
+        <div>
+          <span className="clr-pdetail-label">Referencia</span>
+          <span className="clr-pdetail-ref">{p.referencia || "—"}</span>
+        </div>
+        <div>
+          <span className="clr-pdetail-label">Ubicación</span>
+          <span>
+            {p.departamento}
+            {p.ciudad ? ` · ${p.ciudad}` : ""}
+          </span>
+        </div>
+      </div>
+
+      {!hasPerfil && (
+        <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
+          <p>¿Puedo participar? Cuéntanos de ti y te decimos si este proceso te conviene.</p>
+          <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
+            Cuéntanos de ti →
+          </button>
+        </section>
+      )}
+
+      {hasPerfil && faltaExperiencia && (
+        <section className="clr-elig clr-elig-cta" aria-label="Elegibilidad">
+          <p>
+            Tu evaluación de habilitación está incompleta — cuéntanos tu experiencia y capacidad
+            financiera para verla completa.
+          </p>
+          <button type="button" className="clr-elig-cta-btn" onClick={onRequestPerfil}>
+            Completar mi RUP →
+          </button>
+        </section>
+      )}
+
+      {hasPerfil && verdictLoading && !v && (
+        <section className="clr-elig" aria-label="Elegibilidad">
+          <p className="clr-elig-loading">Calculando elegibilidad…</p>
+        </section>
+      )}
+
+      {hasPerfil && v && (
+        <section className="clr-elig" aria-label="Elegibilidad">
+          <header className="clr-elig-head">
+            <span>Elegibilidad · nivel 0</span>
+            <span className="clr-elig-count">
+              {passCount} de {gateTotal} compuertas
+            </span>
+          </header>
+          {/* Resumen de un vistazo. Cada tramo lleva su glifo, así que el color
+              nunca viaja solo (verde y ámbar difieren un 4% en luminancia). Se
+              oculta a lectores de pantalla porque la lista de abajo dice lo
+              mismo con palabras. */}
+          <div className="clr-elig-bar" aria-hidden="true">
+            {GATE_LABEL.map(([key]) => {
+              const s = STATUS[v.gates[key].status];
+              return (
+                <span key={key} className={`clr-elig-seg clr-elig-seg--${s.cls}`}>
+                  {s.glyph}
+                </span>
+              );
+            })}
+          </div>
+          <ul className="clr-elig-gates">
+            {GATE_LABEL.map(([key, label]) => {
+              const g = v.gates[key];
+              const s = STATUS[g.status];
+              const razon = razonDe(g);
+              const esHabilitacion = key === "habilitacion";
+              const partes = esHabilitacion && razon ? razon.split(" · ") : null;
+              return (
+                <li key={key} className="clr-elig-gate">
+                  <span className={`clr-elig-glyph clr-elig-glyph--${s.cls}`}>{s.glyph}</span>
+                  <span className="clr-elig-name">{label}</span>
+                  <span className="clr-elig-reason">
+                    {partes && partes.length > 1 ? (
+                      <ul className="clr-elig-subgates">
+                        {partes.map((parte, i) => (
+                          <li key={i}>{parte}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        {razon ?? ESTADO_PALABRA[g.status]}
+                        {razon && g.requiredLevel === 2 && key !== "habilitacion"
+                          ? " · requiere revisar pliego (nivel 2)"
+                          : ""}
+                      </>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {v.gates.habilitacion.status === "FAIL" && (
+            <p className="clr-elig-nota">
+              Una brecha se puede cerrar en consorcio o unión temporal.
+            </p>
+          )}
+        </section>
+      )}
+
+      {p.descripcion && (
+        <div className={`clr-pdetail-desc${expanded ? " is-expanded" : ""}`}>
+          <p>{p.descripcion}</p>
+          {p.descripcion.length > 320 && (
+            <button
+              type="button"
+              className="clr-pdetail-more"
+              onClick={() => setExpanded((e) => !e)}
+            >
+              {expanded ? "Ver menos" : "Ver más"}
+            </button>
+          )}
+        </div>
+      )}
+
+      {p.adjudicatario && p.adjudicatario !== "No Adjudicado" && (
+        <p className="clr-secop-adj">
+          Adjudicatario: <strong>{p.adjudicatario}</strong>
+        </p>
+      )}
+
+      <footer className="clr-pdetail-foot">
+        <span className={`clr-badge clr-badge--${ACCESS_CLASS[access.state]}`}>
+          {probing ? "Verificando acceso…" : ACCESS_LABEL[access.state]}
+        </span>
+        {p.url && (
+          <a className="clr-pdetail-cta" href={p.url} target="_blank" rel="noreferrer">
+            Abrir en SECOP II ↗
+          </a>
+        )}
+      </footer>
+    </article>
+  );
+}

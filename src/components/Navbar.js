@@ -140,36 +140,67 @@ const AUTH_CSS = `
    encima lo partía en dos webs pegadas. Solo ahí: el resto del producto (la
    ficha, las facetas, las cuentas) es claro y la barra clara le pertenece.
    Los colores son los del hero (hero-territorial.module.css), no tokens de
-   globals.css, por la misma razón que el hero. El azul de los botones es
-   --aq-cta: el texto blanco sobre él se mide en contraste-oscuro.test.ts. */
+   globals.css, por la misma razón que el hero.
+
+   Píldora flotante (2026-10-04): la barra no ocupa el ancho ni se separa con
+   una línea; el <nav> pinta el fondo de la portada (#061423, igual que el
+   hero, así que no se ve) y .clr-nav-inner es la píldora, con un borde tenue y
+   un resplandor azul debajo en vez de sombra negra. Mide 16px más que
+   --nav-h: es el aire alrededor de la píldora. Enlaces al centro y el botón en
+   blanco sobre la noche, el inverso del fondo. Contrastes medidos en
+   contraste-oscuro.test.ts contra el fondo de la píldora. */
 .clr-nav--oscuro{
-  background: rgba(6, 20, 35, 0.94);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(140, 190, 225, 0.14);
+  background: #061423;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border-bottom: none;
+  height: calc(var(--nav-h) + 16px);
+  padding: 10px var(--gutter) 6px;
 }
+.clr-nav--oscuro .clr-nav-inner{
+  position: relative;
+  max-width: 1320px; height: 100%;
+  padding: 0 7px 0 16px;
+  border-radius: 999px;
+  background: rgba(12, 32, 52, 0.8);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(140, 190, 225, 0.16);
+  box-shadow:
+    0 12px 36px -14px rgba(76, 201, 255, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.clr-nav--oscuro .clr-links{ margin-left: auto; margin-right: auto; }
+.clr-nav--oscuro .clr-nav-auth{ margin-left: 0; }
 .clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; }
 /* En la portada no va "En línea" (2026-09-27): su punto late sin parar y era
    una de las 15 animaciones del primer pliegue. El resto del sitio lo conserva. */
 .clr-nav--oscuro .clr-status,
 .clr-nav--oscuro .clr-nav-divider{ display: none; }
-.clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; }
+.clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; border-radius: 999px; padding: 7px 14px; }
 .clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.06); }
 .clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #4cc9ff; background: rgba(76, 201, 255, 0.12); }
-.clr-nav--oscuro .clr-nav-cote line{ stroke: #4cc9ff; }
+.clr-nav--oscuro .clr-nav-cote{ display: none; }
 .clr-nav--oscuro .clr-nav-auth-link{ color: #c3d3e0; }
 .clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; }
-.clr-nav--oscuro .clr-nav-auth-cta{
-  font: 600 13px var(--font-inter), sans-serif; background: #0272b0;
-  border-radius: 999px; padding: 8px 16px;
-}
+.clr-nav--oscuro .clr-nav-auth-cta,
 .clr-nav--oscuro .clr-nav-explorar{
-  font: 600 12.5px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
-  background: #0272b0; border-radius: 999px; padding: 0 14px;
+  font: 600 13px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
+  color: #061423; background: #f3f8fc; border-radius: 999px;
 }
-.clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); }
+.clr-nav--oscuro .clr-nav-auth-cta{ padding: 9px 18px; }
+.clr-nav--oscuro .clr-nav-explorar{ padding: 0 16px; }
+.clr-nav--oscuro .clr-nav-auth-cta:hover,
+.clr-nav--oscuro .clr-nav-explorar:hover{ opacity: 1; background: #ffffff; }
+.clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); border-radius: 999px; width: 34px; height: 34px; }
 .clr-nav--oscuro .clr-hamburger-icon span{ background: #c3d3e0; }
 .clr-nav--oscuro .clr-hamburger-icon.open span{ background: #4cc9ff; }
-.clr-nav--oscuro .clr-mobile-menu{ background: #0b1b2b; border-bottom-color: rgba(140, 190, 225, 0.14); }
+/* El menú móvil cuelga de la píldora como una tarjeta redondeada, no como
+   una franja de borde a borde. */
+.clr-nav--oscuro .clr-mobile-menu{
+  top: calc(100% - 2px); left: var(--gutter); right: var(--gutter);
+  background: #0b1b2b; border: 1px solid rgba(140, 190, 225, 0.16);
+  border-radius: 20px;
+}
+.clr-nav--oscuro .clr-mobile-menu:not(.open){ border-color: transparent; }
 .clr-nav--oscuro .clr-mobile-link{ color: #c3d3e0; border-bottom-color: rgba(140, 190, 225, 0.12); }
 .clr-nav--oscuro .clr-mobile-link:hover,
 .clr-nav--oscuro .clr-mobile-link[aria-current="page"]{ color: #4cc9ff; }

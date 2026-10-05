@@ -38,10 +38,9 @@ const nextConfig = {
       // PR 3: cada rival se abre en la §7 de la ficha; quién compra sigue aparte.
       { source: "/competidores", destination: "/licitaciones/entidades", permanent: true },
       { source: "/competidores/:key*", destination: "/licitaciones/entidades", permanent: true },
-      // 2026-10-04: «Explorar» y «Descubrir» se funden en la vitrina, que ahora
-      // busca y filtra (docs/superpowers/plans/2026-10-04-vitrina-radar.md). La
-      // query pasa tal cual, así que `/licitaciones/explorar?q=…` sigue buscando.
-      { source: "/licitaciones/explorar", destination: "/licitaciones", permanent: true },
+      // 2026-10-04: «Descubrir» se funde en la vitrina, que ahora busca y filtra
+      // (docs/superpowers/plans/2026-10-04-vitrina-radar.md). «Explorar» se queda:
+      // es la página de resultados del buscador guiado (#109).
       { source: "/licitaciones/descubrir", destination: "/licitaciones", permanent: true },
     ];
   },

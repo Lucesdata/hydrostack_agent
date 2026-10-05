@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import BloqueDecision from "@/src/components/secop/ficha/BloqueDecision";
 import ExploradorFicha from "@/src/components/secop/ficha/ExploradorFicha";
+import ProcesosCuenta from "@/src/components/mis-procesos/ProcesosCuenta";
+import BotonGuardar from "@/src/components/mis-procesos/BotonGuardar";
+import RegistroVisita from "@/src/components/mis-procesos/RegistroVisita";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
@@ -417,6 +420,14 @@ export default async function FichaPage({ params }: Props) {
             </dl>
           </details>
         </header>
+        <ProcesosCuenta ids={[p.secopProcesoId]}>
+          <BotonGuardar
+            procesoId={p.secopProcesoId}
+            volver={`/licitaciones/${slugDeProceso(p.objeto, p.secopProcesoId)}`}
+          />
+          <a href="/mis-procesos">Mis procesos</a>
+          <RegistroVisita procesoId={p.secopProcesoId} />
+        </ProcesosCuenta>
         <ExploradorFicha secciones={secciones} />
         <footer className="fi-pie-ficha">
           <p>Información pública, al alcance de todos.</p>
