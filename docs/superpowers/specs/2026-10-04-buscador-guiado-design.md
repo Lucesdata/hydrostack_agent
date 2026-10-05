@@ -18,6 +18,17 @@ Tres entradas: «Por tema», «Por número» y «Mis procesos». Se muestra un s
 formulario a la vez. «Por tema» es la entrada inicial. No se añaden secciones
 de marketing a la portada ni se cambia la paleta.
 
+### Presentación del buscador (2026-10-05)
+
+En el hero queda un botón compacto que abre la búsqueda en un modal accesible.
+En «Por tema», tres tarjetas visuales actúan como atajos a valores ya existentes
+del filtro Sistema: Agua potable → `potable`, Aguas residuales → `residual`,
+Redes y alcantarillado → `alcantarillado`. La paleta respeta las familias
+existentes (azul, marrón y gris). La lista de sistemas específicos sigue
+disponible en un desplegable secundario; no se elimina ninguna capacidad de
+búsqueda ni se crean tipos de proyecto. En móvil las tarjetas pueden recorrerse
+horizontalmente.
+
 ### Por tema
 
 Dos listas desplegables con etiquetas visibles:

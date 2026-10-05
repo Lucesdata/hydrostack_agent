@@ -438,15 +438,16 @@
   background: var(--aq-card-activa);
 }
 /* Estructura de la tarjeta (2026-10-04, opción B): cabecera, pastillas, panel
-   tintado y pie. Medida en un boceto a 1440 px: 236 px de alto, frente a los
-   268 de la versión anterior. */
+   tintado y pie. Tope de 236 px de alto a 1440 (la versión anterior medía 268),
+   también con la línea «Según descripción», que es la más alta: la fila
+   iguala las cinco tarjetas a la mayor (2026-10-05). */
 .hero :global(.aqMini article) {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   min-width: 0;
-  padding: 14px;
+  padding: 13px 14px;
 }
 .hero :global(.aqMiniCab) {
   display: grid;
@@ -498,10 +499,20 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Una fila a 1440 en todos los casos medidos (con «Sin subsistema» y
+   «Adjudicado» + «Redes y alcantarillado», el par más ancho). Si no caben
+   —tarjetas más estrechas, entre 1200 y ≈1360 px—, pasan a dos filas antes que
+   recortar el estado o el tipo: el color nunca va sin su nombre. */
 .hero :global(.aqMiniPastillas) {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
+}
+.hero :global(.aqMiniEstadoTexto) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hero :global(.aqMiniEstado),
 .hero :global(.aqMiniCategoria) {
@@ -523,7 +534,7 @@
   background: rgba(159, 180, 198, 0.12);
   color: #c3d3e0;
 }
-.hero :global(.aqMiniEstado span) {
+.hero :global(.aqMiniPuntoEstado) {
   flex: none;
   width: 7px;
   height: 7px;
@@ -534,7 +545,7 @@
   background: rgba(74, 222, 128, 0.12);
   color: var(--aq-abierto);
 }
-.hero :global(.aqMiniEstado--abierto span) {
+.hero :global(.aqMiniEstado--abierto .aqMiniPuntoEstado) {
   background: var(--aq-abierto);
 }
 .hero :global(.aqMiniCategoria) {
@@ -543,8 +554,8 @@
 }
 .hero :global(.aqMiniPanel) {
   display: grid;
-  gap: 6px;
-  padding: 9px 11px;
+  gap: 5px;
+  padding: 8px 11px;
   border-radius: 12px;
   /* Un velo y no un color: se distingue igual sobre la tarjeta y sobre la
      activa (#0f2a44, que casi coincidía con un panel #10283f). */
@@ -583,11 +594,14 @@
   color: #c3d3e0;
 }
 .hero :global(.aqMiniContexto) {
-  margin: 0;
+  margin: -2px 0 0;
   font:
-    11.5px/1.35 var(--font-inter),
+    11px/1.3 var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hero :global(.aqMiniPie) {
   display: flex;
