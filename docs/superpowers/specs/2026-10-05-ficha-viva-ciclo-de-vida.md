@@ -1,7 +1,7 @@
 # Ficha Viva: una verdad por proceso, de la publicación a la ejecución
 
-**Fecha:** 2026-10-05 · **Estado:** spec para revisión del usuario (sin plan ni
-código todavía) · **Flujo:** `docs/CONDUCTA.md` §4 — esto es el QUÉ; el CÓMO va
+**Fecha:** 2026-10-05 · **Estado:** spec con las decisiones del usuario cerradas;
+faltan las mediciones y el plan (sin código todavía) · **Flujo:** `docs/CONDUCTA.md` §4 — esto es el QUÉ; el CÓMO va
 en un plan aparte cuando el spec se apruebe.
 
 ## Origen
@@ -94,19 +94,20 @@ Siete etapas, y solo esas siete. Cada proceso está en una:
 | **Adjudicado** | Se eligió a X por $Y; falta firmar. | Adjudicado, sin contrato vinculado. |
 | **Contratado** | Contrato firmado; la obra aún no empieza según sus fechas. | Contrato con firma y fecha de inicio futura. |
 | **En ejecución** | El contrato está vigente según sus fechas. | Contrato con fecha de inicio pasada y fecha de fin (actual) futura. |
-| **Terminado** | El plazo del contrato venció. | Contrato con fecha de fin (actual) pasada. |
+| **Plazo cumplido** | El plazo del contrato ya pasó. | Contrato con fecha de fin (actual) pasada. |
 | **No se llevó a cabo** | Se declaró desierto, se canceló o se revocó. | Estado del proceso o del contrato que lo dice. |
 
 Más un estado que no es etapa: **Por verificar**, cuando las señales faltan o
 se contradicen de forma que ninguna regla las resuelve. La ficha lo dice así y
 envía al expediente.
 
-**«En ejecución» y «Terminado» salen de las fechas del contrato, no de un estado
+**«En ejecución» y «Plazo cumplido» salen de las fechas del contrato, no de un estado
 de la fuente.** La fuente no publica un estado de ejecución (hallazgo D-012,
 `docs/fase-0/0.6-cierre-fase-0.md`) y no publica avance de obra. La ficha lo
 dice junto a la etapa: «Según las fechas del contrato. El SECOP no publica el
-avance de la obra». «Terminado» significa que **venció el plazo**, no que la
-obra se entregó.
+avance de la obra». «Plazo cumplido» significa que **pasó la fecha de fin del
+contrato**, no que la obra se entregó ni que hay acta de recibo; por eso no se
+llama «Terminado», que se leería así (decisión del usuario, 2026-10-05).
 
 ### Regla de precedencia (R1)
 
@@ -116,7 +117,7 @@ De la señal más fuerte a la más débil:
    revocado), salvo que exista contrato firmado: entonces es una contradicción
    (C5) y la etapa queda **Por verificar**.
 2. **Contrato firmado** vinculado al proceso → Contratado, En ejecución o
-   Terminado, según sus fechas.
+   Plazo cumplido, según sus fechas.
 3. **Adjudicación** (adjudicado, con adjudicatario o fecha) → Adjudicado.
 4. **Apertura a ofertas y fecha de recepción** → Recibe ofertas o En evaluación.
 5. **Estado actual del proceso**, solo si no hay nada de lo anterior.
@@ -138,7 +139,7 @@ pasa con «Quiero participar»:
   pendiente. «Quiero participar» deja de invitar a ofertar y dice por qué.
 - **Adjudicado** — quién ganó, por cuánto y cuánto frente al presupuesto (si
   ambos datos existen).
-- **Contratado / En ejecución / Terminado** — contratista, valor del contrato,
+- **Contratado / En ejecución / Plazo cumplido** — contratista, valor del contrato,
   inicio, fin previsto y fin actual. Si el fin o el valor cambiaron, se dice como
   dato, sin juicio: «Se prorrogó 45 días», «Se adicionaron $120 millones». Los
   pagos se muestran solo si la fuente los publica, rotulados como «pagado según
@@ -194,17 +195,31 @@ pasar por ella.
   marque así (C1).
 - Los procesos en otras etapas **tienen ficha pública e indexable** y se llega a
   ellos por enlace directo, desde «Quién suele competir aquí» y desde la
-  búsqueda, con un filtro de etapa explícito (decisión pendiente: ver
-  preguntas abiertas).
+  búsqueda con un **filtro de etapa explícito, apagado por defecto** (decisión
+  del usuario, 2026-10-05). Sin tocar el filtro, la vitrina es la de hoy.
 - La tarjeta de un proceso que no recibe ofertas lleva su etapa como pastilla
-  («En ejecución», «Terminado»…), nunca «Abierto».
+  («En ejecución», «Plazo cumplido»…), nunca «Abierto».
+
+### Alcance temporal: desde 2026
+
+**Se empieza solo con 2026** (decisión del usuario, 2026-10-05). La ficha de
+ciclo de vida completa —el contenido de «Cómo se contrató», el contrato y sus
+fechas, y la aparición en el filtro de etapa— se ofrece para los procesos con
+**fecha de publicación desde el 1 de enero de 2026**. Es el año que menos
+historia arrastra y el que más sirve a quien va a ofertar ahora.
+
+Lo que **no** se recorta por año, porque es seguridad y no alcance: la etapa se
+calcula para toda ficha que exista. Una ficha de 2023 con contrato firmado deja
+de mostrarse como abierta igual que una de 2026; solo que no se amplía con el
+contenido de ejecución ni aparece en el filtro. Ampliar a años anteriores es una
+decisión posterior, con las mediciones de abajo.
 
 ## Caso de prueba: OPA-ST-07-2023
 
 Con los datos de la página del SECOP que trajo el usuario, la ficha debe decir:
 
 > **Alcantarillado y acueducto en dos sectores de Pereira**
-> **Etapa: Terminado** — según las fechas del contrato (30 nov 2023 → 27 feb
+> **Etapa: Plazo cumplido** — según las fechas del contrato (30 nov 2023 → 27 feb
 > 2024). El SECOP no publica el avance de la obra.
 > **$995.976.833** · Contrato de obra · 90 días
 > **Cómo se contrató:** régimen especial de una empresa de servicios públicos.
@@ -213,7 +228,13 @@ Con los datos de la página del SECOP que trajo el usuario, la ficha debe decir:
 > oferta (C1), y el contrato se firmó el 24 nov 2023, antes de publicarse el
 > proceso el 28 nov 2023 (C2).
 
-Si el contrato no está vinculado en la base, la etapa no puede ser «Terminado»:
+Este proceso es de 2023: queda **fuera del alcance de 2026**, así que no se
+publica como ficha de ciclo de vida. Se conserva como **caso de prueba de la
+regla** (la función que calcula la etapa y las contradicciones), no de la página.
+Para la página hace falta un caso real de 2026 con contrato firmado, que se
+elige en las mediciones y se anota aquí.
+
+Si el contrato no está vinculado en la base, la etapa no puede ser «Plazo cumplido»:
 queda lo que digan las señales del proceso, y si se contradicen, «Por
 verificar». **Se comprueba contra la base antes del plan**: si este proceso no
 está ingerido o no tiene contrato vinculado, se elige otro caso real con las
@@ -232,7 +253,7 @@ mismas características y se anota aquí.
 4. Toda contradicción C1–C7 presente se muestra en «Revisa antes de confiar» con
    las dos fechas o los dos valores que la sostienen; si no hay ninguna, el
    bloque no se pinta.
-5. «En ejecución» y «Terminado» llevan siempre la aclaración de que salen de las
+5. «En ejecución» y «Plazo cumplido» llevan siempre la aclaración de que salen de las
    fechas del contrato. Ningún texto afirma avance de obra, entrega ni lugar de
    ejecución.
 6. Presupuesto, valor del contrato y pagado tienen etiquetas distintas y nunca
@@ -246,7 +267,12 @@ mismas características y se anota aquí.
 9. Sin migraciones: se usa lo que ya está en `proceso` y `contrato`. Si una etapa
    o una contradicción necesitara un dato que no está, se anota como pendiente y
    no se implementa.
-10. El caso de prueba de arriba (o su sustituto medido) se reproduce tal cual.
+10. El caso de prueba de arriba se reproduce tal cual en la prueba de la regla, y
+    el caso de 2026 elegido en las mediciones, en la página.
+11. El filtro de etapa está apagado por defecto: sin tocarlo, la vitrina devuelve
+    lo mismo que hoy (salvo los procesos que dejan de ser oportunidad por C1).
+12. Las fichas de ciclo de vida y el filtro cubren solo procesos publicados
+    desde el 1 de enero de 2026; el cálculo de la etapa cubre todos.
 
 ## Reconocimiento: lo que ya existe (CONDUCTA §1)
 
@@ -287,8 +313,11 @@ aquí:
    hoy se cuentan como abiertos (`condicionAbierto()`) con contrato o
    adjudicación.
 4. Si `CO1.REQ.5354189` está en la base y con qué señales.
-5. Cuántos procesos tendrían cada etapa, para saber cuántas fichas «en
-   ejecución» y «terminadas» se publicarían.
+5. Cuántos procesos **publicados desde el 1 de enero de 2026** tendrían cada
+   etapa, para saber cuántas fichas «En ejecución» y «Plazo cumplido» se
+   publicarían.
+6. Un proceso real de 2026 con contrato firmado (y, si existe, con alguna
+   contradicción C1–C7) para el caso de prueba de la página.
 
 ## Fuera de alcance
 
@@ -303,14 +332,13 @@ aquí:
   necesita la migración `0025`).
 - Cambios de esquema, del clasificador o de la ingesta.
 
-## Preguntas abiertas para el usuario
+## Decisiones del usuario (2026-10-05)
 
-1. **Búsqueda de procesos no abiertos.** ¿La vitrina debe ofrecer un filtro de
-   etapa («En ejecución», «Terminados») para buscarlos, o basta con que existan
-   como fichas a las que se llega por enlace y por el buscador guiado? Propuesta:
-   filtro explícito y apagado por defecto.
-2. **Antigüedad.** ¿Se publican fichas de todos los procesos terminados que hay
-   en la base, o solo de los últimos N años? Afecta a cuántas páginas se indexan.
-3. **Nombre de la etapa final.** «Terminado» puede leerse como «obra
-   entregada». Alternativa más honesta: «Plazo vencido». Propuesta: «Plazo
-   cumplido», con la aclaración de que no es acta de entrega.
+1. **Búsqueda de procesos no abiertos:** filtro de etapa explícito en la
+   vitrina, **apagado por defecto**.
+2. **Antigüedad:** se empieza **solo con 2026** (procesos publicados desde el
+   1 de enero de 2026). Ver «Alcance temporal».
+3. **Nombre de la etapa final:** **«Plazo cumplido»**, no «Terminado».
+
+No quedan preguntas abiertas en el spec. Lo siguiente son las mediciones y, con
+ellas, el plan.

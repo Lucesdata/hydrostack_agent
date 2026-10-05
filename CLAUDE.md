@@ -1,13 +1,15 @@
 # AquaLicita — Instrucciones del Proyecto
 
-**Ficha Viva con ciclo de vida (2026-10-05, spec para revisión, sin código).**
+**Ficha Viva con ciclo de vida (2026-10-05, spec con decisiones cerradas, sin código).**
 Camino de lanzamiento: primero la información. La ficha explica el proceso sin
 contradicciones, ruido ni letra pequeña, y cubre toda su vida: los procesos
 contratados se muestran como ficha en ejecución (decisión del usuario), nunca
 como oportunidad. Siete etapas con una regla de precedencia (contrato >
 adjudicación > apertura > estado) y un bloque «Revisa antes de confiar» (C1–C7).
-Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
-`adjudicado: false`). Spec, mediciones pendientes y preguntas abiertas en
+Decisiones: filtro de etapa apagado por defecto, solo procesos publicados desde
+2026 (la etapa sí se calcula para todos) y la etapa final se llama «Plazo
+cumplido», no «Terminado». Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
+`adjudicado: false`). Spec y mediciones pendientes en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
 **Buscador guiado (2026-10-04, secciones 1 y 2 implementadas localmente).** El usuario
