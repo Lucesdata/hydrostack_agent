@@ -158,7 +158,7 @@ código, una condición y una frase.
 
 | Código | Condición | Lo que dice la ficha |
 |---|---|---|
-| **C1** | Abierto a ofertas (o estado «Publicado») y contrato firmado o adjudicación. | «El SECOP lo muestra abierto, pero ya hay contrato firmado el …». |
+| **C1** | Estado del proceso «Publicado» o «Abierto» (con apertura «Abierto» **o nula**) y contrato firmado o adjudicación. | «El SECOP lo muestra abierto, pero ya hay contrato firmado el …». |
 | **C2** | Contrato firmado antes de la fecha de publicación del proceso. | «El contrato se firmó el …, antes de publicarse el proceso (…)». |
 | **C3** | Abierto a ofertas con la fecha de recepción ya vencida. | «Figura abierto, pero la recepción de ofertas venció el …». |
 | **C4** | Valor del contrato por encima del presupuesto publicado. | «El contrato vale $X, más que el presupuesto publicado ($Y)». |
@@ -336,7 +336,7 @@ Señales de la muestra que el plan tiene que confirmar en la base viva:
 ## Resultados de la base viva
 
 Medido por el usuario el 2026-10-05 en el SQL Editor de Supabase con
-`scripts/sql/medir-ciclo-de-vida-supabase-1.sql` y `-2.sql`. Partes 3 y 4 pendientes.
+`scripts/sql/medir-ciclo-de-vida-supabase-1.sql`, `-2.sql` y `-3.sql`. Parte 4 pendiente.
 
 **M1. El vínculo proceso ↔ contrato existe y es usable.**
 
@@ -398,6 +398,37 @@ del proceso (cuenta «Seleccionado» con apertura «Abierto» como que recibe
 ofertas) ni el estado del contrato (Cancelado, sin firmar, terminado), y trata
 la falta de fecha de recepción como vigente. «Recibe ofertas» está inflado; lo
 mide la parte 4 (`medir-ciclo-de-vida-supabase-4.sql`, M7–M8).
+
+**M4. El proceso del ejemplo está en la base y hoy AquaLicita lo muestra como
+abierto.** `CO1.REQ.5354189` (OPA-ST-07-2023): estado «Publicado», apertura
+«Abierto», fase «Presentación de oferta», sin adjudicación y **sin contrato
+vinculado**. Cumple `condicionAbierto()`, así que la vitrina, el mapa y la ficha
+lo cuentan como oportunidad abierta casi tres años después, aunque la página del
+SECOP trae la minuta firmada. Sin contrato en la base, la regla de precedencia
+sola no lo rescata: hace falta una regla de **antigüedad** (M7, parte 4) para que
+un proceso viejo sin señales de cierre quede «Por verificar» y no «Recibe
+ofertas».
+
+**M6. Procesos de 2026 con contrato firmado** (los diez más recientes). Lo que
+enseñan:
+
+- **Caso de prueba de la página: `CO1.REQ.10637968`**, formulación del PSMV
+  (plan de saneamiento y manejo de vertimientos): el SECOP dice estado
+  «Abierto», pero el contrato se firmó el 2026-09-09, empezó el 2026-09-29 y
+  termina el 2026-12-31. La ficha debe decir **«En ejecución»** y señalar la
+  contradicción. Segundo caso: `CO1.REQ.10824491` (saneamiento básico, estado
+  «Abierto», fin 2026-09-07) → **«Plazo cumplido»**.
+- **C1 se contó de menos.** Varios tienen estado «Publicado»/«Abierto» con
+  apertura **nula** y contrato firmado; C1 pedía apertura «Abierto». La regla
+  correcta mira el estado del proceso aunque falte la apertura.
+- **Ruido en el texto de la fuente:** referencias y objetos llevan pegada la fase
+  («ALSUTAMAR-CMA-002-2026 (Presentación de oferta)»). R3: se limpia al
+  pintar, sin tocar la base.
+- **Contratos de personas naturales.** Entre los diez hay contratos de apoyo a la
+  gestión cuyo objeto es un cargo («TECNICO GRADO 2») o el **nombre de una
+  persona**. Una ficha pública e indexable «en ejecución» sobre el contrato de
+  trabajo de una persona no es información del sector y expone a un particular.
+  Pendiente de decisión del usuario: excluirlos de las fichas de ciclo de vida.
 
 ### Lo que cambia en el spec por estos datos
 
