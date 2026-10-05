@@ -12,11 +12,18 @@
  * mismo hecho.
  */
 
-import { and, asc, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, isNull, or, sql, type SQL } from "drizzle-orm";
 import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import { condicionAbierto } from "./agregados";
-import type { TipoProyecto } from "../classify/tipo-proyecto";
+import { TIPOS_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
+import {
+  SIN_FILTROS,
+  hayFiltros,
+  patronIlike,
+  queryDeFiltros,
+  type FiltrosVitrina,
+} from "./filtros-vitrina";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
 export type PestanaVitrina = (typeof PESTANAS_VITRINA)[number];
@@ -38,6 +45,7 @@ export interface ProcesoDeVitrina {
   estadoActual: string | null;
   estadoApertura: string | null;
   fechaRecepcion: string | null;
+  fechaPublicacion: string | null;
   tipoProyecto: TipoProyecto | null;
   adjudicatario: string | null;
   valorAdjudicacion: string | null;
@@ -50,6 +58,8 @@ export interface PaginaDeVitrina {
   pagina: number;
   porPagina: number;
   pestana: PestanaVitrina;
+  /** Los filtros aplicados. Solo los abiertos se filtran; ver `procesosDeVitrina`. */
+  filtros: FiltrosVitrina;
 }
 
 /**
@@ -72,8 +82,18 @@ export function paginaValida(raw: string): number | null {
   return n > 1 && n <= PAGINA_MAXIMA ? n : null;
 }
 
-export function rutaVitrina(pestana: PestanaVitrina, pagina: number): string {
+/**
+ * Sin filtros, la página va en el camino (`/licitaciones/pagina/3`): esas rutas
+ * son ISR y las sigue un buscador. Con filtros va en la query
+ * (`/licitaciones?tipo=ptar&pagina=3`), porque solo la base lee `searchParams`.
+ */
+export function rutaVitrina(
+  pestana: PestanaVitrina,
+  pagina: number,
+  filtros: FiltrosVitrina = SIN_FILTROS
+): string {
   const base = pestana === "abiertos" ? "/licitaciones" : "/licitaciones/adjudicados";
+  if (pestana === "abiertos" && hayFiltros(filtros)) return base + queryDeFiltros(filtros, pagina);
   return pagina <= 1 ? base : `${base}/pagina/${pagina}`;
 }
 
@@ -88,6 +108,7 @@ const CAMPOS = {
   estadoActual: proceso.estadoActual,
   estadoApertura: proceso.estadoApertura,
   fechaRecepcion: proceso.fechaRecepcion,
+  fechaPublicacion: proceso.fechaPublicacion,
   // `proceso.tipo_proyecto` es `text` en el esquema: sin este tipado explícito
   // Drizzle infiere `string | null` y el `as ProcesoDeVitrina[]` de más abajo
   // tapaba el único TypeError real —`TIPO_PROYECTO[p.tipoProyecto]` en
@@ -110,11 +131,75 @@ function condicionDe(pestana: PestanaVitrina) {
   );
 }
 
+/** Los cuatro tipos que afirman un subsistema de agua: todos menos `otros`. */
+const TIPOS_DE_AGUA = TIPOS_PROYECTO.filter((t) => t !== "otros");
+
+/**
+ * Tramo de relevancia de un abierto, de 0 (primero) a 2 (al final).
+ *
+ * 0 · tiene uno de los cuatro tipos de agua y sigue recibiendo ofertas.
+ * 1 · tipo `otros` o sin clasificar: entró por el filtro de la ingesta, pero el
+ *     clasificador no le encuentra subsistema. En la vitrina del 2026-10-04 la
+ *     primera fila eran unos GPS para una empresa de energía y el estudio de
+ *     tramos de espacio público de EPM.
+ * 2 · su `fecha_recepcion` ya pasó (el día en Colombia). Sigue en el conteo
+ *     porque `condicionAbierto()` es la definición común y no se reescribe
+ *     aquí; solo deja de ocupar la primera página.
+ *
+ * Ordena, no filtra: el total no cambia y nada desaparece de la vitrina.
+ */
+export function tramoDeRelevancia(): SQL<number> {
+  const tiposDeAgua = sql.join(
+    TIPOS_DE_AGUA.map((t) => sql`${t}`),
+    sql`, `
+  );
+  return sql<number>`case
+    when ${proceso.fechaRecepcion} < (now() at time zone 'America/Bogota')::date then 2
+    when ${proceso.tipoProyecto} in (${tiposDeAgua}) then 0
+    else 1
+  end`;
+}
+
+/**
+ * Las condiciones de los filtros. `departamentoCodigo` llega ya resuelto desde
+ * el slug por quien llama, que tiene la lista de departamentos; un slug que no
+ * existe llega como `null` y no filtra.
+ */
+function condicionesDeFiltros(f: FiltrosVitrina, departamentoCodigo: string | null) {
+  return [
+    f.q
+      ? or(
+          ilike(proceso.objeto, patronIlike(f.q)),
+          ilike(entidad.nombre, patronIlike(f.q)),
+          ilike(geografia.municipioNombre, patronIlike(f.q))
+        )
+      : undefined,
+    f.tipo ? eq(proceso.tipoProyecto, f.tipo) : undefined,
+    departamentoCodigo ? eq(geografia.departamentoCodigo, departamentoCodigo) : undefined,
+    f.presupuestoMin ? gte(proceso.valorEstimado, String(f.presupuestoMin * 1_000_000)) : undefined,
+  ];
+}
+
+function ordenDeAbiertos(orden: FiltrosVitrina["orden"]) {
+  if (orden === "recientes") return [desc(proceso.fechaPublicacion), asc(proceso.id)];
+  if (orden === "valor") return [sql`${proceso.valorEstimado} desc nulls last`, asc(proceso.id)];
+  return [asc(tramoDeRelevancia()), desc(proceso.fechaPublicacion), asc(proceso.id)];
+}
+
+/**
+ * Los filtros solo se aplican a los abiertos: es la pestaña de trabajo. Los
+ * adjudicados recientes son ~190 y se leen enteros.
+ */
 export async function procesosDeVitrina(
   pestana: PestanaVitrina,
-  pagina = 1
+  pagina = 1,
+  opciones: { filtros?: FiltrosVitrina; departamentoCodigo?: string | null } = {}
 ): Promise<PaginaDeVitrina> {
-  const where = condicionDe(pestana);
+  const filtros = pestana === "abiertos" ? (opciones.filtros ?? SIN_FILTROS) : SIN_FILTROS;
+  const where = and(
+    condicionDe(pestana),
+    ...condicionesDeFiltros(filtros, opciones.departamentoCodigo ?? null)
+  );
   // `proceso.id` como segunda clave: Postgres no garantiza orden estable entre
   // empates de `fecha_publicacion`/`fecha_adjudicacion` (columna `date`, con
   // empates masivos), y cada página es una entrada ISR generada en momentos
@@ -122,7 +207,7 @@ export async function procesosDeVitrina(
   // o saltárselo.
   const orden =
     pestana === "abiertos"
-      ? [desc(proceso.fechaPublicacion), asc(proceso.id)]
+      ? ordenDeAbiertos(filtros.orden)
       : [desc(proceso.fechaAdjudicacion), asc(proceso.id)];
 
   const [filas, [{ total }]] = await Promise.all([
@@ -135,9 +220,12 @@ export async function procesosDeVitrina(
       .orderBy(...orden)
       .limit(POR_PAGINA_VITRINA)
       .offset((pagina - 1) * POR_PAGINA_VITRINA),
+    // Mismos joins que la página: los filtros leen entidad y geografía.
     db
       .select({ total: sql<number>`count(*)::int` })
       .from(proceso)
+      .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
+      .leftJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
       .where(where),
   ]);
 
@@ -147,5 +235,6 @@ export async function procesosDeVitrina(
     pagina,
     porPagina: POR_PAGINA_VITRINA,
     pestana,
+    filtros,
   };
 }

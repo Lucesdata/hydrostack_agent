@@ -25,19 +25,11 @@
   --aq-redes: #a3b1c2;
   --aq-otros: #8c99a6;
   --aq-abierto: #4ade80;
-  /* Horizonte de luz (.procesos::before): la sombra bajo el arco y el
-     resplandor encima. */
-  --aq-horizonte-sombra: #040e1a;
-  --aq-horizonte-luz: rgba(76, 201, 255, 0.2);
   position: relative;
   isolation: isolate;
   padding: clamp(16px, 2vw, 28px) var(--gutter) clamp(28px, 2.6vw, 40px);
   background: var(--aq-bg);
   color: var(--aq-text);
-  /* El horizonte (.procesos::before) es más ancho que la pantalla y más alto
-     que lo que queda de hero: se recorta aquí, para que no abra scroll lateral
-     ni se pinte sobre la franja de la ficha. */
-  overflow: clip;
 }
 
 .contenedor {
@@ -340,38 +332,9 @@
 
 /* ── Nivel inferior: procesos para explorar ───────────────────────────────── */
 .procesos {
-  position: relative;
   display: flex;
   flex-direction: column;
   margin-top: clamp(16px, 1.8vw, 24px);
-}
-/* Horizonte de luz (2026-10-04): un arco enorme cuyo vértice queda justo
-   encima de las tarjetas, como la curva de un planeta (o una lámina de agua)
-   vista de lejos. Va anclado a la fila de tarjetas y no al alto del hero para
-   que caiga entre el mapa y las tarjetas en cualquier pantalla. Debajo del
-   borde, un tono algo más oscuro que el fondo; encima, un resplandor cian muy
-   bajo. Estático: sin animación (portada aligerada del 2026-09-27). Va en la
-   capa -1 del hero (que aísla su apilamiento), detrás de mapa y tarjetas.
-   El texto que queda sobre el resplandor se mide en contraste-oscuro.test.ts
-   contra su punto más claro (--aq-horizonte-luz). */
-.procesos::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  /* El vértice, en el hueco entre la leyenda del mapa y las tarjetas (16–24 px
-     según el ancho): a -10 px no cruza el texto de la leyenda en ningún ancho. */
-  top: -10px;
-  left: 50%;
-  width: max(1500px, 150vw);
-  height: max(760px, 62vw);
-  transform: translateX(-50%);
-  border-radius: 50%;
-  pointer-events: none;
-  border-top: 1px solid rgba(125, 211, 252, 0.3);
-  background:
-    radial-gradient(ellipse 40% 14% at 50% 0%, rgba(76, 201, 255, 0.07), transparent 100%),
-    linear-gradient(var(--aq-horizonte-sombra), var(--aq-bg) 260px);
-  box-shadow: 0 -40px 140px -30px var(--aq-horizonte-luz);
 }
 /* Bajo las tarjetas: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
    a todas las fichas (2026-10-04, opción D). */

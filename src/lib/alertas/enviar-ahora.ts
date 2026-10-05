@@ -49,7 +49,7 @@ export async function enviarDigestAhora(usuarioId: string): Promise<EnvioResulta
     return {
       estado: "error",
       matches: 0,
-      error: "Completa tu perfil en /licitaciones/explorar para recibir alertas por correo.",
+      error: "Completa tu perfil en /perfil para recibir alertas por correo.",
     };
   }
 

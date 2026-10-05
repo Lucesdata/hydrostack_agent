@@ -1051,3 +1051,44 @@ enlaces del mapa a las facetas.
   abiertos no pese (`ORDER BY random()` con top-N; una consulta cada 6 h).
 - **Peso.** El JS de primera carga de `/` quedó en 105,6 kB gzip
   (`npm run presupuesto`), desde 109,1: salieron el buscador y el resumen.
+
+### 54. Vitrina, fase 0: lo que queda abierto (2026-10-04)
+
+- **El conteo «N procesos abiertos» incluye los de recepción vencida.** Es
+  `condicionAbierto()`, la definición común, y no se cambió: esos procesos solo
+  bajan al final del orden y su tarjeta dice «CERRADO A OFERTAS». Medir cuántos
+  son antes de decidir si la definición común debe mirar `fecha_recepcion`.
+- **Sin medir qué parte de los abiertos es `otros` o sin tipo.** La fase 0 los
+  ordena detrás; si son muchos, la fase 1 puede ofrecer un filtro.
+- **El clasificador marca PTAR un contrato de ingeniería química** de la
+  Universidad Nacional (`CO1.REQ.11144709`, visto en la vitrina). Revisar con el
+  plan propio que exige tocar el clasificador.
+- **Los nombres propios que no son el municipio o el departamento del proceso**
+  quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
+  («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
+  gritaba.
+- **Dos buscadores con dos definiciones de «abierto»** (2026-10-05). La vitrina
+  (`/licitaciones`, `condicionAbierto()`) y el buscador guiado de #109
+  (`/licitaciones/explorar` + `GET /api/secop`, con `estado_apertura`) conviven.
+  Este PR había retirado Explorar, `/api/secop`, `/api/secop/probe` y
+  `probeDocument()`, pero #109 llegó antes a `main` y los usa; por decisión del
+  usuario se conservan tal como están en `main`. Unificar es portar a la vitrina
+  los criterios del guiado (sistema, actividad, número de proceso) o llevar el
+  guiado a `condicionAbierto()`; hasta entonces un mismo proceso puede salir
+  abierto en uno y no en el otro.
+- **Fase 3 de la vitrina en espera** (2026-10-04). Seguir, la alerta desde la
+  vitrina, el tipo de obra en los filtros guardados y «Para ti» viven en la
+  rama `claude/vitrina-fase3`, separada del PR de las fases 0–2. Necesitan la
+  migración `0025` (dos columnas nulas en `coincidencia` y
+  `al_filtros_usuario`), y la Supabase viva está al límite del plan. **No
+  fusionar esa rama sin aplicar antes la migración**: Drizzle lee e inserta
+  todas las columnas del esquema, así que sin ellas fallarían también el cron
+  de filtros y el registro de coincidencias que ya existen.
+- **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
+  `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
+  perfil. Si el tráfico crece, se puede calcular en el navegador con los
+  requisitos públicos, pero hoy el veredicto vive en el servidor.
+- **«Cierre en N días» en las páginas ISR de la vitrina** (`/licitaciones/pagina/N`)
+  se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
+  ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
+

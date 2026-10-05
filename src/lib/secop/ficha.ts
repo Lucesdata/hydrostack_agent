@@ -17,7 +17,7 @@
  * vez de inventar una cifra o dejar un hueco mudo.
  */
 
-import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { entidad, geografia, proceso } from "../db/schema";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
@@ -51,41 +51,59 @@ export interface ProcesoFicha {
   municipio: string | null;
 }
 
+/** Las columnas de `ProcesoFicha`: las comparten la ficha y el panel del Radar. */
+const COLUMNAS_FICHA = {
+  id: proceso.id,
+  secopProcesoId: proceso.secopProcesoId,
+  referencia: proceso.referencia,
+  objeto: proceso.objeto,
+  descripcion: proceso.descripcion,
+  modalidad: proceso.modalidad,
+  tipoContrato: proceso.tipoContrato,
+  unspsc: proceso.unspsc,
+  estadoActual: proceso.estadoActual,
+  estadoApertura: proceso.estadoApertura,
+  fechaPublicacion: proceso.fechaPublicacion,
+  fechaRecepcion: proceso.fechaRecepcion,
+  valorEstimado: proceso.valorEstimado,
+  documentAccess: proceso.documentAccess,
+  url: proceso.url,
+  tipoProyecto: sql<TipoProyecto | null>`${proceso.tipoProyecto}`,
+  entidadNombre: entidad.nombre,
+  entidadNit: entidad.nitCanonico,
+  departamento: geografia.departamentoNombre,
+  departamentoCodigo: geografia.departamentoCodigo,
+  municipio: geografia.municipioNombre,
+};
+
+function consultaFicha() {
+  return db
+    .select(COLUMNAS_FICHA)
+    .from(proceso)
+    .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
+    .leftJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId));
+}
+
 export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null> {
   const id = idDesdeSlug(slug);
   if (!id) return null;
 
-  const [fila] = await db
-    .select({
-      id: proceso.id,
-      secopProcesoId: proceso.secopProcesoId,
-      referencia: proceso.referencia,
-      objeto: proceso.objeto,
-      descripcion: proceso.descripcion,
-      modalidad: proceso.modalidad,
-      tipoContrato: proceso.tipoContrato,
-      unspsc: proceso.unspsc,
-      estadoActual: proceso.estadoActual,
-      estadoApertura: proceso.estadoApertura,
-      fechaPublicacion: proceso.fechaPublicacion,
-      fechaRecepcion: proceso.fechaRecepcion,
-      valorEstimado: proceso.valorEstimado,
-      documentAccess: proceso.documentAccess,
-      url: proceso.url,
-      tipoProyecto: sql<TipoProyecto | null>`${proceso.tipoProyecto}`,
-      entidadNombre: entidad.nombre,
-      entidadNit: entidad.nitCanonico,
-      departamento: geografia.departamentoNombre,
-      departamentoCodigo: geografia.departamentoCodigo,
-      municipio: geografia.municipioNombre,
-    })
-    .from(proceso)
-    .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
-    .leftJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
+  const [fila] = await consultaFicha()
     .where(and(eq(proceso.secopProcesoId, id), isNull(proceso.deletedAt)))
     .limit(1);
 
   return fila ?? null;
+}
+
+/**
+ * Varias fichas a la vez, por `secop_proceso_id`, sin orden garantizado. Las
+ * pide el panel del Radar de la vitrina para las tarjetas de una página.
+ */
+export async function procesosFichaPorIds(ids: string[]): Promise<ProcesoFicha[]> {
+  if (ids.length === 0) return [];
+  return consultaFicha().where(
+    and(inArray(proceso.secopProcesoId, ids), isNull(proceso.deletedAt))
+  );
 }
 
 /**

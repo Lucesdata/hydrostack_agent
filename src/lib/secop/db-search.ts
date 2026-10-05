@@ -65,6 +65,7 @@ export interface DbProcesoRow {
   modalidad: string | null;
   tipoContrato: string | null;
   fechaPublicacion: string | null;
+  fechaRecepcion?: string | null;
   precioBase: string | null;
   estadoActual: string | null;
   documentAccess: string | null;
@@ -101,6 +102,7 @@ export function mapDbRowToProceso(row: DbProcesoRow): SecopProceso {
     modalidad: row.modalidad ?? "",
     tipoContrato: row.tipoContrato ?? "",
     fechaPublicacion: row.fechaPublicacion,
+    fechaRecepcion: row.fechaRecepcion ?? null,
     precioBase: toNumber(row.precioBase),
     adjudicado: (row.adjudicadoRaw ?? "").toLowerCase() === "si",
     valorAdjudicacion: toNumber(row.valorAdjudicacionRaw),
@@ -189,6 +191,7 @@ async function prepare(query: SecopQuery) {
     !porNumero && patronTexto
       ? or(ilike(proceso.objeto, patronTexto), ilike(entidad.nombre, patronTexto))
       : undefined,
+    query.ids ? inArray(proceso.secopProcesoId, query.ids) : undefined,
   ].filter((c): c is NonNullable<typeof c> => c !== undefined);
 
   return {
@@ -244,6 +247,9 @@ export async function searchProcesosDb(query: SecopQuery = {}): Promise<SecopRes
       modalidad: proceso.modalidad,
       tipoContrato: proceso.tipoContrato,
       fechaPublicacion: proceso.fechaPublicacion,
+      // La compuerta de plazo cierra con la recepción cuando no hay cronograma
+      // del pliego (`toVerdictInput`); sin ella, el matching la daba sin datos.
+      fechaRecepcion: proceso.fechaRecepcion,
       precioBase: sql<string | null>`${proceso.valorEstimado}::text`,
       estadoActual: proceso.estadoActual,
       documentAccess: proceso.documentAccess,

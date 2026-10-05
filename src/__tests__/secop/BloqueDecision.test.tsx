@@ -7,7 +7,10 @@
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import BloqueDecision, { type DatosDecision } from "@/src/components/secop/ficha/BloqueDecision";
+import BloqueDecision, {
+  hrefsDePaso,
+  type DatosDecision,
+} from "@/src/components/secop/ficha/BloqueDecision";
 import { compuertasAbsolutas } from "@/src/lib/secop/semaforo";
 import type { SecopProceso } from "@/src/lib/secop/types";
 
@@ -104,5 +107,15 @@ describe("BloqueDecision — HTML sin JavaScript", () => {
 
   it("el formulario del perfil no se pinta hasta que se pide", () => {
     expect(html()).not.toContain("fd-wizard");
+  });
+});
+
+describe("BloqueDecision fuera de la ficha (panel del Radar, 2026-10-04)", () => {
+  it("los pasos al pliego apuntan a la ficha, no a un #pliego de la vitrina", () => {
+    expect(hrefsDePaso(datos())["subir-pliego"]).toBe("#pliego");
+    const enPanel = hrefsDePaso(datos({ hrefFicha: "/licitaciones/ptar-tunja--CO1.REQ.123" }));
+    expect(enPanel["subir-pliego"]).toBe("/licitaciones/ptar-tunja--CO1.REQ.123#pliego");
+    expect(enPanel["requisitos-pliego"]).toBe("/licitaciones/ptar-tunja--CO1.REQ.123#pliego");
+    expect(enPanel["ofertar-secop"]).toBe("https://community.secop.gov.co/x");
   });
 });

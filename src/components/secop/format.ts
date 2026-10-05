@@ -8,7 +8,39 @@ import type { VerdictPublico } from "@/src/lib/secop/verdict-publico";
 import { montoConDato } from "@/src/lib/secop/monto";
 
 /** Siglas del sector que deben conservarse en mayúsculas al normalizar títulos. */
-const ACRONYMS = ["PTAP", "PTAR", "PTAT", "ESP", "SENA", "INVIAS", "PDA", "SGP"];
+const ACRONYMS = [
+  "PTAP",
+  "PTAR",
+  "PTAT",
+  "PTARD",
+  "ESP",
+  "SENA",
+  "INVIAS",
+  "PDA",
+  "SGP",
+  "PSMV",
+  "PMAA",
+  "PUEAA",
+  "EPM",
+  "EAAB",
+  "RUP",
+  "SECOP",
+  "UNSPSC",
+  "GPS",
+  "GNSS",
+  "PVC",
+  "HDPE",
+  "PEAD",
+  "GRP",
+  "II",
+  "III",
+  "IV",
+  "VII",
+  "VIII",
+  "IX",
+  "XI",
+  "XII",
+];
 
 /**
  * SECOP publica títulos EN MAYÚSCULAS. Los baja a sentence case preservando
