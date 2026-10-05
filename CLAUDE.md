@@ -259,7 +259,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-04 (minificha con estructura de tarjeta; barra de la portada en píldora flotante y horizonte de luz en el hero; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-05 (minificha con tope de 236 px; antes, 2026-10-04: minificha con estructura de tarjeta; barra de la portada en píldora flotante y horizonte de luz en el hero; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -370,8 +370,14 @@ coroplético del hero. Spec y reconocimiento:
   panel opaco); pie con el número de proceso («Proceso:» solo para lector de
   pantalla) y la píldora «Ver ficha →» en `--aq-cta`, cuyo `::after` sigue
   cubriendo la tarjeta. Sigue oscura: el usuario descartó la versión blanca.
-  Mide 236 px a 1440 (antes 268); 257 cuando en el grupo hay una de «Sin
-  subsistema identificado», porque sus pastillas pasan a dos filas.
+  **Tope de 236 px de alto a 1440** (antes 268; decisión del usuario del
+  2026-10-05): 219 la tarjeta normal y 236 la que lleva «Según descripción», que
+  es la más alta y a la que la fila iguala las cinco. Para no pasar de ahí, la
+  pastilla neutra se acorta a «Sin subsistema» (el texto completo en su
+  `title`; leyenda y mapa lo conservan). Entre 1200 y ≈1360 px las tarjetas son
+  más estrechas y el par de pastillas más ancho pasa a dos filas (246 px): se
+  prefirió eso a recortar el estado o el tipo, porque el color nunca va sin su
+  nombre.
 
 *(Sustituido el 2026-10-04 por el hero de cinco minifichas, arriba.)* **Hero «Explora el mapa. Entiende cada proceso.» (2026-10-02).** Reproduce una
 referencia visual aprobada por el usuario
@@ -672,7 +678,8 @@ la ubicación de la entidad. Diseño aprobado y alcance en
 
 **Contexto sectorial del hero (2026-10-04).** La minificha conserva el objeto
 publicado y el tipo persistido. Si el objeto abreviado no contiene evidencia del
-tipo, pero la descripción sí, muestra «Tipo según descripción: [tipo]».
+tipo, pero la descripción sí, muestra «Según descripción: [tipo].» (era «Tipo según
+descripción»; se acortó el 2026-10-05 para caber en una línea a 1200 px).
 `procesoPortadaDesdeFila` reutiliza la evidencia y la poda de razón social de
 `clasificarTipoProyecto`; no cambia el clasificador ni escribe en la base.
 `muestraPortada` trae la descripción en la misma consulta. Caso verificado:

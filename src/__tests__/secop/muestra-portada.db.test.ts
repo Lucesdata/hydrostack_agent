@@ -140,7 +140,7 @@ describe("muestraPortada", () => {
     const cali = m.find((p) => p.id === validos[0])!;
     expect(cali).toMatchObject({
       numeroProceso: "001-LP-2026",
-      contextoTipo: "Tipo según descripción: Acueducto.",
+      contextoTipo: "Según descripción: Acueducto.",
       entidad: "MUNICIPIO DE CALI",
       presupuesto: 2_450_000_000,
       departamentoCodigo: "76",
