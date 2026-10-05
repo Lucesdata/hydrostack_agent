@@ -31,6 +31,7 @@ export default function BuscadorGuiado({
 }: Props) {
   const compacto = variante === "hero";
   const uid = useId();
+  const modalRef = useRef<HTMLDialogElement>(null);
   const [modo, setModo] = useState(consultaInicial.modo ?? "tema");
   const [tema, setTema] = useState(temaDesde(consultaInicial));
   const [numero, setNumero] = useState(consultaInicial.numero ?? "");
@@ -101,10 +102,43 @@ export default function BuscadorGuiado({
       : "";
 
   return (
-    <section
-      className={`${styles.buscador} ${compacto ? "" : styles.claro}`}
-      aria-label="Buscador guiado de procesos"
-    >
+    <>
+      <button
+        type="button"
+        className={styles.activador}
+        onClick={() => modalRef.current?.showModal()}
+        aria-haspopup="dialog"
+      >
+        <span>Buscar procesos</span>
+        <span className={styles.activadorIcono} aria-hidden="true">⌕</span>
+      </button>
+      <dialog
+        ref={modalRef}
+        className={styles.dialog}
+        aria-labelledby={`${uid}-titulo-modal`}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) modalRef.current?.close();
+        }}
+      >
+        <div className={styles.dialogCabecera}>
+          <div>
+            <p className={styles.dialogEyebrow}>BÚSQUEDA GUIADA</p>
+            <h2 id={`${uid}-titulo-modal`}>Encuentra un proceso</h2>
+            <p>Busca por tema o introduce el número SECOP II.</p>
+          </div>
+          <button
+            type="button"
+            className={styles.cerrar}
+            onClick={() => modalRef.current?.close()}
+            aria-label="Cerrar búsqueda"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <section
+          className={`${styles.buscador} ${compacto ? "" : styles.claro}`}
+          aria-label="Buscador guiado de procesos"
+        >
       <fieldset className={styles.selector}>
         <legend className="sr-only">Cómo quieres buscar</legend>
         <input
@@ -293,6 +327,8 @@ export default function BuscadorGuiado({
           onPagina={(page) => ejecutar({ ...estado.consulta, page })}
         />
       )}
-    </section>
+        </section>
+      </dialog>
+    </>
   );
 }
