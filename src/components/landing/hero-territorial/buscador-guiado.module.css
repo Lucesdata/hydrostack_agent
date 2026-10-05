@@ -257,3 +257,137 @@
     margin-top: 24px;
   }
 }
+
+
+/* Activador compacto en el hero; el flujo completo aparece solo al solicitarlo. */
+.activador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 48px;
+  margin-top: 24px;
+  padding: 0 16px 0 18px;
+  border: 1px solid rgba(76, 201, 255, 0.58);
+  border-radius: 10px;
+  background: rgba(10, 29, 48, 0.92);
+  color: #f3f8fc;
+  font: 600 15px var(--font-inter), sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+}
+.activador:hover {
+  background: #0f2a44;
+  border-color: #4cc9ff;
+  transform: translateY(-1px);
+}
+.activador:focus-visible {
+  outline: 2px solid #4cc9ff;
+  outline-offset: 3px;
+}
+.activadorIcono {
+  color: #4cc9ff;
+  font-size: 23px;
+  line-height: 1;
+}
+.dialog {
+  width: min(680px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(86dvh, 820px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 18px;
+  background: #061423;
+  color: #f3f8fc;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.5);
+}
+.dialog::backdrop {
+  background: rgba(1, 9, 17, 0.76);
+  backdrop-filter: blur(4px);
+}
+.dialogCabecera {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 28px 0;
+  background: #061423;
+}
+.dialogEyebrow {
+  margin: 0 0 7px;
+  color: #4cc9ff;
+  font: 700 10px/1.3 var(--font-inter), sans-serif;
+  letter-spacing: 0.12em;
+}
+.dialogCabecera h2 {
+  margin: 0;
+  color: #f3f8fc;
+  font: 650 23px/1.2 var(--font-inter), sans-serif;
+}
+.dialogCabecera p:last-child {
+  margin: 7px 0 0;
+  color: #9fb4c6;
+  font: 13px/1.45 var(--font-inter), sans-serif;
+}
+.cerrar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(140, 190, 225, 0.28);
+  border-radius: 50%;
+  background: #0a1d30;
+  color: #eaf4fb;
+  font-size: 27px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cerrar:hover {
+  border-color: #4cc9ff;
+  background: #0f2a44;
+}
+.dialog .buscador {
+  margin: 0;
+  padding: 18px 28px 26px;
+}
+.dialog .selector {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.dialog .formularios {
+  padding-top: 16px;
+}
+.dialog .estado {
+  margin-top: 12px;
+}
+.dialog .compacta {
+  max-height: 17rem;
+}
+@media (max-width: 600px) {
+  .activador {
+    min-height: 48px;
+    margin-top: 20px;
+  }
+  .dialog {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .dialogCabecera {
+    padding: 20px 18px 0;
+  }
+  .dialogCabecera h2 {
+    font-size: 21px;
+  }
+  .dialog .buscador {
+    padding: 16px 18px 24px;
+  }
+}
