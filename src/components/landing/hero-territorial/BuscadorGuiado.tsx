@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { SISTEMAS_BUSQUEDA, ACTIVIDADES_BUSQUEDA } from "@/src/lib/secop/busqueda-guiada";
 import { consultaDesdeParametros, enlaceBusqueda } from "@/src/lib/secop/busqueda-navegacion";
 import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
@@ -14,7 +14,12 @@ interface Props {
   resultadoInicial?: SecopResult<SecopProceso> | null;
   errorInicial?: string | null;
 }
-const inicial: SecopQuery = { modo: "tema", apertura: "Abierto", page: 1, pageSize: 25 };
+const inicial: SecopQuery = {
+  modo: "tema",
+  apertura: "Abierto",
+  page: 1,
+  pageSize: 25,
+};
 const temaDesde = (query: SecopQuery) => ({
   sistema: query.sistema ?? "",
   actividad: query.actividad ?? "",
@@ -31,6 +36,7 @@ export default function BuscadorGuiado({
 }: Props) {
   const compacto = variante === "hero";
   const uid = useId();
+  const modalRef = useRef<HTMLDialogElement>(null);
   const [modo, setModo] = useState(consultaInicial.modo ?? "tema");
   const [tema, setTema] = useState(temaDesde(consultaInicial));
   const [numero, setNumero] = useState(consultaInicial.numero ?? "");
@@ -89,7 +95,12 @@ export default function BuscadorGuiado({
   const cambiarModo = (nuevo: "tema" | "numero") => {
     carga.cancelar();
     setModo(nuevo);
-    setEstado({ consulta: { modo: nuevo }, resultado: null, error: null, cargando: false });
+    setEstado({
+      consulta: { modo: nuevo },
+      resultado: null,
+      error: null,
+      cargando: false,
+    });
   };
   const campo =
     (key: keyof typeof tema) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -101,198 +112,326 @@ export default function BuscadorGuiado({
       : "";
 
   return (
-    <section
-      className={`${styles.buscador} ${compacto ? "" : styles.claro}`}
-      aria-label="Buscador guiado de procesos"
-    >
-      <fieldset className={styles.selector}>
-        <legend className="sr-only">Cómo quieres buscar</legend>
-        <input
-          className={styles.radioTema}
-          type="radio"
-          name={`entrada-${uid}`}
-          id={`${uid}-tema`}
-          checked={modo === "tema"}
-          onChange={() => cambiarModo("tema")}
-        />
-        <label className={styles.pestana} htmlFor={`${uid}-tema`}>
-          Por tema
-        </label>
-        <input
-          className={styles.radioNumero}
-          type="radio"
-          name={`entrada-${uid}`}
-          id={`${uid}-numero`}
-          checked={modo === "numero"}
-          onChange={() => cambiarModo("numero")}
-        />
-        <label className={styles.pestana} htmlFor={`${uid}-numero`}>
-          Por número
-        </label>
-        <a className={styles.pestana} href="/mis-procesos">
-          Mis procesos
-        </a>
-        <div className={styles.formularios}>
-          <form
-            className={styles.formTema}
-            action="/licitaciones/explorar"
-            method="get"
-            onSubmit={enviar}
+    <>
+      <button
+        type="button"
+        className={styles.activador}
+        onClick={() => modalRef.current?.showModal()}
+        aria-haspopup="dialog"
+      >
+        <span>Buscar procesos</span>
+        <span className={styles.activadorIcono} aria-hidden="true">
+          ⌕
+        </span>
+      </button>
+      <dialog
+        ref={modalRef}
+        className={styles.dialog}
+        aria-labelledby={`${uid}-titulo-modal`}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) modalRef.current?.close();
+        }}
+      >
+        <div className={styles.dialogCabecera}>
+          <div>
+            <p className={styles.dialogEyebrow}>BÚSQUEDA GUIADA</p>
+            <h2 id={`${uid}-titulo-modal`}>Encuentra un proceso</h2>
+            <p>Busca por tema o introduce el número SECOP II.</p>
+          </div>
+          <button
+            type="button"
+            className={styles.cerrar}
+            onClick={() => modalRef.current?.close()}
+            aria-label="Cerrar búsqueda"
           >
-            <input type="hidden" name="modo" value="tema" />
-            <input type="hidden" name="page" value="1" />
-            <input
-              type="hidden"
-              name="pageSize"
-              value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
-            />
-            {compacto && <input type="hidden" name="apertura" value="Abierto" />}
-            <div className={styles.campos}>
-              <label htmlFor={`${uid}-sistema`}>
-                Sistema
-                <select
-                  id={`${uid}-sistema`}
-                  name="sistema"
-                  value={tema.sistema}
-                  onChange={campo("sistema")}
-                >
-                  <option value="">Todos los sistemas</option>
-                  {SISTEMAS_BUSQUEDA.map((opcion) => (
-                    <option value={opcion.value} key={opcion.value}>
-                      {opcion.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label htmlFor={`${uid}-actividad`}>
-                Actividad
-                <select
-                  id={`${uid}-actividad`}
-                  name="actividad"
-                  value={tema.actividad}
-                  onChange={campo("actividad")}
-                >
-                  <option value="">Todas las actividades</option>
-                  {ACTIVIDADES_BUSQUEDA.map((opcion) => (
-                    <option value={opcion.value} key={opcion.value}>
-                      {opcion.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <label htmlFor={`${uid}-q`}>
-              Palabra o entidad <span className={styles.opcional}>· opcional</span>
-              <input
-                id={`${uid}-q`}
-                name="q"
-                value={tema.q}
-                onChange={campo("q")}
-                maxLength={120}
-                placeholder="Bombeo, laboratorio…"
-                autoComplete="off"
-              />
-            </label>
-            {!compacto && (
-              <div className={styles.campos}>
-                <label htmlFor={`${uid}-apertura`}>
-                  Apertura
-                  <select
-                    id={`${uid}-apertura`}
-                    name="apertura"
-                    value={tema.apertura}
-                    onChange={campo("apertura")}
-                  >
-                    <option value="Abierto">Abiertos</option>
-                    <option value="Cerrado">Cerrados</option>
-                    <option value="">Abiertos y cerrados</option>
-                  </select>
-                </label>
-                <label htmlFor={`${uid}-orden`}>
-                  Orden
-                  <select
-                    id={`${uid}-orden`}
-                    name="orden"
-                    value={tema.orden}
-                    onChange={campo("orden")}
-                  >
-                    <option value="fecha">Recientes primero</option>
-                    <option value="valor">Mayor valor primero</option>
-                  </select>
-                </label>
-              </div>
-            )}
-            <div className={styles.acciones}>
-              <button className={styles.buscar} type="submit">
-                Buscar procesos
-              </button>
-              {compacto && <span>Abiertos · Colombia</span>}
-            </div>
-          </form>
-          <form
-            className={styles.formNumero}
-            action="/licitaciones/explorar"
-            method="get"
-            onSubmit={enviar}
-          >
-            <input type="hidden" name="modo" value="numero" />
-            <input type="hidden" name="page" value="1" />
-            <input
-              type="hidden"
-              name="pageSize"
-              value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
-            />
-            <label htmlFor={`${uid}-numero-proceso`}>
-              Número del proceso
-              <input
-                id={`${uid}-numero-proceso`}
-                name="numero"
-                value={numero}
-                onChange={(event) => setNumero(event.target.value)}
-                required
-                maxLength={120}
-                placeholder="CO1.REQ.5720221 o referencia"
-                autoComplete="off"
-                aria-describedby={`${uid}-ayuda`}
-              />
-            </label>
-            <p id={`${uid}-ayuda`} className={styles.ayuda}>
-              Identificador SECOP II o referencia de la entidad. Incluye procesos abiertos y
-              cerrados.
-            </p>
-            <button className={styles.buscar} type="submit">
-              Buscar proceso
-            </button>
-          </form>
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
-      </fieldset>
-      <p className={styles.estado} role="status" aria-live="polite">
-        {estadoTexto}
-      </p>
-      {estado.error && (
-        <div className={styles.error} role="alert">
-          <p>{estado.error}</p>
-          {estado.tipoError !== "validacion" && (
-            <a
-              href={enlaceBusqueda(estado.consulta)}
-              onClick={(event) => {
-                event.preventDefault();
-                ejecutar(estado.consulta);
-              }}
-            >
-              Reintentar
+        <section
+          className={`${styles.buscador} ${compacto ? "" : styles.claro}`}
+          aria-label="Buscador guiado de procesos"
+        >
+          <fieldset className={styles.selector}>
+            <legend className="sr-only">Cómo quieres buscar</legend>
+            <input
+              className={styles.radioTema}
+              type="radio"
+              name={`entrada-${uid}`}
+              id={`${uid}-tema`}
+              checked={modo === "tema"}
+              onChange={() => cambiarModo("tema")}
+            />
+            <label className={styles.pestana} htmlFor={`${uid}-tema`}>
+              Por tema
+            </label>
+            <input
+              className={styles.radioNumero}
+              type="radio"
+              name={`entrada-${uid}`}
+              id={`${uid}-numero`}
+              checked={modo === "numero"}
+              onChange={() => cambiarModo("numero")}
+            />
+            <label className={styles.pestana} htmlFor={`${uid}-numero`}>
+              Por número
+            </label>
+            <a className={styles.pestana} href="/mis-procesos">
+              Mis procesos
             </a>
+            <div className={styles.formularios}>
+              <form
+                className={styles.formTema}
+                action="/licitaciones/explorar"
+                method="get"
+                onSubmit={enviar}
+              >
+                <input type="hidden" name="modo" value="tema" />
+                <input type="hidden" name="page" value="1" />
+                <input
+                  type="hidden"
+                  name="pageSize"
+                  value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
+                />
+                {compacto && <input type="hidden" name="apertura" value="Abierto" />}
+                <fieldset className={styles.categorias}>
+                  <legend>Tipo de obra</legend>
+                  <div className={styles.categoriasGrid}>
+                    {[
+                      {
+                        value: "potable",
+                        label: "Agua potable",
+                        familia: "potable",
+                        icono: "gota",
+                      },
+                      {
+                        value: "residual",
+                        label: "Aguas residuales",
+                        familia: "residual",
+                        icono: "tratamiento",
+                      },
+                      {
+                        value: "alcantarillado",
+                        label: "Redes y alcantarillado",
+                        familia: "redes",
+                        icono: "red",
+                      },
+                    ].map((opcion) => {
+                      const seleccionada =
+                        tema.sistema === opcion.value ||
+                        (opcion.value === "potable" &&
+                          (tema.sistema === "acueducto" || tema.sistema === "ptap")) ||
+                        (opcion.value === "residual" && tema.sistema === "ptar");
+                      return (
+                        <button
+                          key={opcion.value}
+                          type="button"
+                          className={styles.categoria}
+                          data-familia={opcion.familia}
+                          aria-pressed={seleccionada}
+                          onClick={() =>
+                            setTema((actual) => ({
+                              ...actual,
+                              sistema: actual.sistema === opcion.value ? "" : opcion.value,
+                            }))
+                          }
+                        >
+                          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                            {opcion.icono === "gota" ? (
+                              <path
+                                d="M16 3.5S7.5 14 7.5 20.5a8.5 8.5 0 0 0 17 0C24.5 14 16 3.5 16 3.5Z"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinejoin="round"
+                              />
+                            ) : opcion.icono === "tratamiento" ? (
+                              <>
+                                <path
+                                  d="M5 9h22v9a7 7 0 0 1-7 7h-8a7 7 0 0 1-7-7V9Z"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M5 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0 3 2 4 1M11 5h10M14 2h4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                />
+                              </>
+                            ) : (
+                              <path
+                                d="M6 4v9h8v7h12M6 13v13h7m1-13h5V7h7m-12 13h7v6m-7-6v-6"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            )}
+                          </svg>
+                          <span>{opcion.label}</span>
+                          {seleccionada ? (
+                            <span className={styles.categoriaCheck} aria-hidden="true">
+                              ✓
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+                <details className={styles.masSistemas}>
+                  <summary>Elegir un sistema específico</summary>
+                  <label htmlFor={`${uid}-sistema`}>
+                    Sistema
+                    <select
+                      id={`${uid}-sistema`}
+                      name="sistema"
+                      value={tema.sistema}
+                      onChange={campo("sistema")}
+                    >
+                      <option value="">Todos los sistemas</option>
+                      {SISTEMAS_BUSQUEDA.map((opcion) => (
+                        <option value={opcion.value} key={opcion.value}>
+                          {opcion.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </details>
+                <label htmlFor={`${uid}-actividad`}>
+                  Actividad
+                  <select
+                    id={`${uid}-actividad`}
+                    name="actividad"
+                    value={tema.actividad}
+                    onChange={campo("actividad")}
+                  >
+                    <option value="">Todas las actividades</option>
+                    {ACTIVIDADES_BUSQUEDA.map((opcion) => (
+                      <option value={opcion.value} key={opcion.value}>
+                        {opcion.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label htmlFor={`${uid}-q`}>
+                  Palabra o entidad <span className={styles.opcional}>· opcional</span>
+                  <input
+                    id={`${uid}-q`}
+                    name="q"
+                    value={tema.q}
+                    onChange={campo("q")}
+                    maxLength={120}
+                    placeholder="Bombeo, laboratorio…"
+                    autoComplete="off"
+                  />
+                </label>
+                {!compacto && (
+                  <div className={styles.campos}>
+                    <label htmlFor={`${uid}-apertura`}>
+                      Apertura
+                      <select
+                        id={`${uid}-apertura`}
+                        name="apertura"
+                        value={tema.apertura}
+                        onChange={campo("apertura")}
+                      >
+                        <option value="Abierto">Abiertos</option>
+                        <option value="Cerrado">Cerrados</option>
+                        <option value="">Abiertos y cerrados</option>
+                      </select>
+                    </label>
+                    <label htmlFor={`${uid}-orden`}>
+                      Orden
+                      <select
+                        id={`${uid}-orden`}
+                        name="orden"
+                        value={tema.orden}
+                        onChange={campo("orden")}
+                      >
+                        <option value="fecha">Recientes primero</option>
+                        <option value="valor">Mayor valor primero</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
+                <div className={styles.acciones}>
+                  <button className={styles.buscar} type="submit">
+                    Buscar procesos
+                  </button>
+                  {compacto && <span>Abiertos · Colombia</span>}
+                </div>
+              </form>
+              <form
+                className={styles.formNumero}
+                action="/licitaciones/explorar"
+                method="get"
+                onSubmit={enviar}
+              >
+                <input type="hidden" name="modo" value="numero" />
+                <input type="hidden" name="page" value="1" />
+                <input
+                  type="hidden"
+                  name="pageSize"
+                  value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
+                />
+                <label htmlFor={`${uid}-numero-proceso`}>
+                  Número del proceso
+                  <input
+                    id={`${uid}-numero-proceso`}
+                    name="numero"
+                    value={numero}
+                    onChange={(event) => setNumero(event.target.value)}
+                    required
+                    maxLength={120}
+                    placeholder="CO1.REQ.5720221 o referencia"
+                    autoComplete="off"
+                    aria-describedby={`${uid}-ayuda`}
+                  />
+                </label>
+                <p id={`${uid}-ayuda`} className={styles.ayuda}>
+                  Identificador SECOP II o referencia de la entidad. Incluye procesos abiertos y
+                  cerrados.
+                </p>
+                <button className={styles.buscar} type="submit">
+                  Buscar proceso
+                </button>
+              </form>
+            </div>
+          </fieldset>
+          <p className={styles.estado} role="status" aria-live="polite">
+            {estadoTexto}
+          </p>
+          {estado.error && (
+            <div className={styles.error} role="alert">
+              <p>{estado.error}</p>
+              {estado.tipoError !== "validacion" && (
+                <a
+                  href={enlaceBusqueda(estado.consulta)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    ejecutar(estado.consulta);
+                  }}
+                >
+                  Reintentar
+                </a>
+              )}
+            </div>
           )}
-        </div>
-      )}
-      {estado.resultado && (
-        <ResultadosBusquedaServidor
-          resultado={estado.resultado}
-          consulta={estado.consulta}
-          compacto={compacto}
-          onPagina={(page) => ejecutar({ ...estado.consulta, page })}
-        />
-      )}
-    </section>
+          {estado.resultado && (
+            <ResultadosBusquedaServidor
+              resultado={estado.resultado}
+              consulta={estado.consulta}
+              compacto={compacto}
+              onPagina={(page) => ejecutar({ ...estado.consulta, page })}
+            />
+          )}
+        </section>
+      </dialog>
+    </>
   );
 }
