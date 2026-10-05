@@ -258,7 +258,6 @@
   }
 }
 
-
 /* Activador compacto en el hero; el flujo completo aparece solo al solicitarlo. */
 .activador {
   display: inline-flex;
@@ -392,7 +391,6 @@
   }
 }
 
-
 /* Categorías rápidas del buscador: controles compactos, con color e icono. */
 .categorias {
   min-width: 0;
@@ -431,9 +429,15 @@
   cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
 }
-.categoria[data-familia="potable"] { --fam: #4cc9ff; }
-.categoria[data-familia="residual"] { --fam: #d39a62; }
-.categoria[data-familia="redes"] { --fam: #a3b1c2; }
+.categoria[data-familia="potable"] {
+  --fam: #4cc9ff;
+}
+.categoria[data-familia="residual"] {
+  --fam: #d39a62;
+}
+.categoria[data-familia="redes"] {
+  --fam: #a3b1c2;
+}
 .categoria svg {
   width: 25px;
   height: 25px;
