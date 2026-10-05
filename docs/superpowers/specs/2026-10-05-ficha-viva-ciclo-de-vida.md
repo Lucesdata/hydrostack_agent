@@ -161,7 +161,7 @@ código, una condición y una frase.
 | **C1** | Estado del proceso «Publicado» o «Abierto» (con apertura «Abierto» **o nula**) y contrato firmado o adjudicación. | «El SECOP lo muestra abierto, pero ya hay contrato firmado el …». |
 | **C2** | Contrato firmado antes de la fecha de publicación del proceso. | «El contrato se firmó el …, antes de publicarse el proceso (…)». |
 | **C3** | Abierto a ofertas con la fecha de recepción ya vencida. | «Figura abierto, pero la recepción de ofertas venció el …». |
-| **C4** | Valor del contrato por encima del presupuesto publicado. | «El contrato vale $X, más que el presupuesto publicado ($Y)». |
+| **C4** | Valor del contrato más de **10 veces** el presupuesto publicado (M8: por debajo es corriente y no se señala). | «El valor del contrato publicado ($X) parece un error de la fuente: es N veces el presupuesto. Compruébalo en el expediente». |
 | **C5** | Desierto, cancelado o revocado, pero con contrato firmado. | «Figura como …, pero tiene contrato firmado el …». |
 | **C6** | Adjudicado sin adjudicatario publicado. | «Figura adjudicado, pero el SECOP no publica a quién». |
 | **C7** | Fecha de fin del contrato anterior a su fecha de inicio. | «Las fechas del contrato no son coherentes: …». |
@@ -336,7 +336,7 @@ Señales de la muestra que el plan tiene que confirmar en la base viva:
 ## Resultados de la base viva
 
 Medido por el usuario el 2026-10-05 en el SQL Editor de Supabase con
-`scripts/sql/medir-ciclo-de-vida-supabase-1.sql`, `-2.sql` y `-3.sql`. Parte 4 pendiente.
+`scripts/sql/medir-ciclo-de-vida-supabase-1.sql` a `-4.sql`. Parte 5 (modalidad y antigüedad de los abiertos) pendiente.
 
 **M1. El vínculo proceso ↔ contrato existe y es usable.**
 
@@ -429,6 +429,44 @@ enseñan:
   persona**. Una ficha pública e indexable «en ejecución» sobre el contrato de
   trabajo de una persona no es información del sector y expone a un particular.
   Pendiente de decisión del usuario: excluirlos de las fichas de ciclo de vida.
+
+**M7. El hallazgo más grave: «abierto» hoy casi nunca significa que recibe
+ofertas.** Los procesos que cumplen `condicionAbierto()` son **36.088**, y por
+año de publicación:
+
+| Año | Abiertos | Sin fecha de recepción | Recepción vigente |
+|---|---:|---:|---:|
+| 2015–2021 | 1.045 | 1.041 | 0 |
+| 2022 | 3.207 | 3.207 | 0 |
+| 2023 | 8.047 | 8.047 | 0 |
+| 2024 | 7.900 | 7.884 | 0 |
+| 2025 | 8.974 | 8.973 | 0 |
+| 2026 | 6.915 | 6.471 | **128** |
+
+- El **81 %** (29.173) se publicó **antes de 2026**; hay 414 de 2015.
+- **Solo 128 procesos** tienen una fecha de recepción de ofertas que no ha
+  vencido. Son las únicas oportunidades que hoy se pueden afirmar con dato.
+- No es un problema del proceso de Pereira: es el estado en el que la fuente
+  deja a decenas de miles de procesos que nunca actualiza.
+- **Afecta hoy a la portada, la vitrina y el mapa**, no solo a la ficha:
+  `muestraPortada()` sortea entre estos 36.088, así que la mayoría de las
+  minifichas del hero pueden ser procesos de años anteriores.
+
+M7b (2026, apertura «Abierto», por estado): «Publicado» 6.914 (63 con
+contrato) · «Seleccionado» 2.777, **2.676 con contrato** (el estado
+«Seleccionado» es, en la práctica, «ya contratado») · «Evaluación» 850 (669 con
+la recepción vencida) · «Cancelado» 68.
+
+**M8. C4 no es una contradicción, salvo los valores absurdos.** 6.764 casos con
+una mediana de 1,28× el presupuesto: 1.980 hasta 1,1×, 4.254 entre 1,1× y 2×,
+355 entre 2× y 10×, **175 por encima de 10×**. Solo 172 son lotes. Que el
+contrato supere moderadamente el presupuesto publicado es corriente en la fuente
+y no se señala. Por encima de 10× son errores de captura: un contrato de
+desinsectación figura por **538 billones** (el presupuesto multiplicado por sí
+mismo) y uno de transporte de agua por 1.000 veces su presupuesto. **C4 se
+redefine** como «cifra dudosa en la fuente» para razones mayores que 10, y la
+ficha **no pinta esa cifra como dato**: la muestra marcada y remite al
+expediente (R6).
 
 ### Lo que cambia en el spec por estos datos
 
