@@ -1067,23 +1067,27 @@ enlaces del mapa a las facetas.
   quedan en minúscula al pasar un objeto en MAYÚSCULAS a minúscula de oración
   («Alcantarillado - san jeronimo»). Límite aceptado frente a la tarjeta que
   gritaba.
-- **Dos buscadores con dos definiciones de «abierto»** (2026-10-05). La vitrina
-  (`/licitaciones`, `condicionAbierto()`) y el buscador guiado de #109
-  (`/licitaciones/explorar` + `GET /api/secop`, con `estado_apertura`) conviven.
-  Este PR había retirado Explorar, `/api/secop`, `/api/secop/probe` y
-  `probeDocument()`, pero #109 llegó antes a `main` y los usa; por decisión del
-  usuario se conservan tal como están en `main`. Unificar es portar a la vitrina
-  los criterios del guiado (sistema, actividad, número de proceso) o llevar el
-  guiado a `condicionAbierto()`; hasta entonces un mismo proceso puede salir
-  abierto en uno y no en el otro.
-- **Fase 3 de la vitrina en espera** (2026-10-04). Seguir, la alerta desde la
-  vitrina, el tipo de obra en los filtros guardados y «Para ti» viven en la
-  rama `claude/vitrina-fase3`, separada del PR de las fases 0–2. Necesitan la
-  migración `0025` (dos columnas nulas en `coincidencia` y
-  `al_filtros_usuario`), y la Supabase viva está al límite del plan. **No
-  fusionar esa rama sin aplicar antes la migración**: Drizzle lee e inserta
-  todas las columnas del esquema, así que sin ellas fallarían también el cron
-  de filtros y el registro de coincidencias que ya existen.
+- **Dos buscadores con dos definiciones de «abierto»** — CERRADO el 2026-10-05.
+  La vitrina (`/licitaciones`) es el único buscador: absorbió del buscador
+  guiado de #109 el tipo agrupado por sistema (`tipo=potable|residual`), la
+  actividad y la búsqueda por número (abiertos y cerrados, exactos primero), y
+  todo usa `condicionAbierto()`. El modal del hero envía a `/licitaciones`;
+  `/licitaciones/explorar` redirige con 308 traduciendo sus parámetros
+  (`desdeExplorar`). Salieron `GET /api/secop`, `POST /api/secop/probe`,
+  `SecopExplorer`, `ProcessList`, `ProcessDetail`, `RupWizard`,
+  `ResultadosBusquedaServidor`, `parse-query.ts`, `busqueda-navegacion.ts`,
+  `cached-db-search.ts`, la búsqueda en vivo contra Socrata de `client.ts` y
+  el sondeo de `document-access.ts`. Quedó sin consumidor `GET /api/diagnostico`
+  (el escalón para las tarjetas del explorador); `POST` lo sigue usando
+  `/diagnostico`. «Guardar» pasó a la vitrina en el mismo cambio.
+- **Fase 3 de la vitrina en espera** (2026-10-04). La alerta desde la vitrina,
+  el tipo de obra en los filtros guardados y «Para ti» viven en la rama
+  `claude/vitrina-fase3` (#112). «Seguir» se sustituyó por el «Guardar» de
+  `/mis-procesos`, que ya está en `main`. Necesitan la migración `0025` (una
+  columna nula en `al_filtros_usuario`), y la Supabase viva está al límite del
+  plan. **No fusionar esa rama sin aplicar antes la migración**: Drizzle lee
+  todas las columnas de la tabla, así que sin ella fallaría también el cron de
+  filtros que ya existe.
 - **Fase 1b: el encaje de la tarjeta hace una petición por página** (2026-10-04).
   `POST /api/vitrina/encaje` con los 9 ids; no se cachea porque depende del
   perfil. Si el tráfico crece, se puede calcular en el navegador con los

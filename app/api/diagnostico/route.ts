@@ -35,9 +35,10 @@ export const runtime = "nodejs";
 /**
  * GET — el escalón del visitante, y nada más.
  *
- * Lo consume `/licitaciones/explorar`, que es una página estática con un
- * componente cliente: pedirlo por aquí evita volverla dinámica solo para
- * adornar unas tarjetas. Devuelve exclusivamente el escalón y la versión; el
+ * Lo consumía el explorador de `/licitaciones/explorar`, que salió el
+ * 2026-10-05 al unificar los buscadores en la vitrina: hoy no lo llama nadie
+ * (PENDIENTES §54). Se pedía por aquí para no volver dinámica una página
+ * estática solo por adornar unas tarjetas. Devuelve exclusivamente el escalón y la versión; el
  * resto del diagnóstico no tiene por qué viajar para esto.
  *
  * Nunca responde 401: sin diagnóstico devuelve nulls, porque es un adorno del

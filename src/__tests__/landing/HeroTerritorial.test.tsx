@@ -32,8 +32,10 @@ describe("HeroTerritorial", () => {
   });
 
   it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {
-    expect(html).toContain('action="/licitaciones/explorar"');
-    expect(html).toContain('name="sistema"');
+    // Desde el 2026-10-05 el modal envía a la vitrina, el único buscador.
+    expect(html).toContain('action="/licitaciones"');
+    expect(html).not.toContain("/licitaciones/explorar");
+    expect(html).toContain('name="tipo"');
     expect(html).toContain('name="actividad"');
     expect(html).toContain('name="numero"');
     expect(html).not.toContain("Busca por entidad u objeto");

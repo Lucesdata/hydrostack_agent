@@ -1,116 +1,41 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { SISTEMAS_BUSQUEDA, ACTIVIDADES_BUSQUEDA } from "@/src/lib/secop/busqueda-guiada";
-import { consultaDesdeParametros, enlaceBusqueda } from "@/src/lib/secop/busqueda-navegacion";
-import type { SecopProceso, SecopQuery, SecopResult } from "@/src/lib/secop/types";
-import ResultadosBusquedaServidor from "@/src/components/secop/ResultadosBusquedaServidor";
-import { crearCargaBusqueda, rechazoDeConsulta, type EstadoBusqueda } from "./carga-busqueda";
+import { useId, useRef, useState } from "react";
+import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
+import {
+  ACTIVIDADES_BUSQUEDA,
+  ETIQUETA_SISTEMA,
+  SISTEMAS_AGRUPADOS,
+} from "@/src/lib/secop/busqueda-guiada";
 import styles from "./buscador-guiado.module.css";
 
-interface Props {
-  variante?: "hero" | "explorador";
-  consultaInicial?: SecopQuery;
-  resultadoInicial?: SecopResult<SecopProceso> | null;
-  errorInicial?: string | null;
-}
-const inicial: SecopQuery = {
-  modo: "tema",
-  apertura: "Abierto",
-  page: 1,
-  pageSize: 25,
-};
-const temaDesde = (query: SecopQuery) => ({
-  sistema: query.sistema ?? "",
-  actividad: query.actividad ?? "",
-  q: query.q ?? "",
-  apertura: query.apertura ?? "",
-  orden: query.orden ?? "fecha",
-});
+/** Sistemas agrupados y luego los cuatro tipos de agua (sin `otros`). */
+const OPCIONES_SISTEMA = [
+  ...SISTEMAS_AGRUPADOS.map((value) => ({ value, label: ETIQUETA_SISTEMA[value] })),
+  ...TIPOS_PROYECTO.filter((t) => t !== "otros").map((value) => ({
+    value,
+    label: TIPO_PROYECTO[value].label,
+  })),
+];
 
-export default function BuscadorGuiado({
-  variante = "hero",
-  consultaInicial = inicial,
-  resultadoInicial = null,
-  errorInicial = null,
-}: Props) {
-  const compacto = variante === "hero";
+/**
+ * «Buscar procesos» del hero: un modal con dos formularios GET a
+ * `/licitaciones`, la vitrina, que es el único buscador desde el 2026-10-05.
+ * Por tema envía `tipo`, `actividad` y `q`; por número, `numero`. Sin
+ * JavaScript propio más allá de abrir el modal y marcar las categorías: el
+ * resultado es una URL normal, con la tarjeta, el encaje y el Radar de la
+ * vitrina. Antes (#109) enseñaba cinco resultados dentro del modal y tenía su
+ * propio explorador en `/licitaciones/explorar`, que ahora redirige.
+ */
+export default function BuscadorGuiado() {
   const uid = useId();
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [modo, setModo] = useState(consultaInicial.modo ?? "tema");
-  const [tema, setTema] = useState(temaDesde(consultaInicial));
-  const [numero, setNumero] = useState(consultaInicial.numero ?? "");
-  const [estado, setEstado] = useState<EstadoBusqueda>({
-    consulta: consultaInicial,
-    resultado: resultadoInicial,
-    error: errorInicial,
-    cargando: false,
-  });
-  const carga = useMemo(() => crearCargaBusqueda(setEstado), []);
-  useEffect(() => () => carga.cancelar(), [carga]);
-  useEffect(() => {
-    if (compacto) return;
-    const volver = () => {
-      try {
-        const query = consultaDesdeParametros(new URLSearchParams(window.location.search));
-        if (!query.modo) {
-          window.location.reload();
-          return;
-        }
-        setModo(query.modo);
-        setTema(temaDesde(query));
-        setNumero(query.numero ?? "");
-        carga.cargar(query);
-      } catch (error) {
-        carga.cancelar();
-        setEstado(rechazoDeConsulta(inicial, error));
-      }
-    };
-    window.addEventListener("popstate", volver);
-    return () => window.removeEventListener("popstate", volver);
-  }, [carga, compacto]);
-
-  const ejecutar = (query: SecopQuery) => {
-    if (!compacto) {
-      const href = enlaceBusqueda(query);
-      if (`${window.location.pathname}${window.location.search}` !== href)
-        window.history.pushState(null, "", href);
-    }
-    carga.cargar(query);
-  };
-  const enviar = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const params = new URLSearchParams();
-    new FormData(event.currentTarget).forEach((value, key) =>
-      params.set(key, String(value).trim())
-    );
-    try {
-      const query = consultaDesdeParametros(params);
-      ejecutar({ ...query, pageSize: compacto ? 5 : query.pageSize });
-    } catch (error) {
-      carga.cancelar();
-      setEstado(rechazoDeConsulta(estado.consulta, error));
-    }
-  };
-  const cambiarModo = (nuevo: "tema" | "numero") => {
-    carga.cancelar();
-    setModo(nuevo);
-    setEstado({
-      consulta: { modo: nuevo },
-      resultado: null,
-      error: null,
-      cargando: false,
-    });
-  };
+  const [modo, setModo] = useState<"tema" | "numero">("tema");
+  const [tema, setTema] = useState({ sistema: "", actividad: "", q: "" });
+  const [numero, setNumero] = useState("");
   const campo =
     (key: keyof typeof tema) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setTema((actual) => ({ ...actual, [key]: event.target.value }));
-  const estadoTexto = estado.cargando
-    ? "Buscando procesos…"
-    : estado.resultado
-      ? `${estado.resultado.total?.toLocaleString("es-CO") ?? estado.resultado.items.length} resultados${estado.consulta.modo === "numero" ? " por número" : " para estos filtros"}.`
-      : "";
-
   return (
     <>
       <button
@@ -147,10 +72,7 @@ export default function BuscadorGuiado({
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <section
-          className={`${styles.buscador} ${compacto ? "" : styles.claro}`}
-          aria-label="Buscador guiado de procesos"
-        >
+        <section className={styles.buscador} aria-label="Buscador guiado de procesos">
           <fieldset className={styles.selector}>
             <legend className="sr-only">Cómo quieres buscar</legend>
             <input
@@ -159,7 +81,7 @@ export default function BuscadorGuiado({
               name={`entrada-${uid}`}
               id={`${uid}-tema`}
               checked={modo === "tema"}
-              onChange={() => cambiarModo("tema")}
+              onChange={() => setModo("tema")}
             />
             <label className={styles.pestana} htmlFor={`${uid}-tema`}>
               Por tema
@@ -170,7 +92,7 @@ export default function BuscadorGuiado({
               name={`entrada-${uid}`}
               id={`${uid}-numero`}
               checked={modo === "numero"}
-              onChange={() => cambiarModo("numero")}
+              onChange={() => setModo("numero")}
             />
             <label className={styles.pestana} htmlFor={`${uid}-numero`}>
               Por número
@@ -179,20 +101,7 @@ export default function BuscadorGuiado({
               Mis procesos
             </a>
             <div className={styles.formularios}>
-              <form
-                className={styles.formTema}
-                action="/licitaciones/explorar"
-                method="get"
-                onSubmit={enviar}
-              >
-                <input type="hidden" name="modo" value="tema" />
-                <input type="hidden" name="page" value="1" />
-                <input
-                  type="hidden"
-                  name="pageSize"
-                  value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
-                />
-                {compacto && <input type="hidden" name="apertura" value="Abierto" />}
+              <form className={styles.formTema} action="/licitaciones" method="get" role="search">
                 <fieldset className={styles.categorias}>
                   <legend>Tipo de obra</legend>
                   <div className={styles.categoriasGrid}>
@@ -289,12 +198,12 @@ export default function BuscadorGuiado({
                     Sistema
                     <select
                       id={`${uid}-sistema`}
-                      name="sistema"
+                      name="tipo"
                       value={tema.sistema}
                       onChange={campo("sistema")}
                     >
                       <option value="">Todos los sistemas</option>
-                      {SISTEMAS_BUSQUEDA.map((opcion) => (
+                      {OPCIONES_SISTEMA.map((opcion) => (
                         <option value={opcion.value} key={opcion.value}>
                           {opcion.label}
                         </option>
@@ -330,55 +239,14 @@ export default function BuscadorGuiado({
                     autoComplete="off"
                   />
                 </label>
-                {!compacto && (
-                  <div className={styles.campos}>
-                    <label htmlFor={`${uid}-apertura`}>
-                      Apertura
-                      <select
-                        id={`${uid}-apertura`}
-                        name="apertura"
-                        value={tema.apertura}
-                        onChange={campo("apertura")}
-                      >
-                        <option value="Abierto">Abiertos</option>
-                        <option value="Cerrado">Cerrados</option>
-                        <option value="">Abiertos y cerrados</option>
-                      </select>
-                    </label>
-                    <label htmlFor={`${uid}-orden`}>
-                      Orden
-                      <select
-                        id={`${uid}-orden`}
-                        name="orden"
-                        value={tema.orden}
-                        onChange={campo("orden")}
-                      >
-                        <option value="fecha">Recientes primero</option>
-                        <option value="valor">Mayor valor primero</option>
-                      </select>
-                    </label>
-                  </div>
-                )}
                 <div className={styles.acciones}>
                   <button className={styles.buscar} type="submit">
                     Buscar procesos
                   </button>
-                  {compacto && <span>Abiertos · Colombia</span>}
+                  <span>Abiertos · Colombia</span>
                 </div>
               </form>
-              <form
-                className={styles.formNumero}
-                action="/licitaciones/explorar"
-                method="get"
-                onSubmit={enviar}
-              >
-                <input type="hidden" name="modo" value="numero" />
-                <input type="hidden" name="page" value="1" />
-                <input
-                  type="hidden"
-                  name="pageSize"
-                  value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
-                />
+              <form className={styles.formNumero} action="/licitaciones" method="get" role="search">
                 <label htmlFor={`${uid}-numero-proceso`}>
                   Número del proceso
                   <input
@@ -403,33 +271,6 @@ export default function BuscadorGuiado({
               </form>
             </div>
           </fieldset>
-          <p className={styles.estado} role="status" aria-live="polite">
-            {estadoTexto}
-          </p>
-          {estado.error && (
-            <div className={styles.error} role="alert">
-              <p>{estado.error}</p>
-              {estado.tipoError !== "validacion" && (
-                <a
-                  href={enlaceBusqueda(estado.consulta)}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    ejecutar(estado.consulta);
-                  }}
-                >
-                  Reintentar
-                </a>
-              )}
-            </div>
-          )}
-          {estado.resultado && (
-            <ResultadosBusquedaServidor
-              resultado={estado.resultado}
-              consulta={estado.consulta}
-              compacto={compacto}
-              onPagina={(page) => ejecutar({ ...estado.consulta, page })}
-            />
-          )}
         </section>
       </dialog>
     </>

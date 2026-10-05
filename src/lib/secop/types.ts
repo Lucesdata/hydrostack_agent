@@ -6,7 +6,6 @@
  */
 
 import type { DocumentAccess } from "./document-access";
-import type { ActividadBusqueda, SistemaBusqueda } from "./busqueda-guiada";
 
 /**
  * Apertura del proceso (campo `estado_de_apertura_del_proceso`). Único insumo
@@ -17,8 +16,6 @@ import type { ActividadBusqueda, SistemaBusqueda } from "./busqueda-guiada";
 export type EstadoApertura = "Abierto" | "Cerrado";
 
 export interface SecopProceso {
-  /** Solo en búsqueda por número: igualdad completa o coincidencia parcial. */
-  coincidencia?: "exacta" | "parcial";
   id: string;
   referencia: string;
   nombre: string;
@@ -64,10 +61,6 @@ export interface SecopContrato {
 }
 
 export interface SecopQuery {
-  modo?: "tema" | "numero";
-  sistema?: SistemaBusqueda;
-  actividad?: ActividadBusqueda;
-  numero?: string;
   /** Texto libre (busca en nombre/descripción del proceso). */
   q?: string;
   departamento?: string;
