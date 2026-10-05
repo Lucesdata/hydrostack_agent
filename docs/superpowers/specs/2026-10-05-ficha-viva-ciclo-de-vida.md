@@ -336,7 +336,7 @@ Señales de la muestra que el plan tiene que confirmar en la base viva:
 ## Resultados de la base viva
 
 Medido por el usuario el 2026-10-05 en el SQL Editor de Supabase con
-`scripts/sql/medir-ciclo-de-vida-supabase-1.sql`. Partes 2 y 3 pendientes.
+`scripts/sql/medir-ciclo-de-vida-supabase-1.sql` y `-2.sql`. Partes 3 y 4 pendientes.
 
 **M1. El vínculo proceso ↔ contrato existe y es usable.**
 
@@ -377,6 +377,27 @@ contratos **sin firmar** (≈ 5.800, coherente con M2e).
 
 **M2e. Fechas y pagos.** Firma 32.946 (84 %) · inicio 36.211 · fin actual
 38.968 · con pagos 13.525 · prorrogados 872 · adicionados 283.
+
+**M3. Contradicciones** (parte 2; todos / desde 2026):
+
+| | Todos | 2026 | Lectura |
+|---|---:|---:|---|
+| C1 abierto con contrato o adjudicación | 61 | 57 | Raro: la trampa de Pereira no es masiva por esta vía. |
+| C2 firma antes de publicar | 0 | 0 | No aparece en la base; se conserva la regla, sin prioridad. |
+| C3 apertura «Abierto» con recepción vencida | 6.631 | 1.171 | Frecuente: es la trampa común. |
+| C4 contrato mayor que el presupuesto | 6.729 | 591 | Demasiado para ser real sin revisar: puede ser lote, presupuesto en cero o unidades. **No se publica hasta calibrarla (M8).** |
+| C5 cancelado con contrato | 10 | 1 | Raro. |
+| C6 adjudicado sin adjudicatario | 10 | 9 | Raro. |
+| C7 fin antes del inicio | 12 | 0 | Raro. |
+
+**M5. Etapa aproximada de los 13.666 procesos de 2026:** recibe ofertas 6.967 ·
+en ejecución 2.520 · en evaluación 1.833 · plazo cumplido 1.316 · contratado sin
+fechas 422 · no se llevó a cabo 318 · adjudicado 247 · por verificar 42 ·
+contratado 1. **Limitación conocida:** este SQL provisional no mira el estado
+del proceso (cuenta «Seleccionado» con apertura «Abierto» como que recibe
+ofertas) ni el estado del contrato (Cancelado, sin firmar, terminado), y trata
+la falta de fecha de recepción como vigente. «Recibe ofertas» está inflado; lo
+mide la parte 4 (`medir-ciclo-de-vida-supabase-4.sql`, M7–M8).
 
 ### Lo que cambia en el spec por estos datos
 
