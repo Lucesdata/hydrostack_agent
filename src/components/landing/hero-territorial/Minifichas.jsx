@@ -27,6 +27,18 @@ export function categoriaDe(tipo) {
   return tipo ? COLOR_TIPO[tipo].familiaLabel : ETIQUETA_SIN_TIPO;
 }
 
+/**
+ * La categoría en la pastilla de la tarjeta. Igual que `categoriaDe` salvo la
+ * neutra, que se acorta: «Sin subsistema identificado» no cabía junto al estado
+ * en ≈225 px, pasaba a dos filas y estiraba las cinco tarjetas de 236 a 257 px
+ * (2026-10-05, decisión del usuario). La leyenda y la línea del mapa conservan
+ * el texto completo, que también va en el `title` de la pastilla.
+ */
+export function pastillaDe(tipo) {
+  const categoria = categoriaDe(tipo);
+  return categoria === ETIQUETA_SIN_TIPO ? "Sin subsistema" : categoria;
+}
+
 function IconoLugar() {
   return (
     <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
@@ -138,10 +150,12 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
             className={`aqMiniEstado${p.abierto ? " aqMiniEstado--abierto" : ""}`}
             title={estado}
           >
-            <span aria-hidden="true" />
-            {estado}
+            <span className="aqMiniPuntoEstado" aria-hidden="true" />
+            <span className="aqMiniEstadoTexto">{estado}</span>
           </span>
-          <span className="aqMiniCategoria">{categoriaDe(p.tipoProyecto)}</span>
+          <span className="aqMiniCategoria" title={categoriaDe(p.tipoProyecto)}>
+            {pastillaDe(p.tipoProyecto)}
+          </span>
         </div>
         <div className="aqMiniPanel">
           <p className="aqMiniLugar">

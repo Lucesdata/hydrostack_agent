@@ -94,6 +94,11 @@ describe("HeroTerritorial", () => {
     expect(parcial).not.toContain("$0");
     expect(parcial).toContain(">Valle del Cauca</span>");
     expect(parcial).toContain("Sin subsistema identificado");
+    // La pastilla lo acorta para caber en una fila (236 px); el texto completo
+    // queda en su `title` (2026-10-05).
+    expect(parcial).toContain(
+      '<span class="aqMiniCategoria" title="Sin subsistema identificado">Sin subsistema</span>'
+    );
     expect(parcial).toContain("Adjudicado");
     expect(parcial).not.toContain(">Abierto<");
     // La leyenda añade la categoría neutra solo cuando hace falta.
@@ -145,7 +150,7 @@ describe("HeroTerritorial", () => {
 });
 
 it("muestra el contexto del subsistema en la tarjeta sin exigir interacción", () => {
-  const p = { ...cinco[0], contextoTipo: "Tipo según descripción: Acueducto." };
+  const p = { ...cinco[0], contextoTipo: "Según descripción: Acueducto." };
   const con = renderToStaticMarkup(<HeroTerritorial procesos={[p]} />);
-  expect(con).toContain("Tipo según descripción: Acueducto.");
+  expect(con).toContain("Según descripción: Acueducto.");
 });
