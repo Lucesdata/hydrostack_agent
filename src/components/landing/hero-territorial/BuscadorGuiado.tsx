@@ -181,7 +181,91 @@ export default function BuscadorGuiado({
               value={compacto ? 25 : (estado.consulta.pageSize ?? 25)}
             />
             {compacto && <input type="hidden" name="apertura" value="Abierto" />}
-            <div className={styles.campos}>
+            <fieldset className={styles.categorias}>
+              <legend>Tipo de obra</legend>
+              <div className={styles.categoriasGrid}>
+                {[
+                  { value: "potable", label: "Agua potable", familia: "potable", icono: "gota" },
+                  {
+                    value: "residual",
+                    label: "Aguas residuales",
+                    familia: "residual",
+                    icono: "tratamiento",
+                  },
+                  {
+                    value: "alcantarillado",
+                    label: "Redes y alcantarillado",
+                    familia: "redes",
+                    icono: "red",
+                  },
+                ].map((opcion) => {
+                  const seleccionada =
+                    tema.sistema === opcion.value ||
+                    (opcion.value === "potable" &&
+                      (tema.sistema === "acueducto" || tema.sistema === "ptap")) ||
+                    (opcion.value === "residual" && tema.sistema === "ptar");
+                  return (
+                    <button
+                      key={opcion.value}
+                      type="button"
+                      className={styles.categoria}
+                      data-familia={opcion.familia}
+                      aria-pressed={seleccionada}
+                      onClick={() =>
+                        setTema((actual) => ({
+                          ...actual,
+                          sistema: actual.sistema === opcion.value ? "" : opcion.value,
+                        }))
+                      }
+                    >
+                      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                        {opcion.icono === "gota" ? (
+                          <path
+                            d="M16 3.5S7.5 14 7.5 20.5a8.5 8.5 0 0 0 17 0C24.5 14 16 3.5 16 3.5Z"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinejoin="round"
+                          />
+                        ) : opcion.icono === "tratamiento" ? (
+                          <>
+                            <path
+                              d="M5 9h22v9a7 7 0 0 1-7 7h-8a7 7 0 0 1-7-7V9Z"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M5 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0 3 2 4 1M11 5h10M14 2h4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                          </>
+                        ) : (
+                          <path
+                            d="M6 4v9h8v7h12M6 13v13h7m1-13h5V7h7m-12 13h7v6m-7-6v-6"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        )}
+                      </svg>
+                      <span>{opcion.label}</span>
+                      {seleccionada ? (
+                        <span className={styles.categoriaCheck} aria-hidden="true">✓</span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+            <details className={styles.masSistemas}>
+              <summary>Elegir un sistema específico</summary>
               <label htmlFor={`${uid}-sistema`}>
                 Sistema
                 <select
@@ -198,23 +282,23 @@ export default function BuscadorGuiado({
                   ))}
                 </select>
               </label>
-              <label htmlFor={`${uid}-actividad`}>
-                Actividad
-                <select
-                  id={`${uid}-actividad`}
-                  name="actividad"
-                  value={tema.actividad}
-                  onChange={campo("actividad")}
-                >
-                  <option value="">Todas las actividades</option>
-                  {ACTIVIDADES_BUSQUEDA.map((opcion) => (
-                    <option value={opcion.value} key={opcion.value}>
-                      {opcion.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            </details>
+            <label htmlFor={`${uid}-actividad`}>
+              Actividad
+              <select
+                id={`${uid}-actividad`}
+                name="actividad"
+                value={tema.actividad}
+                onChange={campo("actividad")}
+              >
+                <option value="">Todas las actividades</option>
+                {ACTIVIDADES_BUSQUEDA.map((opcion) => (
+                  <option value={opcion.value} key={opcion.value}>
+                    {opcion.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label htmlFor={`${uid}-q`}>
               Palabra o entidad <span className={styles.opcional}>· opcional</span>
               <input
