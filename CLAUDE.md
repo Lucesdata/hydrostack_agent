@@ -686,3 +686,8 @@ listas en el navegador ni incorporar estado personal al ISR de la ficha.
 Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
 y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
 No se ha desplegado esta sección.
+
+**Actualización de publicación (2026-10-04):** el usuario autorizó fusionar y
+desplegar PR #109 (`3895bf3`), publicado en producción con los cinco checks
+aprobados y sin migraciones. La prueba de Guardados y Recientes con cuentas
+reales se pospone por indicación expresa del usuario: `PENDIENTES.md` §54.
