@@ -38,7 +38,7 @@ filtros, coincidencias), así que cada corrida del recorrido empieza igual.
 
 ## Qué hay en la base
 
-- **Las 26 migraciones de `drizzle/`**, las mismas que en producción, con
+- **Todas las migraciones de `drizzle/`**, las mismas que en producción, con
   `drizzle-kit migrate`. Si la rama trae una migración nueva, `preparar` la
   aplica en local; la Supabase viva no se toca.
 - **La muestra de SECOP de `samples/`** (500 procesos, 500 contratos), con el
@@ -78,5 +78,7 @@ una captura por paso en `.local/recorrido/`:
 3. Beto: sin perfil no hay «Para ti».
 4. A 390 px, «Guardar» no se monta sobre la tarjeta.
 
-Termina con código 1 si algún paso falla. `AQ_URL` cambia el servidor;
+Los pasos de «Para ti», «Avisarme» y el tipo de obra en `/mis-filtros` prueban
+la fase 3 de la vitrina (#112): sin ella fallan, y es lo esperado. Termina con
+código 1 si algún paso falla. `AQ_URL` cambia el servidor;
 `PLAYWRIGHT_CHROMIUM` usa un Chromium ya instalado.
