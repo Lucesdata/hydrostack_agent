@@ -1092,3 +1092,20 @@ enlaces del mapa a las facetas.
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
 
+
+### 55. «Abierto» = recepción vigente: lo que queda (2026-10-05)
+PR 1 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+`condicionAbierto()` exige ahora `fecha_recepcion` igual o posterior a hoy en
+Colombia (medido: de 36.088 «abiertos» solo 128 la tenían; el 98 % era régimen
+especial sin fecha). Queda:
+- **`/api/secop` (`db-search.ts`)**, el buscador guiado y el explorador avanzado,
+  siguen con su propia noción de abierto (§54): pueden ofrecer como abiertos
+  procesos que la vitrina ya no cuenta.
+- **La ficha individual** sigue diciendo «Abierto a ofertas» con
+  `estado_apertura`; lo corrige el PR 2 (etapa única).
+- **La portada puede quedar con menos de cinco minifichas** si un día hay menos
+  procesos con recepción vigente y ancla en el mapa. Se acepta: pinta los que
+  haya. Vigilar tras cada ingesta fallida.
+- **`landingStats.ts`** cuenta abiertos contra Socrata con `estado_apertura` a
+  secas; no se usa en la portada desde el 2026-09-28, pero si vuelve, debe usar
+  la regla nueva.

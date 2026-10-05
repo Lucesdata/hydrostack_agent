@@ -29,7 +29,7 @@ async function unProceso(
   v: {
     tipo: string | null;
     publicado: string;
-    recepcion?: string;
+    recepcion?: string | null;
     objeto?: string;
     geo?: string;
     valor?: string;
@@ -46,7 +46,8 @@ async function unProceso(
     estadoActual: "Publicado",
     tipoProyecto: v.tipo,
     fechaPublicacion: v.publicado,
-    fechaRecepcion: v.recepcion ?? null,
+    // Por defecto recibe ofertas (recepción vigente); `null` = sin fecha publicada.
+    fechaRecepcion: v.recepcion === undefined ? dia(30) : v.recepcion,
   });
 }
 
@@ -72,7 +73,8 @@ beforeAll(async () => {
     .insert(entidad)
     .values({ nitCanonico: "9", nombre: "EMPRESAS PUBLICAS DE MEDELLIN" })
     .returning({ id: entidad.id });
-  // El más reciente de todos es «otros»; el siguiente, de agua pero vencido.
+  // El más reciente de todos es «otros»; el siguiente, de agua pero vencido, y
+  // uno de agua sin fecha de recepción: esos dos no recibe ofertas y no cuentan.
   await unProceso("CO1.REQ.OTROS", {
     tipo: "otros",
     publicado: dia(0),
@@ -81,6 +83,7 @@ beforeAll(async () => {
     valor: "413000000",
   });
   await unProceso("CO1.REQ.VENCIDO", { tipo: "ptar", publicado: dia(0), recepcion: dia(-10) });
+  await unProceso("CO1.REQ.SINFECHA", { tipo: "ptar", publicado: dia(0), recepcion: null });
   await unProceso("CO1.REQ.SINTIPO", {
     tipo: null,
     publicado: dia(-1),
@@ -101,19 +104,21 @@ beforeAll(async () => {
 });
 
 describe("el orden de los abiertos", () => {
-  it("agua que recibe ofertas, luego sin subsistema, al final la recepción vencida", async () => {
+  it("agua que recibe ofertas primero, luego sin subsistema", async () => {
     const p = await procesosDeVitrina("abiertos", 1);
     expect(p.items.map((i) => i.secopProcesoId)).toEqual([
       "CO1.REQ.PTAR",
       "CO1.REQ.ACUEDUCTO",
       "CO1.REQ.OTROS",
       "CO1.REQ.SINTIPO",
-      "CO1.REQ.VENCIDO",
     ]);
   });
 
-  it("ordena, no filtra: el total sigue siendo el de condicionAbierto()", async () => {
-    expect((await procesosDeVitrina("abiertos", 1)).total).toBe(5);
+  it("sin recepción vigente no es abierto: ni la vencida ni la que no tiene fecha", async () => {
+    const p = await procesosDeVitrina("abiertos", 1);
+    expect(p.total).toBe(4);
+    expect(p.items.map((i) => i.secopProcesoId)).not.toContain("CO1.REQ.VENCIDO");
+    expect(p.items.map((i) => i.secopProcesoId)).not.toContain("CO1.REQ.SINFECHA");
   });
 });
 
@@ -127,7 +132,7 @@ describe("los filtros", () => {
     ).items.map((i) => i.secopProcesoId);
 
   it("por tipo", async () => {
-    expect(await ids({ tipo: "ptar" })).toEqual(["CO1.REQ.PTAR", "CO1.REQ.VENCIDO"]);
+    expect(await ids({ tipo: "ptar" })).toEqual(["CO1.REQ.PTAR"]);
   });
 
   it("por departamento, con el código ya resuelto", async () => {
@@ -161,8 +166,7 @@ describe("los filtros", () => {
       "CO1.REQ.PTAR",
       "CO1.REQ.OTROS",
       "CO1.REQ.ACUEDUCTO",
-      expect.any(String),
-      expect.any(String),
+      "CO1.REQ.SINTIPO",
     ]);
   });
 

@@ -142,9 +142,10 @@ const TIPOS_DE_AGUA = TIPOS_PROYECTO.filter((t) => t !== "otros");
  *     clasificador no le encuentra subsistema. En la vitrina del 2026-10-04 la
  *     primera fila eran unos GPS para una empresa de energía y el estudio de
  *     tramos de espacio público de EPM.
- * 2 · su `fecha_recepcion` ya pasó (el día en Colombia). Sigue en el conteo
- *     porque `condicionAbierto()` es la definición común y no se reescribe
- *     aquí; solo deja de ocupar la primera página.
+ * 2 · su `fecha_recepcion` ya pasó (el día en Colombia). Desde el 2026-10-05
+ *     `condicionAbierto()` exige la recepción vigente, así que dentro de los
+ *     abiertos este tramo ya no se da; se conserva como red por si la regla
+ *     común vuelve a cambiar.
  *
  * Ordena, no filtra: el total no cambia y nada desaparece de la vitrina.
  */

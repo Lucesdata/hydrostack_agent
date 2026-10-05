@@ -12,7 +12,12 @@ cumplido», no «Terminado», aunque la fuente diga «terminado»; los contratos
 personas naturales (CC/CE/pasaporte o sin dato) se excluyen. Medido en la base
 viva: de 36.088 procesos que `condicionAbierto()` cuenta como abiertos, el 81 %
 es anterior a 2026 y solo 128 tienen recepción vigente: el 98 % es régimen
-especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vigente. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
+especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vigente.
+**PR 1 aplicado (2026-10-05):** `condicionAbierto()` exige `fecha_recepcion >=` hoy
+en Colombia, y su espejo de cliente es `recibeOfertas()` (`estados-abierto.ts`),
+que usa la minificha. Lo heredan mapa, imagen OG, facetas, vitrina, entidades,
+destacados y hero. Fuera: `/api/secop` y la ficha (PENDIENTES §55). Plan en
+`docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
 `adjudicado: false`). Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
@@ -334,7 +339,8 @@ buscador, la lista de departamentos, las «Opciones del mapa» y el mapa
 coroplético del hero. Spec y reconocimiento:
 `docs/superpowers/specs/2026-10-04-hero-cinco-minifichas.md`. Lo que hay:
 - `muestraPortada()` (`src/lib/secop/muestra-portada.ts`): **una** consulta,
-  `ORDER BY random() LIMIT 5` sobre todos los abiertos (`condicionAbierto()`)
+  `ORDER BY random() LIMIT 5` sobre todos los abiertos (`condicionAbierto()`,
+  con recepción vigente desde el 2026-10-05)
   con `referencia` y objeto publicados, id `CO1.<X>.<n>` y departamento
   anclable. La llama `app/page.js` (ISR 6 h): la selección viaja en el HTML,
   así que es estable en la visita y sin sorteo en el navegador. Ya no se llama
