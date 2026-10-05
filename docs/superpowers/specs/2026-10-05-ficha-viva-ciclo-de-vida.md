@@ -319,6 +319,20 @@ aquí:
 6. Un proceso real de 2026 con contrato firmado (y, si existe, con alguna
    contradicción C1–C7) para el caso de prueba de la página.
 
+**Script listo:** `scripts/sql/medir-ciclo-de-vida.sql` (M1–M6, dentro de una
+transacción `READ ONLY`). Se probó el 2026-10-05 contra el entorno local
+(`npm run local:preparar`): corre sin errores, pero **la muestra no sirve para
+medir**. Sus 500 contratos no se vinculan con ningún proceso, porque las
+ventanas de la muestra no coinciden (la misma exención de la fase 0, C1.1). Y
+ninguno trae `fecha_de_firma`, porque la muestra de la fase 0.2 se descargó sin
+ese campo. La ingesta real **sí lo pide** (`FIELDS_CONTRATOS.fechaFirma` en
+`src/lib/secop/config.ts`, que entra en el `$select`). Las cifras salen solo de
+la base viva.
+
+Señales de la muestra que el plan tiene que confirmar en la base viva:
+`estado_actual = 'Seleccionado'` convive con `estado_apertura = 'Abierto'` en
+103 de 474 procesos, y 81 figuran abiertos con la recepción vencida (C3).
+
 ## Fuera de alcance
 
 - Datos que **no se ingieren hoy**: PAA, CDP, garantías, fuentes de recursos,
