@@ -114,7 +114,7 @@ export function procesoPortadaDesdeFila(f: FilaProcesoPortada): ProcesoPortada |
         entidadNombre: f.entidadNombre,
       });
       if (deDescripcion.evidencia[tipoProyecto]?.length) {
-        contextoTipo = `Tipo según descripción: ${TIPO_PROYECTO[tipoProyecto].label}.`;
+        contextoTipo = `Según descripción: ${TIPO_PROYECTO[tipoProyecto].label}.`;
       }
     }
   }

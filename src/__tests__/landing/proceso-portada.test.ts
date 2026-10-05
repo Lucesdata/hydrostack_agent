@@ -60,7 +60,7 @@ describe("procesoPortadaDesdeFila", () => {
         "MEJORAMIENTO DE VÍA MEDIANTE LA CONSTRUCCIÓN DE PAVIMENTO RÍGIDO Y RED DE ACUEDUCTO EN LA CALLE 4 ENTRE CARRERAS 4 Y 5 DEL MUNICIPIO DE CHIPATÁ, SANTANDER",
       tipoProyecto: "acueducto",
     })!;
-    expect(p.contextoTipo).toBe("Tipo según descripción: Acueducto.");
+    expect(p.contextoTipo).toBe("Según descripción: Acueducto.");
     expect(p.objeto).toBe("CONSTRUCCION DE PAVIMENTO RIGIDO EN CHIPATA SANTANDER");
     expect(p.href).toBe(
       "/licitaciones/construccion-de-pavimento-rigido-en-chipata-santander--CO1.REQ.5720221"
