@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { borrarSessionToken } from "@/src/lib/diagnostico/session-token";
+import { COOKIE_SESION_LOCAL, sesionLocalActiva } from "@/src/lib/sesion-local/sesion-local";
 
 /**
  * No usa `src/lib/supabase/server.ts` a propósito: ese cliente escribe
@@ -15,6 +16,13 @@ export async function POST(request: NextRequest) {
   // original, así que el navegador reintentaría `/` con POST (una página,
   // no un route handler) en vez de GET.
   const response = NextResponse.redirect(new URL("/", request.url), 303);
+
+  if (sesionLocalActiva()) {
+    response.cookies.delete(COOKIE_SESION_LOCAL);
+    borrarSessionToken(response);
+    response.headers.set("Clear-Site-Data", '"storage"');
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

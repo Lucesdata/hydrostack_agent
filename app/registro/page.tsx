@@ -3,6 +3,8 @@ import { AuthCard } from "@/src/components/auth/AuthCard";
 import { GoogleButton } from "@/src/components/auth/GoogleButton";
 import { signUpAction } from "@/src/lib/supabase/actions";
 import { authErrorMessage } from "@/src/lib/supabase/auth-messages";
+import { redirect } from "next/navigation";
+import { sesionLocalActiva } from "@/src/lib/sesion-local/sesion-local";
 
 export default async function RegistroPage({
   searchParams,
@@ -11,6 +13,8 @@ export default async function RegistroPage({
 }) {
   const params = await searchParams;
   const next = params.next && params.next.startsWith("/") ? params.next : "/";
+  // Entorno local sin Supabase: se entra eligiendo un usuario de prueba.
+  if (sesionLocalActiva()) redirect(`/dev/sesion?next=${encodeURIComponent(next)}`);
   const error = authErrorMessage(params.error);
 
   return (

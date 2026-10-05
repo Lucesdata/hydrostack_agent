@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_SESION_LOCAL, sesionLocalActiva, usuarioLocal } from "../sesion-local/sesion-local";
 
 /**
  * Refresca el token de sesión en cada request (patrón estándar de
@@ -9,6 +10,12 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+
+  // Entorno local sin Supabase (solo `next dev` + AQ_SESION_LOCAL=1).
+  if (sesionLocalActiva()) {
+    const local = usuarioLocal(request.cookies.get(COOKIE_SESION_LOCAL)?.value);
+    return { response, user: local ? { id: local.id, email: local.email } : null };
+  }
 
   // Sin NEXT_PUBLIC_SUPABASE_URL/ANON_KEY configuradas (o si Supabase no
   // responde), no debe caerse el sitio entero — se trata como "sin sesión":
