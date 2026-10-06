@@ -1102,11 +1102,14 @@ PR 1 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 `condicionAbierto()` exige ahora `fecha_recepcion` igual o posterior a hoy en
 Colombia (medido: de 36.088 «abiertos» solo 128 la tenían; el 98 % era régimen
 especial sin fecha). Queda:
-- **`db-search.ts`** sigue con su propia noción de abierto. `/api/secop` y el
-  explorador salieron con #118 (el buscador vive en la vitrina, que sí usa
-  `condicionAbierto()`), pero `db-search` alimenta el matching
-  (`/mis-coincidencias`, alertas) y el encaje de la vitrina: puede ofrecer como
-  coincidencia abierta un proceso que la vitrina ya no cuenta.
+- ~~**`db-search.ts`** sigue con su propia noción de abierto.~~ **Resuelto el
+  2026-10-06** (rama `claude/coincidencias-abiertas`): el matching
+  (`getMatchesForPerfil`, `getMatchesForPerfilMinimo`), y con él
+  `/mis-coincidencias`, las alertas diarias y la vista previa del perfil, piden
+  `recibeOfertas: true`, que aplica `condicionAbierto()`. Pedían
+  `apertura: "Abierto"` a secas: entraban seleccionados, en evaluación y
+  régimen especial sin fecha. `apertura` sigue existiendo en `SecopQuery`, pero
+  ya no lo usa ningún llamador de producción.
 - **La ficha individual** sigue diciendo «Abierto a ofertas» con
   `estado_apertura`; lo corrige el PR 2 (etapa única).
 - **La portada puede quedar con menos de cinco minifichas** si un día hay menos
