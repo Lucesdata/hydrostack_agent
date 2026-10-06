@@ -1131,3 +1131,19 @@ pinta «Revisa antes de confiar» con las contradicciones C1–C7. Queda:
   del SECOP; no consulta contratos para no duplicar la consulta.
 - **Contratista, valor del contrato, prórrogas, adiciones y pagos** son el PR 3
   («Cómo se contrató»), con la exclusión de personas naturales.
+
+### 57. Ficha en ejecución y filtro de etapa: lo que queda (2026-10-06)
+PR 3 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+«Cómo se contrató» (`src/lib/secop/como-se-contrato.ts`) y el filtro de etapa de
+la vitrina (`condicionDeEtapa()` en `vitrina.ts`). Queda:
+- **El filtro y la ficha pueden discrepar en procesos con varios contratos**: el
+  filtro acepta el proceso si **algún** contrato con NIT está en la etapa; la
+  ficha calcula la etapa con el de firma más reciente, sea cual sea el
+  contratista. Raro (879 procesos con más de un contrato, M1c).
+- **El filtro de etapa no tiene caché**: es una consulta con semijoin sobre
+  `contrato` (~39.000 filas) por visita. Si se usa mucho, el índice por
+  `proceso_id` de §56 lo abarata.
+- **«OTRO» en `tipo_documento` (284 contratos) se trata como persona natural.**
+  Si se mide qué hay dentro y resultan ser personas jurídicas, se pueden incluir.
+- **La búsqueda por número** sigue pintando la pastilla desde `estado_actual`
+  (§56).

@@ -28,6 +28,7 @@ describe("los filtros salen de la URL", () => {
       departamento: "antioquia",
       presupuestoMin: 500,
       orden: "valor",
+      etapa: null,
     });
     expect(pagina).toBe(3);
   });
@@ -77,6 +78,7 @@ describe("la URL de unos filtros", () => {
       departamento: "boyaca",
       presupuestoMin: 100 as const,
       orden: "recientes" as const,
+      etapa: null,
     };
     expect(filtrosDesdeParams(new URLSearchParams(queryDeFiltros(f, 4).slice(1)))).toEqual({
       filtros: f,
@@ -165,5 +167,22 @@ describe("los enlaces viejos de /licitaciones/explorar", () => {
       numero: "CO1.REQ.42",
     });
     expect(desdeExplorar({ sistema: "inventado", valorMin: "5", orden: "x" })).toEqual(SIN_FILTROS);
+  });
+});
+
+describe("el filtro de etapa (2026-10-05)", () => {
+  it("apagado por defecto; solo acepta las tres etapas con contrato", () => {
+    expect(filtrosDesdeParams({}).filtros.etapa ?? null).toBeNull();
+    expect(filtrosDesdeParams({ etapa: "en_ejecucion" }).filtros.etapa).toBe("en_ejecucion");
+    expect(filtrosDesdeParams({ etapa: "plazo_cumplido" }).filtros.etapa).toBe("plazo_cumplido");
+    expect(filtrosDesdeParams({ etapa: "recibe_ofertas" }).filtros.etapa).toBeNull();
+    expect(filtrosDesdeParams({ etapa: "terminado" }).filtros.etapa).toBeNull();
+  });
+
+  it("cuenta como filtro (página noindex) y viaja en la URL", () => {
+    const { filtros } = filtrosDesdeParams({ etapa: "en_ejecucion" });
+    expect(hayFiltros(filtros)).toBe(true);
+    expect(queryDeFiltros(filtros)).toBe("?etapa=en_ejecucion");
+    expect(filtrosDesdeParams(new URLSearchParams("etapa=en_ejecucion")).filtros).toEqual(filtros);
   });
 });

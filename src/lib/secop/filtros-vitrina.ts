@@ -52,6 +52,22 @@ export function etiquetaPresupuesto(m: PresupuestoMin): string {
   return `desde $${m.toLocaleString("es-CO")} M`;
 }
 
+/**
+ * El filtro de etapa (PR 3 del plan 2026-10-05-ficha-viva-ciclo-de-vida),
+ * **apagado por defecto** (decisión del usuario): sin él, la vitrina es la de
+ * oportunidades. Con él, muestra procesos publicados desde 2026 que ya tienen
+ * contrato firmado con una persona jurídica (NIT), según las fechas del
+ * contrato. Las personas naturales no aparecen.
+ */
+export const ETAPAS_FILTRO = ["contratado", "en_ejecucion", "plazo_cumplido"] as const;
+export type EtapaFiltro = (typeof ETAPAS_FILTRO)[number];
+
+export const ETIQUETA_ETAPA_FILTRO: Record<EtapaFiltro, string> = {
+  contratado: "Contratados (aún sin empezar)",
+  en_ejecucion: "En ejecución",
+  plazo_cumplido: "Plazo cumplido",
+};
+
 export interface FiltrosVitrina {
   /** Texto libre: objeto, entidad o municipio. */
   q: string | null;
@@ -69,6 +85,8 @@ export interface FiltrosVitrina {
   departamento: string | null;
   presupuestoMin: PresupuestoMin | null;
   orden: OrdenVitrina;
+  /** `null` = procesos que reciben ofertas (por defecto). */
+  etapa?: EtapaFiltro | null;
 }
 
 export const SIN_FILTROS: FiltrosVitrina = {
@@ -79,6 +97,7 @@ export const SIN_FILTROS: FiltrosVitrina = {
   departamento: null,
   presupuestoMin: null,
   orden: "relevancia",
+  etapa: null,
 };
 
 /** Largo máximo de la búsqueda: el mismo que tenía el explorador. */
@@ -104,6 +123,7 @@ export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagin
   const dep = leer(sp, "departamento");
   const pres = Number(leer(sp, "presupuesto"));
   const orden = leer(sp, "orden");
+  const etapa = leer(sp, "etapa");
   const pag = leer(sp, "pagina");
   const n = pag && /^[1-9][0-9]*$/.test(pag) ? Number(pag) : 1;
 
@@ -121,6 +141,10 @@ export function filtrosDesdeParams(sp: Params): { filtros: FiltrosVitrina; pagin
         orden && (ORDENES_VITRINA as readonly string[]).includes(orden)
           ? (orden as OrdenVitrina)
           : "relevancia",
+      etapa:
+        etapa && (ETAPAS_FILTRO as readonly string[]).includes(etapa)
+          ? (etapa as EtapaFiltro)
+          : null,
     },
     pagina: n <= PAGINA_MAXIMA ? n : 1,
   };
@@ -135,6 +159,7 @@ export function hayFiltros(f: FiltrosVitrina): boolean {
     f.numero ||
     f.departamento ||
     f.presupuestoMin ||
+    f.etapa ||
     f.orden !== "relevancia"
   );
 }
@@ -152,6 +177,7 @@ export function queryDeFiltros(f: FiltrosVitrina, pagina = 1): string {
   if (f.actividad) sp.set("actividad", f.actividad);
   if (f.departamento) sp.set("departamento", f.departamento);
   if (f.presupuestoMin) sp.set("presupuesto", String(f.presupuestoMin));
+  if (f.etapa) sp.set("etapa", f.etapa);
   if (f.orden !== "relevancia") sp.set("orden", f.orden);
   if (pagina > 1) sp.set("pagina", String(pagina));
   const s = sp.toString();
@@ -188,5 +214,6 @@ export function desdeExplorar(sp: Params): FiltrosVitrina {
     departamento: dep && /^[a-z0-9-]{2,60}$/.test(slugificar(dep)) ? slugificar(dep) : null,
     presupuestoMin: piso,
     orden: orden === "fecha" ? "recientes" : orden === "valor" ? "valor" : "relevancia",
+    etapa: null,
   };
 }

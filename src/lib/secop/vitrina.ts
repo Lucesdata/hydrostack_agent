@@ -22,8 +22,11 @@ import {
   hayFiltros,
   patronIlike,
   queryDeFiltros,
+  type EtapaFiltro,
   type FiltrosVitrina,
 } from "./filtros-vitrina";
+import { DESDE_CICLO_DE_VIDA } from "./como-se-contrato";
+import { NOMBRE_ETAPA } from "./etapa";
 import { patronDeActividad, tiposDeSistema } from "./busqueda-guiada";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
@@ -51,6 +54,12 @@ export interface ProcesoDeVitrina {
   adjudicatario: string | null;
   valorAdjudicacion: string | null;
   fechaAdjudicacion: string | null;
+  /**
+   * La etapa ya calculada, cuando la página viene del filtro de etapa: manda
+   * sobre `estado_actual` en la pastilla de la tarjeta, que nunca puede decir
+   * ABIERTO de un contrato en ejecución.
+   */
+  etapaCalculada?: string | null;
 }
 
 export interface PaginaDeVitrina {
@@ -130,6 +139,43 @@ function condicionDe(pestana: PestanaVitrina) {
       sql`current_date - make_interval(days => ${DIAS_ADJUDICACION_RECIENTE})`
     )
   );
+}
+
+/**
+ * El universo del filtro de etapa (PR 3), en SQL: procesos publicados desde
+ * 2026, no cancelados, con un contrato **firmado** con una persona jurídica
+ * (NIT) cuyas fechas lo ponen en esa etapa. Es la misma regla que
+ * `etapaDeProceso()` para un contrato; si un proceso tiene varios, basta con
+ * uno en la etapa (879 procesos tienen más de uno, M1c).
+ *
+ * `contrato` no tiene índice por `proceso_id`: el `IN (subconsulta)` se
+ * resuelve como semijoin con una sola pasada por la tabla, no por fila.
+ */
+function condicionDeEtapa(etapa: EtapaFiltro): SQL {
+  const hoy = sql`(now() at time zone 'America/Bogota')::date`;
+  const fin = sql`coalesce(c.fecha_fin_actual, c.fecha_fin_inicial)`;
+  const porFechas =
+    etapa === "contratado"
+      ? sql`(c.fecha_inicio is null or c.fecha_inicio > ${hoy})`
+      : etapa === "en_ejecucion"
+        ? sql`(c.fecha_inicio <= ${hoy} and (${fin} is null or ${fin} >= ${hoy}))`
+        : sql`(c.fecha_inicio <= ${hoy} and ${fin} < ${hoy})`;
+  return and(
+    isNull(proceso.deletedAt),
+    gte(proceso.fechaPublicacion, DESDE_CICLO_DE_VIDA),
+    sql`coalesce(${proceso.estadoActual}, '') !~* '(cancel|desiert|revoc)'`,
+    sql`${proceso.id} in (
+      select c.proceso_id from contrato c
+      join proveedor pv on pv.id = c.proveedor_id
+      where c.deleted_at is null
+        and c.proceso_id is not null
+        and c.fecha_firma is not null
+        and coalesce(c.estado_actual, '') !~* '^(borrador|enviado proveedor|en aprobaci[oó]n)$'
+        and coalesce(c.estado_actual, '') !~* '(cancel|desiert|revoc)'
+        and upper(trim(pv.tipo_documento)) = 'NIT'
+        and ${porFechas}
+    )`
+  )!;
 }
 
 /** Los cuatro tipos que afirman un subsistema de agua: todos menos `otros`. */
@@ -232,7 +278,10 @@ export async function procesosDeVitrina(
   const where =
     porNumero?.where ??
     and(
-      condicionDe(pestana),
+      // El filtro de etapa cambia el universo: ya no son oportunidades.
+      pestana === "abiertos" && filtros.etapa
+        ? condicionDeEtapa(filtros.etapa)
+        : condicionDe(pestana),
       ...condicionesDeFiltros(filtros, opciones.departamentoCodigo ?? null)
     );
   // `proceso.id` como segunda clave: Postgres no garantiza orden estable entre
@@ -265,8 +314,20 @@ export async function procesosDeVitrina(
       .where(where),
   ]);
 
+  // Con el filtro de etapa, la pastilla dice la etapa y no se nombra al
+  // adjudicatario del proceso: puede ser una persona natural (decisión del
+  // usuario del 2026-10-05). El contratista con NIT está en la ficha.
+  const items =
+    pestana === "abiertos" && filtros.etapa && !porNumero
+      ? filas.map((f) => ({
+          ...f,
+          adjudicatario: null,
+          etapaCalculada: NOMBRE_ETAPA[filtros.etapa!],
+        }))
+      : filas;
+
   return {
-    items: filas,
+    items,
     total,
     pagina,
     porPagina: POR_PAGINA_VITRINA,

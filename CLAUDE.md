@@ -25,7 +25,17 @@ ignora. La cabecera de la ficha pinta la etapa y «Revisa antes de confiar»;
 «Participar» solo muestra el bloque de decisión si recibe ofertas. La ficha lee
 los contratos con `contratosDeProceso()` (sin índice por `proceso_id`,
 PENDIENTES §56). `aSecopProceso` sigue fijando `adjudicado: false` para el
-veredicto. Spec y mediciones (completas) en
+veredicto.
+**PR 3 (2026-10-06, rama `claude/ficha-ejecucion`):** «Cómo se contrató» en
+«Participar» (`comoSeContrato()`, `src/lib/secop/como-se-contrato.ts`): solo
+procesos publicados desde 2026 y solo contratistas con **NIT** (cualquier otro
+documento, «OTRO» o sin dato se trata como persona natural y no se nombra);
+contratista, valor, adición, prórroga y pagado «según el SECOP», nunca como
+avance; con C4 el valor no se pinta como dato. Filtro de etapa en la vitrina
+(`?etapa=contratado|en_ejecucion|plazo_cumplido`, apagado por defecto, noindex):
+`condicionDeEtapa()` en `vitrina.ts` con semijoin sobre contratos firmados con
+NIT; la tarjeta pinta la etapa (`etapaCalculada`), sin Radar, sin encaje y sin
+adjudicatario. Lo que queda, en PENDIENTES §57. Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
 **Buscador guiado (2026-10-04). Unificado con la vitrina el 2026-10-05:** lo que

@@ -5,7 +5,12 @@ import { ESTILOS_VITRINA } from "./estilos";
 import { hrefDeProceso } from "../lista/PaginaFaceta";
 import LicitacionesTabs from "../LicitacionesTabs";
 import { rutaVitrina, type PaginaDeVitrina, type PestanaVitrina } from "@/src/lib/secop/vitrina";
-import { hayFiltros, queryDeFiltros, SIN_FILTROS } from "@/src/lib/secop/filtros-vitrina";
+import {
+  ETIQUETA_ETAPA_FILTRO,
+  hayFiltros,
+  queryDeFiltros,
+  SIN_FILTROS,
+} from "@/src/lib/secop/filtros-vitrina";
 import FiltrosVitrina, { type OpcionDepartamento } from "./FiltrosVitrina";
 import { ProveedorEncaje } from "./EncajeVitrina";
 import RadarVitrina from "./RadarVitrina";
@@ -51,7 +56,10 @@ export default function Vitrina({
   /** El panel del Radar; sin detalles (adjudicados, o si su consulta falló), solo la rejilla. */
   detalles?: DetalleRadar[];
 }) {
-  const conRadar = pagina.pestana === "abiertos" && detalles.length > 0;
+  // Con el filtro de etapa no son oportunidades: sin Radar (su panel invita a
+  // ofertar) ni encaje con el perfil.
+  const porEtapa = pagina.pestana === "abiertos" && !!pagina.filtros.etapa;
+  const conRadar = pagina.pestana === "abiertos" && detalles.length > 0 && !porEtapa;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
   const filtrado = pagina.pestana === "abiertos" && hayFiltros(pagina.filtros);
   const numero = pagina.pestana === "abiertos" ? pagina.filtros.numero : null;
@@ -104,9 +112,13 @@ export default function Vitrina({
             {numero
               ? `${pagina.total === 1 ? "proceso" : "procesos"} con el número «${numero}» · abiertos y cerrados, los exactos primero`
               : pagina.pestana === "abiertos"
-                ? pagina.total === 1
-                  ? `proceso abierto${filtrado ? " con estos filtros" : ""}`
-                  : `procesos abiertos${filtrado ? " con estos filtros" : ""}`
+                ? porEtapa
+                  ? `${pagina.total === 1 ? "proceso" : "procesos"} de 2026 con contrato firmado · ${ETIQUETA_ETAPA_FILTRO[
+                      pagina.filtros.etapa!
+                    ].toLowerCase()} según las fechas del contrato`
+                  : pagina.total === 1
+                    ? `proceso abierto${filtrado ? " con estos filtros" : ""}`
+                    : `procesos abiertos${filtrado ? " con estos filtros" : ""}`
                 : pagina.total === 1
                   ? "adjudicación en los últimos 30 días"
                   : "adjudicaciones en los últimos 30 días"}
@@ -139,15 +151,19 @@ export default function Vitrina({
           </div>
         ) : (
           <ProcesosCuenta ids={pagina.items.map((p) => p.secopProcesoId)}>
-            <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
-              {conRadar ? (
-                <RadarVitrina detalles={detalles} volver={ruta(pagina.pagina)}>
-                  {rejilla}
-                </RadarVitrina>
-              ) : (
-                rejilla
-              )}
-            </ProveedorEncaje>
+            {porEtapa ? (
+              rejilla
+            ) : (
+              <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
+                {conRadar ? (
+                  <RadarVitrina detalles={detalles} volver={ruta(pagina.pagina)}>
+                    {rejilla}
+                  </RadarVitrina>
+                ) : (
+                  rejilla
+                )}
+              </ProveedorEncaje>
+            )}
           </ProcesosCuenta>
         )}
 

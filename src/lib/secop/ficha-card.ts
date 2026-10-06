@@ -66,6 +66,11 @@ export interface ProcesoParaCard {
   estadoActual: string | null;
   estadoApertura: string | null;
   fechaRecepcion: string | null;
+  /**
+   * La etapa ya calculada (filtro de etapa de la vitrina, PR 3 del plan
+   * 2026-10-05): manda sobre `estado_actual` y el proceso no recibe ofertas.
+   */
+  etapaCalculada?: string | null;
   /** Para la etiqueta «Nuevo». Opcional: solo la vitrina la trae. */
   fechaPublicacion?: string | null;
   adjudicatario?: string | null;
@@ -297,8 +302,11 @@ export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
   const etapaEstado: EtapaVista = p.fechaAdjudicacion
     ? ETAPA_POR_ESTADO["Seleccionado"]
     : (p.estadoActual && ETAPA_POR_ESTADO[p.estadoActual]) || ETAPA_DESCONOCIDA;
-  const etapa =
-    etapaEstado.clave === "abierto" && !recibeOfertas(p, hoy) ? ETAPA_CERRADA : etapaEstado;
+  const etapa: EtapaVista = p.etapaCalculada
+    ? { clave: "cerrado", label: p.etapaCalculada.toUpperCase() }
+    : etapaEstado.clave === "abierto" && !recibeOfertas(p, hoy)
+      ? ETAPA_CERRADA
+      : etapaEstado;
 
   return {
     id: p.secopProcesoId,
@@ -309,8 +317,10 @@ export function vistaFichaCard(p: ProcesoParaCard, hoy: Date): FichaCardVista {
     cuantia: valor === null ? "Cuantía no publicada" : formatCopCompact(valor),
     cuantiaPublicada: valor !== null,
     ubicacion: lugar || "Ubicación no informada",
-    plazo: plazoDe(p, hoy),
-    cierre: cierreDe(p, hoy),
+    plazo: p.etapaCalculada ? "No recibe ofertas" : plazoDe(p, hoy),
+    cierre: p.etapaCalculada
+      ? { valor: "Cerrada", detalle: null, urgente: false, apagado: true }
+      : cierreDe(p, hoy),
     nuevo: esNuevo(p, hoy),
     adjudicacion: adjudicacionDe(p),
   };
