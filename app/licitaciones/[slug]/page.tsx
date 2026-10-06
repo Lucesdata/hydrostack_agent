@@ -18,6 +18,8 @@ import {
   slugDeProceso,
 } from "@/src/lib/secop/ficha";
 import { etapaDeProceso, fechaLegible, sinFasePegada } from "@/src/lib/secop/etapa";
+import { comoSeContrato } from "@/src/lib/secop/como-se-contrato";
+import { explicacionModalidad } from "@/src/lib/secop/semaforo";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import { formatCopFull, sentenceCaseTitle } from "@/src/components/secop/format";
@@ -102,6 +104,11 @@ export default async function FichaPage({ params }: Props) {
   const etapa = etapaDeProceso({ ...p, contratos });
   const recibeOfertas = etapa.etapa === "recibe_ofertas";
   const contrato = etapa.contrato;
+  // «Cómo se contrató» (PR 3): solo 2026, solo contratistas con NIT.
+  const contratacion = comoSeContrato(p.fechaPublicacion, etapa.etapa, contratos);
+  // C4: el valor publicado del contrato es un error de captura; no se pinta como dato.
+  const cifraDudosa = etapa.contradicciones.some((c) => c.codigo === "C4");
+  const modalidadExplicada = explicacionModalidad(p.modalidad);
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const valor = montoConDato(p.valorEstimado);
   const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
@@ -305,7 +312,11 @@ export default async function FichaPage({ params }: Props) {
             <Dato nombre="Entidad contratante">{p.entidadNombre ?? "Entidad sin resolver"}</Dato>
             {p.entidadNit && <Dato nombre="NIT de la entidad">{p.entidadNit}</Dato>}
             <Dato nombre="Ubicación de la entidad">{lugar || "Sin ubicación resuelta"}</Dato>
-            <Dato nombre="Contratista">No identificado en esta ficha</Dato>
+            <Dato nombre="Contratista">
+              {contratacion
+                ? contratacion.contratos.map((c) => c.contratista).join(" · ")
+                : "No identificado en esta ficha"}
+            </Dato>
             <Dato nombre="Supervisión o interventoría">Por verificar</Dato>
           </dl>
           <div className="fi-nota">
@@ -356,7 +367,9 @@ export default async function FichaPage({ params }: Props) {
       contenido: (
         <>
           <p className="fi-sobretitulo">Para tu empresa</p>
-          <h2 className="fi-titulo-panel">¿Puedo participar?</h2>
+          <h2 className="fi-titulo-panel">
+            {contratacion ? "¿Cómo se contrató?" : "¿Puedo participar?"}
+          </h2>
           {recibeOfertas ? (
             /* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
                en «Quiero participar» como pide el spec de la ficha interactiva
@@ -371,6 +384,50 @@ export default async function FichaPage({ params }: Props) {
                 Explorar procesos que reciben ofertas
               </Link>
             </div>
+          )}
+          {contratacion && (
+            <section id="como-se-contrato" className="fi-sec">
+              <h3 className="fi-h2">Cómo se contrató</h3>
+              <dl className="fi-datos">
+                <Dato nombre="Modalidad">{p.modalidad ?? "Modalidad no informada"}</Dato>
+              </dl>
+              {modalidadExplicada && <p className="fi-ayuda">{modalidadExplicada}</p>}
+              {contratacion.contratos.map((c, i) => (
+                <dl className="fi-datos" key={i}>
+                  <Dato nombre="Contratista">{c.contratista}</Dato>
+                  <Dato nombre="Valor del contrato">
+                    {cifraDudosa
+                      ? "Cifra dudosa en la fuente: compruébala en el expediente"
+                      : c.valor !== null
+                        ? formatCopFull(c.valor)
+                        : "No publicado"}
+                  </Dato>
+                  {c.adicion !== null && !cifraDudosa && (
+                    <Dato nombre="Adición">{`Se adicionaron ${formatCopFull(c.adicion)}`}</Dato>
+                  )}
+                  <Dato nombre="Inicio">{c.inicio ?? "Sin fecha publicada"}</Dato>
+                  <Dato nombre="Fin previsto">{c.finPrevisto ?? "Sin fecha publicada"}</Dato>
+                  {c.prorrogaDias !== null && (
+                    <Dato nombre="Prórroga">{`Se prorrogó ${c.prorrogaDias} días: termina el ${c.finActual}`}</Dato>
+                  )}
+                  {c.pagado !== null && (
+                    <Dato nombre="Pagado según el SECOP">{formatCopFull(c.pagado)}</Dato>
+                  )}
+                  {c.estado && <Dato nombre="Estado del contrato según SECOP II">{c.estado}</Dato>}
+                </dl>
+              ))}
+              {contratacion.ocultos > 0 && (
+                <p className="fi-ayuda">
+                  {contratacion.ocultos === 1
+                    ? "Hay otro contrato con una persona natural: no se detalla."
+                    : `Hay ${contratacion.ocultos} contratos más con personas naturales: no se detallan.`}
+                </p>
+              )}
+              <p className="fi-ayuda">
+                Según las fechas y valores publicados en SECOP II. No es avance de obra ni acta de
+                entrega. Presupuesto, valor del contrato y pagado son cifras distintas.
+              </p>
+            </section>
           )}
           <section id="pliego" className="fi-sec">
             <h3 className="fi-h2">Requisitos y pliego</h3>

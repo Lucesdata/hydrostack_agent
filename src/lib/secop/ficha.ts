@@ -19,11 +19,11 @@
 
 import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "../db/client";
-import { contrato, entidad, geografia, proceso } from "../db/schema";
+import { contrato, entidad, geografia, proceso, proveedor } from "../db/schema";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
 // Puras y sin base: viven en ./slug para que el navegador pueda importarlas.
 import { idDesdeSlug, slugDeProceso } from "./slug";
-import type { ContratoSenal } from "./etapa";
+import type { ContratoFicha } from "./como-se-contrato";
 import type { SecopProceso } from "./types";
 
 export { idDesdeSlug, slugDeProceso };
@@ -105,15 +105,16 @@ export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null>
 }
 
 /**
- * Los contratos del proceso, para calcular su etapa (`etapaDeProceso`). Solo
- * fechas, valores y estado: el contratista no se lee aquí (las personas
- * naturales no se exponen, decisión del usuario del 2026-10-05).
+ * Los contratos del proceso: sus fechas, valores y estado calculan la etapa
+ * (`etapaDeProceso`), y con el contratista y su tipo de documento arman «Cómo
+ * se contrató» (`comoSeContrato`), que solo nombra a personas jurídicas (NIT):
+ * las personas naturales no se exponen (decisión del usuario del 2026-10-05).
  *
  * `contrato` no tiene índice por `proceso_id` (medido el 2026-10-05): esto es un
  * barrido de ~39.000 filas por ficha regenerada, que con el ISR de 12 h es
  * aceptable. Un índice exige migración y queda anotado en PENDIENTES §56.
  */
-export async function contratosDeProceso(procesoId: string): Promise<ContratoSenal[]> {
+export async function contratosDeProceso(procesoId: string): Promise<ContratoFicha[]> {
   return db
     .select({
       fechaFirma: contrato.fechaFirma,
@@ -123,8 +124,12 @@ export async function contratosDeProceso(procesoId: string): Promise<ContratoSen
       valorInicial: contrato.valorInicial,
       valorActual: contrato.valorActual,
       estado: contrato.estadoActual,
+      valorPagado: contrato.valorPagado,
+      contratista: proveedor.razonSocial,
+      tipoDocumento: proveedor.tipoDocumento,
     })
     .from(contrato)
+    .leftJoin(proveedor, eq(proveedor.id, contrato.proveedorId))
     .where(and(eq(contrato.procesoId, procesoId), isNull(contrato.deletedAt)))
     .orderBy(desc(contrato.fechaFirma));
 }

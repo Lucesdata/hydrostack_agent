@@ -314,3 +314,20 @@ describe("«Nuevo»", () => {
     expect(vistaFichaCard({ ...base, fechaPublicacion: "2027-01-01" }, HOY).nuevo).toBe(false);
   });
 });
+
+describe("con la etapa ya calculada (filtro de etapa de la vitrina)", () => {
+  it("la pastilla dice la etapa y nunca ABIERTO; no invita a ofertar", () => {
+    const v = vistaFichaCard(
+      {
+        ...base,
+        estadoActual: "Abierto",
+        estadoApertura: "Abierto",
+        etapaCalculada: "En ejecución",
+      },
+      HOY
+    );
+    expect(v.etapa.label).toBe("EN EJECUCIÓN");
+    expect(v.plazo).toBe("No recibe ofertas");
+    expect(v.cierre).toMatchObject({ valor: "Cerrada", apagado: true });
+  });
+});

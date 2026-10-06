@@ -185,6 +185,74 @@ describe("Ficha pública para explorar desde el celular", () => {
     expect(salida).not.toContain("(Presentación de oferta)");
     expect(salida).not.toContain("¿Es para ti?");
   });
+  describe("«Cómo se contrató» (PR 3)", () => {
+    const enEjecucion = {
+      ...proceso,
+      estadoActual: "Abierto",
+      estadoApertura: null,
+      fechaRecepcion: null,
+      fechaPublicacion: "2026-07-11",
+    };
+    const contratoNit = {
+      fechaFirma: "2026-09-09",
+      fechaInicio: "2026-09-29",
+      fechaFinInicial: "2099-11-15",
+      fechaFinActual: "2099-12-30",
+      valorInicial: "400000000",
+      valorActual: "520000000",
+      estado: "En ejecución",
+      valorPagado: "150000000",
+      contratista: "INGENIERÍA DEL AGUA S.A.S.",
+      tipoDocumento: "NIT",
+    };
+
+    it("con NIT y desde 2026: contratista, valor, adición, prórroga y pagado", async () => {
+      datos.proceso.mockResolvedValue(enEjecucion);
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("¿Cómo se contrató?");
+      expect(salida).toContain("INGENIERÍA DEL AGUA S.A.S.");
+      expect(salida).toContain("520.000.000");
+      expect(salida).toContain("Se adicionaron");
+      expect(salida).toContain("Se prorrogó 45 días");
+      expect(salida).toContain("Pagado según el SECOP");
+      expect(salida).toContain("No es avance de obra");
+      expect(salida).not.toContain("No identificado en esta ficha");
+    });
+
+    it("persona natural: no se nombra ni se detalla", async () => {
+      datos.proceso.mockResolvedValue(enEjecucion);
+      datos.contratos.mockResolvedValue([
+        { ...contratoNit, contratista: "Angie Michelle Ascanio Jaime", tipoDocumento: "CC" },
+      ]);
+      const salida = await html();
+      expect(salida).not.toContain("Angie Michelle");
+      expect(salida).not.toContain("¿Cómo se contrató?");
+      expect(salida).toContain("En ejecución");
+      expect(salida).toContain("No identificado en esta ficha");
+    });
+
+    it("antes de 2026: la etapa se calcula, pero la ficha no se amplía", async () => {
+      datos.proceso.mockResolvedValue({ ...enEjecucion, fechaPublicacion: "2025-11-20" });
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("En ejecución");
+      expect(salida).not.toContain("INGENIERÍA DEL AGUA");
+      expect(salida).not.toContain("¿Cómo se contrató?");
+    });
+
+    it("cifra dudosa (C4): el valor del contrato no se pinta como dato", async () => {
+      datos.proceso.mockResolvedValue({ ...enEjecucion, valorEstimado: "1000000" });
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("Cifra dudosa en la fuente");
+      // La cifra solo aparece como evidencia en «Revisa antes de confiar», no como dato.
+      expect(salida).toContain("Revisa antes de confiar");
+      expect(salida.split("520.000.000").length - 1).toBe(1);
+      expect(salida).not.toContain("Se adicionaron");
+    });
+  });
+
   it("conserva los datos del pliego y distingue su presupuesto del publicado en SECOP", async () => {
     datos.pliego.mockResolvedValue(pliego);
     const salida = await html();
