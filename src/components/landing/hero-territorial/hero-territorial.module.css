@@ -1,4 +1,5 @@
-/* Hero territorial de la portada (2026-10-04: mapa + cinco minifichas). Tema
+/* Hero territorial de la portada (2026-10-06: mapa + ficha central; antes,
+   cinco minifichas en fila). Tema
    oscuro propio: no usa los tokens de globals.css (que son de fondo claro), así
    que contraste.test.ts no lo cubre; los colores de texto los mide
    contraste-oscuro.test.ts. Los colores de familia son los `oscuro` de
@@ -27,12 +28,22 @@
   --aq-abierto: #4ade80;
   position: relative;
   isolation: isolate;
+  /* Centrado en la pantalla: lo que sobra se reparte arriba y abajo, nunca
+     solo al final (spec 2026-10-06 §1). La pantalla es la que deja la barra
+     oscura de la portada, que mide --nav-h + 16 px (Navbar.js): con 100vh a
+     secas el hero bajaba 72 px del borde y cortaba el sur del mapa. */
+  --aq-pantalla: calc(100vh - var(--nav-h, 56px) - 16px);
+  min-height: var(--aq-pantalla);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: clamp(16px, 2vw, 28px) var(--gutter) clamp(28px, 2.6vw, 40px);
   background: var(--aq-bg);
   color: var(--aq-text);
 }
 
 .contenedor {
+  width: 100%;
   max-width: 1320px;
   margin: 0 auto;
 }
@@ -53,32 +64,29 @@
   --fam: var(--aq-otros);
 }
 
-/* ── Nivel superior: mensaje · mapa ───────────────────────────────────────── */
-/* Cinco zonas. Arriba, mensaje y mapa (texto ≈46 %, mapa ≈51 %, spec §4.4; con el titular en dos líneas no cabe más mapa);
-   abajo, las tarjetas a todo el ancho (sin título desde el 2026-10-04).
-   La leyenda va dentro del panel del mapa. */
+/* ── Dos columnas: mensaje y ficha · mapa ─────────────────────────────────── */
+/* A la izquierda (≈44 %) el titular, la frase, el buscador, la ficha y su
+   navegación; a la derecha (≈56 %) el mapa y la leyenda (spec 2026-10-06). */
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
-  grid-template-areas:
-    "copy mapa"
-    "tarjetas tarjetas";
-  column-gap: clamp(20px, 3vw, 44px);
+  grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
+  grid-template-areas: "copy mapa";
+  column-gap: clamp(24px, 3vw, 48px);
   align-items: center;
 }
 .copy {
   grid-area: copy;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .mapPanel {
   grid-area: mapa;
 }
-.procesos {
-  grid-area: tarjetas;
-}
 .copy h1 {
   margin: 0;
   font:
-    700 clamp(2rem, 2.3rem + 1.25vw, 3.45rem)/1.07 var(--font-inter),
+    700 clamp(2rem, 1.6rem + 1.6vw, 3.2rem)/1.07 var(--font-inter),
     sans-serif;
   letter-spacing: -0.028em;
   /* globals.css activa `hyphens: auto` en los titulares de `.bp-page`. */
@@ -90,9 +98,9 @@
 }
 .lead {
   max-width: 44ch;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   font:
-    400 clamp(17px, 0.85rem + 0.5vw, 22px)/1.45 var(--font-inter),
+    400 clamp(16px, 0.8rem + 0.4vw, 20px)/1.45 var(--font-inter),
     sans-serif;
   color: #c3d3e0;
   hyphens: manual;
@@ -114,14 +122,12 @@
   gap: 0;
   color: var(--aq-text);
 }
-/* Alto ligado al viewport. Hasta el 2026-10-04 se restaban ≈455 px para que a
-   1440×900 cupieran las cinco tarjetas enteras; el país quedaba en 445 px de
-   alto y se veía pequeño. Ahora manda el mapa (decisión del usuario): ≈500 px
-   a 1440×900, y la fila de tarjetas asoma en el primer pantallazo y se termina
-   de ver al bajar. En ventanas bajas manda el suelo: se desplaza antes que
-   encoger las etiquetas. */
+/* Alto ligado al viewport (2026-10-06): sin la fila de tarjetas debajo ni las
+   columnas de etiquetas a los lados, el país ocupa el panel entero. El
+   viewBox mantiene la proporción (`meet`) y el SVG se centra. Los 110 px del
+   spec se cuentan desde debajo de la barra (relleno del hero y leyenda). */
 .map :global(.clr-mapa__svg) {
-  max-height: clamp(360px, calc(100vh - 400px), 620px);
+  height: clamp(440px, calc(var(--aq-pantalla) - 110px), 860px);
   width: 100%;
   margin-inline: auto;
 }
@@ -170,18 +176,22 @@
     sans-serif;
   letter-spacing: 0.01em;
 }
-.map :global(.clr-mapa__guia) {
-  stroke: rgba(234, 248, 255, 0.5);
-  stroke-width: 0.9;
-  transition:
-    opacity 0.15s,
-    stroke 0.15s;
-}
 .map :global(.clr-mapa__ancla) {
+  r: 4.4px;
   fill: var(--fam);
   stroke: var(--aq-bg);
   stroke-width: 1.6;
-  transition: opacity 0.15s;
+  pointer-events: none;
+  transition:
+    opacity 0.15s,
+    r 0.15s;
+}
+/* El área de impacto de cada anclaje: señalarla activa el primer proceso de
+   su departamento (sincronia.js). Invisible. */
+.map :global(.clr-mapa__ancla-zona) {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
 }
 /* Un anclaje compartido por familias distintas es blanco; al activar uno de
    sus procesos toma la familia de ese proceso. */
@@ -201,12 +211,19 @@
   fill: var(--aq-otros);
 }
 .map :global(.clr-mapa__ancla[data-activa]) {
+  r: 5.6px;
   stroke: #ffffff;
   stroke-width: 2;
 }
+/* Una sola etiqueta visible, la del activo (2026-10-06): las demás no se
+   pintan ni reciben foco, como los grupos ocultos. */
 .map :global(.clr-mapa__etq) {
+  display: none;
   cursor: pointer;
-  transition: opacity 0.15s;
+}
+.map :global(.clr-mapa__etq.is-activo) {
+  display: inline;
+  animation: aqAparece 0.2s ease-out;
 }
 .map :global(.clr-mapa__etq rect) {
   fill: var(--aq-card);
@@ -232,22 +249,18 @@
 }
 .map :global(.clr-mapa__etq-lugar) {
   fill: #c3d3e0;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
 }
 .map :global(.clr-mapa__etq-valor) {
   fill: #ffffff;
-  font-size: 14.5px;
+  font-size: 13px;
   font-weight: 700;
 }
 .map :global(.clr-mapa__etq.is-activo rect) {
   fill: var(--aq-card-activa);
   stroke: #ffffff;
   stroke-width: 1.8;
-}
-.map :global(.clr-mapa__guia.is-activo) {
-  stroke: #ffffff;
-  stroke-width: 1.4;
 }
 .map :global(.clr-mapa__etq:focus) {
   outline: none;
@@ -269,14 +282,13 @@
     opacity: 0;
   }
 }
-/* Con un proceso activo, el resto se atenúa sin ocultarse. */
-.map[data-activo] :global(.clr-mapa__etq:not(.is-activo)),
-.map[data-activo] :global(.clr-mapa__guia:not(.is-activo)),
+/* Con un proceso activo (siempre, desde el 2026-10-06), los anclajes de los
+   demás se atenúan sin ocultarse. */
 .map[data-activo] :global(.clr-mapa__ancla:not([data-activa])) {
   opacity: 0.45;
 }
 
-/* La línea del proceso activo: solo donde las etiquetas no caben (móvil). */
+/* La línea del proceso activo: solo donde la etiqueta se oculta (móvil). */
 .previa {
   display: none;
   min-height: 1.5em;
@@ -330,13 +342,94 @@
   color: var(--aq-muted);
 }
 
-/* ── Nivel inferior: procesos para explorar ───────────────────────────────── */
+/* ── La ficha central y su navegación ─────────────────────────────────────── */
 .procesos {
   display: flex;
   flex-direction: column;
-  margin-top: clamp(16px, 1.8vw, 24px);
+  align-self: stretch;
+  min-width: 0;
+  margin-top: 28px;
 }
-/* Bajo las tarjetas: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
+/* ← · puntos · «n de N» · → (spec 2026-10-06 §2). Circulares. */
+.navFicha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.flecha {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(140, 190, 225, 0.28);
+  border-radius: 50%;
+  background: var(--aq-card);
+  color: var(--aq-text);
+  font:
+    600 16px/1 var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.flecha:hover {
+  border-color: var(--aq-cyan);
+  background: var(--aq-card-activa);
+}
+.puntos {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+/* El punto se dibuja en ::before; el botón da un objetivo mayor que 7 px. */
+.punto {
+  display: grid;
+  place-items: center;
+  width: auto;
+  min-width: 18px;
+  height: 24px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+.punto::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(159, 180, 198, 0.4);
+  transition:
+    width 0.2s,
+    background-color 0.2s;
+}
+.punto[data-activo]::before {
+  width: 22px;
+  background: var(--aq-cyan);
+}
+.punto:hover:not([data-activo])::before {
+  background: rgba(159, 180, 198, 0.7);
+}
+.flecha:focus-visible,
+.punto:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.posicion {
+  margin: 0;
+  font:
+    500 12px/1 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Bajo la ficha: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
    a todas las fichas (2026-10-04, opción D). */
 .procesosPie {
   display: flex;
@@ -409,17 +502,16 @@
   color: #c3d3e0;
 }
 
-/* Cinco columnas iguales en escritorio amplio. */
+/* Una sola ficha, del ancho de la columna (2026-10-06). */
 .hero :global(.aqMinifichas) {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
+  display: flex;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .hero :global(.aqMini) {
   position: relative;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   border: 1px solid var(--aq-line);
@@ -438,9 +530,7 @@
   background: var(--aq-card-activa);
 }
 /* Estructura de la tarjeta (2026-10-04, opción B): cabecera, pastillas, panel
-   tintado y pie. Tope de 236 px de alto a 1440 (la versión anterior medía 268),
-   también con la línea «Según descripción», que es la más alta: la fila
-   iguala las cinco tarjetas a la mayor (2026-10-05). */
+   tintado y pie. Desde el 2026-10-06 es una sola y del ancho de la columna. */
 .hero :global(.aqMini article) {
   display: flex;
   flex-direction: column;
@@ -483,9 +573,10 @@
   min-height: calc(2 * 1.3em);
   margin: 0;
   font:
-    650 14px/1.3 var(--font-inter),
+    650 17px/1.3 var(--font-inter),
     sans-serif;
   color: var(--aq-text);
+  text-wrap: pretty;
   overflow-wrap: anywhere;
   hyphens: manual;
 }
@@ -499,10 +590,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Una fila a 1440 en todos los casos medidos (con «Sin subsistema» y
-   «Adjudicado» + «Redes y alcantarillado», el par más ancho). Si no caben
-   —tarjetas más estrechas, entre 1200 y ≈1360 px—, pasan a dos filas antes que
-   recortar el estado o el tipo: el color nunca va sin su nombre. */
+/* Si no caben en una fila, pasan a dos antes que recortar el estado o el tipo:
+   el color nunca va sin su nombre. */
 .hero :global(.aqMiniPastillas) {
   display: flex;
   flex-wrap: wrap;
@@ -658,77 +747,44 @@
 }
 
 /* ── Adaptación ───────────────────────────────────────────────────────────── */
-@media (min-width: 900px) and (max-width: 1199px) {
-  .copy h1 {
-    font-size: clamp(2.4rem, 0.6rem + 3vw, 2.875rem);
-  }
-}
-/* Cinco columnas serían demasiado estrechas: fila desplazable con ajuste,
-   asomando la siguiente tarjeta. Las cinco siguen en el documento. */
-@media (max-width: 1199px) {
-  .hero :global(.aqMinifichas),
-  .hero :global(.aqMinifichas[data-n]) {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 2px;
-    padding: 2px 2px 10px;
-    margin-inline: -2px;
-  }
-  .hero :global(.aqMini) {
-    flex: 0 0 clamp(250px, 30vw, 290px);
-    scroll-snap-align: start;
-  }
-}
 @media (max-width: 899px) {
-  /* Móvil y tablet: título, descripción, mapa (con su leyenda) y fila de
-     tarjetas (spec §9). */
+  /* Una columna: el mensaje con la ficha y su navegación, y después el mapa
+     (spec 2026-10-06 §4). */
+  .hero {
+    min-height: 0;
+  }
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "copy" "mapa" "tarjetas";
+    grid-template-areas: "copy" "mapa";
     align-items: start;
   }
   .copy {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   .copy h1 {
     font-size: clamp(2rem, 1.3rem + 2.6vw, 2.6rem);
   }
+  /* Con el alto ligado al viewport quedaban franjas vacías a los lados o
+     arriba y abajo en tableta: aquí manda el ancho. */
   .map :global(.clr-mapa__svg) {
-    max-height: none;
+    height: auto;
   }
   .leyenda {
     justify-content: flex-start;
   }
 }
 @media (max-width: 599px) {
-  /* Las etiquetas del mapa bajarían de 6 px: se ocultan y la línea .previa
-     dice el proceso activo. Las tarjetas siguen teniendo todo. */
+  /* La etiqueta flotante taparía departamentos vecinos: se oculta y la línea
+     .previa dice el proceso activo. La ficha tiene todo. */
   .map :global(.clr-mapa__etq),
-  .map :global(.clr-mapa__guia) {
+  .map :global(.clr-mapa__etq.is-activo) {
     display: none;
   }
   .previa {
     display: block;
   }
-  /* Sin etiquetas, el hueco lateral del viewBox (MARGEN_ETIQUETAS = 150 a
-     cada lado de un mapa de 420, etiquetas-procesos.ts) solo encogería el
-     país: se ensancha el SVG y ese hueco queda fuera de la vista. */
-  .map {
-    overflow-x: clip;
-  }
-  .map :global(.clr-mapa__svg) {
-    width: calc(100% * 720 / 420);
-    max-width: none;
-    margin-inline: calc(-100% * 150 / 420);
-  }
   .map :global(.clr-mapa__ancla) {
     stroke-width: 2.4;
-  }
-  .hero :global(.aqMini) {
-    flex-basis: min(82%, 300px);
   }
 }
 @media (max-width: 430px) {

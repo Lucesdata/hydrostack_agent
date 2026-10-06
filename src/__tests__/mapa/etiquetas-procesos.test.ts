@@ -4,8 +4,12 @@ import {
   ALTO_ETIQUETA,
   ANCHO_ETIQUETA,
   CODIGOS_CON_ANCLA,
+  ALTO_FLOTANTE,
+  ANCHO_FLOTANTE,
   MARGEN_ETIQUETAS,
+  VIEWBOX_SELECCION,
   anclaDe,
+  colocarEtiquetaFlotante,
   colocarEtiquetas,
 } from "@/src/lib/mapa/etiquetas-procesos";
 import { ALTO_MAPA, ANCHO_MAPA } from "@/src/lib/mapa/modelo";
@@ -194,5 +198,28 @@ describe("recuadro de San Andrés y Providencia", () => {
     for (const a of e.filter((x) => x.lado === "oeste")) {
       expect(a.x + ANCHO_ETIQUETA / 2).toBeLessThanOrEqual(r.x);
     }
+  });
+});
+
+describe("colocarEtiquetaFlotante (hero con ficha central)", () => {
+  const { x: vx, ancho: vAncho } = VIEWBOX_SELECCION;
+
+  it("los 33 departamentos: la etiqueta queda dentro del lienzo y no tapa su anclaje", () => {
+    for (const dpto of CODIGOS_CON_ANCLA) {
+      const [ax, ay] = anclaDe(dpto)!;
+      const { x0, y0 } = colocarEtiquetaFlotante(ax, ay);
+      expect(x0, dpto).toBeGreaterThanOrEqual(vx);
+      expect(x0 + ANCHO_FLOTANTE, dpto).toBeLessThanOrEqual(vx + vAncho);
+      expect(y0, dpto).toBeGreaterThanOrEqual(0);
+      expect(y0 + ALTO_FLOTANTE, dpto).toBeLessThanOrEqual(ALTO_MAPA);
+      expect(ax < x0 || ax > x0 + ANCHO_FLOTANTE, `${dpto} tapa su anclaje`).toBe(true);
+    }
+  });
+
+  it("a la derecha del punto, salvo en el oriente", () => {
+    expect(colocarEtiquetaFlotante(100, 200)).toEqual({ x0: 114, y0: 180 });
+    expect(colocarEtiquetaFlotante(350, 200)).toEqual({ x0: 228, y0: 180 });
+    expect(colocarEtiquetaFlotante(100, 0).y0).toBe(4);
+    expect(colocarEtiquetaFlotante(100, ALTO_MAPA).y0).toBe(ALTO_MAPA - ALTO_FLOTANTE - 4);
   });
 });

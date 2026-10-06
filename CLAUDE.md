@@ -318,7 +318,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -364,7 +364,36 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
   esa línea y con `src/lib/landing/cifras.ts`.
 
-**Hero con cinco minifichas (2026-10-04).** Sustituye la tarjeta única, el
+**Hero con ficha central (2026-10-06).** Sustituye la composición del hero de
+cinco minifichas (abajo); el contrato de datos, `muestraPortada()`, los grupos de
+cinco, el recorrido de 5 s, «Ver otros», el buscador y los colores no cambian.
+Spec y lo que quedó: `docs/superpowers/specs/2026-10-06-hero-ficha-central.md`.
+- Dos columnas (44/56): a la izquierda titular, frase, buscador, **una** ficha
+  —la del proceso activo— y su navegación (← · puntos · «n de N» · →,
+  circulares) con el pie; a la derecha el mapa y la leyenda. Debajo de 900 px,
+  una columna: mensaje con ficha y después el mapa.
+- **Siempre hay un proceso activo** mientras el grupo no esté vacío: el hero
+  guarda la elección y deriva el activo (si no está en el grupo visible, el
+  primero). Soltar el puntero no lo borra; «Ver otros» y «Pausar» vuelven al
+  primero. El recorrido avanza desde el activo, también tras usar las flechas.
+  La navegación manual se anuncia en el `role="status"`; el recorrido, no.
+- Mapa sin columnas de etiquetas: `viewBox` `-8 0 436 520` (`VIEWBOX_SELECCION`),
+  sin guías. Una etiqueta por proceso en el DOM, flotando junto a su anclaje
+  (`colocarEtiquetaFlotante`, 108×40), y solo se ve la del activo (`is-activo`;
+  las demás `display: none`). El nombre se abrevia solo ahí (`departamentoMapa`:
+  «Valle», «N. Santander»). Bajo 600 px la etiqueta se oculta y queda `.previa`.
+- Cada anclaje tiene una zona de impacto transparente (`r` 12, `data-primero`):
+  señalarla activa el primer proceso de su departamento. No recibe foco.
+- **El alto se mide desde debajo de la barra** (`--aq-pantalla`, `100vh −
+  --nav-h − 16 px`): con `100vh` a secas el sur del mapa salía de la pantalla.
+  El hero queda centrado y acaba en el borde inferior a 1440×900, 1280×800,
+  1920×1080 y 1024×768 (medido en Chromium).
+- Salieron `useActivarAlDesplazar` y la fila desplazable de tarjetas.
+
+*(Composición sustituida el 2026-10-06 por la ficha central, arriba: lo que
+sigue sobre datos, anclajes, islas, recorrido y la estructura de la minificha
+sigue vigente; la fila de cinco, las columnas de etiquetas y el tope de alto de
+la fila, no.)* **Hero con cinco minifichas (2026-10-04).** Sustituye la tarjeta única, el
 buscador, la lista de departamentos, las «Opciones del mapa» y el mapa
 coroplético del hero. Spec y reconocimiento:
 `docs/superpowers/specs/2026-10-04-hero-cinco-minifichas.md`. Lo que hay:

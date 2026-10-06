@@ -5,8 +5,8 @@ import { useEffect } from "react";
 /**
  * Sincronía mapa ↔ minifichas del hero (spec 2026-10-04-hero-cinco-minifichas §8).
  *
- * El mapa es SVG de servidor y no lleva JS: cada etiqueta y cada guía llevan el
- * id del proceso en `data-proceso`, cada anclaje los ids que comparte en
+ * El mapa es SVG de servidor y no lleva JS: cada etiqueta lleva el id del
+ * proceso en `data-proceso`, cada anclaje los ids que comparte en
  * `data-procesos` y cada departamento su código en `data-dpto`. El hero escucha
  * por delegación y marca con clases y atributos lo que toca resaltar. Nunca
  * reordena el SVG: lo pinta React y moverle nodos rompería la reconciliación.
@@ -15,10 +15,18 @@ import { useEffect } from "react";
  * departamento); su estado previo está en git.
  */
 
-/** El id del proceso bajo el puntero o el foco, o `null`. */
+/**
+ * El id del proceso bajo el puntero o el foco, o `null`. Una etiqueta da el
+ * suyo; un anclaje (o su zona de impacto), el primero de su departamento
+ * (hero con ficha central, 2026-10-06).
+ */
 export function procesoDesdeObjetivo(objetivo) {
   const el = objetivo?.closest?.("[data-proceso]");
-  return el ? el.getAttribute("data-proceso") : null;
+  if (el) return el.getAttribute("data-proceso");
+  const ancla = objetivo?.closest?.("[data-ancla]");
+  if (!ancla) return null;
+  const ids = ancla.getAttribute("data-primero") ?? ancla.getAttribute("data-procesos") ?? "";
+  return ids.split(" ").filter(Boolean)[0] ?? null;
 }
 
 /**
@@ -36,7 +44,7 @@ export function marcasDeActivo(activo, anclas, familias) {
 
 /**
  * Aplica el proceso activo al mapa:
- * - `is-activo` en su etiqueta y su guía;
+ * - `is-activo` en su etiqueta, que es la única visible (2026-10-06);
  * - `data-activa` en su anclaje, con su familia: un anclaje compartido por
  *   categorías distintas toma la del activo mientras dure (spec §7.6);
  * - `is-resaltado` en su departamento;

@@ -166,6 +166,21 @@ export function departamentoCorto(nombre: string): string {
     .trim();
 }
 
+/**
+ * El departamento en la etiqueta flotante del mapa del hero, que mide 108
+ * unidades: abrevia los dos nombres que no caben. Solo para el mapa; la ficha
+ * conserva el nombre completo.
+ */
+const ABREVIATURAS_MAPA: Record<string, string> = {
+  "Valle del Cauca": "Valle",
+  "Norte de Santander": "N. Santander",
+};
+
+export function departamentoMapa(nombre: string): string {
+  const corto = departamentoCorto(nombre);
+  return ABREVIATURAS_MAPA[corto] ?? corto;
+}
+
 const ENTERO = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0, useGrouping: "always" });
 
 const COP = new Intl.NumberFormat("es-CO", {

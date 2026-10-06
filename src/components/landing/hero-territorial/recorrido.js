@@ -25,6 +25,15 @@ export function siguienteIndice(actual, total) {
   return (actual + 1) % total;
 }
 
+/**
+ * El índice a `paso` posiciones de `actual`, dando la vuelta en los dos
+ * sentidos: las flechas de la ficha (← −1, → +1) son circulares.
+ */
+export function indiceRelativo(actual, paso, total) {
+  if (total <= 0) return -1;
+  return (((actual + paso) % total) + total) % total;
+}
+
 /** `true` si el sistema pide reducir el movimiento. Falso en el servidor. */
 export function usePrefiereMenosMovimiento() {
   const [reduce, setReduce] = useState(false);
@@ -40,22 +49,19 @@ export function usePrefiereMenosMovimiento() {
 }
 
 /**
- * Mueve `onActivar` por los `ids` mientras `activo` sea verdadero. Al
- * reanudar sigue desde el siguiente al último resaltado; al cambiar la lista
- * (otro grupo) empieza por el primero.
+ * Mueve `onActivar` por los `ids` mientras `activo` sea verdadero, desde el
+ * proceso que está a la vista (`actual`): si el usuario avanzó con las
+ * flechas, el recorrido sigue desde ahí y no desde donde lo dejó él.
  */
-export function useRecorrido(ids, onActivar, activo) {
-  const indice = useRef(-1);
+export function useRecorrido(ids, onActivar, activo, actual = null) {
+  const actualRef = useRef(actual);
+  actualRef.current = actual;
   const clave = ids.join(" ");
-  useEffect(() => {
-    indice.current = -1;
-  }, [clave]);
   useEffect(() => {
     if (!activo || ids.length < 2) return undefined;
     const t = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      indice.current = siguienteIndice(indice.current, ids.length);
-      onActivar(ids[indice.current]);
+      onActivar(ids[siguienteIndice(ids.indexOf(actualRef.current), ids.length)]);
     }, INTERVALO_RECORRIDO);
     return () => clearInterval(t);
     // `clave` resume `ids`: una lista nueva con los mismos ids no reinicia.

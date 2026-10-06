@@ -51,11 +51,31 @@ describe("ColombiaChoropleth en modo selección", () => {
       expect(html).toContain(`href="${p.href}"`);
       expect(html).toContain(`aria-label="Ver ficha del proceso ${p.numeroProceso}: ${p.objeto}"`);
     }
-    expect(html.match(/class="clr-mapa__etq"/g)).toHaveLength(5);
+    // Cinco enlaces en el DOM; solo el primero sale visible (is-activo) y el
+    // cliente conmuta la clase (spec 2026-10-06 §3.2).
+    expect(html.match(/class="clr-mapa__etq( is-activo)?"/g)).toHaveLength(5);
+    expect(html.match(/class="clr-mapa__etq is-activo"/g)).toHaveLength(1);
+    expect(html).toContain('class="clr-mapa__etq is-activo" data-proceso="CO1.REQ.1"');
+  });
+
+  it("el país ocupa el panel: viewBox ajustado, sin guías ni columnas de etiquetas", () => {
+    expect(html).toContain('viewBox="-8 0 436 520"');
+    expect(html).toContain('preserveAspectRatio="xMidYMid meet"');
+    expect(html).not.toContain("clr-mapa__guia");
+  });
+
+  it("cada anclaje tiene un área de impacto que apunta al primer proceso de su departamento", () => {
+    expect(html).toContain('class="clr-mapa__ancla-zona" data-ancla="76" data-primero="CO1.REQ.1"');
+    expect(html.match(/class="clr-mapa__ancla-zona"/g)).toHaveLength(4);
+    expect(html).toMatch(/class="clr-mapa__ancla-zona"[^>]* r="12"/);
+    // No entran en el recorrido con teclado.
+    expect(html).not.toMatch(/clr-mapa__ancla[^>]*tabindex/);
   });
 
   it("la etiqueta dice departamento y presupuesto abreviado; sin presupuesto, lo dice", () => {
-    expect(html).toContain(">Valle del Cauca<");
+    // Abreviado solo en la etiqueta (departamentoMapa).
+    expect(html).toContain(">Valle<");
+    expect(html).not.toContain(">Valle del Cauca<");
     expect(html).toContain(">$980 M<");
     expect(html).toContain(">Sin presupuesto<");
     expect(html).toContain(">San Andrés<");

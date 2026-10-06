@@ -163,3 +163,33 @@ export function colocarEtiquetas(entradas: { id: string; dpto: string }[]): Etiq
 
   return entradas.flatMap((e) => colocadas.get(e.id) ?? []);
 }
+
+/*
+ * ── Etiqueta flotante (hero con ficha central, spec 2026-10-06) ─────────────
+ *
+ * Desde el 2026-10-06 el hero no pinta columnas de etiquetas: el país ocupa el
+ * panel entero y solo se ve la etiqueta del proceso activo, junto a su
+ * anclaje. Las columnas de arriba (`colocarEtiquetas`, `X_COLUMNA`) se
+ * conservan por si otro mapa las necesita.
+ */
+
+/** El `viewBox` del mapa del hero: el país con un margen mínimo. */
+export const VIEWBOX_SELECCION = { x: -8, y: 0, ancho: ANCHO_MAPA + 16, alto: ALTO_MAPA } as const;
+export const ANCHO_FLOTANTE = 108;
+export const ALTO_FLOTANTE = 40;
+/** Distancia entre el anclaje y el borde de la caja. */
+const SEPARACION_FLOTANTE = 14;
+/** A partir de esta x, la caja va a la izquierda del anclaje (el oriente). */
+const X_CAMBIO_LADO = 300;
+
+/**
+ * La esquina superior izquierda de la etiqueta flotante de un anclaje: a la
+ * derecha del punto en casi todo el país, a la izquierda en el oriente para no
+ * salirse del lienzo, y siempre dentro de él en vertical.
+ */
+export function colocarEtiquetaFlotante(ax: number, ay: number): { x0: number; y0: number } {
+  const x0 =
+    ax > X_CAMBIO_LADO ? ax - SEPARACION_FLOTANTE - ANCHO_FLOTANTE : ax + SEPARACION_FLOTANTE;
+  const y0 = Math.min(Math.max(ay - ALTO_FLOTANTE / 2, 4), ALTO_MAPA - ALTO_FLOTANTE - 4);
+  return { x0, y0 };
+}

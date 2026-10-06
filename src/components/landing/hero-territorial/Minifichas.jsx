@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import {
   estadoVisible,
@@ -12,9 +11,10 @@ import {
 import { frase, titulo } from "@/src/components/landing/texto";
 
 /**
- * Las minifichas del hero: hasta cinco procesos reales, en una lista (spec
- * 2026-10-04-hero-cinco-minifichas §6). Son la alternativa textual completa al
- * mapa: todo lo que dice una etiqueta del mapa está aquí, y más.
+ * La ficha del hero: el proceso activo del grupo visible, en una lista de uno
+ * (spec 2026-10-06-hero-ficha-central §2; hasta entonces eran cinco tarjetas
+ * en fila). Es la alternativa textual completa al mapa: todo lo que dice la
+ * etiqueta del mapa está aquí, y más.
  *
  * Cada tarjeta tiene **un** enlace, «Ver ficha →», que se estira sobre la
  * tarjeta entera con un pseudoelemento: toda la tarjeta se puede pulsar sin
@@ -115,7 +115,7 @@ function IconoFamilia({ familia }) {
  * familia, objeto y entidad; pastillas de estado y categoría; un panel con
  * lugar y presupuesto; y un pie con el número de proceso y «Ver ficha →».
  */
-export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) {
+export function Minificha({ proceso: p, activo = false }) {
   const familia = familiaDe(p.tipoProyecto);
   const objeto = frase(p.objeto);
   const entidad = titulo(p.entidad) || "Entidad no disponible";
@@ -126,10 +126,6 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
       data-proceso={p.id}
       data-familia={familia}
       data-activo={activo ? "" : undefined}
-      onPointerEnter={() => onActivar(p.id)}
-      onPointerLeave={() => onActivar(null)}
-      onFocus={() => onActivar(p.id)}
-      onBlur={() => onActivar(null)}
     >
       <article aria-labelledby={`aq-mini-${p.id}`}>
         <div className="aqMiniCab">
@@ -189,52 +185,14 @@ export function Minificha({ proceso: p, activo = false, onActivar = () => {} }) 
 }
 
 /**
- * En pantallas táctiles no hay puntero que señale: la tarjeta que queda a la
- * vista en la fila desplazable es la activa, y el mapa la marca. Solo cuando la
- * fila de verdad se desplaza; nunca mueve la página.
+ * Una sola ficha, siempre con el aspecto activo: es el proceso que marcan el
+ * mapa y la navegación. Nunca queda vacía mientras haya procesos.
  */
-function useActivarAlDesplazar(listaRef, onActivar) {
-  useEffect(() => {
-    const lista = listaRef.current;
-    if (!lista || typeof IntersectionObserver === "undefined" || !window.matchMedia) return;
-    if (!window.matchMedia("(hover: none)").matches) return;
-    const visibles = new Map();
-    const obs = new IntersectionObserver(
-      (entradas) => {
-        if (lista.scrollWidth <= lista.clientWidth + 1) return;
-        for (const e of entradas)
-          visibles.set(e.target.getAttribute("data-proceso"), e.intersectionRatio);
-        let mejor = null;
-        let ratio = 0.6;
-        for (const [id, r] of visibles) {
-          if (r >= ratio) {
-            mejor = id;
-            ratio = r;
-          }
-        }
-        if (mejor) onActivar(mejor);
-      },
-      { root: lista, threshold: [0, 0.6, 0.9, 1] }
-    );
-    for (const li of lista.querySelectorAll("[data-proceso]")) obs.observe(li);
-    return () => obs.disconnect();
-  }, [listaRef, onActivar]);
-}
-
-export default function Minifichas({ procesos, activo = null, onActivar = () => {} }) {
-  const listaRef = useRef(null);
-  useActivarAlDesplazar(listaRef, onActivar);
+export default function Minifichas({ proceso }) {
   return (
-    <ul
-      ref={listaRef}
-      className="aqMinifichas"
-      data-n={procesos.length}
-      // Sin título visible: el nombre de la lista va en aria-label.
-      aria-label="Procesos para explorar"
-    >
-      {procesos.map((p) => (
-        <Minificha key={p.id} proceso={p} activo={activo === p.id} onActivar={onActivar} />
-      ))}
+    // Sin título visible: el nombre de la lista va en aria-label.
+    <ul className="aqMinifichas" aria-label="Proceso para explorar">
+      <Minificha key={proceso.id} proceso={proceso} activo />
     </ul>
   );
 }

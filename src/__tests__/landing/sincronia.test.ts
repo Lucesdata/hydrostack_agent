@@ -11,6 +11,18 @@ describe("procesoDesdeObjetivo", () => {
     expect(procesoDesdeObjetivo({ closest: () => etiqueta })).toBe("CO1.REQ.1");
   });
 
+  it("sobre un anclaje o su zona, el primer proceso de su departamento", () => {
+    const zona = { getAttribute: (n: string) => (n === "data-primero" ? "CO1.REQ.4" : null) };
+    const ancla = {
+      getAttribute: (n: string) => (n === "data-procesos" ? "CO1.REQ.1 CO1.REQ.4" : null),
+    };
+    const sobre = (el: unknown) => ({
+      closest: (sel: string) => (sel === "[data-ancla]" ? el : null),
+    });
+    expect(procesoDesdeObjetivo(sobre(zona))).toBe("CO1.REQ.4");
+    expect(procesoDesdeObjetivo(sobre(ancla))).toBe("CO1.REQ.1");
+  });
+
   it("sobre un departamento o el hueco del mapa, ninguno", () => {
     expect(procesoDesdeObjetivo({ closest: () => null })).toBeNull();
     expect(procesoDesdeObjetivo(null)).toBeNull();
