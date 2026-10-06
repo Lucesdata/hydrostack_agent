@@ -59,7 +59,10 @@ export default function Vitrina({
   // Con el filtro de etapa no son oportunidades: sin Radar (su panel invita a
   // ofertar) ni encaje con el perfil.
   const porEtapa = pagina.pestana === "abiertos" && !!pagina.filtros.etapa;
-  const conRadar = pagina.pestana === "abiertos" && detalles.length > 0 && !porEtapa;
+  // Ni el filtro de etapa ni la búsqueda por número (que también encuentra
+  // cerrados y contratados) son solo oportunidades: sin Radar ni encaje.
+  const sinOportunidades = porEtapa || (pagina.pestana === "abiertos" && !!pagina.filtros.numero);
+  const conRadar = pagina.pestana === "abiertos" && detalles.length > 0 && !sinOportunidades;
   const totalPaginas = Math.max(1, Math.ceil(pagina.total / pagina.porPagina));
   const filtrado = pagina.pestana === "abiertos" && hayFiltros(pagina.filtros);
   const numero = pagina.pestana === "abiertos" ? pagina.filtros.numero : null;
@@ -151,7 +154,7 @@ export default function Vitrina({
           </div>
         ) : (
           <ProcesosCuenta ids={pagina.items.map((p) => p.secopProcesoId)}>
-            {porEtapa ? (
+            {sinOportunidades ? (
               rejilla
             ) : (
               <ProveedorEncaje ids={pagina.items.map((p) => p.secopProcesoId)}>
