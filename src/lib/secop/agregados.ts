@@ -11,7 +11,7 @@
  * puede depender de que un tercero responda.
  */
 
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { geografia, proceso } from "../db/schema";
 import { TIPOS_PROYECTO, TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
@@ -23,17 +23,26 @@ import { ESTADOS_ABIERTO } from "./estados-abierto";
 export { slugificar };
 
 /**
- * Qué cuenta como "abierto ahora".
+ * Qué cuenta como "abierto ahora": el proceso **recibe ofertas hoy**.
  *
- * `estado_apertura = 'Abierto'` a secas NO sirve: son 68.563 procesos e incluye
- * los ya seleccionados, evaluados y cancelados, porque ese campo describe la
- * ventana de recepción y no el estado del trámite. Cruzado con
- * `estado_actual in ('Publicado','Abierto')` quedan 35.222, que sí son los que
- * un oferente puede mirar hoy.
+ * Tres condiciones, y las tres hacen falta:
+ * - `estado_apertura = 'Abierto'`. A secas no sirve: incluye los ya
+ *   seleccionados, evaluados y cancelados, porque ese campo describe la ventana
+ *   de recepción y no el estado del trámite.
+ * - `estado_actual in ('Publicado','Abierto')`.
+ * - **`fecha_recepcion` igual o posterior a hoy en Colombia.** Medido en la base
+ *   viva el 2026-10-05 (spec 2026-10-05-ficha-viva-ciclo-de-vida, M7–M9): con
+ *   solo las dos primeras salían 36.088 «abiertos», el 81 % publicados antes de
+ *   2026 (414 de 2015) y el 98 % de «Contratación régimen especial» sin fecha de
+ *   recepción, que el SECOP deja en «Publicado / Abierto» para siempre aunque se
+ *   contraten por dentro. Las modalidades competitivas traen la fecha siempre.
+ *   Con recepción vigente eran 128. Sin fecha no se afirma que se pueda ofertar.
  *
  * Vive aquí y se exporta porque el mapa, la faceta, la vitrina y las rutas
  * tienen que contar EXACTAMENTE lo mismo: si cada uno define "abierto" a su
- * manera, la portada enseña cuatro cifras distintas del mismo hecho.
+ * manera, la portada enseña cuatro cifras distintas del mismo hecho. Su espejo
+ * en JavaScript, para lo que corre en el navegador, es `recibeOfertas()` de
+ * `estados-abierto.ts`.
  */
 export { ESTADOS_ABIERTO };
 
@@ -41,7 +50,10 @@ export function condicionAbierto() {
   return and(
     isNull(proceso.deletedAt),
     eq(proceso.estadoApertura, "Abierto"),
-    inArray(proceso.estadoActual, [...ESTADOS_ABIERTO])
+    inArray(proceso.estadoActual, [...ESTADOS_ABIERTO]),
+    // `fecha_recepcion` es DATE: el día de calendario, que cierra al final del
+    // día en Colombia. NULL no pasa (`>=` con NULL es desconocido).
+    gte(proceso.fechaRecepcion, sql`(now() at time zone 'America/Bogota')::date`)
   );
 }
 

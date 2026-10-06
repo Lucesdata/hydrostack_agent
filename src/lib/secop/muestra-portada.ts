@@ -32,7 +32,8 @@ export const N_PROCESOS_PORTADA = 5;
 
 /**
  * Elegibles (spec §5.2): abiertos según `condicionAbierto()` —la misma regla del
- * mapa y las facetas, sin deducir apertura de una fecha ausente—, con número de
+ * mapa y las facetas: recepción de ofertas vigente, sin deducir apertura de una
+ * fecha ausente—, con número de
  * proceso y objeto publicados, un id con la forma que resuelve la ficha y un
  * departamento que el mapa sabe anclar. La ingesta ya garantiza que es de agua.
  */
@@ -46,6 +47,7 @@ export async function muestraPortada(n = N_PROCESOS_PORTADA): Promise<ProcesoPor
       entidadNombre: entidad.nombre,
       estadoActual: proceso.estadoActual,
       estadoApertura: proceso.estadoApertura,
+      fechaRecepcion: proceso.fechaRecepcion,
       tipoProyecto: proceso.tipoProyecto,
       valorEstimado: proceso.valorEstimado,
       departamentoCodigo: geografia.departamentoCodigo,

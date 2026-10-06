@@ -38,6 +38,8 @@ beforeAll(async () => {
     fechaPublicacion: "2026-09-01",
     estadoApertura: "Abierto",
     estadoActual: "Publicado",
+    // Abierto = recibe ofertas: hace falta una recepción vigente (condicionAbierto).
+    fechaRecepcion: "2099-12-31",
   };
   const cerrado = { estadoApertura: "Cerrado", estadoActual: "Seleccionado" };
   await db.insert(proceso).values([

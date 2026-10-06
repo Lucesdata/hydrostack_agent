@@ -14,7 +14,7 @@ import {
   TIPO_PROYECTO,
   type TipoProyecto,
 } from "../classify/tipo-proyecto";
-import { ESTADOS_ABIERTO } from "../secop/estados-abierto";
+import { recibeOfertas } from "../secop/estados-abierto";
 import { montoConDato } from "../secop/monto";
 import { idDesdeSlug, slugDeProceso } from "../secop/slug";
 
@@ -28,7 +28,10 @@ export interface ProcesoPortada {
   numeroProceso: string;
   objeto: string;
   entidad: string | null;
-  /** `true` solo si cumple la definición de abierto de `condicionAbierto()`. */
+  /**
+   * `true` solo si recibe ofertas hoy: la definición de `condicionAbierto()`,
+   * fecha de recepción vigente incluida (`recibeOfertas()`).
+   */
   abierto: boolean;
   /** El estado del trámite tal como lo publica la fuente (`estado_actual`). */
   estado: string | null;
@@ -60,6 +63,8 @@ export interface FilaProcesoPortada {
   entidadNombre: string | null;
   estadoActual: string | null;
   estadoApertura: string | null;
+  /** `fecha_recepcion` (DATE como `AAAA-MM-DD`); sin ella no se afirma abierto. */
+  fechaRecepcion?: string | null;
   tipoProyecto: string | null;
   valorEstimado: string | number | null;
   departamentoCodigo: string | null;
@@ -84,7 +89,10 @@ const normal = (s: string) =>
  * departamento. La consulta ya filtra lo mismo; esto es la segunda puerta, y la
  * que se prueba sin base (spec §10, datos parciales).
  */
-export function procesoPortadaDesdeFila(f: FilaProcesoPortada): ProcesoPortada | null {
+export function procesoPortadaDesdeFila(
+  f: FilaProcesoPortada,
+  hoy: Date = new Date()
+): ProcesoPortada | null {
   const id = texto(f.secopProcesoId);
   const numeroProceso = texto(f.referencia);
   const objeto = texto(f.objeto);
@@ -123,10 +131,10 @@ export function procesoPortadaDesdeFila(f: FilaProcesoPortada): ProcesoPortada |
     numeroProceso,
     objeto,
     entidad: texto(f.entidadNombre),
-    abierto:
-      f.estadoApertura === "Abierto" &&
-      !!estado &&
-      (ESTADOS_ABIERTO as readonly string[]).includes(estado),
+    abierto: recibeOfertas(
+      { estadoApertura: f.estadoApertura, estadoActual: estado, fechaRecepcion: f.fechaRecepcion },
+      hoy
+    ),
     estado,
     tipoProyecto,
     contextoTipo,

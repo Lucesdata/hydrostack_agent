@@ -19,7 +19,12 @@ import { entidad, geografia, proceso } from "@/src/lib/db/schema";
 import { entidadesCompradoras } from "@/src/lib/secop/compradores";
 
 let n = 0;
-const abierto = { estadoApertura: "Abierto", estadoActual: "Publicado" } as const;
+// Abierto = recibe ofertas: apertura, estado y recepción vigente (condicionAbierto).
+const abierto = {
+  estadoApertura: "Abierto",
+  estadoActual: "Publicado",
+  fechaRecepcion: "2099-12-31",
+} as const;
 
 beforeAll(async () => {
   await migrate(db as never, { migrationsFolder: path.resolve(__dirname, "../../../drizzle") });
@@ -54,6 +59,9 @@ beforeAll(async () => {
     p(alcaldia.id, { estadoApertura: "Cerrado", estadoActual: "Adjudicado" }),
     p(alcaldia.id, { estadoApertura: "Cerrado", estadoActual: "Adjudicado" }),
     p(alcaldia.id, { estadoApertura: "Cerrado", estadoActual: "Adjudicado" }),
+    // «Abiertos» sin recepción vigente (régimen especial sin fecha, o vencida): no cuentan.
+    p(alcaldia.id, { fechaRecepcion: null }),
+    p(alcaldia.id, { fechaRecepcion: "2020-01-01" }),
   ]);
 });
 
