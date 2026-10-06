@@ -6,6 +6,7 @@ import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerri
 import { aplicarGrupo } from "@/src/components/landing/hero-territorial/sincronia";
 import {
   INTERVALO_RECORRIDO,
+  indiceRelativo,
   siguienteIndice,
 } from "@/src/components/landing/hero-territorial/recorrido";
 import {
@@ -113,6 +114,19 @@ describe("recorrido", () => {
     expect(siguienteIndice(0, 0)).toBe(-1);
   });
 
+  it("las flechas de la ficha son circulares en los dos sentidos", () => {
+    expect(indiceRelativo(0, -1, 5)).toBe(4);
+    expect(indiceRelativo(4, 1, 5)).toBe(0);
+    expect(indiceRelativo(2, 1, 5)).toBe(3);
+    expect(indiceRelativo(2, -1, 5)).toBe(1);
+    expect(indiceRelativo(0, 1, 0)).toBe(-1);
+  });
+
+  it("el recorrido avanza desde el proceso a la vista, no desde su propio contador", () => {
+    const fuente = readFileSync("src/components/landing/hero-territorial/recorrido.js", "utf8");
+    expect(fuente).toMatch(/ids\.indexOf\(actualRef\.current\)/);
+  });
+
   it("da tiempo a leer: 5 s por paso (decisión del usuario)", () => {
     expect(INTERVALO_RECORRIDO).toBe(5000);
   });
@@ -132,9 +146,11 @@ describe("recorrido", () => {
 });
 
 describe("hero con varios grupos", () => {
-  it("muestra cinco tarjetas, «Ver otros 5 procesos» y «Pausar recorrido»", () => {
+  it("muestra la ficha del primero, cinco puntos, «Ver otros 5 procesos» y «Pausar recorrido»", () => {
     const html = renderToStaticMarkup(<HeroTerritorial procesos={doce} />);
-    expect(html.match(/<li class="aqMini"/g)).toHaveLength(5);
+    expect(html.match(/<li class="aqMini"/g)).toHaveLength(1);
+    expect(html).toContain(`data-proceso="${doce[0].id}"`);
+    expect(html.match(/aria-label="Ver proceso \d"/g)).toHaveLength(5);
     expect(html).toMatch(/Ver otros (<!-- -->)?5(<!-- -->)? procesos/);
     expect(html).toContain("Pausar recorrido");
     for (const p of doce.slice(5)) expect(html).not.toContain(`href="${p.href}"`);

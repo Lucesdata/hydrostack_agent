@@ -6,45 +6,55 @@ import { FAMILIAS } from "@/src/lib/classify/tipo-color";
 import { departamentoCorto, familiaDe, presupuestoCorto } from "@/src/lib/landing/proceso-portada";
 import Minifichas, { categoriaDe } from "./Minifichas";
 import { procesoDesdeObjetivo, useActivoEnMapa, useGrupoEnMapa } from "./sincronia";
-import { usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
+import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
 import { familiasPorDepartamento, gruposDe } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
 import BuscadorGuiado from "./BuscadorGuiado";
 
 /**
- * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con cinco
- * minifichas (spec 2026-10-04-hero-cinco-minifichas).
+ * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con una
+ * ficha central (spec 2026-10-06-hero-ficha-central; sustituye a la fila de
+ * cinco minifichas del 2026-10-04).
  *
- * Arriba, el mensaje a la izquierda y el mapa a la derecha; debajo, a todo el
- * ancho, sin título (2026-10-04; la lista se nombra con aria-label). La leyenda de colores va pequeña bajo el
- * mapa, dentro de su panel. Mapa y tarjetas son **la misma selección**:
- * llegan en `procesos` desde el servidor (`muestraPortada()`), y el mapa del
- * servidor se dibujó con esos mismos objetos. Aquí no se sortea ni se pide nada.
+ * Dos columnas: a la izquierda el mensaje, el buscador, **una** ficha —la del
+ * proceso activo— y su navegación (← · puntos · «n de 5» · →); a la derecha el
+ * mapa, con una sola etiqueta flotante junto al anclaje del activo, y la
+ * leyenda. Mapa y ficha son **la misma selección**: llegan en `procesos` desde
+ * el servidor (`muestraPortada()`), y el mapa del servidor se dibujó con esos
+ * mismos objetos. Aquí no se sortea ni se pide nada.
  *
- * Un solo estado compartido, el proceso activo (su id): señalar o enfocar una
- * tarjeta resalta su etiqueta, su anclaje y su departamento; señalar o enfocar
- * una etiqueta del mapa resalta su tarjeta. Nada de eso cambia la selección ni
- * mueve la página.
+ * Un solo estado compartido, el proceso activo (su id), y **siempre hay uno**
+ * mientras el grupo no esté vacío: por defecto el primero, también al cambiar
+ * de grupo o pausar. Lo cambian las flechas y los puntos, señalar un anclaje o
+ * enfocar una etiqueta del mapa, y el recorrido. Soltar el puntero no lo
+ * borra: la ficha nunca queda vacía.
  *
- * Desde el 2026-10-04 (opción D) `procesos` trae la muestra entera —hasta 30—
- * y se ven de cinco en cinco: «Ver otros 5 procesos» enciende el grupo
- * siguiente en las tarjetas y en el mapa a la vez (el mapa ya los trae
- * dibujados todos). Un recorrido resalta por turnos los cinco visibles cada
- * 5 s (`recorrido.js`); se detiene al señalar o enfocar algo del hero, con
- * «Pausar recorrido» y si el sistema pide reducir el movimiento.
+ * `procesos` trae la muestra entera —hasta 30— y se ven de cinco en cinco:
+ * «Ver otros 5 procesos» enciende el grupo siguiente en la ficha y en el mapa a
+ * la vez (el mapa ya los trae dibujados todos). Un recorrido avanza la ficha
+ * cada 5 s (`recorrido.js`); se detiene al señalar o enfocar la ficha o el
+ * mapa, con «Pausar recorrido» y si el sistema pide reducir el movimiento.
  *
  * `procesos === null` es un error de carga (la consulta falló al regenerar la
  * portada); `[]`, que no hay candidatos. No hay estado «cargando»: la selección
  * viaja en el HTML.
  */
 export default function HeroTerritorial({ mapa = null, procesos = null }) {
-  const [activo, setActivo] = useState(null);
+  // `null` = el primero del grupo visible. Se guarda la elección y se deriva el
+  // activo: así cambiar de grupo o pausar vuelve al primero sin un efecto.
+  const [eleccion, setActivo] = useState(null);
   const onActivar = useCallback((id) => setActivo(id), []);
   const mapaRef = useRef(null);
   const muestra = useMemo(() => procesos ?? [], [procesos]);
   const grupos = useMemo(() => gruposDe(muestra), [muestra]);
   const [grupo, setGrupo] = useState(0);
-  const lista = grupos[grupo] ?? [];
+  const lista = useMemo(() => grupos[grupo] ?? [], [grupos, grupo]);
+  const posicion = Math.max(
+    0,
+    lista.findIndex((p) => p.id === eleccion)
+  );
+  const procesoActivo = lista[posicion] ?? null;
+  const activo = procesoActivo?.id ?? null;
   const familias = useMemo(
     () => new Map(muestra.map((p) => [p.id, familiaDe(p.tipoProyecto)])),
     [muestra]
@@ -60,7 +70,7 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
   const menosMovimiento = usePrefiereMenosMovimiento();
   const ids = useMemo(() => lista.map((p) => p.id), [lista]);
   const hayRecorrido = !menosMovimiento && ids.length > 1;
-  useRecorrido(ids, onActivar, hayRecorrido && !pausado && !interactuando);
+  useRecorrido(ids, onActivar, hayRecorrido && !pausado && !interactuando, activo);
   const [aviso, setAviso] = useState("");
   const verOtros = () => {
     const siguiente = (grupo + 1) % grupos.length;
@@ -84,12 +94,23 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
     setPausado((p) => !p);
     setActivo(null);
   };
+  // Navegación manual: se anuncia (el recorrido no), con la posición y el
+  // objeto del proceso nuevo.
+  const irA = (indice) => {
+    const p = lista[indice];
+    if (!p) return;
+    setActivo(p.id);
+    setAviso(`Proceso ${indice + 1} de ${lista.length}: ${p.objeto ?? p.numeroProceso}.`);
+  };
   const siguienteTamano = grupos.length > 1 ? grupos[(grupo + 1) % grupos.length].length : 0;
-  const alSenalarMapa = (e) => setActivo(procesoDesdeObjetivo(e.target));
-  const alSoltarMapa = () => setActivo(null);
-  const procesoActivo = lista.find((p) => p.id === activo) ?? null;
+  // Señalar el fondo del mapa no borra el activo: solo lo cambian una etiqueta
+  // o un anclaje.
+  const alSenalarMapa = (e) => {
+    const id = procesoDesdeObjetivo(e.target);
+    if (id) setActivo(id);
+  };
   // La leyenda dice las tres familias siempre; «sin subsistema» solo si hay
-  // alguna tarjeta así a la vista (spec §7.8).
+  // algún proceso así en el grupo visible (spec §7.8).
   const conSinTipo = lista.some((p) => familiaDe(p.tipoProyecto) === "otros");
   const leyenda = FAMILIAS.filter((f) => f.familia !== "otros" || conSinTipo);
 
@@ -105,6 +126,77 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
               Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha.
             </p>
             <BuscadorGuiado />
+            <div className={styles.procesos} {...pausaAlInteractuar}>
+              {procesos == null ? (
+                <p className={styles.notaProcesos} role="status">
+                  No pudimos cargar los procesos. Inténtalo de nuevo.
+                </p>
+              ) : !procesoActivo ? (
+                <p className={styles.notaProcesos} role="status">
+                  No hay procesos disponibles para mostrar en este momento.
+                </p>
+              ) : (
+                <>
+                  <Minifichas proceso={procesoActivo} />
+                  {lista.length > 1 ? (
+                    <div className={styles.navFicha}>
+                      <button
+                        type="button"
+                        className={styles.flecha}
+                        aria-label="Proceso anterior"
+                        onClick={() => irA(indiceRelativo(posicion, -1, lista.length))}
+                      >
+                        <span aria-hidden="true">←</span>
+                      </button>
+                      <div className={styles.puntos}>
+                        {lista.map((p, i) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className={styles.punto}
+                            data-activo={i === posicion ? "" : undefined}
+                            aria-label={`Ver proceso ${i + 1}`}
+                            aria-current={i === posicion ? "true" : undefined}
+                            onClick={() => irA(i)}
+                          />
+                        ))}
+                      </div>
+                      <p className={styles.posicion}>
+                        {posicion + 1} de {lista.length}
+                      </p>
+                      <button
+                        type="button"
+                        className={styles.flecha}
+                        aria-label="Proceso siguiente"
+                        onClick={() => irA(indiceRelativo(posicion, 1, lista.length))}
+                      >
+                        <span aria-hidden="true">→</span>
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              )}
+              <div className={styles.procesosPie}>
+                {grupos.length > 1 ? (
+                  <button type="button" className={styles.botonOtros} onClick={verOtros}>
+                    <span aria-hidden="true">↻</span> Ver otros {siguienteTamano} procesos
+                  </button>
+                ) : null}
+                {hayRecorrido ? (
+                  <button type="button" className={styles.botonPausa} onClick={pausar}>
+                    {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
+                  </button>
+                ) : null}
+                <Link className={styles.enlaceTodos} href="/licitaciones">
+                  Ver todas las fichas <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+              {/* Solo al pulsar «Ver otros» o navegar a mano: el recorrido no
+                  se anuncia. */}
+              <p className="sr-only" role="status">
+                {aviso}
+              </p>
+            </div>
           </div>
 
           <div className={styles.mapPanel} {...pausaAlInteractuar}>
@@ -112,27 +204,18 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
               ref={mapaRef}
               className={styles.map}
               onPointerOver={alSenalarMapa}
-              onPointerLeave={alSoltarMapa}
               onFocus={alSenalarMapa}
-              onBlur={alSoltarMapa}
             >
               {mapa}
             </div>
-            {/* En móvil las etiquetas del mapa no caben: esta línea dice dónde
+            {/* En móvil la etiqueta del mapa se oculta: esta línea dice dónde
                 está y cuánto vale el proceso activo. Oculta al lector de
-                pantalla, que ya tiene las tarjetas, para no anunciar cada
-                desplazamiento. */}
-            {lista.length > 0 ? (
+                pantalla, que ya tiene la ficha. */}
+            {procesoActivo ? (
               <p className={styles.previa} aria-hidden="true">
-                {procesoActivo ? (
-                  <>
-                    <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}
-                    {presupuestoCorto(procesoActivo.presupuesto)} ·{" "}
-                    {categoriaDe(procesoActivo.tipoProyecto)}
-                  </>
-                ) : (
-                  "Desliza las tarjetas para ver cada proceso en el mapa."
-                )}
+                <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}
+                {presupuestoCorto(procesoActivo.presupuesto)} ·{" "}
+                {categoriaDe(procesoActivo.tipoProyecto)}
               </p>
             ) : null}
             {/* Solo los colores, discretos, bajo el mapa (2026-10-04). Las notas
@@ -150,38 +233,6 @@ export default function HeroTerritorial({ mapa = null, procesos = null }) {
             {!mapa ? (
               <p className={styles.noData}>El mapa no está disponible en este momento.</p>
             ) : null}
-          </div>
-          <div className={styles.procesos} {...pausaAlInteractuar}>
-            {procesos == null ? (
-              <p className={styles.notaProcesos} role="status">
-                No pudimos cargar los procesos. Inténtalo de nuevo.
-              </p>
-            ) : lista.length === 0 ? (
-              <p className={styles.notaProcesos} role="status">
-                No hay procesos disponibles para mostrar en este momento.
-              </p>
-            ) : (
-              <Minifichas procesos={lista} activo={activo} onActivar={onActivar} />
-            )}
-            <div className={styles.procesosPie}>
-              {grupos.length > 1 ? (
-                <button type="button" className={styles.botonOtros} onClick={verOtros}>
-                  <span aria-hidden="true">↻</span> Ver otros {siguienteTamano} procesos
-                </button>
-              ) : null}
-              {hayRecorrido ? (
-                <button type="button" className={styles.botonPausa} onClick={pausar}>
-                  {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
-                </button>
-              ) : null}
-              <Link className={styles.enlaceTodos} href="/licitaciones">
-                Ver todas las fichas <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-            {/* Solo al pulsar «Ver otros»: el recorrido no se anuncia. */}
-            <p className="sr-only" role="status">
-              {aviso}
-            </p>
           </div>
         </div>
       </div>

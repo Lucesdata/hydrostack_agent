@@ -10,13 +10,14 @@ import {
 } from "@/src/lib/mapa/modelo";
 import { ALTO_ROTULO, ANCHO_ROTULO, MARGEN_ROTULOS, colocarRotulos } from "@/src/lib/mapa/rotulos";
 import {
-  ALTO_ETIQUETA,
-  ANCHO_ETIQUETA,
-  MARGEN_ETIQUETAS,
-  colocarEtiquetas,
+  ALTO_FLOTANTE,
+  ANCHO_FLOTANTE,
+  VIEWBOX_SELECCION,
+  anclaDe,
+  colocarEtiquetaFlotante,
 } from "@/src/lib/mapa/etiquetas-procesos";
 import {
-  departamentoCorto,
+  departamentoMapa,
   familiaDe,
   presupuestoCorto,
   type ProcesoPortada,
@@ -296,88 +297,95 @@ export { familiasPorDepartamento };
 
 /** Ancho aproximado de un texto de Inter, para no salirse de la caja. */
 const anchoTexto = (t: string, cuerpo: number) => t.length * cuerpo * 0.56;
-const TEXTO_X = 21;
-const TEXTO_UTIL = ANCHO_ETIQUETA - TEXTO_X - 8;
+const TEXTO_X = 18;
+const TEXTO_UTIL = ANCHO_FLOTANTE - TEXTO_X - 6;
 
-/** Las guías, los anclajes y las etiquetas de un grupo de procesos. */
+/**
+ * Los anclajes y las etiquetas de un grupo de procesos (hero con ficha
+ * central, 2026-10-06). Hay una etiqueta por proceso, flotando junto a su
+ * anclaje, pero solo se ve la del activo (`is-activo`; el resto va con
+ * `display: none` y no recibe foco): el cliente conmuta la clase y no hay que
+ * volver a pintar el SVG. La primera del grupo sale marcada desde el servidor,
+ * para que sin JavaScript también se vea una.
+ */
 function SenalesGrupo({ procesos }: { procesos: ProcesoPortada[] }) {
   const familias = familiasPorDepartamento(procesos);
-  const etiquetas = colocarEtiquetas(
-    procesos.map((p) => ({ id: p.id, dpto: p.departamentoCodigo }))
-  );
-  const porId = new Map(procesos.map((p) => [p.id, p]));
   // Un anclaje por departamento, con los ids que comparte.
   const anclas = new Map<string, { x: number; y: number; ids: string[] }>();
-  for (const e of etiquetas) {
-    const a = anclas.get(e.dpto) ?? { x: e.anclaX, y: e.anclaY, ids: [] };
-    a.ids.push(e.id);
-    anclas.set(e.dpto, a);
+  const conAncla: ProcesoPortada[] = [];
+  for (const p of procesos) {
+    const punto = anclaDe(p.departamentoCodigo);
+    if (!punto) continue;
+    conAncla.push(p);
+    const a = anclas.get(p.departamentoCodigo) ?? { x: punto[0], y: punto[1], ids: [] };
+    a.ids.push(p.id);
+    anclas.set(p.departamentoCodigo, a);
   }
   return (
     <>
-      <g aria-hidden="true" pointerEvents="none">
-        {etiquetas.map((e) => (
-          <line
-            key={e.id}
-            className="clr-mapa__guia"
-            data-proceso={e.id}
-            x1={e.guiaX}
-            y1={e.y}
-            x2={e.anclaX}
-            y2={e.anclaY}
-          />
-        ))}
+      {/* Los anclajes son también un control con el puntero: señalar uno activa
+          el primer proceso de su departamento (sincronia.js). No reciben foco:
+          por teclado se navega con las flechas de la ficha. */}
+      <g aria-hidden="true">
         {[...anclas].map(([dpto, a]) => (
-          <circle
-            key={dpto}
-            className="clr-mapa__ancla"
-            data-ancla={dpto}
-            data-procesos={a.ids.join(" ")}
-            data-familia={familias.get(dpto)}
-            cx={a.x}
-            cy={a.y}
-            r={4.2}
-          />
+          <g key={dpto}>
+            <circle
+              className="clr-mapa__ancla-zona"
+              data-ancla={dpto}
+              data-primero={a.ids[0]}
+              cx={a.x}
+              cy={a.y}
+              r={12}
+            />
+            <circle
+              className="clr-mapa__ancla"
+              data-ancla={dpto}
+              data-procesos={a.ids.join(" ")}
+              data-familia={familias.get(dpto)}
+              cx={a.x}
+              cy={a.y}
+              r={4.4}
+            />
+          </g>
         ))}
       </g>
-      {etiquetas.map((e) => {
-        const p = porId.get(e.id)!;
+      {conAncla.map((p, i) => {
+        const a = anclas.get(p.departamentoCodigo)!;
+        const { x0, y0 } = colocarEtiquetaFlotante(a.x, a.y);
         // El nombre del departamento sale de la fila del proceso, no del
         // archivo del DANE: así la etiqueta dice lo mismo que la tarjeta.
-        const lugar = departamentoCorto(p.departamento);
+        const lugar = departamentoMapa(p.departamento);
         const valor = presupuestoCorto(p.presupuesto);
-        const x0 = e.x - ANCHO_ETIQUETA / 2;
-        const y0 = e.y - ALTO_ETIQUETA / 2;
-        // Un nombre que no cabe se comprime un poco en vez de salirse.
+        // Un texto que no cabe se comprime un poco en vez de salirse.
         const ajuste = (t: string, cuerpo: number) =>
           anchoTexto(t, cuerpo) > TEXTO_UTIL
             ? { textLength: TEXTO_UTIL, lengthAdjust: "spacingAndGlyphs" as const }
             : {};
         return (
           <a
-            key={e.id}
+            key={p.id}
             href={p.href}
-            className="clr-mapa__etq"
+            className={`clr-mapa__etq${i === 0 ? " is-activo" : ""}`}
             data-proceso={p.id}
             data-familia={familiaDe(p.tipoProyecto)}
             // El mismo nombre accesible que el enlace de su tarjeta.
             aria-label={`Ver ficha del proceso ${p.numeroProceso}: ${frase(p.objeto)}`}
           >
-            <rect x={x0} y={y0} width={ANCHO_ETIQUETA} height={ALTO_ETIQUETA} rx={7} />
-            <circle className="clr-mapa__etq-punto" cx={x0 + 11} cy={y0 + 14} r={4.4} />
+            <rect x={x0} y={y0} width={ANCHO_FLOTANTE} height={ALTO_FLOTANTE} rx={6} />
+            <circle className="clr-mapa__etq-punto" cx={x0 + 9} cy={y0 + 13} r={3.8} />
             <text
               className="clr-mapa__etq-lugar"
               x={x0 + TEXTO_X}
-              y={y0 + 18}
-              {...ajuste(lugar, 13)}
+              y={y0 + 16}
+              {...ajuste(lugar, 11.5)}
             >
               {lugar}
             </text>
             <text
               className="clr-mapa__etq-valor"
               x={x0 + TEXTO_X}
-              y={y0 + 36}
-              {...ajuste(valor, 14.5)}
+              y={y0 + 33}
+              {...ajuste(valor, 13)}
             >
               {valor}
             </text>
@@ -408,7 +416,8 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
     <figure className="clr-mapa clr-mapa--seleccion">
       <svg
         className="clr-mapa__svg"
-        viewBox={`${-MARGEN_ETIQUETAS} 0 ${ANCHO_MAPA + 2 * MARGEN_ETIQUETAS} ${ALTO_MAPA}`}
+        viewBox={`${VIEWBOX_SELECCION.x} ${VIEWBOX_SELECCION.y} ${VIEWBOX_SELECCION.ancho} ${VIEWBOX_SELECCION.alto}`}
+        preserveAspectRatio="xMidYMid meet"
         role="group"
         // Nombre por aria-label y no por <title>: el <title> del SVG sale como
         // cartel al pasar el cursor por cualquier hueco del mapa.
@@ -418,13 +427,13 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
         <desc id="clr-mapa-desc">
           {primero.length === 0
             ? "No hay procesos marcados en el mapa."
-            : `${primero.length === 1 ? "Un proceso marcado" : `${primero.length} procesos marcados`} en el departamento de su entidad contratante, no en el lugar de la obra. La lista de procesos debajo del mapa tiene la misma información.`}
+            : `${primero.length === 1 ? "Un proceso marcado" : `${primero.length} procesos marcados`} en el departamento de su entidad contratante, no en el lugar de la obra. La ficha junto al mapa tiene la misma información.`}
         </desc>
         {continente.map((e) => (
           <Departamento key={e.dpto} entrada={e} familia={conFamilia(e)} />
         ))}
         {/* San Andrés y Providencia, con sus costas en detalle y a la misma
-            escala (recuadro-islas.ts). Sin transform: el anclaje y las guías
+            escala (recuadro-islas.ts). Sin transform: el anclaje y la etiqueta
             usan las mismas coordenadas que el resto del mapa. */}
         {sanAndres && (
           <g className="clr-mapa__islas">

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   departamentoCorto,
+  departamentoMapa,
   estadoVisible,
   familiaDe,
   presupuestoCorto,
@@ -184,6 +185,15 @@ describe("formatos", () => {
       "San Andrés"
     );
     expect(departamentoCorto("Norte de Santander")).toBe("Norte de Santander");
+  });
+
+  it("la etiqueta flotante abrevia Valle y Norte de Santander; el resto, igual", () => {
+    expect(departamentoMapa("Valle del Cauca")).toBe("Valle");
+    expect(departamentoMapa("Norte de Santander")).toBe("N. Santander");
+    expect(departamentoMapa("Archipiélago de San Andrés, Providencia y Santa Catalina")).toBe(
+      "San Andrés"
+    );
+    expect(departamentoMapa("Cundinamarca")).toBe("Cundinamarca");
   });
 
   it("sin tipo, la familia neutra; nunca «redes»", () => {

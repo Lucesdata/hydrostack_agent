@@ -5,7 +5,8 @@ import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerri
 import { procesoPortada } from "./fixtures-portada";
 
 /**
- * El hero con cinco minifichas (spec 2026-10-04-hero-cinco-minifichas). Se
+ * El hero con ficha central (spec 2026-10-06-hero-ficha-central; antes, cinco
+ * minifichas en fila). Se
  * renderiza el HTML que llega al navegador: es lo que ve quien no tiene JS y
  * lo que hidrata React.
  */
@@ -45,18 +46,33 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Opciones del mapa");
   });
 
-  it("cinco minifichas en una lista, cada una con su número y un solo enlace a su ficha", () => {
+  it("una sola ficha, la del primer proceso, activa, con su número y un solo enlace", () => {
+    expect(html).toContain('<ul class="aqMinifichas" aria-label="Proceso para explorar">');
+    expect(html.match(/<li class="aqMini"/g)).toHaveLength(1);
+    const [p] = cinco;
+    expect(html).toContain(`data-proceso="${p.id}" data-familia="potable" data-activo=""`);
     expect(html).toContain(
-      '<ul class="aqMinifichas" data-n="5" aria-label="Procesos para explorar">'
+      `<span class="sr-only">Proceso: </span><span translate="no">${p.numeroProceso}</span>`
     );
-    expect(html.match(/<li class="aqMini"/g)).toHaveLength(5);
-    for (const p of cinco) {
-      expect(html).toContain(
-        `<span class="sr-only">Proceso: </span><span translate="no">${p.numeroProceso}</span>`
-      );
-      expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
-      expect(html).toContain(`aria-label="Ver ficha del proceso ${p.numeroProceso}: ${p.objeto}"`);
-    }
+    expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
+    expect(html).toContain(`aria-label="Ver ficha del proceso ${p.numeroProceso}: ${p.objeto}"`);
+    for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}"`);
+  });
+
+  it("navegación de la ficha: ←, un punto por proceso, «1 de 5» y →", () => {
+    expect(html).toContain('aria-label="Proceso anterior"');
+    expect(html).toContain('aria-label="Proceso siguiente"');
+    for (const i of [1, 2, 3, 4, 5]) expect(html).toContain(`aria-label="Ver proceso ${i}"`);
+    expect(html.match(/aria-current="true"/g)).toHaveLength(1);
+    expect(html).toContain('data-activo="" aria-label="Ver proceso 1" aria-current="true"');
+    expect(html).toMatch(/>1(<!-- -->)? de (<!-- -->)?5</);
+    // La ficha y su navegación van en la columna del mensaje, antes del mapa.
+    expect(html.indexOf("Proceso siguiente")).toBeLessThan(html.indexOf('data-testid="mapa"'));
+  });
+
+  it("la línea del mapa en móvil dice el proceso activo, nunca un texto de espera", () => {
+    expect(html).toContain("<strong>Valle del Cauca</strong> · $2.450 M · Agua potable");
+    expect(html).not.toContain("Desliza las tarjetas");
   });
 
   it("orden de la minificha (opción B): objeto, entidad, estado, categoría, lugar, presupuesto, número, acceso", () => {
@@ -117,10 +133,14 @@ describe("HeroTerritorial", () => {
     expect(html).not.toMatch(/\b1 – 10\b|procesos abiertos por departamento/i);
   });
 
-  it("menos de cinco candidatos: solo los que hay, sin rellenos", () => {
+  it("menos de cinco candidatos: un punto por cada uno, sin rellenos; con uno, sin navegación", () => {
     const dos = renderToStaticMarkup(<HeroTerritorial procesos={cinco.slice(0, 2)} />);
-    expect(dos.match(/<li class="aqMini"/g)).toHaveLength(2);
+    expect(dos.match(/<li class="aqMini"/g)).toHaveLength(1);
+    expect(dos.match(/aria-label="Ver proceso \d"/g)).toHaveLength(2);
     expect(dos).not.toContain("EJEMPLO");
+    const uno = renderToStaticMarkup(<HeroTerritorial procesos={cinco.slice(0, 1)} />);
+    expect(uno.match(/<li class="aqMini"/g)).toHaveLength(1);
+    expect(uno).not.toContain("Proceso siguiente");
   });
 
   it("vacío y error se distinguen, sin tarjetas", () => {
