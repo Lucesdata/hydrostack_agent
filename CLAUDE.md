@@ -37,7 +37,15 @@ avance; con C4 el valor no se pinta como dato. Filtro de etapa en la vitrina
 (`?etapa=contratado|en_ejecucion|plazo_cumplido`, apagado por defecto, noindex):
 `condicionDeEtapa()` en `vitrina.ts` con semijoin sobre contratos firmados con
 NIT; la tarjeta pinta la etapa (`etapaCalculada`), sin Radar, sin encaje y sin
-adjudicatario. Lo que queda, en PENDIENTES §57. Spec y mediciones (completas) en
+adjudicatario. Lo que queda, en PENDIENTES §57.
+**Glosario (2026-10-06, rama `claude/ficha-glosario`, regla R7 «lenguaje
+simple»):** `src/lib/secop/glosario.ts` es la única fuente de definiciones de una
+línea (pliego, expediente, presupuesto oficial, modalidad, régimen especial,
+UNSPSC, NIT, habilitantes, causales, adenda, adición, prórroga…). La ficha cierra
+con «Palabras de esta ficha, explicadas» (`<details>`, sin JavaScript), que
+lista solo los términos que esa ficha usa (`terminosDeFicha()`), y explica UNSPSC
+y NIT junto al dato (`Dato def=…`, clase `.fi-def` con `--text-muted`). Toda
+palabra técnica nueva de la ficha se define ahí, no en el componente. Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.
 
 **Buscador guiado (2026-10-04). Unificado con la vitrina el 2026-10-05:** lo que
