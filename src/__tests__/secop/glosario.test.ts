@@ -18,6 +18,12 @@ const base: ContextoGlosario = {
 const nombres = (c: ContextoGlosario) => terminosDeFicha(c).map((d) => d.termino);
 
 describe("glosario", () => {
+  it("explica el RUP y las capacidades cuando la guía pública las nombra", () => {
+    const n = nombres({ ...base, conRequisitosGenerales: true });
+    expect(n).toContain("RUP");
+    expect(n).toContain("Capacidad financiera");
+    expect(n).toContain("Capacidad organizacional");
+  });
   it("cada término tiene una definición de una línea, sin punto suspensivo ni promesa", () => {
     for (const t of TERMINOS) {
       const d = GLOSARIO[t];

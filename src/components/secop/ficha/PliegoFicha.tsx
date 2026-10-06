@@ -2,6 +2,7 @@ import { formatCopFull } from "@/src/components/secop/format";
 import { subirPliegoDesdeFichaAction } from "@/src/lib/secop/pliego-actions";
 import type { OrigenCampo, PliegoFicha as Pliego } from "@/src/lib/secop/pliego-ficha";
 import { CUOTA_PLIEGOS, VENTANA_HORAS } from "@/src/lib/pliego/cuota-limites";
+import { fechaInstanteColombia } from "@/src/lib/secop/fecha-instante";
 import AvisoPliego from "./AvisoPliego";
 
 /**
@@ -29,9 +30,6 @@ const CONFIANZA: Record<Pliego["confianza"], string> = {
   media: "media",
   baja: "baja",
 };
-
-const fecha = (iso: string) =>
-  new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" });
 
 export default function PliegoFicha({
   pliego,
@@ -72,7 +70,8 @@ function SinPliego({ urlSecop }: { urlSecop: string | null }) {
       <ul className="fi-desbloquea-lista">
         <li>
           <strong>Requisitos habilitantes</strong>: experiencia e indicadores financieros exigidos,
-          y cuáles se pueden subsanar. Con tu perfil, la compuerta de habilitación se resuelve sola.
+          y cuáles se pueden subsanar. Revisa los requisitos extraídos y comprueba cómo se acreditan
+          en el pliego vigente.
         </li>
         <li>
           <strong>Presupuesto oficial y por capítulo</strong>, con aviso si no cuadra ítem a ítem.
@@ -112,7 +111,8 @@ function Extraccion({ pliego }: { pliego: Pliego }) {
   return (
     <div className="fi-panel fi-pl">
       <p className="fi-pl-meta">
-        Pliego «{pliego.nombreArchivo}», procesado el {fecha(pliego.actualizado)} · confianza{" "}
+        Pliego «{pliego.nombreArchivo}», procesado el{" "}
+        {fechaInstanteColombia(pliego.actualizado) ?? "fecha por verificar"} · confianza{" "}
         {CONFIANZA[pliego.confianza]} ·{" "}
         {pliego.consistente ? (
           <span className="fi-pl-ok">el presupuesto cuadra ítem a ítem</span>

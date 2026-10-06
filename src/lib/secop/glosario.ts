@@ -26,6 +26,7 @@ export const TERMINOS = [
   "estudios_previos",
   "adicion",
   "prorroga",
+  "rup",
 ] as const;
 export type Termino = (typeof TERMINOS)[number];
 
@@ -35,6 +36,11 @@ export interface Definicion {
 }
 
 export const GLOSARIO: Record<Termino, Definicion> = {
+  rup: {
+    termino: "RUP",
+    definicion:
+      "Registro Único de Proponentes: reúne información jurídica, experiencia y capacidades del proponente. Su exigencia depende del proceso y de las excepciones aplicables.",
+  },
   secop: {
     termino: "SECOP II",
     definicion:
@@ -133,6 +139,7 @@ export interface ContextoGlosario {
   adjudicado: boolean;
   conAdicion: boolean;
   conProrroga: boolean;
+  conRequisitosGenerales?: boolean;
 }
 
 /**
@@ -153,9 +160,10 @@ export function terminosDeFicha(c: ContextoGlosario): Definicion[] {
     // La sección del pliego los nombra aunque el pliego no esté procesado:
     // dice qué se desbloquea al subirlo.
     "requisitos_habilitantes",
-    c.conPliego ? "experiencia_especifica" : null,
-    c.conPliego ? "capacidad_financiera" : null,
-    c.conPliego ? "capacidad_organizacional" : null,
+    c.conRequisitosGenerales ? "rup" : null,
+    c.conPliego || c.conRequisitosGenerales ? "experiencia_especifica" : null,
+    c.conPliego || c.conRequisitosGenerales ? "capacidad_financiera" : null,
+    c.conPliego || c.conRequisitosGenerales ? "capacidad_organizacional" : null,
     "causales_rechazo",
     "adenda",
     "estudios_previos",

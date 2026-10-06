@@ -1,5 +1,24 @@
 # AquaLicita — Instrucciones del Proyecto
 
+**Reemplazo de la ficha operativa (2026-10-06, rama `codex/ficha-operativa-viva-actual`).**
+La ruta `/licitaciones/[slug]` conserva URL canónica, JSON-LD e ISR de 12 h y
+sustituye las preguntas por una ficha oscura de lectura continua. Hero ilustrativo,
+KPIs, guía temporal, objeto, situación, cambios, requisitos públicos, información
+general/técnica, presupuesto, cronograma, proponentes, documentos y SECOP.
+`RelojFicha` comparte la hora de Colombia entre guía, estado y disponibilidad;
+`guiaTemporal` conserva `etapaDeProceso`, cuenta días DATE sin inventar horas y
+no convierte fechas textuales del pliego en instantes. Se retira `BloqueDecision`
+de esta ruta: la participación es una guía por tipos de requisito, no una
+comparación de perfiles. Se mantienen cuentas/guardado, visitas, análisis de
+pliego y la política NIT/C4 de «Cómo se contrató». `cambiosDeProceso` lee hasta
+20 eventos por el índice SECOP, sin payload/delta ni nombres; un cambio detectado
+no se llama adenda oficial. Documentos busca/pagina referencias conocidas del
+pliego; no existe inventario público de archivos enlazado al proceso en el modelo
+actual y no se reutiliza `documento` (son archivos privados de asistentes).
+No hay dependencias ni migraciones nuevas. Spec y plan:
+`docs/superpowers/{specs,plans}/2026-10-06-ficha-operativa-viva.md`.
+Entrega en PR borrador; no implica despliegue ni aprobación visual con datos vivos.
+
 **Ficha Viva con ciclo de vida (2026-10-05, spec con decisiones cerradas, sin código).**
 Camino de lanzamiento: primero la información. La ficha explica el proceso sin
 contradicciones, ruido ni letra pequeña, y cubre toda su vida: los procesos
