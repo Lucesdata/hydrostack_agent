@@ -22,7 +22,10 @@ export async function getMatchesForPerfil(
   now: Date = new Date()
 ): Promise<Match[]> {
   const { items } = await searchProcesosDb({
-    apertura: "Abierto",
+    // Solo lo que recibe ofertas hoy: la misma regla de la portada. Con
+    // `apertura: "Abierto"` a secas entraban procesos ya seleccionados y de
+    // régimen especial sin fecha, y llegaban por correo (spec 2026-10-05, M7–M9).
+    recibeOfertas: true,
     soloAgua: true,
     valorMin: perfil.cuantiaObjetivo.minCop,
     // Los sin presupuesto entran con la cuantía en UNKNOWN, detrás (§43).

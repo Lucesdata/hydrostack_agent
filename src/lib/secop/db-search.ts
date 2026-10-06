@@ -127,6 +127,11 @@ async function prepare(query: SecopQuery) {
   ]);
   const { and, eq, gte, ilike, inArray, isNull, lte, or, sql } = ops;
   const { proceso, entidad, geografia, rawRecord } = schema;
+  // La definición única de «recibe ofertas» (spec 2026-10-05). Import dinámico,
+  // como el cliente de la base, para no cargar Postgres al importar el módulo.
+  const { condicionAbierto } = query.recibeOfertas
+    ? await import("./agregados")
+    : { condicionAbierto: null };
   const payload = rawRecord.payload;
 
   /**
@@ -169,6 +174,7 @@ async function prepare(query: SecopQuery) {
       : undefined,
     query.desde ? gte(proceso.fechaPublicacion, query.desde) : undefined,
     query.apertura ? eq(aperturaRaw, query.apertura) : undefined,
+    condicionAbierto ? condicionAbierto() : undefined,
     query.q
       ? or(ilike(proceso.objeto, `%${query.q}%`), ilike(entidad.nombre, `%${query.q}%`))
       : undefined,

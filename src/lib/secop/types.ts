@@ -76,8 +76,19 @@ export interface SecopQuery {
   incluirSinValor?: boolean;
   /** Solo procesos publicados desde esta fecha ISO (YYYY-MM-DD). */
   desde?: string;
-  /** Filtra por apertura del proceso (Abierto = aún recibe ofertas). */
+  /**
+   * Filtra por `estado_apertura` a secas. **No dice que reciba ofertas**: ese
+   * campo queda en «Abierto» para procesos ya seleccionados, en evaluación o de
+   * régimen especial sin fecha (spec 2026-10-05, M7–M9). Para oportunidades,
+   * `recibeOfertas`.
+   */
   apertura?: EstadoApertura;
+  /**
+   * Solo Postgres: procesos que reciben ofertas hoy, con la misma regla de la
+   * portada y la vitrina (`condicionAbierto()`: apertura, estado y fecha de
+   * recepción vigente). Es la que usan el matching y las alertas.
+   */
+  recibeOfertas?: boolean;
   /** Orden: fecha de publicación desc (default) o precio base desc. */
   orden?: "fecha" | "valor";
   /** Si true, aplica el filtro de palabras clave del sector agua. */
