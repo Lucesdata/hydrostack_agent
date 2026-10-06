@@ -1148,5 +1148,13 @@ la vitrina (`condicionDeEtapa()` en `vitrina.ts`). Queda:
   `proceso_id` de §56 lo abarata.
 - **«OTRO» en `tipo_documento` (284 contratos) se trata como persona natural.**
   Si se mide qué hay dentro y resultan ser personas jurídicas, se pueden incluir.
-- **La búsqueda por número** sigue pintando la pastilla desde `estado_actual`
-  (§56).
+- ~~**La búsqueda por número** sigue pintando la pastilla desde `estado_actual`
+  (§56).~~ **Resuelto el 2026-10-06** (rama `claude/etapa-busqueda-numero`):
+  `conEtapaCalculada()` en `vitrina.ts` lee los contratos de la página con
+  `contratosDeProcesos()` (una consulta) y pinta `etapaDeProceso()`; lo que
+  recibe ofertas conserva su cuenta atrás. Sin Radar ni encaje en esa búsqueda.
+  Sigue pendiente: la tarjeta de la pestaña «adjudicados» y la de la búsqueda por
+  número muestran «Adjudicado a X» con `proceso.adjudicatario`, que puede ser
+  una persona natural (anterior a la decisión del 2026-10-05; no se tocó aquí).
+- **«OTRO» se mide con `scripts/sql/medir-tipo-documento-otro.sql`.** En la
+  muestra local el único caso es una S.A.S.: puede que «OTRO» sean empresas.

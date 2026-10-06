@@ -25,8 +25,9 @@ import {
   type EtapaFiltro,
   type FiltrosVitrina,
 } from "./filtros-vitrina";
-import { DESDE_CICLO_DE_VIDA } from "./como-se-contrato";
-import { NOMBRE_ETAPA } from "./etapa";
+import { DESDE_CICLO_DE_VIDA, type ContratoFicha } from "./como-se-contrato";
+import { etapaDeProceso, NOMBRE_ETAPA } from "./etapa";
+import { contratosDeProcesos } from "./ficha";
 import { patronDeActividad, tiposDeSistema } from "./busqueda-guiada";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
@@ -54,6 +55,7 @@ export interface ProcesoDeVitrina {
   adjudicatario: string | null;
   valorAdjudicacion: string | null;
   fechaAdjudicacion: string | null;
+  adjudicado?: boolean | null;
   /**
    * La etapa ya calculada, cuando la página viene del filtro de etapa: manda
    * sobre `estado_actual` en la pastilla de la tarjeta, que nunca puede decir
@@ -125,6 +127,7 @@ const CAMPOS = {
   // `compuertasAbsolutas` no tiene guarda para un valor fuera de los cinco.
   tipoProyecto: sql<TipoProyecto | null>`${proceso.tipoProyecto}`,
   adjudicatario: proceso.adjudicatario,
+  adjudicado: proceso.adjudicado,
   valorAdjudicacion: proceso.valorAdjudicacion,
   fechaAdjudicacion: proceso.fechaAdjudicacion,
 };
@@ -264,6 +267,38 @@ function busquedaPorNumero(numero: string) {
 }
 
 /**
+ * La búsqueda por número encuentra también cerrados y contratados: su pastilla
+ * sale de `etapaDeProceso()`, como la cabecera de la ficha, y no de
+ * `estado_actual` (PENDIENTES §56). Lo que recibe ofertas se deja como está:
+ * la tarjeta ya pinta su cuenta atrás. Si la consulta de contratos falla, la
+ * búsqueda sale sin etapa calculada en vez de romperse.
+ */
+async function conEtapaCalculada(filas: ProcesoDeVitrina[]): Promise<ProcesoDeVitrina[]> {
+  if (filas.length === 0) return filas;
+  let contratos: Map<string, ContratoFicha[]>;
+  try {
+    contratos = await contratosDeProcesos(filas.map((f) => f.id));
+  } catch (error) {
+    console.error("[vitrina] contratos de la búsqueda por número:", error);
+    return filas;
+  }
+  return filas.map((f) => {
+    const e = etapaDeProceso({
+      estadoActual: f.estadoActual,
+      estadoApertura: f.estadoApertura,
+      fechaPublicacion: f.fechaPublicacion,
+      fechaRecepcion: f.fechaRecepcion,
+      valorEstimado: f.valorEstimado,
+      adjudicado: f.adjudicado ?? null,
+      adjudicatario: f.adjudicatario,
+      fechaAdjudicacion: f.fechaAdjudicacion,
+      contratos: contratos.get(f.id) ?? [],
+    });
+    return e.etapa === "recibe_ofertas" ? f : { ...f, etapaCalculada: e.nombre };
+  });
+}
+
+/**
  * Los filtros solo se aplican a los abiertos: es la pestaña de trabajo. Los
  * adjudicados recientes son ~190 y se leen enteros. Con `numero`, la búsqueda
  * es otra (`busquedaPorNumero`).
@@ -324,7 +359,9 @@ export async function procesosDeVitrina(
           adjudicatario: null,
           etapaCalculada: NOMBRE_ETAPA[filtros.etapa!],
         }))
-      : filas;
+      : porNumero
+        ? await conEtapaCalculada(filas)
+        : filas;
 
   return {
     items,

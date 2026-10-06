@@ -123,3 +123,33 @@ describe("filtro de etapa de la vitrina", () => {
     expect(p.total).toBe(0);
   });
 });
+
+describe("la búsqueda por número pinta la etapa (PENDIENTES §56)", () => {
+  const buscar = (numero: string) =>
+    procesosDeVitrina("abiertos", 1, { filtros: { ...SIN_FILTROS, numero } });
+
+  it("un proceso con contrato en ejecución sale como «En ejecución», no ABIERTO", async () => {
+    const r = await buscar("CO1.REQ.EJECUCION");
+    expect(r.items.map((i) => [i.secopProcesoId, i.etapaCalculada])).toEqual([
+      ["CO1.REQ.EJECUCION", "En ejecución"],
+    ]);
+  });
+
+  it("un «Abierto» sin fecha de recepción ni contrato sale «Por verificar»", async () => {
+    const r = await buscar("CO1.REQ.SINCONTRATO");
+    expect(r.items[0].etapaCalculada).toBe("Por verificar");
+  });
+
+  it("uno que recibe ofertas conserva su tarjeta normal (cuenta atrás)", async () => {
+    await db.insert(proceso).values({
+      secopProcesoId: "CO1.REQ.VIGENTE",
+      objeto: "Obra vigente",
+      estadoApertura: "Abierto",
+      estadoActual: "Publicado",
+      fechaPublicacion: "2026-09-01",
+      fechaRecepcion: dia(20),
+    });
+    const r = await buscar("CO1.REQ.VIGENTE");
+    expect(r.items[0].etapaCalculada ?? null).toBeNull();
+  });
+});

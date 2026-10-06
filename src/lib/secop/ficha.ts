@@ -115,8 +115,22 @@ export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null>
  * aceptable. Un índice exige migración y queda anotado en PENDIENTES §56.
  */
 export async function contratosDeProceso(procesoId: string): Promise<ContratoFicha[]> {
-  return db
+  return (await contratosDeProcesos([procesoId])).get(procesoId) ?? [];
+}
+
+/**
+ * Los contratos de varios procesos a la vez, agrupados por `proceso.id`. La usa
+ * la búsqueda por número de la vitrina para calcular la etapa de cada tarjeta
+ * en una sola consulta (un semijoin, una pasada por `contrato`).
+ */
+export async function contratosDeProcesos(
+  procesoIds: string[]
+): Promise<Map<string, ContratoFicha[]>> {
+  const porProceso = new Map<string, ContratoFicha[]>();
+  if (procesoIds.length === 0) return porProceso;
+  const filas = await db
     .select({
+      procesoId: contrato.procesoId,
       fechaFirma: contrato.fechaFirma,
       fechaInicio: contrato.fechaInicio,
       fechaFinInicial: contrato.fechaFinInicial,
@@ -130,8 +144,13 @@ export async function contratosDeProceso(procesoId: string): Promise<ContratoFic
     })
     .from(contrato)
     .leftJoin(proveedor, eq(proveedor.id, contrato.proveedorId))
-    .where(and(eq(contrato.procesoId, procesoId), isNull(contrato.deletedAt)))
+    .where(and(inArray(contrato.procesoId, procesoIds), isNull(contrato.deletedAt)))
     .orderBy(desc(contrato.fechaFirma));
+  for (const { procesoId, ...c } of filas) {
+    if (!procesoId) continue;
+    porProceso.set(procesoId, [...(porProceso.get(procesoId) ?? []), c]);
+  }
+  return porProceso;
 }
 
 /**
