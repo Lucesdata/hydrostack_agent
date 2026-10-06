@@ -1096,3 +1096,12 @@ enlaces del mapa a las facetas.
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
 
+### 58. Datos que faltan en la ficha: PAA, CDP, garantías, recursos, modificaciones, documentos y lugar de ejecución (2026-10-06)
+Spec en borrador: `docs/superpowers/specs/2026-10-06-ficha-viva-datos-nuevos.md`.
+Hallazgo: fuentes de recursos, saldo de CDP, duración, ofertas recibidas,
+liquidación y anticipo **ya llegan** en los dos conjuntos que se ingieren y el
+transform los descarta. Lugar de ejecución, modificaciones, garantías, PAA y
+documentos son conjuntos aparte, sin verificar (datos.gov.co bloqueado desde el
+entorno del agente). Esperan: M11 (`scripts/sql/medir-espacio-ingesta.sql`), M12
+(esquema de cada conjunto, desde el navegador) y las decisiones D1–D5.
+
