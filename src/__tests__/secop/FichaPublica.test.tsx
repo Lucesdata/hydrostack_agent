@@ -264,6 +264,15 @@ describe("Ficha pública para explorar desde el celular", () => {
     expect(salida).toContain("4.200.000.000");
     expect(salida).toContain("Procesar y reemplazar");
   });
+  it("explica sus palabras en una línea, sin JavaScript (regla R7)", async () => {
+    const salida = await html();
+    expect(salida).toContain("Palabras de esta ficha, explicadas");
+    expect(salida).toContain("Pliego de condiciones");
+    expect(salida).toContain("Código UNSPSC");
+    expect(salida).toContain("clasifica lo que se compra");
+    expect(salida).not.toContain("Régimen especial</dt>");
+  });
+
   it("el objeto externo no puede cerrar el JSON-LD e inyectar HTML", async () => {
     datos.proceso.mockResolvedValue({
       ...proceso,

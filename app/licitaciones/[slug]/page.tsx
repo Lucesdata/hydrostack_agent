@@ -20,6 +20,7 @@ import {
 import { etapaDeProceso, fechaLegible, sinFasePegada } from "@/src/lib/secop/etapa";
 import { comoSeContrato } from "@/src/lib/secop/como-se-contrato";
 import { explicacionModalidad } from "@/src/lib/secop/semaforo";
+import { GLOSARIO, terminosDeFicha } from "@/src/lib/secop/glosario";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import { formatCopFull, sentenceCaseTitle } from "@/src/components/secop/format";
@@ -59,11 +60,15 @@ function Fuente({ children, url }: { children: ReactNode; url: string | null }) 
     </details>
   );
 }
-function Dato({ nombre, children }: { nombre: string; children: ReactNode }) {
+/** `def`: la palabra explicada en una línea, junto al dato (regla R7 del spec). */
+function Dato({ nombre, children, def }: { nombre: string; children: ReactNode; def?: string }) {
   return (
     <div className="fi-dato">
       <dt>{nombre}</dt>
-      <dd>{children}</dd>
+      <dd>
+        {children}
+        {def && <span className="fi-def">{def}</span>}
+      </dd>
     </div>
   );
 }
@@ -109,6 +114,17 @@ export default async function FichaPage({ params }: Props) {
   // C4: el valor publicado del contrato es un error de captura; no se pinta como dato.
   const cifraDudosa = etapa.contradicciones.some((c) => c.codigo === "C4");
   const modalidadExplicada = explicacionModalidad(p.modalidad);
+  const glosario = terminosDeFicha({
+    modalidad: p.modalidad,
+    tieneUnspsc: !!p.unspsc,
+    tieneNit: !!p.entidadNit,
+    conPliego: pliego !== null,
+    adjudicado: ["adjudicado", "contratado", "en_ejecucion", "plazo_cumplido"].includes(
+      etapa.etapa
+    ),
+    conAdicion: !!contratacion?.contratos.some((c) => c.adicion !== null),
+    conProrroga: !!contratacion?.contratos.some((c) => c.prorrogaDias !== null),
+  });
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const valor = montoConDato(p.valorEstimado);
   const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
@@ -310,7 +326,11 @@ export default async function FichaPage({ params }: Props) {
           <h2 className="fi-titulo-panel">¿Quién responde?</h2>
           <dl className="fi-datos">
             <Dato nombre="Entidad contratante">{p.entidadNombre ?? "Entidad sin resolver"}</Dato>
-            {p.entidadNit && <Dato nombre="NIT de la entidad">{p.entidadNit}</Dato>}
+            {p.entidadNit && (
+              <Dato nombre="NIT de la entidad" def={GLOSARIO.nit.definicion}>
+                {p.entidadNit}
+              </Dato>
+            )}
             <Dato nombre="Ubicación de la entidad">{lugar || "Sin ubicación resuelta"}</Dato>
             <Dato nombre="Contratista">
               {contratacion
@@ -500,7 +520,11 @@ export default async function FichaPage({ params }: Props) {
             <dl className="fi-datos">
               <Dato nombre="Identificador SECOP">{p.secopProcesoId}</Dato>
               <Dato nombre="Tipo de contrato">{p.tipoContrato ?? "No informado"}</Dato>
-              {p.unspsc && <Dato nombre="UNSPSC">{p.unspsc.replace(/^V\d+\./i, "")}</Dato>}
+              {p.unspsc && (
+                <Dato nombre="Código UNSPSC" def={GLOSARIO.unspsc.definicion}>
+                  {p.unspsc.replace(/^V\d+\./i, "")}
+                </Dato>
+              )}
             </dl>
           </details>
         </header>
@@ -513,6 +537,18 @@ export default async function FichaPage({ params }: Props) {
           <RegistroVisita procesoId={p.secopProcesoId} />
         </ProcesosCuenta>
         <ExploradorFicha secciones={secciones} />
+        {/* Las palabras que esta ficha usa, explicadas en una línea (regla R7 del
+            spec 2026-10-05). Solo las que aparecen; sin JavaScript. */}
+        <details className="fi-desplegable fi-glosario">
+          <summary>Palabras de esta ficha, explicadas</summary>
+          <dl className="fi-datos">
+            {glosario.map((g) => (
+              <Dato key={g.termino} nombre={g.termino}>
+                {g.definicion}
+              </Dato>
+            ))}
+          </dl>
+        </details>
         <footer className="fi-pie-ficha">
           <p>Información pública, al alcance de todos.</p>
           {urlSecop ? (

@@ -302,6 +302,7 @@ export const ESTILOS_FICHA = `
 .fi-ayuda{ color: var(--text-muted); font: 13px/1.6 var(--font-sans); margin: 16px 0 0; }
 .fi-desplegable{ margin-top: 16px; font: 14px/1.6 var(--font-sans); color: var(--text-primary); }
 .fi-desplegable>summary{ font-weight: 500; }
+.fi-def{ display: block; color: var(--text-muted); font: 12.5px/1.5 var(--font-sans); margin-top: 2px; }
 .fi-pendiente{ display: flex; align-items: flex-start; gap: 14px; padding: 18px 0; font: 14px/1.6 var(--font-sans); }
 .fi-pendiente>span{ display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px dashed var(--text-muted); border-radius: 50%; font: 500 18px var(--font-sans); color: var(--text-muted); }
 .fi-pendiente strong{ color: var(--text-primary); font-weight: 600; }
