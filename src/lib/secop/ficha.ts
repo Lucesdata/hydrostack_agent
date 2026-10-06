@@ -19,10 +19,11 @@
 
 import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "../db/client";
-import { entidad, geografia, proceso } from "../db/schema";
+import { contrato, entidad, geografia, proceso } from "../db/schema";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
 // Puras y sin base: viven en ./slug para que el navegador pueda importarlas.
 import { idDesdeSlug, slugDeProceso } from "./slug";
+import type { ContratoSenal } from "./etapa";
 import type { SecopProceso } from "./types";
 
 export { idDesdeSlug, slugDeProceso };
@@ -49,6 +50,11 @@ export interface ProcesoFicha {
   departamento: string | null;
   departamentoCodigo: string | null;
   municipio: string | null;
+  // Señales de la etapa (spec 2026-10-05-ficha-viva-ciclo-de-vida). La `fase` no
+  // se lee: la fuente no la actualiza (M2b).
+  adjudicado: boolean | null;
+  adjudicatario: string | null;
+  fechaAdjudicacion: string | null;
 }
 
 /** Las columnas de `ProcesoFicha`: las comparten la ficha y el panel del Radar. */
@@ -74,6 +80,9 @@ const COLUMNAS_FICHA = {
   departamento: geografia.departamentoNombre,
   departamentoCodigo: geografia.departamentoCodigo,
   municipio: geografia.municipioNombre,
+  adjudicado: proceso.adjudicado,
+  adjudicatario: proceso.adjudicatario,
+  fechaAdjudicacion: proceso.fechaAdjudicacion,
 };
 
 function consultaFicha() {
@@ -93,6 +102,31 @@ export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null>
     .limit(1);
 
   return fila ?? null;
+}
+
+/**
+ * Los contratos del proceso, para calcular su etapa (`etapaDeProceso`). Solo
+ * fechas, valores y estado: el contratista no se lee aquí (las personas
+ * naturales no se exponen, decisión del usuario del 2026-10-05).
+ *
+ * `contrato` no tiene índice por `proceso_id` (medido el 2026-10-05): esto es un
+ * barrido de ~39.000 filas por ficha regenerada, que con el ISR de 12 h es
+ * aceptable. Un índice exige migración y queda anotado en PENDIENTES §56.
+ */
+export async function contratosDeProceso(procesoId: string): Promise<ContratoSenal[]> {
+  return db
+    .select({
+      fechaFirma: contrato.fechaFirma,
+      fechaInicio: contrato.fechaInicio,
+      fechaFinInicial: contrato.fechaFinInicial,
+      fechaFinActual: contrato.fechaFinActual,
+      valorInicial: contrato.valorInicial,
+      valorActual: contrato.valorActual,
+      estado: contrato.estadoActual,
+    })
+    .from(contrato)
+    .where(and(eq(contrato.procesoId, procesoId), isNull(contrato.deletedAt)))
+    .orderBy(desc(contrato.fechaFirma));
 }
 
 /**
