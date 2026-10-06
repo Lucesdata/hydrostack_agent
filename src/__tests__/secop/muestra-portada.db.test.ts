@@ -32,6 +32,8 @@ async function unProceso(v: {
   valor?: string | null;
   entidadId?: string | null;
   tipo?: string | null;
+  /** `fecha_recepcion`; por defecto vigente. `null` = no publicada. */
+  recepcion?: string | null;
 }) {
   n += 1;
   const id = v.id ?? `CO1.REQ.${n}`;
@@ -46,6 +48,7 @@ async function unProceso(v: {
     estadoApertura: v.abierto === false ? "Cerrado" : "Abierto",
     estadoActual: v.estadoActual ?? (v.abierto === false ? "Adjudicado" : "Publicado"),
     tipoProyecto: v.tipo === undefined ? "acueducto" : v.tipo,
+    fechaRecepcion: v.recepcion === undefined ? "2099-12-31" : v.recepcion,
   });
   return id;
 }
@@ -108,6 +111,8 @@ beforeAll(async () => {
   await unProceso({ geo: null }); // sin ubicación
   await unProceso({ geo: "99999" }); // ubicación que el mapa no ancla
   await unProceso({ id: "PROC-123" }); // id que la ficha no resuelve
+  await unProceso({ recepcion: null }); // sin fecha de recepción: no se afirma abierto
+  await unProceso({ recepcion: "2020-01-01" }); // recepción vencida
 });
 
 describe("muestraPortada", () => {

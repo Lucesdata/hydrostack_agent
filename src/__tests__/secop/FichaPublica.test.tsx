@@ -3,11 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProcesoFicha } from "@/src/lib/secop/ficha";
 import type { PliegoFicha } from "@/src/lib/secop/pliego-ficha";
 
-const datos = vi.hoisted(() => ({ proceso: vi.fn(), pliego: vi.fn(), competidores: vi.fn() }));
+const datos = vi.hoisted(() => ({
+  proceso: vi.fn(),
+  pliego: vi.fn(),
+  competidores: vi.fn(),
+  contratos: vi.fn(),
+}));
 vi.mock("@/src/lib/secop/ficha", async (original) => ({
   ...(await original<object>()),
   procesoPorSlug: datos.proceso,
   competidoresComparables: datos.competidores,
+  contratosDeProceso: datos.contratos,
 }));
 vi.mock("@/src/lib/secop/pliego-ficha", () => ({ pliegoDeProceso: datos.pliego }));
 vi.mock("@/src/lib/secop/pliego-actions", () => ({ subirPliegoDesdeFichaAction: vi.fn() }));
@@ -23,10 +29,11 @@ const proceso: ProcesoFicha = {
   modalidad: "Licitación pública",
   tipoContrato: "Obra",
   unspsc: "V1.831015",
-  estadoActual: "Presentación de oferta",
+  estadoActual: "Publicado",
   estadoApertura: "Abierto",
   fechaPublicacion: "2026-09-01T12:00:00Z",
-  fechaRecepcion: null,
+  // Recibe ofertas: recepción vigente (spec 2026-10-05, M9).
+  fechaRecepcion: "2099-12-31",
   valorEstimado: "4250000000",
   documentAccess: "UNKNOWN",
   url: "https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.42",
@@ -36,6 +43,9 @@ const proceso: ProcesoFicha = {
   departamento: "Antioquia",
   departamentoCodigo: "05",
   municipio: "Medellín",
+  adjudicado: false,
+  adjudicatario: null,
+  fechaAdjudicacion: null,
 };
 const pliego: PliegoFicha = {
   nombreArchivo: "base.pdf",
@@ -68,6 +78,7 @@ describe("Ficha pública para explorar desde el celular", () => {
     datos.proceso.mockResolvedValue(proceso);
     datos.pliego.mockResolvedValue(null);
     datos.competidores.mockResolvedValue([]);
+    datos.contratos.mockResolvedValue([]);
   });
   it("ofrece las seis preguntas del boceto y conserva el acceso para empresas", async () => {
     const salida = await html();
@@ -129,13 +140,119 @@ describe("Ficha pública para explorar desde el celular", () => {
     expect(salida).toContain("26 de septiembre de 2026");
     expect(salida).toContain("20 de octubre de 2026");
   });
-  it("advierte que está cerrado aunque el estado descriptivo conserve un texto anterior", async () => {
+  it("cerrado a ofertas: la etapa es «En evaluación» y no invita a ofertar", async () => {
     datos.proceso.mockResolvedValue({ ...proceso, estadoApertura: "Cerrado" });
     const salida = await html();
-    expect(salida).toContain("Cerrado a ofertas");
-    expect(salida).toContain("Este proceso figura como cerrado");
-    expect(salida).toContain("Explorar procesos abiertos");
+    expect(salida).toContain("En evaluación");
+    expect(salida).toContain("Este proceso no recibe ofertas ahora");
+    expect(salida).toContain("Explorar procesos que reciben ofertas");
+    expect(salida).not.toContain("¿Es para ti?");
   });
+
+  it("«Publicado / Abierto» sin fecha de recepción no se presenta como abierto", async () => {
+    datos.proceso.mockResolvedValue({ ...proceso, fechaRecepcion: null });
+    const salida = await html();
+    expect(salida).toContain("Por verificar");
+    expect(salida).not.toContain("Abierto a ofertas");
+    expect(salida).not.toContain("¿Es para ti?");
+  });
+
+  it("con contrato en ejecución: lo dice, señala la contradicción y no inventa avance", async () => {
+    datos.proceso.mockResolvedValue({
+      ...proceso,
+      estadoActual: "Abierto",
+      estadoApertura: null,
+      fechaRecepcion: null,
+      referencia: "4182.010.32.1.327-2026 (Presentación de oferta)",
+    });
+    datos.contratos.mockResolvedValue([
+      {
+        fechaFirma: "2026-09-09",
+        fechaInicio: "2026-09-29",
+        fechaFinInicial: "2099-12-31",
+        fechaFinActual: "2099-12-31",
+        valorInicial: "400000000",
+        valorActual: "400000000",
+        estado: "En ejecución",
+      },
+    ]);
+    const salida = await html();
+    expect(salida).toContain("En ejecución");
+    expect(salida).toContain("Según las fechas del contrato");
+    expect(salida).toContain("Revisa antes de confiar");
+    expect(salida).toContain("9 sep 2026");
+    expect(salida).toContain("4182.010.32.1.327-2026");
+    expect(salida).not.toContain("(Presentación de oferta)");
+    expect(salida).not.toContain("¿Es para ti?");
+  });
+  describe("«Cómo se contrató» (PR 3)", () => {
+    const enEjecucion = {
+      ...proceso,
+      estadoActual: "Abierto",
+      estadoApertura: null,
+      fechaRecepcion: null,
+      fechaPublicacion: "2026-07-11",
+    };
+    const contratoNit = {
+      fechaFirma: "2026-09-09",
+      fechaInicio: "2026-09-29",
+      fechaFinInicial: "2099-11-15",
+      fechaFinActual: "2099-12-30",
+      valorInicial: "400000000",
+      valorActual: "520000000",
+      estado: "En ejecución",
+      valorPagado: "150000000",
+      contratista: "INGENIERÍA DEL AGUA S.A.S.",
+      tipoDocumento: "NIT",
+    };
+
+    it("con NIT y desde 2026: contratista, valor, adición, prórroga y pagado", async () => {
+      datos.proceso.mockResolvedValue(enEjecucion);
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("¿Cómo se contrató?");
+      expect(salida).toContain("INGENIERÍA DEL AGUA S.A.S.");
+      expect(salida).toContain("520.000.000");
+      expect(salida).toContain("Se adicionaron");
+      expect(salida).toContain("Se prorrogó 45 días");
+      expect(salida).toContain("Pagado según el SECOP");
+      expect(salida).toContain("No es avance de obra");
+      expect(salida).not.toContain("No identificado en esta ficha");
+    });
+
+    it("persona natural: no se nombra ni se detalla", async () => {
+      datos.proceso.mockResolvedValue(enEjecucion);
+      datos.contratos.mockResolvedValue([
+        { ...contratoNit, contratista: "Angie Michelle Ascanio Jaime", tipoDocumento: "CC" },
+      ]);
+      const salida = await html();
+      expect(salida).not.toContain("Angie Michelle");
+      expect(salida).not.toContain("¿Cómo se contrató?");
+      expect(salida).toContain("En ejecución");
+      expect(salida).toContain("No identificado en esta ficha");
+    });
+
+    it("antes de 2026: la etapa se calcula, pero la ficha no se amplía", async () => {
+      datos.proceso.mockResolvedValue({ ...enEjecucion, fechaPublicacion: "2025-11-20" });
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("En ejecución");
+      expect(salida).not.toContain("INGENIERÍA DEL AGUA");
+      expect(salida).not.toContain("¿Cómo se contrató?");
+    });
+
+    it("cifra dudosa (C4): el valor del contrato no se pinta como dato", async () => {
+      datos.proceso.mockResolvedValue({ ...enEjecucion, valorEstimado: "1000000" });
+      datos.contratos.mockResolvedValue([contratoNit]);
+      const salida = await html();
+      expect(salida).toContain("Cifra dudosa en la fuente");
+      // La cifra solo aparece como evidencia en «Revisa antes de confiar», no como dato.
+      expect(salida).toContain("Revisa antes de confiar");
+      expect(salida.split("520.000.000").length - 1).toBe(1);
+      expect(salida).not.toContain("Se adicionaron");
+    });
+  });
+
   it("conserva los datos del pliego y distingue su presupuesto del publicado en SECOP", async () => {
     datos.pliego.mockResolvedValue(pliego);
     const salida = await html();
@@ -147,6 +264,15 @@ describe("Ficha pública para explorar desde el celular", () => {
     expect(salida).toContain("4.200.000.000");
     expect(salida).toContain("Procesar y reemplazar");
   });
+  it("explica sus palabras en una línea, sin JavaScript (regla R7)", async () => {
+    const salida = await html();
+    expect(salida).toContain("Palabras de esta ficha, explicadas");
+    expect(salida).toContain("Pliego de condiciones");
+    expect(salida).toContain("Código UNSPSC");
+    expect(salida).toContain("clasifica lo que se compra");
+    expect(salida).not.toContain("Régimen especial</dt>");
+  });
+
   it("el objeto externo no puede cerrar el JSON-LD e inyectar HTML", async () => {
     datos.proceso.mockResolvedValue({
       ...proceso,

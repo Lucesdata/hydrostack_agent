@@ -19,10 +19,11 @@
 
 import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "../db/client";
-import { entidad, geografia, proceso } from "../db/schema";
+import { contrato, entidad, geografia, proceso, proveedor } from "../db/schema";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
 // Puras y sin base: viven en ./slug para que el navegador pueda importarlas.
 import { idDesdeSlug, slugDeProceso } from "./slug";
+import type { ContratoFicha } from "./como-se-contrato";
 import type { SecopProceso } from "./types";
 
 export { idDesdeSlug, slugDeProceso };
@@ -49,6 +50,11 @@ export interface ProcesoFicha {
   departamento: string | null;
   departamentoCodigo: string | null;
   municipio: string | null;
+  // Señales de la etapa (spec 2026-10-05-ficha-viva-ciclo-de-vida). La `fase` no
+  // se lee: la fuente no la actualiza (M2b).
+  adjudicado: boolean | null;
+  adjudicatario: string | null;
+  fechaAdjudicacion: string | null;
 }
 
 /** Las columnas de `ProcesoFicha`: las comparten la ficha y el panel del Radar. */
@@ -74,6 +80,9 @@ const COLUMNAS_FICHA = {
   departamento: geografia.departamentoNombre,
   departamentoCodigo: geografia.departamentoCodigo,
   municipio: geografia.municipioNombre,
+  adjudicado: proceso.adjudicado,
+  adjudicatario: proceso.adjudicatario,
+  fechaAdjudicacion: proceso.fechaAdjudicacion,
 };
 
 function consultaFicha() {
@@ -93,6 +102,55 @@ export async function procesoPorSlug(slug: string): Promise<ProcesoFicha | null>
     .limit(1);
 
   return fila ?? null;
+}
+
+/**
+ * Los contratos del proceso: sus fechas, valores y estado calculan la etapa
+ * (`etapaDeProceso`), y con el contratista y su tipo de documento arman «Cómo
+ * se contrató» (`comoSeContrato`), que solo nombra a personas jurídicas (NIT):
+ * las personas naturales no se exponen (decisión del usuario del 2026-10-05).
+ *
+ * `contrato` no tiene índice por `proceso_id` (medido el 2026-10-05): esto es un
+ * barrido de ~39.000 filas por ficha regenerada, que con el ISR de 12 h es
+ * aceptable. Un índice exige migración y queda anotado en PENDIENTES §56.
+ */
+export async function contratosDeProceso(procesoId: string): Promise<ContratoFicha[]> {
+  return (await contratosDeProcesos([procesoId])).get(procesoId) ?? [];
+}
+
+/**
+ * Los contratos de varios procesos a la vez, agrupados por `proceso.id`. La usa
+ * la búsqueda por número de la vitrina para calcular la etapa de cada tarjeta
+ * en una sola consulta (un semijoin, una pasada por `contrato`).
+ */
+export async function contratosDeProcesos(
+  procesoIds: string[]
+): Promise<Map<string, ContratoFicha[]>> {
+  const porProceso = new Map<string, ContratoFicha[]>();
+  if (procesoIds.length === 0) return porProceso;
+  const filas = await db
+    .select({
+      procesoId: contrato.procesoId,
+      fechaFirma: contrato.fechaFirma,
+      fechaInicio: contrato.fechaInicio,
+      fechaFinInicial: contrato.fechaFinInicial,
+      fechaFinActual: contrato.fechaFinActual,
+      valorInicial: contrato.valorInicial,
+      valorActual: contrato.valorActual,
+      estado: contrato.estadoActual,
+      valorPagado: contrato.valorPagado,
+      contratista: proveedor.razonSocial,
+      tipoDocumento: proveedor.tipoDocumento,
+    })
+    .from(contrato)
+    .leftJoin(proveedor, eq(proveedor.id, contrato.proveedorId))
+    .where(and(inArray(contrato.procesoId, procesoIds), isNull(contrato.deletedAt)))
+    .orderBy(desc(contrato.fechaFirma));
+  for (const { procesoId, ...c } of filas) {
+    if (!procesoId) continue;
+    porProceso.set(procesoId, [...(porProceso.get(procesoId) ?? []), c]);
+  }
+  return porProceso;
 }
 
 /**

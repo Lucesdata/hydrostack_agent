@@ -11,7 +11,16 @@ import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
 import { datosDecisionDe, urlSecopDe } from "@/src/lib/secop/datos-decision";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
-import { competidoresComparables, procesoPorSlug, slugDeProceso } from "@/src/lib/secop/ficha";
+import {
+  competidoresComparables,
+  contratosDeProceso,
+  procesoPorSlug,
+  slugDeProceso,
+} from "@/src/lib/secop/ficha";
+import { etapaDeProceso, fechaLegible, sinFasePegada } from "@/src/lib/secop/etapa";
+import { comoSeContrato } from "@/src/lib/secop/como-se-contrato";
+import { explicacionModalidad } from "@/src/lib/secop/semaforo";
+import { GLOSARIO, terminosDeFicha } from "@/src/lib/secop/glosario";
 import { TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import { COLOR_TIPO } from "@/src/lib/classify/tipo-color";
 import { formatCopFull, sentenceCaseTitle } from "@/src/components/secop/format";
@@ -51,11 +60,15 @@ function Fuente({ children, url }: { children: ReactNode; url: string | null }) 
     </details>
   );
 }
-function Dato({ nombre, children }: { nombre: string; children: ReactNode }) {
+/** `def`: la palabra explicada en una línea, junto al dato (regla R7 del spec). */
+function Dato({ nombre, children, def }: { nombre: string; children: ReactNode; def?: string }) {
   return (
     <div className="fi-dato">
       <dt>{nombre}</dt>
-      <dd>{children}</dd>
+      <dd>
+        {children}
+        {def && <span className="fi-def">{def}</span>}
+      </dd>
     </div>
   );
 }
@@ -86,20 +99,36 @@ export default async function FichaPage({ params }: Props) {
   const p = await procesoPorSlug(slug);
   if (!p) notFound();
   const canonico = slugDeProceso(p.objeto, p.secopProcesoId);
-  const [competidores, pliego] = await Promise.all([
+  const [competidores, pliego, contratos] = await Promise.all([
     competidoresComparables(p),
     pliegoDeProceso(p.secopProcesoId),
+    contratosDeProceso(p.id),
   ]);
+  // Una sola respuesta a «¿en qué va?» (spec 2026-10-05-ficha-viva-ciclo-de-vida):
+  // la regla manda sobre el estado del SECOP, que a veces se contradice.
+  const etapa = etapaDeProceso({ ...p, contratos });
+  const recibeOfertas = etapa.etapa === "recibe_ofertas";
+  const contrato = etapa.contrato;
+  // «Cómo se contrató» (PR 3): solo 2026, solo contratistas con NIT.
+  const contratacion = comoSeContrato(p.fechaPublicacion, etapa.etapa, contratos);
+  // C4: el valor publicado del contrato es un error de captura; no se pinta como dato.
+  const cifraDudosa = etapa.contradicciones.some((c) => c.codigo === "C4");
+  const modalidadExplicada = explicacionModalidad(p.modalidad);
+  const glosario = terminosDeFicha({
+    modalidad: p.modalidad,
+    tieneUnspsc: !!p.unspsc,
+    tieneNit: !!p.entidadNit,
+    conPliego: pliego !== null,
+    adjudicado: ["adjudicado", "contratado", "en_ejecucion", "plazo_cumplido"].includes(
+      etapa.etapa
+    ),
+    conAdicion: !!contratacion?.contratos.some((c) => c.adicion !== null),
+    conProrroga: !!contratacion?.contratos.some((c) => c.prorrogaDias !== null),
+  });
   const lugar = [p.municipio, p.departamento].filter(Boolean).join(", ");
   const valor = montoConDato(p.valorEstimado);
   const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
-  const titulo = sentenceCaseTitle(p.objeto ?? p.secopProcesoId);
-  const apertura =
-    p.estadoApertura === "Cerrado"
-      ? "Cerrado a ofertas"
-      : p.estadoApertura === "Abierto"
-        ? "Abierto a ofertas"
-        : "Recepción de ofertas por confirmar";
+  const titulo = sentenceCaseTitle(sinFasePegada(p.objeto ?? p.secopProcesoId));
   // Solo se acorta la presentación; el objeto oficial completo sigue accesible.
   const tituloCorto = titulo.length > 180 ? `${titulo.slice(0, 177).trimEnd()}…` : titulo;
   const urlSecop = urlSecopDe(p.url);
@@ -247,12 +276,24 @@ export default async function FichaPage({ params }: Props) {
           <p className="fi-sobretitulo">Los tiempos</p>
           <h2 className="fi-titulo-panel">¿En qué va el proceso?</h2>
           <dl className="fi-datos">
-            <Dato nombre="Estado registrado">{p.estadoActual ?? "Sin estado informado"}</Dato>
+            <Dato nombre="Etapa">{etapa.nombre}</Dato>
+            <Dato nombre="Estado según SECOP II">{p.estadoActual ?? "Sin estado informado"}</Dato>
             <Dato nombre="Publicación">{fecha(p.fechaPublicacion) ?? "Sin fecha verificada"}</Dato>
             <Dato nombre="Cierre de ofertas">
               {pliego?.fechaCierre ?? fecha(p.fechaRecepcion) ?? "Por confirmar en SECOP II"}
             </Dato>
-            <Dato nombre="Ejecución y entrega">Sin información verificada</Dato>
+            {contrato?.fechaFirma && (
+              <Dato nombre="Firma del contrato">{fechaLegible(contrato.fechaFirma)}</Dato>
+            )}
+            <Dato nombre="Ejecución según el contrato">
+              {contrato?.fechaInicio
+                ? `Del ${fechaLegible(contrato.fechaInicio)}${
+                    contrato.fechaFinActual || contrato.fechaFinInicial
+                      ? ` al ${fechaLegible(contrato.fechaFinActual ?? contrato.fechaFinInicial)}`
+                      : ""
+                  }`
+                : "Sin información verificada"}
+            </Dato>
           </dl>
           {pliego && pliego.cronograma.length > 0 && (
             <details className="fi-desplegable">
@@ -285,9 +326,17 @@ export default async function FichaPage({ params }: Props) {
           <h2 className="fi-titulo-panel">¿Quién responde?</h2>
           <dl className="fi-datos">
             <Dato nombre="Entidad contratante">{p.entidadNombre ?? "Entidad sin resolver"}</Dato>
-            {p.entidadNit && <Dato nombre="NIT de la entidad">{p.entidadNit}</Dato>}
+            {p.entidadNit && (
+              <Dato nombre="NIT de la entidad" def={GLOSARIO.nit.definicion}>
+                {p.entidadNit}
+              </Dato>
+            )}
             <Dato nombre="Ubicación de la entidad">{lugar || "Sin ubicación resuelta"}</Dato>
-            <Dato nombre="Contratista">No identificado en esta ficha</Dato>
+            <Dato nombre="Contratista">
+              {contratacion
+                ? contratacion.contratos.map((c) => c.contratista).join(" · ")
+                : "No identificado en esta ficha"}
+            </Dato>
             <Dato nombre="Supervisión o interventoría">Por verificar</Dato>
           </dl>
           <div className="fi-nota">
@@ -338,26 +387,68 @@ export default async function FichaPage({ params }: Props) {
       contenido: (
         <>
           <p className="fi-sobretitulo">Para tu empresa</p>
-          <h2 className="fi-titulo-panel">¿Puedo participar?</h2>
-          {p.estadoApertura !== "Abierto" && (
+          <h2 className="fi-titulo-panel">
+            {contratacion ? "¿Cómo se contrató?" : "¿Puedo participar?"}
+          </h2>
+          {recibeOfertas ? (
+            /* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
+               en «Quiero participar» como pide el spec de la ficha interactiva
+               (2026-09-29). Solo invita a ofertar cuando el proceso recibe
+               ofertas (spec 2026-10-05, criterio 7). */
+            <BloqueDecision {...datosDecisionDe(p, { conPliego: pliego !== null })} />
+          ) : (
             <div className="fi-nota">
-              <strong>
-                {p.estadoApertura === "Cerrado"
-                  ? "Este proceso figura como cerrado"
-                  : "No consta si este proceso recibe ofertas"}
-              </strong>
-              <p>Confirma el estado vigente en SECOP II antes de preparar una oferta.</p>
-              {p.estadoApertura === "Cerrado" && (
-                <Link className="fi-btn" href="/licitaciones">
-                  Explorar procesos abiertos
-                </Link>
-              )}
+              <strong>Este proceso no recibe ofertas ahora · {etapa.nombre}</strong>
+              <p>{etapa.linea}</p>
+              <Link className="fi-btn" href="/licitaciones">
+                Explorar procesos que reciben ofertas
+              </Link>
             </div>
           )}
-          {/* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
-              en «Quiero participar» como pide el spec de la ficha interactiva
-              (2026-09-29): los seis accesos públicos se conservan. */}
-          <BloqueDecision {...datosDecisionDe(p, { conPliego: pliego !== null })} />
+          {contratacion && (
+            <section id="como-se-contrato" className="fi-sec">
+              <h3 className="fi-h2">Cómo se contrató</h3>
+              <dl className="fi-datos">
+                <Dato nombre="Modalidad">{p.modalidad ?? "Modalidad no informada"}</Dato>
+              </dl>
+              {modalidadExplicada && <p className="fi-ayuda">{modalidadExplicada}</p>}
+              {contratacion.contratos.map((c, i) => (
+                <dl className="fi-datos" key={i}>
+                  <Dato nombre="Contratista">{c.contratista}</Dato>
+                  <Dato nombre="Valor del contrato">
+                    {cifraDudosa
+                      ? "Cifra dudosa en la fuente: compruébala en el expediente"
+                      : c.valor !== null
+                        ? formatCopFull(c.valor)
+                        : "No publicado"}
+                  </Dato>
+                  {c.adicion !== null && !cifraDudosa && (
+                    <Dato nombre="Adición">{`Se adicionaron ${formatCopFull(c.adicion)}`}</Dato>
+                  )}
+                  <Dato nombre="Inicio">{c.inicio ?? "Sin fecha publicada"}</Dato>
+                  <Dato nombre="Fin previsto">{c.finPrevisto ?? "Sin fecha publicada"}</Dato>
+                  {c.prorrogaDias !== null && (
+                    <Dato nombre="Prórroga">{`Se prorrogó ${c.prorrogaDias} días: termina el ${c.finActual}`}</Dato>
+                  )}
+                  {c.pagado !== null && (
+                    <Dato nombre="Pagado según el SECOP">{formatCopFull(c.pagado)}</Dato>
+                  )}
+                  {c.estado && <Dato nombre="Estado del contrato según SECOP II">{c.estado}</Dato>}
+                </dl>
+              ))}
+              {contratacion.ocultos > 0 && (
+                <p className="fi-ayuda">
+                  {contratacion.ocultos === 1
+                    ? "Hay otro contrato con una persona natural: no se detalla."
+                    : `Hay ${contratacion.ocultos} contratos más con personas naturales: no se detallan.`}
+                </p>
+              )}
+              <p className="fi-ayuda">
+                Según las fechas y valores publicados en SECOP II. No es avance de obra ni acta de
+                entrega. Presupuesto, valor del contrato y pagado son cifras distintas.
+              </p>
+            </section>
+          )}
           <section id="pliego" className="fi-sec">
             <h3 className="fi-h2">Requisitos y pliego</h3>
             <PliegoFicha pliego={pliego} slug={canonico} urlSecop={urlSecop} />
@@ -401,22 +492,39 @@ export default async function FichaPage({ params }: Props) {
                 {TIPO_PROYECTO[p.tipoProyecto].label}
               </span>
             )}
-            <span className="fi-identificador">{p.referencia || p.secopProcesoId}</span>
+            <span className="fi-identificador">
+              {sinFasePegada(p.referencia || p.secopProcesoId)}
+            </span>
           </div>
           <h1 className="fi-h1">{tituloCorto}</h1>
           <p className="fi-entidad">{p.entidadNombre ?? "Entidad sin resolver"}</p>
           {lugar && <p className="fi-lugar">Entidad en {lugar}</p>}
           <p className="fi-estado">
-            <span aria-hidden="true">◷</span> {apertura}
-            <span className="fi-estado-nota">Según SECOP II</span>
+            <span aria-hidden="true">◷</span> {etapa.nombre}
+            <span className="fi-estado-nota">{etapa.linea}</span>
           </p>
+          {etapa.contradicciones.length > 0 && (
+            <div className="fi-nota" role="note">
+              <strong>Revisa antes de confiar</strong>
+              <ul>
+                {etapa.contradicciones.map((c) => (
+                  <li key={c.codigo}>{c.texto}</li>
+                ))}
+              </ul>
+              <p>Son datos del SECOP II que no cuadran entre sí. Confírmalos en el expediente.</p>
+            </div>
+          )}
           <details className="fi-identificacion">
             <summary>Leer objeto completo y datos del proceso</summary>
             <p>{p.objeto ?? "Objeto no informado"}</p>
             <dl className="fi-datos">
               <Dato nombre="Identificador SECOP">{p.secopProcesoId}</Dato>
               <Dato nombre="Tipo de contrato">{p.tipoContrato ?? "No informado"}</Dato>
-              {p.unspsc && <Dato nombre="UNSPSC">{p.unspsc.replace(/^V\d+\./i, "")}</Dato>}
+              {p.unspsc && (
+                <Dato nombre="Código UNSPSC" def={GLOSARIO.unspsc.definicion}>
+                  {p.unspsc.replace(/^V\d+\./i, "")}
+                </Dato>
+              )}
             </dl>
           </details>
         </header>
@@ -429,6 +537,18 @@ export default async function FichaPage({ params }: Props) {
           <RegistroVisita procesoId={p.secopProcesoId} />
         </ProcesosCuenta>
         <ExploradorFicha secciones={secciones} />
+        {/* Las palabras que esta ficha usa, explicadas en una línea (regla R7 del
+            spec 2026-10-05). Solo las que aparecen; sin JavaScript. */}
+        <details className="fi-desplegable fi-glosario">
+          <summary>Palabras de esta ficha, explicadas</summary>
+          <dl className="fi-datos">
+            {glosario.map((g) => (
+              <Dato key={g.termino} nombre={g.termino}>
+                {g.definicion}
+              </Dato>
+            ))}
+          </dl>
+        </details>
         <footer className="fi-pie-ficha">
           <p>Información pública, al alcance de todos.</p>
           {urlSecop ? (

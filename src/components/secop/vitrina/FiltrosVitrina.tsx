@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { TIPOS_PROYECTO, TIPO_PROYECTO } from "@/src/lib/classify/tipo-proyecto";
 import {
+  ETAPAS_FILTRO,
+  ETIQUETA_ETAPA_FILTRO,
   ETIQUETA_ORDEN,
   MAX_Q,
   ORDENES_VITRINA,
@@ -73,6 +75,12 @@ export default function FiltrosVitrina({
       clave: "presupuesto",
       label: `Presupuesto ${etiquetaPresupuesto(filtros.presupuestoMin)}`,
       href: con({ presupuestoMin: null }),
+    });
+  if (filtros.etapa)
+    activos.push({
+      clave: "etapa",
+      label: ETIQUETA_ETAPA_FILTRO[filtros.etapa],
+      href: con({ etapa: null }),
     });
   if (filtros.orden !== "relevancia")
     activos.push({
@@ -168,6 +176,19 @@ export default function FiltrosVitrina({
             {PRESUPUESTOS_MIN.map((m) => (
               <option key={m} value={m}>
                 {etiquetaPresupuesto(m)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {/* Apagado por defecto (decisión del usuario, 2026-10-05): sin elegirlo,
+            la vitrina solo muestra procesos que reciben ofertas. */}
+        <label className="vf-campo">
+          <span className="vf-etiqueta">Etapa</span>
+          <select className="clr-select" name="etapa" defaultValue={filtros.etapa ?? ""}>
+            <option value="">Reciben ofertas</option>
+            {ETAPAS_FILTRO.map((e) => (
+              <option key={e} value={e}>
+                {ETIQUETA_ETAPA_FILTRO[e]} · desde 2026
               </option>
             ))}
           </select>

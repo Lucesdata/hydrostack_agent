@@ -15,7 +15,10 @@ const RANK: Record<GateStatus, number> = { PASS: 0, WARN: 1, UNKNOWN: 2, FAIL: 3
 
 export async function getMatchesForPerfilMinimo(perfil: PerfilMinimo): Promise<MatchMinimo[]> {
   const { items } = await searchProcesosDb({
-    apertura: "Abierto",
+    // Solo lo que recibe ofertas hoy: la misma regla de la portada. Con
+    // `apertura: "Abierto"` a secas entraban procesos ya seleccionados y de
+    // régimen especial sin fecha, y llegaban por correo (spec 2026-10-05, M7–M9).
+    recibeOfertas: true,
     soloAgua: true,
     orden: "fecha",
     page: 1,

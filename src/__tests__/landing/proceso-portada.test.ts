@@ -17,6 +17,7 @@ const fila: FilaProcesoPortada = {
   entidadNombre: "MUNICIPIO DE CHINÚ",
   estadoActual: "Publicado",
   estadoApertura: "Abierto",
+  fechaRecepcion: "2099-12-31",
   tipoProyecto: "ptar",
   valorEstimado: "980000000.00",
   departamentoCodigo: "23",
@@ -132,6 +133,20 @@ describe("procesoPortadaDesdeFila", () => {
     expect(estadoVisible(cerrado)).toBe("Adjudicado");
     expect(estadoVisible({ abierto: false, estado: null })).toBe("Estado no disponible");
     expect(estadoVisible(procesoPortadaDesdeFila(fila)!)).toBe("Abierto");
+  });
+
+  it("sin recepción vigente no es abierto, aunque la fuente diga «Publicado / Abierto»", () => {
+    expect(procesoPortadaDesdeFila({ ...fila, fechaRecepcion: null })!.abierto).toBe(false);
+    expect(procesoPortadaDesdeFila({ ...fila, fechaRecepcion: undefined })!.abierto).toBe(false);
+    expect(procesoPortadaDesdeFila({ ...fila, fechaRecepcion: "2020-01-01" })!.abierto).toBe(false);
+  });
+
+  it("la recepción cierra al final del día en Colombia", () => {
+    const f = { ...fila, fechaRecepcion: "2026-10-05" };
+    // 11:30 p. m. del 5 en Colombia (04:30 UTC del 6): todavía recibe ofertas.
+    expect(procesoPortadaDesdeFila(f, new Date("2026-10-06T04:30:00Z"))!.abierto).toBe(true);
+    // 12:30 a. m. del 6 en Colombia: ya no.
+    expect(procesoPortadaDesdeFila(f, new Date("2026-10-06T05:30:00Z"))!.abierto).toBe(false);
   });
 
   it("un tipo desconocido no se convierte en una categoría", () => {

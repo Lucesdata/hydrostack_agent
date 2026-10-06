@@ -1096,6 +1096,69 @@ enlaces del mapa a las facetas.
   se calcula al generar la página, que vive hasta 6 h: cerca de medianoche puede
   ir un día por detrás. La base `/licitaciones` es dinámica y no lo sufre.
 
+
+### 55. «Abierto» = recepción vigente: lo que queda (2026-10-05)
+PR 1 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+`condicionAbierto()` exige ahora `fecha_recepcion` igual o posterior a hoy en
+Colombia (medido: de 36.088 «abiertos» solo 128 la tenían; el 98 % era régimen
+especial sin fecha). Queda:
+- ~~**`db-search.ts`** sigue con su propia noción de abierto.~~ **Resuelto el
+  2026-10-06** (rama `claude/coincidencias-abiertas`): el matching
+  (`getMatchesForPerfil`, `getMatchesForPerfilMinimo`), y con él
+  `/mis-coincidencias`, las alertas diarias y la vista previa del perfil, piden
+  `recibeOfertas: true`, que aplica `condicionAbierto()`. Pedían
+  `apertura: "Abierto"` a secas: entraban seleccionados, en evaluación y
+  régimen especial sin fecha. `apertura` sigue existiendo en `SecopQuery`, pero
+  ya no lo usa ningún llamador de producción.
+- **La ficha individual** sigue diciendo «Abierto a ofertas» con
+  `estado_apertura`; lo corrige el PR 2 (etapa única).
+- **La portada puede quedar con menos de cinco minifichas** si un día hay menos
+  procesos con recepción vigente y ancla en el mapa. Se acepta: pinta los que
+  haya. Vigilar tras cada ingesta fallida.
+- **`landingStats.ts`** cuenta abiertos contra Socrata con `estado_apertura` a
+  secas; no se usa en la portada desde el 2026-09-28, pero si vuelve, debe usar
+  la regla nueva.
+
+### 56. Etapa del proceso en la ficha: lo que queda (2026-10-05)
+PR 2 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+La ficha calcula la etapa con `etapaDeProceso()` (`src/lib/secop/etapa.ts`) y
+pinta «Revisa antes de confiar» con las contradicciones C1–C7. Queda:
+- **`contrato` no tiene índice por `proceso_id`.** `contratosDeProceso()` barre
+  ~39.000 filas por ficha regenerada (ISR 12 h). Aceptable hoy; si la ficha pasa
+  a dinámica o el Radar la usa por página, crear el índice con una migración.
+- **La tarjeta de la vitrina, el Radar y la minificha** no usan aún la etapa.
+  En la pestaña «abiertos» no hace falta (solo hay procesos que reciben ofertas
+  desde el PR 1), pero sí en «adjudicados» y en la búsqueda por número, que
+  encuentra también cerrados.
+- **La descripción de la página (`generateMetadata`)** sigue citando el estado
+  del SECOP; no consulta contratos para no duplicar la consulta.
+- **Contratista, valor del contrato, prórrogas, adiciones y pagos** son el PR 3
+  («Cómo se contrató»), con la exclusión de personas naturales.
+
+### 57. Ficha en ejecución y filtro de etapa: lo que queda (2026-10-06)
+PR 3 del plan `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`.
+«Cómo se contrató» (`src/lib/secop/como-se-contrato.ts`) y el filtro de etapa de
+la vitrina (`condicionDeEtapa()` en `vitrina.ts`). Queda:
+- **El filtro y la ficha pueden discrepar en procesos con varios contratos**: el
+  filtro acepta el proceso si **algún** contrato con NIT está en la etapa; la
+  ficha calcula la etapa con el de firma más reciente, sea cual sea el
+  contratista. Raro (879 procesos con más de un contrato, M1c).
+- **El filtro de etapa no tiene caché**: es una consulta con semijoin sobre
+  `contrato` (~39.000 filas) por visita. Si se usa mucho, el índice por
+  `proceso_id` de §56 lo abarata.
+- **«OTRO» en `tipo_documento` (284 contratos) se trata como persona natural.**
+  Si se mide qué hay dentro y resultan ser personas jurídicas, se pueden incluir.
+- ~~**La búsqueda por número** sigue pintando la pastilla desde `estado_actual`
+  (§56).~~ **Resuelto el 2026-10-06** (rama `claude/etapa-busqueda-numero`):
+  `conEtapaCalculada()` en `vitrina.ts` lee los contratos de la página con
+  `contratosDeProcesos()` (una consulta) y pinta `etapaDeProceso()`; lo que
+  recibe ofertas conserva su cuenta atrás. Sin Radar ni encaje en esa búsqueda.
+  Sigue pendiente: la tarjeta de la pestaña «adjudicados» y la de la búsqueda por
+  número muestran «Adjudicado a X» con `proceso.adjudicatario`, que puede ser
+  una persona natural (anterior a la decisión del 2026-10-05; no se tocó aquí).
+- **«OTRO» se mide con `scripts/sql/medir-tipo-documento-otro.sql`.** En la
+  muestra local el único caso es una S.A.S.: puede que «OTRO» sean empresas.
+
 ### 58. Datos que faltan en la ficha: PAA, CDP, garantías, recursos, modificaciones, documentos y lugar de ejecución (2026-10-06)
 Spec en borrador: `docs/superpowers/specs/2026-10-06-ficha-viva-datos-nuevos.md`.
 Hallazgo: fuentes de recursos, saldo de CDP, duración, ofertas recibidas,

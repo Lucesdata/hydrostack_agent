@@ -33,6 +33,8 @@ async function unProceso(v: {
   valor?: string | null;
   entidadId?: string | null;
   objeto?: string;
+  /** `fecha_recepcion`; por defecto vigente. `null` = no publicada. */
+  recepcion?: string | null;
 }) {
   n += 1;
   await db.insert(proceso).values({
@@ -44,6 +46,7 @@ async function unProceso(v: {
     fechaPublicacion: hace(v.diasAtras) as unknown as string,
     estadoApertura: v.abierto === false ? "Cerrado" : "Abierto",
     estadoActual: v.abierto === false ? "Adjudicado" : "Publicado",
+    fechaRecepcion: v.recepcion === undefined ? "2099-12-31" : v.recepcion,
     tipoProyecto: "ptar",
   });
 }
@@ -83,6 +86,10 @@ beforeAll(async () => {
   await unProceso({ diasAtras: 20, valor: "500", entidadId: null, objeto: "Mediana" });
   // Cerrado: no aparece en destacados ni en el detalle de abiertos.
   await unProceso({ diasAtras: 40, abierto: false, valor: "99999", entidadId: entB });
+  // «Abierto» sin fecha de recepción (régimen especial) o con ella vencida: no
+  // recibe ofertas, así que no es destacado aunque tenga el mayor presupuesto.
+  await unProceso({ diasAtras: 2, valor: "88888", entidadId: entB, recepcion: null });
+  await unProceso({ diasAtras: 2, valor: "77777", entidadId: entB, recepcion: "2020-01-01" });
   // Otro departamento: no se mezcla.
   await unProceso({ dpto: "08", diasAtras: 1, valor: "5000" });
 });
