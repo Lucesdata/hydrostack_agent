@@ -16,7 +16,9 @@ especial sin fecha de recepción. Regla: «Recibe ofertas» exige recepción vig
 **PR 1 aplicado (2026-10-05):** `condicionAbierto()` exige `fecha_recepcion >=` hoy
 en Colombia, y su espejo de cliente es `recibeOfertas()` (`estados-abierto.ts`),
 que usa la minificha. Lo heredan mapa, imagen OG, facetas, vitrina, entidades,
-destacados y hero. Fuera: la ficha (PENDIENTES §55). Plan en
+destacados y hero; desde el 2026-10-06 también el matching (`/mis-coincidencias`,
+alertas diarias, vista previa del perfil) con `recibeOfertas: true` en
+`searchProcesosDb`. Fuera: la ficha (PENDIENTES §55). Plan en
 `docs/superpowers/plans/2026-10-05-ficha-viva-ciclo-de-vida.md`. Hoy la ficha no lee fase, adjudicación ni contrato (`aSecopProceso` fija
 `adjudicado: false`). Spec y mediciones (completas) en
 `docs/superpowers/specs/2026-10-05-ficha-viva-ciclo-de-vida.md`.

@@ -100,3 +100,19 @@ describe("getMatchesForPerfilMinimo — cobertura como filtro", () => {
     expect(ids).toContain("CO1.REQ.SINZONA");
   });
 });
+
+describe("el prefiltro pide solo lo que recibe ofertas (spec 2026-10-05)", () => {
+  it("getMatchesForPerfil usa la regla de la portada, no `apertura` a secas", async () => {
+    await getMatchesForPerfil(perfil, NOW);
+    const consulta = searchProcesosDb.mock.calls.at(-1)?.[0];
+    expect(consulta).toMatchObject({ recibeOfertas: true });
+    expect(consulta).not.toHaveProperty("apertura");
+  });
+
+  it("getMatchesForPerfilMinimo, igual", async () => {
+    await getMatchesForPerfilMinimo(minimo);
+    const consulta = searchProcesosDb.mock.calls.at(-1)?.[0];
+    expect(consulta).toMatchObject({ recibeOfertas: true });
+    expect(consulta).not.toHaveProperty("apertura");
+  });
+});
