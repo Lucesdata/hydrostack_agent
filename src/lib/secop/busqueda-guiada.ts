@@ -8,25 +8,43 @@
  * Puro: sin base.
  */
 
+import { COLOR_TIPO } from "../classify/tipo-color";
 import { TIPOS_PROYECTO, TIPO_PROYECTO, type TipoProyecto } from "../classify/tipo-proyecto";
 
-const [ACUEDUCTO, ALCANTARILLADO, PTAP, PTAR] = TIPOS_PROYECTO;
-
-/** Los dos sistemas que agrupan tipos de obra, además de cada tipo suelto. */
-export const SISTEMAS_AGRUPADOS = ["potable", "residual"] as const;
+/**
+ * Los tres sistemas que agrupan tipos de obra, además de cada tipo suelto. Son
+ * las familias de `tipo-color.ts` —las mismas del color del mapa, la leyenda y
+ * las pestañas del hero—: potable = acueducto + PTAP, residual = PTAR, redes =
+ * alcantarillado. Hasta el 2026-10-07 «residual» incluía el alcantarillado y no
+ * había «redes»: el hero decía «Redes» de un proceso que la vitrina contaba como
+ * residual (spec 2026-10-07-hero-tres-destacados, D1).
+ */
+export const SISTEMAS_AGRUPADOS = ["potable", "residual", "redes"] as const;
 export type SistemaAgrupado = (typeof SISTEMAS_AGRUPADOS)[number];
 export type SistemaBusqueda = SistemaAgrupado | TipoProyecto;
 
-export const ETIQUETA_SISTEMA: Record<SistemaAgrupado, string> = {
-  potable: `Agua potable (${TIPO_PROYECTO[ACUEDUCTO].label} y ${TIPO_PROYECTO[PTAP].label})`,
-  residual: `Aguas residuales (${TIPO_PROYECTO[ALCANTARILLADO].label} y ${TIPO_PROYECTO[PTAR].label})`,
-};
+function tiposDeFamilia(familia: SistemaAgrupado): TipoProyecto[] {
+  return TIPOS_PROYECTO.filter((t) => COLOR_TIPO[t].familia === familia);
+}
+
+/**
+ * «Agua potable (Acueducto y PTAP)»: el nombre de la familia y lo que agrupa.
+ * Sin paréntesis si el nombre ya lo dice: «Redes y alcantarillado», no
+ * «Redes y alcantarillado (Alcantarillado)».
+ */
+export const ETIQUETA_SISTEMA = Object.fromEntries(
+  SISTEMAS_AGRUPADOS.map((s) => {
+    const tipos = tiposDeFamilia(s).map((t) => TIPO_PROYECTO[t].label);
+    const nombre = COLOR_TIPO[tiposDeFamilia(s)[0]].familiaLabel;
+    const dicho = tipos.every((t) => nombre.toLowerCase().includes(t.toLowerCase()));
+    return [s, dicho ? nombre : `${nombre} (${tipos.join(" y ")})`];
+  })
+) as Record<SistemaAgrupado, string>;
 
 /** Para el `<select>` de la vitrina, que es estrecho; la pastilla lleva la larga. */
-export const ETIQUETA_SISTEMA_CORTA: Record<SistemaAgrupado, string> = {
-  potable: "Agua potable",
-  residual: "Aguas residuales",
-};
+export const ETIQUETA_SISTEMA_CORTA = Object.fromEntries(
+  SISTEMAS_AGRUPADOS.map((s) => [s, COLOR_TIPO[tiposDeFamilia(s)[0]].familiaLabel])
+) as Record<SistemaAgrupado, string>;
 
 export type ActividadBusqueda =
   "obras" | "operacion" | "muestreo" | "consultoria" | "interventoria" | "suministros";
@@ -61,9 +79,10 @@ export function esSistema(v: string): v is SistemaBusqueda {
 }
 
 export function tiposDeSistema(sistema: SistemaBusqueda): readonly TipoProyecto[] {
-  if (sistema === "potable") return [ACUEDUCTO, PTAP];
-  if (sistema === "residual") return [ALCANTARILLADO, PTAR];
-  return [sistema];
+  if ((SISTEMAS_AGRUPADOS as readonly string[]).includes(sistema)) {
+    return tiposDeFamilia(sistema as SistemaAgrupado);
+  }
+  return [sistema as TipoProyecto];
 }
 
 /** Patrón fijo PostgreSQL, consumido sobre texto sin tildes y en minúsculas. */

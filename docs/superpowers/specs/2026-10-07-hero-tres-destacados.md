@@ -105,15 +105,37 @@ Mejoras propuestas por Claude y aceptadas («ok go»):
 - Aún sin clic en la región (PR 3): el número de «en 2026» no puede enlazar a
   la vitrina, que solo enseña abiertos, sin contradecirse.
 
-### PR 3 — La región y la alineación de familias (pendiente)
+### PR 3 — La región y la alineación de familias (hecho, 2026-10-07, rama `claude/hero-region`)
 
-- Clic en un departamento: panel en el hero con las 3–5 de mayor presupuesto
-  de esa familia (consulta pequeña por departamento, cacheada como
-  `/api/departamento/[dpto]/resumen`) y «Ver las N →» (D5). Sin JavaScript, el
-  departamento es un enlace a esa misma búsqueda de la vitrina.
-- `tipo=redes` en la vitrina y `residual` = solo PTAR en vitrina y buscador
-  guiado (D1). Cambia lo que devuelve `?tipo=residual`: hay que decirlo en el
-  PR; no hace falta redirigir, la URL sigue valiendo.
+- **Pulsar un departamento** con procesos en la capa elegida (en el mapa o en
+  «Ver por departamento») abre su panel en el sitio de la ficha destacada:
+  «Antioquia · Agua potable», el mismo conteo del mapa, «Ver los 16 que reciben
+  ofertas en Antioquia →» (solo si hay alguno: la vitrina enseña esos) y los 5
+  de mayor presupuesto, cada uno con «Recibe ofertas hasta el…» o «No recibe
+  ofertas»: un contrato en ejecución no se presenta como oportunidad. «← Volver
+  al destacado» lo cierra y devuelve el foco a la pestaña.
+- Cambiar de pestaña con una región abierta cambia la familia del panel. El
+  recorrido se detiene mientras haya una región abierta. Al abrir, el foco va al
+  título del panel (en el celular, así entra en vista). El departamento abierto
+  se marca en el mapa (`is-region`).
+- `regionFamilia()` (`src/lib/secop/region-familia.ts`): dos consultas en
+  paralelo, el conteo con las condiciones de `conteosPorFamilia()` y los
+  primeros 5 con ficha enlazable, sin presupuesto al final. Se pide al pulsar,
+  por `GET /api/portada/region/[dpto]/[familia]` (400 si la región o la familia
+  no valen, 503 sin caché si falla la base, `s-maxage` de 6 h). Es la única
+  petición del hero y vive fuera del componente (`region.js`, con
+  `AbortController` y una respuesta de otra región se descarta).
+- Sin JavaScript, cada departamento de la lista es un enlace a la vitrina de esa
+  región y familia.
+- **Familias alineadas (D1):** los sistemas de la vitrina y del buscador guiado
+  son ya las familias de `tipo-color.ts` (`SISTEMAS_AGRUPADOS` = potable,
+  residual, redes, derivados de `COLOR_TIPO`). **`?tipo=residual` pasa a ser
+  solo PTAR** (antes alcantarillado + PTAR) y `?tipo=redes` es alcantarillado.
+  Las URL viejas siguen valiendo; devuelven menos resultados en residual. La
+  categoría «Redes y alcantarillado» del buscador envía `redes`.
+- Medido en Chromium: con el panel abierto, a 1440×900 la quinta fila queda
+  14 px bajo el primer pantallazo y a 1280×800 unos 120 px; la cabecera, el
+  enlace y las primeras filas se ven de entrada.
 
 ## Lo que no cambia
 

@@ -380,8 +380,13 @@ el mapa se colorea por la familia de la pestaña con `conteosPorFamilia()`
 (publicados en 2026 por departamento y, de ellos, los que reciben ofertas; una
 consulta con `FILTER`): escalones fijos en `data-e-<familia>` de cada camino,
 cifras bajo el anclaje, rampa en el color de la familia y `data-capa` en la raíz
-que elige la capa por CSS; debajo, la escala y «Ver por departamento». Pendiente:
-el panel de la región + alinear `residual` en la vitrina (PR 3). Spec y
+que elige la capa por CSS; debajo, la escala y «Ver por departamento». **PR 3
+(rama `claude/hero-region`):** pulsar un departamento abre su panel en el sitio
+de la ficha (`PanelRegion.jsx`, `regionFamilia()`, `GET
+/api/portada/region/[dpto]/[familia]`): sus 5 de mayor presupuesto de la
+familia, cada uno con «Recibe ofertas» o «No recibe ofertas», y la vitrina solo
+para los que reciben. Y la vitrina usa ya las familias de `tipo-color.ts`:
+**`tipo=residual` es solo PTAR** y existe `tipo=redes`. Spec y
 decisiones: `docs/superpowers/specs/2026-10-07-hero-tres-destacados.md`.
 
 *(Lo que sigue sobre la composición, la etiqueta flotante, los anclajes y el
@@ -813,8 +818,9 @@ JavaScript. Sin filtros, la paginación sigue en el camino (ISR); con filtros va
 en `?pagina=` y la página lleva `noindex`. `/licitaciones/descubrir` redirige con
 308 (la query pasa) y salió `discovery`.
 **Un solo buscador (2026-10-05, decisión del usuario).** La vitrina absorbió el
-buscador guiado de #109: `tipo` admite además `potable` y `residual` (agrupan
-acueducto + PTAP y alcantarillado + PTAR, `tiposDeSistema`), `actividad` busca
+buscador guiado de #109: `tipo` admite además `potable`, `residual` y, desde el
+2026-10-07, `redes` (las familias de `tipo-color.ts`: acueducto + PTAP, PTAR y
+alcantarillado; hasta entonces `residual` era alcantarillado + PTAR, `tiposDeSistema`), `actividad` busca
 menciones en objeto y descripción sin tildes (`ACTIVIDADES_BUSQUEDA`,
 `patronDeActividad` en `busqueda-guiada.ts`) y `numero` busca por id SECOP II o
 referencia **también entre los cerrados**, exactos primero, sin combinarse con

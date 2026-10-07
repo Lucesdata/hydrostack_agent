@@ -158,15 +158,13 @@ describe("tipo agrupado y actividad en la vitrina", () => {
     ]);
   });
 
-  it("residual agrupa alcantarillado y PTAR, solo abiertos", async () => {
+  // Desde el 2026-10-07 las familias son las de tipo-color.ts: residual = PTAR
+  // y redes = alcantarillado (spec 2026-10-07-hero-tres-destacados, D1).
+  it("residual es PTAR y redes es alcantarillado, solo abiertos", async () => {
     const r = await buscar({ tipo: "residual" });
-    expect(ids(r).sort()).toEqual([
-      "MUESTREO-DESCRIPCION",
-      "PTAR-CONSULTORIA",
-      "PTAR-OBRA",
-      "REDES",
-    ]);
-    expect(r.total).toBe(4);
+    expect(ids(r).sort()).toEqual(["MUESTREO-DESCRIPCION", "PTAR-CONSULTORIA", "PTAR-OBRA"]);
+    expect(r.total).toBe(3);
+    expect(ids(await buscar({ tipo: "redes" }))).toEqual(["REDES"]);
   });
 
   it("la actividad se busca también en la descripción", async () => {

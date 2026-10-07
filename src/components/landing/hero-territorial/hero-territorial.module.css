@@ -388,6 +388,16 @@
 .map[data-capa] :global(.clr-mapa__svg) {
   height: clamp(420px, calc(var(--aq-pantalla) - 160px), 810px);
 }
+/* Pulsar un departamento con procesos abre su región (PR 3). */
+.map[data-capa="potable"] :global(.clr-mapa__dpto:not([data-e-potable="0"])),
+.map[data-capa="residual"] :global(.clr-mapa__dpto:not([data-e-residual="0"])),
+.map[data-capa="redes"] :global(.clr-mapa__dpto:not([data-e-redes="0"])) {
+  cursor: pointer;
+}
+.map :global(.clr-mapa__dpto.is-region) {
+  stroke: var(--aq-cyan);
+  stroke-width: 2.2;
+}
 /* Las cifras: solo las de la capa elegida, con halo para leerse sobre
    cualquier escalón. */
 .map :global(.clr-mapa__cifras) {
@@ -507,11 +517,24 @@
   list-style: none;
 }
 .listaDptos li {
+  border-bottom: 1px solid var(--aq-line);
+}
+.listaDptos li a {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--aq-line);
+  min-height: 32px;
+  padding: 6px 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.listaDptos li a:hover,
+.listaDptos li a[aria-current] {
+  background: rgba(76, 201, 255, 0.08);
+}
+.listaDptos li a:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: -2px;
 }
 .listaDptos li strong {
   color: var(--aq-text);
@@ -525,6 +548,125 @@
 .listaDptos p {
   margin: 6px 0 0;
   text-align: left;
+}
+/* ── El panel de una región (PR 3) ─────────────────────────────────────────── */
+.region {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 244px;
+}
+.regionCab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.regionCab h2 {
+  margin: 0;
+  font:
+    700 19px/1.25 var(--font-inter),
+    sans-serif;
+  color: var(--aq-text);
+}
+.regionCab h2:focus {
+  outline: none;
+}
+.regionCab h2:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
+.regionCerrar,
+.regionReintentar {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--aq-cyan);
+  font:
+    600 14px var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+}
+.regionReintentar {
+  min-height: 0;
+  text-decoration: underline;
+}
+.regionCerrar:focus-visible,
+.regionReintentar:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.regionLista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--aq-line);
+  border-left: 3px solid var(--fam);
+  border-radius: 10px;
+  background: var(--aq-card);
+}
+.regionLista li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 14px;
+}
+.regionLista li + li {
+  border-top: 1px solid var(--aq-line);
+}
+.regionObjeto {
+  color: var(--aq-text);
+  font:
+    600 14.5px/1.35 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.regionObjeto:hover {
+  text-decoration: underline;
+}
+.regionObjeto:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.regionEntidad {
+  overflow: hidden;
+  color: var(--aq-muted);
+  font:
+    12.5px/1.4 var(--font-inter),
+    sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.regionDatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font:
+    12.5px/1.4 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.regionDatos strong {
+  color: var(--aq-text);
+  font-weight: 700;
+}
+.regionDatos [data-abierto] {
+  color: var(--aq-abierto);
+}
+.regionNota {
+  margin: 0;
+  font:
+    13px/1.45 var(--font-inter),
+    sans-serif;
+  color: #c3d3e0;
 }
 .noData {
   margin: 8px 0 0;

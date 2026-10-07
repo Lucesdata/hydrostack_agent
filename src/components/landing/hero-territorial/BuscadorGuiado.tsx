@@ -119,7 +119,7 @@ export default function BuscadorGuiado() {
                         icono: "tratamiento",
                       },
                       {
-                        value: "alcantarillado",
+                        value: "redes",
                         label: "Redes y alcantarillado",
                         familia: "redes",
                         icono: "red",
@@ -129,7 +129,8 @@ export default function BuscadorGuiado() {
                         tema.sistema === opcion.value ||
                         (opcion.value === "potable" &&
                           (tema.sistema === "acueducto" || tema.sistema === "ptap")) ||
-                        (opcion.value === "residual" && tema.sistema === "ptar");
+                        (opcion.value === "residual" && tema.sistema === "ptar") ||
+                        (opcion.value === "redes" && tema.sistema === "alcantarillado");
                       return (
                         <button
                           key={opcion.value}

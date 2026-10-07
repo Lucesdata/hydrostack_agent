@@ -55,15 +55,12 @@ export function tiposDeFamilia(familia: FamiliaDestacada): TipoProyecto[] {
 }
 
 /**
- * La vitrina con los procesos de la familia, de mayor a menor presupuesto. Un
- * solo tipo va como tal; potable, que son dos, va como el sistema `potable`
- * de la vitrina, que agrupa los mismos (lo vigila un test). `residual` NO se
- * usa: en la vitrina incluye alcantarillado, que aquí es «Redes».
+ * La vitrina con los procesos de la familia, de mayor a menor presupuesto. La
+ * vitrina conoce las tres familias como sistemas (`busqueda-guiada.ts`) con los
+ * mismos tipos (lo vigila un test).
  */
 export function hrefDeFamilia(familia: FamiliaDestacada): string {
-  const tipos = tiposDeFamilia(familia);
-  const tipo = tipos.length === 1 ? tipos[0] : familia;
-  return `/licitaciones?tipo=${tipo}&orden=valor`;
+  return `/licitaciones?tipo=${familia}&orden=valor`;
 }
 
 /** «14 oct 2026», el día de calendario de un DATE, sin correrlo por zona horaria. */
