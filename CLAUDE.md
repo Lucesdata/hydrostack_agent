@@ -337,7 +337,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -383,7 +383,24 @@ servidor. Las cifras no se sustituyen por cifras ni tendencias de un mockup.
   solo la línea «N procesos del sector» bajo el botón, salió el 2026-09-28 con
   esa línea y con `src/lib/landing/cifras.ts`.
 
-**Hero con ficha central (2026-10-06).** Sustituye la composición del hero de
+**Hero con tres destacados (2026-10-07, PR 1 de 3).** Sustituye la muestra al
+azar del hero con ficha central (abajo): tres pestañas —Agua potable · Agua
+residual · Redes— con el proceso **más relevante** de cada familia, que es una
+regla escrita en la ficha: el de mayor presupuesto entre los que reciben
+ofertas con al menos 5 días por delante (si ninguno los tiene, el mayor, con
+«Cierra pronto»; sin presupuesto no compite; familia vacía = la pestaña lo
+dice). `destacadosPortada()` (`src/lib/secop/destacados-portada.ts`, una
+consulta `DISTINCT ON`) sustituye a `muestraPortada()`; lo puro está en
+`src/lib/landing/destacados-portada.ts`. Familias = las de `tipo-color.ts`
+(residual = PTAR, redes = alcantarillado); «Ver más» enlaza la vitrina con
+exactamente esos tipos, por presupuesto. Recorrido cada 7 s. Salieron las
+flechas, los puntos y «Ver otros». Pendiente: el mapa contado por familia (PR
+2) y el panel de la región + alinear `residual` en la vitrina (PR 3). Spec y
+decisiones: `docs/superpowers/specs/2026-10-07-hero-tres-destacados.md`.
+
+*(Lo que sigue sobre la composición, la etiqueta flotante, los anclajes y el
+alto sigue vigente; la navegación ← · puntos · →, «Ver otros» y la muestra de
+30, no.)* **Hero con ficha central (2026-10-06).** Sustituye la composición del hero de
 cinco minifichas (abajo); el contrato de datos, `muestraPortada()`, los grupos de
 cinco, el recorrido de 5 s, «Ver otros», el buscador y los colores no cambian.
 Spec y lo que quedó: `docs/superpowers/specs/2026-10-06-hero-ficha-central.md`.

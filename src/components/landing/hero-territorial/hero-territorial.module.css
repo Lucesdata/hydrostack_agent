@@ -350,87 +350,85 @@
   min-width: 0;
   margin-top: 28px;
 }
-/* ← · puntos · «n de N» · → (spec 2026-10-06 §2). Circulares. */
-.navFicha {
+/* Tres pestañas, una por familia (spec 2026-10-07): el punto lleva el color
+   de la familia y la elegida se subraya con él. El nombre va siempre escrito:
+   el color nunca va solo (tipo-color.ts, regla 1). */
+.pestanas {
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--aq-line);
+}
+.pestana {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--aq-muted);
+  font:
+    600 14.5px/1 var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+}
+.pestana:hover {
+  color: var(--aq-text);
+}
+.pestana[aria-selected="true"] {
+  border-bottom-color: var(--fam);
+  color: var(--aq-text);
+}
+.pestana:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: -2px;
+}
+.pestanaPunto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fam);
+}
+.panelDestacado {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 12px;
 }
-.flecha {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid rgba(140, 190, 225, 0.28);
-  border-radius: 50%;
-  background: var(--aq-card);
-  color: var(--aq-text);
-  font:
-    600 16px/1 var(--font-inter),
-    sans-serif;
-  cursor: pointer;
-  transition:
-    border-color 0.15s,
-    background-color 0.15s;
+/* El alto de la ficha más alta (la que lleva «Según descripción»): al pasar de
+   pestaña la ficha cambia de alto y, con el hero centrado, la página entera
+   saltaba unos píxeles cada 7 s. */
+.panelDestacado :global(.aqMinifichas) {
+  min-height: 244px;
 }
-.flecha:hover {
-  border-color: var(--aq-cyan);
-  background: var(--aq-card-activa);
-}
-.puntos {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-/* El punto se dibuja en ::before; el botón da un objetivo mayor que 7 px. */
-.punto {
-  display: grid;
-  place-items: center;
-  width: auto;
-  min-width: 18px;
-  height: 24px;
-  padding: 0 4px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  cursor: pointer;
-}
-.punto::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: rgba(159, 180, 198, 0.4);
-  transition:
-    width 0.2s,
-    background-color 0.2s;
-}
-.punto[data-activo]::before {
-  width: 22px;
-  background: var(--aq-cyan);
-}
-.punto:hover:not([data-activo])::before {
-  background: rgba(159, 180, 198, 0.7);
-}
-.flecha:focus-visible,
-.punto:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 2px;
-}
-.posicion {
+/* La regla que eligió el proceso: por qué este y no otro. */
+.criterio {
   margin: 0;
   font:
-    500 12px/1 var(--font-inter),
+    13px/1.45 var(--font-inter),
     sans-serif;
   color: var(--aq-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
-/* Bajo la ficha: «Ver otros 5 procesos», «Pausar recorrido» y el enlace
-   a todas las fichas (2026-10-04, opción D). */
+.enlaceFamilia {
+  align-self: flex-start;
+  padding: 6px 0;
+  color: var(--aq-cyan);
+  font:
+    600 14px/1.35 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.enlaceFamilia:hover {
+  text-decoration: underline;
+}
+.enlaceFamilia:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
+/* Bajo la ficha: «Pausar recorrido» y el enlace a todas las fichas. */
 .procesosPie {
   display: flex;
   flex-wrap: wrap;
@@ -438,36 +436,23 @@
   gap: 4px 18px;
   margin-top: 10px;
 }
-.botonOtros,
 .botonPausa {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 0 16px;
+  padding: 0 4px;
+  border: 0;
   border-radius: 9px;
+  background: none;
   font:
     600 14.5px var(--font-inter),
     sans-serif;
   cursor: pointer;
-}
-.botonOtros {
-  border: 1px solid rgba(76, 201, 255, 0.55);
-  background: rgba(76, 201, 255, 0.1);
-  color: var(--aq-text);
-}
-.botonOtros:hover {
-  background: rgba(76, 201, 255, 0.18);
-}
-.botonPausa {
-  padding: 0 4px;
-  border: 0;
-  background: none;
   color: var(--aq-muted);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.botonOtros:focus-visible,
 .botonPausa:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 2px;
@@ -790,6 +775,12 @@
 @media (max-width: 430px) {
   .hero {
     padding-inline: 16px;
+  }
+  /* Las tres pestañas en una fila a 360 px. */
+  .pestana {
+    gap: 6px;
+    padding: 0 8px;
+    font-size: 13.5px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
