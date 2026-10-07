@@ -10,6 +10,12 @@ import {
   hrefDeFamilia,
   PESTANA,
 } from "@/src/lib/landing/destacados-portada";
+import {
+  DESDE_CONTEOS,
+  ESCALONES_FAMILIA,
+  filasDeCapa,
+  textoConteo,
+} from "@/src/lib/landing/conteos-familia";
 import Minifichas, { categoriaDe } from "./Minifichas";
 import { procesoDesdeObjetivo, useActivoEnMapa, useGrupoEnMapa } from "./sincronia";
 import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
@@ -36,11 +42,17 @@ import BuscadorGuiado from "./BuscadorGuiado";
  * enfocar la ficha o el mapa, con «Pausar recorrido» y si el sistema pide
  * reducir el movimiento.
  *
+ * Con `conteos` (PR 2, 2026-10-07) el mapa es coroplético por familia: la
+ * pestaña elegida enciende su capa (`data-capa` en la raíz del mapa; el SVG ya
+ * trae los escalones y las cifras de las tres) y, debajo, la leyenda de esa
+ * escala y la lista de departamentos por cifra. Sin conteos, el mapa marca solo
+ * los destacados, como antes.
+ *
  * `destacados === null` es un error de carga (la consulta falló al regenerar
  * la portada). Una pestaña sin proceso dice que hoy no hay ninguno: no se
  * rellena con otro.
  */
-export default function HeroTerritorial({ mapa = null, destacados = null }) {
+export default function HeroTerritorial({ mapa = null, destacados = null, conteos = null }) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
   const lista = useMemo(() => destacados ?? [], [destacados]);
@@ -54,7 +66,12 @@ export default function HeroTerritorial({ mapa = null, destacados = null }) {
     () => new Map(procesos.map((p) => [p.id, familiaDe(p.tipoProyecto)])),
     [procesos]
   );
-  const familiasDpto = useMemo(() => familiasPorDepartamento(procesos), [procesos]);
+  // Con conteos el departamento se pinta por su escalón, no por el tinte de
+  // los destacados.
+  const familiasDpto = useMemo(
+    () => (conteos ? new Map() : familiasPorDepartamento(procesos)),
+    [conteos, procesos]
+  );
   useActivoEnMapa(mapaRef, activo, familias);
   // Un solo grupo: el mapa del servidor dibujó los tres destacados.
   useGrupoEnMapa(mapaRef, 0, familiasDpto);
@@ -117,8 +134,11 @@ export default function HeroTerritorial({ mapa = null, destacados = null }) {
     const d = id ? conProceso.find((x) => x.proceso.id === id) : null;
     if (d) setEleccion(d.familia);
   };
-  // La leyenda dice las tres familias: son las tres pestañas.
+  // Sin conteos, la leyenda dice las tres familias: son las tres pestañas.
   const leyenda = FAMILIAS.filter((f) => FAMILIAS_DESTACADAS.includes(f.familia));
+  const capa = conteos && activa ? activa.familia : null;
+  const filasCapa = useMemo(() => (capa ? filasDeCapa(conteos, capa) : []), [conteos, capa]);
+  const anio = DESDE_CONTEOS.slice(0, 4);
 
   return (
     <section className={styles.hero} aria-labelledby="aq-hero-title">
@@ -213,6 +233,8 @@ export default function HeroTerritorial({ mapa = null, destacados = null }) {
             <div
               ref={mapaRef}
               className={styles.map}
+              data-capa={capa ?? undefined}
+              data-familia={capa ?? undefined}
               onPointerOver={alSenalarMapa}
               onFocus={alSenalarMapa}
             >
@@ -228,18 +250,59 @@ export default function HeroTerritorial({ mapa = null, destacados = null }) {
                 {categoriaDe(procesoActivo.tipoProyecto)}
               </p>
             ) : null}
-            {/* Solo los colores, discretos, bajo el mapa (2026-10-04). Las notas
-                de moneda y ubicación salieron por decisión del usuario; la
-                ubicación sigue en la descripción accesible del mapa y los
-                créditos de la geometría, en el pie del sitio. */}
-            <ul className={styles.leyenda} aria-label="Categorías del proceso">
-              {leyenda.map((f) => (
-                <li key={f.familia} data-familia={f.familia}>
-                  <span aria-hidden="true" />
-                  {f.label}
-                </li>
-              ))}
-            </ul>
+            {capa ? (
+              <>
+                {/* La escala de la capa elegida, en el color de su familia. */}
+                <div className={styles.escala} data-familia={capa}>
+                  <p className={styles.escalaTitulo}>
+                    Procesos de {PESTANA[capa].toLowerCase()} publicados en {anio}, por sede de la
+                    entidad
+                  </p>
+                  <ul className={styles.escalaPasos} aria-label="Escala del mapa">
+                    {ESCALONES_FAMILIA.map((e) => (
+                      <li key={e.indice} data-e={e.indice}>
+                        <span aria-hidden="true" />
+                        {e.etiqueta}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* La alternativa textual del mapa, y la forma cómoda de leerlo
+                    en el celular: los departamentos de más a menos. */}
+                <details className={styles.listaDptos}>
+                  <summary>
+                    Ver por departamento ({filasCapa.length}{" "}
+                    {filasCapa.length === 1 ? "departamento" : "departamentos"})
+                  </summary>
+                  {filasCapa.length ? (
+                    <ol>
+                      {filasCapa.map((f) => (
+                        <li key={f.dpto}>
+                          <strong>{departamentoCorto(f.nombre)}</strong>
+                          <span>{textoConteo(f.conteo)}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p>
+                      Ningún departamento publicó procesos de {PESTANA[capa].toLowerCase()} en{" "}
+                      {anio}.
+                    </p>
+                  )}
+                </details>
+              </>
+            ) : (
+              /* Sin conteos: solo los colores, discretos, bajo el mapa
+                 (2026-10-04). */
+              <ul className={styles.leyenda} aria-label="Categorías del proceso">
+                {leyenda.map((f) => (
+                  <li key={f.familia} data-familia={f.familia}>
+                    <span aria-hidden="true" />
+                    {f.label}
+                  </li>
+                ))}
+              </ul>
+            )}
             {!mapa ? (
               <p className={styles.noData}>El mapa no está disponible en este momento.</p>
             ) : null}

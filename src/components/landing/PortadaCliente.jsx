@@ -33,6 +33,7 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  * @param {{
  *   mapa?: import("react").ReactNode,
  *   destacados?: import("@/src/lib/landing/destacados-portada").DestacadoPortada[] | null,
+ *   conteos?: import("@/src/lib/landing/conteos-familia").ConteoDepartamento[] | null,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
  * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
@@ -42,7 +43,7 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  * el mapa del hero marca los procesos elegidos en vez de contar por territorio
  * (spec 2026-10-04-hero-cinco-minifichas §7.2).
  */
-export default function LandingPage({ mapa = null, destacados = null }) {
+export default function LandingPage({ mapa = null, destacados = null, conteos = null }) {
   // La franja de la ficha enlaza las secciones del primer destacado del hero:
   // uno fijo, no el de la pestaña elegida, para que sus cuatro enlaces no
   // cambien de destino mientras se mira el hero.
@@ -63,7 +64,7 @@ export default function LandingPage({ mapa = null, destacados = null }) {
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial mapa={mapa} destacados={destacados} />
+        <HeroTerritorial mapa={mapa} destacados={destacados} conteos={conteos} />
 
         {/* La franja de la ficha: los cuatro accesos al primer proceso del
             hero. Va justo después del hero porque el hero existe para llevar a

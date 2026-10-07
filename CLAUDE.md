@@ -375,8 +375,13 @@ consulta `DISTINCT ON`) sustituye a `muestraPortada()`; lo puro está en
 `src/lib/landing/destacados-portada.ts`. Familias = las de `tipo-color.ts`
 (residual = PTAR, redes = alcantarillado); «Ver más» enlaza la vitrina con
 exactamente esos tipos, por presupuesto. Recorrido cada 7 s. Salieron las
-flechas, los puntos y «Ver otros». Pendiente: el mapa contado por familia (PR
-2) y el panel de la región + alinear `residual` en la vitrina (PR 3). Spec y
+flechas, los puntos y «Ver otros». **PR 2 (rama `claude/hero-mapa-familia`):**
+el mapa se colorea por la familia de la pestaña con `conteosPorFamilia()`
+(publicados en 2026 por departamento y, de ellos, los que reciben ofertas; una
+consulta con `FILTER`): escalones fijos en `data-e-<familia>` de cada camino,
+cifras bajo el anclaje, rampa en el color de la familia y `data-capa` en la raíz
+que elige la capa por CSS; debajo, la escala y «Ver por departamento». Pendiente:
+el panel de la región + alinear `residual` en la vitrina (PR 3). Spec y
 decisiones: `docs/superpowers/specs/2026-10-07-hero-tres-destacados.md`.
 
 *(Lo que sigue sobre la composición, la etiqueta flotante, los anclajes y el

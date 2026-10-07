@@ -24,6 +24,8 @@ import {
 } from "@/src/lib/landing/proceso-portada";
 import { recuadroIslas } from "@/src/lib/mapa/recuadro-islas";
 import { familiasPorDepartamento, gruposDe } from "@/src/lib/landing/grupos-portada";
+import { FAMILIAS_DESTACADAS } from "@/src/lib/landing/destacados-portada";
+import { escalonFamiliaDe, type ConteoDepartamento } from "@/src/lib/landing/conteos-familia";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
 import { frase } from "@/src/components/landing/texto";
 
@@ -68,10 +70,18 @@ function Departamento({
   disponible = true,
   tooltipExterno = false,
   familia,
+  capas,
 }: {
   entrada: EntradaMapa;
   disponible?: boolean;
   tooltipExterno?: boolean;
+  /**
+   * Solo en el modo selección con conteos (hero, 2026-10-07): el escalón del
+   * departamento en cada familia, como `data-e-potable`… El hero elige la capa
+   * con un atributo en la raíz y el CSS pinta el escalón: cambiar de capa no
+   * toca ningún camino.
+   */
+  capas?: Record<string, number>;
   /**
    * Solo en el modo selección: `undefined` para un departamento sin procesos
    * elegidos, la familia de color si todos los suyos la comparten, o "mixta".
@@ -87,6 +97,9 @@ function Departamento({
         className={`clr-mapa__dpto clr-mapa__dpto--base${familia ? " clr-mapa__dpto--sel" : ""}`}
         data-dpto={entrada.dpto}
         data-familia={familia ?? undefined}
+        {...Object.fromEntries(
+          Object.entries(capas ?? {}).map(([f, e]) => [`data-e-${f}`, String(e)])
+        )}
       >
         <title>{entrada.nombre}</title>
       </path>
@@ -152,6 +165,12 @@ export interface ColombiaChoroplethProps {
    * a facetas. Un array vacío es un mapa base sin señales.
    */
   seleccion?: ProcesoPortada[];
+  /**
+   * Con `seleccion`: los procesos de cada familia por departamento
+   * (`conteosPorFamilia()`). El mapa lleva los escalones de las tres familias
+   * y sus cifras; el hero enciende la de la pestaña elegida.
+   */
+  conteos?: ConteoDepartamento[];
 }
 
 export default function ColombiaChoropleth({
@@ -163,8 +182,9 @@ export default function ColombiaChoropleth({
   capaSeleccion = false,
   maxRotulos,
   seleccion,
+  conteos,
 }: ColombiaChoroplethProps) {
-  if (seleccion) return <MapaSeleccion procesos={seleccion} />;
+  if (seleccion) return <MapaSeleccion procesos={seleccion} conteos={conteos} />;
   const { continente, sanAndres, totalLocalizados } = construirModeloMapa(filas);
   const sinUbicacion = totalAbiertos == null ? null : totalAbiertos - totalLocalizados;
   const rotulos = etiquetas && datosDisponibles ? colocarRotulos(continente, maxRotulos) : [];
@@ -397,20 +417,73 @@ function SenalesGrupo({ procesos }: { procesos: ProcesoPortada[] }) {
 }
 
 /**
+ * La cifra de cada departamento en cada familia, bajo su anclaje: un `<g>` por
+ * familia y solo se ve el de la capa elegida (CSS del hero). Oculta al lector
+ * de pantalla: la misma información, con nombre y «reciben ofertas», va en la
+ * lista de departamentos del hero. Un departamento en cero no lleva cifra: lo
+ * dice el rayado.
+ */
+function CifrasFamilia({ conteos }: { conteos: ConteoDepartamento[] }) {
+  return (
+    <g aria-hidden="true">
+      {FAMILIAS_DESTACADAS.map((f) => (
+        <g key={f} className="clr-mapa__cifras" data-cifras={f}>
+          {conteos.map((c) => {
+            const punto = anclaDe(c.dpto);
+            if (!punto || c[f].n === 0) return null;
+            return (
+              <text
+                key={c.dpto}
+                className="clr-mapa__cifra"
+                x={punto[0]}
+                y={punto[1] + DESPLAZAMIENTO_CIFRA}
+                textAnchor="middle"
+              >
+                {numero.format(c[f].n)}
+              </text>
+            );
+          })}
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** Bajo el anclaje, para no taparlo. */
+const DESPLAZAMIENTO_CIFRA = 13;
+
+/**
  * El mapa de los procesos del hero. `procesos` es la muestra entera; se parte
  * en grupos de cinco (`gruposDe`) y se dibujan las señales de **todos** los
  * grupos, cada una en su `<g data-grupo>`. Solo el primero se ve: el cliente
  * cambia de grupo encendiendo otro (`aplicarGrupo` en `sincronia.js`), y un
  * grupo oculto con `display: none` tampoco recibe el foco.
  */
-function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
+function MapaSeleccion({
+  procesos,
+  conteos,
+}: {
+  procesos: ProcesoPortada[];
+  conteos?: ConteoDepartamento[];
+}) {
   const { continente, sanAndres } = construirModeloMapa([]);
   const grupos = gruposDe(procesos);
   const primero = grupos[0] ?? [];
   // El tinte de los departamentos es el del primer grupo; el cliente lo
-  // repinta al cambiar de grupo.
-  const familias = familiasPorDepartamento(primero);
+  // repinta al cambiar de grupo. Con conteos no hay tinte de selección: el
+  // color del departamento es su escalón en la capa elegida.
+  const familias = conteos ? new Map<string, string>() : familiasPorDepartamento(primero);
   const conFamilia = (e: EntradaMapa) => familias.get(e.dpto) ?? null;
+  const porDpto = new Map((conteos ?? []).map((c) => [c.dpto, c]));
+  const capasDe = (e: EntradaMapa) =>
+    conteos
+      ? Object.fromEntries(
+          FAMILIAS_DESTACADAS.map((f) => [
+            f,
+            escalonFamiliaDe(porDpto.get(e.dpto)?.[f].n ?? 0).indice,
+          ])
+        )
+      : undefined;
 
   return (
     <figure className="clr-mapa clr-mapa--seleccion">
@@ -428,9 +501,29 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
           {primero.length === 0
             ? "No hay procesos marcados en el mapa."
             : `${primero.length === 1 ? "Un proceso marcado" : `${primero.length} procesos marcados`} en el departamento de su entidad contratante, no en el lugar de la obra. La ficha junto al mapa tiene la misma información.`}
+          {conteos
+            ? " Cada departamento se colorea según cuántos procesos del tipo elegido publicó este año; la lista bajo el mapa da las cifras."
+            : ""}
         </desc>
+        {/* Con conteos, «ninguno» va rayado además de su tono (WCAG 1.4.1),
+            como en el mapa de abiertos. Id propio: los dos mapas pueden
+            convivir en una página. */}
+        {conteos ? (
+          <defs>
+            <pattern
+              id="clr-mapa-sin-sel"
+              width="6"
+              height="6"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <rect width="6" height="6" className="clr-mapa__sin-fondo" />
+              <line x1="0" y1="0" x2="0" y2="6" className="clr-mapa__sin-raya" />
+            </pattern>
+          </defs>
+        ) : null}
         {continente.map((e) => (
-          <Departamento key={e.dpto} entrada={e} familia={conFamilia(e)} />
+          <Departamento key={e.dpto} entrada={e} familia={conFamilia(e)} capas={capasDe(e)} />
         ))}
         {/* San Andrés y Providencia, con sus costas en detalle y a la misma
             escala (recuadro-islas.ts). Sin transform: el anclaje y la etiqueta
@@ -448,6 +541,7 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
             <Departamento
               entrada={{ ...sanAndres, d: recuadroIslas.d }}
               familia={conFamilia(sanAndres)}
+              capas={capasDe(sanAndres)}
             />
             <text
               className="clr-mapa__recuadro-txt clr-mapa__islas-txt"
@@ -467,6 +561,7 @@ function MapaSeleccion({ procesos }: { procesos: ProcesoPortada[] }) {
             </text>
           </g>
         )}
+        {conteos ? <CifrasFamilia conteos={conteos} /> : null}
         {grupos.map((g, k) => (
           <g key={k} className={`clr-mapa__grupo${k > 0 ? " is-oculto" : ""}`} data-grupo={k}>
             <SenalesGrupo procesos={g} />

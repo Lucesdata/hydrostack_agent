@@ -333,6 +333,199 @@
   background: none;
   border: 1.5px dashed var(--aq-otros);
 }
+/* ── El mapa contado por familia (2026-10-07, PR 2) ───────────────────────────
+   La pestaña pone `data-capa` y `data-familia` en `.map`: el escalón de cada
+   departamento (`data-e-<familia>`) se pinta con la rampa de un solo tono de
+   esa familia —su color sobre el fondo del mapa—, así que el color sigue
+   diciendo el tipo de obra (tipo-color.ts) y la intensidad, cuántos. */
+.map[data-capa] {
+  --capa-1: color-mix(in srgb, var(--fam) 28%, var(--aq-base));
+  --capa-2: color-mix(in srgb, var(--fam) 42%, var(--aq-base));
+  --capa-3: color-mix(in srgb, var(--fam) 54%, var(--aq-base));
+  --capa-4: color-mix(in srgb, var(--fam) 72%, var(--aq-base));
+  --capa-5: color-mix(in srgb, var(--fam) 92%, var(--aq-base));
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="0"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="0"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="0"]) {
+  fill: url(#clr-mapa-sin-sel);
+}
+.map :global(.clr-mapa__sin-fondo) {
+  fill: var(--aq-base);
+}
+.map :global(.clr-mapa__sin-raya) {
+  stroke: rgba(140, 190, 225, 0.14);
+  stroke-width: 2;
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="1"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="1"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="1"]) {
+  fill: var(--capa-1);
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="2"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="2"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="2"]) {
+  fill: var(--capa-2);
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="3"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="3"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="3"]) {
+  fill: var(--capa-3);
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="4"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="4"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="4"]) {
+  fill: var(--capa-4);
+}
+.map[data-capa="potable"] :global(.clr-mapa__dpto[data-e-potable="5"]),
+.map[data-capa="residual"] :global(.clr-mapa__dpto[data-e-residual="5"]),
+.map[data-capa="redes"] :global(.clr-mapa__dpto[data-e-redes="5"]) {
+  fill: var(--capa-5);
+}
+/* Con capas, bajo el mapa van el título de la escala y «Ver por
+   departamento»: el mapa cede esos 50 px para que todo quepa en el primer
+   pantallazo. */
+.map[data-capa] :global(.clr-mapa__svg) {
+  height: clamp(420px, calc(var(--aq-pantalla) - 160px), 810px);
+}
+/* Las cifras: solo las de la capa elegida, con halo para leerse sobre
+   cualquier escalón. */
+.map :global(.clr-mapa__cifras) {
+  display: none;
+}
+.map[data-capa="potable"] :global(.clr-mapa__cifras[data-cifras="potable"]),
+.map[data-capa="residual"] :global(.clr-mapa__cifras[data-cifras="residual"]),
+.map[data-capa="redes"] :global(.clr-mapa__cifras[data-cifras="redes"]) {
+  display: inline;
+}
+.map :global(.clr-mapa__cifra) {
+  fill: #ffffff;
+  font:
+    700 8.5px var(--font-inter),
+    sans-serif;
+  paint-order: stroke;
+  stroke: var(--aq-bg);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+/* La escala bajo el mapa: título y pasos con la misma rampa. */
+.escala {
+  margin-top: 4px;
+}
+.escalaTitulo {
+  margin: 0 0 6px;
+  text-align: right;
+  font:
+    500 12px/1.4 var(--font-inter),
+    sans-serif;
+  color: #c3d3e0;
+}
+.escalaPasos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.escalaPasos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font:
+    11.5px/1.3 var(--font-inter),
+    sans-serif;
+  color: var(--aq-muted);
+}
+.escalaPasos li span {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(140, 190, 225, 0.25);
+}
+.escalaPasos li[data-e="0"] span {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--aq-base) 0 3px,
+    rgba(140, 190, 225, 0.22) 3px 4.5px
+  );
+}
+.escala {
+  --capa-1: color-mix(in srgb, var(--fam) 28%, var(--aq-base));
+  --capa-2: color-mix(in srgb, var(--fam) 42%, var(--aq-base));
+  --capa-3: color-mix(in srgb, var(--fam) 54%, var(--aq-base));
+  --capa-4: color-mix(in srgb, var(--fam) 72%, var(--aq-base));
+  --capa-5: color-mix(in srgb, var(--fam) 92%, var(--aq-base));
+}
+.escalaPasos li[data-e="1"] span {
+  background: var(--capa-1);
+}
+.escalaPasos li[data-e="2"] span {
+  background: var(--capa-2);
+}
+.escalaPasos li[data-e="3"] span {
+  background: var(--capa-3);
+}
+.escalaPasos li[data-e="4"] span {
+  background: var(--capa-4);
+}
+.escalaPasos li[data-e="5"] span {
+  background: var(--capa-5);
+}
+/* Los departamentos por cifra: plegados en escritorio, cómodos en el celular. */
+.listaDptos {
+  margin-top: 0;
+  text-align: right;
+  font:
+    13px/1.45 var(--font-inter),
+    sans-serif;
+  color: #c3d3e0;
+}
+.listaDptos summary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--aq-cyan);
+  font-weight: 600;
+  cursor: pointer;
+}
+.listaDptos summary:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.listaDptos ol {
+  text-align: left;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px 18px;
+  max-height: 260px;
+  margin: 4px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.listaDptos li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--aq-line);
+}
+.listaDptos li strong {
+  color: var(--aq-text);
+  font-weight: 600;
+}
+.listaDptos li span {
+  flex: none;
+  color: var(--aq-muted);
+  text-align: right;
+}
+.listaDptos p {
+  margin: 6px 0 0;
+  text-align: left;
+}
 .noData {
   margin: 8px 0 0;
   text-align: center;
@@ -751,8 +944,16 @@
   }
   /* Con el alto ligado al viewport quedaban franjas vacías a los lados o
      arriba y abajo en tableta: aquí manda el ancho. */
-  .map :global(.clr-mapa__svg) {
+  .map :global(.clr-mapa__svg),
+  .map[data-capa] :global(.clr-mapa__svg) {
     height: auto;
+  }
+  .escalaTitulo,
+  .listaDptos {
+    text-align: left;
+  }
+  .escalaPasos {
+    justify-content: flex-start;
   }
   .leyenda {
     justify-content: flex-start;
