@@ -295,6 +295,10 @@
   line-height: 1;
 }
 .dialog {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
   width: min(680px, calc(100vw - 32px));
   max-width: none;
   max-height: min(86dvh, 820px);
@@ -383,6 +387,8 @@
     margin-top: 20px;
   }
   .dialog {
+    inset: 0;
+    transform: none;
     width: 100vw;
     max-width: none;
     height: 100dvh;
