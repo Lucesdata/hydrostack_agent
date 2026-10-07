@@ -2,19 +2,13 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import ColombiaChoropleth from "@/src/components/mapa/ColombiaChoropleth";
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import { aplicarGrupo } from "@/src/components/landing/hero-territorial/sincronia";
 import {
   INTERVALO_RECORRIDO,
   indiceRelativo,
   siguienteIndice,
 } from "@/src/components/landing/hero-territorial/recorrido";
-import {
-  familiasPorDepartamento,
-  gruposDe,
-  TAMANO_GRUPO,
-  TAMANO_MUESTRA,
-} from "@/src/lib/landing/grupos-portada";
+import { familiasPorDepartamento, gruposDe, TAMANO_GRUPO } from "@/src/lib/landing/grupos-portada";
 import { procesoPortada } from "./fixtures-portada";
 
 /** Doce procesos: dos grupos de cinco y uno de dos. Departamentos variados. */
@@ -35,7 +29,6 @@ describe("gruposDe", () => {
     expect(g.flat().map((p) => p.id)).toEqual(doce.map((p) => p.id));
     expect(gruposDe([])).toEqual([]);
     expect(TAMANO_GRUPO).toBe(5);
-    expect(TAMANO_MUESTRA % TAMANO_GRUPO).toBe(0);
   });
 });
 
@@ -127,8 +120,8 @@ describe("recorrido", () => {
     expect(fuente).toMatch(/ids\.indexOf\(actualRef\.current\)/);
   });
 
-  it("da tiempo a leer: 5 s por paso (decisión del usuario)", () => {
-    expect(INTERVALO_RECORRIDO).toBe(5000);
+  it("da tiempo a leer una ficha: 7 s por paso (2026-10-07; eran 5 s para una etiqueta)", () => {
+    expect(INTERVALO_RECORRIDO).toBe(7000);
   });
 
   it("respeta reducir movimiento, la pestaña oculta y la pausa", () => {
@@ -142,25 +135,5 @@ describe("recorrido", () => {
       "utf8"
     );
     expect(hero).toMatch(/hayRecorrido && !pausado && !interactuando/);
-  });
-});
-
-describe("hero con varios grupos", () => {
-  it("muestra la ficha del primero, cinco puntos, «Ver otros 5 procesos» y «Pausar recorrido»", () => {
-    const html = renderToStaticMarkup(<HeroTerritorial procesos={doce} />);
-    expect(html.match(/<li class="aqMini"/g)).toHaveLength(1);
-    expect(html).toContain(`data-proceso="${doce[0].id}"`);
-    expect(html.match(/aria-label="Ver proceso \d"/g)).toHaveLength(5);
-    expect(html).toMatch(/Ver otros (<!-- -->)?5(<!-- -->)? procesos/);
-    expect(html).toContain("Pausar recorrido");
-    for (const p of doce.slice(5)) expect(html).not.toContain(`href="${p.href}"`);
-  });
-
-  it("con un solo grupo no ofrece «Ver otros»; con uno solo, ni recorrido", () => {
-    const cinco = renderToStaticMarkup(<HeroTerritorial procesos={doce.slice(0, 5)} />);
-    expect(cinco).not.toContain("Ver otros");
-    expect(cinco).toContain("Pausar recorrido");
-    const uno = renderToStaticMarkup(<HeroTerritorial procesos={doce.slice(0, 1)} />);
-    expect(uno).not.toContain("Pausar recorrido");
   });
 });

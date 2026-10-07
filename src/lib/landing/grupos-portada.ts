@@ -1,12 +1,12 @@
 /**
- * Los grupos de procesos del hero (2026-10-04, opción D: recorrido + «Ver otros
- * 5 procesos»).
+ * Los grupos de procesos del mapa del hero (2026-10-04, opción D: recorrido +
+ * «Ver otros 5 procesos»).
  *
- * El servidor sortea hasta `TAMANO_MUESTRA` procesos en la misma consulta de
- * siempre (`muestraPortada`) y el hero los muestra de `TAMANO_GRUPO` en
- * `TAMANO_GRUPO`. El mapa del servidor dibuja las etiquetas de todos los grupos
- * y el navegador solo enciende el visible: cambiar de grupo no pide nada a la
- * red ni manda geometría al cliente.
+ * El mapa del servidor dibuja las etiquetas de todos los grupos y el navegador
+ * solo enciende el visible: cambiar de grupo no pide nada a la red ni manda
+ * geometría al cliente. Desde el 2026-10-07 el hero solo pasa los tres
+ * destacados (`destacadosPortada()`), que caben en un grupo; el mecanismo se
+ * queda en el mapa, que es genérico.
  *
  * Puro: lo usan el mapa (servidor) y el hero (cliente), así que los dos parten
  * la lista exactamente igual.
@@ -15,8 +15,6 @@
 import { familiaDe, type ProcesoPortada } from "./proceso-portada";
 
 export const TAMANO_GRUPO = 5;
-/** Seis grupos de cinco: suficiente variedad sin cargar el HTML. */
-export const TAMANO_MUESTRA = 30;
 
 /** La lista en grupos de `TAMANO_GRUPO`, en su orden; el último puede ser menor. */
 export function gruposDe<T>(procesos: T[], tamano = TAMANO_GRUPO): T[][] {

@@ -5,19 +5,33 @@ import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerri
 import { procesoPortada } from "./fixtures-portada";
 
 /**
- * El hero con ficha central (spec 2026-10-06-hero-ficha-central; antes, cinco
- * minifichas en fila). Se
- * renderiza el HTML que llega al navegador: es lo que ve quien no tiene JS y
- * lo que hidrata React.
+ * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
+ * una ficha central con 30 procesos al azar). Se renderiza el HTML que llega al
+ * navegador: es lo que ve quien no tiene JS y lo que hidrata React.
  */
 
-const cinco = [1, 2, 3, 4, 5].map((i) =>
-  procesoPortada({ id: `CO1.REQ.${i}`, numeroProceso: `00${i}-LP-2026` })
-);
+const TIPO = { potable: "acueducto", residual: "ptar", redes: "alcantarillado" } as const;
+const tres = (["potable", "residual", "redes"] as const).map((familia, i) => ({
+  familia,
+  proceso: procesoPortada({
+    id: `CO1.REQ.${i + 1}`,
+    numeroProceso: `00${i + 1}-LP-2026`,
+    tipoProyecto: TIPO[familia],
+  }),
+  cierre: "2026-10-20",
+  holgado: true,
+}));
+const cinco = tres.map((d) => d.proceso);
 
 const html = renderToStaticMarkup(
-  <HeroTerritorial procesos={cinco} mapa={<div data-testid="mapa">Mapa</div>} />
+  <HeroTerritorial destacados={tres} mapa={<div data-testid="mapa">Mapa</div>} />
 );
+
+/** Los destacados con solo `proceso` para la primera pestaña. */
+const conUno = (p: (typeof cinco)[number]) => [
+  { ...tres[0], proceso: p },
+  ...tres.slice(1).map((d) => ({ ...d, proceso: null, cierre: null, holgado: false })),
+];
 
 describe("HeroTerritorial", () => {
   it("copy de la referencia, un solo h1 y el encabezado de las tarjetas", () => {
@@ -46,7 +60,7 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Opciones del mapa");
   });
 
-  it("una sola ficha, la del primer proceso, activa, con su número y un solo enlace", () => {
+  it("una sola ficha, la del primer destacado, activa, con su número y un solo enlace", () => {
     expect(html).toContain('<ul class="aqMinifichas" aria-label="Proceso para explorar">');
     expect(html.match(/<li class="aqMini"/g)).toHaveLength(1);
     const [p] = cinco;
@@ -59,15 +73,46 @@ describe("HeroTerritorial", () => {
     for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}"`);
   });
 
-  it("navegación de la ficha: ←, un punto por proceso, «1 de 5» y →", () => {
-    expect(html).toContain('aria-label="Proceso anterior"');
-    expect(html).toContain('aria-label="Proceso siguiente"');
-    for (const i of [1, 2, 3, 4, 5]) expect(html).toContain(`aria-label="Ver proceso ${i}"`);
-    expect(html.match(/aria-current="true"/g)).toHaveLength(1);
-    expect(html).toContain('data-activo="" aria-label="Ver proceso 1" aria-current="true"');
-    expect(html).toMatch(/>1(<!-- -->)? de (<!-- -->)?5</);
-    // La ficha y su navegación van en la columna del mensaje, antes del mapa.
-    expect(html.indexOf("Proceso siguiente")).toBeLessThan(html.indexOf('data-testid="mapa"'));
+  it("tres pestañas, una por familia, con la primera elegida", () => {
+    expect(html).toContain('role="tablist" aria-label="Proceso más relevante por tipo de obra"');
+    expect(html.match(/role="tab"/g)).toHaveLength(3);
+    for (const t of ["Agua potable", "Agua residual", "Redes"]) expect(html).toContain(t);
+    expect(html.match(/aria-selected="true"/g)).toHaveLength(1);
+    expect(html).toMatch(/id="aq-pestana-potable"[^>]*aria-selected="true"[^>]*tabindex="0"/);
+    expect(html).toMatch(/id="aq-pestana-redes"[^>]*aria-selected="false"[^>]*tabindex="-1"/);
+    expect(html).toMatch(/role="tabpanel" class="[^"]*" aria-labelledby="aq-pestana-potable"/);
+    // Pestañas y ficha van en la columna del mensaje, antes del mapa.
+    expect(html.indexOf('role="tablist"')).toBeLessThan(html.indexOf('data-testid="mapa"'));
+    // Sin la navegación de la ficha central ni «Ver otros».
+    expect(html).not.toContain("Proceso siguiente");
+    expect(html).not.toContain("Ver otros");
+  });
+
+  it("la regla que eligió el proceso va escrita, y el enlace a los demás de su familia", () => {
+    expect(html).toContain(
+      "El de mayor presupuesto entre los que reciben ofertas 5 días o más. Cierre: 20 oct 2026."
+    );
+    expect(html).toContain('href="/licitaciones?tipo=potable&amp;orden=valor"');
+    expect(html).toMatch(/Ver más de agua potable, de mayor a menor(<!-- -->)?\s*presupuesto/);
+  });
+
+  it("una pestaña sin proceso lo dice; no la rellena con otro", () => {
+    const vacio = renderToStaticMarkup(
+      <HeroTerritorial destacados={tres.map((d) => ({ ...d, proceso: null, cierre: null }))} />
+    );
+    expect(vacio).not.toContain('class="aqMini"');
+    expect(vacio).toMatch(/Hoy no hay procesos de (<!-- -->)?agua potable(<!-- -->)? con/);
+    expect(vacio).toContain('href="/licitaciones?tipo=potable&amp;orden=valor"');
+  });
+
+  it("si la primera familia no tiene proceso, abre la primera que sí", () => {
+    const sinPotable = renderToStaticMarkup(
+      <HeroTerritorial
+        destacados={[{ ...tres[0], proceso: null, cierre: null }, ...tres.slice(1)]}
+      />
+    );
+    expect(sinPotable).toMatch(/id="aq-pestana-residual"[^>]*aria-selected="true"/);
+    expect(sinPotable).toContain(`data-proceso="${cinco[1].id}"`);
   });
 
   it("la línea del mapa en móvil dice el proceso activo, nunca un texto de espera", () => {
@@ -95,7 +140,7 @@ describe("HeroTerritorial", () => {
   it("datos ausentes: texto explícito, nunca $0 ni «Abierto» sin respaldo", () => {
     const parcial = renderToStaticMarkup(
       <HeroTerritorial
-        procesos={[
+        destacados={conUno(
           procesoPortada({
             id: "CO1.REQ.9",
             presupuesto: null,
@@ -104,8 +149,8 @@ describe("HeroTerritorial", () => {
             abierto: false,
             estado: "Adjudicado",
             entidad: null,
-          }),
-        ]}
+          })
+        )}
       />
     );
     expect(parcial).toContain("Presupuesto no disponible");
@@ -119,7 +164,7 @@ describe("HeroTerritorial", () => {
     );
     expect(parcial).toContain("Adjudicado");
     expect(parcial).not.toContain(">Abierto<");
-    // La leyenda añade la categoría neutra solo cuando hace falta.
+    // La leyenda solo nombra las tres familias de las pestañas.
     expect(html).not.toContain("Sin subsistema identificado");
   });
 
@@ -133,22 +178,17 @@ describe("HeroTerritorial", () => {
     expect(html).not.toMatch(/\b1 – 10\b|procesos abiertos por departamento/i);
   });
 
-  it("menos de cinco candidatos: un punto por cada uno, sin rellenos; con uno, sin navegación", () => {
-    const dos = renderToStaticMarkup(<HeroTerritorial procesos={cinco.slice(0, 2)} />);
-    expect(dos.match(/<li class="aqMini"/g)).toHaveLength(1);
-    expect(dos.match(/aria-label="Ver proceso \d"/g)).toHaveLength(2);
-    expect(dos).not.toContain("EJEMPLO");
-    const uno = renderToStaticMarkup(<HeroTerritorial procesos={cinco.slice(0, 1)} />);
-    expect(uno.match(/<li class="aqMini"/g)).toHaveLength(1);
-    expect(uno).not.toContain("Proceso siguiente");
+  it("con un solo destacado no hay recorrido; con dos o más, se puede pausar", () => {
+    expect(html).toContain("Pausar recorrido");
+    const uno = renderToStaticMarkup(<HeroTerritorial destacados={conUno(cinco[0])} />);
+    expect(uno).not.toContain("Pausar recorrido");
   });
 
-  it("vacío y error se distinguen, sin tarjetas", () => {
-    const vacio = renderToStaticMarkup(<HeroTerritorial procesos={[]} />);
-    const error = renderToStaticMarkup(<HeroTerritorial procesos={null} />);
-    expect(vacio).toContain("No hay procesos disponibles para mostrar en este momento.");
+  it("error de carga: aviso, sin pestañas ni tarjetas", () => {
+    const error = renderToStaticMarkup(<HeroTerritorial destacados={null} />);
     expect(error).toContain("No pudimos cargar los procesos. Inténtalo de nuevo.");
-    for (const h of [vacio, error]) expect(h).not.toContain('class="aqMini"');
+    expect(error).not.toContain('class="aqMini"');
+    expect(error).not.toContain('role="tablist"');
   });
 
   it("el mapa del servidor se monta una sola vez", () => {
@@ -173,6 +213,6 @@ describe("HeroTerritorial", () => {
 
 it("muestra el contexto del subsistema en la tarjeta sin exigir interacción", () => {
   const p = { ...cinco[0], contextoTipo: "Según descripción: Acueducto." };
-  const con = renderToStaticMarkup(<HeroTerritorial procesos={[p]} />);
+  const con = renderToStaticMarkup(<HeroTerritorial destacados={conUno(p)} />);
   expect(con).toContain("Según descripción: Acueducto.");
 });
