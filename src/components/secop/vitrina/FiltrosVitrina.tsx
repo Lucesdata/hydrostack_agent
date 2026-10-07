@@ -22,7 +22,9 @@ import {
 } from "@/src/lib/secop/busqueda-guiada";
 
 function etiquetaTipo(t: SistemaBusqueda): string {
-  return t === "potable" || t === "residual" ? ETIQUETA_SISTEMA[t] : TIPO_PROYECTO[t].label;
+  return (SISTEMAS_AGRUPADOS as readonly string[]).includes(t)
+    ? ETIQUETA_SISTEMA[t as (typeof SISTEMAS_AGRUPADOS)[number]]
+    : TIPO_PROYECTO[t as keyof typeof TIPO_PROYECTO].label;
 }
 export interface OpcionDepartamento {
   slug: string;

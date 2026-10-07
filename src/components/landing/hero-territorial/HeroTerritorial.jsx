@@ -14,10 +14,19 @@ import {
   DESDE_CONTEOS,
   ESCALONES_FAMILIA,
   filasDeCapa,
+  hrefRegion,
   textoConteo,
 } from "@/src/lib/landing/conteos-familia";
 import Minifichas, { categoriaDe } from "./Minifichas";
-import { procesoDesdeObjetivo, useActivoEnMapa, useGrupoEnMapa } from "./sincronia";
+import {
+  procesoDesdeObjetivo,
+  regionDesdeObjetivo,
+  useActivoEnMapa,
+  useGrupoEnMapa,
+  useRegionEnMapa,
+} from "./sincronia";
+import { useRegion } from "./region";
+import PanelRegion from "./PanelRegion";
 import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
 import { familiasPorDepartamento } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
@@ -60,6 +69,16 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
   // La pestaña a la vista: la elegida o, si no, la primera con proceso.
   const activa = lista.find((d) => d.familia === eleccion) ?? conProceso[0] ?? lista[0] ?? null;
   const procesoActivo = activa?.proceso ?? null;
+  // La capa del mapa es la pestaña elegida (solo con conteos).
+  const capa = conteos && activa ? activa.familia : null;
+  // La región abierta (PR 3): un departamento pulsado en el mapa o en la lista.
+  // Mientras está abierta, su panel ocupa el sitio de la ficha destacada.
+  const [region, setRegion] = useState(null);
+  const regionAbierta = capa && region ? region : null;
+  const conteoRegion = regionAbierta
+    ? (conteos.find((c) => c.dpto === regionAbierta) ?? null)
+    : null;
+  const estadoRegion = useRegion(regionAbierta, capa);
   const activo = procesoActivo?.id ?? null;
   const procesos = useMemo(() => conProceso.map((d) => d.proceso), [conProceso]);
   const familias = useMemo(
@@ -84,7 +103,14 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
   const ids = useMemo(() => conProceso.map((d) => d.familia), [conProceso]);
   const hayRecorrido = !menosMovimiento && ids.length > 1;
   const onRecorrido = useCallback((f) => setEleccion(f), []);
-  useRecorrido(ids, onRecorrido, hayRecorrido && !pausado && !interactuando, activa?.familia);
+  // Con una región abierta el recorrido se detiene: cambiaría la familia bajo
+  // el panel que se está leyendo.
+  useRecorrido(
+    ids,
+    onRecorrido,
+    hayRecorrido && !pausado && !interactuando && !regionAbierta,
+    activa?.familia
+  );
   const [aviso, setAviso] = useState("");
   // Se detiene solo sobre lo que se lee —el mapa y la ficha—, no en todo el
   // hero: en escritorio ocupa casi la pantalla y no se vería nunca.
@@ -129,6 +155,23 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
     document.getElementById(`aq-pestana-${f}`)?.focus();
   };
   // Señalar el fondo del mapa no cambia nada: solo un anclaje o una etiqueta.
+  useRegionEnMapa(mapaRef, regionAbierta);
+  const abrirRegion = (dpto) => {
+    const c = conteos?.find((x) => x.dpto === dpto);
+    if (!c || !capa) return;
+    setRegion(dpto);
+    setAviso(`${c.nombre}: procesos de ${PESTANA[capa].toLowerCase()}, ${textoConteo(c[capa])}.`);
+  };
+  const cerrarRegion = () => {
+    setRegion(null);
+    document.getElementById(`aq-pestana-${activa?.familia}`)?.focus();
+  };
+  // Pulsar un departamento con procesos en la capa abre su región. Las
+  // etiquetas de los destacados son enlaces y siguen navegando a su ficha.
+  const alPulsarMapa = (e) => {
+    const dpto = regionDesdeObjetivo(e.target, capa);
+    if (dpto) abrirRegion(dpto);
+  };
   const alSenalarMapa = (e) => {
     const id = procesoDesdeObjetivo(e.target);
     const d = id ? conProceso.find((x) => x.proceso.id === id) : null;
@@ -136,7 +179,6 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
   };
   // Sin conteos, la leyenda dice las tres familias: son las tres pestañas.
   const leyenda = FAMILIAS.filter((f) => FAMILIAS_DESTACADAS.includes(f.familia));
-  const capa = conteos && activa ? activa.familia : null;
   const filasCapa = useMemo(() => (capa ? filasDeCapa(conteos, capa) : []), [conteos, capa]);
   const anio = DESDE_CONTEOS.slice(0, 4);
 
@@ -192,7 +234,16 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
                     className={styles.panelDestacado}
                     aria-labelledby={activa ? `aq-pestana-${activa.familia}` : undefined}
                   >
-                    {procesoActivo ? (
+                    {regionAbierta && conteoRegion ? (
+                      <PanelRegion
+                        dpto={regionAbierta}
+                        nombre={conteoRegion.nombre}
+                        familia={capa}
+                        conteo={conteoRegion[capa]}
+                        estado={estadoRegion}
+                        onCerrar={cerrarRegion}
+                      />
+                    ) : procesoActivo ? (
                       <>
                         <p className={styles.criterio}>{criterioDe(activa)}</p>
                         <Minifichas proceso={procesoActivo} />
@@ -203,7 +254,7 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
                         con presupuesto publicado que reciban ofertas.
                       </p>
                     )}
-                    {activa ? (
+                    {activa && !(regionAbierta && conteoRegion) ? (
                       <Link className={styles.enlaceFamilia} href={hrefDeFamilia(activa.familia)}>
                         Ver más de {PESTANA[activa.familia].toLowerCase()}, de mayor a menor
                         presupuesto <span aria-hidden="true">→</span>
@@ -236,6 +287,7 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
               data-capa={capa ?? undefined}
               data-familia={capa ?? undefined}
               onPointerOver={alSenalarMapa}
+              onClick={alPulsarMapa}
               onFocus={alSenalarMapa}
             >
               {mapa}
@@ -278,8 +330,19 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
                     <ol>
                       {filasCapa.map((f) => (
                         <li key={f.dpto}>
-                          <strong>{departamentoCorto(f.nombre)}</strong>
-                          <span>{textoConteo(f.conteo)}</span>
+                          {/* Sin JavaScript, la vitrina de esa región; con él,
+                              su panel en el hero. */}
+                          <a
+                            href={hrefRegion(f.nombre, capa)}
+                            aria-current={f.dpto === regionAbierta ? "true" : undefined}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              abrirRegion(f.dpto);
+                            }}
+                          >
+                            <strong>{departamentoCorto(f.nombre)}</strong>
+                            <span>{textoConteo(f.conteo)}</span>
+                          </a>
                         </li>
                       ))}
                     </ol>

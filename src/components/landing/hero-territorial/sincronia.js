@@ -103,3 +103,34 @@ export function useGrupoEnMapa(contenedorRef, grupo, familiasDpto) {
     aplicarGrupo(contenedorRef.current, grupo, familiasDpto);
   }, [contenedorRef, grupo, familiasDpto]);
 }
+
+/**
+ * Marca el departamento de la región abierta (`is-region`), o ninguno. Como el
+ * resto: clases sobre el SVG del servidor, nunca nodos.
+ */
+export function aplicarRegion(raiz, dpto) {
+  if (!raiz) return;
+  for (const el of raiz.querySelectorAll("path[data-dpto]")) {
+    el.classList.toggle("is-region", dpto != null && el.getAttribute("data-dpto") === dpto);
+  }
+}
+
+export function useRegionEnMapa(contenedorRef, dpto) {
+  useEffect(() => {
+    aplicarRegion(contenedorRef.current, dpto);
+  }, [contenedorRef, dpto]);
+}
+
+/**
+ * El departamento pulsado en el mapa contado por familia, o `null`: solo uno con
+ * procesos en la capa elegida (`data-e-<capa>` distinto de 0), que es lo que el
+ * panel puede enseñar.
+ */
+export function regionDesdeObjetivo(objetivo, capa) {
+  if (!capa) return null;
+  const path = objetivo?.closest?.("path[data-dpto]");
+  if (!path) return null;
+  const escalon = path.getAttribute(`data-e-${capa}`);
+  if (escalon == null || escalon === "0") return null;
+  return path.getAttribute("data-dpto");
+}

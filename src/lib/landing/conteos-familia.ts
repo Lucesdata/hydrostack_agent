@@ -13,7 +13,9 @@
  */
 
 import type { FamiliaDestacada } from "./destacados-portada";
+import type { ProcesoPortada } from "./proceso-portada";
 import type { Escalon } from "../mapa/escala";
+import { slugificar } from "../secop/slug";
 
 /** Desde cuándo cuenta el mapa: el mismo corte de la ficha con ciclo de vida. */
 export const DESDE_CONTEOS = "2026-01-01";
@@ -73,3 +75,30 @@ export function filasDeCapa(
     .map((c) => ({ dpto: c.dpto, nombre: c.nombre, conteo: c[familia] }))
     .sort((a, b) => b.conteo.n - a.conteo.n || a.nombre.localeCompare(b.nombre, "es"));
 }
+
+/**
+ * La vitrina con los que reciben ofertas de una familia en un departamento, de
+ * mayor a menor presupuesto. Solo tiene sentido si hay alguno: la vitrina
+ * enseña los abiertos, y su lista de departamentos solo trae los que tienen.
+ */
+export function hrefRegion(nombre: string, familia: FamiliaDestacada): string {
+  return `/licitaciones?tipo=${familia}&departamento=${slugificar(nombre)}&orden=valor`;
+}
+
+/** Lo que el panel de la región pinta (`GET /api/portada/region/[dpto]/[familia]`). */
+export interface ProcesoRegion extends ProcesoPortada {
+  /** `fecha_recepcion` (`AAAA-MM-DD`), para «Recibe ofertas hasta…». */
+  cierre: string | null;
+}
+
+export interface RegionFamilia {
+  dpto: string;
+  nombre: string;
+  familia: FamiliaDestacada;
+  /** Los mismos números del mapa: publicados en 2026 y, de ellos, abiertos. */
+  conteo: ConteoFamilia;
+  /** Los de mayor presupuesto, hasta `LIMITE_REGION`. */
+  procesos: ProcesoRegion[];
+}
+
+export const LIMITE_REGION = 5;
