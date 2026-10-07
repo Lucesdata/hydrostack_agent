@@ -5,6 +5,7 @@ import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { destacadosPortada } from "@/src/lib/secop/destacados-portada";
 import { procesosDe } from "@/src/lib/landing/destacados-portada";
+import { conteosPorFamilia } from "@/src/lib/secop/conteos-familia";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -34,12 +35,20 @@ export default async function Page() {
   // Si la base no responde, la portada sale con el mapa base y el aviso de
   // error en lugar de caerse: el CI corre `npm run build`, que prerenderiza
   // esta ruta, y el despliegue no se ata a que la base conteste.
-  let destacados = null;
-  try {
-    destacados = await destacadosPortada();
-  } catch (error) {
-    console.error("[portada] destacados del hero no disponibles:", error);
-  }
+  //
+  // Los conteos por familia y departamento colorean el mapa (PR 2 del mismo
+  // spec). Van en paralelo y fallan por separado: sin conteos, el mapa sale
+  // con los destacados y sin capas.
+  const [destacados, conteos] = await Promise.all([
+    destacadosPortada().catch((error) => {
+      console.error("[portada] destacados del hero no disponibles:", error);
+      return null;
+    }),
+    conteosPorFamilia().catch((error) => {
+      console.error("[portada] conteos del mapa no disponibles:", error);
+      return null;
+    }),
+  ]);
   const procesos = procesosDe(destacados);
 
   return (
@@ -51,10 +60,11 @@ export default async function Page() {
       />
       <PortadaCliente
         destacados={destacados}
+        conteos={conteos}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
-            <ColombiaChoropleth filas={[]} seleccion={procesos} />
+            <ColombiaChoropleth filas={[]} seleccion={procesos} conteos={conteos ?? undefined} />
           </>
         }
       />

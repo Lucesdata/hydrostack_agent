@@ -75,17 +75,35 @@ Mejoras propuestas por Claude y aceptadas («ok go»):
 - Verificado en el entorno local (Chromium): 1440×900, 390 y 360 px sin scroll
   horizontal y las tres pestañas en una fila; el teclado mueve pestaña y foco.
 
-### PR 2 — El mapa por familia (pendiente)
+### PR 2 — El mapa por familia (hecho, 2026-10-07, rama `claude/hero-mapa-familia`)
 
-- `conteosPorFamilia()`: una consulta con `count(*) FILTER` por familia y
-  departamento, publicados desde 2026 y, aparte, los que reciben ofertas (D4).
-  Contra PGlite.
-- El mapa del servidor lleva los tres juegos de escalones en atributos
-  (`data-n-potable`…); el cliente cambia la clase de escalón según la pestaña,
-  como hacía `usePinturaEnMapa`. Sin color en línea; rampa de un solo tono por
-  familia, medida en `contraste-oscuro.test.ts`.
-- El número de cada departamento en el SVG (D6) y la lista por cifra en móvil.
-- El anclaje del destacado se conserva encima de la coropleta.
+- `conteosPorFamilia()` (`src/lib/secop/conteos-familia.ts`): **una** consulta
+  agrupada por departamento con `count(*) FILTER` por familia, publicados desde
+  el 2026-01-01 (cualquier etapa) y, de ellos, los que reciben ofertas
+  (`condicionAbierto()`). Solo departamentos que el mapa dibuja. Contra PGlite.
+  Va en paralelo con `destacadosPortada()` y falla por separado: sin conteos el
+  mapa sale como en el PR 1.
+- Lo puro en `src/lib/landing/conteos-familia.ts`: escalones fijos por familia
+  (0, 1–9, 10–49, 50–199, 200–499, 500+; más bajos que los del mapa de abiertos
+  porque cuentan una sola familia), el texto «42 en 2026 · 3 reciben ofertas» y
+  el orden de la lista.
+- El mapa de selección, con `conteos`, lleva en cada departamento su escalón en
+  las tres familias (`data-e-potable`…) y un grupo de cifras por familia bajo
+  cada anclaje (sin ceros, `aria-hidden`). El hero pone `data-capa` en la raíz
+  del mapa y el CSS hace el resto: cambiar de pestaña no toca ningún camino.
+  Rampa de un solo tono **en el color de la familia** (`color-mix` de `--fam`
+  sobre `--aq-base`, 28–92 %): el color sigue diciendo el tipo de obra y la
+  intensidad, cuántos. «Ninguno» va rayado (patrón propio,
+  `#clr-mapa-sin-sel`). Sin tinte de selección de los destacados: su anclaje
+  sigue marcándolos.
+- Bajo el mapa, la escala de la capa elegida («Procesos de agua potable
+  publicados en 2026, por sede de la entidad») y «Ver por departamento (N)», un
+  `<details>` con la lista de más a menos, que es la alternativa textual del
+  mapa y la forma cómoda de leerlo en el celular. El mapa cede 50 px de alto
+  para que todo quepa en el primer pantallazo (medido a 1440×900, 1280×800 y
+  1920×1080); 390 px sin scroll horizontal.
+- Aún sin clic en la región (PR 3): el número de «en 2026» no puede enlazar a
+  la vitrina, que solo enseña abiertos, sin contradecirse.
 
 ### PR 3 — La región y la alineación de familias (pendiente)
 
