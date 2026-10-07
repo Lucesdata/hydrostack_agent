@@ -353,8 +353,8 @@ export default function Navbar() {
   const close = () => setOpen(false);
 
   const isActive = (item) => path.startsWith(item.route);
-  // Oscura solo sobre el hero de la portada; ver .clr-nav--oscuro.
-  const oscura = path === "/";
+  // El hero de portada y la ficha comparten la superficie oscura.
+  const oscura = path === "/" || /^\/licitaciones\/[^/]*CO1\.[A-Z]+\.\d+$/i.test(path);
   const navAria = (active) => (active ? { "aria-current": "page" } : {});
 
   return (
