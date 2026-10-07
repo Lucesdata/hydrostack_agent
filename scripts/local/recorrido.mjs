@@ -97,7 +97,7 @@ async function foto(page, nombre) {
   await paso("buscador: el modal del hero lleva a la vitrina con los filtros", async () => {
     await page.goto(`${BASE}/`);
     await page.getByRole("button", { name: "Buscar procesos" }).first().click();
-    await page.getByRole("button", { name: /Aguas residuales/ }).click();
+    await page.getByRole("button", { name: /Agua residual/ }).click();
     await page.locator("dialog select[name=actividad]").selectOption("obras");
     await page.locator("dialog form[role=search] button[type=submit]").first().click();
     await page.waitForURL(/\/licitaciones\?/);
