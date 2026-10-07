@@ -8,12 +8,14 @@ const datos = vi.hoisted(() => ({
   pliego: vi.fn(),
   competidores: vi.fn(),
   contratos: vi.fn(),
+  cambios: vi.fn(),
 }));
 vi.mock("@/src/lib/secop/ficha", async (original) => ({
   ...(await original<object>()),
   procesoPorSlug: datos.proceso,
   competidoresComparables: datos.competidores,
   contratosDeProceso: datos.contratos,
+  cambiosDeProceso: datos.cambios,
 }));
 vi.mock("@/src/lib/secop/pliego-ficha", () => ({ pliegoDeProceso: datos.pliego }));
 vi.mock("@/src/lib/secop/pliego-actions", () => ({ subirPliegoDesdeFichaAction: vi.fn() }));
@@ -79,27 +81,39 @@ describe("Ficha pública para explorar desde el celular", () => {
     datos.pliego.mockResolvedValue(null);
     datos.competidores.mockResolvedValue([]);
     datos.contratos.mockResolvedValue([]);
+    datos.cambios.mockResolvedValue({ cambios: [], error: false });
   });
-  it("ofrece las seis preguntas del boceto y conserva el acceso para empresas", async () => {
+  it("ofrece una ficha completa y requisitos públicos sin evaluación de perfil", async () => {
     const salida = await html();
     for (const id of [
-      "resumen",
       "proposito",
+      "situacion",
+      "cambios",
+      "participar",
+      "general",
+      "metas",
       "dinero",
       "plazos",
-      "responsables",
-      "metas",
-      "participar",
-    ]) {
-      expect(salida).toContain(`aria-controls="ficha-${id}"`);
+      "proponentes",
+      "documentos",
+      "secop",
+    ])
       expect(salida).toContain(`id="ficha-${id}"`);
-    }
-    expect(salida).toContain("Quiero participar");
-    // El bloque de decisión (PR #95) sustituye al semáforo dentro de Participar.
-    expect(salida).toContain("¿Es para ti?");
-    expect(salida).toMatch(/<button[^>]*class="fd-cta"[^>]*>Define tu perfil<\/button>/);
+    expect(salida).toContain("Ficha completa");
+    expect(salida).toContain("Lectura rápida");
+    expect(salida).toContain("¿Qué debo tener para poder participar?");
+    expect(salida).not.toContain("Define tu perfil");
+    expect(salida).not.toContain("¿Es para ti?");
     expect(salida).toContain('name="file"');
     expect(salida).toContain('id="pliego"');
+  });
+  it("no recorta el título oficial largo ni añade cifras del prototipo", async () => {
+    const largo = "Optimización " + "de redes municipales ".repeat(20);
+    datos.proceso.mockResolvedValue({ ...proceso, objeto: largo });
+    const salida = await html();
+    expect(salida).toContain(largo.trim());
+    expect(salida).not.toContain("800 m³");
+    expect(salida).not.toContain("San Miguel");
   });
   it("sirve todo el contenido sin JavaScript y conserva la caché pública", async () => {
     const salida = await html();

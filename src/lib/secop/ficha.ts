@@ -20,6 +20,7 @@
 import { and, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { contrato, entidad, geografia, proceso, proveedor } from "../db/schema";
+import { alProcesoEvento } from "../db/schema/aqualicita";
 import type { TipoProyecto } from "../classify/tipo-proyecto";
 // Puras y sin base: viven en ./slug para que el navegador pueda importarlas.
 import { idDesdeSlug, slugDeProceso } from "./slug";
@@ -31,6 +32,7 @@ export { idDesdeSlug, slugDeProceso };
 export interface ProcesoFicha {
   id: string;
   secopProcesoId: string;
+  actualizado?: string | null;
   referencia: string | null;
   objeto: string | null;
   descripcion: string | null;
@@ -59,6 +61,7 @@ export interface ProcesoFicha {
 
 /** Las columnas de `ProcesoFicha`: las comparten la ficha y el panel del Radar. */
 const COLUMNAS_FICHA = {
+  actualizado: sql<string>`${proceso.updatedAt}::text`,
   id: proceso.id,
   secopProcesoId: proceso.secopProcesoId,
   referencia: proceso.referencia,
@@ -277,4 +280,45 @@ export async function slugsRecientes(
     .limit(limite);
 
   return filas.map((f) => ({ slug: slugDeProceso(f.objeto, f.secopProcesoId), fecha: f.fecha }));
+}
+
+export interface CambioFicha {
+  id: string;
+  tipoEvento: string;
+  detectado: string;
+  estadoAnterior: string | null;
+  estadoNuevo: string | null;
+  valorAnterior: string | null;
+  valorNuevo: string | null;
+  fechaCierreAnterior: string | null;
+  fechaCierreNueva: string | null;
+}
+export interface HistorialFicha {
+  cambios: CambioFicha[];
+  error: boolean;
+}
+/** Proyección pública mínima: no expone payloads, personas ni el diff sin filtrar. */
+export async function cambiosDeProceso(secopProcesoId: string): Promise<HistorialFicha> {
+  try {
+    const cambios = await db
+      .select({
+        id: alProcesoEvento.id,
+        tipoEvento: alProcesoEvento.tipoEvento,
+        detectado: sql<string>`${alProcesoEvento.detectedAt}::text`,
+        estadoAnterior: alProcesoEvento.estadoAnterior,
+        estadoNuevo: alProcesoEvento.estadoNuevo,
+        valorAnterior: alProcesoEvento.valorAnterior,
+        valorNuevo: alProcesoEvento.valorNuevo,
+        fechaCierreAnterior: alProcesoEvento.fechaCierreAnterior,
+        fechaCierreNueva: alProcesoEvento.fechaCierreNueva,
+      })
+      .from(alProcesoEvento)
+      .where(eq(alProcesoEvento.secopProcesoId, secopProcesoId))
+      .orderBy(desc(alProcesoEvento.detectedAt), desc(alProcesoEvento.id))
+      .limit(20);
+    return { cambios, error: false };
+  } catch (error) {
+    console.error("[ficha] No se pudo consultar el historial", error);
+    return { cambios: [], error: true };
+  }
 }

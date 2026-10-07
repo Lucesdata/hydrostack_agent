@@ -1,17 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import BloqueDecision from "@/src/components/secop/ficha/BloqueDecision";
+import RelojFicha, {
+  EstadoFicha,
+  FechaImpresionFicha,
+  SituacionFicha,
+  DisponibilidadFicha,
+} from "@/src/components/secop/ficha/RelojFicha";
+import GuiaTemporal from "@/src/components/secop/ficha/GuiaTemporal";
+import DocumentosFicha from "@/src/components/secop/ficha/DocumentosFicha";
+import CambiosFicha from "@/src/components/secop/ficha/CambiosFicha";
+import ImagenFicha from "@/src/components/secop/ficha/ImagenFicha";
+import { guiaTemporal } from "@/src/lib/secop/guia-temporal";
 import ExploradorFicha from "@/src/components/secop/ficha/ExploradorFicha";
 import ProcesosCuenta from "@/src/components/mis-procesos/ProcesosCuenta";
 import BotonGuardar from "@/src/components/mis-procesos/BotonGuardar";
 import RegistroVisita from "@/src/components/mis-procesos/RegistroVisita";
 import PliegoFicha from "@/src/components/secop/ficha/PliegoFicha";
 import RivalesFicha from "@/src/components/secop/ficha/RivalesFicha";
+import { fechaInstanteColombia } from "@/src/lib/secop/fecha-instante";
 import { pliegoDeProceso } from "@/src/lib/secop/pliego-ficha";
-import { datosDecisionDe, urlSecopDe } from "@/src/lib/secop/datos-decision";
+import { urlSecopDe } from "@/src/lib/secop/datos-decision";
 import { ESTILOS_FICHA } from "@/src/components/secop/ficha/estilos";
 import {
+  cambiosDeProceso,
   competidoresComparables,
   contratosDeProceso,
   procesoPorSlug,
@@ -99,15 +111,15 @@ export default async function FichaPage({ params }: Props) {
   const p = await procesoPorSlug(slug);
   if (!p) notFound();
   const canonico = slugDeProceso(p.objeto, p.secopProcesoId);
-  const [competidores, pliego, contratos] = await Promise.all([
+  const [competidores, pliego, contratos, historial] = await Promise.all([
     competidoresComparables(p),
     pliegoDeProceso(p.secopProcesoId),
     contratosDeProceso(p.id),
+    cambiosDeProceso(p.secopProcesoId),
   ]);
   // Una sola respuesta a «¿en qué va?» (spec 2026-10-05-ficha-viva-ciclo-de-vida):
   // la regla manda sobre el estado del SECOP, que a veces se contradice.
   const etapa = etapaDeProceso({ ...p, contratos });
-  const recibeOfertas = etapa.etapa === "recibe_ofertas";
   const contrato = etapa.contrato;
   // «Cómo se contrató» (PR 3): solo 2026, solo contratistas con NIT.
   const contratacion = comoSeContrato(p.fechaPublicacion, etapa.etapa, contratos);
@@ -116,6 +128,7 @@ export default async function FichaPage({ params }: Props) {
   const modalidadExplicada = explicacionModalidad(p.modalidad);
   const glosario = terminosDeFicha({
     modalidad: p.modalidad,
+    conRequisitosGenerales: true,
     tieneUnspsc: !!p.unspsc,
     tieneNit: !!p.entidadNit,
     conPliego: pliego !== null,
@@ -129,8 +142,38 @@ export default async function FichaPage({ params }: Props) {
   const valor = montoConDato(p.valorEstimado);
   const capitulos = (pliego?.capitulos ?? []).filter((c) => c.items > 0);
   const titulo = sentenceCaseTitle(sinFasePegada(p.objeto ?? p.secopProcesoId));
-  // Solo se acorta la presentación; el objeto oficial completo sigue accesible.
-  const tituloCorto = titulo.length > 180 ? `${titulo.slice(0, 177).trimEnd()}…` : titulo;
+  const ahora = new Date().toISOString();
+  // Solo las señales de ciclo viajan al cliente; nunca nombres de personas naturales.
+  const senales = {
+    estadoActual: p.estadoActual,
+    estadoApertura: p.estadoApertura,
+    fechaPublicacion: p.fechaPublicacion,
+    fechaRecepcion: p.fechaRecepcion,
+    valorEstimado: p.valorEstimado,
+    adjudicado: p.adjudicado,
+    adjudicatario: p.adjudicatario?.trim() ? "Registrado en SECOP" : null,
+    fechaAdjudicacion: p.fechaAdjudicacion,
+    contratos: contratos.map(
+      ({
+        fechaFirma,
+        fechaInicio,
+        fechaFinInicial,
+        fechaFinActual,
+        valorInicial,
+        valorActual,
+        estado,
+      }) => ({
+        fechaFirma,
+        fechaInicio,
+        fechaFinInicial,
+        fechaFinActual,
+        valorInicial,
+        valorActual,
+        estado,
+      })
+    ),
+  };
+  const guia = guiaTemporal(senales, pliego?.fechaCierre ?? null, new Date(ahora));
   const urlSecop = urlSecopDe(p.url);
   const schema = {
     "@context": "https://schema.org",
@@ -152,8 +195,8 @@ export default async function FichaPage({ params }: Props) {
   );
   const fuentePliego = pliego ? (
     <>
-      Pliego «{pliego.nombreArchivo}», procesado el {fecha(pliego.actualizado)}. Comprueba las
-      fechas, las cifras y las adendas en el documento original.
+      Pliego «{pliego.nombreArchivo}», procesado el {fechaInstanteColombia(pliego.actualizado)}.
+      Comprueba las fechas, las cifras y las adendas en el documento original.
     </>
   ) : (
     <>
@@ -164,32 +207,8 @@ export default async function FichaPage({ params }: Props) {
 
   const secciones = [
     {
-      id: "resumen",
-      etiqueta: "Resumen",
-      contenido: (
-        <>
-          <p className="fi-sobretitulo">Lo esencial del proceso</p>
-          <h2 className={`fi-presupuesto${valor === null ? " fi-presupuesto--falta" : ""}`}>
-            {valor === null ? "Presupuesto por confirmar" : formatCopFull(valor)}
-          </h2>
-          <p className="fi-presupuesto-nota">Presupuesto oficial · Pesos colombianos</p>
-          <dl className="fi-datos">
-            <Dato nombre="Publicado">{fecha(p.fechaPublicacion) ?? "Sin fecha verificada"}</Dato>
-            <Dato nombre="Cierre de ofertas">
-              {pliego?.fechaCierre ?? fecha(p.fechaRecepcion) ?? "Por confirmar en SECOP II"}
-            </Dato>
-            <Dato nombre="Cómo se contrata">{p.modalidad ?? "Modalidad no informada"}</Dato>
-          </dl>
-          <Fuente url={urlSecop}>
-            {fuenteDatos}
-            {pliego?.fechaCierre && <> La fecha de cierre se tomó de «{pliego.nombreArchivo}».</>}
-          </Fuente>
-        </>
-      ),
-    },
-    {
       id: "proposito",
-      etiqueta: "¿Para qué?",
+      etiqueta: "Objeto del proceso",
       contenido: (
         <>
           <p className="fi-sobretitulo">El propósito</p>
@@ -217,8 +236,27 @@ export default async function FichaPage({ params }: Props) {
       ),
     },
     {
+      id: "situacion",
+      etiqueta: "Situación del proceso",
+      contenido: (
+        <>
+          <SituacionFicha />
+          <p className="fi-ayuda">
+            La cronología indica la etapa de contratación, no el avance físico de la obra.
+          </p>
+          <Fuente url={urlSecop}>{fuenteDatos}</Fuente>
+        </>
+      ),
+    },
+    {
+      id: "cambios",
+      etiqueta: "Cambios recientes",
+      contenido: <CambiosFicha resultado={historial} urlSecop={urlSecop} />,
+    },
+    {
       id: "dinero",
-      etiqueta: "Dinero",
+      etiqueta: "Presupuesto",
+      desplegable: true,
       contenido: (
         <>
           <p className="fi-sobretitulo">Los recursos públicos</p>
@@ -270,13 +308,16 @@ export default async function FichaPage({ params }: Props) {
     },
     {
       id: "plazos",
-      etiqueta: "Plazos",
+      etiqueta: "Cronograma",
+      desplegable: true,
       contenido: (
         <>
           <p className="fi-sobretitulo">Los tiempos</p>
           <h2 className="fi-titulo-panel">¿En qué va el proceso?</h2>
           <dl className="fi-datos">
-            <Dato nombre="Etapa">{etapa.nombre}</Dato>
+            <Dato nombre="Etapa">
+              <EstadoFicha />
+            </Dato>
             <Dato nombre="Estado según SECOP II">{p.estadoActual ?? "Sin estado informado"}</Dato>
             <Dato nombre="Publicación">{fecha(p.fechaPublicacion) ?? "Sin fecha verificada"}</Dato>
             <Dato nombre="Cierre de ofertas">
@@ -318,10 +359,12 @@ export default async function FichaPage({ params }: Props) {
       ),
     },
     {
-      id: "responsables",
-      etiqueta: "Responsables",
+      id: "general",
+      etiqueta: "Información general",
+      desplegable: true,
       contenido: (
         <>
+          <span id="ficha-responsables" tabIndex={-1} />
           <p className="fi-sobretitulo">Las personas y entidades</p>
           <h2 className="fi-titulo-panel">¿Quién responde?</h2>
           <dl className="fi-datos">
@@ -355,7 +398,8 @@ export default async function FichaPage({ params }: Props) {
     },
     {
       id: "metas",
-      etiqueta: "Metas",
+      etiqueta: "Información técnica",
+      desplegable: true,
       contenido: (
         <>
           <p className="fi-sobretitulo">Los resultados esperados</p>
@@ -383,31 +427,83 @@ export default async function FichaPage({ params }: Props) {
     },
     {
       id: "participar",
-      etiqueta: "Participar",
+      etiqueta: "¿Qué debo tener para poder participar?",
       contenido: (
         <>
-          <p className="fi-sobretitulo">Para tu empresa</p>
-          <h2 className="fi-titulo-panel">
-            {contratacion ? "¿Cómo se contrató?" : "¿Puedo participar?"}
-          </h2>
-          {recibeOfertas ? (
-            /* El bloque de decisión (spec 2026-09-28-ficha-bloque-decision), alojado
-               en «Quiero participar» como pide el spec de la ficha interactiva
-               (2026-09-29). Solo invita a ofertar cuando el proceso recibe
-               ofertas (spec 2026-10-05, criterio 7). */
-            <BloqueDecision {...datosDecisionDe(p, { conPliego: pliego !== null })} />
-          ) : (
+          <p className="fi-texto">
+            Guía general de requisitos mínimos. El pliego vigente define qué exige este proceso,
+            cómo se acredita y qué condiciones aplican a cada forma de participación.
+          </p>
+          <div className="fi-requisitos">
+            {[
+              [
+                "Capacidad jurídica",
+                "Verificar quién puede presentar oferta, representación legal, documentos de constitución y ausencia de inhabilidades o incompatibilidades.",
+              ],
+              [
+                "Registro y clasificación",
+                "Revisar si el pliego exige RUP vigente y la clasificación correspondiente. La exigencia depende de la modalidad y de las excepciones aplicables.",
+              ],
+              [
+                "Experiencia acreditable",
+                "Contar con contratos y soportes que permitan acreditar la experiencia general y específica que solicite el pliego.",
+              ],
+              [
+                "Capacidad financiera y organizacional",
+                "Revisar los indicadores, estados financieros y condiciones exigidas. Los umbrales solo se muestran cuando están verificados en el pliego.",
+              ],
+              [
+                "Equipo y capacidad técnica",
+                "Verificar personal, dedicaciones, equipos y documentos técnicos requeridos para ejecutar el alcance.",
+              ],
+              [
+                "Oferta y garantías",
+                "Preparar los formularios, propuesta económica y garantías exigidas, y presentar la oferta por el canal y dentro del plazo oficial.",
+              ],
+            ].map(([nombre, texto], i) => (
+              <div key={nombre}>
+                <span aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{nombre}</h3>
+                <p>{texto}</p>
+              </div>
+            ))}
+          </div>
+          {pliego && (
             <div className="fi-nota">
-              <strong>Este proceso no recibe ofertas ahora · {etapa.nombre}</strong>
-              <p>{etapa.linea}</p>
-              <Link className="fi-btn" href="/licitaciones">
-                Explorar procesos que reciben ofertas
-              </Link>
+              <strong>Requisitos extraídos para este proceso</strong>
+              <dl className="fi-datos">
+                {pliego.requisitos.map((r) => (
+                  <Dato key={r.clave} nombre={r.etiqueta}>
+                    {r.texto ?? "No identificado en la extracción"}
+                  </Dato>
+                ))}
+              </dl>
+              <p>Extracción del pliego; comprueba la versión vigente y sus adendas.</p>
             </div>
           )}
+          <DisponibilidadFicha />
+          <a className="fi-btn" href="#ficha-documentos">
+            Consultar pliego y documentos →
+          </a>
+          <Fuente url={urlSecop}>
+            {fuentePliego} Esta guía no determina la habilitación de una empresa.
+          </Fuente>
+        </>
+      ),
+    },
+    {
+      id: "proponentes",
+      etiqueta: "Proponentes y contratación",
+      desplegable: true,
+      contenido: (
+        <>
+          <p className="fi-ayuda">
+            No hay un listado verificado de ofertas presentadas para este proceso en esta ficha.
+            Consulta el expediente para conocer los proponentes actuales.
+          </p>
           {contratacion && (
             <section id="como-se-contrato" className="fi-sec">
-              <h3 className="fi-h2">Cómo se contrató</h3>
+              <h3 className="fi-h2">¿Cómo se contrató?</h3>
               <dl className="fi-datos">
                 <Dato nombre="Modalidad">{p.modalidad ?? "Modalidad no informada"}</Dato>
               </dl>
@@ -449,10 +545,6 @@ export default async function FichaPage({ params }: Props) {
               </p>
             </section>
           )}
-          <section id="pliego" className="fi-sec">
-            <h3 className="fi-h2">Requisitos y pliego</h3>
-            <PliegoFicha pliego={pliego} slug={canonico} urlSecop={urlSecop} />
-          </section>
           <details className="fi-desplegable">
             <summary>Quién suele competir en procesos similares</summary>
             {competidores.length > 0 ? (
@@ -461,105 +553,230 @@ export default async function FichaPage({ params }: Props) {
               <p className="fi-ayuda">No hay histórico disponible de oferentes comparables.</p>
             )}
           </details>
+
           <Fuente url={urlSecop}>
-            {fuenteDatos} La comparación usa el perfil que defines. El histórico corresponde a otros
-            procesos, no identifica al contratista de este.
+            El histórico corresponde a otros procesos comparables; no es un listado de los
+            proponentes de este proceso.
           </Fuente>
+        </>
+      ),
+    },
+    {
+      id: "documentos",
+      etiqueta: "Documentos y pliego",
+      desplegable: true,
+      contenido: (
+        <>
+          <DocumentosFicha
+            documentos={
+              pliego
+                ? [
+                    {
+                      id: "pliego-procesado",
+                      nombre: pliego.nombreArchivo,
+                      tipo: "Pliego procesado · referencia de extracción",
+                      fecha: fechaInstanteColombia(pliego.actualizado),
+                      url: null,
+                    },
+                  ]
+                : []
+            }
+            urlSecop={urlSecop}
+          />
+          <section id="pliego" className="fi-sec" tabIndex={-1}>
+            <h3 className="fi-h2">Requisitos y pliego</h3>
+            <PliegoFicha pliego={pliego} slug={canonico} urlSecop={urlSecop} />
+          </section>
+
+          <p className="fi-ayuda">
+            El pliego procesado es una referencia de extracción. El inventario completo de
+            documentos, versiones y adendas debe consultarse en SECOP II.
+          </p>
+          <Fuente url={urlSecop}>{fuentePliego}</Fuente>
+        </>
+      ),
+    },
+    {
+      id: "secop",
+      etiqueta: "Detalles SECOP",
+      desplegable: true,
+      contenido: (
+        <>
+          <dl className="fi-datos">
+            <Dato nombre="Identificador SECOP">{p.secopProcesoId}</Dato>
+            <Dato nombre="Referencia">{sinFasePegada(p.referencia ?? "No informada")}</Dato>
+            <Dato nombre="Estado de la fuente">{p.estadoActual ?? "No informado"}</Dato>
+            <Dato nombre="Estado de apertura">{p.estadoApertura ?? "No informado"}</Dato>
+            <Dato nombre="Tipo de contrato">{p.tipoContrato ?? "No informado"}</Dato>
+            {p.unspsc && (
+              <Dato nombre="Código UNSPSC" def={GLOSARIO.unspsc.definicion}>
+                {p.unspsc.replace(/^V\d+\./i, "")}
+              </Dato>
+            )}
+            <Dato nombre="Acceso a documentos">{p.documentAccess ?? "Sin verificar"}</Dato>
+          </dl>
+          <Fuente url={urlSecop}>{fuenteDatos}</Fuente>
         </>
       ),
     },
   ];
 
+  const orden = [
+    "proposito",
+    "situacion",
+    "cambios",
+    "participar",
+    "general",
+    "metas",
+    "dinero",
+    "plazos",
+    "proponentes",
+    "documentos",
+    "secop",
+  ];
+  const contenido = orden.map((id) => secciones.find((s) => s.id === id)!);
   return (
-    <div className="clr-page fi-pagina">
+    <div className="clr-page fi-pagina tema-oscuro">
       <style dangerouslySetInnerHTML={{ __html: ESTILOS_FICHA }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(schema) }}
       />
-      <article className="fi fi-interactiva">
-        <nav className="fi-migas" aria-label="Ruta de navegación">
-          <Link href="/licitaciones">← Fichas de procesos</Link>
-        </nav>
-        <header className="fi-cabecera">
-          <div className="fi-chips">
-            {p.tipoProyecto && (
-              <span
-                className={`fi-chip fi-chip--tipo fi-chip--${COLOR_TIPO[p.tipoProyecto].familia}`}
-                style={{ ["--tipo" as string]: COLOR_TIPO[p.tipoProyecto].claro }}
-              >
-                <span className="fi-chip-punto" aria-hidden="true" />
-                {TIPO_PROYECTO[p.tipoProyecto].label}
-              </span>
-            )}
-            <span className="fi-identificador">
-              {sinFasePegada(p.referencia || p.secopProcesoId)}
-            </span>
-          </div>
-          <h1 className="fi-h1">{tituloCorto}</h1>
-          <p className="fi-entidad">{p.entidadNombre ?? "Entidad sin resolver"}</p>
-          {lugar && <p className="fi-lugar">Entidad en {lugar}</p>}
-          <p className="fi-estado">
-            <span aria-hidden="true">◷</span> {etapa.nombre}
-            <span className="fi-estado-nota">{etapa.linea}</span>
-          </p>
-          {etapa.contradicciones.length > 0 && (
-            <div className="fi-nota" role="note">
-              <strong>Revisa antes de confiar</strong>
-              <ul>
-                {etapa.contradicciones.map((c) => (
-                  <li key={c.codigo}>{c.texto}</li>
-                ))}
-              </ul>
-              <p>Son datos del SECOP II que no cuadran entre sí. Confírmalos en el expediente.</p>
+      <RelojFicha senales={senales} cierrePliego={pliego?.fechaCierre ?? null} ahora={ahora}>
+        <article className="fi fi-interactiva">
+          <nav className="fi-migas" aria-label="Ruta de navegación">
+            <Link href="/licitaciones">← Fichas de procesos</Link>
+          </nav>
+          <header className="fi-cabecera" id="ficha-inicio" tabIndex={-1}>
+            <ImagenFicha />
+            <div className="fi-hero-grid">
+              <div className="fi-hero-texto">
+                <p className="fi-sobretitulo">AquaLicita · Ficha del proceso</p>
+                <div className="fi-chips">
+                  {p.tipoProyecto && (
+                    <span
+                      className={`fi-chip fi-chip--tipo fi-chip--${COLOR_TIPO[p.tipoProyecto].familia}`}
+                      style={{ ["--tipo" as string]: COLOR_TIPO[p.tipoProyecto].claro }}
+                    >
+                      <span className="fi-chip-punto" aria-hidden="true" />
+                      {TIPO_PROYECTO[p.tipoProyecto].label}
+                    </span>
+                  )}
+                  <span className="fi-identificador" id="ficha-codigo">
+                    {sinFasePegada(p.referencia || p.secopProcesoId)}
+                  </span>
+                </div>
+                <h1 className="fi-h1">{titulo}</h1>
+                <p className="fi-entidad">{p.entidadNombre ?? "Entidad sin resolver"}</p>
+                {lugar && <p className="fi-lugar">Entidad en {lugar}</p>}
+                <p className="fi-ayuda">
+                  {p.actualizado && !Number.isNaN(new Date(p.actualizado).getTime())
+                    ? `Registro actualizado en AquaLicita: ${new Date(p.actualizado).toLocaleString("es-CO", { timeZone: "America/Bogota", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} COT`
+                    : "Fecha de actualización del registro no disponible"}
+                </p>
+                <p className="fi-estado">
+                  <span aria-hidden="true">◷</span> <EstadoFicha />
+                  <span className="fi-estado-nota">
+                    <EstadoFicha plazo />
+                  </span>
+                </p>
+                {etapa.contradicciones.length > 0 && (
+                  <div className="fi-nota" role="note">
+                    <strong>Revisa antes de confiar</strong>
+                    <ul>
+                      {etapa.contradicciones.map((c) => (
+                        <li key={c.codigo}>{c.texto}</li>
+                      ))}
+                    </ul>
+                    <p>
+                      Son datos del SECOP II que no cuadran entre sí. Confírmalos en el expediente.
+                    </p>
+                  </div>
+                )}
+                <details className="fi-identificacion">
+                  <summary>Leer objeto completo y datos del proceso</summary>
+                  <p>{sinFasePegada(p.objeto ?? "Objeto no informado")}</p>
+                  <dl className="fi-datos">
+                    <Dato nombre="Identificador SECOP">{p.secopProcesoId}</Dato>
+                    <Dato nombre="Tipo de contrato">{p.tipoContrato ?? "No informado"}</Dato>
+                    {p.unspsc && (
+                      <Dato nombre="Código UNSPSC" def={GLOSARIO.unspsc.definicion}>
+                        {p.unspsc.replace(/^V\d+\./i, "")}
+                      </Dato>
+                    )}
+                  </dl>
+                </details>
+              </div>
+              <GuiaTemporal />
             </div>
-          )}
-          <details className="fi-identificacion">
-            <summary>Leer objeto completo y datos del proceso</summary>
-            <p>{p.objeto ?? "Objeto no informado"}</p>
+          </header>
+          <section
+            id="ficha-resumen"
+            className="fi-kpis"
+            tabIndex={-1}
+            aria-label="Datos principales"
+          >
+            <div>
+              <span>Presupuesto oficial</span>
+              <strong>{valor === null ? "Por confirmar" : formatCopFull(valor)}</strong>
+              <small>Pesos colombianos</small>
+            </div>
+            <div>
+              <span>Cierre de ofertas</span>
+              <strong>{guia.cierre ?? "Por confirmar"}</strong>
+              <small>
+                {pliego?.fechaCierre
+                  ? "Según el pliego procesado"
+                  : "Fecha registrada · hora por verificar"}
+              </small>
+            </div>
+            <div>
+              <span>Modalidad</span>
+              <strong>{p.modalidad ?? "Sin informar"}</strong>
+              <small>{p.tipoContrato ?? "Tipo de contrato sin informar"}</small>
+            </div>
+          </section>
+          <ExploradorFicha
+            secciones={contenido}
+            acciones={
+              <>
+                {" "}
+                <ProcesosCuenta ids={[p.secopProcesoId]}>
+                  <BotonGuardar
+                    procesoId={p.secopProcesoId}
+                    volver={`/licitaciones/${slugDeProceso(p.objeto, p.secopProcesoId)}`}
+                  />
+                  <a href="/mis-procesos">Mis procesos</a>
+                  <RegistroVisita procesoId={p.secopProcesoId} />
+                </ProcesosCuenta>
+              </>
+            }
+          />
+          {/* Las palabras que esta ficha usa, explicadas en una línea (regla R7 del
+            spec 2026-10-05). Solo las que aparecen; sin JavaScript. */}
+          <details className="fi-desplegable fi-glosario">
+            <summary>Palabras de esta ficha, explicadas</summary>
             <dl className="fi-datos">
-              <Dato nombre="Identificador SECOP">{p.secopProcesoId}</Dato>
-              <Dato nombre="Tipo de contrato">{p.tipoContrato ?? "No informado"}</Dato>
-              {p.unspsc && (
-                <Dato nombre="Código UNSPSC" def={GLOSARIO.unspsc.definicion}>
-                  {p.unspsc.replace(/^V\d+\./i, "")}
+              {glosario.map((g) => (
+                <Dato key={g.termino} nombre={g.termino}>
+                  {g.definicion}
                 </Dato>
-              )}
+              ))}
             </dl>
           </details>
-        </header>
-        <ProcesosCuenta ids={[p.secopProcesoId]}>
-          <BotonGuardar
-            procesoId={p.secopProcesoId}
-            volver={`/licitaciones/${slugDeProceso(p.objeto, p.secopProcesoId)}`}
-          />
-          <a href="/mis-procesos">Mis procesos</a>
-          <RegistroVisita procesoId={p.secopProcesoId} />
-        </ProcesosCuenta>
-        <ExploradorFicha secciones={secciones} />
-        {/* Las palabras que esta ficha usa, explicadas en una línea (regla R7 del
-            spec 2026-10-05). Solo las que aparecen; sin JavaScript. */}
-        <details className="fi-desplegable fi-glosario">
-          <summary>Palabras de esta ficha, explicadas</summary>
-          <dl className="fi-datos">
-            {glosario.map((g) => (
-              <Dato key={g.termino} nombre={g.termino}>
-                {g.definicion}
-              </Dato>
-            ))}
-          </dl>
-        </details>
-        <footer className="fi-pie-ficha">
-          <p>Información pública, al alcance de todos.</p>
-          {urlSecop ? (
-            <a href={urlSecop} target="_blank" rel="noopener noreferrer">
-              Abrir expediente en SECOP II ↗
-            </a>
-          ) : (
-            <span>Enlace al expediente no disponible</span>
-          )}
-        </footer>
-      </article>
+          <footer className="fi-pie-ficha">
+            <p>Información pública, al alcance de todos.</p>
+            <FechaImpresionFicha />
+            {urlSecop ? (
+              <a href={urlSecop} target="_blank" rel="noopener noreferrer">
+                Abrir expediente en SECOP II ↗
+              </a>
+            ) : (
+              <span>Enlace al expediente no disponible</span>
+            )}
+          </footer>
+        </article>
+      </RelojFicha>
     </div>
   );
 }
