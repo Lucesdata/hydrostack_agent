@@ -29,6 +29,16 @@ const PLIEGO: Pliego = {
 const SLUG = "construccion-de-ptar--CO1.REQ.42";
 
 describe("PliegoFicha (§4 de la ficha)", () => {
+  it("muestra el instante de procesamiento en el día de Colombia", () => {
+    const html = renderToStaticMarkup(
+      <PliegoFicha
+        pliego={{ ...PLIEGO, actualizado: "2026-10-07T02:00:00Z" }}
+        slug={SLUG}
+        urlSecop={null}
+      />
+    );
+    expect(html).toContain("06 de octubre de 2026");
+  });
   it("sin pliego: dice qué falta, enlaza el expediente y ofrece subirlo aquí", () => {
     const html = renderToStaticMarkup(
       <PliegoFicha pliego={null} slug={SLUG} urlSecop="https://community.secop.gov.co/x" />

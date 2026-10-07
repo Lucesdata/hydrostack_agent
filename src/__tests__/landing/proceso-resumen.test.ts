@@ -41,12 +41,16 @@ describe("enlacesDeFicha", () => {
   it("los anclajes existen en la ficha", async () => {
     const { readFileSync } = await import("node:fs");
     const pagina = readFileSync("app/licitaciones/[slug]/page.tsx", "utf8");
-    for (const id of ["resumen", "dinero", "plazos", "participar"]) {
+    for (const id of ["dinero", "plazos", "participar"]) {
       expect(pagina).toContain(`id: "${id}"`);
     }
-    const explorador = readFileSync("src/components/secop/ficha/ExploradorFicha.tsx", "utf8");
-    expect(explorador).toContain('hash === "pliego"');
-    expect(explorador).toContain('hash.replace(/^ficha-/, "")');
+    expect(pagina).toContain('id="ficha-resumen"');
+    const { destinoFicha } = await import("@/src/components/secop/ficha/ExploradorFicha");
+    expect(destinoFicha("#pliego")).toBe("pliego");
+    expect(destinoFicha("#pliego=ok")).toBe("pliego");
+    expect(destinoFicha("#ficha-dinero")).toBe("ficha-dinero");
+    expect(destinoFicha("#ficha-plazos")).toBe("ficha-plazos");
+    expect(destinoFicha("#ficha-responsables")).toBe("ficha-general");
   });
 });
 
