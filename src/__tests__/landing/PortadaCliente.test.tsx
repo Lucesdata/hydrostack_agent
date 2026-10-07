@@ -5,17 +5,24 @@ import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import { procesoPortada } from "./fixtures-portada";
 
 const procesos = [1, 2, 3].map((i) => procesoPortada({ id: `CO1.REQ.${i}` }));
+const destacados = (["potable", "residual", "redes"] as const).map((familia, i) => ({
+  familia,
+  proceso: procesos[i],
+  cierre: "2099-12-31",
+  holgado: true,
+}));
 
 describe("PortadaCliente", () => {
-  it("la franja de la ficha enlaza las secciones del primer proceso del hero", () => {
-    const html = renderToStaticMarkup(<PortadaCliente procesos={procesos} />);
+  it("la franja de la ficha enlaza las secciones del primer destacado del hero", () => {
+    const html = renderToStaticMarkup(<PortadaCliente destacados={destacados} />);
     expect(html).toContain(`href="${procesos[0].href}#ficha-dinero"`);
     expect(html).not.toContain(`href="${procesos[1].href}#ficha-dinero"`);
   });
 
   it("sin procesos, la franja no enlaza nada", () => {
-    for (const p of [null, []]) {
-      const html = renderToStaticMarkup(<PortadaCliente procesos={p} />);
+    const vacios = destacados.map((d) => ({ ...d, proceso: null, cierre: null, holgado: false }));
+    for (const d of [null, vacios]) {
+      const html = renderToStaticMarkup(<PortadaCliente destacados={d} />);
       expect(html).toContain("Los accesos se habilitan cuando hay un proceso disponible.");
       expect(html).not.toMatch(/href="\/licitaciones\/[^"]*(#ficha-|#pliego)/);
     }
@@ -23,7 +30,10 @@ describe("PortadaCliente", () => {
 
   it("renderiza el mapa del servidor una sola vez dentro del hero", () => {
     const html = renderToStaticMarkup(
-      <PortadaCliente procesos={procesos} mapa={<div data-testid="mapa-departamental">Mapa</div>} />
+      <PortadaCliente
+        destacados={destacados}
+        mapa={<div data-testid="mapa-departamental">Mapa</div>}
+      />
     );
     expect(html.match(/data-testid="mapa-departamental"/g)).toHaveLength(1);
   });
@@ -46,11 +56,12 @@ describe("PortadaCliente", () => {
     expect(html).toContain(".bp-page a");
   });
 
-  it("mapa y tarjetas salen de la misma selección del servidor, en una consulta", () => {
+  it("mapa y fichas salen de la misma selección del servidor, en una consulta", () => {
     const page = readFileSync("app/page.js", "utf8");
-    expect(page.match(/muestraPortada\(/g)).toHaveLength(1);
-    expect(page).toContain("procesos={procesos}");
-    expect(page).toContain("seleccion={procesos ?? []}");
+    expect(page.match(/destacadosPortada\(/g)).toHaveLength(1);
+    expect(page).toContain("destacados={destacados}");
+    expect(page).toContain("const procesos = procesosDe(destacados);");
+    expect(page).toContain("seleccion={procesos}");
     expect(page).not.toContain("agregadosPortada");
   });
 });

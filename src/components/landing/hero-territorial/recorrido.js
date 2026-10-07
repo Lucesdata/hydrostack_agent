@@ -9,7 +9,9 @@ import { useEffect, useRef, useState } from "react";
  *
  * Reglas, por accesibilidad (WCAG 2.2.2) y por la portada aligerada del
  * 2026-09-27:
- * - un paso cada `INTERVALO_RECORRIDO` ms, tiempo para leer la etiqueta;
+ * - un paso cada `INTERVALO_RECORRIDO` ms, tiempo para leer una ficha entera
+ *   (7 s desde el 2026-10-07: con tres destacados el recorrido pasa de pestaña
+ *   y cambia la ficha, no solo resalta una etiqueta como antes, con 5 s);
  * - se detiene mientras el usuario señala o enfoca algo del hero, y con el
  *   botón «Pausar recorrido»;
  * - no arranca si el sistema pide reducir el movimiento;
@@ -17,7 +19,7 @@ import { useEffect, useRef, useState } from "react";
  * - nunca desplaza la página ni cambia la selección.
  */
 
-export const INTERVALO_RECORRIDO = 5000;
+export const INTERVALO_RECORRIDO = 7000;
 
 /** El índice siguiente del recorrido, dando la vuelta. */
 export function siguienteIndice(actual, total) {

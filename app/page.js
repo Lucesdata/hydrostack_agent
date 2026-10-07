@@ -3,8 +3,9 @@ import { ESTILOS_MAPA } from "@/src/components/mapa/estilos";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
-import { muestraPortada } from "@/src/lib/secop/muestra-portada";
-import { TAMANO_MUESTRA } from "@/src/lib/landing/grupos-portada";
+import { destacadosPortada } from "@/src/lib/secop/destacados-portada";
+import { procesosDe } from "@/src/lib/landing/destacados-portada";
+import { conteosPorFamilia } from "@/src/lib/secop/conteos-familia";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -25,22 +26,30 @@ import { TAMANO_MUESTRA } from "@/src/lib/landing/grupos-portada";
 export const revalidate = 21600;
 
 export default async function Page() {
-  // Los procesos del hero: hasta 30 abiertos, al azar, en UNA consulta; el
-  // hero los muestra de cinco en cinco («Ver otros 5 procesos», 2026-10-04). La
-  // misma lista dibuja el mapa (servidor) y las minifichas (cliente), así que
-  // no pueden enseñar procesos distintos. Como la página es ISR, la selección
-  // queda fija en el HTML hasta la siguiente regeneración: estable durante la
-  // visita y sin sorteo en el navegador (sin desajustes de hidratación).
+  // Los procesos del hero: el más relevante de agua potable, de agua residual
+  // y de redes, en UNA consulta (spec 2026-10-07-hero-tres-destacados). La
+  // misma lista dibuja el mapa (servidor) y las fichas (cliente), así que no
+  // pueden enseñar procesos distintos. Como la página es ISR, la elección
+  // queda fija en el HTML hasta la siguiente regeneración.
   //
   // Si la base no responde, la portada sale con el mapa base y el aviso de
   // error en lugar de caerse: el CI corre `npm run build`, que prerenderiza
   // esta ruta, y el despliegue no se ata a que la base conteste.
-  let procesos = null;
-  try {
-    procesos = await muestraPortada(TAMANO_MUESTRA);
-  } catch (error) {
-    console.error("[portada] procesos del hero no disponibles:", error);
-  }
+  //
+  // Los conteos por familia y departamento colorean el mapa (PR 2 del mismo
+  // spec). Van en paralelo y fallan por separado: sin conteos, el mapa sale
+  // con los destacados y sin capas.
+  const [destacados, conteos] = await Promise.all([
+    destacadosPortada().catch((error) => {
+      console.error("[portada] destacados del hero no disponibles:", error);
+      return null;
+    }),
+    conteosPorFamilia().catch((error) => {
+      console.error("[portada] conteos del mapa no disponibles:", error);
+      return null;
+    }),
+  ]);
+  const procesos = procesosDe(destacados);
 
   return (
     <>
@@ -50,11 +59,12 @@ export default async function Page() {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(datasetJsonLd(appUrl())) }}
       />
       <PortadaCliente
-        procesos={procesos}
+        destacados={destacados}
+        conteos={conteos}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
-            <ColombiaChoropleth filas={[]} seleccion={procesos ?? []} />
+            <ColombiaChoropleth filas={[]} seleccion={procesos} conteos={conteos ?? undefined} />
           </>
         }
       />

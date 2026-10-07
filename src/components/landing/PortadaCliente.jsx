@@ -11,6 +11,7 @@
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import { frase } from "@/src/components/landing/texto";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
+import { procesosDe } from "@/src/lib/landing/destacados-portada";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
 // territorial) y la Ficha Viva. Salieron las rutas de intención, el motor, el
@@ -31,21 +32,22 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
 /**
  * @param {{
  *   mapa?: import("react").ReactNode,
- *   procesos?: import("@/src/lib/landing/proceso-portada").ProcesoPortada[] | null,
+ *   destacados?: import("@/src/lib/landing/destacados-portada").DestacadoPortada[] | null,
+ *   conteos?: import("@/src/lib/landing/conteos-familia").ConteoDepartamento[] | null,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
- * import: importarlo aquí lo arrastraría al bundle del navegador. `procesos` es
- * la selección de `muestraPortada()` con la que el servidor dibujó ese mapa;
- * `null` si la consulta falló.
+ * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
+ * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
+ * mapa; `null` si la consulta falló.
  *
  * Desde el 2026-10-04 la portada ya no recibe los agregados por departamento:
  * el mapa del hero marca los procesos elegidos en vez de contar por territorio
  * (spec 2026-10-04-hero-cinco-minifichas §7.2).
  */
-export default function LandingPage({ mapa = null, procesos = null }) {
-  // La franja de la ficha enlaza las secciones del primer proceso del hero:
-  // uno fijo, no el que esté bajo el puntero, para que sus cuatro enlaces no
+export default function LandingPage({ mapa = null, destacados = null, conteos = null }) {
+  // La franja de la ficha enlaza las secciones del primer destacado del hero:
+  // uno fijo, no el de la pestaña elegida, para que sus cuatro enlaces no
   // cambien de destino mientras se mira el hero.
-  const primero = procesos?.[0];
+  const primero = procesosDe(destacados)[0];
   const destacado = primero ? { href: primero.href, objeto: frase(primero.objeto) } : null;
 
   return (
@@ -62,7 +64,7 @@ export default function LandingPage({ mapa = null, procesos = null }) {
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial mapa={mapa} procesos={procesos} />
+        <HeroTerritorial mapa={mapa} destacados={destacados} conteos={conteos} />
 
         {/* La franja de la ficha: los cuatro accesos al primer proceso del
             hero. Va justo después del hero porque el hero existe para llevar a

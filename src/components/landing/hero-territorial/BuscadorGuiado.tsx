@@ -52,7 +52,7 @@ const FAMILIAS: Record<
     titular: "Obras de agua que transforman territorios",
   },
   redes: {
-    value: "alcantarillado",
+    value: "redes",
     label: "Redes y alcantarillado",
     detalle: "Redes, colectores y obras complementarias",
     imagen: "/images/buscador/redes.webp",
@@ -67,7 +67,7 @@ const ORDEN_FAMILIAS: Familia[] = ["potable", "residual", "redes"];
 function familiaDe(sistema: string): Familia | null {
   if (sistema === "potable" || sistema === "acueducto" || sistema === "ptap") return "potable";
   if (sistema === "residual" || sistema === "ptar") return "residual";
-  if (sistema === "alcantarillado") return "redes";
+  if (sistema === "redes" || sistema === "alcantarillado") return "redes";
   return null;
 }
 
