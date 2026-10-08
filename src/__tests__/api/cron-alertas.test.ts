@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { DailyRunSummary } from "@/src/lib/alertas/run-daily";
 
 // El core hace IO real (DB, matching, Resend). Se mockea para probar SOLO el
@@ -10,6 +10,8 @@ vi.mock("@/src/lib/alertas/run-daily", () => ({
 
 import { GET } from "@/app/api/cron/alertas/route";
 import { runDailyAlertas } from "@/src/lib/alertas/run-daily";
+
+afterEach(() => vi.unstubAllEnvs());
 
 const mockedRun = vi.mocked(runDailyAlertas);
 
@@ -28,7 +30,8 @@ function req(headers: Record<string, string> = {}): Request {
 describe("GET /api/cron/alertas", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.CRON_SECRET = "s3cret";
+    vi.stubEnv("CRON_SECRET", "s3cret");
+    vi.stubEnv("ALERT_EMAILS_ENABLED", "true");
     mockedRun.mockResolvedValue(SAMPLE);
   });
 
@@ -51,6 +54,13 @@ describe("GET /api/cron/alertas", () => {
     expect(body.ok).toBe(true);
     expect(body.summary).toEqual(SAMPLE);
     expect(mockedRun).toHaveBeenCalledTimes(1);
+  });
+
+  it("sin activación explícita no envía ni reserva filas", async () => {
+    delete process.env.ALERT_EMAILS_ENABLED;
+    const res = await GET(req({ authorization: "Bearer s3cret" }));
+    expect(await res.json()).toEqual({ ok: true, disabled: true });
+    expect(mockedRun).not.toHaveBeenCalled();
   });
 
   it("mapea un fallo a 500 con el mensaje de error", async () => {

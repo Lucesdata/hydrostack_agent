@@ -15,7 +15,7 @@
 import { Resend } from "resend";
 import type { Digest } from "./digest";
 
-export async function sendDigestEmail(to: string, digest: Digest): Promise<string | null> {
+export async function sendDigestEmail(to: string, digest: Digest): Promise<string> {
   const apiKey = process.env.AUTH_RESEND_KEY;
   const from = process.env.EMAIL_FROM;
   if (!apiKey) throw new Error("AUTH_RESEND_KEY no definida");
@@ -35,5 +35,6 @@ export async function sendDigestEmail(to: string, digest: Digest): Promise<strin
   });
 
   if (error) throw new Error(error.message);
-  return data?.id ?? null;
+  if (!data?.id) throw new Error("Resend no devolvió un identificador de envío");
+  return data.id;
 }

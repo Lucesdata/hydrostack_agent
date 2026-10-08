@@ -15,9 +15,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
-import { envioLog, usuario, alertaPreferencias } from "@/src/lib/db/schema/cuentas";
+import { envioLog, alertaPreferencias } from "@/src/lib/db/schema/cuentas";
 import { firmaValida } from "@/src/lib/al/notificacion/svix";
 
 export const runtime = "nodejs";
@@ -82,47 +82,64 @@ export async function POST(req: NextRequest): Promise<Response> {
     return NextResponse.json({ ok: false, error: "JSON inválido" }, { status: 400 });
   }
 
-  const estado = ESTADOS[evento.type ?? ""];
+  if (!evento || typeof evento !== "object" || typeof evento.type !== "string") {
+    return NextResponse.json({ ok: false, error: "evento inválido" }, { status: 400 });
+  }
+
+  const estado = Object.hasOwn(ESTADOS, evento.type) ? ESTADOS[evento.type] : undefined;
   if (!estado) return NextResponse.json({ ok: true, ignorado: evento.type });
 
   const mensajeId = evento.data?.email_id;
-  const destinatario = evento.data?.to?.[0];
+  if (typeof mensajeId !== "string" || !mensajeId) {
+    return NextResponse.json({ ok: false, error: "email_id requerido" }, { status: 400 });
+  }
 
-  // Se busca por el id de Resend; si no lo tenemos guardado todavía, por el
-  // correo del destinatario y su último envío.
-  let fila: { id: string; usuarioId: string } | undefined;
-  if (mensajeId) {
-    [fila] = await db
-      .select({ id: envioLog.id, usuarioId: envioLog.usuarioId })
-      .from(envioLog)
-      .where(eq(envioLog.proveedorMensajeId, mensajeId))
-      .limit(1);
-  }
-  if (!fila && destinatario) {
-    [fila] = await db
-      .select({ id: envioLog.id, usuarioId: envioLog.usuarioId })
-      .from(envioLog)
-      .innerJoin(usuario, eq(usuario.id, envioLog.usuarioId))
-      .where(eq(usuario.email, destinatario))
-      .orderBy(desc(envioLog.enviadoEn))
-      .limit(1);
-  }
+  // Nunca atribuir un evento de Auth u otro mensaje al último digest por email.
+  const [fila] = await db
+    .select({ id: envioLog.id, usuarioId: envioLog.usuarioId })
+    .from(envioLog)
+    .where(eq(envioLog.proveedorMensajeId, mensajeId))
+    .limit(1);
 
   if (!fila) {
-    // No es un error: puede ser un correo transaccional que no pasa por envio_log.
-    return NextResponse.json({ ok: true, sinRegistro: true });
+    // El proveedor puede entregar el webhook antes de que guardemos su id.
+    // Un 503 permite su reintento sin modificar ninguna otra fila.
+    return NextResponse.json({ ok: false, sinRegistro: true }, { status: 503 });
   }
 
-  await db
+  const [actualizada] = await db
     .update(envioLog)
     .set({
-      estadoEntrega: estado,
-      proveedorMensajeId: mensajeId ?? undefined,
+      // Precedencia atómica: eventos duplicados o desordenados no borran
+      // quejas/rebotes ni rebajan una apertura a simple entrega.
+      estadoEntrega: sql`CASE
+        WHEN ${envioLog.estadoEntrega} = 'complained' THEN 'complained'
+        WHEN ${estado} = 'complained' THEN 'complained'
+        WHEN ${envioLog.estadoEntrega} = 'bounced' THEN 'bounced'
+        WHEN ${envioLog.estadoEntrega} = 'opened' AND ${estado} = 'delivered' THEN 'opened'
+        ELSE ${estado} END`,
       entregaActualizadaEn: new Date(),
     })
-    .where(eq(envioLog.id, fila.id));
+    .where(and(eq(envioLog.id, fila.id), eq(envioLog.proveedorMensajeId, mensajeId)))
+    .returning({ estadoEntrega: envioLog.estadoEntrega });
 
-  const apagada = estado === "bounced" ? await apagarSiRebotaDosVeces(fila.usuarioId) : false;
+  if (!actualizada) {
+    return NextResponse.json({ ok: false, sinRegistro: true }, { status: 503 });
+  }
+  const efectivo = actualizada.estadoEntrega;
+  let apagada = false;
+  if (efectivo === "complained") {
+    await db
+      .insert(alertaPreferencias)
+      .values({ usuarioId: fila.usuarioId, activo: false })
+      .onConflictDoUpdate({
+        target: alertaPreferencias.usuarioId,
+        set: { activo: false, updatedAt: new Date() },
+      });
+    apagada = true;
+  } else if (efectivo === "bounced") {
+    apagada = await apagarSiRebotaDosVeces(fila.usuarioId);
+  }
 
-  return NextResponse.json({ ok: true, estado, alertasApagadas: apagada });
+  return NextResponse.json({ ok: true, estado: efectivo, alertasApagadas: apagada });
 }

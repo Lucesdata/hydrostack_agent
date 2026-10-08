@@ -31,6 +31,11 @@ export async function GET(request: Request): Promise<Response> {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
+  // Activar solo después de comprobar proveedor, cupos y entrega real.
+  if (process.env.ALERT_EMAILS_ENABLED !== "true") {
+    return NextResponse.json({ ok: true, disabled: true });
+  }
+
   try {
     console.log("[cron/alertas] start", new Date().toISOString());
     const summary = await runDailyAlertas();
