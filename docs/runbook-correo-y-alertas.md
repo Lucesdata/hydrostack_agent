@@ -655,3 +655,40 @@ Contrastado el 2026-09-19 contra el código y el estado real:
   con Neon.
 - `SECOP_APP_TOKEN` no está en Production: la ingesta sale desde IPs compartidas
   de Vercel con el throttling anónimo de Socrata.
+# Actualización de operación — 8 de octubre de 2026
+
+Esta actualización sustituye las observaciones de septiembre que aparecen más abajo; aquellas se conservan como historial.
+
+- Vercel Production ya tiene `AUTH_RESEND_KEY`, `EMAIL_FROM`, `RESEND_WEBHOOK_SECRET`, `AUTH_SECRET` y `CRON_SECRET`. Remitente: `AquaLicita <avisos@alertas.aqualicita.com>`.
+- Resend muestra `alertas.aqualicita.com` y `cuenta.aqualicita.com` como **verified**. Se conservan SPF y MX de retorno en `send.alertas`/`send.cuenta`, ambos selectores DKIM y DMARC raíz `p=none`.
+- Se validó un envío manual desde la aplicación de producción y recepción en la bandeja de entrada del propietario el 8 de octubre de 2026 a las 20:27, Madrid. Gmail confirmó **SPF PASS, DKIM PASS y DMARC PASS**. Esta prueba corresponde a la versión de producción anterior a las correcciones de este PR.
+- El webhook existente está habilitado en `https://aqualicita.vercel.app/api/webhooks/resend`. Ese host sigue siendo alias del mismo proyecto; no es necesario rotar su secreto ni cambiar la URL para esta entrega.
+- La clave `supabase-smtp` figura sin actividad en Resend. Eso no prueba si SMTP está configurado: validar registro/verificación/recuperación en Supabase antes de declararlo operativo.
+- No hay MX corporativos en la raíz. No se crearon buzones, credenciales ni suscripciones.
+
+## Preparación del envío automático
+
+El cambio prepara `/api/cron/alertas` a las **12:00 UTC**, después de la ingesta a las 11:00 UTC. La ruta requiere el secreto habitual y además `ALERT_EMAILS_ENABLED=true`. Ausente o con cualquier otro valor devuelve `{ok:true,disabled:true}` sin leer cuentas, reservar envíos ni mandar correos. La variable se configura solo en Production después de comprobar el flujo real y los límites del proveedor. En Hobby, comprobar en Vercel el horario efectivo y los límites vigentes; no prometer un minuto exacto.
+
+No configurar Resend en Preview con datos de usuarios reales. El envío manual sigue disponible para validar una cuenta del propietario.
+
+La baja de un clic usa POST con token HMAC. GET solo presenta un formulario de confirmación, para evitar bajas por escáneres de enlaces. Los webhooks se correlacionan por el identificador del proveedor, nunca por el último destinatario; una queja apaga las alertas inmediatamente. Un evento sin registro devuelve 503 para permitir que Resend reintente si llegó antes de guardar el identificador. Mensajes externos al registro, como Auth, también pueden agotar esos reintentos; no atribuirlos a otra fila. Evitar enviar los eventos de Auth a este webhook si el proveedor permite filtrarlos. No hay una nueva cola persistente de eventos en esta entrega.
+
+Se mantiene la política existente de dos rebotes registrados consecutivos. No se ha añadido una distinción entre rebote temporal y permanente. El envío manual conserva un registro por día: otro envío manual sustituye su identificador anterior. Una reserva diaria en error no se reenvía automáticamente ese día. Estos límites deben revisarse antes de aumentar volumen.
+
+## Preparación del correo corporativo
+
+1. El propietario confirma si ya existe proveedor/organización. Preferir ese proveedor si está operativo; en caso contrario usar Zoho Mail, sin comprar un plan automáticamente.
+2. Abrir sesión administrativa, verificar `aqualicita.com` con el TXT único de la consola y crear `contacto@aqualicita.com` con alias `soporte@`, `comercial@` y `administracion@`. El propietario establece contraseña y MFA.
+3. Obtener MX, SPF y DKIM de la organización y región exactas de Zoho. No inventar valores ni usar ejemplos como registros definitivos.
+4. Guardar la zona y volver a comprobar los MX raíz antes de cambiarlos. Publicar recepción solo cuando el buzón esté preparado; mantener intactos los MX y SPF de `send.alertas`/`send.cuenta`.
+5. Un solo SPF por nombre, incluyendo todos los emisores legítimos; DKIM de Zoho en su selector propio. Mantener DMARC en observación hasta medir la alineación de todos los emisores. No añadir informes a una dirección que todavía no exista.
+6. Probar entrada desde un correo externo, respuesta desde contacto y cada alias y cabeceras de autenticación. Configurar un Reply-To corporativo en mensajes automáticos cuando el buzón esté validado.
+
+## Puesta en producción y aceptación
+
+Todo entra por PR contra `main`, con CI y preview verdes antes del merge. No usar un despliegue local para saltarse ese flujo. Tras desplegar, comprobar 401 sin firma en el webhook y 401 sin secreto en el cron, GET de baja sin mutación y POST de baja válido únicamente sobre una cuenta de prueba. Enviar un digest manual del propietario y contrastar el identificador guardado con Resend y el webhook. Después activar `ALERT_EMAILS_ENABLED=true` en Production y hacer un nuevo despliegue para aplicar la variable. Observar la primera ejecución programada y el resumen de errores; no llamar al cron de envío sobre todas las cuentas como prueba inicial.
+
+La entrega completa requiere además validar SMTP Auth y recepción corporativa. Un mensaje aceptado por Resend no basta: contrastar recepción, SPF/DKIM/DMARC y el evento de entrega.
+
+---

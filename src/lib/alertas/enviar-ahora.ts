@@ -28,14 +28,23 @@ function hoyIso(): string {
 async function registrarEnvio(
   usuarioId: string,
   estado: EnvioEstado,
-  matches: number
+  matches: number,
+  proveedorMensajeId: string | null = null
 ): Promise<void> {
   await db
     .insert(envioLog)
-    .values({ usuarioId, fecha: hoyIso(), tipo: "on_demand", estado, matches })
+    .values({ usuarioId, fecha: hoyIso(), tipo: "on_demand", estado, matches, proveedorMensajeId })
     .onConflictDoUpdate({
       target: [envioLog.usuarioId, envioLog.fecha, envioLog.tipo],
-      set: { estado, matches, enviadoEn: new Date() },
+      set: {
+        estado,
+        matches,
+        enviadoEn: new Date(),
+        // Un intento fallido no borra la correlación del correo anterior.
+        ...(proveedorMensajeId
+          ? { proveedorMensajeId, estadoEntrega: null, entregaActualizadaEn: null }
+          : {}),
+      },
     });
 }
 
@@ -67,8 +76,8 @@ export async function enviarDigestAhora(usuarioId: string): Promise<EnvioResulta
 
   try {
     const digest = renderDigest(matches, { id: u.id, email: u.email });
-    await sendDigestEmail(u.email, digest);
-    await registrarEnvio(usuarioId, "enviado", matches.length);
+    const mensajeId = await sendDigestEmail(u.email, digest);
+    await registrarEnvio(usuarioId, "enviado", matches.length, mensajeId);
     return { estado: "enviado", matches: matches.length };
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);

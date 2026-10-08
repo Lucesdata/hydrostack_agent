@@ -4,10 +4,11 @@ import type { Match } from "@/src/lib/matching/match";
 
 const mockSelectLimit = vi.fn();
 const mockOnConflictDoUpdate = vi.fn();
+const mockValues = vi.fn(() => ({ onConflictDoUpdate: mockOnConflictDoUpdate }));
 vi.mock("@/src/lib/db/client", () => ({
   db: {
     select: () => ({ from: () => ({ where: () => ({ limit: mockSelectLimit }) }) }),
-    insert: () => ({ values: () => ({ onConflictDoUpdate: mockOnConflictDoUpdate }) }),
+    insert: () => ({ values: mockValues }),
   },
 }));
 
@@ -90,7 +91,7 @@ describe("enviarDigestAhora", () => {
     mockGetMatches.mockResolvedValue(matches);
     const digest = { subject: "s", html: "h", text: "t", unsubscribeUrl: "u" };
     mockRenderDigest.mockReturnValue(digest);
-    mockSendDigestEmail.mockResolvedValue(undefined);
+    mockSendDigestEmail.mockResolvedValue("email-manual-1");
 
     const r = await enviarDigestAhora("u1");
 
@@ -98,6 +99,14 @@ describe("enviarDigestAhora", () => {
     expect(mockSendDigestEmail).toHaveBeenCalledWith("a@b.com", digest);
     expect(r).toEqual({ estado: "enviado", matches: 2 });
     expect(mockOnConflictDoUpdate).toHaveBeenCalledTimes(1);
+    expect(mockValues).toHaveBeenCalledWith(
+      expect.objectContaining({ proveedorMensajeId: "email-manual-1" })
+    );
+    expect(mockOnConflictDoUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        set: expect.objectContaining({ proveedorMensajeId: "email-manual-1", estadoEntrega: null }),
+      })
+    );
   });
 
   it("si el envío falla, registra error y lo reporta sin lanzar", async () => {
@@ -111,5 +120,8 @@ describe("enviarDigestAhora", () => {
 
     expect(r).toEqual({ estado: "error", matches: 2, error: "Resend caído" });
     expect(mockOnConflictDoUpdate).toHaveBeenCalledTimes(1);
+    const update = mockOnConflictDoUpdate.mock.calls[0][0].set;
+    expect(update).not.toHaveProperty("proveedorMensajeId");
+    expect(update).not.toHaveProperty("estadoEntrega");
   });
 });
