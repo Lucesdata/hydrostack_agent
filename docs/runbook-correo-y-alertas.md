@@ -763,3 +763,14 @@ agente de esta fecha corrió en un contenedor sin acceso a los paneles (ver
 Un registro manual por día (el nuevo sustituye al id anterior); eventos sin
 registro correlacionado devuelven 503 (también los de Auth); política de dos
 rebotes consecutivos; una reserva diaria en `error` no se reenvía ese día.
+
+## Webhook de Resend y correos de Auth (9 de octubre de 2026)
+
+Con SMTP de Auth por Resend, los eventos de los correos enviados desde
+`cuenta.aqualicita.com` llegan al mismo webhook y no tienen fila en `envio_log`.
+Antes devolvían 503 (reintento) y cada reintento consultaba la base. Ahora el
+webhook los confirma con 200 (`ignorado: "auth"`) sin leerla, por el dominio del
+remitente. Los eventos de `alertas.` siguen igual. Durante la saturación de
+Supabase de ese día se vieron reintentos continuos de este endpoint con
+`ECHECKOUTTIMEOUT`; este cambio evita alimentarlos, pero no sustituye revisar la
+base.

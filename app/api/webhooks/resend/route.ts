@@ -75,7 +75,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     return NextResponse.json({ ok: false, error: "firma inválida" }, { status: 401 });
   }
 
-  let evento: { type?: string; data?: { email_id?: string; to?: string[] } };
+  let evento: { type?: string; data?: { email_id?: string; to?: string[]; from?: string } };
   try {
     evento = JSON.parse(body);
   } catch {
@@ -88,6 +88,14 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const estado = Object.hasOwn(ESTADOS, evento.type) ? ESTADOS[evento.type] : undefined;
   if (!estado) return NextResponse.json({ ok: true, ignorado: evento.type });
+
+  // Los correos de Supabase Auth salen por el subdominio `cuenta.` y nunca
+  // tienen fila en `envio_log`. Sin este corte devolverían 503 y Resend los
+  // reintentaría, cada vez con una consulta a la base. Se confirman sin leerla.
+  const remitente = typeof evento.data?.from === "string" ? evento.data.from.toLowerCase() : "";
+  if (/@cuenta\.aqualicita\.com\b/.test(remitente)) {
+    return NextResponse.json({ ok: true, ignorado: "auth" });
+  }
 
   const mensajeId = evento.data?.email_id;
   if (typeof mensajeId !== "string" || !mensajeId) {

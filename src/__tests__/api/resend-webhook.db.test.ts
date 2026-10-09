@@ -88,6 +88,21 @@ describe("webhook firmado y correlación real en Postgres", () => {
     await POST(request(event("email.delivered", "email-auth")));
     expect(await state()).toBeNull();
   });
+  it("un correo de Auth (cuenta.) se confirma sin consultar la base ni pedir reintentos", async () => {
+    holder.db = undefined; // cualquier acceso a la base fallaría
+    const res = await POST(
+      request({
+        type: "email.delivered",
+        data: {
+          email_id: "email-auth",
+          from: "AquaLicita <no-responder@cuenta.aqualicita.com>",
+          to: ["test@example.com"],
+        },
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, ignorado: "auth" });
+  });
   it("un identificador todavía no registrado solicita un reintento", async () => {
     expect((await POST(request(event("email.delivered", "email-pending")))).status).toBe(503);
   });
