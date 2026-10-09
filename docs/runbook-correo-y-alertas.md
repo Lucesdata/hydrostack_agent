@@ -692,3 +692,74 @@ Todo entra por PR contra `main`, con CI y preview verdes antes del merge. No usa
 La entrega completa requiere además validar SMTP Auth y recepción corporativa. Un mensaje aceptado por Resend no basta: contrastar recepción, SPF/DKIM/DMARC y el evento de entrega.
 
 ---
+
+# Actualización de operación — 9 de octubre de 2026
+
+Estado por etapa. **Nada de lo marcado como pendiente se ha tocado**: la sesión de
+agente de esta fecha corrió en un contenedor sin acceso a los paneles (ver
+«Límites de acceso»).
+
+## Límites de acceso de esta sesión
+
+- El proxy del entorno responde 403 a `aqualicita.com` (host fuera de la lista
+  permitida), así que no se pudo comprobar DNS, el webhook ni el cron en vivo.
+- El conector de Vercel está `connect_incomplete`; no hay CLI de Vercel ni
+  Supabase, ni credenciales de Resend, Supabase o base de datos.
+- Consecuencia: Supabase SMTP, la clave `supabase-smtp-aqualicita`, el correo
+  corporativo, `ALERT_EMAILS_ENABLED` y la primera ejecución real **no se
+  pudieron ejecutar ni verificar**. El estado de septiembre/8 de octubre sigue
+  siendo el último comprobado; hay que volver a auditarlo antes de actuar.
+
+## Implementado (en el PR de esta rama)
+
+- `EMAIL_REPLY_TO` (opcional, `src/lib/email/send.ts`): si es una dirección válida,
+  el digest sale con `Reply-To`. Ausente o inválida, el mensaje sale igual que
+  antes. Pruebas en `src/__tests__/email/send.test.ts`. No afecta a los correos de
+  Supabase Auth (los envía Supabase; su Reply-To se fija en las plantillas/SMTP).
+- Pruebas ejecutadas: `email`, `alertas` y `api/cron-alertas` (43 correctas). Hay un
+  error de `tsc` previo en `mis-procesos/estado-cliente.test.ts`, ajeno a este cambio.
+
+## Pendiente — requiere al propietario (pasos exactos)
+
+1. **SMTP de Auth.** En Resend → API Keys, comprobar si existe
+   `supabase-smtp-aqualicita`; si no, crearla con *Sending access* limitada a
+   `cuenta.aqualicita.com`. Copiar el valor directamente al campo *Password* de
+   Supabase → Authentication → Emails → SMTP Settings (host `smtp.resend.com`,
+   puerto 465, usuario `resend`, remitente `no-responder@cuenta.aqualicita.com`,
+   nombre `AquaLicita`) y guardar. No pegar la clave en el chat, el repo ni
+   capturas. No borrar `supabase-smtp`.
+2. **Revisar en Supabase** Site URL (`https://aqualicita.com`), allowlist de
+   redirecciones (conservar los `/**`), confirmación de correo, plantillas y límite
+   de envíos (debería subir a 30/h con SMTP propio).
+3. **Validar** registro, confirmación (mismo navegador, PKCE) y recuperación con
+   una cuenta de prueba y un buzón del propietario; en Gmail «Mostrar original»:
+   SPF/DKIM/DMARC PASS con `cuenta.aqualicita.com`. No cambiar contraseñas reales.
+4. **Correo corporativo.** El propietario decide proveedor (¿existe ya
+   organización?; si no, Zoho Mail **sin contratar plan de pago**), crea
+   `contacto@` con alias `soporte@`, `comercial@`, `administracion@`, y fija
+   contraseña y MFA. Con los valores *exactos* de la consola (TXT de verificación,
+   MX, SPF, DKIM): exportar la zona de Vercel, confirmar que la raíz sigue sin MX,
+   publicar MX solo con el buzón listo, un único SPF por nombre y no tocar
+   `send.alertas`/`send.cuenta`. DMARC sigue en `p=none`.
+5. **Reply-To.** Con el buzón validado (entrada, respuesta y alias probados), añadir
+   `EMAIL_REPLY_TO=contacto@aqualicita.com` solo en Production y redesplegar.
+6. **Alertas diarias**, en este orden: baja GET (sin efectos) y POST firmado sobre
+   una cuenta de prueba; id de Resend guardado en `envio_log` y webhook
+   correlacionado; preferencias, elegibilidad y cupo; un envío manual de una cuenta
+   del propietario. Solo entonces `ALERT_EMAILS_ENABLED=true` en Production +
+   redeploy, y observar la primera ejecución (12:00–12:59 UTC en Hobby) con la
+   consulta de `envio_log` del paso 10. No declarar validado antes.
+
+## Reversión
+
+- Reply-To: borrar `EMAIL_REPLY_TO` en Production y redesplegar.
+- Alertas: borrar o poner distinto de `true` `ALERT_EMAILS_ENABLED` y redesplegar
+  (la ruta devuelve `{ok:true,disabled:true}`).
+- SMTP de Auth: Supabase → desactivar *Enable Custom SMTP*; la clave nueva se
+  revoca en Resend sin afectar a las demás.
+
+## Límites conocidos que se mantienen
+
+Un registro manual por día (el nuevo sustituye al id anterior); eventos sin
+registro correlacionado devuelven 503 (también los de Auth); política de dos
+rebotes consecutivos; una reserva diaria en `error` no se reenvía ese día.

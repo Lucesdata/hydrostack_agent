@@ -15,6 +15,16 @@
 import { Resend } from "resend";
 import type { Digest } from "./digest";
 
+/**
+ * Reply-To corporativo opcional (`EMAIL_REPLY_TO`). Se define solo cuando el
+ * buzón corporativo está validado; ausente o con un valor que no parece una
+ * dirección, el mensaje sale sin Reply-To (comportamiento previo).
+ */
+function replyToConfigurado(): string | undefined {
+  const valor = process.env.EMAIL_REPLY_TO?.trim();
+  return valor && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(valor) ? valor : undefined;
+}
+
 export async function sendDigestEmail(to: string, digest: Digest): Promise<string> {
   const apiKey = process.env.AUTH_RESEND_KEY;
   const from = process.env.EMAIL_FROM;
@@ -22,12 +32,14 @@ export async function sendDigestEmail(to: string, digest: Digest): Promise<strin
   if (!from) throw new Error("EMAIL_FROM no definida");
 
   const resend = new Resend(apiKey);
+  const replyTo = replyToConfigurado();
   const { data, error } = await resend.emails.send({
     from,
     to,
     subject: digest.subject,
     html: digest.html,
     text: digest.text,
+    ...(replyTo ? { replyTo } : {}),
     headers: {
       "List-Unsubscribe": `<${digest.unsubscribeUrl}>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
