@@ -21,6 +21,27 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllEnvs());
 
+describe("Reply-To corporativo", () => {
+  const ok = { data: { id: "email-1" }, error: null };
+  it("no envía Reply-To si EMAIL_REPLY_TO no está definida", async () => {
+    send.mockResolvedValue(ok);
+    await sendDigestEmail("test@example.com", digest);
+    expect(send.mock.calls[0][0]).not.toHaveProperty("replyTo");
+  });
+  it("lo añade cuando es una dirección válida", async () => {
+    vi.stubEnv("EMAIL_REPLY_TO", "contacto@aqualicita.com");
+    send.mockResolvedValue(ok);
+    await sendDigestEmail("test@example.com", digest);
+    expect(send.mock.calls[0][0].replyTo).toBe("contacto@aqualicita.com");
+  });
+  it("ignora un valor que no es una dirección", async () => {
+    vi.stubEnv("EMAIL_REPLY_TO", "no es un correo");
+    send.mockResolvedValue(ok);
+    await sendDigestEmail("test@example.com", digest);
+    expect(send.mock.calls[0][0]).not.toHaveProperty("replyTo");
+  });
+});
+
 describe("confirmación del proveedor", () => {
   it("devuelve el identificador aceptado para correlacionar la entrega", async () => {
     send.mockResolvedValue({ data: { id: "email-1" }, error: null });

@@ -24,6 +24,17 @@ const globalForDb = globalThis as unknown as {
   _aqualicitaDb?: NeonDatabase<typeof schema>;
 };
 
+/**
+ * Tope de conexiones por instancia en el camino `pg` (producción en Supabase).
+ * Sin `max`, `pg` abre hasta 10 por instancia; con varias instancias de la
+ * función a la vez agotan el pool del pooler de Supabase (plan Free) y todo
+ * falla con `ECHECKOUTTIMEOUT`. Configurable con `DB_POOL_MAX`.
+ */
+export function topePool(valor = process.env.DB_POOL_MAX): number {
+  const n = Number(valor);
+  return Number.isInteger(n) && n >= 1 && n <= 10 ? n : 3;
+}
+
 function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
   if (process.env.DB_DRIVER === "node") {
     // Driver local node-postgres. Import perezoso: solo se carga si se pide,
@@ -33,6 +44,10 @@ function build(): { db: NeonDatabase<typeof schema>; pool: MinimalPool } {
     const pool: MinimalPool = new PgPool({
       connectionString: process.env.DATABASE_URL,
       keepAlive: true,
+      max: topePool(),
+      // Soltar rápido las conexiones ociosas: en modo transacción no hay
+      // sesión que conservar y cada una cuenta contra el pooler.
+      idleTimeoutMillis: 10_000,
     });
     const db = drizzleNode(pool, { schema }) as unknown as NeonDatabase<typeof schema>;
     return { db, pool };
