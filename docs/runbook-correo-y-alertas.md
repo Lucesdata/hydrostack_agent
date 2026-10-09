@@ -774,3 +774,19 @@ remitente. Los eventos de `alertas.` siguen igual. Durante la saturación de
 Supabase de ese día se vieron reintentos continuos de este endpoint con
 `ECHECKOUTTIMEOUT`; este cambio evita alimentarlos, pero no sustituye revisar la
 base.
+
+## Saturación de la base del 9 de octubre de 2026
+
+Síntomas (17:00–17:05 UTC): `Gateway Timeout` de Supabase Auth en el registro,
+`ECHECKOUTTIMEOUT … in Transaction mode` y `statement timeout` en fichas,
+`/licitaciones/entidades`, `/licitaciones/comparar` y el webhook de Resend. Los
+primeros errores son de las 16:41, antes de activar el SMTP de Auth.
+
+- **Hipótesis, no confirmada:** el cliente `pg` no tenía `max` (10 conexiones por
+  instancia) y varias instancias a la vez agotan el pool del pooler de Supabase
+  (plan Free). Cambio: `max` por instancia = 3 (`DB_POOL_MAX`, 1–10) y
+  `idleTimeoutMillis` 10 s, solo en el camino `pg` (`DB_DRIVER=node`).
+- **Sin verificar:** CPU, memoria y consultas lentas en Supabase → Reports →
+  Database. Si tras el despliegue siguen los timeouts, el cuello es la base
+  (consultas pesadas sobre `proceso`) y no el pool.
+- **Reversión:** `DB_POOL_MAX=10` en Production y redesplegar, o revertir el commit.
