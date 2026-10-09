@@ -1,0 +1,1 @@
+ALTER TABLE "al_filtros_usuario" ADD COLUMN "tipos_proyecto" text[];

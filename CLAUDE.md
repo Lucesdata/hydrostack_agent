@@ -860,9 +860,7 @@ ayer, y «Cumples N de 5» con el perfil del navegador o de la cuenta
 `buildVerdict` y requisitos que la ficha; solo conteos, sin `reason`, así que no
 hay nada que redactar). Sin perfil se define encima de la rejilla, sin cuenta.
 `searchProcesosDb` trae `fecha_recepcion`: el plazo del matching ya no sale
-siempre sin datos. Seguir, la alerta desde la vitrina y «Para ti» son la fase 3,
-en la rama `claude/vitrina-fase3` y un PR aparte: necesitan la migración `0025`,
-que no se puede aplicar mientras la Supabase viva esté al límite del plan.
+siempre sin datos. Guardar pasa a la fase 3 (tabla nueva).
 
 **Radar de la vitrina (2026-10-04, fase 2).** Desde 1100 px, `/licitaciones` es
 lista y detalle (`RadarVitrina.tsx`): las tarjetas siguen siendo enlaces del
@@ -872,6 +870,23 @@ la ficha. Debajo de 1100 px no hay panel: la ficha es el detalle. El servidor ar
 el panel con `detallesDeRadar()` y `datosDecisionDe()`, que ahora también usa la
 ficha. `BloqueDecision` acepta `hrefFicha` para que sus pasos al pliego vayan a
 la ficha. El bloque se monta solo cuando el navegador confirma el ancho.
+
+**Vitrina, fase 3 (2026-10-04/05).** Plan y decisiones en
+`docs/superpowers/plans/2026-10-04-vitrina-fase3.md`. **«Seguir» salió el
+2026-10-05** (decisión del usuario): la tarjeta y el panel del Radar usan el
+«Guardar» de `/mis-procesos` (`BotonGuardar` dentro de `ProcesosCuenta`, sobre
+`senal_usuario`, sin migración), el mismo de la ficha y del buscador guiado.
+Lo demás: los filtros guardados aceptan `tiposProyecto` y el motor descarta con
+`tipo_fuera` (`filtro-v2`; un proceso sin tipo no se descarta; `/mis-filtros`
+lo pide con casillas); con algún criterio activo la vitrina ofrece «🔔 Avisarme
+de procesos nuevos así» (`AlertaVitrina.tsx` + `alerta-vitrina.ts`), que crea un
+filtro de `/mis-filtros`; y el estante «Para ti» (`EstanteParaTi.tsx` +
+`para-ti.ts`) va encima de los resultados, solo sin filtros, en la primera
+página y para cuentas con perfil, con la regla de `/mis-coincidencias`. La
+migración `0025` añade **solo** `al_filtros_usuario.tipos_proyecto` (nula, sin
+default); **en la Supabase viva la aplica el usuario antes de fusionar**: Drizzle
+lee todas las columnas, así que sin ella falla también el cron de filtros. Con
+ella el repo tiene 26 migraciones (`0000`–`0025`).
 
 **Guardados y Recientes (2026-10-04, implementación local).** El buscador y la
 ficha enlazan a `/mis-procesos`, privada y dinámica. Guardar exige cuenta gratuita
