@@ -48,9 +48,20 @@ activar el SMTP. Con el pool limitado (#134) y el webhook corregido ya no aparec
   cuello es la falta de índice, la CPU/IO del plan Free o ambos.
 - La consulta de competidores toca pocas filas; que agote el tiempo sugiere que la
   base está lenta en general (también fallan `count(*)` simples sobre `proceso`).
-  El índice faltante de `contrato` es el candidato más probable de ser un problema
-  propio, no un síntoma.
+  Con ~39.000 filas, el índice faltante de `contrato` es un coste menor, no la causa
+  (ver «Corrección»).
 - No se ha medido cuánto tarda cada consulta en condiciones normales.
+
+## Corrección (mismo día): los índices faltantes no explican los timeouts
+
+`PENDIENTES.md` §56 y §57 ya medían `contrato` en ~39.000 filas, y el histórico en
+~27.000. Un recorrido secuencial de tablas así cuesta milisegundos. Que consultas
+tan baratas agoten `statement_timeout`, y que fallen también `count(*)` simples
+sobre `proceso`, apunta a **una base sin recursos** (CPU/IO limitados del plan
+Free, disco al límite de cuota, bloqueos o conexiones colgadas), no a un índice.
+Por eso las opciones A y B de abajo **no se recomiendan como arreglo de la
+saturación**: añadirían una migración sin evidencia de que ayude. Lo que decide es
+lo que muestra Supabase (Reports → Database, consulta 4 y `show statement_timeout`).
 
 ## Qué mediría el propietario (Supabase → SQL Editor, solo lectura)
 
@@ -96,7 +107,7 @@ con tiempo pequeño, el índice de `proceso_id` ahí no es la causa.
 | D | Precalcular competidores comparables por (tipo, departamento) en el `tick` diario | ingesta / esquema | alto: tabla nueva con RLS | solo si lo medido lo exige |
 | E | Subir de plan o cambiar de región de Vercel (`iad1` ↔ base en `eu-west-1`) | cuenta / infraestructura | decisión de coste del propietario | fuera de código |
 
-Recomendación: **no escribir código todavía.** Ejecutar las consultas 2, 3, 4 y 5 y
+Recomendación: **no escribir código ni migraciones.** Ejecutar las consultas 2, 3, 4 y 5 y
 decidir con el plan real. Si el plan 2 muestra el recorrido secuencial, A es un
 cambio pequeño y reversible (`DROP INDEX`); crear el índice con `CONCURRENTLY`
 fuera de una transacción de migración y fuera de la hora de ingesta (11:00 UTC).
