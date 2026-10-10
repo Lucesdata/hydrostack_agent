@@ -358,6 +358,8 @@ export const alOferentesHistorico = pgTable(
     index("al_hist_entidad_fecha_idx").on(t.entidadId, t.fechaAdjudicacion),
     index("al_hist_unspsc_idx").on(t.unspsc),
     index("al_hist_adjudicado_idx").on(t.adjudicado),
+    /** Join del histórico con `proceso` en la ficha (2026-10-10). */
+    index("al_hist_proceso_idx").on(t.procesoId),
   ]
 ).enableRLS();
 

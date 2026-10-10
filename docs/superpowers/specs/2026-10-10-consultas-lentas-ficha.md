@@ -118,3 +118,33 @@ fuera de una transacción de migración y fuera de la hora de ingesta (11:00 UTC
 - El tiempo de `EXPLAIN ANALYZE` de las consultas 2 y 3 baja de segundos a
   milisegundos con los mismos parámetros.
 - Ninguna ficha deja de renderizar si una consulta falla.
+
+## Medición en Supabase y arreglo aplicado (2026-10-10, lecturas + una migración)
+
+Con el conector de Supabase (proyecto `hydrostacks`, plan Free, 327 MB, 25 de 60
+conexiones, `statement_timeout` 2 min). `pg_stat_statements` antes del arreglo:
+
+| Consulta | Llamadas | Media | Total | Máximo |
+|---|---|---|---|---|
+| competidores comparables | 28.441 | 2,0 s | 57.419 s | 109 s |
+| contratos de la ficha | 8.407 | 1,8 s | 15.400 s | 118 s |
+
+Los planes mostraban `Seq Scan on contrato` (5.108 buffers) y un `Bitmap Heap Scan`
+de 32.213 filas de `proceso` para quedarse con 642, todo en caché: la CPU del plan
+Free es lo que convierte ese trabajo en segundos. **Esto corrige la sección
+anterior:** con una CPU tan escasa, los índices sí importan.
+
+Aplicado en producción (migración `indices_proceso_id_ficha`, `IF NOT EXISTS`):
+`contrato(proceso_id)`, `al_oferentes_historico(proceso_id)` y
+`proceso(geografia_id, tipo_proyecto)`. Resultado con los mismos parámetros:
+
+| Consulta | Antes | Después |
+|---|---|---|
+| contratos de una ficha | 2.557 ms, 5.108 buffers | 4,5 ms, 10 buffers |
+| competidores (acueducto, dpto 85) | 2.582 ms, 10.906 buffers | 395 ms, 2.056 buffers |
+
+Reversión: `DROP INDEX contrato_proceso_idx, al_hist_proceso_idx, proceso_geografia_tipo_idx;`
+
+Pendiente: competidores sigue en ~400 ms con esta CPU. Si los errores `57014` no
+desaparecen, la siguiente medida es cachear ese resultado por (tipo, departamento),
+unas 165 combinaciones frente a decenas de miles de ejecuciones.

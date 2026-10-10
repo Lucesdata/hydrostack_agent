@@ -80,6 +80,8 @@ export const proceso = pgTable(
     index("proceso_portafolio_idx").on(t.portafolioId),
     index("proceso_doc_access_idx").on(t.documentAccess),
     index("proceso_tipo_proyecto_idx").on(t.tipoProyecto),
+    /** Competidores comparables de la ficha: geografía + tipo (2026-10-10). */
+    index("proceso_geografia_tipo_idx").on(t.geografiaId, t.tipoProyecto),
   ]
 ).enableRLS();
 
@@ -130,6 +132,8 @@ export const contrato = pgTable(
     index("contrato_proveedor_idx").on(t.proveedorId),
     index("contrato_entidad_idx").on(t.entidadId),
     index("contrato_estado_idx").on(t.estadoActual),
+    /** Contratos de una ficha por `proceso_id`: antes recorría toda la tabla (2026-10-10). */
+    index("contrato_proceso_idx").on(t.procesoId),
   ]
 ).enableRLS();
 
