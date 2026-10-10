@@ -38,18 +38,11 @@ const NAV_ITEMS = NAV_PRINCIPAL.map((id) => {
 const GRUPOS_CUENTA = [
   {
     titulo: "Seguimiento",
-    items: [
-      { id: "mis-procesos" },
-      { id: "coincidencias" },
-      { id: "filtros" },
-    ],
+    items: [{ id: "mis-procesos" }, { id: "coincidencias" }, { id: "filtros" }],
   },
   {
     titulo: "Preparación",
-    items: [
-      { id: "perfil" },
-      { id: "diagnostico-historial", label: "Mi diagnóstico" },
-    ],
+    items: [{ id: "perfil" }, { id: "diagnostico-historial", label: "Mi diagnóstico" }],
   },
   {
     titulo: "Cuenta",
