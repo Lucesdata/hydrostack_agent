@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MENU_CUENTA, NAV_PRINCIPAL, NOMBRE_POR_ID, ruta } from "./landing/seccionesHome";
 import FormCerrarSesion from "./auth/FormCerrarSesion";
 
@@ -30,10 +30,34 @@ const NAV_ITEMS = NAV_PRINCIPAL.map((id) => {
 // Los ids salen de MENU_CUENTA (seccionesHome.js): era la tercera lista de
 // navegación escrita a mano en este archivo, y la única que enlazaba rutas que
 // el catálogo no conocía.
-const ACCOUNT_ITEMS = MENU_CUENTA.map((id) => ({
-  href: ruta(id).href,
-  label: NOMBRE_POR_ID[id],
-}));
+// El menú se agrupa por lo que la persona hace hoy en el sitio, no por el
+// orden en que se fueron creando las páginas: seguir procesos (guardados,
+// coincidencias con su perfil, filtros), prepararse (perfil RUP y diagnóstico)
+// y la cuenta (alertas). `label` cambia el nombre solo aquí; el catálogo
+// (NOMBRE_POR_ID) lo siguen usando el pie y /precios.
+const GRUPOS_CUENTA = [
+  {
+    titulo: "Seguimiento",
+    items: [{ id: "mis-procesos" }, { id: "coincidencias" }, { id: "filtros" }],
+  },
+  {
+    titulo: "Preparación",
+    items: [{ id: "perfil" }, { id: "diagnostico-historial", label: "Mi diagnóstico" }],
+  },
+  {
+    titulo: "Cuenta",
+    items: [{ id: "alertas", label: "Alertas y cuenta" }],
+  },
+]
+  .map((g) => ({
+    ...g,
+    items: g.items
+      .filter((i) => MENU_CUENTA.includes(i.id))
+      .map((i) => ({ href: ruta(i.id).href, label: i.label || NOMBRE_POR_ID[i.id] })),
+  }))
+  .filter((g) => g.items.length > 0);
+
+const ACCOUNT_ITEMS = GRUPOS_CUENTA.flatMap((g) => g.items);
 
 // El único destino que la portada persigue. Por debajo de 1024px el navbar
 // esconde toda la navegación en la hamburguesa; dejar "Fichas de procesos" fuera
@@ -110,31 +134,71 @@ const AUTH_CSS = `
   position: absolute; top: -1px; right: -1px; width: 9px; height: 9px;
   border-radius: 50%; background: var(--accent, #0369A1); border: 1.5px solid #fff;
 }
+.clr-nav-user-btn:focus-visible{ outline: 2px solid var(--accent, #0369A1); outline-offset: 2px; border-radius: 50%; }
 .clr-nav-user-menu{
-  position: absolute; top: calc(100% + 6px); right: 0; min-width: 220px;
+  position: absolute; top: calc(100% + 10px); right: 0; width: 280px;
+  max-width: calc(100vw - 2 * var(--gutter, 16px));
   background: var(--surface, #fff); border: 1px solid var(--line, #E5E5E0);
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
-  display: flex; flex-direction: column; z-index: 20;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 18px 40px -12px rgba(6,20,35,.35), 0 2px 6px rgba(6,20,35,.08);
+  display: flex; flex-direction: column; z-index: 60;
+  font-family: var(--font-sans, sans-serif);
 }
 .clr-nav-user-head{
-  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
   border-bottom: 1px solid var(--line, #E5E5E0);
 }
+.clr-nav-user-head .clr-avatar, .clr-nav-user-head .clr-avatar-img,
+.clr-nav-user-head .clr-avatar-fallback{ width: 38px; height: 38px; }
 .clr-nav-user-name{
-  font-size: 13px; font-weight: 500; color: var(--ink-900, #0A1F1C);
+  font: 600 14px var(--font-sans, sans-serif); color: var(--ink-900, #0A1F1C);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .clr-nav-user-email{
-  font: 11px var(--font-mono, monospace); color: var(--ink-600, #525B5A);
+  font: 400 12px var(--font-sans, sans-serif); color: var(--ink-600, #525B5A);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.clr-nav-user-menu button, .clr-nav-user-menu a{
-  background: none; border: none; text-align: left; font-size: 12.5px;
-  color: var(--ink-900, #0A1F1C); padding: 9px 14px; cursor: pointer;
-  text-decoration: none; display: block;
+.clr-nav-user-list{ display: flex; flex-direction: column; padding: 4px 6px; }
+.clr-nav-user-list + .clr-nav-user-list{ border-top: 1px solid var(--line, #E5E5E0); }
+.clr-nav-user-group{
+  font: 600 10.5px var(--font-sans, sans-serif); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-600, #525B5A); padding: 8px 12px 2px;
 }
-.clr-nav-user-menu button:hover, .clr-nav-user-menu a:hover{ background: var(--bg, #FAFAF7); }
-.clr-nav-user-sep{ border-top: 1px solid var(--line, #E5E5E0); margin: 4px 0; }
+.clr-nav-user-menu button, .clr-nav-user-menu a{
+  background: none; border: none; text-align: left;
+  font: 500 14px var(--font-sans, sans-serif);
+  color: var(--ink-900, #0A1F1C); padding: 10px 12px; cursor: pointer;
+  text-decoration: none; display: flex; align-items: center; justify-content: space-between;
+  width: 100%; border-radius: 8px; box-sizing: border-box;
+}
+.clr-nav-user-menu button:hover, .clr-nav-user-menu a:hover,
+.clr-nav-user-menu button:focus-visible, .clr-nav-user-menu a:focus-visible{ background: rgba(3,105,161,.08); outline: none; }
+.clr-nav-user-menu a[aria-current="page"]{ color: var(--accent, #0369A1); background: rgba(3,105,161,.08); }
+.clr-nav-user-new{
+  font: 600 10.5px var(--font-sans, sans-serif); color: #fff; background: var(--accent-fill, #0369A1);
+  border-radius: 999px; padding: 2px 8px;
+}
+.clr-nav-user-sep{ border-top: 1px solid var(--line, #E5E5E0); }
+.clr-nav-user-foot{ padding: 6px; }
+.clr-nav-user-foot form{ margin: 0; }
+.clr-nav-user-foot button{ color: var(--danger, #B91C1C); }
+/* En la portada y la ficha la barra es oscura: el menú hace juego. */
+.clr-nav--oscuro .clr-nav-user-menu{
+  background: #0b1b2b; border-color: rgba(140,190,225,.2);
+  box-shadow: 0 18px 40px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(76,201,255,.06);
+}
+.clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-head,
+.clr-nav--oscuro .clr-nav-user-list + .clr-nav-user-list{ border-color: rgba(140,190,225,.14); }
+.clr-nav--oscuro .clr-nav-user-group{ color: #8fa6ba; }
+.clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-sep{ border-color: rgba(140,190,225,.14); }
+.clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-name{ color: #f3f8fc; }
+.clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-email{ color: #9fb4c6; }
+.clr-nav--oscuro .clr-nav-user-menu a, .clr-nav--oscuro .clr-nav-user-menu button{ color: #dbe7f1; }
+.clr-nav--oscuro .clr-nav-user-menu a:hover, .clr-nav--oscuro .clr-nav-user-menu button:hover,
+.clr-nav--oscuro .clr-nav-user-menu a:focus-visible, .clr-nav--oscuro .clr-nav-user-menu button:focus-visible{ background: rgba(255,255,255,.07); color: #fff; }
+.clr-nav--oscuro .clr-nav-user-menu a[aria-current="page"]{ color: #4cc9ff; background: rgba(76,201,255,.12); }
+.clr-nav--oscuro .clr-nav-user-foot button{ color: #ff9b9b; }
+.clr-nav--oscuro .clr-nav-user-new{ color: #061423; background: #4cc9ff; }
 /* ── Tema oscuro de la portada ────────────────────────────────────────────
    En "/" la barra se apoya sobre el hero, que es azul noche: una franja crema
    encima lo partía en dos webs pegadas. Solo ahí: el resto del producto (la
@@ -270,14 +334,43 @@ function CoteGlyph() {
 
 function UserMenu({ user, hasNewMatches }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const path = usePathname();
+
+  // Se cierra al navegar, con clic fuera y con Escape (devolviendo el foco al
+  // botón): antes solo cerraba al volver a pulsar el avatar, así que se
+  // quedaba abierto tapando la página.
+  useEffect(() => {
+    setOpen(false);
+  }, [path]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const fuera = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const tecla = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        ref.current?.querySelector(".clr-nav-user-btn")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", fuera);
+    document.addEventListener("keydown", tecla);
+    return () => {
+      document.removeEventListener("pointerdown", fuera);
+      document.removeEventListener("keydown", tecla);
+    };
+  }, [open]);
 
   return (
-    <div className="clr-nav-user">
+    <div className="clr-nav-user" ref={ref}>
       <button
         type="button"
         className="clr-nav-user-btn"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
+        aria-haspopup="true"
         aria-label="Menú de cuenta"
       >
         <Avatar user={user} withDot hasNew={hasNewMatches} />
@@ -291,19 +384,36 @@ function UserMenu({ user, hasNewMatches }) {
               <div className="clr-nav-user-email">{user.email}</div>
             </div>
           </div>
-          {ACCOUNT_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
-              {item.label}
-            </Link>
+          {GRUPOS_CUENTA.map((g) => (
+            <div className="clr-nav-user-list" role="group" aria-label={g.titulo} key={g.titulo}>
+              <div className="clr-nav-user-group" aria-hidden="true">
+                {g.titulo}
+              </div>
+              {g.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  {...(path.startsWith(item.href) ? { "aria-current": "page" } : {})}
+                >
+                  {item.label}
+                  {hasNewMatches && item.href === "/mis-coincidencias" && (
+                    <span className="clr-nav-user-new">Nuevas</span>
+                  )}
+                </Link>
+              ))}
+            </div>
           ))}
           <div className="clr-nav-user-sep" aria-hidden="true" />
           {/* Sin cerrar el dropdown al enviar: el submit navega fuera de la
               página (redirect a /), y cerrarlo acá desmontaría el <form> a
               mitad del envío ("Form submission canceled because the form is
               not connected"). FormCerrarSesion solo borra el perfil local. */}
-          <FormCerrarSesion>
-            <button type="submit">Cerrar sesión</button>
-          </FormCerrarSesion>
+          <div className="clr-nav-user-foot">
+            <FormCerrarSesion>
+              <button type="submit">Cerrar sesión</button>
+            </FormCerrarSesion>
+          </div>
         </div>
       )}
     </div>
