@@ -30,10 +30,41 @@ const NAV_ITEMS = NAV_PRINCIPAL.map((id) => {
 // Los ids salen de MENU_CUENTA (seccionesHome.js): era la tercera lista de
 // navegación escrita a mano en este archivo, y la única que enlazaba rutas que
 // el catálogo no conocía.
-const ACCOUNT_ITEMS = MENU_CUENTA.map((id) => ({
-  href: ruta(id).href,
-  label: NOMBRE_POR_ID[id],
-}));
+// El menú se agrupa por lo que la persona hace hoy en el sitio, no por el
+// orden en que se fueron creando las páginas: seguir procesos (guardados,
+// coincidencias con su perfil, filtros), prepararse (perfil RUP y diagnóstico)
+// y la cuenta (alertas). `label` cambia el nombre solo aquí; el catálogo
+// (NOMBRE_POR_ID) lo siguen usando el pie y /precios.
+const GRUPOS_CUENTA = [
+  {
+    titulo: "Seguimiento",
+    items: [
+      { id: "mis-procesos" },
+      { id: "coincidencias" },
+      { id: "filtros" },
+    ],
+  },
+  {
+    titulo: "Preparación",
+    items: [
+      { id: "perfil" },
+      { id: "diagnostico-historial", label: "Mi diagnóstico" },
+    ],
+  },
+  {
+    titulo: "Cuenta",
+    items: [{ id: "alertas", label: "Alertas y cuenta" }],
+  },
+]
+  .map((g) => ({
+    ...g,
+    items: g.items
+      .filter((i) => MENU_CUENTA.includes(i.id))
+      .map((i) => ({ href: ruta(i.id).href, label: i.label || NOMBRE_POR_ID[i.id] })),
+  }))
+  .filter((g) => g.items.length > 0);
+
+const ACCOUNT_ITEMS = GRUPOS_CUENTA.flatMap((g) => g.items);
 
 // El único destino que la portada persigue. Por debajo de 1024px el navbar
 // esconde toda la navegación en la hamburguesa; dejar "Fichas de procesos" fuera
@@ -134,7 +165,12 @@ const AUTH_CSS = `
   font: 400 12px var(--font-sans, sans-serif); color: var(--ink-600, #525B5A);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.clr-nav-user-list{ display: flex; flex-direction: column; padding: 6px; }
+.clr-nav-user-list{ display: flex; flex-direction: column; padding: 4px 6px; }
+.clr-nav-user-list + .clr-nav-user-list{ border-top: 1px solid var(--line, #E5E5E0); }
+.clr-nav-user-group{
+  font: 600 10.5px var(--font-sans, sans-serif); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-600, #525B5A); padding: 8px 12px 2px;
+}
 .clr-nav-user-menu button, .clr-nav-user-menu a{
   background: none; border: none; text-align: left;
   font: 500 14px var(--font-sans, sans-serif);
@@ -159,6 +195,8 @@ const AUTH_CSS = `
   box-shadow: 0 18px 40px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(76,201,255,.06);
 }
 .clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-head,
+.clr-nav--oscuro .clr-nav-user-list + .clr-nav-user-list{ border-color: rgba(140,190,225,.14); }
+.clr-nav--oscuro .clr-nav-user-group{ color: #8fa6ba; }
 .clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-sep{ border-color: rgba(140,190,225,.14); }
 .clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-name{ color: #f3f8fc; }
 .clr-nav--oscuro .clr-nav-user-menu .clr-nav-user-email{ color: #9fb4c6; }
@@ -353,21 +391,26 @@ function UserMenu({ user, hasNewMatches }) {
               <div className="clr-nav-user-email">{user.email}</div>
             </div>
           </div>
-          <div className="clr-nav-user-list">
-            {ACCOUNT_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                {...(path.startsWith(item.href) ? { "aria-current": "page" } : {})}
-              >
-                {item.label}
-                {hasNewMatches && item.href === "/mis-coincidencias" && (
-                  <span className="clr-nav-user-new">Nuevas</span>
-                )}
-              </Link>
-            ))}
-          </div>
+          {GRUPOS_CUENTA.map((g) => (
+            <div className="clr-nav-user-list" role="group" aria-label={g.titulo} key={g.titulo}>
+              <div className="clr-nav-user-group" aria-hidden="true">
+                {g.titulo}
+              </div>
+              {g.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  {...(path.startsWith(item.href) ? { "aria-current": "page" } : {})}
+                >
+                  {item.label}
+                  {hasNewMatches && item.href === "/mis-coincidencias" && (
+                    <span className="clr-nav-user-new">Nuevas</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          ))}
           <div className="clr-nav-user-sep" aria-hidden="true" />
           {/* Sin cerrar el dropdown al enviar: el submit navega fuera de la
               página (redirect a /), y cerrarlo acá desmontaría el <form> a
