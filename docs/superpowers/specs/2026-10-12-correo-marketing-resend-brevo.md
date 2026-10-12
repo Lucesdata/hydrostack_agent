@@ -37,10 +37,10 @@ desproporcionada para este volumen.
 
 Seguir `docs/runbook-correo-y-alertas.md`. Resumen:
 
-1. Tener un dominio (p. ej. `aqualicita.co`). Es el único costo posible.
+1. Tener un dominio (p. ej. `aqualicita.com`). Es el único costo posible.
 2. En Resend: añadir el dominio y publicar sus registros DNS (SPF, DKIM) y un
    **DMARC** (`v=DMARC1; p=none; rua=mailto:...` para empezar).
-3. Variables en Vercel: `EMAIL_FROM="AquaLicita <alertas@aqualicita.co>"`,
+3. Variables en Vercel: `EMAIL_FROM="AquaLicita <alertas@aqualicita.com>"`,
    `EMAIL_REPLY_TO` a un buzón real.
 4. Supabase Auth → SMTP personalizado con las credenciales SMTP de Resend, para
    que el registro y la recuperación dejen de depender del correo integrado
@@ -58,7 +58,7 @@ Código relacionado y fuera de esta spec: falta el flujo «olvidé mi contraseñ
 1. Crear cuenta en Brevo; **autenticar el mismo dominio** (DKIM propio de Brevo,
    sin tocar el de Resend: los dos conviven con selectores distintos).
 2. Remitente de marketing distinto del transaccional:
-   `novedades@aqualicita.co`. Así una queja de marketing no daña la reputación
+   `novedades@aqualicita.com`. Así una queja de marketing no daña la reputación
    de las alertas.
 3. Crear la lista **«Beta AquaLicita»** y 2–3 plantillas en el editor de Brevo:
    bienvenida, novedades del producto, aviso a la beta.
@@ -158,9 +158,26 @@ la app, correo masivo a usuarios sin consentimiento.
 | 2 | Código (PR aparte) | Casilla de consentimiento, registro, script de exportación, `/privacy` |
 | 3 | Código, cuando haya audiencia | Sincronización por API |
 
+## 8bis. Estado real del DNS y Vercel (verificado el 2026-10-12)
+
+El dominio es **`aqualicita.com`** (DNS en Vercel; el `.co` de versiones previas
+de esta spec era un error de escritura). La Fase 0 está avanzada:
+
+- Resend ya tiene **dos subdominios** con MX, SPF y DKIM publicados:
+  `alertas.aqualicita.com` (digest) y `cuenta.aqualicita.com` (correo de
+  cuenta). Falta comprobar en el panel de Resend que ambos estén «Verified».
+- `_dmarc` existe en la raíz con `v=DMARC1; p=none;` y **sin `rua`**: no llegan
+  reportes. Añadirlo cuando haya un buzón que reciba.
+- El proyecto Vercel `aqualicita` ya tiene `EMAIL_FROM` y `AUTH_RESEND_KEY`
+  (producción). No existe `EMAIL_REPLY_TO`: falta un buzón que reciba (el dominio
+  no tiene MX en la raíz).
+- **Brevo: sin registros.** Recomendado autenticar un subdominio propio, p. ej.
+  `novedades.aqualicita.com`, para no mezclar reputación con las alertas. Los
+  registros salen del panel de Brevo; no se pueden inventar.
+
 ## 9. Decisiones cerradas (2026-10-12)
 
-1. El dueño **ya tiene dominio** (falta solo verificarlo en Resend y Brevo, Fases 0–1).
+1. El dominio es `aqualicita.com`, ya en Resend (ver 8bis); falta Brevo.
 2. Consentimiento con el **camino A, sin migración**: filas `consentimiento:marketing:v1:alta|baja` en `senal_usuario`.
 3. Existe `/privacy`; se le añadió el fin «novedades por correo» y Brevo como encargado.
 
