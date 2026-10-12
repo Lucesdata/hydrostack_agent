@@ -1,7 +1,12 @@
 # Plan: recuperación de contraseña (2026-10-12)
 
-Estado: **plan para aprobación. Sin código.** Toca autenticación, así que por
-`docs/CONDUCTA.md` §4 necesita plan aprobado antes de implementarse.
+Estado: **aprobado por el propietario el 2026-10-12, sin código todavía.** Toca
+autenticación, así que por `docs/CONDUCTA.md` §4 necesitaba plan aprobado antes de
+implementarse. Decisiones cerradas: **D1 A** (PKCE, mismo navegador), **D2** permitir
+a las cuentas de Google, **D3 A** (cookie de recuperación de 15 minutos), **D4**
+seguir con la sesión y cerrar las otras, **D5** se verifica en la prueba real. Antes
+de implementar faltan dos pasos del propietario: pegar la plantilla «Reset password»
+en español en Supabase y confirmar la lista blanca de redirecciones.
 
 ## Qué se quiere (sin tecnología)
 
@@ -46,7 +51,7 @@ Reutiliza el mismo mecanismo que el alta, así que el flujo se parece al que ya 
 `PENDIENTES.md` §59 (cerrar), runbook de correo y `CLAUDE.md` (una nota). **Sin dependencias, sin
 migraciones, sin tablas ni variables nuevas.**
 
-## Decisiones que necesito de ti
+## Decisiones (cerradas el 2026-10-12)
 
 - **D1. Cómo se abre el enlace.** *A (recomendada):* PKCE como el alta — el enlace solo funciona en el **mismo navegador** donde se pidió. *B:* enlace con `token_hash` y una ruta nueva `/auth/confirmar` (más una plantilla distinta): funciona desde **otro dispositivo** y en el navegador interno de la app de correo del celular, pero añade una ruta y cambia el callback. Con A, quien abre el correo desde el móvil en otro navegador verá «enlace inválido» y tendrá que pedir otro. Empezar por A y pasar a B si molesta.
 - **D2. Cuentas creadas solo con Google.** Pueden pedir recuperación y, al elegir contraseña, quedan con las dos formas de entrar. *Recomendado: permitirlo* (el correo ya está verificado por Google).
