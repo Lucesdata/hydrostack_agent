@@ -103,6 +103,16 @@ Evidencia y punto de
 continuación en
 `docs/superpowers/plans/2026-10-04-buscador-guiado-seccion-1-traspaso.md`.
 
+**Correo de marketing (2026-10-12, rama `claude/aqualicita-email-automation-7veibl`).**
+Resend sigue siendo el correo transaccional; las novedades/campañas van por
+**Brevo gratis** (beta de 15–20 usuarios), sin editor ni motor propios. El
+consentimiento vive en `senal_usuario` (`consentimiento:marketing:v1:alta|baja`,
+sin migración; excluir de análisis de intención) y se exporta con
+`npm run correo:exportar-marketing` solo para cuentas con correo verificado. La
+casilla va desmarcada y es independiente de las alertas. Fases 0–1 (dominio,
+DNS, SMTP de Auth, panel de Brevo) son configuración del dueño. Spec:
+`docs/superpowers/specs/2026-10-12-correo-marketing-resend-brevo.md`.
+
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
 pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto

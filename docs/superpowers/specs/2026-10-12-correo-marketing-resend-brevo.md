@@ -1,6 +1,6 @@
 # Correo propio + marketing con Resend y Brevo (beta de 15–20 usuarios)
 
-**Fecha:** 2026-10-12 · **Estado:** spec para revisión, sin código.
+**Fecha:** 2026-10-12 · **Estado:** decisiones cerradas; Fase 2 implementada en la rama `claude/aqualicita-email-automation-7veibl` (Fases 0 y 1 son configuración del dueño).
 **Pedido:** correo con dominio propio, plantillas de email marketing, envío de
 campañas y automatizaciones, para probar el sitio en beta con 15–20 usuarios
 como máximo. **Costo objetivo: 0 USD** (solo el dominio, si no existe ya).
@@ -158,9 +158,16 @@ la app, correo masivo a usuarios sin consentimiento.
 | 2 | Código (PR aparte) | Casilla de consentimiento, registro, script de exportación, `/privacy` |
 | 3 | Código, cuando haya audiencia | Sincronización por API |
 
-## 9. Decisiones que necesito del usuario
+## 9. Decisiones cerradas (2026-10-12)
 
-1. ¿Existe ya un dominio? ¿Cuál?
-2. ¿Hay política de tratamiento de datos (§18) o seguimos solo con
-   consentimiento escrito manual en la beta?
-3. Fase 2 con camino A (sin migración) o esperar al B.
+1. El dueño **ya tiene dominio** (falta solo verificarlo en Resend y Brevo, Fases 0–1).
+2. Consentimiento con el **camino A, sin migración**: filas `consentimiento:marketing:v1:alta|baja` en `senal_usuario`.
+3. Existe `/privacy`; se le añadió el fin «novedades por correo» y Brevo como encargado.
+
+## 10. Implementado (Fase 2)
+
+- `src/lib/marketing/consentimiento.ts`: estado vigente = última fila (empate: baja), `registrarConsentimiento` (transacción por cuenta, sin repeticiones), `contactosConsentidos()` (solo alta vigente **y correo verificado**), `contactosACsv()` (neutraliza fórmulas).
+- Casilla desmarcada en `/registro` (`signUpAction`; un fallo no rompe el alta) e interruptor en `/cuenta`. Quien entra con Google lo activa en `/cuenta`.
+- `npm run correo:exportar-marketing > contactos.csv` para importar en Brevo.
+- Pruebas: `src/__tests__/lib/marketing-consentimiento{,.db}.test.ts` (PGlite con las migraciones reales).
+- Sin migraciones, sin dependencias, sin claves nuevas.

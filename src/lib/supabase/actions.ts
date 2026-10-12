@@ -6,6 +6,7 @@ import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
 import { authErrorCode } from "@/src/lib/supabase/auth-messages";
 import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
 import { appUrl } from "@/src/lib/app-url";
+import { registrarConsentimiento } from "@/src/lib/marketing/consentimiento";
 
 /**
  * Destino del enlace que Supabase pone en el correo. Lo comparten el alta y el
@@ -79,6 +80,15 @@ export async function signUpAction(formData: FormData): Promise<void> {
 
   if (data.user) {
     await syncUsuario(data.user);
+    // Casilla de novedades: desmarcada por defecto. Un fallo aquí no debe romper
+    // el alta; la persona puede activarla luego en /cuenta.
+    if (formData.get("marketing") === "on") {
+      try {
+        await registrarConsentimiento(data.user.id, true);
+      } catch (err) {
+        console.error("[signUpAction] No se registró el consentimiento de marketing:", err);
+      }
+    }
   }
 
   // El reclamo va DENTRO de la rama con sesión, y no antes, a propósito. Con
