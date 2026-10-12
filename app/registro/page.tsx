@@ -23,6 +23,7 @@ export default async function RegistroPage({
       figLabel="Fig. 06 — Registro"
       title="Crear cuenta"
       subtitle="Guarda tu perfil de oferente y recibe alertas de procesos."
+      titular="Deja de buscar a ciegas: sabe a qué procesos de agua puedes presentarte."
     >
       {error && <p className="clr-auth-msg clr-auth-msg--error">{error}</p>}
 
