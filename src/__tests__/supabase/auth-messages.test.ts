@@ -55,7 +55,13 @@ describe("authErrorCode", () => {
   });
 
   it("los códigos y avisos de la recuperación tienen texto propio", () => {
-    for (const c of ["link_invalid", "password_mismatch", "same_password", "email_required", "reset_error"]) {
+    for (const c of [
+      "link_invalid",
+      "password_mismatch",
+      "same_password",
+      "email_required",
+      "reset_error",
+    ]) {
       expect(authErrorMessage(c)).not.toBe("Ocurrió un error. Intenta de nuevo.");
     }
     expect(authNoticeMessage("reset_sent")).toMatch(/si ese correo tiene cuenta/i);

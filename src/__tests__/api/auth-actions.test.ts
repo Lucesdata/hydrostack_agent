@@ -185,7 +185,9 @@ describe("requestPasswordResetAction", () => {
 
   it("pide el enlace de vuelta por /auth/callback hacia /restablecer", async () => {
     mockReset.mockResolvedValue({ error: null });
-    await correr(() => requestPasswordResetAction(form({ email: "a@b.com", next: "/mis-procesos" })));
+    await correr(() =>
+      requestPasswordResetAction(form({ email: "a@b.com", next: "/mis-procesos" }))
+    );
 
     const opts = mockReset.mock.calls[0][1];
     expect(opts.redirectTo).toContain("/auth/callback?next=");
