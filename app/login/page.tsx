@@ -77,6 +77,10 @@ export default async function LoginPage({
       <div className="clr-auth-divider">o</div>
       <GoogleButton next={next} />
 
+      <p className="clr-auth-foot">
+        <Link href={`/recuperar?next=${encodeURIComponent(next)}`}>¿Olvidaste tu contraseña?</Link>
+      </p>
+
       {mostrarReenvio && <ResendConfirmation next={next} />}
 
       <p className="clr-auth-foot">

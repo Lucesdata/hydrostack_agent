@@ -48,6 +48,20 @@ describe("authErrorCode", () => {
     expect(authErrorMessage("rate_limit")).toMatch(/ya te registraste/i);
   });
 
+  it("reconoce la misma contraseña de antes", () => {
+    expect(
+      authErrorCode("New password should be different from the old password.", "reset_error")
+    ).toBe("same_password");
+  });
+
+  it("los códigos y avisos de la recuperación tienen texto propio", () => {
+    for (const c of ["link_invalid", "password_mismatch", "same_password", "email_required", "reset_error"]) {
+      expect(authErrorMessage(c)).not.toBe("Ocurrió un error. Intenta de nuevo.");
+    }
+    expect(authNoticeMessage("reset_sent")).toMatch(/si ese correo tiene cuenta/i);
+    expect(authNoticeMessage("password_updated")).toMatch(/actualizada/i);
+  });
+
   it("reconoce el correo ya registrado", () => {
     expect(authErrorCode("User already registered", "signup_error")).toBe("email_exists");
   });

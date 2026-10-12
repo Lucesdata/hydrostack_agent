@@ -27,6 +27,7 @@ const CODIGO_POR_MENSAJE: ReadonlyArray<readonly [RegExp, string]> = [
   [/already registered/i, "email_exists"],
   [/email not confirmed/i, "email_not_confirmed"],
   [/invalid login credentials/i, "invalid_credentials"],
+  [/different from the old password/i, "same_password"],
   [/password should be at least/i, "weak_password"],
 ];
 
@@ -57,10 +58,21 @@ const ERROR_MESSAGES: Record<string, string> = {
   email_delivery_failed:
     "No pudimos enviarte el correo de verificación — es una falla de nuestro servidor de correo, no tuya. Tu cuenta quedó creada: entra con Google o escríbenos para activarla.",
   signup_error: "No pudimos crear la cuenta. Intenta de nuevo.",
+  // Recuperación de contraseña.
+  link_invalid:
+    "El enlace no es válido o ya venció. Pide uno nuevo: sirve una sola vez y solo en el mismo navegador donde lo pediste.",
+  password_mismatch: "Las dos contraseñas no coinciden.",
+  same_password: "Elige una contraseña distinta de la anterior.",
+  email_required: "Escribe el correo de tu cuenta.",
+  reset_error: "No pudimos cambiar la contraseña. Pide un enlace nuevo e inténtalo de nuevo.",
 };
 
 const NOTICE_MESSAGES: Record<string, string> = {
   check_email: "Cuenta creada — revisa tu correo para verificarla antes de ingresar.",
+  // Misma respuesta exista o no la cuenta: no revela qué correos están registrados.
+  reset_sent:
+    "Si ese correo tiene cuenta, te enviamos un enlace para elegir una contraseña nueva. Revisa tu bandeja y la carpeta de spam.",
+  password_updated: "Contraseña actualizada. Ya puedes seguir en AquaLicita.",
   confirmation_resent:
     "Te reenviamos el correo de verificación — revisa tu bandeja de entrada y la carpeta de spam.",
 };
