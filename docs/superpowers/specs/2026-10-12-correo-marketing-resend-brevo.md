@@ -201,7 +201,9 @@ una herramienta, un dominio, una reputación. Consecuencias:
 (correos entregados); SPF/DKIM/DMARC en PASS en un correo de cuenta; webhook en
 `https://aqualicita.com/api/webhooks/resend` (un solo endpoint, sin eventos aún en
 la URL nueva); plantillas «Confirm sign up» y «Reset password» en español en
-Supabase; clave `supabase-smtp` sin uso borrada. Pendiente: primer evento del
+Supabase; clave `supabase-smtp` sin uso borrada. `novedades.aqualicita.com` en *Verified* (2 CNAME `rsend.`/`send.` + TXT DKIM
+`resend._domainkey.novedades` en la zona de Vercel; MX de recepción omitido a
+propósito). Pendiente: primer evento del
 webhook, `EMAIL_REPLY_TO` (falta buzón), `rua` de DMARC.
 
 ## 9. Decisiones cerradas (2026-10-12)
