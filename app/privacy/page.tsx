@@ -160,11 +160,8 @@ export default function PrivacyPage() {
           <strong>Vercel</strong> — alojamiento de la aplicación y métricas de navegación.
         </li>
         <li>
-          <strong>Resend</strong> — envío de los correos de alerta y de verificación de cuenta.
-        </li>
-        <li>
-          <strong>Brevo</strong> — envío de las novedades, solo a quienes aceptaron recibirlas
-          (nombre y correo).
+          <strong>Resend</strong> — envío de los correos de alerta, de verificación de cuenta y,
+          solo a quienes lo aceptaron, de las novedades.
         </li>
         <li>
           <strong>Google</strong> — inicio de sesión con Google (si eliges esa vía) y el modelo

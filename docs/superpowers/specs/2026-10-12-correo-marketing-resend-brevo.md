@@ -175,6 +175,35 @@ de esta spec era un error de escritura). La Fase 0 está avanzada:
   `novedades.aqualicita.com`, para no mezclar reputación con las alertas. Los
   registros salen del panel de Brevo; no se pueden inventar.
 
+## 8ter. Decisión revisada (2026-10-12, tras la Fase 0): solo Resend, sin Brevo
+
+El plan **Free de Resend** (verificado en su panel) trae 3.000 correos/mes,
+100/día y 1.000 contactos, con **Broadcasts y Automations incluidos**. Para una
+beta de 15–20 usuarios alcanza para transaccional y marketing juntos (digest
+≤ 20 al día, correos de cuenta, un broadcast ocasional ≤ 20). Se descarta Brevo:
+una herramienta, un dominio, una reputación. Consecuencias:
+
+- Las Fases 1 y 3 pasan a Resend: plantillas en **Templates**, campañas en
+  **Broadcasts**, flujos en **Automations**, lista en **Audience**. El nombre de
+  esta spec conserva «Brevo» por historia.
+- El remitente de marketing conviene en un subdominio propio (p. ej.
+  `novedades.aqualicita.com`) para no mezclar reputación con las alertas; añadirlo
+  en Resend → Domains (3 registros en Vercel).
+- El tope de **100 correos/día** es compartido: revisar al pasar de ~80 usuarios
+  o antes de un broadcast grande.
+- `npm run correo:exportar-marketing` sigue valiendo: el CSV se importa en la
+  Audience de Resend. Las bajas se cruzan con los contactos dados de baja en Resend.
+- `/privacy` ya no nombra a Brevo; Resend cubre alertas, cuenta y novedades.
+
+### Fase 0 cerrada (verificado el 2026-10-12)
+
+`alertas.` y `cuenta.aqualicita.com` en *Verified*; SMTP de Supabase por Resend
+(correos entregados); SPF/DKIM/DMARC en PASS en un correo de cuenta; webhook en
+`https://aqualicita.com/api/webhooks/resend` (un solo endpoint, sin eventos aún en
+la URL nueva); plantillas «Confirm sign up» y «Reset password» en español en
+Supabase; clave `supabase-smtp` sin uso borrada. Pendiente: primer evento del
+webhook, `EMAIL_REPLY_TO` (falta buzón), `rua` de DMARC.
+
 ## 9. Decisiones cerradas (2026-10-12)
 
 1. El dominio es `aqualicita.com`, ya en Resend (ver 8bis); falta Brevo.
