@@ -18,6 +18,12 @@ const CODIGO_POR_MENSAJE: ReadonlyArray<readonly [RegExp, string]> = [
   [/email address not authorized/i, "email_delivery_failed"],
   [/error sending/i, "email_delivery_failed"],
   [/rate limit/i, "rate_limit"],
+  // GoTrue limita los envíos de correo por usuario (60 s por defecto) y lo dice
+  // así, sin la expresión "rate limit": «For security purposes, you can only
+  // request this after 57 seconds» (`over_email_send_rate_limit`). Caía al
+  // genérico «No pudimos crear la cuenta» aunque el primer envío sí la creó.
+  [/you can only request this after/i, "rate_limit"],
+  [/over_email_send_rate_limit/i, "rate_limit"],
   [/already registered/i, "email_exists"],
   [/email not confirmed/i, "email_not_confirmed"],
   [/invalid login credentials/i, "invalid_credentials"],
@@ -44,7 +50,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   email_exists: "Ese correo ya está registrado. Intenta iniciar sesión.",
   weak_password: "La contraseña debe tener al menos 8 caracteres.",
   oauth_error: "No pudimos conectar con Google. Intenta de nuevo.",
-  rate_limit: "Demasiados intentos. Intenta de nuevo en unos minutos.",
+  rate_limit:
+    "Espera un minuto antes de volver a intentarlo. Si ya te registraste, tu cuenta existe: revisa tu correo y la carpeta de spam.",
   // Sin "intenta de nuevo": el alta ya quedó registrada y reintentar solo
   // devuelve "ese correo ya está registrado". Lo que falla es nuestro envío.
   email_delivery_failed:

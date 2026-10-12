@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthCard } from "@/src/components/auth/AuthCard";
+import { BotonEnvio } from "@/src/components/auth/BotonEnvio";
 import { GoogleButton } from "@/src/components/auth/GoogleButton";
 import { signUpAction } from "@/src/lib/supabase/actions";
 import { authErrorMessage } from "@/src/lib/supabase/auth-messages";
@@ -70,9 +71,7 @@ export default async function RegistroPage({
             className="clr-auth-input"
           />
         </div>
-        <button type="submit" className="clr-auth-btn">
-          Crear cuenta
-        </button>
+        <BotonEnvio enviando="Creando cuenta…">Crear cuenta</BotonEnvio>
       </form>
 
       <div className="clr-auth-divider">o</div>

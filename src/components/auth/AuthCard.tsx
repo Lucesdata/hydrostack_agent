@@ -80,6 +80,7 @@ const AUTH_CSS = `
   padding: 11px 16px; cursor: pointer; margin-top: 4px;
 }
 .clr-auth-btn:hover{ opacity: .92; }
+.clr-auth-btn:disabled{ opacity: .6; cursor: wait; }
 .clr-auth-divider{
   display: flex; align-items: center; gap: 10px; margin: 20px 0;
   font: 12px var(--font-sans); color: var(--ink-300, #6B746F);
