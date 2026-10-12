@@ -892,3 +892,13 @@ listas en el navegador ni incorporar estado personal al ISR de la ficha.
 Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
 y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
 No se ha desplegado esta sección.
+
+## Registro territorial (2026-10-12)
+
+`/registro` usa la variante oscura de AuthCard con formulario primero en el DOM
+y vista territorial a su izquierda en escritorio. Reutiliza ColombiaChoropleth
+(SVG servidor), Minifichas y destacadosPortada cacheado 6 h bajo Suspense; sin
+datos se indica fallo/vacío y el alta sigue disponible. Selección manual de
+familia, sin rotación ni storage. Navbar usa su tema oscuro en esta ruta.
+Login y recuperación mantienen defaults; actions, validaciones, callback, RLS
+y sesiones no cambian. Spec y plan: `docs/superpowers/{specs,plans}/2026-10-12-registro-territorial.md`.

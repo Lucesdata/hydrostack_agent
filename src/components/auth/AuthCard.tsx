@@ -19,6 +19,8 @@ export function AuthCard({
   etiqueta = "Cuenta gratuita",
   titular = "Encuentra, entiende y gana procesos de agua en Colombia.",
   beneficios = BENEFICIOS_POR_DEFECTO,
+  visual,
+  variante,
   children,
 }: {
   figLabel: string;
@@ -27,43 +29,52 @@ export function AuthCard({
   etiqueta?: string;
   titular?: string;
   beneficios?: string[];
+  visual?: ReactNode;
+  variante?: "registro";
   children: ReactNode;
 }) {
+  const Contenedor = variante === "registro" ? "div" : "main";
+  const formulario = (
+    <section className="clr-auth-card">
+      <span className="clr-auth-fig-label">{figLabel}</span>
+      <h1 className="clr-auth-title">{title}</h1>
+      {subtitle && <p className="clr-auth-sub">{subtitle}</p>}
+      {children}
+    </section>
+  );
   return (
-    <main className="clr-auth">
+    <Contenedor className={`clr-auth${variante === "registro" ? " clr-auth--registro" : ""}`}>
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-auth-shell">
-        <aside className="clr-auth-brand" aria-label="Qué incluye tu cuenta">
-          <span className="clr-auth-pill">{etiqueta}</span>
-          <p className="clr-auth-headline">{titular}</p>
-          <ul className="clr-auth-benefits">
-            {beneficios.map((b) => (
-              <li key={b}>
-                <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-                  <circle cx="10" cy="10" r="10" fill="rgba(125,211,252,.18)" />
-                  <path
-                    d="M5.5 10.5l3 3 6-6.5"
-                    fill="none"
-                    stroke="#7dd3fc"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="clr-auth-source">Datos del SECOP II</p>
-        </aside>
-        <section className="clr-auth-card">
-          <span className="clr-auth-fig-label">{figLabel}</span>
-          <h1 className="clr-auth-title">{title}</h1>
-          {subtitle && <p className="clr-auth-sub">{subtitle}</p>}
-          {children}
-        </section>
+        {variante === "registro" && formulario}
+        {visual ?? (
+          <aside className="clr-auth-brand" aria-label="Qué incluye tu cuenta">
+            <span className="clr-auth-pill">{etiqueta}</span>
+            <p className="clr-auth-headline">{titular}</p>
+            <ul className="clr-auth-benefits">
+              {beneficios.map((b) => (
+                <li key={b}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                    <circle cx="10" cy="10" r="10" fill="rgba(125,211,252,.18)" />
+                    <path
+                      d="M5.5 10.5l3 3 6-6.5"
+                      fill="none"
+                      stroke="#7dd3fc"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="clr-auth-source">Datos del SECOP II</p>
+          </aside>
+        )}
+        {variante !== "registro" && formulario}
       </div>
-    </main>
+    </Contenedor>
   );
 }
 
