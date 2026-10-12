@@ -1169,7 +1169,7 @@ entorno del agente). Esperan: M11 (`scripts/sql/medir-espacio-ingesta.sql`), M12
 (esquema de cada conjunto, desde el navegador) y las decisiones D1–D5.
 
 
-### 59. No existe recuperación de contraseña (2026-10-12)
+### 59. Recuperación de contraseña (2026-10-12): implementada, falta validarla en vivo
 Al probar el correo de Auth el 2026-10-12 se vio que la app **no tiene flujo de
 «olvidé mi contraseña»**: no hay `resetPasswordForEmail` en
 `src/lib/supabase/actions.ts`, ni enlace en `/login`, ni pantalla para fijar la
@@ -1180,3 +1180,13 @@ un correo por minuto de Supabase (ver el código `rate_limit` de
 `auth-messages.ts`). Es una función nueva, con plan antes de implementarla
 (`docs/CONDUCTA.md` §4: toca auth). El criterio de aceptación «recuperación
 entregada y comprobada» del runbook de correo depende de esto.
+
+**Actualización (2026-10-12):** implementada según el plan aprobado (PR de la
+implementación): `/recuperar`, `/restablecer`, enlace en `/login`, cookie de 15
+minutos en `/auth/callback` y pruebas. **Falta la validación real**, que depende de
+dos pasos del propietario en Supabase: pegar la plantilla «Reset password» en español
+(`docs/supabase-plantillas-correo-es.md`) y confirmar que la lista de redirecciones
+admite `…/auth/callback?next=…`. Después: pedir recuperación con una cuenta de prueba,
+leer el correo (SPF/DKIM/DMARC y texto), abrir el enlace en el mismo navegador, elegir
+contraseña, entrar con ella; y repetir con un enlace usado y desde otro navegador.
+Sin verificar aún: qué hace Supabase al pedir recuperación con el correo sin confirmar.

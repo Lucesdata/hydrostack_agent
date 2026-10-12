@@ -20,9 +20,30 @@ vi.mock("next/navigation", () => ({ redirect: (d: string) => mockRedirect(d) }))
 
 const mockSignIn = vi.fn();
 const mockSignUp = vi.fn();
+const mockReset = vi.fn();
+const mockUpdateUser = vi.fn();
+const mockGetUser = vi.fn();
+const mockSignOut = vi.fn();
 vi.mock("@/src/lib/supabase/server", () => ({
   createClient: async () => ({
-    auth: { signInWithPassword: mockSignIn, signUp: mockSignUp },
+    auth: {
+      signInWithPassword: mockSignIn,
+      signUp: mockSignUp,
+      resetPasswordForEmail: mockReset,
+      updateUser: mockUpdateUser,
+      getUser: mockGetUser,
+      signOut: mockSignOut,
+    },
+  }),
+}));
+
+// Cookie de recuperación simulada: `hayCookie` decide si el jar la tiene.
+let hayCookie = true;
+const mockDelete = vi.fn();
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (n: string) => (hayCookie && n === "aq_recuperacion" ? { value: "1" } : undefined),
+    delete: (n: string) => mockDelete(n),
   }),
 }));
 
@@ -36,7 +57,12 @@ vi.mock("@/src/lib/diagnostico/reclamar", () => ({
   reclamarDiagnosticoAnonimo: (...a: unknown[]) => mockReclamar(...a),
 }));
 
-import { signInWithPasswordAction, signUpAction } from "@/src/lib/supabase/actions";
+import {
+  requestPasswordResetAction,
+  signInWithPasswordAction,
+  signUpAction,
+  updatePasswordAction,
+} from "@/src/lib/supabase/actions";
 
 const form = (campos: Record<string, string>) => {
   const fd = new FormData();
@@ -54,7 +80,10 @@ const correr = async (fn: () => Promise<void>) => {
   }
 };
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  hayCookie = true;
+});
 
 describe("signInWithPasswordAction", () => {
   it("tras entrar, reclama el diagnóstico anónimo", async () => {
@@ -140,5 +169,111 @@ describe("signUpAction", () => {
     );
     expect(mockReclamar).not.toHaveBeenCalled();
     expect(destino).toContain("error=email_exists");
+  });
+});
+
+describe("requestPasswordResetAction", () => {
+  it("responde lo mismo exista o no la cuenta", async () => {
+    mockReset.mockResolvedValue({ error: null });
+    const ok = await correr(() => requestPasswordResetAction(form({ email: "a@b.com" })));
+    mockReset.mockResolvedValue({ error: { message: "User not found" } });
+    const noExiste = await correr(() => requestPasswordResetAction(form({ email: "x@y.com" })));
+
+    expect(ok).toContain("notice=reset_sent");
+    expect(noExiste).toBe(ok);
+  });
+
+  it("pide el enlace de vuelta por /auth/callback hacia /restablecer", async () => {
+    mockReset.mockResolvedValue({ error: null });
+    await correr(() =>
+      requestPasswordResetAction(form({ email: "a@b.com", next: "/mis-procesos" }))
+    );
+
+    const opts = mockReset.mock.calls[0][1];
+    expect(opts.redirectTo).toContain("/auth/callback?next=");
+    // El callback decodifica una vez: lo que recibe como `next` es
+    // `/restablecer?next=%2Fmis-procesos`, y la página lee `next=/mis-procesos`.
+    const next = new URL(opts.redirectTo).searchParams.get("next");
+    expect(next).toBe("/restablecer?next=%2Fmis-procesos");
+    expect(new URL(next!, "https://aqualicita.com").searchParams.get("next")).toBe("/mis-procesos");
+  });
+
+  it("el límite de un correo por minuto se muestra aparte", async () => {
+    mockReset.mockResolvedValue({
+      error: { message: "For security purposes, you can only request this after 57 seconds." },
+    });
+    const destino = await correr(() => requestPasswordResetAction(form({ email: "a@b.com" })));
+    expect(destino).toContain("error=rate_limit");
+  });
+
+  it("sin correo no llama a Supabase", async () => {
+    const destino = await correr(() => requestPasswordResetAction(form({ email: "  " })));
+    expect(mockReset).not.toHaveBeenCalled();
+    expect(destino).toContain("error=email_required");
+  });
+
+  it("un next externo no se respeta (open redirect)", async () => {
+    mockReset.mockResolvedValue({ error: null });
+    const destino = await correr(() =>
+      requestPasswordResetAction(form({ email: "a@b.com", next: "//evil.com" }))
+    );
+    expect(destino).toContain("next=%2F&");
+  });
+});
+
+describe("updatePasswordAction", () => {
+  const datos = { password: "claveNueva1", confirmar: "claveNueva1", next: "/" };
+
+  it("sin la cookie del enlace no cambia nada, aunque haya sesión", async () => {
+    hayCookie = false;
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    const destino = await correr(() => updatePasswordAction(form(datos)));
+
+    expect(mockUpdateUser).not.toHaveBeenCalled();
+    expect(destino).toContain("error=link_invalid");
+  });
+
+  it("sin sesión no cambia nada, aunque haya cookie", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } });
+    const destino = await correr(() => updatePasswordAction(form(datos)));
+
+    expect(mockUpdateUser).not.toHaveBeenCalled();
+    expect(destino).toContain("error=link_invalid");
+  });
+
+  it("rechaza una contraseña corta o que no coincide", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    const corta = await correr(() =>
+      updatePasswordAction(form({ ...datos, password: "corta", confirmar: "corta" }))
+    );
+    const distinta = await correr(() =>
+      updatePasswordAction(form({ ...datos, confirmar: "otraClave99" }))
+    );
+
+    expect(corta).toContain("error=weak_password");
+    expect(distinta).toContain("error=password_mismatch");
+    expect(mockUpdateUser).not.toHaveBeenCalled();
+  });
+
+  it("cambia la contraseña, borra la cookie y cierra las otras sesiones", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockUpdateUser.mockResolvedValue({ error: null });
+    const destino = await correr(() => updatePasswordAction(form(datos)));
+
+    expect(mockUpdateUser).toHaveBeenCalledWith({ password: "claveNueva1" });
+    expect(mockDelete).toHaveBeenCalledWith("aq_recuperacion");
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: "others" });
+    expect(destino).toContain("notice=password_updated");
+  });
+
+  it("la misma contraseña de antes tiene mensaje propio", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockUpdateUser.mockResolvedValue({
+      error: { message: "New password should be different from the old password." },
+    });
+    const destino = await correr(() => updatePasswordAction(form(datos)));
+
+    expect(destino).toContain("error=same_password");
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });

@@ -287,6 +287,14 @@ Entidades y flujos principales:
 - Aparte de eso, la única defensa multi-tenant sigue siendo el `WHERE
   usuarioId=...` de cada query. Auditar manualmente cada query sobre tablas
   de cuentas/oferente antes de tocarlas.
+- **Recuperación de contraseña** (2026-10-12, plan
+  `docs/superpowers/plans/2026-10-12-recuperacion-contrasena.md`): `/recuperar` pide
+  el correo y responde lo mismo exista o no la cuenta; el enlace vuelve por
+  `/auth/callback?next=/restablecer`, que deja una cookie `httpOnly` de 15 minutos
+  (`src/lib/supabase/recuperacion.ts`) y `/restablecer` y `updatePasswordAction` la
+  exigen además de la sesión: una sesión abierta cualquiera no cambia la contraseña.
+  Tras el cambio se borra la cookie y se cierran las demás sesiones. Solo funciona en
+  el mismo navegador donde se pidió (PKCE, como el alta). Sin migraciones.
 - **Una cuenta borrada en Auth no le hereda nada a un alta nueva con el mismo
   correo** (`src/lib/supabase/sync-usuario.ts`, 2026-09-19). Borrarla en el
   dashboard de Supabase deja su fila en `usuario`; cuando el correo vuelve a

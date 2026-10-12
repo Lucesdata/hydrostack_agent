@@ -96,7 +96,7 @@ export async function contactosConsentidos(): Promise<ContactoMarketing[]> {
   return r.rows.map((x) => ({ email: x.email, nombre: x.name ?? "" }));
 }
 
-/** CSV para importar en Brevo. Neutraliza celdas que una hoja de cálculo evaluaría. */
+/** CSV para importar en la Audience de Resend. Neutraliza celdas que una hoja de cálculo evaluaría. */
 export function contactosACsv(contactos: ContactoMarketing[]): string {
   const celda = (v: string) => {
     const seguro = /^[=+\-@\t\r]/.test(v) ? "'" + v : v;
