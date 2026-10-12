@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthCard } from "@/src/components/auth/AuthCard";
+import { BotonEnvio } from "@/src/components/auth/BotonEnvio";
 import { GoogleButton } from "@/src/components/auth/GoogleButton";
 import { ResendConfirmation } from "@/src/components/auth/ResendConfirmation";
 import { signInWithPasswordAction } from "@/src/lib/supabase/actions";
@@ -35,6 +36,13 @@ export default async function LoginPage({
       figLabel="Fig. 05 — Acceso"
       title="Ingresar"
       subtitle="Entra a tu cuenta de AquaLicita."
+      etiqueta="Bienvenido de vuelta"
+      titular="Retoma tu búsqueda donde la dejaste."
+      beneficios={[
+        "Tus procesos guardados y recientes, en un solo lugar",
+        "Tu perfil de oferente listo para medir el encaje",
+        "Análisis de pliegos con tu cuenta gratuita",
+      ]}
     >
       {error && <p className="clr-auth-msg clr-auth-msg--error">{error}</p>}
       {notice && <p className="clr-auth-msg clr-auth-msg--notice">{notice}</p>}
@@ -69,9 +77,7 @@ export default async function LoginPage({
             className="clr-auth-input"
           />
         </div>
-        <button type="submit" className="clr-auth-btn">
-          Entrar
-        </button>
+        <BotonEnvio enviando="Entrando…">Entrar</BotonEnvio>
       </form>
 
       <div className="clr-auth-divider">o</div>
