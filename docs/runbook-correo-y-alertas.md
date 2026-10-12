@@ -803,3 +803,10 @@ primeros errores son de las 16:41, antes de activar el SMTP de Auth.
   como «Espera un minuto…» y el botón se desactiva mientras envía.
 - **Recuperación de contraseña: no existe en la app** (PENDIENTES §59), así que ese
   criterio de aceptación no puede cumplirse todavía.
+
+## Recuperación de contraseña: código listo, sin validar en vivo (12 de octubre de 2026)
+
+Implementada (`/recuperar`, `/restablecer`; PENDIENTES §59). **No validada de
+extremo a extremo**: antes hay que pegar la plantilla «Reset password» en español en
+Supabase y confirmar la lista de redirecciones (Authentication → URL Configuration).
+Reversión: revertir el PR; no hay datos ni esquema que deshacer.

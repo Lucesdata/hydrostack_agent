@@ -6,6 +6,8 @@ import { syncUsuario } from "@/src/lib/supabase/sync-usuario";
 import { authErrorCode } from "@/src/lib/supabase/auth-messages";
 import { reclamarDiagnosticoAnonimo } from "@/src/lib/diagnostico/reclamar";
 import { appUrl } from "@/src/lib/app-url";
+import { cookies } from "next/headers";
+import { COOKIE_RECUPERACION } from "@/src/lib/supabase/recuperacion";
 
 /**
  * Destino del enlace que Supabase pone en el correo. Lo comparten el alta y el
@@ -129,6 +131,71 @@ export async function resendConfirmationAction(formData: FormData): Promise<void
   // Supabase responde igual exista o no la cuenta, para no filtrar qué correos
   // están registrados. Mantenemos ese mismo aviso único.
   redirect(`${volver}&notice=confirmation_resent`);
+}
+
+/**
+ * Pide el correo de recuperación. La respuesta es SIEMPRE la misma —exista o no
+ * la cuenta— para no revelar qué correos están registrados; solo el límite de un
+ * correo por minuto de Supabase se muestra aparte, porque no depende de la cuenta.
+ * El enlace vuelve por /auth/callback con `next=/restablecer`, y el callback deja
+ * la cookie que exige `updatePasswordAction`.
+ */
+export async function requestPasswordResetAction(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") ?? "").trim();
+  const next = safeNext(formData.get("next"));
+  const volver = `/recuperar?next=${encodeURIComponent(next)}`;
+
+  if (!email) {
+    redirect(`${volver}&error=email_required`);
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: callbackUrl(`/restablecer?next=${encodeURIComponent(next)}`),
+  });
+
+  if (error) {
+    console.error("[requestPasswordResetAction] Supabase reset error:", error.message);
+    if (authErrorCode(error.message, "reset_error") === "rate_limit") {
+      redirect(`${volver}&error=rate_limit`);
+    }
+  }
+
+  redirect(`${volver}&notice=reset_sent`);
+}
+
+/**
+ * Fija la contraseña nueva. Exige DOS cosas: la cookie que deja /auth/callback
+ * al venir del enlace del correo y una sesión (la que ese mismo intercambio
+ * abrió). Sin la cookie, una sesión abierta cualquiera no puede cambiarla.
+ */
+export async function updatePasswordAction(formData: FormData): Promise<void> {
+  const password = String(formData.get("password") ?? "");
+  const confirmar = String(formData.get("confirmar") ?? "");
+  const next = safeNext(formData.get("next"));
+  const volver = `/restablecer?next=${encodeURIComponent(next)}`;
+
+  const jar = await cookies();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!jar.get(COOKIE_RECUPERACION) || !data?.user) {
+    redirect(`/recuperar?next=${encodeURIComponent(next)}&error=link_invalid`);
+  }
+
+  if (password.length < 8) redirect(`${volver}&error=weak_password`);
+  if (password !== confirmar) redirect(`${volver}&error=password_mismatch`);
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    console.error("[updatePasswordAction] Supabase update error:", error.message);
+    redirect(`${volver}&error=${authErrorCode(error.message, "reset_error")}`);
+  }
+
+  // Un solo uso: la cookie se borra y las demás sesiones de la cuenta se cierran.
+  jar.delete(COOKIE_RECUPERACION);
+  await supabase.auth.signOut({ scope: "others" });
+
+  redirect(`${volver}&notice=password_updated`);
 }
 
 export async function signInWithGoogleAction(formData: FormData): Promise<void> {
