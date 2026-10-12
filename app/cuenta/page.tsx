@@ -11,6 +11,15 @@ import FormCerrarSesion from "@/src/components/auth/FormCerrarSesion";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/src/lib/supabase/get-session-user";
 import { getPreferencias, savePreferencias } from "@/src/lib/alertas/preferencias-store";
+import { consentimientoVigente, registrarConsentimiento } from "@/src/lib/marketing/consentimiento";
+
+async function handleNovedades(formData: FormData) {
+  "use server";
+  const user = await getSessionUser();
+  if (!user) return;
+  await registrarConsentimiento(user.id, formData.get("novedades") === "on");
+  revalidatePath("/cuenta");
+}
 
 async function handleTogglePausa() {
   "use server";
@@ -35,6 +44,7 @@ async function handleGuardarHora(formData: FormData) {
 export default async function CuentaPage() {
   const user = await getSessionUser();
   const preferencias = user ? await getPreferencias(user.id) : null;
+  const novedades = user ? (await consentimientoVigente(user.id)) === "alta" : false;
 
   return (
     <main className="clr-cuenta">
@@ -85,6 +95,23 @@ export default async function CuentaPage() {
             Cerrar sesión
           </button>
         </FormCerrarSesion>
+        {user && (
+          <div className="clr-cuenta-prefs">
+            <p className="clr-cuenta-prefs-title">Novedades por correo</p>
+            <form action={handleNovedades} className="clr-cuenta-prefs-row">
+              <label className="clr-cuenta-prefs-status" htmlFor="novedades">
+                <input id="novedades" name="novedades" type="checkbox" defaultChecked={novedades} />{" "}
+                Quiero recibir novedades de AquaLicita
+              </label>
+              <button type="submit" className="clr-cuenta-btn-sm">
+                Guardar
+              </button>
+            </form>
+            <p className="clr-cuenta-prefs-note">
+              Es independiente de las alertas. Puedes retirarlo cuando quieras.
+            </p>
+          </div>
+        )}
         {preferencias && (
           <div className="clr-cuenta-prefs">
             <p className="clr-cuenta-prefs-title">Alertas por correo</p>

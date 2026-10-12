@@ -124,6 +124,11 @@ export default function PrivacyPage() {
           habilitantes.
         </li>
         <li>Enviarte las alertas que configuraste, y solo esas.</li>
+        <li>
+          Si marcas la casilla opcional, enviarte novedades de AquaLicita por correo. Es
+          independiente de las alertas y puedes retirarla en tu cuenta o con el enlace de baja de
+          cada correo.
+        </li>
         <li>Extraer los requisitos de los pliegos que subes.</li>
         <li>Operar, depurar y mejorar el producto, y medir qué funciones se usan.</li>
         <li>Cumplir obligaciones legales y atender requerimientos de autoridad competente.</li>
@@ -155,7 +160,8 @@ export default function PrivacyPage() {
           <strong>Vercel</strong> — alojamiento de la aplicación y métricas de navegación.
         </li>
         <li>
-          <strong>Resend</strong> — envío de los correos de alerta y de verificación de cuenta.
+          <strong>Resend</strong> — envío de los correos de alerta, de verificación de cuenta y,
+          solo a quienes lo aceptaron, de las novedades.
         </li>
         <li>
           <strong>Google</strong> — inicio de sesión con Google (si eliges esa vía) y el modelo

@@ -72,6 +72,12 @@ export default async function RegistroPage({
             className="clr-auth-input"
           />
         </div>
+        <div className="clr-auth-field">
+          <label htmlFor="marketing" style={{ display: "flex", gap: 8, fontSize: 13 }}>
+            <input id="marketing" name="marketing" type="checkbox" />
+            <span>Quiero recibir novedades de AquaLicita por correo (opcional).</span>
+          </label>
+        </div>
         <BotonEnvio enviando="Creando cuenta…">Crear cuenta</BotonEnvio>
       </form>
 
