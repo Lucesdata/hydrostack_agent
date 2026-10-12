@@ -57,15 +57,10 @@ export async function consentimientoVigente(usuarioId: string): Promise<EstadoCo
  * Registra el cambio solo si difiere del estado vigente (no engorda el
  * historial con repeticiones). Serializa por cuenta, como `mis-procesos/store`.
  */
-export async function registrarConsentimiento(
-  usuarioId: string,
-  aceptado: boolean
-): Promise<void> {
+export async function registrarConsentimiento(usuarioId: string, aceptado: boolean): Promise<void> {
   const senal = aceptado ? SENAL_ALTA : SENAL_BAJA;
   await db.transaction(async (tx) => {
-    const bloqueo = await tx.execute(
-      sql`SELECT id FROM usuario WHERE id=${usuarioId} FOR UPDATE`
-    );
+    const bloqueo = await tx.execute(sql`SELECT id FROM usuario WHERE id=${usuarioId} FOR UPDATE`);
     if (!bloqueo.rows.length) throw new Error("No se pudo verificar la cuenta.");
     const actual = estadoDesdeFilas(await filasDe(tx, usuarioId));
     if (actual === (aceptado ? "alta" : "baja")) return;
@@ -107,7 +102,8 @@ export function contactosACsv(contactos: ContactoMarketing[]): string {
     const seguro = /^[=+\-@\t\r]/.test(v) ? "'" + v : v;
     return /[",\n\r]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
   };
-  return ["email,nombre", ...contactos.map((c) => `${celda(c.email)},${celda(c.nombre)}`)].join(
+  return (
+    ["email,nombre", ...contactos.map((c) => `${celda(c.email)},${celda(c.nombre)}`)].join("\n") +
     "\n"
-  ) + "\n";
+  );
 }

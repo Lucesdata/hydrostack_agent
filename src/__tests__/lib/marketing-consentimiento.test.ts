@@ -41,8 +41,6 @@ describe("contactosACsv", () => {
       { email: "a@b.co", nombre: 'Ana "la" Pérez, S.A.' },
       { email: "c@d.co", nombre: "=HYPERLINK(1)" },
     ]);
-    expect(csv).toBe(
-      'email,nombre\na@b.co,"Ana ""la"" Pérez, S.A."\nc@d.co,\'=HYPERLINK(1)\n'
-    );
+    expect(csv).toBe('email,nombre\na@b.co,"Ana ""la"" Pérez, S.A."\nc@d.co,\'=HYPERLINK(1)\n');
   });
 });

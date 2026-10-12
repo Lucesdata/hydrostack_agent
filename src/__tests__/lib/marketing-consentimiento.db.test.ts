@@ -39,7 +39,8 @@ describe("consentimiento de marketing", () => {
     expect(await consentimientoVigente("m-nada")).toBe("sin_dato");
 
     const filas = await db.execute(
-      (await import("drizzle-orm")).sql`SELECT count(*)::int AS n FROM senal_usuario WHERE usuario_id='m-ok'`
+      (await import("drizzle-orm"))
+        .sql`SELECT count(*)::int AS n FROM senal_usuario WHERE usuario_id='m-ok'`
     );
     expect((filas.rows[0] as { n: number }).n).toBe(1);
 
