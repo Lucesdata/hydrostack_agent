@@ -1168,3 +1168,15 @@ documentos son conjuntos aparte, sin verificar (datos.gov.co bloqueado desde el
 entorno del agente). Esperan: M11 (`scripts/sql/medir-espacio-ingesta.sql`), M12
 (esquema de cada conjunto, desde el navegador) y las decisiones D1–D5.
 
+
+### 59. No existe recuperación de contraseña (2026-10-12)
+Al probar el correo de Auth el 2026-10-12 se vio que la app **no tiene flujo de
+«olvidé mi contraseña»**: no hay `resetPasswordForEmail` en
+`src/lib/supabase/actions.ts`, ni enlace en `/login`, ni pantalla para fijar la
+contraseña nueva. Quien la olvida solo puede entrar con Google. Hace falta: una
+acción que pida el correo, el enlace de recuperación por `/auth/callback` con
+`next` hacia una pantalla de contraseña nueva (`updateUser`) y el mismo límite de
+un correo por minuto de Supabase (ver el código `rate_limit` de
+`auth-messages.ts`). Es una función nueva, con plan antes de implementarla
+(`docs/CONDUCTA.md` §4: toca auth). El criterio de aceptación «recuperación
+entregada y comprobada» del runbook de correo depende de esto.

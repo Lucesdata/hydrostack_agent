@@ -790,3 +790,16 @@ primeros errores son de las 16:41, antes de activar el SMTP de Auth.
   Database. Si tras el despliegue siguen los timeouts, el cuello es la base
   (consultas pesadas sobre `proceso`) y no el pool.
 - **Reversión:** `DB_POOL_MAX=10` en Production y redesplegar, o revertir el commit.
+
+## Registro validado y límite de un correo por minuto (12 de octubre de 2026)
+
+- **Validado:** alta con `luces.data@gmail.com` el 12-oct 07:18 UTC → Supabase creó
+  la cuenta y envió la confirmación por el SMTP de Resend; el propietario recibió
+  el correo y confirmó. Registro y confirmación funcionan. SPF/DKIM/DMARC del
+  mensaje de Auth **no se revisaron en cabeceras**.
+- **El error visto** («No pudimos crear la cuenta») era de un segundo envío un
+  segundo después: `429 over_email_send_rate_limit` («solo puedes pedir esto cada
+  57 segundos»). La cuenta ya existía. Corregido en el código: ese 429 se muestra
+  como «Espera un minuto…» y el botón se desactiva mientras envía.
+- **Recuperación de contraseña: no existe en la app** (PENDIENTES §59), así que ese
+  criterio de aceptación no puede cumplirse todavía.

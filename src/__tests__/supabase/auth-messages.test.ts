@@ -33,6 +33,21 @@ describe("authErrorCode", () => {
     expect(authErrorCode("email rate limit exceeded", "signup_error")).toBe("rate_limit");
   });
 
+  it("reconoce el límite de un envío por usuario cada 60 s, que no dice «rate limit»", () => {
+    expect(
+      authErrorCode(
+        "For security purposes, you can only request this after 57 seconds.",
+        "signup_error"
+      )
+    ).toBe("rate_limit");
+    expect(authErrorCode("over_email_send_rate_limit", "signup_error")).toBe("rate_limit");
+  });
+
+  it("el aviso del límite dice que esperes y que la cuenta puede existir ya", () => {
+    expect(authErrorMessage("rate_limit")).toMatch(/espera/i);
+    expect(authErrorMessage("rate_limit")).toMatch(/ya te registraste/i);
+  });
+
   it("reconoce el correo ya registrado", () => {
     expect(authErrorCode("User already registered", "signup_error")).toBe("email_exists");
   });
