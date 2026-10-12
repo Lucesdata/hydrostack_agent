@@ -16,6 +16,7 @@ export function AuthCard({
   figLabel,
   title,
   subtitle,
+  etiqueta = "Cuenta gratuita",
   titular = "Encuentra, entiende y gana procesos de agua en Colombia.",
   beneficios = BENEFICIOS_POR_DEFECTO,
   children,
@@ -23,6 +24,7 @@ export function AuthCard({
   figLabel: string;
   title: string;
   subtitle?: string;
+  etiqueta?: string;
   titular?: string;
   beneficios?: string[];
   children: ReactNode;
@@ -32,7 +34,7 @@ export function AuthCard({
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-auth-shell">
         <aside className="clr-auth-brand" aria-label="Qué incluye tu cuenta">
-          <span className="clr-auth-pill">Cuenta gratuita</span>
+          <span className="clr-auth-pill">{etiqueta}</span>
           <p className="clr-auth-headline">{titular}</p>
           <ul className="clr-auth-benefits">
             {beneficios.map((b) => (
@@ -52,7 +54,7 @@ export function AuthCard({
               </li>
             ))}
           </ul>
-          <p className="clr-auth-source">Datos del SECOP II · Sin tarjeta de crédito</p>
+          <p className="clr-auth-source">Datos del SECOP II</p>
         </aside>
         <section className="clr-auth-card">
           <span className="clr-auth-fig-label">{figLabel}</span>
