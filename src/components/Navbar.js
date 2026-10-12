@@ -464,7 +464,8 @@ export default function Navbar() {
 
   const isActive = (item) => path.startsWith(item.route);
   // El hero de portada y la ficha comparten la superficie oscura.
-  const oscura = path === "/" || /^\/licitaciones\/[^/]*CO1\.[A-Z]+\.\d+$/i.test(path);
+  const oscura =
+    path === "/" || path === "/registro" || /^\/licitaciones\/[^/]*CO1\.[A-Z]+\.\d+$/i.test(path);
   const navAria = (active) => (active ? { "aria-current": "page" } : {});
 
   return (
