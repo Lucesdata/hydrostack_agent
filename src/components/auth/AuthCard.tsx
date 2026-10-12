@@ -39,7 +39,14 @@ export function AuthCard({
               <li key={b}>
                 <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
                   <circle cx="10" cy="10" r="10" fill="rgba(125,211,252,.18)" />
-                  <path d="M5.5 10.5l3 3 6-6.5" fill="none" stroke="#7dd3fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M5.5 10.5l3 3 6-6.5"
+                    fill="none"
+                    stroke="#7dd3fc"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 <span>{b}</span>
               </li>
