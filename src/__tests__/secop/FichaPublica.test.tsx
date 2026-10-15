@@ -119,7 +119,7 @@ describe("Ficha pública para explorar desde el celular", () => {
     const salida = await html();
     expect(salida).toContain("Reposición de redes según anexo técnico.");
     expect(salida).not.toMatch(/<section[^>]*hidden/);
-    expect(revalidate).toBe(43200);
+    expect(revalidate).toBe(259200);
     expect(await generateStaticParams()).toEqual([]);
   });
   it("distingue la ubicación de la entidad y no inventa ejecución, metas ni financiación", async () => {
