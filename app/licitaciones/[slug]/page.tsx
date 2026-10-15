@@ -40,7 +40,7 @@ import { montoConDato } from "@/src/lib/secop/monto";
 import { jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 
 // La navegación es local: misma URL pública, consultas y caché que la ficha anterior.
-export const revalidate = 43200;
+export const revalidate = 259200;
 export async function generateStaticParams() {
   return [];
 }

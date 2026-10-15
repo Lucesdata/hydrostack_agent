@@ -22,6 +22,11 @@ export default function robots(): MetadataRoute.Robots {
         "/diagnostico/historial",
         "/login",
         "/registro",
+        // Paginación profunda: ya va noindex y cada página rastreada es una
+        // escritura de ISR (límite del plan gratuito de Vercel).
+        "/licitaciones/pagina/",
+        "/licitaciones/*/pagina/",
+        "/licitaciones/adjudicados/pagina/",
       ],
     },
     sitemap: `${base}/sitemap.xml`,

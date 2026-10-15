@@ -11,7 +11,7 @@ import { procesosDeFaceta, resolverFaceta } from "@/src/lib/secop/facetas";
  * a demanda la primera vez y se cachean.
  */
 /** Misma ventana que la página 1 de su faceta. */
-export const revalidate = 21600;
+export const revalidate = 86400;
 
 type Props = { params: Promise<{ slug: string; n: string }> };
 

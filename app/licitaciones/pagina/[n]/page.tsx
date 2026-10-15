@@ -5,7 +5,7 @@ import { procesosPorDepartamento } from "@/src/lib/secop/agregados";
 import { detallesDeRadar } from "@/src/lib/secop/radar";
 import { hrefDeProceso } from "@/src/components/secop/lista/PaginaFaceta";
 
-export const revalidate = 21600;
+export const revalidate = 86400;
 
 /** Vacío a propósito: prerrenderizar ataría el build a la base de producción. */
 export function generateStaticParams() {

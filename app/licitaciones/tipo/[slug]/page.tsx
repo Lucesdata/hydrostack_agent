@@ -26,7 +26,7 @@ import { procesosPorTipo } from "@/src/lib/secop/agregados";
  * página y día. Si el cron llega a programarse de verdad, este número se puede
  * bajar; mientras tanto, bajarlo solo gasta.
  */
-export const revalidate = 21600;
+export const revalidate = 86400;
 
 /**
  * Vacío a propósito, y no es un olvido.
