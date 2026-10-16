@@ -115,6 +115,12 @@ DNS, SMTP de Auth) están hechas; las plantillas y campañas se arman en el pane
 de Resend. Spec:
 `docs/superpowers/specs/2026-10-12-correo-marketing-resend-brevo.md`.
 
+**Demo Biosfera (2026-10-16, `demos/biosfera-hero/`).** Hero interactivo con
+Three.js 0.160.1 (vendorizado) para otra marca, Biosfera: módulo estático
+autónomo, **no** forma parte de la app Next.js ni se despliega con ella (ver su
+`README.md`). Recorrido ilustrativo de un lote por una planta de tromel; la
+separación es «Visualización conceptual», pendiente de confirmar con Biosfera.
+
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
 pliegos, perfil de oferente/elegibilidad y alertas. Es el **único producto
