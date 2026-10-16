@@ -27,14 +27,23 @@ Es un sitio estático: sube la carpeta tal cual a cualquier hosting estático (V
 | `index.html` | Estructura y contenido de la página |
 | `css/styles.css` | Estilos neobrutalistas y adaptación responsive |
 | `js/data.js` | Datos: equipos, etapas, zonas, textos de documentos y modales |
-| `js/machinery.js` | Construcción de la planta (geometría simplificada) |
+| `js/machinery.js` | Planta de respaldo construida en código (geometría simplificada) |
+| `js/modelo.js` | Carga de un `.glb`, validación del contrato y adaptación; respaldo a la planta de código |
+| `js/config.js` | Ruta del modelo activo (`MODELO`) |
 | `js/lote.js` | Partículas del lote: tierra y fragmentos metálicos, trayectorias |
 | `js/journey.js` | Estado y línea de tiempo del recorrido (sin DOM ni Three) |
 | `js/scene.js` | Renderer, cámara, controles, resaltado, marcadores proyectados |
 | `js/ui.js` | Pasos, panel de equipo/zona, tarjeta del lote, documentos, modal |
 | `js/main.js` | Orquestación y bucle de animación |
-| `vendor/three/` | three **0.160.1** (+ `OrbitControls`, `RoomEnvironment`), con su licencia MIT |
+| `vendor/three/` | three **0.160.1** (+ `OrbitControls`, `RoomEnvironment`, `GLTFLoader`, `GLTFExporter`), con su licencia MIT |
+| `assets/` | Modelos `.glb` (`ejemplo-contrato.glb` es la plantilla) |
+| `herramientas/` | `exportar-contrato.html` regenera la plantilla `.glb` |
+| `docs/CONTRATO-MODELO.md` | Nombres de nodos y anclas que debe cumplir el modelo definitivo |
 | `fonts/` | Barlow Condensed y Inter (`@fontsource`, licencia OFL) |
+
+## Sustituir el modelo 3D
+
+La planta de código es provisional. Un modelo `.glb` externo la reemplaza sin tocar el resto si cumple los nombres de `docs/CONTRATO-MODELO.md`: probarlo con `?modelo=assets/planta.glb&debug` y, cuando esté bien, fijarlo en `js/config.js`. Si falta algo, la página vuelve a la planta de código e indica el motivo en consola.
 
 ## Cómo funciona el recorrido
 
@@ -60,7 +69,7 @@ Botones con nombre accesible y foco visible; pausa con `aria-pressed`; selecció
 
 ## Límites conocidos
 
-- Geometría simplificada, **no es una réplica técnica exacta** (la interfaz lo indica).
+- La geometría de respaldo es simplificada, **no una réplica técnica exacta** (la interfaz lo indica). Mientras no haya modelo definitivo, ese aviso debe mantenerse.
 - Los CTA y las secciones de la navegación abren un **modal de demostración**: no hay integración comercial, no se envía ni guarda nada.
 - No se muestran listados de residuos, licencias, capacidades ni cifras: no hay información verificada.
 - El texto «Yumbo, Valle del Cauca» viene del boceto proporcionado.

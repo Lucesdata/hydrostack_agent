@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Exportar planta de ejemplo (.glb)</title>
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/" } }</script>
+<style>body{font:16px system-ui;margin:2rem;max-width:40rem}button{font:inherit;padding:.6rem 1rem}</style></head>
+<body>
+<h1>Exportar la planta de ejemplo</h1>
+<p>Genera <code>ejemplo-contrato.glb</code> a partir de la planta de código (<code>js/machinery.js</code>). Es una plantilla que cumple <code>docs/CONTRATO-MODELO.md</code>: ábrela en Blender para ver los nombres de nodos y anclas.</p>
+<button id="b" type="button">Descargar ejemplo-contrato.glb</button> <span id="estado"></span>
+<script type="module">
+import * as THREE from "three";
+import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+import { buildPlant } from "../js/machinery.js";
+
+const root = buildPlant();
+// glTF no tiene mapa alfa independiente: la perforación del tromel pasa al canal alfa del color base.
+root.traverse((o) => {
+  if (!o.isMesh) return;
+  (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => {
+    if (!m.alphaMap) return;
+    const src = m.alphaMap.image, c = document.createElement("canvas");
+    c.width = src.width; c.height = src.height;
+    const g = c.getContext("2d"); g.drawImage(src, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height);
+    for (let i = 0; i < d.data.length; i += 4) { const a = d.data[i + 1]; d.data[i] = d.data[i + 1] = d.data[i + 2] = 150; d.data[i + 3] = a; }
+    g.putImageData(d, 0, 0);
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.copy(m.alphaMap.repeat); t.colorSpace = THREE.SRGBColorSpace;
+    m.map = t; m.alphaMap = null; m.alphaTest = 0.5; m.transparent = false; m.color.set(0xffffff); m.needsUpdate = true;
+  });
+});
+root.updateMatrixWorld(true);
+const buf = await new GLTFExporter().parseAsync(root, { binary: true, onlyVisible: false });
+const bytes = new Uint8Array(buf);
+let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+window.__glb = btoa(bin);
+document.getElementById("estado").textContent = `Listo (${(bytes.length / 1024).toFixed(0)} KB)`;
+document.getElementById("b").addEventListener("click", () => {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([buf], { type: "model/gltf-binary" })); a.download = "ejemplo-contrato.glb"; a.click();
+});
+</script></body></html>

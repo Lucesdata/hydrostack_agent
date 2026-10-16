@@ -120,6 +120,8 @@ Three.js 0.160.1 (vendorizado) para otra marca, Biosfera: módulo estático
 autónomo, **no** forma parte de la app Next.js ni se despliega con ella (ver su
 `README.md`). Recorrido ilustrativo de un lote por una planta de tromel; la
 separación es «Visualización conceptual», pendiente de confirmar con Biosfera.
+El modelo 3D es intercambiable: un `.glb` que cumpla `docs/CONTRATO-MODELO.md`
+sustituye a la planta de código (`js/config.js`, `?modelo=`).
 
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de

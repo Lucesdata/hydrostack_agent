@@ -2,6 +2,7 @@
 import { EQUIPOS, ZONAS } from "./data.js";
 import { crearRecorrido, tiempoMecanismos } from "./journey.js";
 import { crearUI } from "./ui.js";
+import { MODELO } from "./config.js";
 
 const $ = (id) => document.getElementById(id);
 const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -83,7 +84,11 @@ async function iniciarEscena() {
   try {
     const m = await import("./scene.js");
     if (!m.webglDisponible()) return sinWebgl("WebGL no disponible");
-    escena = m.crearEscena({ host: $("lienzo"), equipos: EQUIPOS, marcadores: ui.marcadores, reducirMovimiento: reducir, pedirCuadro: pedir });
+    const [{ cargarPlanta }, { buildPlant }] = await Promise.all([import("./modelo.js"), import("./machinery.js")]);
+    const planta = await cargarPlanta({ ruta: new URLSearchParams(location.search).get("modelo") || MODELO, construirPropia: buildPlant });
+    $("lienzo").dataset.modelo = planta.informe.origen;
+    escena = m.crearEscena({ host: $("lienzo"), equipos: EQUIPOS, marcadores: ui.marcadores, reducirMovimiento: reducir, pedirCuadro: pedir, planta });
+    if (new URLSearchParams(location.search).has("debug")) console.info("[biosfera] modelo:", planta.informe);
   } catch (err) {
     escena = null; sinWebgl(err);
   }

@@ -2,10 +2,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { buildPlant } from "./machinery.js";
 import { crearLote } from "./lote.js";
 
-const OBJETIVO = new THREE.Vector3(1.2, 2.3, 0.4);
+const OBJETIVO = new THREE.Vector3(1.2, 2.3, 0.4); // se sustituye por el centro del modelo
 const DIR_3D = new THREE.Vector3(13, 11, 19).normalize();
 const DIR_PLANTA = new THREE.Vector3(0.0, 1, 0.14).normalize();
 const RESALTE = new THREE.Color(0x35d07f);
@@ -17,7 +16,7 @@ export function webglDisponible() {
   } catch { return false; }
 }
 
-export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedirCuadro }) {
+export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedirCuadro, planta }) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
@@ -40,15 +39,14 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
   sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
   escena.add(sol);
 
-  // Losa de la planta
-  const losa = new THREE.Mesh(new THREE.BoxGeometry(22.5, 0.3, 11.5), new THREE.MeshStandardMaterial({ color: 0xdde2d3, roughness: 0.95, metalness: 0 }));
-  losa.position.set(0.8, -0.15, 0.9); losa.receiveShadow = true; escena.add(losa);
-  const borde = new THREE.LineSegments(new THREE.EdgesGeometry(losa.geometry), new THREE.LineBasicMaterial({ color: 0x13392a }));
-  borde.position.copy(losa.position); escena.add(borde);
-
-  const planta = buildPlant();
   escena.add(planta.root);
-  const lote = crearLote(escena);
+  OBJETIVO.copy(planta.encuadre.centro);
+  const lote = crearLote(escena, planta.anclas);
+  // Las sombras abarcan el modelo, sea cual sea su tamaño
+  const radio = Math.max(planta.encuadre.tam.x, planta.encuadre.tam.z) * 0.75;
+  Object.assign(sol.shadow.camera, { left: -radio, right: radio, top: radio * 0.85, bottom: -radio * 0.85, far: radio * 4 });
+  sol.position.set(radio * 0.5, radio * 1.1, radio * 0.6).add(OBJETIVO); sol.target.position.copy(OBJETIVO); escena.add(sol.target);
+  sol.shadow.camera.updateProjectionMatrix();
 
   const camara = new THREE.PerspectiveCamera(20, 1, 0.5, 300);
   const controles = new OrbitControls(camara, renderer.domElement);
@@ -68,9 +66,10 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
   function calcularDistancia() {
     const anchoUtil = escritorio.matches ? ancho * REGION : ancho;
     const asp = anchoUtil / alto;
-    const ancho3d = escritorio.matches ? 21 : 20.8;
-    distBase = Math.max(36, ancho3d / (Math.tan(THREE.MathUtils.degToRad(camara.fov / 2)) * 2 * asp));
+    const ancho3d = planta.encuadre.ancho * (escritorio.matches ? 1 : 0.99);
+    distBase = Math.max(ancho3d * 1.7, ancho3d / (Math.tan(THREE.MathUtils.degToRad(camara.fov / 2)) * 2 * asp));
     controles.maxDistance = distBase * 1.35;
+    controles.minDistance = ancho3d * 1.05;
   }
   function colocar(dir, dist) {
     camara.position.copy(OBJETIVO).addScaledVector(dir, dist);
@@ -111,7 +110,7 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
     const mover = camaraMovida;
     equipos.forEach((e) => {
       const el = marcadores[e.id]; if (!el) return;
-      tmp.set(...e.punto);
+      tmp.set(...(planta.puntos[e.id] || e.punto));
       ndc.copy(tmp).project(camara);
       const fuera = ndc.z > 1 || Math.abs(ndc.x) > 1.02 || Math.abs(ndc.y) > 1.02;
       el.hidden = fuera;
@@ -148,8 +147,8 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
 
       if (T !== ultimoT) { lote.update(T); ultimoT = T; }
       const ciclo = Math.max(0, tMec - 5.6);
-      planta.rot.rotation.x = -0.9 * ciclo;
-      planta.texBanda.offset.x = -1.4 * ciclo;
+      if (planta.rot) planta.rot.rotation.x = -0.9 * ciclo;
+      if (planta.texBanda) planta.texBanda.offset.x = -1.4 * ciclo;
       resaltar(resaltos);
 
       renderer.render(escena, camara);
@@ -167,7 +166,7 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
     vista(m) { modo = m; vistaInicial = true; irA(m === "3d" ? DIR_3D : DIR_PLANTA, distBase * (m === "3d" ? 1 : 0.95)); },
     forzarProyeccion() { camaraMovida = true; },
     // Para pruebas automáticas
-    _debug: { camara, controles },
+    _debug: { camara, controles, planta },
     dispose() { ro.disconnect(); controles.dispose(); renderer.dispose(); },
   };
 }

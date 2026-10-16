@@ -2,7 +2,6 @@
 // La posición de cada pieza es una función pura del tiempo del recorrido T: permite pausar, revisar un paso y reiniciar sin estado oculto.
 // Las dos corrientes de salida son una VISUALIZACIÓN CONCEPTUAL: no afirman ningún mecanismo de separación.
 import * as THREE from "three";
-import { GEOM } from "./machinery.js";
 
 const N_TIERRA = 170;
 const N_METAL = 70;
@@ -13,52 +12,49 @@ function rng(seed) {
 }
 const ease = { lin: (u) => u, in: (u) => u * u, out: (u) => 1 - (1 - u) * (1 - u) };
 
-function construir(tipo, rand, idx, total) {
-  const { tromel: T, tolva: H, beltA: A, beltB: B, bin, bag } = GEOM;
-  const x0 = T.cx - T.len / 2, x1 = T.cx + T.len / 2;
+function construir(tipo, rand, idx, total, A) {
   const v = (x, y, z) => new THREE.Vector3(x, y, z);
   // pila dentro de la tolva
   const ang = rand() * Math.PI * 2, rr = Math.sqrt(rand()) * 0.9;
-  const pila = v(H.x + Math.cos(ang) * rr, 3.55 - 0.55 * (rr / 0.9) + rand() * 0.18, Math.sin(ang) * rr);
+  const pila = v(A.tolva_pila.x + Math.cos(ang) * rr, A.tolva_pila.y + 0.25 - 0.55 * (rr / 0.9) + rand() * 0.18, A.tolva_pila.z + Math.sin(ang) * rr);
   const d = 0.3 + (idx / total) * 4.6 + rand() * 0.3;              // inicio de la caída
   const liberar = 6.0 + rand() * 3.6;                                // sale hacia la banda
-  const dir = new THREE.Vector3().subVectors(B, A).normalize();
-  const n = new THREE.Vector3(-dir.y, dir.x, 0);
   const zl = (rand() - 0.5) * 0.72;
-  const enBanda = (s) => v(0, 0, zl).add(new THREE.Vector3().copy(A).addScaledVector(dir, s).addScaledVector(n, 0.2));
-  const Lb = B.distanceTo(A);
   const z = (rand() - 0.5) * 0.9;
+  const sal = A.tolva_salida, bi = A.banda_ini, bf = A.banda_fin, ti = A.tromel_ini, tf = A.tromel_fin;
   const seg = [
-    { p: v(H.x + (rand() - 0.5) * 0.2, 2.1, (rand() - 0.5) * 0.2), dur: 0.8, m: "in" },
-    { p: enBanda(0.8), dur: 0.5, m: "in" },
-    { p: enBanda(Lb - 0.5), dur: 6.0, m: "lin" },
-    { p: v(x0 + 0.9, 2.4, z), dur: 0.8, m: "in" },
+    { p: v(sal.x + (rand() - 0.5) * 0.2, sal.y, sal.z + (rand() - 0.5) * 0.2), dur: 0.8, m: "in" },
+    { p: v(bi.x, bi.y, bi.z + zl), dur: 0.5, m: "in" },
+    { p: v(bf.x, bf.y, bf.z + zl), dur: 6.0, m: "lin" },
+    { p: v(ti.x, ti.y, ti.z + z), dur: 0.8, m: "in" },
   ];
-  const mont = (cx, cz, rx, rz, y0, alt) => {
+  const mont = (c, rx, rz, alt) => {
     const a = rand() * Math.PI * 2, r = Math.sqrt(rand());
-    return v(cx + Math.cos(a) * r * rx, y0 + alt * (1 - r) + rand() * 0.05, cz + Math.sin(a) * r * rz);
+    return v(c.x + Math.cos(a) * r * rx, c.y + alt * (1 - r) + rand() * 0.05, c.z + Math.sin(a) * r * rz);
   };
   if (tipo === "tierra") {
-    const xs = 2.3 + rand() * 1.2;
-    seg.push({ p: v(xs, 2.4, z), dur: 2.3 + rand() * 0.3, m: "tumble" });
-    seg.push({ p: v(xs, 1.3, 0.1), dur: 0.6, m: "in" });
-    seg.push({ p: v(bin.x + (xs - 3) * 0.8, 0.8, 3.1), dur: 1.4, m: "lin" });
-    seg.push({ p: mont(bin.x, bin.z, 1.2, 0.9, 0.22, 0.38), dur: 0.5, m: "in" });
+    const cai = A.cribado_caida, can = A.cribado_canal;
+    const xs = ti.x + (tf.x - ti.x) * (0.3 + rand() * 0.25);
+    seg.push({ p: v(xs, ti.y, ti.z + z), dur: 2.3 + rand() * 0.3, m: "tumble" });
+    seg.push({ p: v(xs, cai.y, cai.z), dur: 0.6, m: "in" });
+    seg.push({ p: v(can.x + (xs - cai.x) * 0.8, can.y, can.z), dur: 1.4, m: "lin" });
+    seg.push({ p: mont(A.cribado_pila, 1.2, 0.9, 0.38), dur: 0.5, m: "in" });
   } else {
-    seg.push({ p: v(x1 - 0.3, 2.4, z), dur: 3.9 + rand() * 0.3, m: "tumble" });
-    seg.push({ p: v(x1 + 0.4, 2.3, 0.25), dur: 0.5, m: "in" });
-    seg.push({ p: v(bag.x - 0.3 + (rand() - 0.5) * 0.3, 1.78, bag.z - 0.3), dur: 1.2, m: "lin" });
-    seg.push({ p: mont(bag.x, bag.z, 0.55, 0.55, 0.2, 0.45), dur: 0.5, m: "in" });
+    const bo = A.rechazo_boca, can = A.rechazo_canal;
+    seg.push({ p: v(tf.x, tf.y, tf.z + z), dur: 3.9 + rand() * 0.3, m: "tumble" });
+    seg.push({ p: v(bo.x, bo.y, bo.z), dur: 0.5, m: "in" });
+    seg.push({ p: v(can.x + (rand() - 0.5) * 0.3, can.y, can.z), dur: 1.2, m: "lin" });
+    seg.push({ p: mont(A.rechazo_pila, 0.55, 0.55, 0.45), dur: 0.5, m: "in" });
   }
   return { tipo, pila, d, liberar, seg, fase: rand() * 6.28, giro: new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).multiplyScalar(4), rot0: new THREE.Euler(rand() * 6, rand() * 6, rand() * 6),
     s: tipo === "tierra" ? 0.7 + rand() * 0.7 : 0.8 + rand() * 0.6, forma: new THREE.Vector3(1 + rand() * 0.6, 0.35 + rand() * 0.5, 0.8 + rand() * 0.6) };
 }
 
-export function crearLote(escena) {
+export function crearLote(escena, anclas) {
   const rand = rng(20261016);
   const piezas = [];
-  for (let i = 0; i < N_TIERRA; i++) piezas.push(construir("tierra", rand, i, N_TIERRA));
-  for (let i = 0; i < N_METAL; i++) piezas.push(construir("metal", rand, i, N_METAL));
+  for (let i = 0; i < N_TIERRA; i++) piezas.push(construir("tierra", rand, i, N_TIERRA, anclas));
+  for (let i = 0; i < N_METAL; i++) piezas.push(construir("metal", rand, i, N_METAL, anclas));
   // el metal llega algo disperso entre la tierra: se mezclan los instantes de caída
   const tierra = piezas.filter((p) => p.tipo === "tierra"), metal = piezas.filter((p) => p.tipo === "metal");
 

@@ -1,5 +1,6 @@
 // Construcción de la planta (geometría simplificada). Unidades ≈ metros. Eje x = eje del tromel, y = arriba, z = hacia el espectador.
 import * as THREE from "three";
+import { EQUIPOS } from "./data.js";
 
 export const GEOM = {
   tromel: { cx: 3, cy: 3.6, r: 1.5, len: 6 },
@@ -54,7 +55,7 @@ export function buildPlant() {
   const materiales = {};      // id -> materiales propios de ese grupo
   const oclusores = [];       // mallas que tapan marcadores
   const G = (id) => {
-    const g = new THREE.Group(); g.name = id; grupos[id] = g; materiales[id] = new Set(); root.add(g); return g;
+    const g = new THREE.Group(); g.name = "grupo_" + id; grupos[id] = g; materiales[id] = new Set(); root.add(g); return g;
   };
   const base = new THREE.Group(); root.add(base);
 
@@ -99,7 +100,7 @@ export function buildPlant() {
 
   // ---------- Tromel ----------
   const gT = G("tromel");
-  const rot = new THREE.Group(); rot.position.set(cx, cy, 0); gT.add(rot);
+  const rot = new THREE.Group(); rot.name = "mec_tromel"; rot.position.set(cx, cy, 0); gT.add(rot);
   const perf = perforacion(); perf.repeat.set(40, 13);
   const matShell = M("tromel", 0x8d949b, { side: THREE.DoubleSide, alphaMap: perf, alphaTest: 0.5, metalness: 0.75, roughness: 0.42 });
   const shellG = new THREE.CylinderGeometry(r, r, len, 72, 1, true); shellG.rotateZ(Math.PI / 2);
@@ -204,7 +205,7 @@ export function buildPlant() {
   const texB = texturaBanda(); texB.repeat.set(L * 1.6, 1);
   const mBanda = new THREE.MeshStandardMaterial({ map: texB, roughness: 0.9, metalness: 0.1 });
   materiales.cinta.add(mBanda);
-  const sup = box(L, 0.08, 1.1, mBanda, 0, 0.14, 0); sup.receiveShadow = true; belt.add(sup); oclusores.push(sup);
+  const sup = box(L, 0.08, 1.1, mBanda, 0, 0.14, 0); sup.name = "mec_banda"; sup.receiveShadow = true; belt.add(sup); oclusores.push(sup);
   const inf = box(L, 0.05, 1.1, mBanda, 0, -0.14, 0); belt.add(inf);
   [-1, 1].forEach((s) => { const rol = cyl(0.22, 0.22, 1.2, M("cinta", 0x30363b, { metalness: 0.7 }), s * (L / 2 - 0.15), 0, 0, 20); rol.rotation.x = Math.PI / 2; rol.castShadow = true; belt.add(rol); });
   // motor azul en el extremo bajo
@@ -235,5 +236,24 @@ export function buildPlant() {
   trabajador(-5.6, 0.5, 1.5, 0.6); trabajador(-8.2, 0.5, 0.2, 1.2);
   trabajador(8.4, py + 0.06, -2.2, 3.6); trabajador(4.6, 0.5, 3.4, 4.2);
 
-  return { root, grupos, materiales, oclusores, rot, belt: { tex: texB, length: L, dir: dir.clone().normalize(), angle: ang }, texBanda: texB };
+  // ---------- Anclas (ver docs/CONTRATO-MODELO.md): puntos del recorrido y de los marcadores ----------
+  const ancla = (n, x, y, z) => { const o = new THREE.Object3D(); o.name = n; o.position.set(x, y, z); root.add(o); };
+  const dn = dir.clone().normalize(), nn = new THREE.Vector3(-dn.y, dn.x, 0);
+  const enBanda = (s) => new THREE.Vector3().copy(A).addScaledVector(dn, s).addScaledVector(nn, 0.2);
+  ancla("a_tolva_pila", GEOM.tolva.x, 3.3, 0);
+  ancla("a_tolva_salida", GEOM.tolva.x, 2.1, 0);
+  const bi = enBanda(0.8), bf = enBanda(L - 0.5);
+  ancla("a_banda_ini", bi.x, bi.y, bi.z); ancla("a_banda_fin", bf.x, bf.y, bf.z);
+  ancla("a_tromel_ini", x0 + 0.9, 2.4, 0); ancla("a_tromel_fin", x1 - 0.3, 2.4, 0);
+  ancla("a_cribado_caida", cx, 1.3, 0.1); ancla("a_cribado_canal", GEOM.bin.x, 0.8, 3.1); ancla("a_cribado_pila", GEOM.bin.x, 0.22, GEOM.bin.z);
+  ancla("a_rechazo_boca", x1 + 0.4, 2.3, 0.25); ancla("a_rechazo_canal", GEOM.bag.x - 0.3, 1.78, GEOM.bag.z - 0.3); ancla("a_rechazo_pila", GEOM.bag.x, 0.2, GEOM.bag.z);
+  EQUIPOS.forEach((e) => ancla("p_" + e.id, ...e.punto));
+
+  // Losa de la planta (solo en el modelo propio; un modelo externo trae su suelo)
+  const losa = new THREE.Mesh(new THREE.BoxGeometry(22.5, 0.3, 11.5), new THREE.MeshStandardMaterial({ color: 0xdde2d3, roughness: 0.95, metalness: 0 }));
+  losa.name = "suelo"; losa.position.set(0.8, -0.15, 0.9); losa.receiveShadow = true; root.add(losa);
+  const borde = new THREE.LineSegments(new THREE.EdgesGeometry(losa.geometry), new THREE.LineBasicMaterial({ color: 0x13392a }));
+  borde.name = "suelo_borde"; borde.position.copy(losa.position); root.add(borde);
+
+  return root;
 }
