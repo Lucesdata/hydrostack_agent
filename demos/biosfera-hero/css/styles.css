@@ -171,9 +171,9 @@ h1 { margin: 0; font-family: var(--fuente-titulo); font-weight: 800; text-transf
   .hero { min-height: 0; display: flex; flex-direction: column; gap: 20px; }
   .mensaje { width: 100%; min-height: 0; pointer-events: auto; }
   .escena { position: relative; inset: auto; display: flex; flex-direction: column; gap: 12px; }
-  .lienzo { position: relative; inset: auto; height: clamp(360px, 92vw, 620px); border: 2px solid var(--linea); }
+  .lienzo { position: relative; inset: auto; height: clamp(320px, 86vw, 560px); border: 2px solid var(--linea); }
   .vista { right: 12px; top: 12px; }
-  .mandos { right: auto; left: 12px; top: 12px; }
+  .mandos { right: auto; left: 12px; top: auto; bottom: 12px; flex-direction: row; }
   .bajo { position: static; width: 100%; }
   .equipo { position: relative; top: auto; left: auto; width: 100%; min-width: 0; }
   .doc { left: 50%; }

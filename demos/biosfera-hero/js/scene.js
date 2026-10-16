@@ -68,7 +68,8 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
   function calcularDistancia() {
     const anchoUtil = escritorio.matches ? ancho * REGION : ancho;
     const asp = anchoUtil / alto;
-    distBase = Math.max(40, 21 / (Math.tan(THREE.MathUtils.degToRad(camara.fov / 2)) * 2 * asp));
+    const ancho3d = escritorio.matches ? 21 : 20.8;
+    distBase = Math.max(36, ancho3d / (Math.tan(THREE.MathUtils.degToRad(camara.fov / 2)) * 2 * asp));
     controles.maxDistance = distBase * 1.35;
   }
   function colocar(dir, dist) {
