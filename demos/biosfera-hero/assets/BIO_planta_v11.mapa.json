@@ -1,7 +1,6 @@
 {
   "version": 1,
   "modelo": "BIO_planta_v11.glb",
-  "nota": "Incluye módulos marcados como supuestos (separador, imán): pendientes de confirmar.",
   "grupos": {
     "tolva": [
       "BIO_M01_TolvaRecepcion"
