@@ -97,5 +97,4 @@ export const DEMOS = {
   servicios: { titulo: "Servicios", texto: "Sección de demostración: el contenido comercial aún no está integrado." },
   campanas: { titulo: "Campañas", texto: "Sección de demostración: el contenido comercial aún no está integrado." },
   licencias: { titulo: "Licencias", texto: "Sección de demostración: no se muestran licencias porque Biosfera aún no ha aportado la información verificada." },
-  terminos: { titulo: "Aviso", texto: "Demostración visual. No es una réplica técnica exacta ni representa capacidades, estadísticas o datos comerciales." },
 };

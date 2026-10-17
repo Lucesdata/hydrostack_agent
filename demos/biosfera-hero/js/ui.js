@@ -126,7 +126,8 @@ export function crearUI({ alElegirPaso, alElegirEquipo }) {
   // ---------- Modal de demostración ----------
   const modal = $("modal");
   function abrirDemo(clave) {
-    const d = DEMOS[clave] || DEMOS.terminos;
+    const d = DEMOS[clave];
+    if (!d) return;
     $("modal-titulo").textContent = d.titulo; $("modal-texto").textContent = d.texto;
     if (modal.showModal) modal.showModal(); else modal.setAttribute("open", "");
     $("modal-cerrar").focus();
