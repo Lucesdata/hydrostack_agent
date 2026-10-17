@@ -1,116 +1,225 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Biosfera · Economía circular industrial</title>
-  <meta name="description" content="Demostración del hero interactivo de Biosfera: recorrido ilustrativo de un lote por una planta de tromel.">
-  <link rel="preload" href="fonts/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/styles.css">
-  <script type="importmap">
-    { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/" } }
-  </script>
-</head>
-<body>
-  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Biosfera · Economía circular industrial</title>
+    <meta
+      name="description"
+      content="Demostración del hero interactivo de Biosfera: recorrido ilustrativo de un lote por una planta de tromel."
+    />
+    <link
+      rel="preload"
+      href="fonts/barlow-condensed-latin-800-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script type="importmap">
+      {
+        "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/" }
+      }
+    </script>
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
 
-  <header class="cabecera">
-    <a class="marca" href="#inicio" aria-label="Biosfera, economía circular industrial">
-      <svg class="marca__sello" viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" focusable="false">
-        <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="2.4"/>
-        <path d="M24 38V22M24 28c-5 0-8-3-8-8 5 0 8 3 8 8zm0-4c0-5 3-8 8-8 0 5-3 8-8 8zm0-8V9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="marca__texto"><span class="marca__nombre">Biosfera</span><span class="marca__desc">Economía circular industrial</span></span>
-    </a>
-    <nav class="nav" aria-label="Principal">
-      <a href="#inicio" data-demo="servicios">Servicios</a>
-      <a href="#inicio" data-demo="residuos">Residuos</a>
-      <a href="#inicio" data-demo="campanas">Campañas</a>
-      <a href="#inicio" data-demo="licencias">Licencias</a>
-    </nav>
-    <button class="btn btn--solido btn--cotizar" type="button" data-demo="cotizar">Cotizar</button>
-  </header>
+    <header class="cabecera">
+      <a class="marca" href="#inicio" aria-label="Biosfera, economía circular industrial">
+        <svg
+          class="marca__sello"
+          viewBox="0 0 48 48"
+          width="46"
+          height="46"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="2.4" />
+          <path
+            d="M24 38V22M24 28c-5 0-8-3-8-8 5 0 8 3 8 8zm0-4c0-5 3-8 8-8 0 5-3 8-8 8zm0-8V9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="marca__texto"
+          ><span class="marca__nombre">Biosfera</span
+          ><span class="marca__desc">Economía circular industrial</span></span
+        >
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="#inicio" data-demo="servicios">Servicios</a>
+        <a href="#inicio" data-demo="residuos">Residuos</a>
+        <a href="#inicio" data-demo="campanas">Campañas</a>
+        <a href="#inicio" data-demo="licencias">Licencias</a>
+      </nav>
+      <button class="btn btn--solido btn--cotizar" type="button" data-demo="cotizar">
+        Cotizar
+      </button>
+    </header>
 
-  <main id="contenido" class="hero">
-    <section class="mensaje" id="inicio" aria-labelledby="titulo">
-      <p class="eyebrow"><span class="eyebrow__raya" aria-hidden="true"></span>Economía circular industrial · Yumbo, Valle del Cauca</p>
-      <h1 id="titulo">Residuos peligrosos y RAEE, <span class="verde">de la recepción al certificado.</span></h1>
-      <p class="apoyo">Biosfera es una empresa con planta en Yumbo. Recibe, trata y documenta lotes de residuos peligrosos y RAEE, con trazabilidad hasta su destino, para que cada empresa pueda demostrar a qué fin llegaron sus residuos.</p>
-      <div class="cta">
-        <button class="btn btn--solido btn--grande" type="button" data-demo="cotizar">Solicitar cotización <span aria-hidden="true">→</span></button>
-        <button class="btn btn--linea btn--grande" type="button" data-demo="residuos">Ver qué residuos gestionamos</button>
-      </div>
-
-      <section class="pasos" aria-labelledby="t-pasos">
-        <h2 id="t-pasos">Así recorre un lote nuestra planta</h2>
-        <ol class="pasos__lista" id="pasos"></ol>
-      </section>
-    </section>
-
-    <section class="escena" aria-label="Planta de tromel interactiva (modelo 3D ilustrativo)">
-      <div class="lienzo" id="lienzo" data-modo="planta">
-        <div class="marcadores" id="marcadores"></div>
-        <div class="sin-webgl" id="sin-webgl" hidden role="alert">
-          <strong>No se pudo mostrar la planta en 3D.</strong>
-          <p>Tu navegador o dispositivo no tiene WebGL disponible. El resto de la página y los pasos del recorrido siguen funcionando.</p>
-          <ul id="lista-equipos" class="lista-equipos"></ul>
+    <main id="contenido" class="hero">
+      <section class="mensaje" id="inicio" aria-labelledby="titulo">
+        <p class="eyebrow">
+          <span class="eyebrow__raya" aria-hidden="true"></span>Economía circular industrial ·
+          Yumbo, Valle del Cauca
+        </p>
+        <h1 id="titulo">
+          Residuos peligrosos y RAEE, <span class="verde">de la recepción al certificado.</span>
+        </h1>
+        <p class="apoyo">
+          Biosfera es una empresa con planta en Yumbo. Recibe, trata y documenta lotes de residuos
+          peligrosos y RAEE, con trazabilidad hasta su destino, para que cada empresa pueda
+          demostrar a qué fin llegaron sus residuos.
+        </p>
+        <div class="cta">
+          <button class="btn btn--solido btn--grande" type="button" data-demo="cotizar">
+            Solicitar cotización <span aria-hidden="true">→</span>
+          </button>
+          <button class="btn btn--linea btn--grande" type="button" data-demo="residuos">
+            Ver qué residuos gestionamos
+          </button>
         </div>
 
-        <div class="vista" role="group" aria-label="Tipo de vista">
-          <button type="button" class="vista__btn" id="vista-3d" aria-pressed="true">Vista 3D</button>
-          <button type="button" class="vista__btn" id="vista-planta" aria-pressed="false">Vista planta</button>
-        </div>
-
-        <div class="mandos" role="group" aria-label="Controles de cámara">
-          <button type="button" class="mando" id="zoom-mas" aria-label="Acercar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-          <button type="button" class="mando" id="zoom-menos" aria-label="Alejar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
-          <button type="button" class="mando" id="vista-inicial" aria-label="Recuperar la vista inicial"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v10h12V10"/></svg></button>
-          <button type="button" class="mando" id="autorrotar" aria-pressed="false" aria-label="Autorrotación de la cámara"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button>
-        </div>
-
-        <article class="doc" id="doc" hidden aria-live="polite"></article>
-      </div>
-
-      <aside class="equipo" id="panel-equipo" hidden aria-live="polite" aria-label="Equipo seleccionado o zona activa">
-        <button type="button" class="equipo__cerrar" id="equipo-cerrar" aria-label="Cerrar el equipo seleccionado" hidden>×</button>
-        <p class="equipo__n" id="equipo-n"></p>
-        <h3 id="equipo-nombre"></h3>
-        <p id="equipo-texto"></p>
-      </aside>
-
-      <div class="bajo">
-        <section class="lote" aria-labelledby="lote-t">
-          <div class="lote__fila">
-            <div>
-              <p class="lote__etq" id="lote-t">Lote de ejemplo</p>
-              <p class="lote__id" id="lote-id">BIO-0000</p>
-            </div>
-            <p class="lote__estado" id="lote-estado">Listo para iniciar</p>
-          </div>
-          <p class="lote__texto" id="lote-texto">Pulsa «Iniciar recorrido» para ver cómo avanza un lote ilustrativo por la planta.</p>
-                    <div class="progreso" role="progressbar" aria-label="Avance del recorrido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progreso"><span id="progreso-barra"></span></div>
-          <div class="lote__botones">
-            <button type="button" class="btn btn--claro" id="b-iniciar">Iniciar recorrido</button>
-            <button type="button" class="btn btn--claro" id="b-pausa" aria-pressed="false" disabled>Pausar</button>
-            <button type="button" class="btn btn--claro" id="b-reiniciar">Reiniciar lote</button>
-          </div>
-          <p class="lote__movimiento" id="aviso-movimiento" hidden>Movimiento reducido: la cámara no se anima y el recorrido solo avanza si lo inicias.</p>
+        <section class="pasos" aria-labelledby="t-pasos">
+          <h2 id="t-pasos">Así recorre un lote nuestra planta</h2>
+          <ol class="pasos__lista" id="pasos"></ol>
         </section>
+      </section>
+
+      <section class="escena" aria-label="Planta de tromel interactiva (modelo 3D ilustrativo)">
+        <div class="lienzo" id="lienzo" data-modo="planta">
+          <div class="marcadores" id="marcadores"></div>
+          <div class="sin-webgl" id="sin-webgl" hidden role="alert">
+            <strong>No se pudo mostrar la planta en 3D.</strong>
+            <p>
+              Tu navegador o dispositivo no tiene WebGL disponible. El resto de la página y los
+              pasos del recorrido siguen funcionando.
+            </p>
+            <ul id="lista-equipos" class="lista-equipos"></ul>
+          </div>
+
+          <div class="vista" role="group" aria-label="Tipo de vista">
+            <button type="button" class="vista__btn" id="vista-3d" aria-pressed="true">
+              Vista 3D
+            </button>
+            <button type="button" class="vista__btn" id="vista-planta" aria-pressed="false">
+              Vista planta
+            </button>
+          </div>
+
+          <div class="mandos" role="group" aria-label="Controles de cámara">
+            <button type="button" class="mando" id="zoom-mas" aria-label="Acercar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+            <button type="button" class="mando" id="zoom-menos" aria-label="Alejar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+            </button>
+            <button
+              type="button"
+              class="mando"
+              id="vista-inicial"
+              aria-label="Recuperar la vista inicial"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 11l8-7 8 7M6 10v10h12V10" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="mando"
+              id="autorrotar"
+              aria-pressed="false"
+              aria-label="Autorrotación de la cámara"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5" />
+              </svg>
+            </button>
+          </div>
+
+          <article class="doc" id="doc" hidden aria-live="polite"></article>
+        </div>
+
+        <aside
+          class="equipo"
+          id="panel-equipo"
+          hidden
+          aria-live="polite"
+          aria-label="Equipo seleccionado o zona activa"
+        >
+          <button
+            type="button"
+            class="equipo__cerrar"
+            id="equipo-cerrar"
+            aria-label="Cerrar el equipo seleccionado"
+            hidden
+          >
+            ×
+          </button>
+          <p class="equipo__n" id="equipo-n"></p>
+          <h3 id="equipo-nombre"></h3>
+          <p id="equipo-texto"></p>
+        </aside>
+
+        <div class="bajo">
+          <section class="lote" aria-labelledby="lote-t">
+            <div class="lote__fila">
+              <div>
+                <p class="lote__etq" id="lote-t">Lote de ejemplo</p>
+                <p class="lote__id" id="lote-id">BIO-0000</p>
+              </div>
+              <p class="lote__estado" id="lote-estado">Listo para iniciar</p>
+            </div>
+            <p class="lote__texto" id="lote-texto">
+              Pulsa «Iniciar recorrido» para ver cómo avanza un lote ilustrativo por la planta.
+            </p>
+            <div
+              class="progreso"
+              role="progressbar"
+              aria-label="Avance del recorrido"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="progreso"
+            >
+              <span id="progreso-barra"></span>
+            </div>
+            <div class="lote__botones">
+              <button type="button" class="btn btn--claro" id="b-iniciar">Iniciar recorrido</button>
+              <button
+                type="button"
+                class="btn btn--claro"
+                id="b-pausa"
+                aria-pressed="false"
+                disabled
+              >
+                Pausar
+              </button>
+              <button type="button" class="btn btn--claro" id="b-reiniciar">Reiniciar lote</button>
+            </div>
+            <p class="lote__movimiento" id="aviso-movimiento" hidden>
+              Movimiento reducido: la cámara no se anima y el recorrido solo avanza si lo inicias.
+            </p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <p class="sr-estado" id="sr-estado" role="status" aria-live="polite"></p>
+
+    <dialog class="modal" id="modal" aria-labelledby="modal-titulo">
+      <div class="modal__cuerpo">
+        <p class="modal__sello">Demostración</p>
+        <h2 id="modal-titulo"></h2>
+        <p id="modal-texto"></p>
+        <button type="button" class="btn btn--solido" id="modal-cerrar">Entendido</button>
       </div>
-    </section>
-  </main>
+    </dialog>
 
-  <p class="sr-estado" id="sr-estado" role="status" aria-live="polite"></p>
-
-  <dialog class="modal" id="modal" aria-labelledby="modal-titulo">
-    <div class="modal__cuerpo">
-      <p class="modal__sello">Demostración</p>
-      <h2 id="modal-titulo"></h2>
-      <p id="modal-texto"></p>
-      <button type="button" class="btn btn--solido" id="modal-cerrar">Entendido</button>
-    </div>
-  </dialog>
-
-  <script type="module" src="js/main.js"></script>
-</body>
+    <script type="module" src="js/main.js"></script>
+  </body>
 </html>

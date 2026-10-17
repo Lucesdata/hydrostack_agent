@@ -21,3 +21,6 @@ docs/referencia
 # compacta a propósito: formatearla la convierte en ~30.000 líneas de una coordenada
 # cada una, con lo que cualquier actualización del MGN produce un diff ilegible.
 data/geo/*.geo.json
+
+# Demo Biosfera: three.js y descodificador meshopt vendorizados (código de terceros con su licencia)
+demos/biosfera-hero/vendor

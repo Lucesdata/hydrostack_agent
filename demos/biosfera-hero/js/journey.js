@@ -41,15 +41,37 @@ export function crearRecorrido(onChange) {
     estado,
     // true si el tiempo avanza solo
     avanzando: () => s.iniciado && !s.pausado && s.T < FIN,
-    iniciar() { s.T = 0; s.iniciado = true; s.pausado = false; emitir(); },
-    alternarPausa() { s.pausado = !s.pausado; emitir(); },
-    fijarPausa(v) { s.pausado = v; emitir(); },
-    reiniciar() { s.T = 0; s.iniciado = false; s.pausado = false; emitir(); },
+    iniciar() {
+      s.T = 0;
+      s.iniciado = true;
+      s.pausado = false;
+      emitir();
+    },
+    alternarPausa() {
+      s.pausado = !s.pausado;
+      emitir();
+    },
+    fijarPausa(v) {
+      s.pausado = v;
+      emitir();
+    },
+    reiniciar() {
+      s.T = 0;
+      s.iniciado = false;
+      s.pausado = false;
+      emitir();
+    },
     // revisar un momento: salta a ese paso y se queda en pausa
-    irAEtapa(i) { s.T = ETAPAS[i].revisar; s.iniciado = true; s.pausado = true; emitir(); },
+    irAEtapa(i) {
+      s.T = ETAPAS[i].revisar;
+      s.iniciado = true;
+      s.pausado = true;
+      emitir();
+    },
     avanzar(dt) {
       if (!(s.iniciado && !s.pausado && s.T < FIN)) return;
-      s.T = Math.min(FIN, s.T + dt); emitir();
+      s.T = Math.min(FIN, s.T + dt);
+      emitir();
     },
   };
 }
