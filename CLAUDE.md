@@ -1,5 +1,19 @@
 # AquaLicita — Instrucciones del Proyecto
 
+> ## REGLA INVIOLABLE: AquaLicita y Biosfera son dos proyectos distintos (2026-10-17)
+>
+> Este repositorio (`Lucesdata/hydrostack_agent`) es **solo AquaLicita**. Biosfera
+> —su landing, su hero 3D, su modelo de planta, sus textos, sus assets y sus docs—
+> vive **únicamente** en `https://github.com/Lucesdata/biosfera-landing`.
+>
+> - Nunca se añade a este repo código, carpetas, dependencias, imágenes, modelos,
+>   notas ni referencias de Biosfera, ni siquiera como demo, borrador o respaldo.
+> - Nunca se prueba, ensaya ni "aparca" trabajo de Biosfera en una rama de este repo.
+> - Si una tarea habla de Biosfera, se trabaja en el repo de Biosfera. Si no está
+>   claro en cuál repo va algo, se pregunta **antes** de crear ramas o PR.
+> - Esta regla no se relaja por comodidad, por urgencia ni porque "no se despliegue":
+>   ya hubo un error así (#147, revertido en #148) y no debe repetirse.
+
 **Reemplazo de la ficha operativa (2026-10-06, rama `codex/ficha-operativa-viva-actual`).**
 La ruta `/licitaciones/[slug]` conserva URL canónica, JSON-LD e ISR de 12 h y
 sustituye las preguntas por una ficha oscura de lectura continua. Hero ilustrativo,
@@ -114,14 +128,6 @@ casilla va desmarcada y es independiente de las alertas. Fases 0–1 (dominio,
 DNS, SMTP de Auth) están hechas; las plantillas y campañas se arman en el panel
 de Resend. Spec:
 `docs/superpowers/specs/2026-10-12-correo-marketing-resend-brevo.md`.
-
-**Demo Biosfera (2026-10-16, `demos/biosfera-hero/`).** Hero interactivo con
-Three.js 0.160.1 (vendorizado) para otra marca, Biosfera: módulo estático
-autónomo, **no** forma parte de la app Next.js ni se despliega con ella (ver su
-`README.md`). Recorrido ilustrativo de un lote por una planta de tromel; la
-separación es «Visualización conceptual», pendiente de confirmar con Biosfera.
-El modelo 3D es intercambiable: un `.glb` que cumpla `docs/CONTRATO-MODELO.md`
-sustituye a la planta de código (`js/config.js`, `?modelo=`).
 
 AquaLicita es una plataforma de inteligencia para contratación pública en
 agua y saneamiento sobre SECOP II: exploración de procesos, extracción de
