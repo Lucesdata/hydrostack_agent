@@ -1,5 +1,5 @@
 // Interfaz HTML: pasos, marcadores, panel de equipo, tarjeta del lote, documentos y modal. Sin Three.js.
-import { EQUIPOS, ETAPAS, ZONAS, REGISTRO, CERTIFICADO, DEMOS, LOTE_ID, NOTA_MODELO } from "./data.js";
+import { EQUIPOS, ETAPAS, ZONAS, REGISTRO, CERTIFICADO, DEMOS, LOTE_ID } from "./data.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -49,8 +49,6 @@ export function crearUI({ alElegirPaso, alElegirEquipo }) {
     const li = el("li"), b = el("button", { type: "button", "aria-pressed": "false" }, `${e.n}. ${e.nombre}`);
     b.addEventListener("click", () => alElegirEquipo(e.id)); li.append(b); listaEq.append(li); botonesLista[e.id] = b;
   });
-
-  $("nota-modelo").textContent = NOTA_MODELO;
 
   // ---------- Panel de equipo ----------
   const panel = $("panel-equipo");

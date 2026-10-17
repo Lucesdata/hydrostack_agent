@@ -99,7 +99,3 @@ export const DEMOS = {
   licencias: { titulo: "Licencias", texto: "Sección de demostración: no se muestran licencias porque Biosfera aún no ha aportado la información verificada." },
   terminos: { titulo: "Aviso", texto: "Demostración visual. No es una réplica técnica exacta ni representa capacidades, estadísticas o datos comerciales." },
 };
-
-export const NOTA_MODELO =
-  "Modelo 3D simplificado, no es una réplica técnica exacta. Visualización conceptual de separación: no afirma un mecanismo específico. " +
-  "No todos los residuos peligrosos y RAEE pasan por el tromel.";

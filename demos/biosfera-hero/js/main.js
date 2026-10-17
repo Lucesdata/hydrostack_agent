@@ -87,7 +87,6 @@ async function iniciarEscena() {
     const [{ cargarPlanta }, { buildPlant }] = await Promise.all([import("./modelo.js"), import("./machinery.js")]);
     const planta = await cargarPlanta({ ruta: new URLSearchParams(location.search).get("modelo") || MODELO, mapa: new URLSearchParams(location.search).get("mapa") || MAPA, construirPropia: buildPlant });
     $("lienzo").dataset.modelo = planta.informe.origen;
-    if (planta.nota) $("nota-modelo").textContent += " " + planta.nota;
     escena = m.crearEscena({ host: $("lienzo"), equipos: EQUIPOS, marcadores: ui.marcadores, reducirMovimiento: reducir, pedirCuadro: pedir, planta });
     if (new URLSearchParams(location.search).has("debug")) console.info("[biosfera] modelo:", planta.informe);
   } catch (err) {
