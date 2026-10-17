@@ -92,6 +92,7 @@ h1 { margin: 0; font-family: var(--fuente-titulo); font-weight: 800; text-transf
 .marcador__num { position: absolute; inset: 7px; display: grid; place-items: center; background: var(--noche); color: #fff; border: 2px solid #fff; border-radius: 50%; font-weight: 600; font-size: 0.9rem; box-shadow: 0 0 0 2px var(--noche); }
 .marcador__etq { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); white-space: nowrap; padding: 3px 8px; background: var(--papel); border: 2px solid var(--noche); font-size: 0.78rem; font-weight: 600; pointer-events: none; }
 .marcador[data-lado="izq"] .marcador__etq { left: auto; right: 40px; }
+.marcador[data-sin-etq="true"]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .marcador__etq { display: none; }
 .marcador[aria-pressed="true"] .marcador__num { background: var(--verde-claro); color: var(--noche); box-shadow: 0 0 0 3px var(--noche), 0 0 0 6px var(--verde-claro); }
 .marcador[aria-pressed="true"] .marcador__etq { background: var(--noche); color: #fff; }
 .marcador:hover .marcador__num { background: var(--verde); }
@@ -171,7 +172,7 @@ h1 { margin: 0; font-family: var(--fuente-titulo); font-weight: 800; text-transf
   .hero { min-height: 0; display: flex; flex-direction: column; gap: 20px; }
   .mensaje { width: 100%; min-height: 0; pointer-events: auto; }
   .escena { position: relative; inset: auto; display: flex; flex-direction: column; gap: 12px; }
-  .lienzo { position: relative; inset: auto; height: clamp(320px, 86vw, 560px); border: 2px solid var(--linea); }
+  .lienzo { position: relative; inset: auto; height: clamp(260px, 72vw, 480px); border: 2px solid var(--linea); }
   .vista { right: 12px; top: 12px; }
   .mandos { right: auto; left: 12px; top: auto; bottom: 12px; flex-direction: row; }
   .bajo { position: static; width: 100%; }

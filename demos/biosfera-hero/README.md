@@ -43,7 +43,7 @@ Es un sitio estático: sube la carpeta tal cual a cualquier hosting estático (V
 
 ## Sustituir el modelo 3D
 
-La planta de código es provisional. Un modelo `.glb` externo la reemplaza sin tocar el resto si cumple los nombres de `docs/CONTRATO-MODELO.md`: probarlo con `?modelo=assets/planta.glb&debug` y, cuando esté bien, fijarlo en `js/config.js`. Si falta algo, la página vuelve a la planta de código e indica el motivo en consola.
+El modelo activo es `assets/BIO_planta_v11.glb` (planta armada, comprimida con meshopt) con su mapa de nodos `assets/BIO_planta_v11.mapa.json`. La planta de código (`js/machinery.js`) es solo el respaldo. Un modelo `.glb` externo la reemplaza sin tocar el resto si cumple los nombres de `docs/CONTRATO-MODELO.md`: probarlo con `?modelo=assets/planta.glb&debug` y, cuando esté bien, fijarlo en `js/config.js`. Si falta algo, la página vuelve a la planta de código e indica el motivo en consola.
 
 ## Cómo funciona el recorrido
 

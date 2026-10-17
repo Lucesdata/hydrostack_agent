@@ -10,7 +10,7 @@ Plantilla viva de este contrato: `assets/ejemplo-contrato.glb` (se regenera con 
 - **Unidades: metros. Eje Y arriba.** Origen en el suelo, en el centro de la planta.
 - **El eje del tromel va a lo largo de X.** La alimentación (tolva) queda a la izquierda (−X) y la plataforma a la derecha (+X); el espectador mira desde el cuadrante frontal derecho (+X, +Z). Un modelo de ~15–30 m en X encaja solo: el encuadre se calcula con su volumen.
 - Materiales PBR estándar de glTF (metallic-roughness). Texturas ≤ 2048 px.
-- **Sin compresión Draco, Meshopt ni KTX2** (no hay descodificador incluido; si hace falta comprimir, se añade).
+- **Sin compresión Draco ni KTX2** (Meshopt sí se admite y se recomienda).
 - Peso orientativo: ≤ 150 000 triángulos (más de 300 000 genera un aviso; el móvil sufre).
 - **Nombres sin puntos ni espacios** (three.js los sanea y dejarían de coincidir). Usar `_`.
 
@@ -78,6 +78,28 @@ La separación sigue siendo una **visualización conceptual** de dos corrientes 
 
 Errores que impiden usar el modelo (cae al respaldo): falta algún `grupo_*` o ancla `a_*`, no hay mallas, o su tamaño en X es absurdo (<3 m o >200 m: suele ser un problema de unidades). Todo lo demás son avisos.
 
-## 9. Instrucciones breves para quien construye el modelo
+## 9. Mapa de nodos (para modelos que ya existen con otros nombres)
+
+Si un modelo no usa los nombres de este contrato y no conviene renombrarlo, se añade un archivo `*.mapa.json` que los traduce (se activa con `MAPA` en `js/config.js` o `?mapa=`). Ejemplo real: `assets/BIO_planta_v11.mapa.json`.
+
+| Clave | Contenido |
+|---|---|
+| `grupos` | `{ "tolva": [selector, …], … }`: los nodos que se agrupan en cada `grupo_*`. Un selector es un nombre exacto, o `{ "re": "^Prefijo", "en": "NodoPadre", "nivel": 1 }` (expresión regular sobre nombres saneados; `en` limita a los descendientes de un nodo; `nivel: 1` solo mira hijos directos de la raíz). |
+| `mecanismos` | `{ "tromel": "NombreDelNodoQueGira", "banda": "MallaConTextura" }` |
+| `anclas` | `{ "tolva_pila": [x, y, z], … }`: las 12 anclas del §4, en metros y coordenadas mundo. Se admiten puntos intermedios opcionales `cribado_via1…` y `rechazo_via1…` para trayectos con curvas. |
+| `puntos` | `{ "tromel": [x, y, z], … }`: posición de los marcadores (§5). |
+| `parametros` | `{ "escala": 0.55 }`: tamaño del material y de sus saltos respecto a la planta de respaldo (1 = tromel de 1,5 m de radio). |
+| `camara` | `{ "dir": [x, y, z] }`: dirección de la vista inicial (un modelo largo y estrecho gana con una vista más frontal). |
+| `ocultar` | Selectores de nodos que no deben dibujarse. |
+| `nota` | Texto que se añade al aviso bajo la escena (por ejemplo, módulos supuestos). |
+| `fusionar` | `false` desactiva la fusión de mallas estáticas por material (por defecto activa: reduce las llamadas de dibujo). |
+
+**Herramientas:** `herramientas/inspeccionar-modelo.html?modelo=../assets/x.glb` lista los nodos de primer nivel con su caja en metros, triángulos y animaciones.
+
+**Peso:** conviene comprimir con meshopt (`npx @gltf-transform/cli dedup in.glb a.glb && … weld a.glb b.glb && … meshopt b.glb out.glb --level medium`). El modelo de la planta bajó de 11 MB a 1 MB sin cambiar su aspecto. El descodificador ya está incluido.
+
+**Alojamientos que no sirven `.glb`:** una ruta `*.glb.js` carga un módulo con el binario en base64 (`export default "…"`).
+
+## 10. Instrucciones breves para quien construye el modelo
 
 > Exporta un `.glb` (metros, Y arriba, eje del tromel en X, tolva a la izquierda) con los nodos de `docs/CONTRATO-MODELO.md`: seis `grupo_*`, doce anclas `a_*` como *Empties*, `mec_tromel` (gira sobre X) y `mec_banda` (textura repetible). Sin Draco, sin luces ni cámaras, sin puntos ni espacios en los nombres. Compáralo con `assets/ejemplo-contrato.glb`.

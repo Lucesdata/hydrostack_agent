@@ -5,7 +5,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { crearLote } from "./lote.js";
 
 const OBJETIVO = new THREE.Vector3(1.2, 2.3, 0.4); // se sustituye por el centro del modelo
-const DIR_3D = new THREE.Vector3(13, 11, 19).normalize();
+const DIR_3D = new THREE.Vector3(13, 11, 19).normalize(); // un modelo puede cambiarla con «camara.dir» en su mapa
 const DIR_PLANTA = new THREE.Vector3(0.0, 1, 0.14).normalize();
 const RESALTE = new THREE.Color(0x35d07f);
 
@@ -41,7 +41,16 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
 
   escena.add(planta.root);
   OBJETIVO.copy(planta.encuadre.centro);
-  const lote = crearLote(escena, planta.anclas);
+  if (planta.camara && planta.camara.dir) DIR_3D.set(...planta.camara.dir).normalize();
+  // Losa de apoyo (recibe sombras) si el modelo no trae suelo propio
+  if (!planta.tieneSuelo) {
+    const { tam, centro } = planta.encuadre, margen = 1.6;
+    const losa = new THREE.Mesh(new THREE.BoxGeometry(tam.x + margen * 2, 0.3, tam.z + margen * 2), new THREE.MeshStandardMaterial({ color: 0xdde2d3, roughness: 0.95, metalness: 0 }));
+    losa.position.set(centro.x, -0.15, centro.z); losa.receiveShadow = true; escena.add(losa);
+    const borde = new THREE.LineSegments(new THREE.EdgesGeometry(losa.geometry), new THREE.LineBasicMaterial({ color: 0x13392a }));
+    borde.position.copy(losa.position); escena.add(borde);
+  }
+  const lote = crearLote(escena, planta.anclas, planta.parametros);
   // Las sombras abarcan el modelo, sea cual sea su tamaño
   const radio = Math.max(planta.encuadre.tam.x, planta.encuadre.tam.z) * 0.75;
   Object.assign(sol.shadow.camera, { left: -radio, right: radio, top: radio * 0.85, bottom: -radio * 0.85, far: radio * 4 });
@@ -107,7 +116,7 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
   }
 
   function proyectarMarcadores() {
-    const mover = camaraMovida;
+    const mover = camaraMovida, cajas = [];
     equipos.forEach((e) => {
       const el = marcadores[e.id]; if (!el) return;
       tmp.set(...(planta.puntos[e.id] || e.punto));
@@ -115,9 +124,15 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
       const fuera = ndc.z > 1 || Math.abs(ndc.x) > 1.02 || Math.abs(ndc.y) > 1.02;
       el.hidden = fuera;
       if (fuera) return;
-      const px = ((ndc.x + 1) / 2) * ancho;
-      el.style.transform = `translate(${px}px, ${((1 - ndc.y) / 2) * alto}px)`;
+      const px = ((ndc.x + 1) / 2) * ancho, py = ((1 - ndc.y) / 2) * alto;
+      el.style.transform = `translate(${px}px, ${py}px)`;
       el.dataset.lado = px > ancho * 0.8 ? "izq" : "der";
+      // La etiqueta de texto se omite si choca con otra ya colocada (queda el número)
+      const w = (e.corto.length * 7.4 + 22), x0 = el.dataset.lado === "izq" ? px - 40 - w : px + 40;
+      const caja = [x0, py - 14, x0 + w, py + 14];
+      const choca = cajas.some((c) => caja[0] < c[2] && caja[2] > c[0] && caja[1] < c[3] && caja[3] > c[1]);
+      el.dataset.sinEtq = choca ? "true" : "false";
+      if (!choca) cajas.push(caja);
       if (mover) {
         const dir = tmp.clone().sub(camara.position), dist = dir.length();
         raycaster.set(camara.position, dir.normalize()); raycaster.far = dist;
@@ -147,7 +162,7 @@ export function crearEscena({ host, equipos, marcadores, reducirMovimiento, pedi
 
       if (T !== ultimoT) { lote.update(T); ultimoT = T; }
       const ciclo = Math.max(0, tMec - 5.6);
-      if (planta.rot) planta.rot.rotation.x = -0.9 * ciclo;
+      planta.girar(-0.9 * ciclo);
       if (planta.texBanda) planta.texBanda.offset.x = -1.4 * ciclo;
       resaltar(resaltos);
 

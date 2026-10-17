@@ -37,10 +37,10 @@ export const ZONAS = {
 // Línea de tiempo del recorrido (segundos). El estado completo es función pura del tiempo.
 export const TIEMPOS = {
   recepcion: [0, 6],
-  tratamiento: [6, 24],
-  documentacion: [24, 29],
-  certificado: [29, 33],
-  fin: 33,
+  tratamiento: [6, 28],
+  documentacion: [28, 33],
+  certificado: [33, 37],
+  fin: 37,
 };
 
 export const ETAPAS = [
@@ -55,11 +55,11 @@ export const ETAPAS = [
   { id: "documentacion", n: 3, titulo: "Documentación", breve: "Cada lote queda documentado.",
     icono: "documento",
     explicacion: "Terminado el paso del lote, se muestra su registro asociado al mismo identificador. Los datos de este ejemplo son ilustrativos.",
-    revisar: 26 },
+    revisar: 30 },
   { id: "certificado", n: 4, titulo: "Certificado", breve: "Usted recibe el certificado de disposición de su lote.",
     icono: "certificado",
     explicacion: "El recorrido cierra con una representación documental del lote procesado. Es un ejemplo ilustrativo, no un certificado real.",
-    revisar: 32 },
+    revisar: 36 },
 ];
 
 // Registro y certificado ilustrativos: sin mediciones. "—" = dato por registrar.
