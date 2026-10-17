@@ -1,5 +1,19 @@
 # AquaLicita — Instrucciones del Proyecto
 
+> ## REGLA INVIOLABLE: AquaLicita y Biosfera son dos proyectos distintos (2026-10-17)
+>
+> Este repositorio (`Lucesdata/hydrostack_agent`) es **solo AquaLicita**. Biosfera
+> —su landing, su hero 3D, su modelo de planta, sus textos, sus assets y sus docs—
+> vive **únicamente** en `https://github.com/Lucesdata/biosfera-landing`.
+>
+> - Nunca se añade a este repo código, carpetas, dependencias, imágenes, modelos,
+>   notas ni referencias de Biosfera, ni siquiera como demo, borrador o respaldo.
+> - Nunca se prueba, ensaya ni "aparca" trabajo de Biosfera en una rama de este repo.
+> - Si una tarea habla de Biosfera, se trabaja en el repo de Biosfera. Si no está
+>   claro en cuál repo va algo, se pregunta **antes** de crear ramas o PR.
+> - Esta regla no se relaja por comodidad, por urgencia ni porque "no se despliegue":
+>   ya hubo un error así (#147, revertido en #148) y no debe repetirse.
+
 **Reemplazo de la ficha operativa (2026-10-06, rama `codex/ficha-operativa-viva-actual`).**
 La ruta `/licitaciones/[slug]` conserva URL canónica, JSON-LD e ISR de 12 h y
 sustituye las preguntas por una ficha oscura de lectura continua. Hero ilustrativo,
