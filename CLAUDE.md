@@ -403,6 +403,16 @@ colores se miden en `contraste-tu-perfil.test.ts`. La miniatura del semáforo
 (`semaforo.webp`) se generó pero no se usa. No añadir precios, preguntas
 frecuentes ni mercado a la portada.
 
+**Marco global: navbar fijo y pie (2026-10-22).** El navbar es `position: sticky`
+y su contenedor es el `body`: con `height: 100%` el body medía una pantalla y el
+navbar dejaba de ser fijo a los ~830 px de scroll (en la portada, antes de la
+tercera sección). Ahora es `min-height: 100%` y **no se vuelve a fijar la altura
+ni a poner `overflow: hidden` en el body**. El pie (`S6Footer.jsx`) usa el azul
+noche de la portada (`COLORES_PIE`, `#061423` = `.tema-oscuro --bg`) y el borde
+tenue de la barra, en todas las páginas; antes era un verde casi negro con una
+línea casi blanca que en la portada se veía como otra web pegada. Lo vigila
+`src/__tests__/design/layout-global.test.ts`.
+
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,

@@ -198,7 +198,10 @@ body {
   background: var(--deep1);
   color: var(--white);
   font-family: var(--mono);
-  height: 100%;
+  /* min-height y no height: con height:100% el body mide una pantalla y el
+     contenido desborda; el contenedor de un position:sticky es el body, así
+     que el navbar dejaba de ser fijo a los ~830 px de scroll (2026-10-22). */
+  min-height: 100%;
   /* clip y no hidden: hidden convierte al body en contenedor de scroll y
      rompe cualquier position:sticky que cuelgue de él. */
   overflow-x: clip;

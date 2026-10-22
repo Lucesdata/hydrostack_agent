@@ -15,9 +15,21 @@ import { COLUMNAS_PIE, NOMBRE_POR_ID, ruta } from "./seccionesHome";
 
 const href = (id) => ruta(id).href;
 
+// El pie usa el azul noche de la portada (#061423) y el borde tenue de la barra
+// de navegación. Era un verde casi negro (#070E0C) con una línea casi blanca
+// (#DADAD2): sobre la portada se veía como otra web pegada debajo (2026-10-22).
+// Los contrastes los mide src/__tests__/design/pie.test.ts.
+export const COLORES_PIE = {
+  fondo: "#061423",
+  borde: "rgba(140, 190, 225, 0.16)",
+  separador: "rgba(140, 190, 225, 0.14)",
+  texto: "#9fb4c6",
+  grupo: "#7dd3fc",
+};
+
 const linkStyle = {
   font: "13px var(--font-inter)",
-  color: "#8A938F",
+  color: COLORES_PIE.texto,
   textDecoration: "none",
   display: "flex",
   alignItems: "center",
@@ -30,8 +42,8 @@ export default function S6Footer() {
     <footer
       style={{
         padding: "48px var(--gutter) 32px",
-        background: "#070E0C",
-        borderTop: "1px solid #DADAD2",
+        background: COLORES_PIE.fondo,
+        borderTop: `1px solid ${COLORES_PIE.borde}`,
       }}
     >
       <div
@@ -49,7 +61,7 @@ export default function S6Footer() {
             <div
               style={{
                 font: "10px var(--font-jetbrains-mono),monospace",
-                color: "#7DD3FC",
+                color: COLORES_PIE.grupo,
                 textTransform: "uppercase",
                 letterSpacing: ".12em",
                 marginBottom: 12,
@@ -69,9 +81,9 @@ export default function S6Footer() {
       <div
         style={{
           textAlign: "center",
-          color: "#8A938F",
+          color: COLORES_PIE.texto,
           font: "12px var(--font-inter)",
-          borderTop: "1px solid rgba(255,255,255,0.12)",
+          borderTop: `1px solid ${COLORES_PIE.separador}`,
           paddingTop: 24,
         }}
       >
