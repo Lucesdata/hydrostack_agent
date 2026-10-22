@@ -387,12 +387,21 @@ Rules:
 **Portada en tres secciones (2026-10-22, rama `ccr-458ae577-hfois8`).** Decisión
 del usuario: la portada son tres y no se apilan más sin una razón medida —
 (1) hero «Explora el mapa», (2) Ficha Viva, (3) `TuPerfil`
-(`src/components/landing/tu-perfil/`, «¿Puedes participar?»): cierre hacia la
-cuenta gratuita con cuatro beneficios que ya existen y son `gratis` en
-`politica.ts` (semáforo con perfil, análisis de pliego, guardar, alertas
-diarias), «Crear cuenta gratis» → `/registro` y diagnóstico sin cuenta →
-`/diagnostico`. Sin cifras; un test vigila que lo prometido sea gratuito. No
-añadir precios, preguntas frecuentes ni mercado a la portada.
+(`src/components/landing/tu-perfil/`, «¿Puedes participar?»). **Rediseño de la
+tercera (mismo día)** según un mockup aprobado: fondo y miniaturas **generados**
+(`public/portada/*.webp`, ≈175 KB, decorativos: `alt=""`, `loading="lazy"`, sin
+texto ni datos; todo el texto es HTML), eyebrow, titular con degradado, el
+diagnóstico sin cuenta como botón principal y «Crear cuenta gratis» secundario,
+un ejemplo del semáforo y tres tarjetas enlazadas por su título (`::after`).
+Apartados del mockup a propósito: el ejemplo usa las **cinco compuertas reales**
+(`ETIQUETA_COMPUERTA`, `PALABRA_ESTADO`) rotuladas «Ejemplo ilustrativo», sin
+cifras (el mockup contaba «4 requisitos»); «Tus datos solo los ves tú» y no
+«siempre privados» (política de datos pendiente, PENDIENTES §18); las alertas
+dicen «nuevos procesos», no «cambios», y el pliego no promete «criterios». Todo
+lo que promete como gratuito lo es en `politica.ts` y un test lo vigila; los
+colores se miden en `contraste-tu-perfil.test.ts`. La miniatura del semáforo
+(`semaforo.webp`) se generó pero no se usa. No añadir precios, preguntas
+frecuentes ni mercado a la portada.
 
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
