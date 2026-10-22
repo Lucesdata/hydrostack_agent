@@ -15,7 +15,8 @@ const BENEFICIOS = [
   {
     clave: "semaforo",
     titulo: "Semáforo con tu perfil",
-    texto: "Cada proceso se compara con tu experiencia, tu capacidad y tu zona, compuerta por compuerta.",
+    texto:
+      "Cada proceso se compara con tu experiencia, tu capacidad y tu zona, compuerta por compuerta.",
     icono: (
       <>
         <rect x="8" y="2" width="8" height="20" rx="4" />
