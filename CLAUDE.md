@@ -384,6 +384,16 @@ Rules:
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
 
 
+**Portada en tres secciones (2026-10-22, rama `ccr-458ae577-hfois8`).** Decisión
+del usuario: la portada son tres y no se apilan más sin una razón medida —
+(1) hero «Explora el mapa», (2) Ficha Viva, (3) `TuPerfil`
+(`src/components/landing/tu-perfil/`, «¿Puedes participar?»): cierre hacia la
+cuenta gratuita con cuatro beneficios que ya existen y son `gratis` en
+`politica.ts` (semáforo con perfil, análisis de pliego, guardar, alertas
+diarias), «Crear cuenta gratis» → `/registro` y diagnóstico sin cuenta →
+`/diagnostico`. Sin cifras; un test vigila que lo prometido sea gratuito. No
+añadir precios, preguntas frecuentes ni mercado a la portada.
+
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,

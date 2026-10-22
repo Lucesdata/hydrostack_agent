@@ -11,6 +11,7 @@
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
 import { frase } from "@/src/components/landing/texto";
 import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
+import TuPerfil from "@/src/components/landing/tu-perfil/TuPerfil";
 import { procesosDe } from "@/src/lib/landing/destacados-portada";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
@@ -70,6 +71,11 @@ export default function LandingPage({ mapa = null, destacados = null, conteos = 
             hero. Va justo después del hero porque el hero existe para llevar a
             una ficha. */}
         <FichaViva destacado={destacado} />
+
+        {/* Tercera y última sección (2026-10-22): «¿Puedes participar?», el
+            cierre hacia la cuenta gratuita. La portada son estas tres y no se
+            apilan más sin una razón medida. */}
+        <TuPerfil />
       </div>
     </div>
   );
