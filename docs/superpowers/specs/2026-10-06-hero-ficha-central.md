@@ -1,5 +1,7 @@
 # Hero territorial con ficha central — spec de cambios
 
+> **Estado: Histórica / sustituida.** Parcialmente sustituida por `2026-10-07-hero-tres-destacados.md` (la muestra al azar, los grupos de cinco, el recorrido y la navegación ← · puntos · →; la composición, la etiqueta flotante y el alto siguen vigentes). Conservada como historia (2026-10-24).
+
 **Fecha:** 2026-10-06 · **Sustituye a:** `2026-10-04-hero-cinco-minifichas.md` (solo la composición y la fila de cinco tarjetas; el contrato de datos y la consulta no cambian).
 **Prototipo de referencia:** `Hero AquaLicita v2 ficha central.dc.html` (procesos ficticios; las cifras y los textos son ilustrativos).
 **Destino sugerido en el repo:** `docs/superpowers/specs/2026-10-06-hero-ficha-central.md`.

@@ -14,8 +14,25 @@
 > - Esta regla no se relaja por comodidad, por urgencia ni porque "no se despliegue":
 >   ya hubo un error así (#147, revertido en #148) y no debe repetirse.
 
+**Consolidación para lanzamiento (2026-10-24, rama `claude/consolidacion-lanzamiento-a`, PR A).**
+Tres recorridos con significado propio: **diagnóstico** (`/diagnostico`, preparación
+general, sin cuenta, no verifica un proceso ni recoge pliego, RUP, experiencia o
+capacidad financiera), **coincidencias** (`/mis-coincidencias`, cruce preliminar
+proceso–perfil, pide cuenta y perfil, «sin datos» donde falte evidencia) y **ficha
+pública** (informativa, sin evaluación personalizada). La sección «¿Puedes
+participar?» de la portada se reescribió: «¿Estás preparado para participar?», la
+tarjeta del semáforo enlaza a `/mis-coincidencias` y las **alertas por correo
+figuran «en validación»** (el cron de `vercel.json` y la ruta existen, pero con
+`ALERT_EMAILS_ENABLED` distinto de `true` la ruta responde 200 sin enviar: un 200
+no demuestra entrega). «Adenda» solo se dice de un documento o evento oficial;
+la detección es «cambios detectados en SECOP». La ficha dice `revalidate = 259200`
+(72 h), no 12 h: la frescura real también depende de la ingesta, las visitas y
+los fallos de regeneración (decisión pendiente en el PR B). Spec, hallazgos y
+criterios: `docs/superpowers/specs/2026-10-24-consolidacion-lanzamiento.md`;
+índice de specs: `docs/superpowers/specs/INDICE.md`.
+
 **Reemplazo de la ficha operativa (2026-10-06, rama `codex/ficha-operativa-viva-actual`).**
-La ruta `/licitaciones/[slug]` conserva URL canónica, JSON-LD e ISR de 12 h y
+La ruta `/licitaciones/[slug]` conserva URL canónica y JSON-LD, con ISR de 72 h (`revalidate = 259200`, desde #146; antes 12 h) y
 sustituye las preguntas por una ficha oscura de lectura continua. Hero ilustrativo,
 KPIs, guía temporal, objeto, situación, cambios, requisitos públicos, información
 general/técnica, presupuesto, cronograma, proponentes, documentos y SECOP.
@@ -847,7 +864,7 @@ sección en el hash y permiten Atrás. Un enlace directo a una sección (`#ficha
 se vuelve a apuntar al cargar, sin animación: el navegador salta con las siete
 visibles y el `scroll-behavior: smooth` competiría. `#pliego` y `#pliego=…` abren «Participar»,
 que conserva el semáforo, `PliegoFicha` y `RivalesFicha`. Las fuentes se despliegan
-por sección. Sigue la misma URL, las mismas consultas y el ISR de 12 horas.
+por sección. Sigue la misma URL, las mismas consultas y la misma estrategia de ISR (hoy 72 h, ver arriba).
 Las fechas de publicación/recepción son columnas DATE: conservar su día de
 calendario, sin convertir medianoche UTC al día anterior en Colombia.
 La compuerta de plazo toma `fecha_recepcion` cuando no hay cronograma del pliego

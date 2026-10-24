@@ -17,6 +17,13 @@ viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 | Interfaz y eficiencia | §24–26, §46, §47, §50 | Contraste, estilos heredados, funcionalidades planificadas y consultas sin consumidores |
 | Decisiones de producto | §11, §12, §14, §29–30 | Confirmar alcance y límites antes de implementar |
 
+**Revisión 2026-10-24** (spec `docs/superpowers/specs/2026-10-24-consolidacion-lanzamiento.md`):
+la promesa de alertas queda «en validación» (§0, §44); la ficha usa ISR de 72 h, no
+12 h (PR B decidirá la frescura); hay cuatro migraciones numeradas `0025`
+(`0025_indices_proceso_id_ficha` ya en main; #39, #97 y #112 traen la suya, ver
+`docs/superpowers/specs/2026-10-24-destino-pr-abiertos.md`); el estado del
+checklist de lanzamiento está en `docs/superpowers/specs/2026-10-24-validacion-lanzamiento.md`.
+
 §19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
 ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es
 historial del bloqueo del mapa y del hero, ya construidos. §49 registra la

@@ -15,8 +15,11 @@ import styles from "./tu-perfil.module.css";
  *    ilustrativo», **sin cifras**: el mockup contaba «4 requisitos» y el
  *    semáforo tiene cinco compuertas, no siete requisitos.
  *  - Solo promete lo que existe y es gratis (`NIVEL_MINIMO` en
- *    acceso/politica.ts): sin «cambios» en las alertas (hoy avisan de procesos
- *    nuevos) ni «criterios» en el pliego (el extractor no los saca).
+ *    acceso/politica.ts): sin «criterios» en el pliego (el extractor no los saca).
+ *  - 2026-10-24: el diagnóstico se presenta como preparación general (no verifica
+ *    un proceso concreto), el semáforo enlaza al cruce real (`/mis-coincidencias`)
+ *    y las alertas figuran «en validación» sin enlace: la entrega no está
+ *    demostrada (spec 2026-10-24-consolidacion-lanzamiento).
  *  - «Tus datos solo los ves tú» en vez de «siempre privados»: la política de
  *    tratamiento está pendiente (PENDIENTES §18).
  * Cada tarjeta es un enlace por su título (`::after` cubre la tarjeta, como la
@@ -60,8 +63,9 @@ const TARJETAS = [
   },
   {
     clave: "alertas",
-    titulo: "Alertas diarias",
-    texto: "Recibe en tu correo los nuevos procesos que encajan con tu perfil.",
+    titulo: "Alertas por correo — en validación",
+    texto: "Aún no enviamos avisos por correo: comprobamos la entrega antes de activarlos.",
+    enValidacion: true,
     imagen: "/portada/alertas.webp",
     icono: (
       <>
@@ -153,14 +157,14 @@ export default function TuPerfil() {
 
       <div className={styles.contenedor}>
         <div className={styles.mensaje}>
-          <p className={styles.eyebrow}>Verifica tu elegibilidad</p>
+          <p className={styles.eyebrow}>Tu preparación general</p>
           <h2 id="tu-perfil-titulo">
-            <span className={styles.pregunta}>¿Puedes participar?</span>{" "}
-            <span className={styles.degradado}>Compruébalo antes de leer el pliego.</span>
+            <span className={styles.pregunta}>¿Estás preparado</span>{" "}
+            <span className={styles.degradado}>para participar?</span>
           </h2>
           <p className={styles.frase}>
-            AquaLicita cruza cada proceso con tu experiencia, capacidad y zona de trabajo. En
-            minutos sabrás qué cumples y qué te falta.
+            Evalúa tu preparación general y descubre qué aspectos debes fortalecer antes de revisar
+            un proceso.
           </p>
           <div className={styles.acciones}>
             <Link className={styles.principal} href="/diagnostico">
@@ -190,11 +194,14 @@ export default function TuPerfil() {
             </Icono>
             <div>
               <h3>
-                <Link className={styles.cubre} href="/diagnostico">
-                  Semáforo con tu perfil
+                <Link className={styles.cubre} href="/mis-coincidencias">
+                  Compara procesos con tu perfil
                 </Link>
               </h3>
-              <p>Compara los requisitos del proceso con tu experiencia y capacidades.</p>
+              <p>
+                Revisa el encaje según la información disponible del proceso y los datos que
+                declares en tu perfil. Requiere cuenta y perfil.
+              </p>
             </div>
             <Flecha />
           </div>
@@ -218,8 +225,8 @@ export default function TuPerfil() {
               <circle cx="12" cy="12" r="9.5" />
               <path d="M12 11v5M12 8h.01" />
             </Icono>
-            Resultado preliminar basado en la información del proceso y tu perfil. Revisa siempre el
-            pliego.
+            Resultado preliminar basado en la información del proceso y tu perfil. Donde falte
+            información verás «sin datos». Revisa siempre el pliego vigente.
           </p>
         </article>
 
@@ -241,13 +248,17 @@ export default function TuPerfil() {
               </Icono>
               <div className={styles.lateralTexto}>
                 <h3>
-                  <Link className={styles.cubre} href="/registro">
-                    {t.titulo}
-                  </Link>
+                  {t.enValidacion ? (
+                    t.titulo
+                  ) : (
+                    <Link className={styles.cubre} href="/registro">
+                      {t.titulo}
+                    </Link>
+                  )}
                 </h3>
                 <p>{t.texto}</p>
               </div>
-              <Flecha />
+              {!t.enValidacion && <Flecha />}
             </article>
           ))}
         </div>
