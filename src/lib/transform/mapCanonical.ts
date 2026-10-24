@@ -15,6 +15,7 @@
 import { cleanText, parseBool, parseDate, parseMoney } from "./normalize";
 import { canonicalizeNit, normalizeTipoDoc } from "./nit";
 import { normalizeGeoText } from "./geo";
+import { mapLote1Contrato, mapLote1Proceso, type Lote1Contrato, type Lote1Proceso } from "./lote1";
 
 type SodaRow = Record<string, unknown>;
 
@@ -52,7 +53,7 @@ export interface GeoHints {
   municipio: string | null;
 }
 
-export interface ProcesoProjection {
+export interface ProcesoProjection extends Lote1Proceso {
   secopProcesoId: string;
   portafolioId: string | null; // CO1.BDOS — llave de enlace con contrato (D11/H1)
   referencia: string | null;
@@ -78,7 +79,7 @@ export interface ProcesoProjection {
   geo: GeoHints;
 }
 
-export interface ContratoProjection {
+export interface ContratoProjection extends Lote1Contrato {
   secopContratoId: string;
   procesoDeCompra: string | null; // → proceso.portafolioId (H1); resolución diferida (D11)
   referencia: string | null;
@@ -148,6 +149,7 @@ export function mapProcesoRow(row: SodaRow): ProcesoProjection {
     fechaAdjudicacion: parseDate(row["fecha_adjudicacion"]),
     estadoApertura: cleanText(row["estado_de_apertura_del_proceso"]),
     fechaRecepcion: parseDate(row["fecha_de_recepcion_de"]),
+    ...mapLote1Proceso(row),
     entidad: buildEntidad(row["nit_entidad"], row["entidad"], row["ordenentidad"], null, null),
     geo: {
       departamento: normalizeGeoText(row["departamento_entidad"]),
@@ -191,6 +193,7 @@ export function mapContratoRow(row: SodaRow): ContratoProjection {
     valorPendientePago: parseMoney(row["valor_pendiente_de_pago"]),
     unspsc: cleanText(row["codigo_de_categoria_principal"]),
     url: urlDe(row["urlproceso"]),
+    ...mapLote1Contrato(row),
     entidad: buildEntidad(
       row["nit_entidad"],
       row["nombre_entidad"],
