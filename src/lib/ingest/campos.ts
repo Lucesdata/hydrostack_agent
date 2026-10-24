@@ -12,6 +12,7 @@
  */
 
 import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from "@/src/lib/secop/config";
+import { CAMPOS_LOTE1_PROCESOS, CAMPOS_LOTE1_CONTRATOS } from "@/src/lib/transform/lote1";
 import { SOURCE_PROCESOS, SOURCE_CONTRATOS, type IngestSourceKey } from "./sources";
 
 /** Consumidos por mapProcesoRow sin estar en FIELDS_PROCESOS. */
@@ -19,6 +20,7 @@ const EXTRA_PROCESOS = [
   "id_del_portafolio", // → proceso.portafolio_id, llave de enlace con contrato (D11/H1)
   "id_estado_del_procedimiento", // → proceso.estado_codigo
   "ordenentidad", // → entidad.nivel_gobierno
+  ...CAMPOS_LOTE1_PROCESOS, // → proceso.duracion_valor / duracion_unidad (Lote 1)
 ] as const;
 
 /** Consumidos por mapContratoRow sin estar en FIELDS_CONTRATOS. */
@@ -40,6 +42,7 @@ const EXTRA_CONTRATOS = [
   "valor_facturado", // → contrato.valorFacturado
   "valor_pagado", // → contrato.valorPagado
   "valor_pendiente_de_pago", // → contrato.valorPendientePago
+  ...CAMPOS_LOTE1_CONTRATOS, // → origen/destino/fuentes de recursos, días adicionados, liquidación (Lote 1)
 ] as const;
 
 export function camposDe(source: IngestSourceKey): string[] {
