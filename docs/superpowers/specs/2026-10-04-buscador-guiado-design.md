@@ -1,5 +1,7 @@
 # AquaLicita — Buscador guiado
 
+> **Estado: Histórica / sustituida.** Sustituida el 2026-10-05: el buscador guiado se unificó con la vitrina `/licitaciones` (ver CLAUDE.md, «Un solo buscador»). Conservada como historia (2026-10-24).
+
 Fecha: 2026-10-04. Estado: alternativa visual 1 y recomendación de guardado
 con cuenta gratuita aceptadas por el usuario. Diseño cerrado para planificación;
 el plan de ejecución se revisa antes de implementar.

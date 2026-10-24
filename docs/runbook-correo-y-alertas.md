@@ -8,6 +8,15 @@ que rehacer. Sustituye a `PENDIENTES-CORREO.md` como guía de ejecución; ese
 archivo queda como historia del diagnóstico del 2026-09-07. Al final hay una
 sección con lo que de él ya no aplica.
 
+> **Nota 2026-10-24.** Este runbook se escribió el 2026-09-19. Desde entonces
+> `alertas` entró en `vercel.json` (12:00 UTC) y `ALERT_EMAILS_ENABLED` bloquea el
+> envío. Un cron programado o una respuesta 200 **no** demuestran entrega: con la
+> variable apagada la ruta responde `{ok:true, disabled:true}`. La promesa pública es
+> «Alertas por correo — en validación» hasta tener, juntas: configuración de
+> producción comprobada, ejecución programada observada, un envío real a una cuenta de
+> prueba y su correlación con el evento del webhook de Resend en `envio_log`. La tabla
+> «Estado de partida» de abajo es la del 2026-09-19.
+
 Quién lo ejecuta: el dueño del proyecto, con sus credenciales de Resend, Vercel
 y Supabase. Ningún paso de este documento es código. La única pieza que vive en
 el repo —los crons de `vercel.json`— está en el paso 10.

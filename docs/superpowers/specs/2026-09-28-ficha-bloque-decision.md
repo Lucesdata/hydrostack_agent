@@ -1,5 +1,7 @@
 # La ficha que decide: bloque de decisión arriba del todo
 
+> **Estado: Histórica / sustituida.** Sustituida en la ficha por `2026-10-06-ficha-operativa-viva.md` (el `BloqueDecision` se retiró de `/licitaciones/[slug]`; sigue en el panel del Radar de la vitrina). Conservada como historia (2026-10-24).
+
 **Fecha:** 2026-09-28 · **Estado:** spec con las tres decisiones cerradas por el usuario (2026-09-28);
 falta el plan.
 **Maqueta:** escritorio y móvil, con los tres estados conmutables, en el lienzo

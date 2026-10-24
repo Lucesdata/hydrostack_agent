@@ -163,8 +163,8 @@ export default function ComoRazonaFicha() {
     <div className={styles.razona}>
       <Esquema />
       <p className={styles.cambios}>
-        <strong>Seguir sus cambios</strong> — adendas, cambios de estado y adjudicación dentro de la
-        propia ficha.{" "}
+        <strong>Seguir sus cambios</strong> — avisarte de los cambios detectados en SECOP, como un
+        cambio de estado o una adjudicación.{" "}
         <span className={styles.estado} data-estado="construccion">
           {EN_CONSTRUCCION}
         </span>{" "}

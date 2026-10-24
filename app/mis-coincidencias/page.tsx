@@ -257,7 +257,7 @@ export default async function MisCoincidenciasPage({ searchParams }: Props) {
         <p className="clr-mc-sub" style={{ margin: "0 0 24px" }}>
           {matches.length} proceso{matches.length === 1 ? "" : "s"} del sector agua que calzan con
           tu perfil. <Link href="/perfil">Completa tu perfil RUP</Link> para ver también tu semáforo
-          de elegibilidad y recibir alertas por correo.
+          de elegibilidad. Las alertas por correo están en validación.
         </p>
         <PanelBloqueantes diagnostico={diagnostico} />
         {hayRegimenPrivado(matches, diagnostico) && (

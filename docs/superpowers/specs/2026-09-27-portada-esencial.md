@@ -1,5 +1,7 @@
 # Spec — Portada esencial (D)
 
+> **Estado: Histórica / sustituida.** Parcialmente sustituida: el hero de dos zonas lo reemplazó `2026-10-02-hero-mapa-ficha.md` y sucesoras; la retirada de secciones de la portada sigue vigente. Conservada como historia (2026-10-24).
+
 **Fecha:** 2026-09-27 · **Plan:** `docs/superpowers/plans/2026-09-27-portada-esencial.md`
 
 ## Por qué
