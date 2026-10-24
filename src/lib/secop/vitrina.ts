@@ -29,6 +29,7 @@ import { DESDE_CICLO_DE_VIDA, type ContratoFicha } from "./como-se-contrato";
 import { etapaDeProceso, NOMBRE_ETAPA } from "./etapa";
 import { contratosDeProcesos } from "./ficha";
 import { patronDeActividad, tiposDeSistema } from "./busqueda-guiada";
+import { hoyEnColombia } from "./hoy-colombia";
 
 export const PESTANAS_VITRINA = ["abiertos", "adjudicados"] as const;
 export type PestanaVitrina = (typeof PESTANAS_VITRINA)[number];
@@ -155,7 +156,7 @@ function condicionDe(pestana: PestanaVitrina) {
  * resuelve como semijoin con una sola pasada por la tabla, no por fila.
  */
 function condicionDeEtapa(etapa: EtapaFiltro): SQL {
-  const hoy = sql`(now() at time zone 'America/Bogota')::date`;
+  const hoy = hoyEnColombia();
   const fin = sql`coalesce(c.fecha_fin_actual, c.fecha_fin_inicial)`;
   const porFechas =
     etapa === "contratado"
@@ -205,7 +206,7 @@ export function tramoDeRelevancia(): SQL<number> {
     sql`, `
   );
   return sql<number>`case
-    when ${proceso.fechaRecepcion} < (now() at time zone 'America/Bogota')::date then 2
+    when ${proceso.fechaRecepcion} < ${hoyEnColombia()} then 2
     when ${proceso.tipoProyecto} in (${tiposDeAgua}) then 0
     else 1
   end`;
