@@ -19,6 +19,7 @@ import { CLASES_ENTIDAD, CLASE_ENTIDAD, sqlClaseEntidad, type ClaseEntidad } fro
 // Pura y sin base: vive en ./slug para que el navegador pueda importarla.
 import { slugificar } from "./slug";
 import { ESTADOS_ABIERTO } from "./estados-abierto";
+import { hoyEnColombia } from "./hoy-colombia";
 
 export { slugificar };
 
@@ -53,7 +54,7 @@ export function condicionAbierto() {
     inArray(proceso.estadoActual, [...ESTADOS_ABIERTO]),
     // `fecha_recepcion` es DATE: el día de calendario, que cierra al final del
     // día en Colombia. NULL no pasa (`>=` con NULL es desconocido).
-    gte(proceso.fechaRecepcion, sql`(now() at time zone 'America/Bogota')::date`)
+    gte(proceso.fechaRecepcion, hoyEnColombia())
   );
 }
 
