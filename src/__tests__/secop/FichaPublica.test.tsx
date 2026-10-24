@@ -9,6 +9,7 @@ const datos = vi.hoisted(() => ({
   competidores: vi.fn(),
   contratos: vi.fn(),
   cambios: vi.fn(),
+  frescura: vi.fn(),
 }));
 vi.mock("@/src/lib/secop/ficha", async (original) => ({
   ...(await original<object>()),
@@ -16,6 +17,10 @@ vi.mock("@/src/lib/secop/ficha", async (original) => ({
   competidoresComparables: datos.competidores,
   contratosDeProceso: datos.contratos,
   cambiosDeProceso: datos.cambios,
+}));
+vi.mock("@/src/lib/secop/frescura", async (original) => ({
+  ...(await original<object>()),
+  frescuraDeProceso: datos.frescura,
 }));
 vi.mock("@/src/lib/secop/pliego-ficha", () => ({ pliegoDeProceso: datos.pliego }));
 vi.mock("@/src/lib/secop/pliego-actions", () => ({ subirPliegoDesdeFichaAction: vi.fn() }));
@@ -82,6 +87,24 @@ describe("Ficha pública para explorar desde el celular", () => {
     datos.competidores.mockResolvedValue([]);
     datos.contratos.mockResolvedValue([]);
     datos.cambios.mockResolvedValue({ cambios: [], error: false });
+    datos.frescura.mockResolvedValue({
+      sincronizacion: "2026-10-19T11:57:00.000Z",
+      publicadoSecop: "2026-10-17T08:30:00.000Z",
+      error: false,
+    });
+  });
+  it("muestra por separado la sincronización de AquaLicita y lo publicado en SECOP", async () => {
+    const salida = await html();
+    expect(salida).toContain("Última sincronización de AquaLicita:");
+    expect(salida).toContain("Última actualización publicada en SECOP:");
+    expect(salida).toContain("puede haber cambios posteriores");
+    expect(salida).not.toContain("Registro actualizado en AquaLicita");
+  });
+  it("sin fechas lo dice en vez de inventarlas", async () => {
+    datos.frescura.mockResolvedValue({ sincronizacion: null, publicadoSecop: null, error: true });
+    const salida = await html();
+    expect(salida).toContain("Última sincronización de AquaLicita: no disponible");
+    expect(salida).toContain("Última actualización publicada en SECOP: no disponible");
   });
   it("ofrece una ficha completa y requisitos públicos sin evaluación de perfil", async () => {
     const salida = await html();

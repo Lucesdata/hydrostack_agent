@@ -10,6 +10,8 @@ import RelojFicha, {
 import GuiaTemporal from "@/src/components/secop/ficha/GuiaTemporal";
 import DocumentosFicha from "@/src/components/secop/ficha/DocumentosFicha";
 import CambiosFicha from "@/src/components/secop/ficha/CambiosFicha";
+import FrescuraFicha from "@/src/components/secop/ficha/FrescuraFicha";
+import { frescuraDeProceso } from "@/src/lib/secop/frescura";
 import ImagenFicha from "@/src/components/secop/ficha/ImagenFicha";
 import { guiaTemporal } from "@/src/lib/secop/guia-temporal";
 import ExploradorFicha from "@/src/components/secop/ficha/ExploradorFicha";
@@ -111,11 +113,12 @@ export default async function FichaPage({ params }: Props) {
   const p = await procesoPorSlug(slug);
   if (!p) notFound();
   const canonico = slugDeProceso(p.objeto, p.secopProcesoId);
-  const [competidores, pliego, contratos, historial] = await Promise.all([
+  const [competidores, pliego, contratos, historial, frescura] = await Promise.all([
     competidoresComparables(p),
     pliegoDeProceso(p.secopProcesoId),
     contratosDeProceso(p.id),
     cambiosDeProceso(p.secopProcesoId),
+    frescuraDeProceso(p.secopProcesoId),
   ]);
   // Una sola respuesta a «¿en qué va?» (spec 2026-10-05-ficha-viva-ciclo-de-vida):
   // la regla manda sobre el estado del SECOP, que a veces se contradice.
@@ -669,11 +672,7 @@ export default async function FichaPage({ params }: Props) {
                 <h1 className="fi-h1">{titulo}</h1>
                 <p className="fi-entidad">{p.entidadNombre ?? "Entidad sin resolver"}</p>
                 {lugar && <p className="fi-lugar">Entidad en {lugar}</p>}
-                <p className="fi-ayuda">
-                  {p.actualizado && !Number.isNaN(new Date(p.actualizado).getTime())
-                    ? `Registro actualizado en AquaLicita: ${new Date(p.actualizado).toLocaleString("es-CO", { timeZone: "America/Bogota", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} COT`
-                    : "Fecha de actualización del registro no disponible"}
-                </p>
+                <FrescuraFicha frescura={frescura} />
                 <p className="fi-estado">
                   <span aria-hidden="true">◷</span> <EstadoFicha />
                   <span className="fi-estado-nota">
