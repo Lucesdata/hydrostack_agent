@@ -19,10 +19,12 @@ viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 
 **Frescura y operación (2026-10-24, PR B):** la ficha muestra la sincronización de AquaLicita y
 lo publicado en SECOP por separado; la invalidación selectiva está propuesta, no hecha
-(`docs/superpowers/specs/2026-10-24-frescura-ficha.md`). **Abierto y más urgente:** la
-ingesta del `tick` falló el 18 y el 20 de octubre (`insert into raw_record`) y se agotó a
-los 300 s el 21; la lectura de la ficha dio 108 timeouts (`EAUTHQUERY`) entre el 9 y el 20.
-Leer los logs de esas corridas y `sync_log` antes de tocar caché.
+(`docs/superpowers/specs/2026-10-24-frescura-ficha.md`). **Abierto y más urgente (diagnosticado, no
+arreglado):** `condicionAbierto()` evalúa `(now() at time zone 'America/Bogota')::date`
+fila a fila (8,4 s frente a 174 ms con la fecha calculada una vez) y ocupa el pooler
+con regeneraciones ISR de 5–12 s; la ingesta de procesos corre `ok` (falló una vez la de
+contratos, 2026-10-20). Detalle y propuesta en
+`docs/superpowers/specs/2026-10-24-diagnostico-ingesta-timeouts.md`.
 
 §19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
 ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es

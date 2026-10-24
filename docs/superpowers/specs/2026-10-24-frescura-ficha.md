@@ -30,11 +30,13 @@ No se pueden dar por resueltos ni la saturación ni la frescura:
 - **Consultas con `statement timeout`** en rutas ISR y dinámicas: departamento (40),
   competidores de la ficha (38), conteos de la vitrina y facetas (≈20), portada
   (destacados y conteos del mapa), `/licitaciones/entidades`, `/comparar`, `/informe`.
-- **Ingesta (`/api/cron/tick`):** «ingesta FALLÓ… insert into raw_record» el
-  2026-10-18 y el 2026-10-20, y un «Task timed out after 300 seconds» el 2026-10-21
-  (11:56 UTC). El texto exacto de la causa no consta en el resumen; hay que leer el
-  log de esas corridas y `sync_log`. Si la ingesta falla, **ninguna estrategia de
-  caché mejora la frescura**.
+- **Ingesta (`/api/cron/tick`):** la de procesos corrió `ok` cada día (verificado en
+  `sync_log`); falló una sola corrida, la de **contratos** del 2026-10-20, por
+  `statement timeout`, y se recuperó al día siguiente. El «Task timed out after 300
+  seconds» del 21 fue de una etapa posterior del `tick`, aún sin diagnosticar. Detalle,
+  medición y causa de los timeouts de lectura en
+  `2026-10-24-diagnostico-ingesta-timeouts.md` (el predicado de «abierto» se evaluaba
+  fila a fila: 8,4 s frente a 174 ms con la fecha calculada una vez).
 - Un `Invariant: expected pageData to be a string` (2) en la ficha.
 
 Ya existe `drizzle/0025_indices_proceso_id_ficha.sql` en main (#136); no se verificó
@@ -80,8 +82,8 @@ regeneración de esa página, no la de ahora. La nota lo dice.
 
 **A ahora (hecho) + B por etapas, condicionada a medir. C descartada por ahora.**
 Razón: C aumenta la carga de lectura en el punto que hoy falla; B solo actúa sobre lo
-que cambió y se apaga con un interruptor. **Primero hay que estabilizar la ingesta y
-las consultas** (§1): sin eso B no se puede evaluar.
+que cambió y se apaga con un interruptor. **Primero hay que arreglar las consultas
+lentas** (diagnóstico enlazado en §1): sin eso B no se puede evaluar.
 
 Nunca se invalidan todas las fichas tras una ingesta.
 
@@ -105,14 +107,14 @@ Nunca se invalidan todas las fichas tras una ingesta.
 
 ## 6. Qué queda fuera del PR B
 
-- Diagnóstico y arreglo de los timeouts y de la ingesta fallida: primero leer los logs
-  de las corridas del 18, 20 y 21 de octubre y `sync_log`; **no** es un cambio de
-  caché. Se propone como trabajo aparte (PENDIENTES).
+- Arreglo de los timeouts de lectura: diagnosticado (calcular «hoy en Colombia» una vez
+  por consulta) en `2026-10-24-diagnostico-ingesta-timeouts.md`; **no** es un cambio de
+  caché y se propone como PR aparte.
 - Aplicar o reconciliar migraciones (incluida `0025`).
 
 ## 7. Decisión que necesito del propietario
 
-1. ¿Se prioriza estabilizar la ingesta y las consultas lentas antes de B? (recomendado)
+1. ¿Se aplica primero el arreglo de las consultas lentas antes de B? (recomendado)
 2. ¿Tope diario aceptable de fichas invalidadas y se autoriza leer la base para el
    paso 1 del plan (solo lectura)?
 3. ¿Se acepta subir el `revalidate` de la ficha de 72 h a otro valor, o se mantiene
