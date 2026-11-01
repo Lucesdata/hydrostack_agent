@@ -57,6 +57,18 @@ const GRUPOS_CUENTA = [
   }))
   .filter((g) => g.items.length > 0);
 
+// Solo en la portada (barra del boceto V3.1): dos accesos más a páginas que
+// existen. No son del catálogo de secciones porque no son del producto de
+// licitaciones: uno es informativo y el otro la guía de participación.
+const ENLACES_PORTADA = [
+  { href: "/gemelos-digitales", route: "/gemelos-digitales", label: "Gemelos digitales" },
+  {
+    href: "/licitaciones/como-participar",
+    route: "/licitaciones/como-participar",
+    label: "Cómo funciona",
+  },
+];
+
 const ACCOUNT_ITEMS = GRUPOS_CUENTA.flatMap((g) => g.items);
 
 // El único destino que la portada persigue. Por debajo de 1024px el navbar
@@ -214,46 +226,48 @@ const AUTH_CSS = `
    blanco sobre la noche, el inverso del fondo. Contrastes medidos en
    contraste-oscuro.test.ts contra el fondo de la píldora. */
 .clr-nav--oscuro{
-  background: #061423;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  border-bottom: none;
+  background: rgba(3, 22, 37, 0.86);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(140, 190, 225, 0.14);
   height: calc(var(--nav-h) + 16px);
-  padding: 10px var(--gutter) 6px;
+  padding: 8px var(--gutter);
 }
 .clr-nav--oscuro .clr-nav-inner{
   position: relative;
   max-width: 1320px; height: 100%;
-  padding: 0 7px 0 16px;
-  border-radius: 999px;
-  background: rgba(12, 32, 52, 0.8);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border: 1px solid rgba(140, 190, 225, 0.16);
-  box-shadow:
-    0 12px 36px -14px rgba(76, 201, 255, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 0;
+  background: transparent; border: 0; box-shadow: none;
 }
+/* Barra del boceto V3.1 (2026-11-01): plana y a todo el ancho, con la marca,
+   «INTELIGENCIA SECOP II», los enlaces en píldoras y «Crear cuenta» en cian. */
+.clr-nav-tag{ display: none; }
+.clr-nav--oscuro .clr-nav-divider{ display: block; width: 1px; height: 26px; margin: 0 18px; background: rgba(140, 190, 225, 0.3); }
+.clr-nav--oscuro .clr-nav-tag{
+  display: none; color: #aec2d2; font: 500 12px var(--font-inter), sans-serif;
+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+@media (min-width: 1180px){ .clr-nav--oscuro .clr-nav-tag{ display: inline; } }
 .clr-nav--oscuro .clr-links{ margin-left: auto; margin-right: auto; }
 .clr-nav--oscuro .clr-nav-auth{ margin-left: 0; }
 .clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; }
 /* En la portada no va "En línea" (2026-09-27): su punto late sin parar y era
    una de las 15 animaciones del primer pliegue. El resto del sitio lo conserva. */
-.clr-nav--oscuro .clr-status,
-.clr-nav--oscuro .clr-nav-divider{ display: none; }
+.clr-nav--oscuro .clr-status{ display: none; }
 .clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; border-radius: 999px; padding: 7px 14px; }
 .clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.06); }
-.clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #4cc9ff; background: rgba(76, 201, 255, 0.12); }
+.clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #00d9f4; background: rgba(0, 217, 244, 0.1); box-shadow: inset 0 0 0 1px rgba(0, 217, 244, 0.55); }
 .clr-nav--oscuro .clr-nav-cote{ display: none; }
 .clr-nav--oscuro .clr-nav-auth-link{ color: #c3d3e0; }
 .clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; }
 .clr-nav--oscuro .clr-nav-auth-cta,
 .clr-nav--oscuro .clr-nav-explorar{
   font: 600 13px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
-  color: #061423; background: #f3f8fc; border-radius: 999px;
+  color: #031625; background: #00d9f4; border-radius: 999px;
 }
-.clr-nav--oscuro .clr-nav-auth-cta{ padding: 9px 18px; }
+.clr-nav--oscuro .clr-nav-auth-cta{ padding: 10px 22px; font-size: 14px; }
 .clr-nav--oscuro .clr-nav-explorar{ padding: 0 16px; }
 .clr-nav--oscuro .clr-nav-auth-cta:hover,
-.clr-nav--oscuro .clr-nav-explorar:hover{ opacity: 1; background: #ffffff; }
+.clr-nav--oscuro .clr-nav-explorar:hover{ opacity: 1; background: #4de6f8; }
 .clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); border-radius: 999px; width: 34px; height: 34px; }
 .clr-nav--oscuro .clr-hamburger-icon span{ background: #c3d3e0; }
 .clr-nav--oscuro .clr-hamburger-icon.open span{ background: #4cc9ff; }
@@ -488,11 +502,12 @@ export default function Navbar() {
         </span>
 
         <span className="clr-nav-divider" aria-hidden="true" />
+        <span className="clr-nav-tag">Inteligencia SECOP II</span>
 
         {/* .clr-links ya trae margin-left:auto en globals.css — por eso el
             bloque de auth no lo lleva inline. */}
         <div className="clr-links">
-          {NAV_ITEMS.map((item) => (
+          {[...NAV_ITEMS, ...(oscura ? ENLACES_PORTADA : [])].map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -547,7 +562,7 @@ export default function Navbar() {
       </div>
 
       <div id="clr-mobile-menu" className={`clr-mobile-menu${open ? " open" : ""}`}>
-        {NAV_ITEMS.map((item) => (
+        {[...NAV_ITEMS, ...(oscura ? ENLACES_PORTADA : [])].map((item) => (
           <Link
             key={item.href}
             href={item.href}

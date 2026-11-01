@@ -138,7 +138,18 @@ function Icono({ nombre }: { nombre: string }) {
  * vitrina. Diseño del 2026-10-07: foto y acento de color según el tipo de obra
  * (azul potable, naranja residual, violeta redes; azul si no hay tipo elegido).
  */
-export default function BuscadorGuiado() {
+/**
+ * `activadorClase` y `etiqueta` dejan que el hero use el botón que abre el
+ * modal como su acción principal («Explorar oportunidades»), con su propio
+ * estilo; sin ellos es el botón «Buscar procesos» de siempre.
+ */
+export default function BuscadorGuiado({
+  activadorClase,
+  etiqueta = "Buscar procesos",
+}: {
+  activadorClase?: string;
+  etiqueta?: string;
+} = {}) {
   const uid = useId();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [modo, setModo] = useState<"tema" | "numero">("tema");
@@ -154,14 +165,18 @@ export default function BuscadorGuiado() {
     <>
       <button
         type="button"
-        className={styles.activador}
+        className={activadorClase ?? styles.activador}
         onClick={() => modalRef.current?.showModal()}
         aria-haspopup="dialog"
       >
-        <span>Buscar procesos</span>
-        <span className={styles.activadorIcono} aria-hidden="true">
-          ⌕
-        </span>
+        <span>{etiqueta}</span>
+        {activadorClase ? (
+          <span aria-hidden="true">→</span>
+        ) : (
+          <span className={styles.activadorIcono} aria-hidden="true">
+            ⌕
+          </span>
+        )}
       </button>
       <dialog
         ref={modalRef}

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PanelRegion from "@/src/components/landing/hero-territorial/PanelRegion";
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import { esRespuestaDe, urlRegion } from "@/src/components/landing/hero-territorial/region";
 import {
   aplicarRegion,
@@ -155,12 +155,12 @@ describe("hero con regiones", () => {
 
   it("de entrada no hay región abierta: se ve el destacado", () => {
     expect(html).not.toContain("aq-region-titulo");
-    expect(html).toContain('class="aqMini"');
+    expect(html).toContain("aq-ficha-titulo");
   });
 
   it("la única petición del hero es la de la región, fuera del componente", () => {
     const hero = readFileSync(
-      "src/components/landing/hero-territorial/HeroTerritorial.jsx",
+      "src/components/landing/hero-territorial/HeroTerritorialV3.jsx",
       "utf8"
     );
     const panelFuente = readFileSync(

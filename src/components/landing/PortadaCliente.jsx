@@ -8,11 +8,8 @@
 // dibuja y lo entrega ya pintado por la prop `mapa`, que es el mismo patrón del
 // hueco `semaforo` en `FilaProceso`.
 
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
-import { frase } from "@/src/components/landing/texto";
-import FichaViva from "@/src/components/landing/ficha-viva/FichaViva";
+import HeroTerritorialV3 from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import TuPerfil from "@/src/components/landing/tu-perfil/TuPerfil";
-import { procesosDe } from "@/src/lib/landing/destacados-portada";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
 // territorial) y la Ficha Viva. Salieron las rutas de intención, el motor, el
@@ -45,12 +42,6 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  * (spec 2026-10-04-hero-cinco-minifichas §7.2).
  */
 export default function LandingPage({ mapa = null, destacados = null, conteos = null }) {
-  // La franja de la ficha enlaza las secciones del primer destacado del hero:
-  // uno fijo, no el de la pestaña elegida, para que sus cuatro enlaces no
-  // cambien de destino mientras se mira el hero.
-  const primero = procesosDe(destacados)[0];
-  const destacado = primero ? { href: primero.href, objeto: frase(primero.objeto) } : null;
-
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -65,14 +56,12 @@ export default function LandingPage({ mapa = null, destacados = null, conteos = 
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        <HeroTerritorial mapa={mapa} destacados={destacados} conteos={conteos} />
+        {/* El hero V3 (2026-11-01): mensaje, mapa con las tres familias y, en su
+            franja inferior, la Ficha Viva y los gemelos digitales. La Ficha
+            Viva absorbió a la sección FichaViva que iba justo después. */}
+        <HeroTerritorialV3 mapa={mapa} destacados={destacados} conteos={conteos} />
 
-        {/* La franja de la ficha: los cuatro accesos al primer proceso del
-            hero. Va justo después del hero porque el hero existe para llevar a
-            una ficha. */}
-        <FichaViva destacado={destacado} />
-
-        {/* Tercera y última sección (2026-10-22): «¿Puedes participar?», el
+        {/* Segunda y última sección (2026-11-01; era la tercera): «¿Puedes participar?», el
             cierre hacia la cuenta gratuita. La portada son estas tres y no se
             apilan más sin una razón medida. */}
         <TuPerfil />

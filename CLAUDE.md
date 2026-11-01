@@ -403,6 +403,17 @@ colores se miden en `contraste-tu-perfil.test.ts`. La miniatura del semáforo
 (`semaforo.webp`) se generó pero no se usa. No añadir precios, preguntas
 frecuentes ni mercado a la portada.
 
+**Hero V3.1 (2026-11-01, rama `claude/hero-territorial-v3`, sin PR).** Sustituye la
+composición del hero: mensaje «Oportunidades reales en agua y saneamiento.», el
+mapa con las tres familias como tarjetas-pestaña (cifra real de
+`conteosPorFamilia()`) y una franja inferior con la Ficha Viva (que **absorbe la
+sección FichaViva**: la portada queda en hero + `TuPerfil`) y «Gemelos
+digitales» (`/gemelos-digitales`, página informativa; la planta es una
+ilustración y sus lecturas están rotuladas como demostrativas). Componentes en
+`hero-territorial/HeroTerritorialV3.jsx` y `hero-v3.module.css`; fondo y planta
+en `public/portada/hero/`. Inventario, verificación y diferencias pendientes:
+`docs/hero-v3/README.md`.
+
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
 
 El hero vive en `src/components/landing/hero-territorial/` (`HeroTerritorial`,

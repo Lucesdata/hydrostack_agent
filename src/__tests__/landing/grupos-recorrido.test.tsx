@@ -131,7 +131,7 @@ describe("recorrido", () => {
     expect(fuente).toContain("clearInterval");
     expect(fuente).not.toMatch(/scrollIntoView|scrollTo/);
     const hero = readFileSync(
-      "src/components/landing/hero-territorial/HeroTerritorial.jsx",
+      "src/components/landing/hero-territorial/HeroTerritorialV3.jsx",
       "utf8"
     );
     expect(hero).toMatch(/hayRecorrido && !pausado && !interactuando/);
