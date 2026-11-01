@@ -8,7 +8,6 @@ import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { destacadosPortada } from "@/src/lib/secop/destacados-portada";
 import { procesosDe } from "@/src/lib/landing/destacados-portada";
-import { anclaDe, VIEWBOX_SELECCION } from "@/src/lib/mapa/etiquetas-procesos";
 import { conteosPorFamilia } from "@/src/lib/secop/conteos-familia";
 
 /**
@@ -54,25 +53,6 @@ export default async function Page() {
     }),
   ]);
   const procesos = procesosDe(destacados);
-  // El anclaje de cada departamento con proceso, ya como porcentaje de la caja
-  // del mapa: la tarjeta flotante solo necesita dos números, y así la geometría
-  // de las islas no viaja al navegador (presupuesto de peso de la portada).
-  const anclas = Object.fromEntries(
-    procesos.flatMap((p) => {
-      const a = anclaDe(p.departamentoCodigo);
-      return a
-        ? [
-            [
-              p.departamentoCodigo,
-              [
-                ((a[0] - VIEWBOX_SELECCION.x) / VIEWBOX_SELECCION.ancho) * 100,
-                ((a[1] - VIEWBOX_SELECCION.y) / VIEWBOX_SELECCION.alto) * 100,
-              ],
-            ],
-          ]
-        : [];
-    })
-  );
 
   return (
     <>
@@ -86,7 +66,6 @@ export default async function Page() {
         conteos={conteos}
         // Huecos de servidor: next/image y el marcado fijo no viajan en el JS del
         // navegador (presupuesto de peso de la portada).
-        anclas={anclas}
         fondo={<HeroBackground />}
         mensaje={<HeroMessage />}
         gemelos={<DigitalTwinsPreview />}

@@ -7,11 +7,7 @@ import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/Digit
 import { procesoPortada } from "./fixtures-portada";
 
 // El mensaje y los gemelos llegan como huecos de servidor desde `app/page.js`.
-const huecos = {
-  mensaje: <HeroMessage />,
-  gemelos: <DigitalTwinsPreview />,
-  anclas: { "76": [20, 62] as [number, number] },
-};
+const huecos = { mensaje: <HeroMessage />, gemelos: <DigitalTwinsPreview /> };
 
 /**
  * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
@@ -77,9 +73,7 @@ describe("HeroTerritorial", () => {
     expect(html).toContain('data-familia="potable"');
     expect(html).toContain(`aria-label="Ver ficha: ${p.objeto}"`);
     // El objeto enlaza a la ficha; los cuatro accesos, a sus secciones.
-    // Dos enlaces al proceso: su título y la tarjeta del mapa (sin conteos no
-    // abre región: enlaza a la ficha).
-    expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(2);
+    expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
     for (const ancla of ["#ficha-resumen", "#ficha-dinero", "#ficha-plazos", "#pliego"]) {
       expect(html).toContain(`href="${p.href}${ancla}"`);
     }
