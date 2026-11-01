@@ -11,6 +11,7 @@
 
 /* ── Fondo ────────────────────────────────────────────────────────────────── */
 .fondo {
+  background: linear-gradient(180deg, #0a2a44 0%, #031625 70%);
   position: absolute;
   inset: 0;
   z-index: -1;

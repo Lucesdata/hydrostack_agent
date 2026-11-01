@@ -2,7 +2,16 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
+import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
+import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
 import { procesoPortada } from "./fixtures-portada";
+
+// El mensaje y los gemelos llegan como huecos de servidor desde `app/page.js`.
+const huecos = {
+  mensaje: <HeroMessage />,
+  gemelos: <DigitalTwinsPreview />,
+  anclas: { "76": [20, 62] as [number, number] },
+};
 
 /**
  * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
@@ -24,7 +33,7 @@ const tres = (["potable", "residual", "redes"] as const).map((familia, i) => ({
 const cinco = tres.map((d) => d.proceso);
 
 const html = renderToStaticMarkup(
-  <HeroTerritorial destacados={tres} mapa={<div data-testid="mapa">Mapa</div>} />
+  <HeroTerritorial destacados={tres} mapa={<div data-testid="mapa">Mapa</div>} {...huecos} />
 );
 
 /** Los destacados con solo `proceso` para la primera pestaña. */

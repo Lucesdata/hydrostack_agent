@@ -32,6 +32,11 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   mapa?: import("react").ReactNode,
  *   destacados?: import("@/src/lib/landing/destacados-portada").DestacadoPortada[] | null,
  *   conteos?: import("@/src/lib/landing/conteos-familia").ConteoDepartamento[] | null,
+ *   fondo?: import("react").ReactNode,
+ *   mensaje?: import("react").ReactNode,
+ *   gemelos?: import("react").ReactNode,
+ *   anclas?: Record<string, [number, number]> | null — anclaje de cada departamento
+ *     como porcentaje de la caja del mapa (la geometría de las islas no viaja al navegador).
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
  * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
@@ -41,7 +46,15 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  * el mapa del hero marca los procesos elegidos en vez de contar por territorio
  * (spec 2026-10-04-hero-cinco-minifichas §7.2).
  */
-export default function LandingPage({ mapa = null, destacados = null, conteos = null }) {
+export default function LandingPage({
+  mapa = null,
+  destacados = null,
+  conteos = null,
+  fondo = null,
+  mensaje = null,
+  gemelos = null,
+  anclas = null,
+}) {
   return (
     <div
       // La portada entera en oscuro (punto 45, 2026-09-26): el hero ya lo era y
@@ -59,7 +72,15 @@ export default function LandingPage({ mapa = null, destacados = null, conteos = 
         {/* El hero V3 (2026-11-01): mensaje, mapa con las tres familias y, en su
             franja inferior, la Ficha Viva y los gemelos digitales. La Ficha
             Viva absorbió a la sección FichaViva que iba justo después. */}
-        <HeroTerritorialV3 mapa={mapa} destacados={destacados} conteos={conteos} />
+        <HeroTerritorialV3
+          mapa={mapa}
+          destacados={destacados}
+          conteos={conteos}
+          fondo={fondo}
+          mensaje={mensaje}
+          gemelos={gemelos}
+          anclas={anclas}
+        />
 
         {/* Segunda y última sección (2026-11-01; era la tercera): «¿Puedes participar?», el
             cierre hacia la cuenta gratuita. La portada son estas tres y no se

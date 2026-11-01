@@ -26,18 +26,14 @@ import {
   useGrupoEnMapa,
   useRegionEnMapa,
 } from "./sincronia";
-import { anclaDe, VIEWBOX_SELECCION } from "@/src/lib/mapa/etiquetas-procesos";
 import { useRegion } from "./region";
 import PanelRegion from "./PanelRegion";
 import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
 import { familiasPorDepartamento } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
 import v3 from "./hero-v3.module.css";
-import HeroBackground from "./HeroBackground";
-import HeroMessage from "./HeroMessage";
 import FamiliaCards from "./FamiliaCards";
 import FeaturedLiveProcess from "./FeaturedLiveProcess";
-import DigitalTwinsPreview from "./DigitalTwinsPreview";
 
 /**
  * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con los
@@ -68,7 +64,15 @@ import DigitalTwinsPreview from "./DigitalTwinsPreview";
  * la portada). Una pestaña sin proceso dice que hoy no hay ninguno: no se
  * rellena con otro.
  */
-export default function HeroTerritorialV3({ mapa = null, destacados = null, conteos = null }) {
+export default function HeroTerritorialV3({
+  mapa = null,
+  destacados = null,
+  conteos = null,
+  fondo = null,
+  mensaje = null,
+  gemelos = null,
+  anclas = null,
+}) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
   const lista = useMemo(() => destacados ?? [], [destacados]);
@@ -194,7 +198,7 @@ export default function HeroTerritorialV3({ mapa = null, destacados = null, cont
   // destacado. Se coloca en HTML sobre una caja con la proporción exacta del
   // viewBox, así que el anclaje es un porcentaje y no se mueve con el tamaño.
   // Pulsarla abre el panel de ese departamento (o, sin conteos, su ficha).
-  const ancla = procesoActivo ? anclaDe(procesoActivo.departamentoCodigo) : null;
+  const ancla = procesoActivo ? (anclas?.[procesoActivo.departamentoCodigo] ?? null) : null;
   const conteoActivo =
     conteos && procesoActivo && capa
       ? conteos.find((c) => c.dpto === procesoActivo.departamentoCodigo)
@@ -203,8 +207,8 @@ export default function HeroTerritorialV3({ mapa = null, destacados = null, cont
     <div
       className={v3.tarjetaMapa}
       style={{
-        left: `${((ancla[0] - VIEWBOX_SELECCION.x) / VIEWBOX_SELECCION.ancho) * 100}%`,
-        top: `${((ancla[1] - VIEWBOX_SELECCION.y) / VIEWBOX_SELECCION.alto) * 100}%`,
+        left: `${ancla[0]}%`,
+        top: `${ancla[1]}%`,
       }}
     >
       {(() => {
@@ -280,10 +284,10 @@ export default function HeroTerritorialV3({ mapa = null, destacados = null, cont
 
   return (
     <section className={`${styles.hero} ${v3.hero}`} aria-labelledby="aq-hero-title">
-      <HeroBackground />
+      {fondo}
       <div className={styles.contenedor}>
         <div className={v3.grid}>
-          <HeroMessage />
+          {mensaje}
 
           <div className={`${styles.mapPanel} ${v3.mapaZona}`} {...pausaAlInteractuar}>
             {/* Las familias van antes que el mapa en el DOM: el teclado llega a las
@@ -430,7 +434,7 @@ export default function HeroTerritorialV3({ mapa = null, destacados = null, cont
               pie={pieFicha}
             />
           </div>
-          <DigitalTwinsPreview />
+          {gemelos}
         </div>
         {/* Solo al elegir a mano: el recorrido no se anuncia. */}
         <p className="sr-only" role="status">

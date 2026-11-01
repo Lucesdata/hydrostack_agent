@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
+import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
+import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
 import { procesoPortada } from "./fixtures-portada";
 
 const procesos = [1, 2, 3].map((i) => procesoPortada({ id: `CO1.REQ.${i}` }));
@@ -39,7 +41,9 @@ describe("PortadaCliente", () => {
   });
 
   it("usa el copy de la referencia aprobada", () => {
-    const html = renderToStaticMarkup(<PortadaCliente />);
+    const html = renderToStaticMarkup(
+      <PortadaCliente mensaje={<HeroMessage />} gemelos={<DigitalTwinsPreview />} />
+    );
     expect(html).toContain("Oportunidades reales");
     expect(html).toContain("saneamiento.");
     // «Procesos para explorar» ya no es un título visible (2026-10-04).
