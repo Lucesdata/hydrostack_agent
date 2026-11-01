@@ -33,9 +33,9 @@ export default function GemelosDigitalesPage() {
       </ul>
       <h2>Estado en AquaLicita</h2>
       <p>
-        Esta herramienta todavía no está disponible. Las lecturas que se ven en la portada son una
-        ilustración con datos demostrativos, no mediciones de una planta real. Hoy AquaLicita te
-        ayuda a encontrar procesos de contratación y a revisar sus requisitos.
+        Esta herramienta todavía no está disponible. La planta que se ve en la portada es una
+        ilustración demostrativa, no una planta real. Hoy AquaLicita te ayuda a encontrar procesos
+        de contratación y a revisar sus requisitos.
       </p>
       <p>
         <Link href="/licitaciones">Explorar oportunidades →</Link>

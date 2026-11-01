@@ -35,8 +35,6 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   fondo?: import("react").ReactNode,
  *   mensaje?: import("react").ReactNode,
  *   gemelos?: import("react").ReactNode,
- *   anclas?: Record<string, [number, number]> | null — anclaje de cada departamento
- *     como porcentaje de la caja del mapa (la geometría de las islas no viaja al navegador).
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
  * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
@@ -53,7 +51,6 @@ export default function LandingPage({
   fondo = null,
   mensaje = null,
   gemelos = null,
-  anclas = null,
 }) {
   return (
     <div
@@ -79,7 +76,6 @@ export default function LandingPage({
           fondo={fondo}
           mensaje={mensaje}
           gemelos={gemelos}
-          anclas={anclas}
         />
 
         {/* Segunda y última sección (2026-11-01; era la tercera): «¿Puedes participar?», el

@@ -129,17 +129,10 @@ describe("hero con conteos", () => {
     expect(html).toMatch(/data-capa="potable" data-familia="potable"/);
   });
 
-  it("bajo el mapa, la escala de esa familia y la lista de departamentos por cifra", () => {
-    expect(html).toMatch(
-      /Procesos de (<!-- -->)?agua potable(<!-- -->)? publicados en (<!-- -->)?2026/
-    );
-    for (const e of ESCALONES_FAMILIA) expect(html).toContain(`>${e.etiqueta}</li>`);
-    expect(html).toMatch(/Ver por departamento \((<!-- -->)?3/);
-    const desde = html.indexOf("Ver por departamento");
-    const lista = html.slice(html.indexOf("<ol>", desde), html.indexOf("</ol>", desde));
-    expect(lista.indexOf("Antioquia")).toBeLessThan(lista.indexOf("Valle del Cauca"));
-    expect(lista).toContain("42 en 2026 · 3 reciben ofertas");
-    // La leyenda de familias deja su sitio a la escala.
+  it("con conteos el mapa va sin escala, sin lista de departamentos y sin leyenda (2026-11-01)", () => {
+    expect(html).not.toMatch(/publicados en (<!-- -->)?2026, por sede/);
+    expect(html).not.toContain("Ver por departamento");
+    expect(html).not.toContain('aria-label="Escala del mapa"');
     expect(html).not.toContain('aria-label="Categorías del proceso"');
   });
 

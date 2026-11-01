@@ -149,8 +149,11 @@ describe("hero con regiones", () => {
     <HeroTerritorial destacados={destacados} conteos={conteos} mapa={<svg />} />
   );
 
-  it("cada departamento de la lista es un enlace a su vitrina (sin JavaScript) que abre su panel", () => {
-    expect(html).toContain(`href="${hrefRegion("Antioquia", "potable").replaceAll("&", "&amp;")}"`);
+  it("sin la lista de departamentos: la región se abre pulsando el mapa", () => {
+    expect(html).not.toContain(hrefRegion("Antioquia", "potable").replaceAll("&", "&amp;"));
+    expect(
+      readFileSync("src/components/landing/hero-territorial/HeroTerritorialV3.jsx", "utf8")
+    ).toContain("regionDesdeObjetivo");
   });
 
   it("de entrada no hay región abierta: se ve el destacado", () => {

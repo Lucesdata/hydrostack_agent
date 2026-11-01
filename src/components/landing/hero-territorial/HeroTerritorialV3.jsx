@@ -11,13 +11,7 @@ import {
   hrefDeFamilia,
   PESTANA,
 } from "@/src/lib/landing/destacados-portada";
-import {
-  DESDE_CONTEOS,
-  ESCALONES_FAMILIA,
-  filasDeCapa,
-  hrefRegion,
-  textoConteo,
-} from "@/src/lib/landing/conteos-familia";
+import { textoConteo } from "@/src/lib/landing/conteos-familia";
 import { categoriaDe } from "./Minifichas";
 import {
   procesoDesdeObjetivo,
@@ -71,7 +65,6 @@ export default function HeroTerritorialV3({
   fondo = null,
   mensaje = null,
   gemelos = null,
-  anclas = null,
 }) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
@@ -190,73 +183,6 @@ export default function HeroTerritorialV3({
   };
   // Sin conteos, la leyenda dice las tres familias: son las tres pestañas.
   const leyenda = FAMILIAS.filter((f) => FAMILIAS_DESTACADAS.includes(f.familia));
-  const filasCapa = useMemo(() => (capa ? filasDeCapa(conteos, capa) : []), [conteos, capa]);
-  const anio = DESDE_CONTEOS.slice(0, 4);
-
-  // La tarjeta flotante del mapa (boceto V3.1): el departamento del proceso
-  // activo, con los procesos de la familia elegida y el presupuesto del
-  // destacado. Se coloca en HTML sobre una caja con la proporción exacta del
-  // viewBox, así que el anclaje es un porcentaje y no se mueve con el tamaño.
-  // Pulsarla abre el panel de ese departamento (o, sin conteos, su ficha).
-  const ancla = procesoActivo ? (anclas?.[procesoActivo.departamentoCodigo] ?? null) : null;
-  const conteoActivo =
-    conteos && procesoActivo && capa
-      ? conteos.find((c) => c.dpto === procesoActivo.departamentoCodigo)
-      : null;
-  const tarjetaMapa = ancla ? (
-    <div
-      className={v3.tarjetaMapa}
-      style={{
-        left: `${ancla[0]}%`,
-        top: `${ancla[1]}%`,
-      }}
-    >
-      {(() => {
-        const contenido = (
-          <>
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
-              <circle cx="12" cy="10" r="2.3" />
-            </svg>
-            <span className={v3.tarjetaMapaTexto}>
-              <span className={v3.tarjetaMapaLugar}>{procesoActivo.departamento}</span>
-              {conteoActivo ? (
-                <strong>
-                  {conteoActivo[capa].n.toLocaleString("es-CO")} <span>procesos</span>
-                </strong>
-              ) : null}
-              <span className={v3.tarjetaMapaValor}>
-                {presupuestoCorto(procesoActivo.presupuesto)} · destacado
-              </span>
-            </span>
-            <span aria-hidden="true">›</span>
-          </>
-        );
-        return conteoActivo ? (
-          <button
-            type="button"
-            onClick={() => abrirRegion(procesoActivo.departamentoCodigo)}
-            aria-label={`Ver los procesos de ${procesoActivo.departamento}`}
-          >
-            {contenido}
-          </button>
-        ) : (
-          <Link href={procesoActivo.href} aria-label={`Ver ficha: ${frase(procesoActivo.objeto)}`}>
-            {contenido}
-          </Link>
-        );
-      })()}
-    </div>
-  ) : null;
 
   const pieFicha = (
     <div className={v3.fichaPie}>
@@ -322,7 +248,6 @@ export default function HeroTerritorialV3({
                 >
                   {mapa}
                 </div>
-                {tarjetaMapa}
               </div>
               {procesoActivo ? (
                 <p className={styles.previa} aria-hidden="true">
@@ -335,59 +260,9 @@ export default function HeroTerritorialV3({
                 <p className={styles.noData}>El mapa no está disponible en este momento.</p>
               ) : null}
             </div>
-            {capa ? (
-              <div className={v3.escalaZona}>
-                {/* La escala de la capa elegida, en el color de su familia. */}
-                <div className={styles.escala} data-familia={capa}>
-                  <p className={styles.escalaTitulo}>
-                    Procesos de {PESTANA[capa].toLowerCase()} publicados en {anio}, por sede de la
-                    entidad
-                  </p>
-                  <ul className={styles.escalaPasos} aria-label="Escala del mapa">
-                    {ESCALONES_FAMILIA.map((e) => (
-                      <li key={e.indice} data-e={e.indice}>
-                        <span aria-hidden="true" />
-                        {e.etiqueta}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                {/* La alternativa textual del mapa, y la forma cómoda de leerlo
-                    en el celular: los departamentos de más a menos. */}
-                <details className={styles.listaDptos}>
-                  <summary>
-                    Ver por departamento ({filasCapa.length}{" "}
-                    {filasCapa.length === 1 ? "departamento" : "departamentos"})
-                  </summary>
-                  {filasCapa.length ? (
-                    <ol>
-                      {filasCapa.map((f) => (
-                        <li key={f.dpto}>
-                          {/* Sin JavaScript, la vitrina de esa región; con él,
-                              su panel en el hero. */}
-                          <a
-                            href={hrefRegion(f.nombre, capa)}
-                            aria-current={f.dpto === regionAbierta ? "true" : undefined}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              abrirRegion(f.dpto);
-                            }}
-                          >
-                            <strong>{departamentoCorto(f.nombre)}</strong>
-                            <span>{textoConteo(f.conteo)}</span>
-                          </a>
-                        </li>
-                      ))}
-                    </ol>
-                  ) : (
-                    <p>
-                      Ningún departamento publicó procesos de {PESTANA[capa].toLowerCase()} en{" "}
-                      {anio}.
-                    </p>
-                  )}
-                </details>
-              </div>
-            ) : (
+            {/* Con conteos el mapa va sin escala ni lista (2026-11-01, pedido del
+                usuario); sin ellos queda la leyenda de las tres familias. */}
+            {capa ? null : (
               /* Sin conteos: solo los colores, discretos, bajo el mapa. */
               <ul
                 className={`${styles.leyenda} ${v3.escalaZona}`}
