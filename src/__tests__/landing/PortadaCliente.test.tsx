@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
+import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
+import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
 import { procesoPortada } from "./fixtures-portada";
 
 const procesos = [1, 2, 3].map((i) => procesoPortada({ id: `CO1.REQ.${i}` }));
@@ -13,17 +15,17 @@ const destacados = (["potable", "residual", "redes"] as const).map((familia, i) 
 }));
 
 describe("PortadaCliente", () => {
-  it("la franja de la ficha enlaza las secciones del primer destacado del hero", () => {
+  it("la Ficha Viva del hero enlaza las secciones del primer destacado del hero", () => {
     const html = renderToStaticMarkup(<PortadaCliente destacados={destacados} />);
     expect(html).toContain(`href="${procesos[0].href}#ficha-dinero"`);
     expect(html).not.toContain(`href="${procesos[1].href}#ficha-dinero"`);
   });
 
-  it("sin procesos, la franja no enlaza nada", () => {
+  it("sin procesos, la Ficha Viva no enlaza nada", () => {
     const vacios = destacados.map((d) => ({ ...d, proceso: null, cierre: null, holgado: false }));
     for (const d of [null, vacios]) {
       const html = renderToStaticMarkup(<PortadaCliente destacados={d} />);
-      expect(html).toContain("Los accesos se habilitan cuando hay un proceso disponible.");
+      expect(html).toMatch(/Hoy no hay procesos de (<!-- -->)?agua potable|No pudimos cargar/);
       expect(html).not.toMatch(/href="\/licitaciones\/[^"]*(#ficha-|#pliego)/);
     }
   });
@@ -39,12 +41,17 @@ describe("PortadaCliente", () => {
   });
 
   it("usa el copy de la referencia aprobada", () => {
-    const html = renderToStaticMarkup(<PortadaCliente />);
-    expect(html).toContain("Explora el mapa.");
-    expect(html).toContain("Entiende cada proceso.");
+    const html = renderToStaticMarkup(
+      <PortadaCliente mensaje={<HeroMessage />} gemelos={<DigitalTwinsPreview />} />
+    );
+    expect(html).toContain("Oportunidades reales");
+    expect(html).toContain("saneamiento.");
     // «Procesos para explorar» ya no es un título visible (2026-10-04).
     expect(html).not.toContain("Procesos para explorar</h2>");
-    expect(html).toContain("Del territorio a los detalles que necesitas.");
+    // La Ficha Viva y los gemelos viven en la franja del hero (2026-11-01).
+    expect(html).toContain("Ficha Viva");
+    expect(html).toContain("Diseña, simula y optimiza proyectos.");
+    expect(html).not.toContain("Del territorio a los detalles que necesitas.");
   });
 
   it("sin ticker ni fondo animado: la portada se aligeró (2026-09-27)", () => {

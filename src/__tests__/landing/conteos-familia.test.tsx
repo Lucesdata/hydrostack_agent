@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import ColombiaChoropleth from "@/src/components/mapa/ColombiaChoropleth";
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import {
   escalonFamiliaDe,
   ESCALONES_FAMILIA,
@@ -135,7 +135,8 @@ describe("hero con conteos", () => {
     );
     for (const e of ESCALONES_FAMILIA) expect(html).toContain(`>${e.etiqueta}</li>`);
     expect(html).toMatch(/Ver por departamento \((<!-- -->)?3/);
-    const lista = html.slice(html.indexOf("<ol>"), html.indexOf("</ol>"));
+    const desde = html.indexOf("Ver por departamento");
+    const lista = html.slice(html.indexOf("<ol>", desde), html.indexOf("</ol>", desde));
     expect(lista.indexOf("Antioquia")).toBeLessThan(lista.indexOf("Valle del Cauca"));
     expect(lista).toContain("42 en 2026 · 3 reciben ofertas");
     // La leyenda de familias deja su sitio a la escala.

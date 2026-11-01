@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FAMILIAS } from "@/src/lib/classify/tipo-color";
 import { departamentoCorto, familiaDe, presupuestoCorto } from "@/src/lib/landing/proceso-portada";
+import { frase } from "@/src/components/landing/texto";
 import {
   criterioDe,
   FAMILIAS_DESTACADAS,
@@ -17,7 +18,7 @@ import {
   hrefRegion,
   textoConteo,
 } from "@/src/lib/landing/conteos-familia";
-import Minifichas, { categoriaDe } from "./Minifichas";
+import { categoriaDe } from "./Minifichas";
 import {
   procesoDesdeObjetivo,
   regionDesdeObjetivo,
@@ -30,7 +31,9 @@ import PanelRegion from "./PanelRegion";
 import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
 import { familiasPorDepartamento } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
-import BuscadorGuiado from "./BuscadorGuiado";
+import v3 from "./hero-v3.module.css";
+import FamiliaCards from "./FamiliaCards";
+import FeaturedLiveProcess from "./FeaturedLiveProcess";
 
 /**
  * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con los
@@ -61,7 +64,15 @@ import BuscadorGuiado from "./BuscadorGuiado";
  * la portada). Una pestaña sin proceso dice que hoy no hay ninguno: no se
  * rellena con otro.
  */
-export default function HeroTerritorial({ mapa = null, destacados = null, conteos = null }) {
+export default function HeroTerritorialV3({
+  mapa = null,
+  destacados = null,
+  conteos = null,
+  fondo = null,
+  mensaje = null,
+  gemelos = null,
+  anclas = null,
+}) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
   const lista = useMemo(() => destacados ?? [], [destacados]);
@@ -182,128 +193,150 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
   const filasCapa = useMemo(() => (capa ? filasDeCapa(conteos, capa) : []), [conteos, capa]);
   const anio = DESDE_CONTEOS.slice(0, 4);
 
+  // La tarjeta flotante del mapa (boceto V3.1): el departamento del proceso
+  // activo, con los procesos de la familia elegida y el presupuesto del
+  // destacado. Se coloca en HTML sobre una caja con la proporción exacta del
+  // viewBox, así que el anclaje es un porcentaje y no se mueve con el tamaño.
+  // Pulsarla abre el panel de ese departamento (o, sin conteos, su ficha).
+  const ancla = procesoActivo ? (anclas?.[procesoActivo.departamentoCodigo] ?? null) : null;
+  const conteoActivo =
+    conteos && procesoActivo && capa
+      ? conteos.find((c) => c.dpto === procesoActivo.departamentoCodigo)
+      : null;
+  const tarjetaMapa = ancla ? (
+    <div
+      className={v3.tarjetaMapa}
+      style={{
+        left: `${ancla[0]}%`,
+        top: `${ancla[1]}%`,
+      }}
+    >
+      {(() => {
+        const contenido = (
+          <>
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
+              <circle cx="12" cy="10" r="2.3" />
+            </svg>
+            <span className={v3.tarjetaMapaTexto}>
+              <span className={v3.tarjetaMapaLugar}>{procesoActivo.departamento}</span>
+              {conteoActivo ? (
+                <strong>
+                  {conteoActivo[capa].n.toLocaleString("es-CO")} <span>procesos</span>
+                </strong>
+              ) : null}
+              <span className={v3.tarjetaMapaValor}>
+                {presupuestoCorto(procesoActivo.presupuesto)} · destacado
+              </span>
+            </span>
+            <span aria-hidden="true">›</span>
+          </>
+        );
+        return conteoActivo ? (
+          <button
+            type="button"
+            onClick={() => abrirRegion(procesoActivo.departamentoCodigo)}
+            aria-label={`Ver los procesos de ${procesoActivo.departamento}`}
+          >
+            {contenido}
+          </button>
+        ) : (
+          <Link href={procesoActivo.href} aria-label={`Ver ficha: ${frase(procesoActivo.objeto)}`}>
+            {contenido}
+          </Link>
+        );
+      })()}
+    </div>
+  ) : null;
+
+  const pieFicha = (
+    <div className={v3.fichaPie}>
+      {activa && procesoActivo && !(regionAbierta && conteoRegion) ? (
+        <p className="sr-only">{criterioDe(activa)}</p>
+      ) : null}
+      <div className={v3.fichaPieFila}>
+        {activa && !(regionAbierta && conteoRegion) ? (
+          <Link className={v3.enlace} href={hrefDeFamilia(activa.familia)}>
+            Ver más de {PESTANA[activa.familia].toLowerCase()}, por presupuesto{" "}
+            <span aria-hidden="true">→</span>
+          </Link>
+        ) : null}
+        {hayRecorrido ? (
+          <button type="button" className={v3.pausa} onClick={pausar}>
+            {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
+          </button>
+        ) : null}
+        <Link className={v3.enlace} href="/licitaciones">
+          Ver todas las fichas <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
-    <section className={styles.hero} aria-labelledby="aq-hero-title">
+    <section className={`${styles.hero} ${v3.hero}`} aria-labelledby="aq-hero-title">
+      {fondo}
       <div className={styles.contenedor}>
-        <div className={styles.grid}>
-          <div className={styles.copy}>
-            <h1 id="aq-hero-title">
-              <span>Explora el mapa.</span> <span>Entiende cada proceso.</span>
-            </h1>
-            <p className={styles.lead}>
-              Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha.
-            </p>
-            <BuscadorGuiado />
-            <div className={styles.procesos} {...pausaAlInteractuar}>
+        <div className={v3.grid}>
+          {mensaje}
+
+          <div className={`${styles.mapPanel} ${v3.mapaZona}`} {...pausaAlInteractuar}>
+            {/* Las familias van antes que el mapa en el DOM: el teclado llega a las
+                pestañas sin cruzar los 33 departamentos; la rejilla las coloca a la
+                derecha (o sobre el mapa en pantallas estrechas). */}
+            <div className={v3.familias} {...pausaAlInteractuar}>
               {destacados == null ? (
                 <p className={styles.notaProcesos} role="status">
                   No pudimos cargar los procesos. Inténtalo de nuevo.
                 </p>
               ) : (
-                <>
-                  <div
-                    className={styles.pestanas}
-                    role="tablist"
-                    aria-label="Proceso más relevante por tipo de obra"
-                    onKeyDown={alTeclear}
-                  >
-                    {lista.map((d) => {
-                      const elegida = d.familia === activa?.familia;
-                      return (
-                        <button
-                          key={d.familia}
-                          id={`aq-pestana-${d.familia}`}
-                          type="button"
-                          role="tab"
-                          className={styles.pestana}
-                          data-familia={d.familia}
-                          aria-selected={elegida}
-                          aria-controls="aq-panel-destacado"
-                          tabIndex={elegida ? 0 : -1}
-                          onClick={() => elegir(d.familia)}
-                        >
-                          <span className={styles.pestanaPunto} aria-hidden="true" />
-                          {PESTANA[d.familia]}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div
-                    id="aq-panel-destacado"
-                    role="tabpanel"
-                    className={styles.panelDestacado}
-                    aria-labelledby={activa ? `aq-pestana-${activa.familia}` : undefined}
-                  >
-                    {regionAbierta && conteoRegion ? (
-                      <PanelRegion
-                        dpto={regionAbierta}
-                        nombre={conteoRegion.nombre}
-                        familia={capa}
-                        conteo={conteoRegion[capa]}
-                        estado={estadoRegion}
-                        onCerrar={cerrarRegion}
-                      />
-                    ) : procesoActivo ? (
-                      <>
-                        <p className={styles.criterio}>{criterioDe(activa)}</p>
-                        <Minifichas proceso={procesoActivo} />
-                      </>
-                    ) : (
-                      <p className={styles.notaProcesos}>
-                        Hoy no hay procesos de {PESTANA[activa?.familia ?? "potable"].toLowerCase()}{" "}
-                        con presupuesto publicado que reciban ofertas.
-                      </p>
-                    )}
-                    {activa && !(regionAbierta && conteoRegion) ? (
-                      <Link className={styles.enlaceFamilia} href={hrefDeFamilia(activa.familia)}>
-                        Ver más de {PESTANA[activa.familia].toLowerCase()}, de mayor a menor
-                        presupuesto <span aria-hidden="true">→</span>
-                      </Link>
-                    ) : null}
-                  </div>
-                </>
+                <FamiliaCards
+                  lista={lista}
+                  activa={activa?.familia ?? null}
+                  conteos={conteos}
+                  onElegir={elegir}
+                  onTeclear={alTeclear}
+                />
               )}
-              <div className={styles.procesosPie}>
-                {hayRecorrido ? (
-                  <button type="button" className={styles.botonPausa} onClick={pausar}>
-                    {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
-                  </button>
-                ) : null}
-                <Link className={styles.enlaceTodos} href="/licitaciones">
-                  Ver todas las fichas <span aria-hidden="true">→</span>
-                </Link>
+            </div>
+            <div className={v3.mapaCol}>
+              <div className={v3.halo} aria-hidden="true" />
+              <div className={v3.mapaCaja}>
+                <div
+                  ref={mapaRef}
+                  className={styles.map}
+                  data-capa={capa ?? undefined}
+                  data-familia={capa ?? undefined}
+                  onPointerOver={alSenalarMapa}
+                  onClick={alPulsarMapa}
+                  onFocus={alSenalarMapa}
+                >
+                  {mapa}
+                </div>
+                {tarjetaMapa}
               </div>
-              {/* Solo al elegir a mano: el recorrido no se anuncia. */}
-              <p className="sr-only" role="status">
-                {aviso}
-              </p>
+              {procesoActivo ? (
+                <p className={styles.previa} aria-hidden="true">
+                  <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}
+                  {presupuestoCorto(procesoActivo.presupuesto)} ·{" "}
+                  {categoriaDe(procesoActivo.tipoProyecto)}
+                </p>
+              ) : null}
+              {!mapa ? (
+                <p className={styles.noData}>El mapa no está disponible en este momento.</p>
+              ) : null}
             </div>
-          </div>
-
-          <div className={styles.mapPanel} {...pausaAlInteractuar}>
-            <div
-              ref={mapaRef}
-              className={styles.map}
-              data-capa={capa ?? undefined}
-              data-familia={capa ?? undefined}
-              onPointerOver={alSenalarMapa}
-              onClick={alPulsarMapa}
-              onFocus={alSenalarMapa}
-            >
-              {mapa}
-            </div>
-            {/* En móvil la etiqueta del mapa se oculta: esta línea dice dónde
-                está y cuánto vale el proceso activo. Oculta al lector de
-                pantalla, que ya tiene la ficha. */}
-            {procesoActivo ? (
-              <p className={styles.previa} aria-hidden="true">
-                <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}
-                {presupuestoCorto(procesoActivo.presupuesto)} ·{" "}
-                {categoriaDe(procesoActivo.tipoProyecto)}
-              </p>
-            ) : null}
             {capa ? (
-              <>
+              <div className={v3.escalaZona}>
                 {/* La escala de la capa elegida, en el color de su familia. */}
                 <div className={styles.escala} data-familia={capa}>
                   <p className={styles.escalaTitulo}>
@@ -353,11 +386,13 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
                     </p>
                   )}
                 </details>
-              </>
+              </div>
             ) : (
-              /* Sin conteos: solo los colores, discretos, bajo el mapa
-                 (2026-10-04). */
-              <ul className={styles.leyenda} aria-label="Categorías del proceso">
+              /* Sin conteos: solo los colores, discretos, bajo el mapa. */
+              <ul
+                className={`${styles.leyenda} ${v3.escalaZona}`}
+                aria-label="Categorías del proceso"
+              >
                 {leyenda.map((f) => (
                   <li key={f.familia} data-familia={f.familia}>
                     <span aria-hidden="true" />
@@ -366,11 +401,45 @@ export default function HeroTerritorial({ mapa = null, destacados = null, conteo
                 ))}
               </ul>
             )}
-            {!mapa ? (
-              <p className={styles.noData}>El mapa no está disponible en este momento.</p>
-            ) : null}
           </div>
         </div>
+
+        <div className={v3.franja} {...pausaAlInteractuar}>
+          <div
+            id="aq-panel-destacado"
+            role="tabpanel"
+            aria-labelledby={activa ? `aq-pestana-${activa.familia}` : undefined}
+            className={v3.franjaFicha}
+          >
+            <FeaturedLiveProcess
+              proceso={procesoActivo}
+              cierre={activa?.cierre ?? null}
+              vacio={
+                destacados == null
+                  ? "No pudimos cargar los procesos. Inténtalo de nuevo."
+                  : `Hoy no hay procesos de ${PESTANA[activa?.familia ?? "potable"].toLowerCase()} con presupuesto publicado que reciban ofertas.`
+              }
+              region={
+                regionAbierta && conteoRegion ? (
+                  <PanelRegion
+                    dpto={regionAbierta}
+                    nombre={conteoRegion.nombre}
+                    familia={capa}
+                    conteo={conteoRegion[capa]}
+                    estado={estadoRegion}
+                    onCerrar={cerrarRegion}
+                  />
+                ) : null
+              }
+              pie={pieFicha}
+            />
+          </div>
+          {gemelos}
+        </div>
+        {/* Solo al elegir a mano: el recorrido no se anuncia. */}
+        <p className="sr-only" role="status">
+          {aviso}
+        </p>
       </div>
     </section>
   );

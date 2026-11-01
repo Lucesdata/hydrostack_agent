@@ -1,8 +1,17 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorial";
+import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
+import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
+import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
 import { procesoPortada } from "./fixtures-portada";
+
+// El mensaje y los gemelos llegan como huecos de servidor desde `app/page.js`.
+const huecos = {
+  mensaje: <HeroMessage />,
+  gemelos: <DigitalTwinsPreview />,
+  anclas: { "76": [20, 62] as [number, number] },
+};
 
 /**
  * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
@@ -24,7 +33,7 @@ const tres = (["potable", "residual", "redes"] as const).map((familia, i) => ({
 const cinco = tres.map((d) => d.proceso);
 
 const html = renderToStaticMarkup(
-  <HeroTerritorial destacados={tres} mapa={<div data-testid="mapa">Mapa</div>} />
+  <HeroTerritorial destacados={tres} mapa={<div data-testid="mapa">Mapa</div>} {...huecos} />
 );
 
 /** Los destacados con solo `proceso` para la primera pestaña. */
@@ -35,15 +44,18 @@ const conUno = (p: (typeof cinco)[number]) => [
 
 describe("HeroTerritorial", () => {
   it("copy de la referencia, un solo h1 y el encabezado de las tarjetas", () => {
-    expect(html).toContain("<span>Explora el mapa.</span> <span>Entiende cada proceso.</span>");
     expect(html).toContain(
-      "Encuentra procesos de agua y saneamiento y revisa sus condiciones en una ficha."
+      "<span>Oportunidades reales</span> <span>en agua y <em>saneamiento.</em></span>"
+    );
+    expect(html).toContain(
+      "Encuentra procesos, analiza requisitos y decide con información confiable."
     );
     expect(html.match(/<h1/g)).toHaveLength(1);
     // Sin título visible sobre las tarjetas (2026-10-04): la lista se nombra sola.
     expect(html).not.toContain("Procesos para explorar</h2>");
-    // Los objetos de las tarjetas son h2: no se salta nivel bajo el h1.
-    expect(html).not.toContain("<h3");
+    // «Ficha Viva» y «Gemelos digitales» son h2 bajo el h1; el objeto, h3.
+    expect(html).toContain('<h2 id="aq-ficha-titulo">Ficha Viva</h2>');
+    expect(html).toContain('<h2 id="aq-gemelos-titulo">');
   });
 
   it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {
@@ -60,28 +72,29 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Opciones del mapa");
   });
 
-  it("una sola ficha, la del primer destacado, activa, con su número y un solo enlace", () => {
-    expect(html).toContain('<ul class="aqMinifichas" aria-label="Proceso para explorar">');
-    expect(html.match(/<li class="aqMini"/g)).toHaveLength(1);
+  it("una sola ficha, la del primer destacado, con su enlace y los cuatro accesos a su ficha", () => {
     const [p] = cinco;
-    expect(html).toContain(`data-proceso="${p.id}" data-familia="potable" data-activo=""`);
-    expect(html).toContain(
-      `<span class="sr-only">Proceso: </span><span translate="no">${p.numeroProceso}</span>`
-    );
-    expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
-    expect(html).toContain(`aria-label="Ver ficha del proceso ${p.numeroProceso}: ${p.objeto}"`);
-    for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}"`);
+    expect(html).toContain('data-familia="potable"');
+    expect(html).toContain(`aria-label="Ver ficha: ${p.objeto}"`);
+    // El objeto enlaza a la ficha; los cuatro accesos, a sus secciones.
+    // Dos enlaces al proceso: su título y la tarjeta del mapa (sin conteos no
+    // abre región: enlaza a la ficha).
+    expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(2);
+    for (const ancla of ["#ficha-resumen", "#ficha-dinero", "#ficha-plazos", "#pliego"]) {
+      expect(html).toContain(`href="${p.href}${ancla}"`);
+    }
+    for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}`);
   });
 
   it("tres pestañas, una por familia, con la primera elegida", () => {
-    expect(html).toContain('role="tablist" aria-label="Proceso más relevante por tipo de obra"');
+    expect(html).toContain('role="tablist" aria-label="Tipo de obra"');
     expect(html.match(/role="tab"/g)).toHaveLength(3);
     for (const t of ["Agua potable", "Agua residual", "Redes"]) expect(html).toContain(t);
     expect(html.match(/aria-selected="true"/g)).toHaveLength(1);
     expect(html).toMatch(/id="aq-pestana-potable"[^>]*aria-selected="true"[^>]*tabindex="0"/);
     expect(html).toMatch(/id="aq-pestana-redes"[^>]*aria-selected="false"[^>]*tabindex="-1"/);
-    expect(html).toMatch(/role="tabpanel" class="[^"]*" aria-labelledby="aq-pestana-potable"/);
-    // Pestañas y ficha van en la columna del mensaje, antes del mapa.
+    expect(html).toMatch(/role="tabpanel" aria-labelledby="aq-pestana-potable"/);
+    // Las pestañas van antes del mapa en el DOM (la rejilla las coloca a su lado).
     expect(html.indexOf('role="tablist"')).toBeLessThan(html.indexOf('data-testid="mapa"'));
     // Sin la navegación de la ficha central ni «Ver otros».
     expect(html).not.toContain("Proceso siguiente");
@@ -93,7 +106,7 @@ describe("HeroTerritorial", () => {
       "El de mayor presupuesto entre los que reciben ofertas 5 días o más. Cierre: 20 oct 2026."
     );
     expect(html).toContain('href="/licitaciones?tipo=potable&amp;orden=valor"');
-    expect(html).toMatch(/Ver más de agua potable, de mayor a menor(<!-- -->)?\s*presupuesto/);
+    expect(html).toMatch(/Ver más de agua potable, por(<!-- -->)?\s*presupuesto/);
   });
 
   it("una pestaña sin proceso lo dice; no la rellena con otro", () => {
@@ -112,7 +125,7 @@ describe("HeroTerritorial", () => {
       />
     );
     expect(sinPotable).toMatch(/id="aq-pestana-residual"[^>]*aria-selected="true"/);
-    expect(sinPotable).toContain(`data-proceso="${cinco[1].id}"`);
+    expect(sinPotable).toContain(`href="${cinco[1].href}`);
   });
 
   it("la línea del mapa en móvil dice el proceso activo, nunca un texto de espera", () => {
@@ -120,18 +133,17 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Desliza las tarjetas");
   });
 
-  it("orden de la minificha (opción B): objeto, entidad, estado, categoría, lugar, presupuesto, número, acceso", () => {
-    const inicio = html.indexOf('<li class="aqMini"');
-    const tarjeta = html.slice(inicio, html.indexOf("</li>", inicio));
+  it("orden de la ficha: objeto, entidad y lugar, estado, presupuesto, cierre, accesos", () => {
+    const inicio = html.indexOf('<article class="');
+    const tarjeta = html.slice(inicio, html.indexOf("Qué falta verificar", inicio) + 20);
     const orden = [
       "Obra de prueba",
       "Municipio de Prueba",
-      "Abierto",
-      "Agua potable",
       "Cali · Valle del Cauca",
+      "Abierto",
       "$2.450 millones",
-      "Proceso:",
-      "Ver ficha",
+      "Cierre: 20 oct 2026",
+      "Qué se contrata",
     ].map((t) => tarjeta.indexOf(t));
     expect(orden.every((i) => i >= 0)).toBe(true);
     expect([...orden].sort((a, b) => a - b)).toEqual(orden);
@@ -155,15 +167,9 @@ describe("HeroTerritorial", () => {
     );
     expect(parcial).toContain("Presupuesto no disponible");
     expect(parcial).not.toContain("$0");
-    expect(parcial).toContain(">Valle del Cauca</span>");
-    expect(parcial).toContain("Sin subsistema identificado");
-    // La pastilla lo acorta para caber en una fila (236 px); el texto completo
-    // queda en su `title` (2026-10-05).
-    expect(parcial).toContain(
-      '<span class="aqMiniCategoria" title="Sin subsistema identificado">Sin subsistema</span>'
-    );
+    expect(parcial).toContain("Valle del Cauca");
     expect(parcial).toContain("Adjudicado");
-    expect(parcial).not.toContain(">Abierto<");
+    expect(parcial).not.toMatch(/<li data-abierto/);
     // La leyenda solo nombra las tres familias de las pestañas.
     expect(html).not.toContain("Sin subsistema identificado");
   });
@@ -197,7 +203,7 @@ describe("HeroTerritorial", () => {
 
   it("sin sorteo ni peticiones en el cliente: la selección llega del servidor", () => {
     for (const ruta of [
-      "src/components/landing/hero-territorial/HeroTerritorial.jsx",
+      "src/components/landing/hero-territorial/HeroTerritorialV3.jsx",
       "src/components/landing/hero-territorial/Minifichas.jsx",
       "src/components/landing/PortadaCliente.jsx",
     ]) {

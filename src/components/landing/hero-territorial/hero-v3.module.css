@@ -1,0 +1,851 @@
+/* Hero territorial V3.1 (2026-11-01): mensaje · mapa con tres familias · franja
+   inferior (Ficha Viva y gemelos digitales). Convive con
+   hero-territorial.module.css, que conserva los tokens `--aq-*` (paleta del spec:
+   fondo #031625, superficies #0a2236, acento #00d9f4, texto #f4f8fc, secundario
+   #aec2d2), el mapa, la escala y el panel de región. Aquí solo la composición.
+   Los textos van en HTML: las imágenes son decorativas. */
+
+.hero {
+  overflow-x: clip;
+}
+
+/* ── Fondo ────────────────────────────────────────────────────────────────── */
+.fondo {
+  background: linear-gradient(180deg, #0a2a44 0%, #031625 70%);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fondoImg {
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+/* Velo ligero: oscurece la izquierda (donde va el texto) y el borde inferior,
+   y deja el paisaje y la onda luminosa a la vista. */
+.fondoVelo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 22, 37, 0.55) 0%,
+      rgba(3, 22, 37, 0.15) 50%,
+      rgba(3, 22, 37, 0) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(3, 22, 37, 0.2) 0%,
+      rgba(3, 22, 37, 0) 30%,
+      rgba(3, 22, 37, 0) 80%,
+      #031625 100%
+    );
+}
+
+/* El filete que abre el eyebrow del hero. */
+.mensaje .eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 26px;
+  height: 2px;
+  margin-right: 10px;
+  vertical-align: middle;
+  background: var(--aq-cyan);
+}
+
+/* ── Composición superior: 45 / 55 ────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+  column-gap: clamp(20px, 3vw, 48px);
+  align-items: center;
+}
+.mensaje {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.eyebrow {
+  margin: 0 0 16px;
+  hyphens: manual;
+  color: var(--aq-cyan);
+  font:
+    600 12px/1.4 var(--font-inter),
+    sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.mensaje h1 {
+  margin: 0;
+  font:
+    700 clamp(2.1rem, 1rem + 2.4vw, 3.1rem)/1.06 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.03em;
+  hyphens: manual;
+}
+.mensaje h1 span {
+  display: block;
+}
+.mensaje h1 em {
+  position: relative;
+  display: inline-block;
+  color: var(--aq-cyan);
+  font-style: normal;
+}
+/* El trazo curvo bajo «saneamiento.»: decorativo, el texto sigue siendo texto. */
+.mensaje h1 em::after {
+  content: "";
+  position: absolute;
+  left: 2%;
+  right: 4%;
+  bottom: -0.16em;
+  height: 0.2em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1 8 Q 45 1 99 4' fill='none' stroke='%2300d9f4' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+.lead {
+  max-width: 38ch;
+  margin: 14px 0 0;
+  color: #cfe0ee;
+  font:
+    400 clamp(16px, 0.8rem + 0.45vw, 21px)/1.5 var(--font-inter),
+    sans-serif;
+  hyphens: manual;
+}
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-top: 26px;
+}
+.ctaPrimario,
+.ctaSecundario,
+.ctaContorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 30px;
+  border-radius: 999px;
+  font:
+    600 17px/1 var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+/* Texto noche sobre cian: el contraste es alto y lo mide contraste-oscuro. */
+.ctaPrimario {
+  border: 0;
+  background: var(--aq-cyan);
+  color: #031625;
+  box-shadow: 0 8px 26px -10px rgba(0, 217, 244, 0.7);
+}
+.ctaPrimario:hover {
+  background: #4de6f8;
+}
+.ctaSecundario {
+  gap: 10px;
+  padding: 0 28px 0 18px;
+  border: 1px solid rgba(244, 248, 252, 0.4);
+  background: rgba(3, 22, 37, 0.35);
+  color: var(--aq-text);
+}
+.ctaSecundario:hover {
+  background: rgba(244, 248, 252, 0.08);
+}
+.ctaContorno {
+  min-height: 48px;
+  padding: 0 22px;
+  white-space: nowrap;
+  border: 1px solid var(--aq-cyan);
+  color: var(--aq-cyan);
+}
+.ctaContorno:hover {
+  background: rgba(0, 217, 244, 0.1);
+}
+.ctaPrimario:focus-visible,
+.ctaSecundario:focus-visible,
+.ctaContorno:focus-visible {
+  outline: 2px solid var(--aq-text);
+  outline-offset: 3px;
+}
+.pasos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 0;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pasos li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--aq-muted);
+  font:
+    400 14.5px/1.3 var(--font-inter),
+    sans-serif;
+}
+/* La flecha entre pasos: decorativa, la lista ya es ordenada. */
+.pasos li:not(:last-child)::after {
+  content: "→";
+  margin: 0 16px;
+  color: var(--aq-muted);
+  font-size: 18px;
+}
+.pasos svg {
+  flex: none;
+  color: var(--aq-text);
+}
+.pasos strong {
+  display: block;
+  color: var(--aq-text);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* ── Mapa y familias ──────────────────────────────────────────────────────── */
+.mapaZona {
+  --mapa-alto: clamp(360px, calc(var(--aq-pantalla) - 430px), 700px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(200px, 16vw, 236px);
+  grid-template-areas:
+    "mapa familias"
+    "mapa escala";
+  grid-template-rows: auto 1fr;
+  column-gap: 12px;
+  align-items: start;
+  min-width: 0;
+}
+.mapaCol {
+  grid-area: mapa;
+  position: relative;
+  min-width: 0;
+}
+/* Los anillos del boceto detrás del país: dos elipses, una punteada, y un
+   resplandor azul. Decorativos y fuera del flujo: no mueven ni deforman nada. */
+.halo {
+  position: absolute;
+  inset: 6% -6% 0 -8%;
+  z-index: 0;
+  border: 1px solid rgba(0, 217, 244, 0.2);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 150, 255, 0.16), transparent 66%);
+  pointer-events: none;
+}
+.halo::after {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed rgba(0, 217, 244, 0.28);
+  border-radius: 50%;
+}
+.mapaCol > :global(*):not(.halo) {
+  position: relative;
+  z-index: 1;
+}
+/* La caja tiene exactamente la proporción del viewBox del mapa (436 × 520), así
+   que un porcentaje dentro de ella cae en el mismo punto del país a cualquier
+   tamaño: de ahí cuelga la tarjeta flotante. */
+.mapaCaja {
+  position: relative;
+  width: min(100%, calc(var(--mapa-alto) * 436 / 520));
+  aspect-ratio: 436 / 520;
+  /* Pegada a las tarjetas: el hueco que sobra queda a la izquierda, donde cabe
+     la tarjeta flotante sin invadir el texto. */
+  margin-left: auto;
+}
+.mapaCaja > :global(.clr-mapa),
+.mapaCaja > div:not(.tarjetaMapa) {
+  height: 100%;
+}
+.mapaCaja :global(.clr-mapa__svg) {
+  width: 100%;
+  height: 100%;
+  /* Relieve: tres capas de espesor y luego sombra y brillo. Los filtros no
+     transforman el SVG: la forma y la posición son las de siempre. */
+  filter: drop-shadow(0 1px 0 #2b86c4) drop-shadow(0 4px 0 #0c4170) drop-shadow(0 8px 0 #082c4b)
+    drop-shadow(0 18px 16px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 20px rgba(0, 150, 255, 0.3));
+}
+/* La etiqueta del propio SVG cede su sitio a la tarjeta HTML (que es el mismo
+   dato y enlaza igual); queda en el DOM para quien no tiene estilos. */
+.mapaCaja :global(.clr-mapa__etq),
+.mapaCaja :global(.clr-mapa__etq.is-activo) {
+  display: none;
+}
+.tarjetaMapa {
+  position: absolute;
+  z-index: 3;
+  width: max-content;
+  /* Su borde derecho a 12 px del anclaje, centrada en vertical. */
+  transform: translate(calc(-100% - 10px), -50%);
+}
+.tarjetaMapa > a,
+.tarjetaMapa > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px 9px 12px;
+  border: 1px solid rgba(0, 217, 244, 0.55);
+  border-radius: 12px;
+  background: rgba(8, 36, 58, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px -12px rgba(0, 217, 244, 0.45);
+  color: var(--aq-text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tarjetaMapa svg {
+  flex: none;
+  align-self: flex-start;
+  margin-top: 2px;
+  color: var(--aq-cyan);
+}
+.tarjetaMapa > a > span[aria-hidden],
+.tarjetaMapa > button > span[aria-hidden] {
+  color: var(--aq-muted);
+  font-size: 22px;
+  line-height: 1;
+}
+.tarjetaMapaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.tarjetaMapaLugar {
+  font:
+    500 13px/1.3 var(--font-inter),
+    sans-serif;
+}
+.tarjetaMapaTexto strong {
+  font:
+    700 22px/1.15 var(--font-inter),
+    sans-serif;
+}
+.tarjetaMapaTexto strong span {
+  font-size: 14px;
+  font-weight: 500;
+}
+.tarjetaMapaValor {
+  color: #cfe0ee;
+  font:
+    500 13px/1.3 var(--font-inter),
+    sans-serif;
+}
+.tarjetaMapa > a:focus-visible,
+.tarjetaMapa > button:focus-visible {
+  outline: 2px solid var(--aq-text);
+  outline-offset: 2px;
+}
+.familias {
+  grid-area: familias;
+  min-width: 0;
+  align-self: start;
+}
+.escalaZona {
+  grid-area: escala;
+  min-width: 0;
+  margin-top: 6px;
+}
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 16px;
+  border: 1px solid rgba(140, 190, 225, 0.22);
+  border-radius: 12px;
+  background: rgba(10, 34, 54, 0.86);
+  color: var(--aq-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.tarjeta svg {
+  flex: none;
+  box-sizing: content-box;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--fam) 55%, transparent);
+  border-radius: 10px;
+  color: var(--fam);
+}
+.tarjeta:hover {
+  border-color: var(--fam);
+}
+.tarjeta[aria-selected="true"] {
+  border-color: var(--fam);
+  background: #0f2d46;
+  box-shadow: inset 3px 0 0 var(--fam);
+}
+.tarjeta:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.tarjetaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tarjetaNombre {
+  color: var(--aq-text);
+  font:
+    500 15px/1.25 var(--font-inter),
+    sans-serif;
+}
+.tarjetaCifra {
+  color: var(--aq-muted);
+  font:
+    400 14px/1.2 var(--font-inter),
+    sans-serif;
+}
+.tarjetaCifra strong {
+  color: var(--aq-text);
+  font:
+    700 21px/1.2 var(--font-inter),
+    sans-serif;
+}
+
+/* ── Franja inferior: Ficha Viva · Gemelos digitales ──────────────────────── */
+.franja {
+  display: grid;
+  grid-template-columns: minmax(0, 36fr) minmax(0, 64fr);
+  column-gap: clamp(20px, 2.4vw, 40px);
+  align-items: center;
+  margin-top: clamp(8px, 1vw, 16px);
+}
+.franjaFicha {
+  min-width: 0;
+  padding-right: clamp(16px, 2.4vw, 40px);
+  border-right: 1px solid var(--aq-line);
+}
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fichaCab {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.fichaCab h2 {
+  margin: 0;
+  font:
+    700 clamp(1.6rem, 1.2rem + 1vw, 2.1rem)/1.1 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.02em;
+}
+.fichaCab p {
+  max-width: 28ch;
+  margin: 4px 0 0;
+  color: var(--aq-muted);
+  font:
+    400 14.5px/1.4 var(--font-inter),
+    sans-serif;
+}
+.fichaIcono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(140, 190, 225, 0.3);
+  border-radius: 14px;
+  background: linear-gradient(160deg, #123a5c, #0a2236);
+  color: var(--aq-text);
+  box-shadow: 0 10px 24px -12px rgba(0, 150, 255, 0.5);
+}
+.fichaTarjeta {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 217, 244, 0.35);
+  border-radius: 14px;
+  background: rgba(8, 36, 58, 0.72);
+  box-shadow: 0 12px 30px -16px rgba(0, 217, 244, 0.4);
+}
+.fichaAvatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid color-mix(in srgb, var(--fam, #00d9f4) 50%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fam, #00d9f4) 14%, transparent);
+  color: var(--fam, #00d9f4);
+}
+.fichaTitulos {
+  min-width: 0;
+}
+.fichaTitulos h3 {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font:
+    600 16px/1.3 var(--font-inter),
+    sans-serif;
+}
+/* Un único enlace estirado sobre la tarjeta: toda se puede pulsar sin anidar
+   enlaces; los accesos de debajo quedan por encima. */
+.fichaTitulos h3 a {
+  color: var(--aq-text);
+  text-decoration: none;
+}
+.fichaTitulos h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+}
+.fichaTitulos h3 a:focus-visible {
+  outline: none;
+}
+.fichaTitulos h3 a:focus-visible::after {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.fichaTitulos p {
+  margin: 3px 0 0;
+  color: var(--aq-muted);
+  font:
+    400 12.5px/1.4 var(--font-inter),
+    sans-serif;
+}
+.fichaFlecha {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(0, 217, 244, 0.6);
+  border-radius: 50%;
+  color: var(--aq-cyan);
+  font-size: 17px;
+}
+.fichaDatos {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 0;
+  margin: 10px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--aq-line);
+  list-style: none;
+  font:
+    600 13px/1.3 var(--font-inter),
+    sans-serif;
+}
+.fichaDatos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-left: 1px solid var(--aq-line);
+}
+.fichaDatos li:first-child {
+  padding: 2px 10px;
+  border: 1px solid var(--aq-muted);
+  border-radius: 999px;
+}
+.fichaDatos li:nth-child(2) {
+  border-left: 0;
+  margin-left: 4px;
+}
+.fichaDatos li:last-child {
+  color: var(--aq-muted);
+  font-weight: 500;
+}
+.fichaDatos li > span {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--aq-muted);
+  border-radius: 50%;
+}
+.fichaDatos li[data-abierto] {
+  border-color: var(--aq-abierto);
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--aq-abierto);
+}
+.fichaDatos li[data-abierto] > span {
+  border-color: var(--aq-abierto);
+}
+.fichaAccesos {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fichaAccesos a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--aq-cyan);
+  font:
+    500 12.5px/1 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.fichaAccesos a:hover {
+  background: rgba(0, 217, 244, 0.1);
+}
+.fichaAccesos a:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 2px;
+}
+.fichaVacio {
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--aq-line);
+  border-radius: 14px;
+  background: var(--aq-card);
+  color: var(--aq-muted);
+  font:
+    15px/1.5 var(--font-inter),
+    sans-serif;
+}
+.fichaPie {
+  display: flex;
+  flex-direction: column;
+}
+.fichaPieFila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 14px;
+}
+.enlace {
+  display: inline-block;
+  padding: 4px 0;
+  color: var(--aq-cyan);
+  font:
+    600 13px/1.35 var(--font-inter),
+    sans-serif;
+  text-decoration: none;
+}
+.enlace:hover {
+  text-decoration: underline;
+}
+.enlace:focus-visible,
+.pausa:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
+.pausa {
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--aq-muted);
+  font:
+    600 13px var(--font-inter),
+    sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Gemelos digitales: texto a la izquierda y la planta grande a la derecha,
+   que se sale un poco del margen como en el boceto. */
+.gemelos {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
+  gap: clamp(8px, 1.5vw, 24px);
+  align-items: center;
+  min-width: 0;
+}
+.gemelosTexto h2 {
+  margin: 0;
+  font:
+    700 clamp(1.6rem, 1.1rem + 1.4vw, 2.3rem)/1.1 var(--font-inter),
+    sans-serif;
+  letter-spacing: -0.02em;
+  hyphens: manual;
+}
+.gemelosTexto p:not(.eyebrow) {
+  margin: 12px 0 18px;
+  color: #cfe0ee;
+  font:
+    400 14.5px/1.5 var(--font-inter),
+    sans-serif;
+}
+.gemelosTexto .eyebrow {
+  margin-bottom: 8px;
+}
+.gemelosTexto .eyebrow::before {
+  display: none;
+}
+.planta {
+  position: relative;
+  margin: 0 calc(var(--gutter, 20px) * -0.8) 0 0;
+}
+.plantaImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.demo {
+  position: absolute;
+  left: 0;
+  bottom: 2%;
+  padding: 4px 10px;
+  border: 1px solid var(--aq-line);
+  border-radius: 999px;
+  background: rgba(3, 22, 37, 0.85);
+  color: var(--aq-muted);
+  font:
+    500 11.5px/1.2 var(--font-inter),
+    sans-serif;
+}
+.lectura {
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid rgba(0, 217, 244, 0.4);
+  border-radius: 10px;
+  background: rgba(8, 36, 58, 0.88);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.lectura dt {
+  grid-column: 1 / -1;
+  color: var(--aq-muted);
+  font:
+    500 12px/1.2 var(--font-inter),
+    sans-serif;
+}
+.lectura dd {
+  display: contents;
+  margin: 0;
+  color: var(--aq-text);
+  font:
+    700 20px/1.2 var(--font-inter),
+    sans-serif;
+}
+.lectura dd span {
+  color: var(--aq-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.spark,
+.anillo {
+  color: var(--aq-cyan);
+}
+.lecturaCaudal {
+  left: 2%;
+  top: 8%;
+}
+.lecturaEficiencia {
+  right: 4%;
+  top: 0;
+}
+
+/* ── Adaptación ───────────────────────────────────────────────────────────── */
+@media (max-width: 1099px) {
+  /* Las familias pasan sobre el mapa, en fila. */
+  .familias {
+    align-self: auto;
+  }
+  .mapaZona {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "familias" "mapa" "escala";
+    grid-template-rows: none;
+    --mapa-alto: 520px;
+    row-gap: 12px;
+  }
+  .tarjetas {
+    flex-direction: row;
+  }
+  .tarjeta {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 0;
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 899px) {
+  .grid,
+  .franja {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+  }
+  .franjaFicha {
+    padding-right: 0;
+    border-right: 0;
+  }
+  .planta {
+    margin-right: 0;
+  }
+  .grid {
+    align-items: start;
+  }
+  .gemelos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .pasos {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pasos li::after {
+    display: none;
+  }
+  /* En el celular la tarjeta se saldría de la pantalla: la línea .previa
+     (hero-territorial.module.css) dice el proceso activo. */
+  .tarjetaMapa {
+    display: none;
+  }
+  .tarjetas {
+    flex-direction: column;
+  }
+  .tarjeta {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .acciones > a {
+    flex: 1 1 100%;
+  }
+  .lecturaCaudal {
+    top: 4%;
+  }
+}

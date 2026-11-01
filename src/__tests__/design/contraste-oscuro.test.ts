@@ -197,21 +197,21 @@ describe("botones azules con texto blanco", () => {
 });
 
 describe("barra y árbol de la Ficha Viva", () => {
-  // La píldora de la barra oscura (2026-10-04): su fondo translúcido sobre el
-  // de la portada.
-  const barra = componer([12, 32, 52], 0.8, "#061423");
+  // La barra oscura (hero V3.1, 2026-11-01): plana y translúcida sobre el fondo
+  // de la portada (se mide contra el azul noche, el caso menos favorable).
+  const barra = componer([3, 22, 37], 0.86, "#031625");
   it("enlaces y texto secundario de la barra oscura", () => {
-    pinta(navbar, "rgba(12, 32, 52, 0.8)");
-    for (const color of ["#c3d3e0", "#9fb4c6", "#4cc9ff"]) {
+    pinta(navbar, "rgba(3, 22, 37, 0.86)");
+    for (const color of ["#c3d3e0", "#aec2d2", "#00d9f4"]) {
       pinta(navbar, color);
       expect(contraste(color, barra)).toBeGreaterThanOrEqual(AA.texto);
     }
   });
 
-  it("el botón blanco de la barra: texto noche y se distingue de la píldora", () => {
-    pinta(navbar, "color: #061423; background: #f3f8fc");
-    expect(contraste("#061423", "#f3f8fc")).toBeGreaterThanOrEqual(AA.texto);
-    expect(contraste("#f3f8fc", barra)).toBeGreaterThanOrEqual(AA.noTextual);
+  it("el botón cian de la barra: texto noche y se distingue de la barra", () => {
+    pinta(navbar, "color: #031625; background: #00d9f4");
+    expect(contraste("#031625", "#00d9f4")).toBeGreaterThanOrEqual(AA.texto);
+    expect(contraste("#00d9f4", barra)).toBeGreaterThanOrEqual(AA.noTextual);
   });
 
   it("texto del árbol de decisiones", () => {
