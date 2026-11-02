@@ -164,15 +164,11 @@
   stroke: #ffffff;
   stroke-width: 2;
 }
-/* Una sola etiqueta visible, la del activo (2026-10-06): las demás no se
-   pintan ni reciben foco, como los grupos ocultos. */
+/* Sin rótulo flotante sobre el mapa (2026-11-02, pedido del usuario): las
+   etiquetas siguen en el SVG de servidor, pero ninguna se pinta ni recibe foco;
+   el proceso activo se lee en la Ficha Viva. */
 .map :global(.clr-mapa__etq) {
   display: none;
-  cursor: pointer;
-}
-.map :global(.clr-mapa__etq.is-activo) {
-  display: inline;
-  animation: aqAparece 0.2s ease-out;
 }
 .map :global(.clr-mapa__etq rect) {
   fill: var(--aq-card);

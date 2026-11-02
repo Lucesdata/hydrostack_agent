@@ -46,3 +46,6 @@ Se quitaron del hero: la tarjeta flotante del mapa («Valle del Cauca · N proce
 
 ## Limpieza 2 (2026-11-02, pedido del usuario)
 Se quitaron los tres pasos «Descubre → Evalúa → Sigue» del mensaje y los cuatro accesos a secciones de la ficha (Qué se contrata, Presupuesto, Plazos, Qué falta verificar). La tarjeta de la Ficha Viva sigue enlazando a la ficha por su título. Se borró `HeroWorkflow.jsx`.
+
+## Limpieza 3 (2026-11-02, pedido del usuario)
+Se oculta el rótulo flotante del mapa («Valle $500 M»): las etiquetas siguen en el SVG de servidor pero no se pintan.
