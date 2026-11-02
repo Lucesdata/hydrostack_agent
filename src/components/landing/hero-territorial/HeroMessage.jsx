@@ -1,6 +1,5 @@
 import Link from "next/link";
 import BuscadorGuiado from "./BuscadorGuiado";
-import HeroWorkflow from "./HeroWorkflow";
 import styles from "./hero-v3.module.css";
 
 /**
@@ -45,7 +44,6 @@ export default function HeroMessage() {
           Ver cómo funciona
         </Link>
       </div>
-      <HeroWorkflow />
     </div>
   );
 }

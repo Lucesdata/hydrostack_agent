@@ -175,41 +175,7 @@
   outline: 2px solid var(--aq-text);
   outline-offset: 3px;
 }
-.pasos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 0;
-  margin: 34px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.pasos li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--aq-muted);
-  font:
-    400 14.5px/1.3 var(--font-inter),
-    sans-serif;
-}
 /* La flecha entre pasos: decorativa, la lista ya es ordenada. */
-.pasos li:not(:last-child)::after {
-  content: "→";
-  margin: 0 16px;
-  color: var(--aq-muted);
-  font-size: 18px;
-}
-.pasos svg {
-  flex: none;
-  color: var(--aq-text);
-}
-.pasos strong {
-  display: block;
-  color: var(--aq-text);
-  font-weight: 600;
-  font-size: 16px;
-}
 
 /* ── Mapa y familias ──────────────────────────────────────────────────────── */
 .mapaZona {
@@ -527,35 +493,6 @@
 .fichaDatos li[data-abierto] > span {
   border-color: var(--aq-abierto);
 }
-.fichaAccesos {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.fichaAccesos a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  color: var(--aq-cyan);
-  font:
-    500 12.5px/1 var(--font-inter),
-    sans-serif;
-  text-decoration: none;
-}
-.fichaAccesos a:hover {
-  background: rgba(0, 217, 244, 0.1);
-}
-.fichaAccesos a:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 2px;
-}
 .fichaVacio {
   margin: 0;
   padding: 16px 18px;
@@ -708,13 +645,6 @@
   }
 }
 @media (max-width: 599px) {
-  .pasos {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .pasos li::after {
-    display: none;
-  }
   .tarjetas {
     flex-direction: column;
   }
