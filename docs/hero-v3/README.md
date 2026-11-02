@@ -43,3 +43,6 @@ Implementación del boceto aprobado sobre el hero existente. Sin despliegue ni P
 
 ## Limpieza posterior (2026-11-01, pedido del usuario)
 Se quitaron del hero: la tarjeta flotante del mapa («Valle del Cauca · N procesos»), la escala de colores con su título, la lista «Ver por departamento» y las lecturas de telemetría de la planta (Caudal y Eficiencia). El pie de la planta dice ahora «Ilustración demostrativa». Con conteos el mapa queda sin leyenda; sin ellos se conserva la leyenda de las tres familias. La región sigue abriéndose pulsando el mapa. Se pierde la alternativa textual por departamento (lista) que ofrecía el hero.
+
+## Limpieza 2 (2026-11-02, pedido del usuario)
+Se quitaron los tres pasos «Descubre → Evalúa → Sigue» del mensaje y los cuatro accesos a secciones de la ficha (Qué se contrata, Presupuesto, Plazos, Qué falta verificar). La tarjeta de la Ficha Viva sigue enlazando a la ficha por su título. Se borró `HeroWorkflow.jsx`.

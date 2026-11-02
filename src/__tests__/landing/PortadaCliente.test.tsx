@@ -15,10 +15,10 @@ const destacados = (["potable", "residual", "redes"] as const).map((familia, i) 
 }));
 
 describe("PortadaCliente", () => {
-  it("la Ficha Viva del hero enlaza las secciones del primer destacado del hero", () => {
+  it("la Ficha Viva del hero enlaza la ficha del primer destacado", () => {
     const html = renderToStaticMarkup(<PortadaCliente destacados={destacados} />);
-    expect(html).toContain(`href="${procesos[0].href}#ficha-dinero"`);
-    expect(html).not.toContain(`href="${procesos[1].href}#ficha-dinero"`);
+    expect(html).toContain(`href="${procesos[0].href}"`);
+    expect(html).not.toContain(`href="${procesos[1].href}"`);
   });
 
   it("sin procesos, la Ficha Viva no enlaza nada", () => {

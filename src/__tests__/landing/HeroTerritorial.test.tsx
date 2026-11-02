@@ -68,15 +68,14 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Opciones del mapa");
   });
 
-  it("una sola ficha, la del primer destacado, con su enlace y los cuatro accesos a su ficha", () => {
+  it("una sola ficha, la del primer destacado, con su enlace a la ficha", () => {
     const [p] = cinco;
     expect(html).toContain('data-familia="potable"');
     expect(html).toContain(`aria-label="Ver ficha: ${p.objeto}"`);
-    // El objeto enlaza a la ficha; los cuatro accesos, a sus secciones.
     expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
-    for (const ancla of ["#ficha-resumen", "#ficha-dinero", "#ficha-plazos", "#pliego"]) {
-      expect(html).toContain(`href="${p.href}${ancla}"`);
-    }
+    // Sin los accesos a secciones ni los tres pasos (2026-11-02).
+    expect(html).not.toContain("#ficha-dinero");
+    expect(html).not.toContain("Descubre");
     for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}`);
   });
 
@@ -127,9 +126,9 @@ describe("HeroTerritorial", () => {
     expect(html).not.toContain("Desliza las tarjetas");
   });
 
-  it("orden de la ficha: objeto, entidad y lugar, estado, presupuesto, cierre, accesos", () => {
+  it("orden de la ficha: objeto, entidad y lugar, estado, presupuesto, cierre", () => {
     const inicio = html.indexOf('<article class="');
-    const tarjeta = html.slice(inicio, html.indexOf("Qué falta verificar", inicio) + 20);
+    const tarjeta = html.slice(inicio, html.indexOf("Cierre: 20 oct 2026", inicio) + 20);
     const orden = [
       "Obra de prueba",
       "Municipio de Prueba",
@@ -137,7 +136,6 @@ describe("HeroTerritorial", () => {
       "Abierto",
       "$2.450 millones",
       "Cierre: 20 oct 2026",
-      "Qué se contrata",
     ].map((t) => tarjeta.indexOf(t));
     expect(orden.every((i) => i >= 0)).toBe(true);
     expect([...orden].sort((a, b) => a - b)).toEqual(orden);

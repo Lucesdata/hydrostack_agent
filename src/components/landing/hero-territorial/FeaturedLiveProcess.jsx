@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { enlacesDeFicha } from "@/src/components/landing/proceso-resumen";
 import { frase, titulo } from "@/src/components/landing/texto";
 import {
   estadoVisible,
@@ -12,8 +11,8 @@ import styles from "./hero-v3.module.css";
 
 /**
  * La Ficha Viva de la franja inferior: un proceso real del destacado activo
- * con título, entidad, estado, presupuesto y cierre, y los cuatro accesos a las
- * secciones de **su** ficha (antes, la sección FichaViva bajo el hero).
+ * con título, entidad, estado, presupuesto y cierre, (antes, la sección
+ * FichaViva bajo el hero; sus cuatro accesos a secciones salieron el 2026-11-02).
  *
  * Es el mismo proceso que marca el mapa. Si se abre un departamento, su panel
  * ocupa este sitio. El estado sale de `estadoVisible()` y el cierre de la
@@ -31,13 +30,6 @@ const TRAZO = {
   otros: <path d="M5 12h.01M12 12h.01M19 12h.01" />,
 };
 
-const ACCESOS = [
-  ["resumen", "Qué se contrata"],
-  ["dinero", "Presupuesto"],
-  ["plazos", "Plazos"],
-  ["pliego", "Qué falta verificar"],
-];
-
 export default function FeaturedLiveProcess({
   proceso,
   cierre,
@@ -46,7 +38,6 @@ export default function FeaturedLiveProcess({
   pie = null,
 }) {
   const objeto = proceso ? frase(proceso.objeto) : "";
-  const enlaces = proceso ? enlacesDeFicha(proceso.href) : null;
   const cierreTexto = fechaDeCierre(cierre ?? null);
   return (
     <section className={styles.ficha} aria-labelledby="aq-ficha-titulo">
@@ -113,17 +104,6 @@ export default function FeaturedLiveProcess({
               <li>{cierreTexto ? `Cierre: ${cierreTexto}` : "Cierre sin fecha publicada"}</li>
             </ul>
           </article>
-          {enlaces ? (
-            <ul className={styles.fichaAccesos} aria-label="Secciones de la ficha">
-              {ACCESOS.map(([clave, etiqueta]) => (
-                <li key={clave}>
-                  <Link href={enlaces[clave]} aria-label={`${etiqueta} de ${objeto}`}>
-                    {etiqueta}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </>
       ) : (
         <p className={styles.fichaVacio} role="status">
