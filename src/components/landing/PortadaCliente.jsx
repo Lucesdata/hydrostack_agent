@@ -82,79 +82,78 @@ export default function LandingPage({
 
         {/* Accesos al observatorio: las rutas y sus consultas SECOP II se conservan. */}
         <section aria-label="Observatorio de contratación AquaLicita" className={styles.section}>
+          <header className={styles.intro}>
+            <span className={styles.kicker}>HERRAMIENTAS DE INTELIGENCIA</span>
+            <h2>
+              Explora la contratación en <span>agua y saneamiento</span>
+            </h2>
+            <p>
+              Dos herramientas complementarias para explorar adjudicaciones, analizar el mercado y
+              consultar las entidades del sector, con datos de SECOP II.
+            </p>
+          </header>
           <div className={styles.grid}>
             <Link href="/proyectos-adjudicados" className={`${styles.card} ${styles.projects}`}>
               <div className={styles.topline}>
-                <span className={styles.eyebrow}>OBSERVATORIO SECOP II</span>
-                <span className={styles.marker} aria-hidden="true">
-                  01 /
+                <span className={styles.icon} aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.7">
+                    <path d="m4 10 12-6 12 6-12 6-12-6Zm0 7 12 6 12-6M4 24l12 6 12-6" />
+                  </svg>
                 </span>
+                <span>CONTRATACIÓN SECOP II</span>
               </div>
               <div className={styles.content}>
-                <h2>
+                <h3>
                   Proyectos
                   <br />
                   adjudicados
-                </h2>
+                </h3>
                 <p>
-                  Explora las mayores adjudicaciones de agua y saneamiento del último mes cerrado.
+                  Consulta y analiza las mayores adjudicaciones de agua y saneamiento del último mes
+                  cerrado. Conoce quién contrató, a quién y por qué valor.
                 </p>
                 <span className={styles.cta}>
-                  Explorar proyectos <span aria-hidden="true">↗</span>
+                  Explorar adjudicados <span aria-hidden="true">→</span>
                 </span>
               </div>
-              <div className={styles.scene} aria-hidden="true">
-                <span className={styles.sceneLabel}>INFRAESTRUCTURA HÍDRICA</span>
-                <img
-                  src="/ilustraciones/adjudicaciones-agua.svg"
-                  alt=""
-                  loading="lazy"
-                  width="680"
-                  height="420"
-                />
-                <span className={styles.sceneCaption}>AGUA / SANEAMIENTO</span>
-              </div>
-              <div className={styles.footer}>
-                <span>Adjudicaciones</span>
-                <span>Último mes cerrado</span>
-              </div>
+              <img
+                className={styles.scene}
+                src="/portada/observatorio/planta-adjudicados.webp"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width="1100"
+                height="733"
+              />
             </Link>
             <Link href="/licitaciones/entidades" className={`${styles.card} ${styles.radar}`}>
               <div className={styles.topline}>
-                <span className={styles.eyebrow}>FICHAS VIVAS INSTITUCIONALES</span>
-                <span className={styles.marker} aria-hidden="true">
-                  02 /
+                <span className={styles.icon} aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.7">
+                    <path d="m4 10 12-6 12 6H4Zm2 3h20M7 25h18M4 28h24M9 13v12m7-12v12m7-12v12" />
+                  </svg>
                 </span>
+                <span>ENTIDADES Y CONTRATACIÓN</span>
               </div>
               <div className={styles.content}>
-                <h2>
-                  Radar
-                  <br />
-                  institucional
-                </h2>
+                <h3>Radar institucional</h3>
                 <p>
-                  Descubre quién contrata. Consulta las entidades y explora su actividad en el
-                  sector.
+                  Consulta la actividad de contratación de entidades clave del sector. Explora su
+                  historial, adjudicaciones y procesos abiertos.
                 </p>
                 <span className={styles.cta}>
-                  Explorar entidades <span aria-hidden="true">↗</span>
+                  Explorar entidades <span aria-hidden="true">→</span>
                 </span>
               </div>
-              <div className={styles.scene} aria-hidden="true">
-                <span className={styles.sceneLabel}>RED DE CONTRATACIÓN</span>
-                <img
-                  src="/ilustraciones/radar-agua.svg"
-                  alt=""
-                  loading="lazy"
-                  width="680"
-                  height="420"
-                />
-                <span className={styles.sceneCaption}>ENTIDADES / CONEXIONES</span>
-              </div>
-              <div className={styles.footer}>
-                <span>Entidades contratantes</span>
-                <span>SECOP II</span>
-              </div>
+              <img
+                className={styles.scene}
+                src="/portada/observatorio/radar-institucional.webp"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width="1100"
+                height="733"
+              />
             </Link>
           </div>
         </section>

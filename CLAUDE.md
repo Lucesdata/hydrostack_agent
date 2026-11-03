@@ -950,7 +950,11 @@ y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspas
 No se ha desplegado esta sección.
 
 **Observatorio de portada (2026-11-03, rama `codex/observatorio-tarjetas-industriales`).**
-Las dos tarjetas de `PortadaCliente.jsx` usan `observatorio.module.css`: azul
-petróleo, acentos ámbar/cian, fondo ambiental y los SVG existentes. Conservan
-`/proyectos-adjudicados` y `/licitaciones/entidades`, sin consultas ni cifras
-nuevas. Una columna bajo 760 px, foco visible y movimiento reducido.
+`PortadaCliente.jsx` y `observatorio.module.css` siguen la imagen aportada por
+el usuario «Herramientas inteligentes para el sector hídrico»: encabezado,
+bordes cian, CTA redondeados e ilustraciones 3D decorativas generadas y
+comprimidas en `public/portada/observatorio/`. La referencia corrige la primera
+aproximación de acentos ámbar/cian. Conserva `/proyectos-adjudicados` y
+`/licitaciones/entidades`, sin consultas ni cifras nuevas. Responsive, foco
+visible y movimiento reducido. Procedencia y plan en
+`docs/superpowers/plans/2026-11-03-observatorio-tarjetas.md`.
