@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" role="img" aria-label="Ilustración técnica de planta de tratamiento de agua">
+<defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d9faf3"/><stop offset="1" stop-color="#2799ab"/></linearGradient><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a4f6e9"/><stop offset="1" stop-color="#087b91"/></linearGradient></defs>
+<g opacity=".25" fill="none" stroke="#168d9e" stroke-width="2"><path d="M50 325L320 180L620 318L350 410Z"/><path d="M50 270L320 125L620 265"/><path d="M50 215L320 70L620 210"/><path d="M120 360L385 206M200 398L465 245M290 405L550 277"/></g>
+<g transform="translate(160 135)"><path d="M0 45l225-95 210 100-225 108Z" fill="#c5f4ee"/><path d="M0 45v95l210 111v-93Z" fill="#8ac4c3"/><path d="M210 158v93l225-109V50Z" fill="#2a8e9b"/>
+<ellipse cx="207" cy="60" rx="168" ry="70" fill="#ceeae8" stroke="#0d889e" stroke-width="9"/><ellipse cx="207" cy="60" rx="134" ry="49" fill="url(#w)" stroke="#aaf5e8" stroke-width="5"/>
+<path d="M83 70c52-25 190-26 252 1M101 91c65-24 156-23 209-2" fill="none" stroke="#d6fcf5" stroke-opacity=".6" stroke-width="4"/>
+<path d="M40 18l22-10 292 116 22-9" fill="none" stroke="#ffcf73" stroke-width="5"/><g stroke="#ffcf73" stroke-width="4"><path d="M80 25v-35M128 20v-35M176 24v-35M220 45v-35M268 63v-35M318 87v-35"/></g>
+<circle cx="207" cy="60" r="19" fill="#d5fff9" stroke="#047d91" stroke-width="4"/><path d="M207 60v-35m0 35l47 13m-47-13l-41 17" stroke="#047d91" stroke-width="5"/>
+</g><g fill="url(#a)" stroke="#087a8c" stroke-width="5"><rect x="40" y="205" width="110" height="105" rx="5"/><rect x="56" y="170" width="80" height="40" rx="7"/></g><path d="M150 258h63m0 0v-30" fill="none" stroke="#05a7af" stroke-width="15"/><path d="M150 258h63m0 0v-30" fill="none" stroke="#c9f9ed" stroke-width="5" stroke-dasharray="9 8"/>
+</svg>

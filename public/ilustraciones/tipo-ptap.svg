@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" role="img" aria-label="Ilustración conceptual de una planta de tratamiento de agua potable">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6f3fb"/><stop offset="1" stop-color="#bfe0f3"/></linearGradient><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7fd0f5"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs>
+<rect width="680" height="420" fill="url(#bg)"/>
+<path d="M0 330h680v90H0z" fill="#d3e8f3"/>
+<g stroke="#0369a1" stroke-width="4" stroke-linejoin="round">
+<!-- clarificador circular -->
+<ellipse cx="200" cy="270" rx="120" ry="38" fill="#a9d6ee"/><path d="M80 270v50c0 21 54 38 120 38s120-17 120-38v-50" fill="#7fbcdf"/><ellipse cx="200" cy="270" rx="120" ry="38" fill="#a9d6ee"/><ellipse cx="200" cy="270" rx="98" ry="28" fill="url(#w)"/>
+<path d="M200 270V225M110 255l180 26" stroke="#e9f6fd" stroke-width="5"/><circle cx="200" cy="270" r="10" fill="#e9f6fd"/>
+<!-- filtros -->
+<rect x="360" y="250" width="120" height="80" rx="6" fill="#8fc5e4"/><rect x="372" y="262" width="96" height="24" rx="4" fill="url(#w)"/><rect x="372" y="296" width="96" height="24" rx="4" fill="url(#w)"/>
+<rect x="500" y="250" width="120" height="80" rx="6" fill="#8fc5e4"/><rect x="512" y="262" width="96" height="24" rx="4" fill="url(#w)"/><rect x="512" y="296" width="96" height="24" rx="4" fill="url(#w)"/>
+<!-- tanque de almacenamiento -->
+<rect x="420" y="130" width="130" height="120" rx="8" fill="#a9d6ee"/><path d="M420 160h130M420 190h130M420 220h130" stroke-width="2" opacity=".5"/><path d="M420 130a65 18 0 0 1 130 0" fill="#d6ecf8"/>
+</g>
+<!-- tuberías -->
+<path d="M320 300h40M480 300h20M485 250v-10h-65" fill="none" stroke="#0369a1" stroke-width="10"/><path d="M320 300h40M480 300h20" fill="none" stroke="#e9f6fd" stroke-width="3" stroke-dasharray="8 7"/>
+<!-- gota -->
+<path d="M80 95c0 0-26 30-26 48a26 26 0 0 0 52 0c0-18-26-48-26-48z" fill="#0369a1"/><path d="M68 148a12 12 0 0 0 12 12" fill="none" stroke="#e9f6fd" stroke-width="4" stroke-linecap="round"/>
+</svg>

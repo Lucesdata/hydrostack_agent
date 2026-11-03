@@ -1,58 +1,68 @@
 import Link from "next/link";
-import { ESTILOS_LISTA } from "@/src/components/secop/lista/estilos";
-import ListaCompradores, {
-  ESTILOS_COMPRADORES,
-} from "@/src/components/secop/compradores/ListaCompradores";
-import { formatConteo } from "@/src/components/secop/format";
+import RadarEntidades from "@/src/components/secop/radar/RadarEntidades";
 import { entidadesCompradoras, type Compradores } from "@/src/lib/secop/compradores";
-
-/**
- * Quién compra: las entidades con más procesos abiertos. Pública, sin cuenta,
- * como las facetas. No lee `searchParams` (ver las rutas facetadas): es
- * estática y se revalida con la misma cadencia de 6 h.
- */
+import "@/src/components/secop/radar/radar.css";
 export const revalidate = 21600;
-
 export const metadata = {
-  title: "Quién compra · Entidades con más procesos de agua abiertos",
+  title: "Radar institucional · Entidades contratantes",
   description:
-    "Las entidades públicas con más procesos abiertos de agua y saneamiento en el SECOP II: cuántos tienen, cuánto presupuesto publican y dónde está su sede.",
+    "Fichas institucionales de entidades públicas que contratan proyectos de agua y saneamiento en SECOP II.",
   alternates: { canonical: "/licitaciones/entidades" },
 };
-
 export default async function Page() {
   let datos: Compradores | null = null;
   try {
     datos = await entidadesCompradoras();
   } catch (error) {
-    // Sin base (p. ej. en el build), la página sale sin listado en vez de caerse.
-    console.error("[licitaciones/entidades] no disponible:", error);
+    console.error("[radar institucional] fuente no disponible", error);
   }
-
   return (
-    <div className="clr-page">
-      <style dangerouslySetInnerHTML={{ __html: ESTILOS_LISTA + ESTILOS_COMPRADORES }} />
-      <div className="clr-container">
-        <header className="lp-cab">
-          <nav className="lp-cab-migas" aria-label="Ruta de navegación">
-            <Link href="/licitaciones">Fichas de procesos</Link>
-            {" · "}Quién compra
-          </nav>
-          <h1 className="lp-cab-h1">Quién compra</h1>
-          <p className="lp-cab-desc">
-            Las entidades con más procesos abiertos de agua y saneamiento en el SECOP II. El
-            departamento es el de la sede de la entidad. Quién se presenta y gana está en cada
-            ficha, en «Quién suele competir aquí».
+    <div className="ri-page">
+      <header className="ri-hero ri-hero--radar">
+        <div className="ri-shell">
+          <span className="ri-eyebrow">AQUALICITA · INTELIGENCIA INSTITUCIONAL</span>
+          <h1>
+            Radar <span style={{ color: "#008c90" }}>institucional</span>
+          </h1>
+          <p>
+            Explora las fichas vivas de alcaldías, empresas de servicios públicos, gobernaciones e
+            instituciones que contratan agua y saneamiento en Colombia.
           </p>
-          {datos && datos.totalEntidades > 0 ? (
-            <p className="lp-cab-conteo">
-              {datos.entidades.length < datos.totalEntidades
-                ? `Las ${formatConteo(datos.entidades.length)} primeras de ${formatConteo(datos.totalEntidades)} entidades con procesos abiertos`
-                : `${formatConteo(datos.totalEntidades)} entidades con procesos abiertos`}
+        </div>
+      </header>
+      <div className="ri-shell ri-section">
+        <div className="ri-tabs">
+          <Link className="ri-tab" href="/proyectos-adjudicados">
+            Proyectos adjudicados ↗
+          </Link>
+          <Link className="ri-tab" href="/licitaciones">
+            Fichas de procesos ↗
+          </Link>
+        </div>
+        {datos ? (
+          <>
+            <p className="ri-muted">
+              {datos.totalEntidades.toLocaleString("es-CO")} entidades con procesos abiertos en la
+              base · se muestran hasta {datos.entidades.length} · actualización según ingesta de
+              SECOP II.
             </p>
-          ) : null}
-        </header>
-        <ListaCompradores datos={datos} />
+            <RadarEntidades datos={datos} />
+          </>
+        ) : (
+          <div className="ri-empty">
+            No se pudo conectar con los registros SECOP II. Esta página no muestra cifras simuladas.
+          </div>
+        )}
+        <aside className="ri-criteria">
+          <strong>Cómo leer este radar</strong>
+          <p>
+            El orden inicial usa la cantidad de procesos que reciben ofertas, no el valor
+            adjudicado. Las cifras monetarias representan presupuesto oficial de procesos abiertos
+            con monto positivo, no contratos adjudicados. La ubicación corresponde a la sede de la
+            entidad. Cada ficha institucional reúne historial, adjudicaciones identificadas y
+            procesos abiertos.
+          </p>
+        </aside>
       </div>
     </div>
   );

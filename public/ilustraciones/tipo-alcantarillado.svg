@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" role="img" aria-label="Ilustración conceptual de una red de alcantarillado: calle, pozos de inspección y colector subterráneo">
+<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#eef1f5"/><stop offset="1" stop-color="#d6dde6"/></linearGradient></defs>
+<rect width="680" height="420" fill="url(#sk)"/>
+<!-- suelo -->
+<path d="M0 190h680v230H0z" fill="#c9d1db"/><path d="M0 190h680v22H0z" fill="#8b97a7"/><path d="M0 212h680" stroke="#5b6776" stroke-width="3"/>
+<path d="M0 235c120 10 200-10 340 5s240 0 340-10v185H0z" fill="#b9c3cf" opacity=".6"/>
+<!-- edificios -->
+<g stroke="#5b6776" stroke-width="4" stroke-linejoin="round"><path d="M70 190v-90h90v90z" fill="#f5f7fa"/><path d="M190 190v-60h70v60z" fill="#f5f7fa"/><path d="M520 190v-110h100v110z" fill="#f5f7fa"/><path d="M380 190v-50h80v50z" fill="#f5f7fa"/></g>
+<g fill="#aab6c4"><rect x="90" y="115" width="14" height="14"/><rect x="120" y="115" width="14" height="14"/><rect x="90" y="145" width="14" height="14"/><rect x="120" y="145" width="14" height="14"/><rect x="545" y="100" width="14" height="14"/><rect x="580" y="100" width="14" height="14"/><rect x="545" y="135" width="14" height="14"/><rect x="580" y="135" width="14" height="14"/></g>
+<!-- colector -->
+<g stroke="#5b6776" stroke-width="4"><path d="M0 330h680" stroke-width="42" stroke="#5b6776"/><path d="M0 330h680" stroke-width="30" stroke="#a3b1c2"/></g>
+<path d="M0 336h680" stroke="#5b6776" stroke-width="12" opacity=".35"/>
+<path d="M60 330h80M260 330h80M460 330h80" stroke="#f5f7fa" stroke-width="4" stroke-dasharray="14 10"/><path d="M590 318l24 12-24 12" fill="none" stroke="#f5f7fa" stroke-width="5"/>
+<!-- pozos de inspección -->
+<g stroke="#5b6776" stroke-width="4" stroke-linejoin="round"><path d="M175 196v118" stroke-width="30" stroke="#5b6776"/><path d="M175 196v118" stroke-width="22" stroke="#a3b1c2"/><ellipse cx="175" cy="196" rx="19" ry="6" fill="#5b6776"/>
+<path d="M455 196v118" stroke-width="30" stroke="#5b6776"/><path d="M455 196v118" stroke-width="22" stroke="#a3b1c2"/><ellipse cx="455" cy="196" rx="19" ry="6" fill="#5b6776"/></g>
+<!-- acometidas -->
+<path d="M115 190v125M550 190v125M420 190v125" stroke="#5b6776" stroke-width="8" opacity=".7"/>
+<path d="M640 70c0 0-20 24-20 38a20 20 0 0 0 40 0c0-14-20-38-20-38z" fill="#5b6776"/>
+</svg>
