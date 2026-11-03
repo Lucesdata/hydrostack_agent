@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { principalesAdjudicaciones } from "@/src/lib/secop/radar-institucional";
+import { principalesAdjudicaciones, periodoAnterior } from "@/src/lib/secop/radar-institucional";
 import { formatCopEscala } from "@/src/components/secop/format";
-import { slugificar } from "@/src/lib/secop/slug";
+import { slugDeProceso } from "@/src/lib/secop/slug";
 import "@/src/components/secop/radar/radar.css";
 export const revalidate=21600;
 export const metadata={title:"Proyectos adjudicados de agua y saneamiento",description:"Los cinco mayores procesos adjudicados de agua potable y saneamiento del mes anterior, según registros SECOP II.",alternates:{canonical:"/proyectos-adjudicados"}};
@@ -10,7 +10,7 @@ const fecha=(s:string|null)=>s?new Intl.DateTimeFormat("es-CO",{timeZone:"UTC",d
 export default async function Page(){
  let datos:Awaited<ReturnType<typeof principalesAdjudicaciones>>|null=null;
  try{datos=await principalesAdjudicaciones()}catch(e){console.error("[adjudicados] fuente no disponible",e)}
- const mes=new Intl.DateTimeFormat("es-CO",{month:"long",year:"numeric",timeZone:"America/Bogota"}).format(new Date(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth()-1,15)));
+ const mes=periodoAnterior().etiqueta;
  return <div className="ri-page">
   <header className="ri-hero"><div className="ri-shell"><span className="ri-eyebrow">SECOP II · {mes}</span><h1>Los proyectos de agua y saneamiento <span style={{color:"#008e8e"}}>más grandes del mes</span></h1><p>Los cinco mayores valores adjudicados de acueducto, alcantarillado, PTAP y PTAR. Ordenados por valor de adjudicación publicado, no por presupuesto oficial.</p></div></header>
   <div className="ri-shell ri-section"><div className="ri-tabs"><Link href="/licitaciones/entidades" className="ri-tab">Radar institucional ↗</Link><Link href="/licitaciones" className="ri-tab">Explorar procesos ↗</Link></div>
@@ -23,12 +23,12 @@ export default async function Page(){
         <p style={i===0?{color:"#cdecea"}:{}}>{p.entidadNombre||"Entidad sin identificar"} · {p.departamento||"Sede por verificar"} · {fecha(p.fecha)}</p>
         <p style={{marginTop:6,...(i===0?{color:"#cdecea"}:{})}}>Referencia: {p.referencia||p.secopId}</p>
         <div style={{display:"flex",gap:16,marginTop:13,flexWrap:"wrap"}}>
-          <Link className="ri-button" href={`/licitaciones/${slugificar(p.objeto||"proceso")}-${p.secopId}`}>Ver ficha →</Link>
+          <Link className="ri-button" href={`/licitaciones/${slugDeProceso(p.objeto,p.secopId)}`}>Ver ficha →</Link>
           {p.entidadId?<Link href={`/entidades/${p.entidadId}`} className="ri-button ri-button--outline">Ver entidad</Link>:null}
           {p.url?.startsWith("https://")?<a href={p.url} className="ri-button ri-button--outline" target="_blank" rel="noopener noreferrer">Ver SECOP II ↗</a>:null}
         </div></div>
       <div><span className="ri-eyebrow" style={i===0?{color:"#a7eae5"}:{}}>Valor adjudicado</span><strong style={{fontSize:25,display:"block",margin:"8px 0"}}>{formatCopEscala(p.valor)}</strong><p style={i===0?{color:"#cdecea"}:{}}>Presupuesto oficial: {p.presupuesto?formatCopEscala(p.presupuesto):"No publicado"}</p><p style={i===0?{color:"#cdecea"}:{}}>Adjudicatario: {p.adjudicatario||"Por verificar"}</p></div>
      </div></article>)}</div>}
-  <aside className="ri-criteria"><strong>Cómo se eligen</strong><p>Procesos con estado adjudicado, fecha de adjudicación del mes anterior en hora de Colombia, tipo acueducto, alcantarillado, PTAP o PTAR y valor adjudicado positivo. La cifra no es el valor pagado ni acredita avance de obra. La localización es la sede de la entidad cuando está disponible.</p></aside>
+  <aside className="ri-criteria"><strong>Cómo se eligen</strong><p>Procesos en estado «Seleccionado» con adjudicatario publicado, sin duplicar entidad y referencia, fecha de adjudicación del mes anterior en hora de Colombia, tipo acueducto, alcantarillado, PTAP o PTAR y valor adjudicado positivo. La cifra no es el valor pagado ni acredita avance de obra. La localización es la sede de la entidad cuando está disponible.</p></aside>
  </div></div>
 }
