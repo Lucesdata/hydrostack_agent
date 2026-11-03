@@ -948,3 +948,13 @@ listas en el navegador ni incorporar estado personal al ISR de la ficha.
 Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
 y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
 No se ha desplegado esta sección.
+
+**Observatorio de portada (2026-11-03, rama `codex/observatorio-tarjetas-industriales`).**
+`PortadaCliente.jsx` y `observatorio.module.css` siguen la imagen aportada por
+el usuario «Herramientas inteligentes para el sector hídrico»: encabezado,
+bordes cian, CTA redondeados e ilustraciones 3D decorativas generadas y
+comprimidas en `public/portada/observatorio/`. La referencia corrige la primera
+aproximación de acentos ámbar/cian. Conserva `/proyectos-adjudicados` y
+`/licitaciones/entidades`, sin consultas ni cifras nuevas. Responsive, foco
+visible y movimiento reducido. Procedencia y plan en
+`docs/superpowers/plans/2026-11-03-observatorio-tarjetas.md`.
