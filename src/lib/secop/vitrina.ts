@@ -249,13 +249,18 @@ function ordenDeAbiertos(orden: FiltrosVitrina["orden"]) {
  * las parciales. `%`, `_` y `\` se buscan como caracteres (`patronIlike`).
  */
 function busquedaPorNumero(numero: string) {
-  const exacta = sql`(lower(${proceso.secopProcesoId}) = lower(${numero}) or lower(${proceso.referencia}) = lower(${numero}))`;
+  // NTC es el aviso público; REQ es el proceso. Solo la URL vincula ambos.
+  const aviso = /^CO1\.NTC\.\d+$/i.test(numero)
+    ? sql`substring(lower(${proceso.url}) from '^https://community[.]secop[.]gov[.]co/[^#]*[?&]noticeuid=(co1[.]ntc[.][0-9]+)(&|$)') = lower(${numero})`
+    : sql`false`;
+  const exacta = sql`(lower(${proceso.secopProcesoId}) = lower(${numero}) or lower(${proceso.referencia}) = lower(${numero}) or ${aviso})`;
   return {
     where: and(
       isNull(proceso.deletedAt),
       or(
         ilike(proceso.secopProcesoId, patronIlike(numero)),
-        ilike(proceso.referencia, patronIlike(numero))
+        ilike(proceso.referencia, patronIlike(numero)),
+        aviso
       )
     ),
     orden: [

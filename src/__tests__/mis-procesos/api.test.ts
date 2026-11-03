@@ -79,3 +79,15 @@ describe("API privada de procesos", () => {
     ).toBe(400);
   });
 });
+it("API acepta un lote REQ/NTC y mantiene la cuenta de la sesión", async () => {
+  vi.mocked(store.estadoGuardados).mockResolvedValue(["CO1.NTC.123"]);
+  const r = await GET(
+    new NextRequest("http://localhost:3000/api/mis-procesos?ids=CO1.REQ.12,CO1.NTC.123")
+  );
+  expect(r.status).toBe(200);
+  expect(await r.json()).toEqual({ usuarioId: "cuenta-a", guardados: ["CO1.NTC.123"] });
+  expect(store.estadoGuardados).toHaveBeenCalledWith("cuenta-a", ["CO1.REQ.12", "CO1.NTC.123"]);
+  const guardado = await PUT(req(), { params: { id: "co1.ntc.123" } });
+  expect(guardado.status).toBe(200);
+  expect(store.guardarProceso).toHaveBeenCalledWith({ usuarioId: "cuenta-a" }, "CO1.NTC.123");
+});

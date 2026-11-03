@@ -1,3 +1,4 @@
+import { urlSecopDe } from "./url";
 /**
  * Búsqueda de PROCESOS contra Postgres (ingesta cron). La usan el matching
  * (`getMatchesForPerfil`), el encaje de la vitrina y el estado del pliego; el
@@ -38,7 +39,7 @@ function toNumber(v: unknown): number | null {
  * Queda la validación de forma por si la fuente trae basura.
  */
 function extractUrl(v: string | null): string | null {
-  return typeof v === "string" && v.startsWith("http") ? v : null;
+  return urlSecopDe(v);
 }
 
 const DOCUMENT_ACCESS_VALUES: DocumentAccess[] = [

@@ -14,10 +14,8 @@ import { aSecopProceso, type ProcesoFicha } from "./ficha";
 import { montoConDato } from "./monto";
 import { compuertasAbsolutas, fechaCortaDeDia } from "./semaforo";
 
-/** Solo un enlace http(s): lo demás que traiga la fuente no se pinta como enlace. */
-export function urlSecopDe(url: string | null): string | null {
-  return url && /^https?:\/\//i.test(url) ? url : null;
-}
+import { urlSecopDe } from "./url";
+export { urlSecopDe } from "./url";
 
 export function datosDecisionDe(
   p: ProcesoFicha,

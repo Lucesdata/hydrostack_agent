@@ -72,6 +72,9 @@ vi.mock("@/src/lib/transform/writers", () => {
     size() {
       return 1;
     }
+    resolveEntidad() {
+      return "05001";
+    }
     resolve() {
       return null;
     }

@@ -73,5 +73,8 @@ export function parseDate(value: unknown): string | null {
   const s = cleanText(value);
   if (s === null) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+  if (!m) return null;
+  const dia = `${m[1]}-${m[2]}-${m[3]}`;
+  const fecha = new Date(`${dia}T12:00:00Z`);
+  return Number.isFinite(fecha.getTime()) && fecha.toISOString().slice(0, 10) === dia ? dia : null;
 }

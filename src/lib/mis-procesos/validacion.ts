@@ -1,7 +1,7 @@
 export class ConsultaPersonalInvalidaError extends Error {}
 export class ProcesoNoDisponibleError extends Error {}
 export function validarId(value: unknown): string {
-  if (typeof value !== "string" || value.length > 32 || !/^CO1\.REQ\.\d+$/i.test(value))
+  if (typeof value !== "string" || value.length > 32 || !/^CO1\.(?:REQ|NTC)\.\d+$/i.test(value))
     throw new ConsultaPersonalInvalidaError("Identificador de proceso inválido.");
   return value.toUpperCase();
 }

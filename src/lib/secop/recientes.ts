@@ -1,3 +1,4 @@
+import { urlSecopDe } from "./url";
 /**
  * El DTO de un proceso en resumen y su mapeo desde la fila de base.
  *
@@ -34,10 +35,10 @@ export interface ProcesoResumen {
 
 /** `urlproceso` llega como `{ url }`, string, o basura. Igual que en client.ts. */
 export function extractUrlProceso(v: unknown): string | null {
-  if (typeof v === "string" && v.startsWith("http")) return v;
+  if (typeof v === "string") return urlSecopDe(v);
   if (typeof v === "object" && v !== null && "url" in v) {
     const u = (v as { url?: unknown }).url;
-    return typeof u === "string" && u.startsWith("http") ? u : null;
+    return typeof u === "string" ? urlSecopDe(u) : null;
   }
   return null;
 }

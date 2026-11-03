@@ -189,7 +189,7 @@ async function transformProcesos(geo: GeoResolver, batchId: string): Promise<Sou
     }
 
     // Resolver geografía de la entidad (procesos: departamento_entidad/ciudad_entidad)
-    const entidadGeo = geo.resolve(projection.geo);
+    const entidadGeo = geo.resolveEntidad(projection.entidad?.nitCanonico ?? null, projection.geo);
     if (projection.entidad) {
       entidadItems.push({ proj: projection.entidad, geografiaId: entidadGeo });
       m.entidadesUpsert++;
@@ -260,12 +260,13 @@ async function transformContratos(geo: GeoResolver, batchId: string): Promise<So
       continue;
     }
 
-    // Geografía de la entidad y del contrato es el mismo hint (D25: localizaci_n
-    // primaria, depto/ciudad fallback). Hint de entidad es departamento_entidad/
-    // ciudad_entidad del contrato; en muestra observada coincide casi siempre.
+    // localizaci_n pertenece al contrato, no a la sede de la entidad.
     const contratoGeo = geo.resolve(projection.geo);
     if (projection.entidad) {
-      entidadItems.push({ proj: projection.entidad, geografiaId: contratoGeo });
+      entidadItems.push({
+        proj: projection.entidad,
+        geografiaId: geo.resolveEntidad(projection.entidad.nitCanonico, projection.entidadGeo),
+      });
       m.entidadesUpsert++;
     }
 

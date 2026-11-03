@@ -28,7 +28,7 @@ it("invalidar sesión descarta una respuesta personal pendiente", async () => {
   const carga = crearCargaCuenta(
     (e) => estados.push(e),
     () =>
-      new Promise((resolve) => {
+      new Promise<Response>((resolve) => {
         responder = resolve;
       })
   );
