@@ -14,6 +14,7 @@
 
 import { cleanText, parseBool, parseDate, parseMoney } from "./normalize";
 import { canonicalizeNit, normalizeTipoDoc } from "./nit";
+import { urlSecopDe } from "../secop/url";
 import { normalizeGeoText } from "./geo";
 
 type SodaRow = Record<string, unknown>;
@@ -99,6 +100,8 @@ export interface ContratoProjection {
   entidad: EntidadProjection | null;
   proveedor: ProveedorProjection | null;
   proveedorRaw: string | null; // texto crudo cuando proveedor no canóniza (D3)
+  /** Sede declarada de la entidad; nunca se rellena con localizaci_n. */
+  entidadGeo: GeoHints;
   geo: GeoHints;
 }
 
@@ -204,6 +207,10 @@ export function mapContratoRow(row: SodaRow): ContratoProjection {
     // D25: `localizaci_n` PRIMARIA ("Colombia, <dep>, <mun>" viene 0% nula);
     // `departamento`/`ciudad` son fallback (72-74% centinela en contratos).
     geo: geoFromContrato(row),
+    entidadGeo: {
+      departamento: normalizeGeoText(row["departamento"]),
+      municipio: normalizeGeoText(row["ciudad"]),
+    },
   };
 }
 
@@ -250,6 +257,7 @@ function parseLocalizacion(value: unknown): GeoHints {
  * sobre payloads reales: 100% de las filas que lo traen usan esa forma.
  */
 function urlDe(value: unknown): string | null {
+  if (typeof value === "string") return urlSecopDe(value);
   if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
-  return cleanText((value as Record<string, unknown>)["url"]);
+  return urlSecopDe(cleanText((value as Record<string, unknown>)["url"]));
 }

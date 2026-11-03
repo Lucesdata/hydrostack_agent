@@ -183,6 +183,13 @@
       "when": 1791663572057,
       "tag": "0025_indices_proceso_id_ficha",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793714400000,
+      "tag": "0026_reparar_sedes_auditoria",
+      "breakpoints": true
     }
   ]
 }

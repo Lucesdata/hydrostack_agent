@@ -1,3 +1,4 @@
+import { urlSecopDe } from "./url";
 import { and, desc, eq, gte, isNull, lt, sql } from "drizzle-orm";
 import { db } from "@/src/lib/db/client";
 import { entidad, geografia, proceso } from "@/src/lib/db/schema";
@@ -87,6 +88,7 @@ export async function principalesAdjudicaciones(limite = 5) {
   });
   return unicas.slice(0, limite).map((f) => ({
     ...f,
+    url: urlSecopDe(f.url),
     valor: Number(f.valor),
     presupuesto: f.presupuesto ? Number(f.presupuesto) : null,
   }));

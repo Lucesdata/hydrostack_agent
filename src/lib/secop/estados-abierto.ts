@@ -1,3 +1,5 @@
+import { parseDate } from "../transform/normalize";
+
 /**
  * Los `estado_actual` que cuentan como abiertos (junto con
  * `estado_apertura = 'Abierto'` y una `fecha_recepcion` vigente; la regla entera
@@ -28,11 +30,12 @@ export function recibeOfertas(
   p: { estadoApertura: string | null; estadoActual: string | null; fechaRecepcion?: string | null },
   hoy: Date = new Date()
 ): boolean {
+  const fecha = parseDate(p.fechaRecepcion);
   return (
     p.estadoApertura === "Abierto" &&
     !!p.estadoActual &&
     (ESTADOS_ABIERTO as readonly string[]).includes(p.estadoActual) &&
-    !!p.fechaRecepcion &&
-    p.fechaRecepcion.slice(0, 10) >= diaEnColombia(hoy)
+    !!fecha &&
+    fecha >= diaEnColombia(hoy)
   );
 }

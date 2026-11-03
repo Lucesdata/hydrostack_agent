@@ -17,10 +17,14 @@ const baseRow: RecienteRow = {
 
 describe("extractUrlProceso", () => {
   it("string http → tal cual", () => {
-    expect(extractUrlProceso("https://a.co/p")).toBe("https://a.co/p");
+    expect(extractUrlProceso("https://community.secop.gov.co/p")).toBe(
+      "https://community.secop.gov.co/p"
+    );
   });
   it("objeto { url } → url interna", () => {
-    expect(extractUrlProceso({ url: "https://a.co/p" })).toBe("https://a.co/p");
+    expect(extractUrlProceso({ url: "https://community.secop.gov.co/p" })).toBe(
+      "https://community.secop.gov.co/p"
+    );
   });
   it("basura → null", () => {
     expect(extractUrlProceso(null)).toBeNull();

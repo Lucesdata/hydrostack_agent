@@ -19,6 +19,7 @@
  *   cumplido» aunque el SECOP diga «terminado» (decisión del usuario).
  */
 
+import { parseDate } from "../transform/normalize";
 import { diaEnColombia, ESTADOS_ABIERTO, recibeOfertas } from "./estados-abierto";
 
 export type Etapa =
@@ -92,8 +93,7 @@ const TERMINADO = /^(terminado|cerrado)$/i;
 /** Razón contrato/presupuesto a partir de la cual el valor es un error de captura (M8). */
 const RAZON_CIFRA_DUDOSA = 10;
 
-const dia = (iso: string | null | undefined): string | null =>
-  iso && /^\d{4}-\d{2}-\d{2}/.test(iso) ? iso.slice(0, 10) : null;
+const dia = (iso: string | null | undefined): string | null => parseDate(iso);
 
 const numero = (v: string | number | null | undefined): number | null => {
   if (v === null || v === undefined) return null;

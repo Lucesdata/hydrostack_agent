@@ -30,6 +30,7 @@ import {
   contrato,
   entidad,
   geografiaAlias,
+  geografia,
   proceso,
   proveedor,
   transformQuarantine,
@@ -45,6 +46,9 @@ import type {
   ProveedorProjection,
 } from "./mapCanonical";
 import type { DocumentAccessResult } from "@/src/lib/secop/document-access";
+
+import { DEPARTAMENTOS } from "@/data/dane/divipola";
+import { normalizeGeoText } from "./geo";
 
 type Db = NeonDatabase<typeof schema>;
 
@@ -68,20 +72,45 @@ export class GeoResolver {
         .select({ texto: geografiaAlias.textoNormalizado, divipola: geografiaAlias.codigoDivipola })
         .from(geografiaAlias)
     );
-    return new GeoResolver(new Map(rows.map((r) => [r.texto, r.divipola])));
+    const aliases = new Map(rows.map((r) => [r.texto, r.divipola]));
+    // El alias simple puede haber colisionado entre municipios homónimos.
+    const municipios = await withTransientRetry(() => db.select().from(geografia));
+    for (const g of municipios) {
+      const nombre = normalizeGeoText(g.municipioNombre);
+      if (nombre) aliases.set(`${g.departamentoCodigo}:${nombre}`, g.codigoDivipola);
+    }
+    return new GeoResolver(aliases);
   }
 
-  /** D25: prioriza municipio (más específico); cae a departamento; null si nada. */
+  /** El departamento confirma el municipio; un homónimo no puede cruzarlo. */
   resolve(hints: GeoHints): string | null {
+    const dep = hints.departamento
+      ? (DEPARTAMENTOS.find((d) =>
+          [d.departamentoNombre, ...(d.aliases ?? [])].some(
+            (nombre) => normalizeGeoText(nombre) === hints.departamento
+          )
+        )?.divipola ?? this.aliases.get(hints.departamento))
+      : null;
+    const codigoDep = dep?.slice(0, 2);
     if (hints.municipio) {
-      const mun = this.aliases.get(hints.municipio);
-      if (mun) return mun;
+      const mun =
+        (codigoDep && this.aliases.get(`${codigoDep}:${hints.municipio}`)) ||
+        this.aliases.get(hints.municipio);
+      if (mun && (!hints.departamento || (codigoDep && mun.startsWith(codigoDep)))) return mun;
     }
-    if (hints.departamento) {
-      const dep = this.aliases.get(hints.departamento);
-      if (dep) return dep;
-    }
-    return null;
+    return dep ?? null;
+  }
+
+  /** Sede contrastada por NIT, sin inferencia a partir del nombre.
+   * https://caldas.gov.co/130-informacion-general/3550-direccion-fisica
+   */
+  resolveEntidad(nit: string | null, hints: GeoHints): string | null {
+    if (nit === "890801052") return "17001";
+    // Municipio de Guayatá, Boyacá. Identidad contrastada en la circular BDME:
+    // https://fps.gov.co/assets/files/news/news_files/CIRCULAR%20BDME%20-%20MAYO%202025.pdf
+    // Solo departamento: no se atribuye una dirección ni un lugar de ejecución.
+    if (nit === "891800896") return "15000";
+    return this.resolve(hints);
   }
 
   size(): number {
@@ -102,7 +131,16 @@ export async function batchUpsertEntidades(
   items: EntidadItem[]
 ): Promise<Map<string, string>> {
   const idByNit = new Map<string, string>();
-  const deduped = dedupLastWins(items, (i) => i.proj.nitCanonico);
+  // La última proyección conserva los datos más recientes; una sede ausente
+  // no debe descartar una sede válida recibida antes en el mismo lote.
+  const sedes = new Map<string, string>();
+  for (const item of items) {
+    if (item.geografiaId) sedes.set(item.proj.nitCanonico, item.geografiaId);
+  }
+  const deduped = dedupLastWins(items, (i) => i.proj.nitCanonico).map((item) => ({
+    ...item,
+    geografiaId: item.geografiaId ?? sedes.get(item.proj.nitCanonico) ?? null,
+  }));
   for (const batch of chunk(deduped, CHUNK_SIZE)) {
     const rows = await withTransientRetry(() =>
       db
@@ -125,7 +163,7 @@ export async function batchUpsertEntidades(
             nombre: sql`excluded.nombre`,
             nivelGobierno: sql`excluded.nivel_gobierno`,
             sectorAdministrativo: sql`excluded.sector_administrativo`,
-            geografiaId: sql`excluded.geografia_id`,
+            geografiaId: sql`coalesce(excluded.geografia_id, ${entidad.geografiaId})`,
             rawAttrs: sql`excluded.raw_attrs`,
             updatedAt: sql`now()`,
           },

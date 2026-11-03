@@ -75,7 +75,7 @@ describe("mapDbRowToProceso (fila DB → SecopProceso)", () => {
   });
 
   it("url llega como string (columna o payload->>'url'); basura → null", () => {
-    expect(mapDbRowToProceso(row({ urlRaw: "https://x.test" })).url).toBe("https://x.test");
+    expect(mapDbRowToProceso(row({ urlRaw: "https://x.test" })).url).toBeNull();
     expect(mapDbRowToProceso(row({ urlRaw: "basura" })).url).toBeNull();
     expect(mapDbRowToProceso(row({ urlRaw: null })).url).toBeNull();
   });
