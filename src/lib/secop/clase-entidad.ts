@@ -47,6 +47,9 @@ export const CLASE_ENTIDAD: Record<ClaseEntidad, MetaClaseEntidad> = {
       "aguas de ",
       "acueducto",
       "alcantarillado",
+      // «Empresas Municipales de Cali» es EMCALI (NIT 890399003): su razón social no
+      // trae «E.S.P.» ni «emcali» (medido 2026-11-03).
+      "empresas municipales de",
       "empocab|empoduitama|empocaldas|emcali|epm|triple a",
     ],
   },
