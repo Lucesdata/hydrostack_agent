@@ -23,6 +23,12 @@ export const SECCIONES_HOME = [
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "informe", href: "/informe", capacidad: "explorar", etiqueta: "sin cuenta" },
   {
+    id: "adjudicados",
+    href: "/proyectos-adjudicados",
+    capacidad: "explorar",
+    etiqueta: "sin cuenta",
+  },
+  {
     id: "comparar",
     href: "/licitaciones/comparar",
     capacidad: "explorar",
@@ -116,6 +122,7 @@ export const NOMBRE_POR_ID = {
   compradores: "Quién compra",
   comparar: "Comparar departamentos",
   informe: "Informe mensual",
+  adjudicados: "Proyectos adjudicados",
   coincidencias: "Mis coincidencias",
   filtros: "Mis filtros",
   "mis-procesos": "Mis procesos",
@@ -151,7 +158,9 @@ export const NOMBRE_POR_ID = {
  * solo se llegaba a ella desde el propio correo de alertas — o sea, solo si ya
  * la tenías.
  */
-export const NAV_PRINCIPAL = ["explorar", "alertas"];
+// `adjudicados` sube al nav el 2026-11-03 (pedido del usuario): los cinco
+// proyectos de agua y saneamiento más grandes adjudicados en el último mes.
+export const NAV_PRINCIPAL = ["explorar", "adjudicados", "alertas"];
 
 /**
  * Las columnas del pie. Incluye todo lo que el nav deja fuera, para que ninguna
@@ -160,7 +169,7 @@ export const NAV_PRINCIPAL = ["explorar", "alertas"];
 export const COLUMNAS_PIE = [
   {
     grupo: "Explorar",
-    ids: ["explorar", "compradores", "comparar", "informe", "diagnostico"],
+    ids: ["explorar", "adjudicados", "compradores", "comparar", "informe", "diagnostico"],
   },
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas"] },
   { grupo: "En cada ficha", ids: ["competidores", "pliego"] },

@@ -29,7 +29,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = appUrl().replace(/\/$/, "");
   const ahora = new Date();
 
-  const fijas = ["", "/licitaciones", "/licitaciones/adjudicados", "/diagnostico", "/precios"].map(
+  const fijas = [
+    "",
+    "/licitaciones",
+    "/licitaciones/adjudicados",
+    "/proyectos-adjudicados",
+    "/diagnostico",
+    "/precios",
+  ].map(
     (ruta) => ({
       url: `${base}${ruta}`,
       lastModified: ahora,
