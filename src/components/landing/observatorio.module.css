@@ -1,0 +1,279 @@
+.section {
+  padding: 28px clamp(16px, 4vw, 54px) 45px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.card {
+  --detail: #83e6df;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 26px 28px 0;
+  overflow: hidden;
+  border: 1px solid #28515e;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 95% 60%, #0b4755 0, transparent 65%), #0a202e;
+  color: #effbff;
+  box-shadow:
+    0 16px 36px #00000024,
+    inset 0 1px #ffffff08;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #0a202e 10%, #0a202eaa 45%, #0a202e44),
+    url("/portada/hero/fondo-montanas.webp") center / cover;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.projects {
+  --detail: #f3cc89;
+  background: radial-gradient(ellipse at 95% 65%, #164754 0, transparent 65%), #0b2230;
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow,
+.marker,
+.sceneLabel,
+.sceneCaption {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.11em;
+}
+
+.eyebrow {
+  color: var(--detail);
+  font-weight: 600;
+}
+.marker {
+  color: #9ab2bd;
+  white-space: nowrap;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: 55%;
+  padding: 26px 0 30px;
+}
+
+.content h2 {
+  margin: 0;
+  width: max-content;
+  hyphens: none;
+  font-size: clamp(27px, 2.5vw, 36px);
+  line-height: 1.12;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.content p {
+  margin: 16px 0 23px;
+  max-width: 245px;
+  color: #bed0d9;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid #83e6df66;
+  border-radius: 8px;
+  background: #83e6df0d;
+  color: #c5fff7;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.projects .cta {
+  border-color: #f3cc8970;
+  background: #f3cc8912;
+  color: #ffe0aa;
+}
+
+.cta span {
+  font-size: 19px;
+  transition: transform 180ms ease;
+}
+
+.scene {
+  position: absolute;
+  z-index: 0;
+  top: 83px;
+  right: 0;
+  bottom: 62px;
+  width: 47%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#80d4d508 1px, transparent 1px),
+    linear-gradient(90deg, #80d4d508 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 90%, transparent);
+}
+
+.scene img {
+  width: 120%;
+  height: auto;
+  max-width: none;
+  filter: drop-shadow(0 14px 20px #00000040);
+  transition: transform 240ms ease;
+}
+
+.sceneLabel,
+.sceneCaption {
+  color: #9dbbc5;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.sceneLabel::before {
+  content: "+ ";
+  color: var(--detail);
+}
+
+.footer {
+  position: relative;
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 16px 0;
+  border-top: 1px solid #b3dce323;
+  color: #a9c3cf;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.footer span:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 8px;
+  border: 1px solid var(--detail);
+  border-radius: 50%;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--detail);
+  outline-offset: 5px;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--detail);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 42px #00000038;
+  }
+  .card:hover .scene img {
+    transform: translateY(-4px);
+  }
+  .card:hover .cta span {
+    transform: translate(2px, -2px);
+  }
+}
+
+@media (max-width: 1050px) {
+  .grid {
+    gap: 16px;
+  }
+  .card {
+    padding: 24px 22px 0;
+  }
+  .content {
+    width: 62%;
+  }
+  .scene {
+    width: 40%;
+  }
+  .sceneLabel,
+  .sceneCaption {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .content {
+    width: 57%;
+  }
+  .content h2 {
+    font-size: 32px;
+  }
+  .scene {
+    width: 45%;
+  }
+}
+
+@media (max-width: 380px) {
+  .card {
+    padding: 22px 18px 0;
+  }
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+  .content {
+    width: 69%;
+  }
+  .content h2 {
+    font-size: 29px;
+  }
+  .scene {
+    width: 33%;
+    opacity: 0.65;
+  }
+  .cta {
+    padding: 0 12px;
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .scene img,
+  .cta span {
+    transition: none;
+  }
+  .card:hover,
+  .card:hover .scene img,
+  .card:hover .cta span {
+    transform: none;
+  }
+}

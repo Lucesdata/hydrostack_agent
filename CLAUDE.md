@@ -948,3 +948,9 @@ listas en el navegador ni incorporar estado personal al ISR de la ficha.
 Excluir estos prefijos de análisis de intención. Cierre, pruebas, decisiones
 y limitaciones en `docs/superpowers/specs/2026-10-04-guardados-recientes-traspaso.md`.
 No se ha desplegado esta sección.
+
+**Observatorio de portada (2026-11-03, rama `codex/observatorio-tarjetas-industriales`).**
+Las dos tarjetas de `PortadaCliente.jsx` usan `observatorio.module.css`: azul
+petróleo, acentos ámbar/cian, fondo ambiental y los SVG existentes. Conservan
+`/proyectos-adjudicados` y `/licitaciones/entidades`, sin consultas ni cifras
+nuevas. Una columna bajo 760 px, foco visible y movimiento reducido.
