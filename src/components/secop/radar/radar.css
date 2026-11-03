@@ -48,3 +48,8 @@ a.ri-card:hover{transform:translateY(-2px);border-color:#31b9ba}
 .ri-empty{background:#fff;border:1px dashed #a8d4d0;border-radius:16px;padding:35px;color:#587176}
 @media(max-width:900px){.ri-layout{grid-template-columns:1fr}.ri-hero-graphic{display:none}.ri-shell{padding:0 18px}.ri-hero{padding:38px 0}.ri-process{grid-template-columns:30px minmax(0,1fr)}.ri-process strong{grid-column:2}.ri-stats{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){.ri-stats{grid-template-columns:1fr}.ri-hero h1{font-size:38px}.ri-entity-nums{gap:8px}}
+
+.ri-hero--radar{background-image:url('/ilustraciones/radar-agua.svg'),radial-gradient(ellipse at 80% 30%,#b6ebec 0%,transparent 45%),linear-gradient(120deg,#fff 20%,#e7f9f8 100%);background-size:400px auto,auto,auto;background-position:95% 50%,center,center;background-repeat:no-repeat}
+.ri-page .ri-hero:not(.ri-hero--radar){background-image:url('/ilustraciones/adjudicaciones-agua.svg'),radial-gradient(ellipse at 80% 30%,#b6ebec 0%,transparent 45%),linear-gradient(120deg,#fff 20%,#e7f9f8 100%);background-size:420px auto,auto,auto;background-position:95% 50%,center,center;background-repeat:no-repeat}
+@media(max-width:1050px){.ri-hero--radar,.ri-page .ri-hero:not(.ri-hero--radar){background-size:260px auto,auto,auto;background-position:100% 100%,center,center}}
+@media(max-width:700px){.ri-hero--radar,.ri-page .ri-hero:not(.ri-hero--radar){background-size:190px auto,auto,auto;background-position:110% 100%,center,center}}
