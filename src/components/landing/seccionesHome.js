@@ -22,6 +22,7 @@ export const SECCIONES_HOME = [
   { id: "diagnostico", href: "/diagnostico", capacidad: "diagnostico", etiqueta: "sin cuenta" },
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "informe", href: "/informe", capacidad: "explorar", etiqueta: "sin cuenta" },
+  { id: "adjudicados", href: "/proyectos-adjudicados", capacidad: "explorar", etiqueta: "sin cuenta" },
   {
     id: "comparar",
     href: "/licitaciones/comparar",
@@ -113,7 +114,8 @@ export const NOMBRE_POR_ID = {
   // "Fichas de procesos" y no "Licitaciones": decisión C del 2026-09-21
   // (AUDITORIA-SPECS-LANDING-MAPA §9). La ruta /licitaciones se conserva.
   explorar: "Fichas de procesos",
-  compradores: "Quién compra",
+  compradores: "Radar institucional",
+  adjudicados: "Proyectos adjudicados",
   comparar: "Comparar departamentos",
   informe: "Informe mensual",
   coincidencias: "Mis coincidencias",
@@ -151,7 +153,7 @@ export const NOMBRE_POR_ID = {
  * solo se llegaba a ella desde el propio correo de alertas — o sea, solo si ya
  * la tenías.
  */
-export const NAV_PRINCIPAL = ["explorar", "alertas"];
+export const NAV_PRINCIPAL = ["explorar", "adjudicados", "compradores", "alertas"];
 
 /**
  * Las columnas del pie. Incluye todo lo que el nav deja fuera, para que ninguna
@@ -160,7 +162,7 @@ export const NAV_PRINCIPAL = ["explorar", "alertas"];
 export const COLUMNAS_PIE = [
   {
     grupo: "Explorar",
-    ids: ["explorar", "compradores", "comparar", "informe", "diagnostico"],
+    ids: ["explorar", "adjudicados", "compradores", "comparar", "informe", "diagnostico"],
   },
   { grupo: "Tu cuenta", ids: ["coincidencias", "filtros", "alertas"] },
   { grupo: "En cada ficha", ids: ["competidores", "pliego"] },
