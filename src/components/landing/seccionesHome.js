@@ -22,7 +22,12 @@ export const SECCIONES_HOME = [
   { id: "diagnostico", href: "/diagnostico", capacidad: "diagnostico", etiqueta: "sin cuenta" },
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "informe", href: "/informe", capacidad: "explorar", etiqueta: "sin cuenta" },
-  { id: "adjudicados", href: "/proyectos-adjudicados", capacidad: "explorar", etiqueta: "sin cuenta" },
+  {
+    id: "adjudicados",
+    href: "/proyectos-adjudicados",
+    capacidad: "explorar",
+    etiqueta: "sin cuenta",
+  },
   {
     id: "comparar",
     href: "/licitaciones/comparar",
