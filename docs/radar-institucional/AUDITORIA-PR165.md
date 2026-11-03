@@ -18,9 +18,12 @@
 6. Móvil: el fondo del hero tapaba el texto.
 7. `tsc`: faltaba declaración `*.css`.
 
+## Segunda tanda
+- **Búsqueda en servidor** (`GET /api/radar/entidades?q=&clase=`, `src/lib/secop/buscar-entidades.ts`): recorre toda la tabla `entidad` por nombre (todas las palabras, sin tildes) o NIT, aunque la entidad no tenga procesos abiertos. Dos pasos (entidades, luego una agregación de abiertos): la versión con unión tardaba 8,4 s en la base viva; separada, ~230 ms. Caché CDN de 1 h.
+- **Ilustraciones por tipo**: `public/ilustraciones/tipo-{ptap,ptar,acueducto,alcantarillado}.svg`, con la paleta de `tipo-color.ts` (azul potable, marrón residual, gris redes). En proyectos adjudicados, el primero va como franja grande y los demás como miniatura; todas rotuladas «Ilustración conceptual, no es una foto de la obra».
+
 ## Pendientes
-- El buscador del Radar solo ve las 50 entidades con más procesos abiertos; EMCALI/UAESP/EAAB pueden no aparecer. Falta una consulta de búsqueda en servidor.
-- Ilustraciones por tipo (PTAR/PTAP/acueducto/alcantarillado): hay 2 genéricas.
+- **Índice faltante (no aplicado):** `proceso` no tiene índice por `entidad_id`. Las consultas por entidad (ficha institucional, conteos del Radar) recorren las ~94.000 filas (~230 ms por consulta medida en la base viva). Recomendado: `CREATE INDEX CONCURRENTLY proceso_entidad_idx ON proceso (entidad_id)` en una migración aparte; no se aplicó ni se añadió migración a esta PR.
 - Clasificación: un convenio de «mejoramientos de vivienda» quedó como acueducto.
 - La portada añade una sección entre hero y TuPerfil; CLAUDE.md pide no apilar más secciones sin razón medida.
 - Seguimiento/alertas institucionales: no implementados, no se ofrecen.

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" role="img" aria-label="Ilustración conceptual de un acueducto: bocatoma, tanque y redes hasta las viviendas">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e3f1fb"/><stop offset="1" stop-color="#c5e2f5"/></linearGradient><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7fd0f5"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs>
+<rect width="680" height="420" fill="url(#bg)"/>
+<path d="M0 250c80-90 150-100 230-30s120 40 190-10 160-10 260 40v170H0z" fill="#b5d9ee"/><path d="M0 310c120-40 220-20 330 10s230 10 350-20v120H0z" fill="#9ccbe5"/>
+<g stroke="#0369a1" stroke-width="4" stroke-linejoin="round">
+<!-- bocatoma/río -->
+<path d="M0 330c60-20 120 0 180-10l20 30c-70 10-130-10-200 10z" fill="url(#w)"/>
+<!-- tanque elevado -->
+<path d="M290 150h90v70H290z" fill="#a9d6ee"/><path d="M290 150a45 14 0 0 1 90 0" fill="#d6ecf8"/><path d="M290 220a45 14 0 0 0 90 0" fill="#7fbcdf"/><path d="M290 175h90" stroke-width="2" opacity=".5"/>
+<path d="M300 234l-20 90M370 234l20 90M335 236v88M290 280h90" fill="none"/>
+<!-- viviendas -->
+<path d="M470 300v-40l30-24 30 24v40z" fill="#e9f6fd"/><path d="M560 310v-44l32-26 32 26v44z" fill="#e9f6fd"/><path d="M590 310v-22h20v22" fill="#a9d6ee"/><path d="M490 300v-20h20v20" fill="#a9d6ee"/>
+</g>
+<!-- tuberías -->
+<path d="M200 345l90-10h90M380 322h60v-12h30M440 322h120" fill="none" stroke="#0369a1" stroke-width="10" stroke-linejoin="round"/><path d="M200 345l90-10h90M380 322h60v-12h30M440 322h120" fill="none" stroke="#e9f6fd" stroke-width="3" stroke-dasharray="8 7" stroke-linejoin="round"/>
+<path d="M70 95c0 0-26 30-26 48a26 26 0 0 0 52 0c0-18-26-48-26-48z" fill="#0369a1"/><path d="M58 148a12 12 0 0 0 12 12" fill="none" stroke="#e9f6fd" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -415,3 +415,81 @@ a.ri-card:hover {
       center;
   }
 }
+
+/* Proyectos adjudicados: ilustración conceptual por tipo */
+.ri-adj {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+.ri-adj--top {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
+  overflow: hidden;
+}
+.ri-adj--top > .ri-process {
+  padding: 6px 26px 24px;
+}
+.ri-ilus {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #eef6f8;
+}
+.ri-ilus img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ri-ilus figcaption {
+  font-size: 10px;
+  line-height: 1.3;
+  color: #52686b;
+  padding: 4px 8px;
+  background: #f3f9f9;
+}
+.ri-adj--top > .ri-ilus {
+  border-radius: 0;
+  max-height: 260px;
+  position: relative;
+}
+.ri-adj--top > .ri-ilus img {
+  height: 260px;
+  object-fit: cover;
+  object-position: center 60%;
+}
+.ri-adj--top > .ri-ilus figcaption {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  border-radius: 6px;
+  background: #ffffffd9;
+}
+@media (min-width: 901px) {
+  .ri-adj--top {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 40%);
+  }
+  .ri-adj--top > .ri-ilus {
+    order: 2;
+    max-height: none;
+    height: 100%;
+  }
+  .ri-adj--top > .ri-ilus img {
+    height: 100%;
+    min-height: 260px;
+  }
+  .ri-adj--top > .ri-process {
+    padding: 24px 6px 24px 26px;
+    order: 1;
+  }
+}
+@media (max-width: 700px) {
+  .ri-adj {
+    grid-template-columns: 1fr;
+  }
+  .ri-adj > .ri-ilus img {
+    max-height: 150px;
+    object-fit: cover;
+  }
+}

@@ -16,6 +16,13 @@ const tipos: Record<string, string> = {
   ptap: "PTAP",
   ptar: "PTAR",
 };
+/** Ilustraciones conceptuales por tipo (public/ilustraciones/tipo-*.svg). No son fotografías de obra. */
+const ilustracion: Record<string, string> = {
+  acueducto: "/ilustraciones/tipo-acueducto.svg",
+  alcantarillado: "/ilustraciones/tipo-alcantarillado.svg",
+  ptap: "/ilustraciones/tipo-ptap.svg",
+  ptar: "/ilustraciones/tipo-ptar.svg",
+};
 const fecha = (s: string | null) =>
   s
     ? new Intl.DateTimeFormat("es-CO", {
@@ -76,7 +83,7 @@ export default async function Page() {
             {datos.map((p, i) => (
               <article
                 key={p.id}
-                className="ri-card"
+                className={`ri-card ri-adj${i === 0 ? " ri-adj--top" : ""}`}
                 style={
                   i === 0
                     ? {
@@ -87,6 +94,19 @@ export default async function Page() {
                     : {}
                 }
               >
+                {ilustracion[p.tipo ?? ""] ? (
+                  <figure className="ri-ilus">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={ilustracion[p.tipo ?? ""]}
+                      alt={`Ilustración conceptual de ${tipos[p.tipo ?? ""].toLowerCase()}`}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      width={680}
+                      height={420}
+                    />
+                    <figcaption>Ilustración conceptual, no es una foto de la obra</figcaption>
+                  </figure>
+                ) : null}
                 <div
                   className="ri-process"
                   style={{ gridTemplateColumns: "50px minmax(0,1fr) minmax(130px,200px)" }}

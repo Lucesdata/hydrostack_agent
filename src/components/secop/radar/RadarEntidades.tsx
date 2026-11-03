@@ -1,8 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatCopEscala } from "@/src/components/secop/format";
-import type { Compradores } from "@/src/lib/secop/compradores";
+import type { Compradores, EntidadCompradora } from "@/src/lib/secop/compradores";
+
+const MIN_BUSQUEDA = 2;
+type EntidadVista = EntidadCompradora & { nit?: string | null };
 const grupos = [
   ["todas", "Todas"],
   ["esp", "Empresas de servicios públicos"],
@@ -15,24 +18,46 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
   const [tipo, setTipo] = useState("todas"),
     [busqueda, setBusqueda] = useState(""),
     [seleccion, setSeleccion] = useState<string | null>(null),
-    [tope, setTope] = useState(12);
-  const visibles = useMemo(
+    [tope, setTope] = useState(12),
+    [remotas, setRemotas] = useState<EntidadVista[] | null>(null),
+    [estado, setEstado] = useState<"idle" | "cargando" | "error">("idle");
+  const texto = busqueda.trim();
+  const buscando = texto.length >= MIN_BUSQUEDA;
+
+  // Con 2+ caracteres se busca en servidor sobre TODAS las entidades (el top
+  // inicial solo trae las 50 con más procesos abiertos).
+  useEffect(() => {
+    if (!buscando) {
+      setRemotas(null);
+      setEstado("idle");
+      return;
+    }
+    const ctl = new AbortController();
+    setEstado("cargando");
+    const t = setTimeout(async () => {
+      try {
+        const qs = new URLSearchParams({ q: texto, clase: tipo });
+        const r = await fetch(`/api/radar/entidades?${qs}`, { signal: ctl.signal });
+        if (!r.ok) throw new Error(String(r.status));
+        const j = (await r.json()) as { entidades: EntidadVista[] };
+        setRemotas(j.entidades);
+        setEstado("idle");
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") setEstado("error");
+      }
+    }, 300);
+    return () => {
+      clearTimeout(t);
+      ctl.abort();
+    };
+  }, [buscando, texto, tipo]);
+
+  const visibles: EntidadVista[] = useMemo(
     () =>
-      datos.entidades.filter(
-        (e) =>
-          (tipo === "todas" || e.clase === tipo) &&
-          e.nombre
-            .toLocaleLowerCase("es")
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .includes(
-              busqueda
-                .toLocaleLowerCase("es")
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-            )
-      ),
-    [datos, tipo, busqueda]
+      buscando
+        ? (remotas ?? []).filter((e) => tipo === "todas" || e.clase === tipo)
+        : datos.entidades.filter((e) => tipo === "todas" || e.clase === tipo),
+    [datos, tipo, buscando, remotas]
   );
   const activa = visibles.find((e) => e.id === seleccion) ?? visibles[0];
   return (
@@ -54,7 +79,7 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
         ))}
       </div>
       <label style={{ display: "block", marginBottom: 23 }}>
-        <span className="ri-muted">Buscar institución por nombre</span>
+        <span className="ri-muted">Buscar institución por nombre o NIT</span>
         <input
           type="search"
           value={busqueda}
@@ -80,12 +105,17 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
       <div className="ri-layout">
         <section>
           <h2 className="ri-title">Entidades contratantes</h2>
-          <p className="ri-muted">
-            Ordenadas por cantidad de procesos que reciben ofertas; presupuesto acumulado de esos
-            procesos.
+          <p className="ri-muted" role="status" aria-live="polite">
+            {buscando
+              ? estado === "cargando"
+                ? "Buscando en todas las entidades…"
+                : estado === "error"
+                  ? "No se pudo buscar ahora. Intenta de nuevo."
+                  : `Resultados en todas las entidades de la base (${visibles.length}).`
+              : "Ordenadas por cantidad de procesos que reciben ofertas; presupuesto acumulado de esos procesos."}
           </p>
           <div className="ri-stack" style={{ marginTop: 20 }}>
-            {visibles.length === 0 ? (
+            {visibles.length === 0 && estado !== "cargando" ? (
               <p className="ri-empty">No hay entidades que coincidan con la búsqueda.</p>
             ) : (
               visibles.slice(0, tope).map((e, i) => (
@@ -102,7 +132,9 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
                       {e.nombre.trim().slice(0, 2).toUpperCase()}
                     </span>
                     <div style={{ minWidth: 0 }}>
-                      <span className="ri-eyebrow">#{i + 1}</span>
+                      <span className="ri-eyebrow">
+                        {buscando ? (e.nit ? `NIT ${e.nit}` : "Entidad") : `#${i + 1}`}
+                      </span>
                       <p className="ri-entity-name">{e.nombre}</p>
                       <p className="ri-entity-meta">{e.departamento || "Sede por verificar"}</p>
                     </div>
