@@ -5,6 +5,8 @@ import {
   numeric,
   date,
   boolean,
+  integer,
+  jsonb,
   timestamp,
   index,
   uniqueIndex,
@@ -54,6 +56,11 @@ export const proceso = pgTable(
     fechaAdjudicacion: date("fecha_adjudicacion"),
     estadoApertura: text("estado_apertura"), // Abierto | Cerrado — señal real de plazo
     fechaRecepcion: date("fecha_recepcion"),
+    // ── Lote 1 de datos (spec 2026-10-24-lote1-datos-columnas) ───────────────
+    // Duración prevista según el SECOP: valor y unidad van juntos o ninguno.
+    // `dias | semanas | meses | anos`; ver `transform/lote1.ts`.
+    duracionValor: integer("duracion_valor"),
+    duracionUnidad: text("duracion_unidad"),
     // ── Tipo de proyecto (taxonomía de cinco) ────────────────────────────────
     // Derivado y recomputable, igual que `clasificacion_sectorial`, pero vive
     // aquí y no allí porque el camino de lectura lo exige: la faceta, el mapa,
@@ -122,6 +129,14 @@ export const contrato = pgTable(
     // leían del payload.
     unspsc: text("unspsc"), // codigo_de_categoria_principal
     url: text("url"), // urlproceso.url
+    // ── Lote 1 de datos (spec 2026-10-24-lote1-datos-columnas) ───────────────
+    // Todo «según el SECOP». `fuentes_recursos` es disperso: solo las claves con
+    // valor > 0 (`sgp`, `propios`, `pgn`, `credito`, `regalias`).
+    origenRecursos: text("origen_recursos"),
+    destinoGasto: text("destino_gasto"),
+    fuentesRecursos: jsonb("fuentes_recursos"),
+    diasAdicionados: integer("dias_adicionados"),
+    liquidado: boolean("liquidado"),
     rawRecordIdActual: uuid("raw_record_id_actual").references(() => rawRecord.id),
     deletedAt: timestamp("deleted_at", { withTimezone: true }), // soft delete (D6)
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

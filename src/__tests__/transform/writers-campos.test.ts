@@ -19,17 +19,27 @@ const PROMOVIDOS_PROCESO = [
   "fechaAdjudicacion",
   "estadoApertura",
   "fechaRecepcion",
+  "duracionValor",
+  "duracionUnidad",
 ] as const;
 
-const PROMOVIDOS_CONTRATO = ["unspsc", "url"] as const;
+const PROMOVIDOS_CONTRATO = [
+  "unspsc",
+  "url",
+  "origenRecursos",
+  "destinoGasto",
+  "fuentesRecursos",
+  "diasAdicionados",
+  "liquidado",
+] as const;
 
 describe("proyecciones promovidas", () => {
-  it("mapProcesoRow expone las 11 propiedades promovidas", () => {
+  it("mapProcesoRow expone las propiedades promovidas (incluido el Lote 1)", () => {
     const p = mapProcesoRow({ id_del_proceso: "CO1.REQ.1" });
     for (const k of PROMOVIDOS_PROCESO) expect(p).toHaveProperty(k);
   });
 
-  it("mapContratoRow expone las 2 propiedades promovidas", () => {
+  it("mapContratoRow expone las propiedades promovidas (incluido el Lote 1)", () => {
     const c = mapContratoRow({ id_contrato: "CO1.PCCNTR.1" });
     for (const k of PROMOVIDOS_CONTRATO) expect(c).toHaveProperty(k);
   });

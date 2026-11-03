@@ -254,6 +254,8 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             fechaAdjudicacion: proj.fechaAdjudicacion,
             estadoApertura: proj.estadoApertura,
             fechaRecepcion: proj.fechaRecepcion,
+            duracionValor: proj.duracionValor,
+            duracionUnidad: proj.duracionUnidad,
             // El gate (B2/B3) se reescribe SIEMPRE: NOT_PUBLISHED/UNKNOWN se
             // re-evalúan en cada corrida porque el estado cambia con la fase.
             documentAccess: docAccess.state,
@@ -295,6 +297,10 @@ export async function batchUpsertProcesos(db: Db, items: ProcesoItem[]): Promise
             fechaAdjudicacion: sql`excluded.fecha_adjudicacion`,
             estadoApertura: sql`excluded.estado_apertura`,
             fechaRecepcion: sql`excluded.fecha_recepcion`,
+            // Lote 1: un payload sin estos campos no borra un valor ya rellenado
+            // (spec 2026-10-24-lote1-datos-columnas, D-T2).
+            duracionValor: sql`coalesce(excluded.duracion_valor, ${proceso.duracionValor})`,
+            duracionUnidad: sql`coalesce(excluded.duracion_unidad, ${proceso.duracionUnidad})`,
             documentAccess: sql`excluded.document_access`,
             documentAccessReason: sql`excluded.document_access_reason`,
             documentAccessMethod: sql`excluded.document_access_method`,
@@ -366,6 +372,11 @@ export async function batchUpsertContratos(db: Db, items: ContratoItem[]): Promi
                 proj.valorPendientePago !== null ? String(proj.valorPendientePago) : null,
               unspsc: proj.unspsc,
               url: proj.url,
+              origenRecursos: proj.origenRecursos,
+              destinoGasto: proj.destinoGasto,
+              fuentesRecursos: proj.fuentesRecursos,
+              diasAdicionados: proj.diasAdicionados,
+              liquidado: proj.liquidado,
               rawRecordIdActual: rawRecordId,
             };
           })
@@ -395,6 +406,12 @@ export async function batchUpsertContratos(db: Db, items: ContratoItem[]): Promi
             valorPendientePago: sql`excluded.valor_pendiente_pago`,
             unspsc: sql`excluded.unspsc`,
             url: sql`excluded.url`,
+            // Lote 1 (D-T2): coalesce, un payload sin los campos no borra lo rellenado.
+            origenRecursos: sql`coalesce(excluded.origen_recursos, ${contrato.origenRecursos})`,
+            destinoGasto: sql`coalesce(excluded.destino_gasto, ${contrato.destinoGasto})`,
+            fuentesRecursos: sql`coalesce(excluded.fuentes_recursos, ${contrato.fuentesRecursos})`,
+            diasAdicionados: sql`coalesce(excluded.dias_adicionados, ${contrato.diasAdicionados})`,
+            liquidado: sql`coalesce(excluded.liquidado, ${contrato.liquidado})`,
             rawRecordIdActual: sql`excluded.raw_record_id_actual`,
             updatedAt: sql`now()`,
           },

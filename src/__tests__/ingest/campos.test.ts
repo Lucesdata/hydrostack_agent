@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { camposDe, selectDe } from "@/src/lib/ingest/campos";
+import { CAMPOS_LOTE1_PROCESOS, CAMPOS_LOTE1_CONTRATOS } from "@/src/lib/transform/lote1";
 import { FIELDS_PROCESOS, FIELDS_CONTRATOS } from "@/src/lib/secop/config";
 import { SOURCE_PROCESOS, SOURCE_CONTRATOS } from "@/src/lib/ingest/sources";
 
@@ -60,6 +61,23 @@ describe("camposDe", () => {
     expect(leidas.length).toBeGreaterThan(15);
     const campos = camposDe("secop_ii_contratos");
     for (const clave of leidas) expect(campos).toContain(clave);
+  });
+
+  it("pide los campos del Lote 1, derivados del código de lote1.ts y no de una lista a mano", () => {
+    const lote1Src = readFileSync("src/lib/transform/lote1.ts", "utf8");
+    const cuerpoProceso = lote1Src.slice(lote1Src.indexOf("export function mapLote1Proceso"));
+    const idx = cuerpoProceso.indexOf("export function mapLote1Contrato");
+    const claves = (t: string) => [...t.matchAll(/row\[["']([^"']+)["']\]/g)].map((m) => m[1]);
+    const deProceso = claves(cuerpoProceso.slice(0, idx));
+    const deContrato = claves(cuerpoProceso.slice(idx));
+    expect(deProceso.length).toBeGreaterThanOrEqual(2);
+    // Las fuentes de recursos se leen con `row[campo]` (variable): se cubren por la lista exportada.
+    expect(deContrato.length).toBeGreaterThanOrEqual(4);
+    for (const c of deProceso) expect(camposDe("secop_ii_procesos")).toContain(c);
+    for (const c of deContrato) expect(camposDe("secop_ii_contratos")).toContain(c);
+    for (const c of CAMPOS_LOTE1_PROCESOS) expect(camposDe("secop_ii_procesos")).toContain(c);
+    for (const c of CAMPOS_LOTE1_CONTRATOS) expect(camposDe("secop_ii_contratos")).toContain(c);
+    expect(CAMPOS_LOTE1_CONTRATOS).toContain("sistema_general_de_regal_as");
   });
 
   it("no tiene duplicados", () => {
