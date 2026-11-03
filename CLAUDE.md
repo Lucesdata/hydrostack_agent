@@ -21,7 +21,7 @@ los **cinco** procesos de agua potable y saneamiento básico con mayor
 (`mesDelInforme()`, como `/informe`). Regla en
 `src/lib/secop/adjudicados-mes.ts`: `adjudicado = true`, valor > 0, tipo
 acueducto/alcantarillado/PTAP/PTAR (`otros` y sin tipo fuera), una consulta,
-ISR 6 h. El adjudicatario solo se nombra si su NIT casa con un `proveedor` de
+ISR 24 h (no más: el día 1 debe cambiar de mes y el SECOP registra adjudicaciones tarde). El adjudicatario solo se nombra si su NIT casa con un `proveedor` de
 tipo NIT (`esPersonaJuridica`); si no, «No se nombra». No sustituye a la pestaña
 «Adjudicados recientes» de la vitrina (`/licitaciones/adjudicados`, últimos 30
 días, todos). La lista sale de la base: no se escriben a mano proyectos ni cifras.

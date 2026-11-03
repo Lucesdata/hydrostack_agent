@@ -14,7 +14,7 @@
  *   su NIT casa con un proveedor de tipo de documento NIT (misma regla que
  *   «Cómo se contrató», `esPersonaJuridica`). El proceso sí entra en la lista.
  *
- * Una consulta, pagada por revalidación de la página (6 h), no por visita.
+ * Una consulta, pagada por revalidación de la página (24 h), no por visita.
  */
 
 import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, sql } from "drizzle-orm";

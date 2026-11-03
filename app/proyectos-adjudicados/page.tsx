@@ -5,10 +5,13 @@ import { mesDelInforme } from "@/src/lib/secop/informe";
 /**
  * «Proyectos adjudicados»: los cinco procesos de agua potable y saneamiento
  * básico de mayor valor adjudicado en el último mes completo. Estático y
- * revalidado cada 6 h, como el informe mensual: el mes no cambia entre visitas.
- * La regla de selección vive en `src/lib/secop/adjudicados-mes.ts`.
+ * revalidado cada 24 h (decisión del usuario del 2026-11-03): el mes ya está
+ * cerrado y no hace falta más. No se alarga más porque el día 1 la página debe
+ * pasar al mes nuevo, y el SECOP recibe adjudicaciones registradas con días de
+ * retraso que hay que recoger. La regla de selección vive en
+ * `src/lib/secop/adjudicados-mes.ts`.
  */
-export const revalidate = 21600;
+export const revalidate = 86400;
 
 export async function generateMetadata() {
   const { etiqueta } = mesDelInforme();
