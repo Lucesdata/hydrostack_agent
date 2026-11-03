@@ -14,6 +14,18 @@
 > - Esta regla no se relaja por comodidad, por urgencia ni porque "no se despliegue":
 >   ya hubo un error así (#147, revertido en #148) y no debe repetirse.
 
+**Proyectos adjudicados (2026-11-03, pedido del usuario).** Sección nueva en
+`/proyectos-adjudicados`, en la barra principal y en el pie (`seccionesHome.js`):
+los **cinco** procesos de agua potable y saneamiento básico con mayor
+**valor adjudicado** del último mes completo en hora de Colombia
+(`mesDelInforme()`, como `/informe`). Regla en
+`src/lib/secop/adjudicados-mes.ts`: `adjudicado = true`, valor > 0, tipo
+acueducto/alcantarillado/PTAP/PTAR (`otros` y sin tipo fuera), una consulta,
+ISR 6 h. El adjudicatario solo se nombra si su NIT casa con un `proveedor` de
+tipo NIT (`esPersonaJuridica`); si no, «No se nombra». No sustituye a la pestaña
+«Adjudicados recientes» de la vitrina (`/licitaciones/adjudicados`, últimos 30
+días, todos). La lista sale de la base: no se escriben a mano proyectos ni cifras.
+
 **Reemplazo de la ficha operativa (2026-10-06, rama `codex/ficha-operativa-viva-actual`).**
 La ruta `/licitaciones/[slug]` conserva URL canónica, JSON-LD e ISR de 12 h y
 sustituye las preguntas por una ficha oscura de lectura continua. Hero ilustrativo,
