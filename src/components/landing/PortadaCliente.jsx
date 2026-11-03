@@ -10,6 +10,7 @@
 
 import HeroTerritorialV3 from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import TuPerfil from "@/src/components/landing/tu-perfil/TuPerfil";
+import Link from "next/link";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
 // territorial) y la Ficha Viva. Salieron las rutas de intención, el motor, el
@@ -81,6 +82,20 @@ export default function LandingPage({
         {/* Segunda y última sección (2026-11-01; era la tercera): «¿Puedes participar?», el
             cierre hacia la cuenta gratuita. La portada son estas tres y no se
             apilan más sin una razón medida. */}
+        <section aria-label="Observatorio de contratación AquaLicita" style={{padding:"24px clamp(16px,4vw,54px) 45px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:18}}>
+            <Link href="/proyectos-adjudicados" style={{display:"block",position:"relative",minHeight:210,padding:25,border:"1px solid #1c6575",borderRadius:18,background:"linear-gradient(110deg,#082c3d,#00545b)",color:"#ecffff",textDecoration:"none",overflow:"hidden"}}>
+              <img src="/ilustraciones/adjudicaciones-agua.svg" alt="" aria-hidden="true" style={{position:"absolute",width:230,right:-40,bottom:-75,opacity:.6}}/>
+              <span style={{color:"#7be8e0",fontSize:11,letterSpacing:".13em",fontWeight:800}}>OBSERVATORIO SECOP II</span><h2 style={{position:"relative",fontSize:27,maxWidth:240,margin:"15px 0 9px"}}>Proyectos adjudicados</h2>
+              <p style={{position:"relative",fontSize:13,maxWidth:245,color:"#c1e2e4"}}>Las mayores adjudicaciones de agua y saneamiento del último mes cerrado.</p><b style={{position:"relative",fontSize:13,color:"#83f3e9"}}>Explorar proyectos →</b>
+            </Link>
+            <Link href="/licitaciones/entidades" style={{display:"block",position:"relative",minHeight:210,padding:25,border:"1px solid #1c6575",borderRadius:18,background:"linear-gradient(110deg,#082c3d,#00545b)",color:"#ecffff",textDecoration:"none",overflow:"hidden"}}>
+              <img src="/ilustraciones/radar-agua.svg" alt="" aria-hidden="true" style={{position:"absolute",width:225,right:-35,bottom:-65,opacity:.6}}/>
+              <span style={{color:"#7be8e0",fontSize:11,letterSpacing:".13em",fontWeight:800}}>FICHAS VIVAS INSTITUCIONALES</span><h2 style={{position:"relative",fontSize:27,maxWidth:260,margin:"15px 0 9px"}}>Radar institucional</h2>
+              <p style={{position:"relative",fontSize:13,maxWidth:250,color:"#c1e2e4"}}>Descubre quién contrata, consulta entidades y sigue su actividad.</p><b style={{position:"relative",fontSize:13,color:"#83f3e9"}}>Explorar entidades →</b>
+            </Link>
+          </div>
+        </section>
         <TuPerfil />
       </div>
     </div>
