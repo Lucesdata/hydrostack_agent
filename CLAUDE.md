@@ -958,3 +958,11 @@ aproximación de acentos ámbar/cian. Conserva `/proyectos-adjudicados` y
 `/licitaciones/entidades`, sin consultas ni cifras nuevas. Responsive, foco
 visible y movimiento reducido. Procedencia y plan en
 `docs/superpowers/plans/2026-11-03-observatorio-tarjetas.md`.
+
+**Agua Viva en adjudicados (2026-11-04).** La tarjeta Proyectos adjudicados
+integra el ZIP del usuario en `public/portada/observatorio/agua-viva/`, mediante
+`AguaViva.jsx`: carga diferida, iframe decorativo transparente, pausa independiente
+y detención por visibilidad o movimiento reducido. El enlace extendido sigue
+yendo a `/proyectos-adjudicados`; el Radar conserva su imagen. El modelo mantiene
+licencia MIT de Three.js y no entra en el bundle inicial. Plan:
+`docs/superpowers/plans/2026-11-04-adjudicados-agua-viva.md`.
