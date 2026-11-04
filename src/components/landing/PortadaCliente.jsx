@@ -12,6 +12,7 @@ import HeroTerritorialV3 from "@/src/components/landing/hero-territorial/HeroTer
 import TuPerfil from "@/src/components/landing/tu-perfil/TuPerfil";
 import Link from "next/link";
 import styles from "./observatorio.module.css";
+import AguaViva from "./AguaViva";
 
 // La portada se concentra en dos cosas (2026-09-26): el mapa de procesos (hero
 // territorial) y la Ficha Viva. Salieron las rutas de intención, el motor, el
@@ -93,7 +94,7 @@ export default function LandingPage({
             </p>
           </header>
           <div className={styles.grid}>
-            <Link href="/proyectos-adjudicados" className={`${styles.card} ${styles.projects}`}>
+            <article className={`${styles.card} ${styles.projects}`}>
               <div className={styles.topline}>
                 <span className={styles.icon} aria-hidden="true">
                   <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -104,9 +105,11 @@ export default function LandingPage({
               </div>
               <div className={styles.content}>
                 <h3>
-                  Proyectos
-                  <br />
-                  adjudicados
+                  <Link href="/proyectos-adjudicados" className={styles.projectLink}>
+                    Proyectos
+                    <br />
+                    adjudicados
+                  </Link>
                 </h3>
                 <p>
                   Consulta y analiza las mayores adjudicaciones de agua y saneamiento del último mes
@@ -116,16 +119,8 @@ export default function LandingPage({
                   Explorar adjudicados <span aria-hidden="true">→</span>
                 </span>
               </div>
-              <img
-                className={styles.scene}
-                src="/portada/observatorio/planta-adjudicados.webp"
-                alt=""
-                aria-hidden="true"
-                loading="lazy"
-                width="1100"
-                height="733"
-              />
-            </Link>
+              <AguaViva />
+            </article>
             <Link href="/licitaciones/entidades" className={`${styles.card} ${styles.radar}`}>
               <div className={styles.topline}>
                 <span className={styles.icon} aria-hidden="true">
