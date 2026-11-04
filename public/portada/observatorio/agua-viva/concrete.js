@@ -1,13 +1,23 @@
 // Concrete is shaded in world-space metres, preserving texture scale on every wall.
-export function concreteMaterial(T,{circular=false,base=0.1,color=0x92958d,panels=true}={}){
- const material=new T.MeshStandardMaterial({color,roughness:.92,metalness:0});
- material.onBeforeCompile=shader=>{
-  shader.uniforms.wallCircular={value:circular?1:0};
-  shader.uniforms.wallBase={value:base};
-  shader.uniforms.wallPanels={value:panels?1:0};
-  shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vConcreteWorld;')
-   .replace('#include <begin_vertex>','#include <begin_vertex>\nvConcreteWorld=(modelMatrix*vec4(position,1.0)).xyz;');
-  shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
+export function concreteMaterial(
+  T,
+  { circular = false, base = 0.1, color = 0x92958d, panels = true } = {}
+) {
+  const material = new T.MeshStandardMaterial({ color, roughness: 0.92, metalness: 0 });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.wallCircular = { value: circular ? 1 : 0 };
+    shader.uniforms.wallBase = { value: base };
+    shader.uniforms.wallPanels = { value: panels ? 1 : 0 };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vConcreteWorld;")
+      .replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\nvConcreteWorld=(modelMatrix*vec4(position,1.0)).xyz;"
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
    varying vec3 vConcreteWorld;
    uniform float wallCircular;
    uniform float wallBase;
@@ -22,7 +32,11 @@ export function concreteMaterial(T,{circular=false,base=0.1,color=0x92958d,panel
     return vec2(abs(n.x)>.7?vConcreteWorld.z:vConcreteWorld.x,vConcreteWorld.y-wallBase);
    }
    float concreteHeight(vec2 p){return wallNoise(p*95.0)*.0012+wallNoise(p*27.0)*.0025+wallNoise(p*7.0)*.003;}
-  `).replace('#include <color_fragment>',`#include <color_fragment>
+  `
+      )
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
    vec2 cUV=concreteUV();
    vec3 faceNormal=normalize(cross(dFdx(vConcreteWorld),dFdy(vConcreteWorld)));
    float verticalFace=1.0-smoothstep(.4,.75,abs(faceNormal.y));
@@ -56,22 +70,40 @@ export function concreteMaterial(T,{circular=false,base=0.1,color=0x92958d,panel
    diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.38,.49,.29),tide*(.35+irregular*.45)+belowTide*.24);
    diffuseColor.rgb+=vec3(.09,.085,.063)*mineral*irregular;
 
-  `).replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+  `
+      )
+      .replace(
+        "#include <normal_fragment_maps>",
+        `#include <normal_fragment_maps>
    // Millimetre-scale relief changes light response without adding geometry.
    float concreteRelief=concreteHeight(concreteUV());
    vec3 sX=dFdx(-vViewPosition),sY=dFdy(-vViewPosition);
    vec3 rX=cross(sY,normal),rY=cross(normal,sX);
    float determinant=dot(sX,rX);
    normal=normalize(abs(determinant)*normal-sign(determinant)*(dFdx(concreteRelief)*rX+dFdy(concreteRelief)*rY));
-  `);
- };
- material.customProgramCacheKey=()=>`concrete-v1-${circular}-${base}-${panels}`;
- return material;
+  `
+      );
+  };
+  material.customProgramCacheKey = () => `concrete-v1-${circular}-${base}-${panels}`;
+  return material;
 }
 
-export function beveledConcreteBox(T,w,h,d){
- const b=Math.min(.026,w*.08,h*.08,d*.08);
- const shape=new T.Shape();shape.moveTo(-w/2+b,-h/2+b);shape.lineTo(w/2-b,-h/2+b);shape.lineTo(w/2-b,h/2-b);shape.lineTo(-w/2+b,h/2-b);shape.closePath();
- const geo=new T.ExtrudeGeometry(shape,{depth:d-2*b,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:b,bevelThickness:b});
- geo.translate(0,0,-d/2+b);return geo;
+export function beveledConcreteBox(T, w, h, d) {
+  const b = Math.min(0.026, w * 0.08, h * 0.08, d * 0.08);
+  const shape = new T.Shape();
+  shape.moveTo(-w / 2 + b, -h / 2 + b);
+  shape.lineTo(w / 2 - b, -h / 2 + b);
+  shape.lineTo(w / 2 - b, h / 2 - b);
+  shape.lineTo(-w / 2 + b, h / 2 - b);
+  shape.closePath();
+  const geo = new T.ExtrudeGeometry(shape, {
+    depth: d - 2 * b,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 1,
+    bevelSize: b,
+    bevelThickness: b,
+  });
+  geo.translate(0, 0, -d / 2 + b);
+  return geo;
 }
