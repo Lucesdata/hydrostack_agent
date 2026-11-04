@@ -29,6 +29,7 @@ import {
 } from "../landing/destacados-portada";
 import { procesoPortadaDesdeFila, type FilaProcesoPortada } from "../landing/proceso-portada";
 import { condicionAbierto } from "./agregados";
+import { hoyEnColombia } from "./hoy-colombia";
 
 /**
  * Elegibles: abiertos según `condicionAbierto()` —recepción de ofertas
@@ -71,7 +72,7 @@ function familiaSql() {
 
 export async function destacadosPortada(): Promise<DestacadoPortada[]> {
   const familia = familiaSql();
-  const holgado = sql<boolean>`(${proceso.fechaRecepcion} >= (now() at time zone 'America/Bogota')::date + ${DIAS_MINIMOS_DESTACADO}::int)`;
+  const holgado = sql<boolean>`(${proceso.fechaRecepcion} >= ${hoyEnColombia()} + ${DIAS_MINIMOS_DESTACADO}::int)`;
   const tipos = FAMILIAS_DESTACADAS.flatMap(tiposDeFamilia);
 
   const filas: (FilaProcesoPortada & { familia: FamiliaDestacada; holgado: boolean })[] = await db
