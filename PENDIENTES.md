@@ -17,6 +17,15 @@ viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 | Interfaz y eficiencia | §24–26, §46, §47, §50 | Contraste, estilos heredados, funcionalidades planificadas y consultas sin consumidores |
 | Decisiones de producto | §11, §12, §14, §29–30 | Confirmar alcance y límites antes de implementar |
 
+**Frescura y operación (2026-10-24, PR B):** la ficha muestra la sincronización de AquaLicita y
+lo publicado en SECOP por separado; la invalidación selectiva está propuesta, no hecha
+(`docs/superpowers/specs/2026-10-24-frescura-ficha.md`). **Abierto y más urgente (diagnosticado, no
+arreglado):** `condicionAbierto()` evalúa `(now() at time zone 'America/Bogota')::date`
+fila a fila (8,4 s frente a 174 ms con la fecha calculada una vez) y ocupa el pooler
+con regeneraciones ISR de 5–12 s; la ingesta de procesos corre `ok` (falló una vez la de
+contratos, 2026-10-20). Detalle y propuesta en
+`docs/superpowers/specs/2026-10-24-diagnostico-ingesta-timeouts.md`.
+
 §19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
 ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es
 historial del bloqueo del mapa y del hero, ya construidos. §49 registra la
