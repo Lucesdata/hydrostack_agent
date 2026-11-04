@@ -1,5 +1,7 @@
 # Ficha comprensible e interactiva
 
+> **Estado: Histórica / sustituida.** Sustituida por `2026-10-06-ficha-operativa-viva.md` (la ficha ya no se organiza en seis preguntas). Conservada como historia (2026-10-24).
+
 El usuario aprobó en esta conversación un boceto navegable con seis preguntas
 y su versión móvil, y pidió pulir el diseño y publicarlo el 2026-09-29.
 

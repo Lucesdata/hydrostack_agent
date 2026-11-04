@@ -1,5 +1,7 @@
 # AquaLicita — Spec del hero «Explora el mapa. Entiende cada proceso.»
 
+> **Estado: Histórica / sustituida.** Sustituida por `2026-10-04-hero-cinco-minifichas.md` y sus sucesoras. Conservada como historia (2026-10-24).
+
 **Fecha:** 2026-10-02. **Versión:** 1.0, para revisión y traspaso a Claude Code.
 **Tipo:** especificación de producto, diseño e interacciones; no es código implementado.
 **Referencia visual aprobada:** [imagen completa](2026-10-02-hero-mapa-ficha/referencia-aprobada.png).

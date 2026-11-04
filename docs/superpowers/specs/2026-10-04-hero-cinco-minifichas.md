@@ -1,5 +1,7 @@
 # Hero territorial con cinco minifichas — reconocimiento y decisiones
 
+> **Estado: Histórica / sustituida.** Sustituida en composición por `2026-10-06-hero-ficha-central.md` (y luego `2026-10-07-hero-tres-destacados.md`); el contrato de datos y la estructura de la minificha siguen vigentes. Conservada como historia (2026-10-24).
+
 **Fecha:** 2026-10-04 · **Origen:** SDD «Hero Territorial con cinco minifichas»
 v1.0 del usuario, con un boceto aprobado (composición y estilo; sus procesos,
 cifras, identificadores y geometría son ilustrativos y no se trasladaron).
