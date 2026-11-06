@@ -2,6 +2,7 @@ import Link from "next/link";
 import { principalesAdjudicaciones, periodoAnterior } from "@/src/lib/secop/radar-institucional";
 import { formatCopEscala } from "@/src/components/secop/format";
 import { slugDeProceso } from "@/src/lib/secop/slug";
+import { urlDetalleSecop } from "@/src/lib/secop/url-secop";
 import "@/src/components/secop/radar/radar.css";
 export const revalidate = 21600;
 export const metadata = {
@@ -139,9 +140,9 @@ export default async function Page() {
                           Ver entidad
                         </Link>
                       ) : null}
-                      {p.url?.startsWith("https://") ? (
+                      {urlDetalleSecop(p.url) ? (
                         <a
-                          href={p.url}
+                          href={urlDetalleSecop(p.url) ?? undefined}
                           className="ri-button ri-button--outline"
                           target="_blank"
                           rel="noopener noreferrer"
