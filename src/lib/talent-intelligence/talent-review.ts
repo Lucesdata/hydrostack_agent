@@ -68,8 +68,8 @@ export function prepararRevisionPersonal(
         tablaProbable || variosCargos ? null : resultado.requisito.dedicacionPorcentaje,
       cita,
       motivosRevision: motivos,
-      visibilidad: "revision_interna",
-      esVacante: false,
+      visibilidad: "revision_interna" as const,
+      esVacante: false as const,
     };
   });
 }
