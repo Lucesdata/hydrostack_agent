@@ -119,3 +119,14 @@ o de cuenta; no hay datos de SECOP que perder.
 - **Decisión de diseño al implementar:** los triggers de solo anexado permiten el `DELETE` en cascada (`pg_trigger_depth() > 1`) para no impedir la supresión de la cuenta (derecho de supresión de datos). Un `DELETE`/`UPDATE` directo se rechaza.
 - **Pendiente para aplicar `0027`/`0028` a la base viva (requiere autorización expresa):** explicar el conteo de migraciones, D11 (plan y cuota), verificación de RLS (§10.3 del SDD) tras aplicar, y plan de carga inicial de `ci_contrato_estado` (~40.000 filas, por lotes y con vigilancia de tamaño como `backfill-tipo-proyecto.ts`). No se aplicó nada.
 - **No incluido, a propósito:** B (evidencia/necesidades/coincidencia), D (`representacion_proveedor`, D10) y E (consorcios, D3).
+
+## 11. Avance CI-05 (2026-11-09) — perfil de empresa
+
+Sin pantalla (la interfaz entra tras los prototipos de CI-06) y sin tocar la base viva.
+- **Capacidad `empresa_perfil`** en `src/lib/acceso/politica.ts`, nivel `gratis` (una cuenta = una empresa); el test de política la clasifica.
+- **`src/lib/empresa/validar.ts` (puro):** solo lee campos conocidos; país ISO alfa-2; roles del brief; nodos validados contra la taxonomía; DIVIPOLA de 2 o 5 dígitos; **rechaza claves de precio** (precio, price, tarifa, cotización, costo, descuento, usd/eur/cop…) a cualquier profundidad; límites de tamaño; `completitud()` (qué le falta al perfil para servir al matching).
+- **`src/lib/empresa/servicio.ts`:** única puerta de `ci_empresa*`. `usuarioId` solo de la sesión (no existe función que reciba un `empresaId` externo); guardado transaccional y serializado por cuenta (advisory lock); **el cliente no fija estados** (todo nace `declarado`; `documentado`/`verificado` solo sobreviven si el dato no cambia); cambiar la identidad de una empresa `verificada` la devuelve a `en_revision`; una `rechazada`/`revocada` no se rehabilita editando; cada guardado deja una fila de auditoría con conteos, nunca el contenido.
+- **`src/lib/empresa/actions.ts`:** `guardarEmpresaAction` y `leerMiEmpresaAction` (sesión → `puede()` → servicio). Los errores de base se propagan, no se tragan (CONDUCTA §5).
+- **Pruebas (nuevas: 32):** validador puro (13), servicio sobre PGlite con las migraciones reales (14: aislamiento entre cuentas, ids ajenos ignorados, estados, identidad, auditoría, rollback por entrada inválida, concurrencia), acciones con sesión simulada (5).
+- **No incluido, a propósito:** limitación de tasa contra spam, subida de documentos que eleve un dato a `documentado`, flujo de verificación (quién pasa una empresa a `verificada`) y cualquier ruta o pantalla. Quedan para CI-06/CI-08.
+- **Nota técnica:** el repo compila con `strict: false`; las uniones de resultado llevan `errores?: undefined`/`valor?: undefined` en ambos casos para que `tsc` acepte la lectura tras comprobar `ok`.

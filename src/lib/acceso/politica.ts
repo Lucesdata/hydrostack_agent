@@ -38,7 +38,8 @@ export type Capacidad =
   | "competidores"
   | "procesos_guardar"
   | "procesos_recientes"
-  | "pliego_extraer";
+  | "pliego_extraer"
+  | "empresa_perfil";
 
 /**
  * La tabla. `veredicto_resumen` es el semáforo agregado y el estado de cada
@@ -65,6 +66,11 @@ export type Capacidad =
  * de búsqueda propios exige cuenta porque las filas cuelgan de una cuenta, pero
  * no es una frontera de pago. Explorar y ver el semáforo siguen siendo anónimos.
  *
+ * `empresa_perfil` (Commercial Intelligence, CI-05) es `gratis`: crear y editar el
+ * perfil de empresa comercial exige cuenta porque la fila cuelga de ella (una
+ * cuenta = una empresa, D2). Los estados «documentado» y «verificado» NO los
+ * concede este nivel: los fija la verificación, nunca el propio usuario.
+ *
  * `diagnostico` es anónimo pero `diagnostico_historial` no: responder no pide
  * cuenta, comparar tus respuestas en el tiempo sí — no hay historial sin a
  * quién atribuirlo. La ruta ya está en `PROTECTED_PREFIXES`; esta fila es lo
@@ -86,6 +92,7 @@ const NIVEL_MINIMO: Record<Capacidad, Nivel> = {
   procesos_guardar: "gratis",
   procesos_recientes: "gratis",
   pliego_extraer: "gratis",
+  empresa_perfil: "gratis",
 };
 
 /** Todas las capacidades, para iterarlas sin repetir la lista a mano. */

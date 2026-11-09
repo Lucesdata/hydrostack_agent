@@ -43,6 +43,7 @@ describe("puede", () => {
     "pliego_extraer",
     "procesos_guardar",
     "procesos_recientes",
+    "empresa_perfil",
   ];
   // Vacío desde el 2026-09-27: el análisis de pliego pasó a gratis y no queda
   // ninguna capacidad de pago. Los tests de abajo siguen valiendo cuando la haya.
