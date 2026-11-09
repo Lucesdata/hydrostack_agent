@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TAL-03 — Registro de verificación humana de requisitos profesionales",
+  "description": "Registro manual de evidencia; no implica publicación, oferta de empleo ni validación automática del PDF.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expediente", "documento", "estado", "requisitos"],
+  "properties": {
+    "expediente": {
+      "type": "string",
+      "minLength": 1
+    },
+    "documento": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "sha256", "fechaConsulta", "nombreArchivo"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "fechaConsulta": {
+          "type": "string",
+          "format": "date"
+        },
+        "nombreArchivo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": ["string", "null"]
+        },
+        "observaciones": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "estado": {
+      "enum": [
+        "sin_acceso",
+        "pdf_obtenido",
+        "en_revision",
+        "revisado_con_pendientes",
+        "verificado_manualmente"
+      ]
+    },
+    "requisitos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cargoLiteral",
+          "paginaPdf",
+          "fragmento",
+          "tipo",
+          "revision",
+          "formacion",
+          "experienciaGeneralAnios",
+          "experienciaEspecifica",
+          "dedicacionPorcentaje",
+          "cantidad",
+          "fase"
+        ],
+        "properties": {
+          "cargoLiteral": {
+            "type": "string",
+            "minLength": 1
+          },
+          "paginaPdf": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "paginaImpresa": {
+            "type": ["integer", "null"],
+            "minimum": 1
+          },
+          "seccion": {
+            "type": ["string", "null"]
+          },
+          "fragmento": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tipo": {
+            "enum": ["habilitante", "puntuable", "opcional", "ejecucion", "por_determinar"]
+          },
+          "revision": {
+            "enum": ["pendiente", "verificado", "ambiguo", "descartado"]
+          },
+          "formacion": {
+            "type": ["string", "null"]
+          },
+          "experienciaGeneralAnios": {
+            "type": ["number", "null"],
+            "minimum": 0
+          },
+          "experienciaEspecifica": {
+            "type": ["string", "null"]
+          },
+          "dedicacionPorcentaje": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "cantidad": {
+            "type": ["integer", "null"],
+            "minimum": 1
+          },
+          "fase": {
+            "type": ["string", "null"]
+          },
+          "motivoRevision": {
+            "type": ["string", "null"]
+          },
+          "verificadoPor": {
+            "type": ["string", "null"]
+          },
+          "fechaRevision": {
+            "type": ["string", "null"],
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}
