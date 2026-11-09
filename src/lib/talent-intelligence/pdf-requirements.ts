@@ -1,4 +1,5 @@
 import { pdfToText } from "../pliego/rules/pdfToText";
+import { prepararRevisionPersonal, type RequisitoEnRevision } from "./talent-review";
 import {
   extraerPersonalPorPaginas,
   type PaginaDeDocumento,
@@ -44,4 +45,19 @@ export async function extraerRequisitosPersonalPdf(
   if (!documentoId.trim()) throw new Error("Falta identificador del documento");
   const texto = await pdfToText(pdf);
   return extraerPersonalPorPaginas(documentoId, dividirTextoPdfEnPaginas(texto));
+}
+
+/**
+ * Punto de entrada seguro para una futura interfaz de revisión.
+ * Reutiliza el texto una sola vez y NO genera datos publicables.
+ */
+export async function extraerRequisitosPersonalPdfParaRevision(
+  documentoId: string,
+  pdf: string | Buffer
+): Promise<RequisitoEnRevision[]> {
+  if (!documentoId.trim()) throw new Error("Falta identificador del documento");
+  const texto = await pdfToText(pdf);
+  const paginas = dividirTextoPdfEnPaginas(texto);
+  const resultados = extraerPersonalPorPaginas(documentoId, paginas);
+  return prepararRevisionPersonal(resultados, paginas);
 }
