@@ -12,7 +12,9 @@ describe("Talent Intelligence: verificación literal en texto", () => {
   });
 
   it("no da por acreditadas frases inexistentes", () => {
-    expect(\n      encontrarCitaEnTexto("Se requiere ingeniero civil.", "ingeniero sanitario cinco años")\n    ).toBeNull();
+    expect(
+      encontrarCitaEnTexto("Se requiere ingeniero civil.", "ingeniero sanitario cinco años")
+    ).toBeNull();
   });
 
   it("no acepta coincidencias demasiado cortas", () => {
@@ -20,6 +22,8 @@ describe("Talent Intelligence: verificación literal en texto", () => {
   });
 
   it("trata signos de puntuación como caracteres literales", () => {
-    expect(\n      encontrarCitaEnTexto("Requiere PLC (SCADA) certificado.", "PLC (SCADA) certificado.")\n    ).not.toBeNull();
+    expect(
+      encontrarCitaEnTexto("Requiere PLC (SCADA) certificado.", "PLC (SCADA) certificado.")
+    ).not.toBeNull();
   });
 });
