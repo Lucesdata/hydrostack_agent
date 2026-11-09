@@ -18,6 +18,8 @@ export const STAFF_FAMILIES = [
   "MGMT_PROJECT",
   "ADMIN_PROC",
   "SST",
+  "TOPO",
+  "SOCIAL",
 ] as const;
 
 export type StaffFamily = (typeof STAFF_FAMILIES)[number];
@@ -47,7 +49,8 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   },
   {
     code: "TECH_EM",
-    pattern: /t[eé]cnic[oa] electromec[aá]nic[oa]|t[eé]cnic[oa] de mantenimiento/i,
+    pattern:
+      /t[eé]cnic[oa] electromec[aá]nic[oa]|t[eé]cnic[oa] de mantenimiento|especialista electromec[aá]nic[oa]/i,
   },
   {
     code: "CONS_SUP",
@@ -56,7 +59,7 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   {
     code: "MGMT_PROJECT",
     pattern:
-      /director(?:a)? de proyecto|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
+      /director(?:a)? (?:de|del) proyecto|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
   },
   {
     code: "ADMIN_PROC",
@@ -66,8 +69,10 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   {
     code: "SST",
     pattern:
-      /(?:profesional|coordinador(?:a)?|especialista) (?:en|de) (?:sst|seguridad y salud en el trabajo)/i,
+      /(?:profesional|coordinador(?:a)?|especialista) (?:en|de) (?:sst|seguridad y salud en el trabajo)|supervisor(?:a)? de seguridad industrial/i,
   },
+  { code: "TOPO", pattern: /top[oó]graf[oa]|topograf[ií]a/i },
+  { code: "SOCIAL", pattern: /profesional social|trabajador(?:a)? social/i },
 ];
 
 export function clasificarFamiliasPersonal(texto: string): StaffFamily[] {
