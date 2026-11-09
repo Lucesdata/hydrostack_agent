@@ -9,26 +9,41 @@ export interface RequisitoPersonalV0 {
   experienciaEspecificaAnios: number | null;
   dedicacionPorcentaje: number | null;
   tipo: "obligatorio" | "puntuable" | "opcional" | "por_verificar";
-  evidencia: { fragmento: string; literalEnEntrada: true; documentoVerificado: false };
+  evidencia: {
+    fragmento: string;
+    literalEnEntrada: true;
+    documentoVerificado: false;
+  };
   version: "talent-rules-v0";
 }
 
-const NEGACION = /\b(?:no se (?:requiere|exige|solicita)|sin necesidad de|no (?:es|ser[aá]) obligatorio|se excluye)\b/i;
-const PERSONAL = /(?:ingenier[oa]|especialista|profesional|t[eé]cnic[oa]|operador(?:a)?|dibujante|delineante|modelador|interventor|supervisor|residente|director|gerente|auxiliar|instrumentista|coordinador)/i;
-const REQUISITO = /(?:personal|equipo|perfil|cargo|profesional|ingenier|especialista|t[eé]cnic|operador|dibujante|interventor|residente|director|coordinador|requerid|exigid|mínim|m[ií]nim)/i;
-const DATO_PERSONAL = /\b(?:c[eé]dula|documento de identidad|pasaporte|tel[eé]fono|correo electr[oó]nico)\b|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i;
+const NEGACION =
+  /\b(?:no se (?:requiere|exige|solicita)|sin necesidad de|no (?:es|ser[aá]) obligatorio|se excluye)\b/i;
+const PERSONAL =
+  /(?:ingenier[oa]|especialista|profesional|t[eé]cnic[oa]|operador(?:a)?|dibujante|delineante|modelador|interventor|supervisor|residente|director|gerente|auxiliar|instrumentista|coordinador)/i;
+const REQUISITO =
+  /(?:personal|equipo|perfil|cargo|profesional|ingenier|especialista|t[eé]cnic|operador|dibujante|interventor|residente|director|coordinador|requerid|exigid|mínim|m[ií]nim)/i;
+const DATO_PERSONAL =
+  /\b(?:c[eé]dula|documento de identidad|pasaporte|tel[eé]fono|correo electr[oó]nico)\b|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i;
 
 function extraerAnios(linea: string, tipo: "general" | "especifica"): number | null {
   const palabra = tipo === "general" ? "general" : "espec[ií]fica";
-  const antes = new RegExp(`(?:experiencia\\s+${palabra})[^.\\n]{0,55}?(\\d{1,2})\\s*a[nñ]os?`, "i");
-  const despues = new RegExp(`(\\d{1,2})\\s*a[nñ]os?[^.\\n]{0,40}?(?:de\\s+)?experiencia\\s+${palabra}`, "i");
+  const antes = new RegExp(
+    `(?:experiencia\\s+${palabra})[^.\\n]{0,55}?(\\d{1,2})\\s*a[nñ]os?`,
+    "i",
+  );
+  const despues = new RegExp(
+    `(\\d{1,2})\\s*a[nñ]os?[^.\\n]{0,40}?(?:de\\s+)?experiencia\\s+${palabra}`,
+    "i",
+  );
   const m = linea.match(antes) ?? linea.match(despues);
   return m ? Number(m[1]) : null;
 }
 
 function extraerDedicacion(linea: string): number | null {
-  const m = linea.match(/dedicaci[oó]n[^.\n]{0,35}?(\d{1,3})\s*%/i)
-    ?? linea.match(/(\d{1,3})\s*%\s*de\s*dedicaci[oó]n/i);
+  const m =
+    linea.match(/dedicaci[oó]n[^.\n]{0,35}?(\d{1,3})\s*%/i) ??
+    linea.match(/(\d{1,3})\s*%\s*de\s*dedicaci[oó]n/i);
   if (!m) return null;
   const n = Number(m[1]);
   return n >= 0 && n <= 100 ? n : null;
@@ -36,17 +51,19 @@ function extraerDedicacion(linea: string): number | null {
 
 function tipoDeRequisito(linea: string): RequisitoPersonalV0["tipo"] {
   if (/opcional|podr[aá] contar|podr[aá] incluir/i.test(linea)) return "opcional";
-  if (/puntaje|puntuaci[oó]n|se valorar[aá]|otorga puntos|factor de evaluaci[oó]n/i.test(linea)) return "puntuable";
-  if (/deber[aá]|debe contar|se exige|se requiere|m[ií]nimo|obligatori|equipo m[ií]nimo/i.test(linea)) return "obligatorio";
+  if (/puntaje|puntuaci[oó]n|se valorar[aá]|otorga puntos|factor de evaluaci[oó]n/i.test(linea)) {
+    return "puntuable";
+  }
+  if (/deber[aá]|debe contar|se exige|se requiere|m[ií]nimo|obligatori|equipo m[ií]nimo/i.test(linea)) {
+    return "obligatorio";
+  }
   return "por_verificar";
 }
 
 /**
- * Primer paso de procesamiento sobre texto YA obtenido legalmente de un pliego.
- * - No descarga documentos.
- * - No procesa CV ni información personal.
- * - Solo retorna fragmentos literales presentes en la entrada.
- * - Cada resultado requiere revisión cuando no se demuestra obligatoriedad.
+ * Primer paso sobre texto previamente obtenido de un pliego.
+ * No descarga documentos, ni procesa CV o datos personales.
+ * Todos los fragmentos son literales de entrada; NO están verificados contra PDF.
  */
 export function extraerRequisitosPersonalDeTexto(texto: string): RequisitoPersonalV0[] {
   if (!texto.trim()) return [];
@@ -67,7 +84,11 @@ export function extraerRequisitosPersonalDeTexto(texto: string): RequisitoPerson
       experienciaEspecificaAnios: extraerAnios(fragmento, "especifica"),
       dedicacionPorcentaje: extraerDedicacion(fragmento),
       tipo: tipoDeRequisito(fragmento),
-      evidencia: { fragmento, literalEnEntrada: true, documentoVerificado: false },
+      evidencia: {
+        fragmento,
+        literalEnEntrada: true,
+        documentoVerificado: false,
+      },
       version: "talent-rules-v0",
     });
   }
