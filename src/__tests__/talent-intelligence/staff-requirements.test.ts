@@ -4,9 +4,10 @@ import { extraerRequisitosPersonalDeTexto } from "../../lib/talent-intelligence/
 
 describe("Talent Intelligence V0: clasificación conservadora", () => {
   it("reconoce familias técnicas", () => {
-    expect(
-      clasificarFamiliasPersonal("Ingeniero sanitario y técnico de instrumentación")
-    ).toEqual(["ENG_SAN", "TECH_INST"]);
+    expect(clasificarFamiliasPersonal("Ingeniero sanitario y técnico de instrumentación")).toEqual([
+      "ENG_SAN",
+      "TECH_INST",
+    ]);
   });
 
   it("extrae experiencia y dedicación con fragmento literal", () => {
