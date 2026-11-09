@@ -15,7 +15,7 @@ function escapeRegExp(texto: string): string {
 
 export function encontrarCitaEnTexto(
   textoDocumento: string,
-  cita: string,
+  cita: string
 ): CoincidenciaCita | null {
   const palabras = cita.trim().split(/\s+/).filter(Boolean);
   if (palabras.length < 3 || textoDocumento.trim().length === 0) return null;
