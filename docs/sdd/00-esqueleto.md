@@ -749,8 +749,8 @@ que el backfill esté verificado; después, solo `account_id`.
 
 ### 4.9 Commercial & Supply Intelligence — PROPUESTA (CI-03, 2026-11-09)
 
-> **Estado (2026-11-09): migraciones A y C GENERADAS en el repo (`drizzle/0027_ci_a_perfil_empresa`,
-> `drizzle/0028_ci_c_cambios_contrato`) y probadas en PGlite; NO aplicadas a la base viva.**
+> **Estado (2026-11-09): migraciones A y C APLICADAS a la base viva** (`drizzle/0027_ci_a_perfil_empresa`,
+> `drizzle/0028_ci_c_cambios_contrato`), con autorización expresa del usuario y verificadas (9 tablas `ci_*`, todas con RLS; 0 tablas de `public` sin RLS).
 > B, D y E siguen solo propuestas. Esquema: `src/lib/db/schema/comercial.ts`.
 > Antes de esta línea decía: «propuesto, NO aplicado. Ninguna de estas tablas existe en el
 > esquema Drizzle ni en la base». Entra a la fase de migración (CI-04) solo con
@@ -1126,6 +1126,8 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 | `0019_secret_changeling` | 9 `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` + 2 FK | ✅ **Aplicada 2026-09-05** |
 | `0020_huge_ego` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | ✅ **Aplicada 2026-09-05** |
 | `0021_kind_warbird` | `al_sanciones` (DDL cerrado tras V-F-2) | ✅ **Aplicada 2026-09-05** |
+| `0027_ci_a_perfil_empresa` | `ci_empresa`, `ci_empresa_rol`, `ci_empresa_capacidad`, `ci_empresa_cobertura`, `ci_consentimiento`, `ci_seguimiento`, `ci_auditoria` + función y 2 triggers de solo anexado (§4.9) | ✅ **Aplicada 2026-11-09** |
+| `0028_ci_c_cambios_contrato` | `ci_contrato_estado`, `ci_contrato_cambio` (§4.9) | ✅ **Aplicada 2026-11-09** |
 
 **Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
 repartidas por fase como preveía el plan original. Razón: el esqueleto es la

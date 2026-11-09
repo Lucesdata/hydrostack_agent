@@ -149,3 +149,14 @@ Sin tocar la base viva ni el cron. Rellena `ci_contrato_estado` y `ci_contrato_c
 Consecuencia: un `npm run db:migrate` contra la base viva **volvería a ejecutar `0025` y `0026` antes de `0027`/`0028`**. Es inocuo hoy: `0025` usa `CREATE INDEX IF NOT EXISTS` y `0026` usa `INSERT … ON CONFLICT DO NOTHING` y un `UPDATE` condicionado a que el valor difiera. No se tocó la tabla de migraciones. Además `0025` crea `al_hist_proceso_idx`, cuyo estado en la base viva no verifiqué.
 
 Orden de `when` verificado: `0026` < `0027` < `0028` (monótono), así que el migrador las aplicaría en ese orden.
+
+## 14. Aplicación de `0027` y `0028` a la base viva (2026-11-09)
+
+Autorizada expresamente por el usuario («realiza las migraciones», tras haber dicho «no por ahora» el mismo día). Proyecto Supabase `prnipcaspjadhypsclyi` (`hydrostacks`, eu-west-1).
+- **Antes (solo lectura):** ninguna tabla `ci_*` ni la función existían; 31 tablas en `public` y 0 sin RLS; 337,4 MB; 1 conexión activa.
+- **Cómo:** el SQL exacto de los dos archivos, en **una sola llamada** (transacción implícita: todo o nada) con `execute_sql` del MCP de Supabase, no con `drizzle-kit migrate` (en esta sesión no hay `DATABASE_URL`). Sin errores.
+- **Registro:** dos filas en `drizzle.__drizzle_migrations` (ids 26 y 27) con el **hash SHA-256 del archivo** y el `when` del journal; se comprobó que coinciden con `readMigrationFiles` de Drizzle. Con `created_at` mayor que el de `0025`/`0026`, un futuro `db:migrate` **no las repetirá** (esto además deja de re-ejecutar `0025`/`0026`, que quedan sin fila propia).
+- **Después:** 9 tablas `ci_*`, todas con RLS; **0 tablas de `public` sin RLS** (40 en total); 2 triggers + 1 función; 11 CHECK, 8 FK, 19 índices `ci_*`; base en 337,7 MB (+0,3 MB); `contrato` (40.418) y `usuario` (5) intactos.
+- **Prueba de humo dentro de la base viva, revertida:** un bloque `DO` que insertó un usuario y filas de prueba, comprobó que `UPDATE` y `DELETE` directos en `ci_consentimiento` y `ci_auditoria` se **rechazan**, que un `pais` de 3 letras viola el CHECK y que borrar la cuenta **sí arrastra** el consentimiento, y terminó con una excepción deliberada que revirtió todo. Verificado después: 0 filas de prueba, 5 usuarios.
+- **Qué NO se hizo:** no se corrió el job `contratos:base-cambios` (las tablas están vacías); no se enciende ninguna bandera; las migraciones B, D y E no se generaron.
+- **Reversión, si hiciera falta:** `DROP TABLE` de las 9 tablas `ci_*`, `DROP FUNCTION ci_rechazar_modificacion()` (los triggers caen con las tablas) y borrar las filas 26 y 27 de `drizzle.__drizzle_migrations`.
