@@ -15,7 +15,7 @@ describe("Talent Intelligence V0: clasificación conservadora", () => {
     expect(rol.experienciaEspecificaAnios).toBe(3);
     expect(rol.dedicacionPorcentaje).toBe(50);
     expect(rol.tipo).toBe("obligatorio");
-    expect(rol.evidencia).toEqual({ fragmento: texto, verificada: true });
+    expect(rol.evidencia).toEqual({ fragmento: texto, literalEnEntrada: true, documentoVerificado: false });
   });
 
   it("retiene alternativas sin exigir artificialmente ambas profesiones", () => {
