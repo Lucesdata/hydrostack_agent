@@ -60,15 +60,12 @@ export function prepararRevisionPersonal(
       cargoDetectado: cita,
       familias: resultado.requisito.familias,
       tipoDeclaradoPorReglas: resultado.requisito.tipo,
-      experienciaGeneralAnios: tablaProbable || variosCargos
-        ? null
-        : resultado.requisito.experienciaGeneralAnios,
-      experienciaEspecificaAnios: tablaProbable || variosCargos
-        ? null
-        : resultado.requisito.experienciaEspecificaAnios,
-      dedicacionPorcentaje: tablaProbable || variosCargos
-        ? null
-        : resultado.requisito.dedicacionPorcentaje,
+      experienciaGeneralAnios:
+        tablaProbable || variosCargos ? null : resultado.requisito.experienciaGeneralAnios,
+      experienciaEspecificaAnios:
+        tablaProbable || variosCargos ? null : resultado.requisito.experienciaEspecificaAnios,
+      dedicacionPorcentaje:
+        tablaProbable || variosCargos ? null : resultado.requisito.dedicacionPorcentaje,
       cita,
       motivosRevision: motivos,
       visibilidad: "revision_interna",
