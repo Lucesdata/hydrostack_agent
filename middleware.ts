@@ -32,6 +32,8 @@ const PROTECTED_PREFIXES = [
   "/diagnostico/historial",
   "/cuenta",
   "/mis-procesos",
+  // Perfil de empresa comercial (CI-11b): exige cuenta (`empresa_perfil` es `gratis`).
+  "/comercial/perfil",
 ];
 
 export async function middleware(request: NextRequest) {

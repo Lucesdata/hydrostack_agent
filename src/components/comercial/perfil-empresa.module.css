@@ -1,0 +1,171 @@
+/* Perfil de empresa comercial (CI-11b). Tokens de app/globals.css. */
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+  color: var(--ink-900);
+}
+.title {
+  font-size: 1.55rem;
+  margin: 0.2rem 0 0.4rem;
+}
+.lead {
+  color: var(--ink-600);
+  max-width: 68ch;
+  margin: 0 0 1rem;
+}
+.note {
+  border: 1px dashed var(--line);
+  background: var(--surface-alt);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: var(--ink-600);
+  margin: 0 0 12px;
+}
+.noteWarn {
+  border-color: var(--warning);
+}
+.ok {
+  border: 1px solid var(--success);
+  color: var(--success);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+.errors {
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 0 0 12px;
+}
+.errors ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.2rem;
+}
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+.meter {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  margin: 0.3rem 0;
+}
+.meter i {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--accent);
+}
+.fieldset {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px 14px;
+  margin: 12px 0;
+  background: var(--surface);
+}
+.legend {
+  font-weight: 700;
+  padding: 0 6px;
+}
+.label {
+  display: block;
+  font-weight: 600;
+  margin: 10px 0 4px;
+}
+.input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--ink-300);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-900);
+  font: inherit;
+  min-height: 44px;
+}
+.input:focus-visible,
+.btn:focus-visible,
+.check input:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.grid2 {
+  display: grid;
+  gap: 0 14px;
+}
+@media (min-width: 700px) {
+  .grid2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+.cap {
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+}
+.capHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.capMarcas {
+  margin: 4px 0 0 28px;
+}
+.child {
+  margin-left: 18px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.declared {
+  color: var(--ink-600);
+}
+.documented {
+  color: var(--accent);
+}
+.verified {
+  color: var(--success);
+}
+.muted {
+  color: var(--ink-600);
+  font-size: 0.85rem;
+}
+.btn {
+  display: inline-block;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 44px;
+}

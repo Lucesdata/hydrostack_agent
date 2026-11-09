@@ -13,7 +13,7 @@ Fecha: 2026-11-09 · Prototipos aprobados «tal cual» por el usuario el 2026-11
 | # | Pantalla | Depende de | Estado |
 |---|---|---|---|
 | 11a | Ficha comercial de contrato (`/comercial/contratos/[id]`) | Nada nuevo: `contrato`, `proveedor`, `entidad`, clasificador puro | **Hecha (esta entrega)** |
-| 11b | Perfil de empresa (`/comercial/perfil`) | `0027` aplicada (servicio y acciones ya existen) | Espera autorización de migración |
+| 11b | Perfil de empresa (`/comercial/perfil`) | `0027` aplicada (servicio y acciones ya existen) | **Hecha (2026-11-09)**; `0027` aplicada a la base viva |
 | 11c | Explorador de oportunidades | Filtro por tecnología (clasificador sobre `objeto`) y perfil | Espera 11b |
 | 11d | Radar de suministros | Migración B (`ci_necesidad`) y D10 | Espera D10 y etiquetado (CI-09) |
 | 11e | Perfil de contratista + reclamación | Migración D (`representacion_proveedor`) y D10 | Espera D10 |
@@ -35,3 +35,12 @@ Fecha: 2026-11-09 · Prototipos aprobados «tal cual» por el usuario el 2026-11
 - **Verificado:** `npm run build` pasa y la ruta compila como dinámica (ƒ); con la bandera apagada y con un id inválido responde **404** (`next start` local). Con la bandera encendida no se probó contra una base real (en esta sesión no hay `DATABASE_URL`): la lectura está probada sobre PGlite.
 - **Pruebas (24 nuevas):** armado puro (NIT vs persona natural, cita literal, negaciones, vigencia en hora de Colombia, ids), componente renderizado (aviso de no-avance físico, glifo + nombre, «sin dato», sin representantes legales ni supervisores, reserva de Talent Intelligence) y lectura SQL (joins, soft-delete, `raw_attrs.representante_legal` no se filtra, inyección en el id).
 - **Para encenderla:** `CI_COMERCIAL_HABILITADO=1` en el entorno (decisión de despliegue del usuario). No hay enlaces desde ninguna otra página: se llega por URL directa.
+
+## 11b — resultado (2026-11-09)
+Prototipo `02-perfil.html` aprobado; `0027` ya está en la base viva.
+- **Ruta:** `/comercial/perfil` (privada, dinámica, `noindex`), detrás de `CI_COMERCIAL_HABILITADO=1`. Se añadió `/comercial/perfil` a `PROTECTED_PREFIXES` del middleware (sin sesión redirige al login; con sesión y bandera apagada, 404).
+- **Formulario HTML puro con acción de servidor** (sin JavaScript de cliente): `PerfilEmpresaForm.tsx` + `guardarEmpresaFormAction` → redirige a `?ok=1` o `?error=campos` (solo campos conocidos; lo que viene de la URL se filtra contra una lista).
+- **`entradaDesdeFormData` (puro):** solo lee los campos que el formulario ofrece; estados, verificación e ids no existen en él. **Conserva** las especificaciones técnicas y la cobertura municipal ya guardadas, que el formulario no edita (el servicio reemplaza los hijos).
+- **Muestra** el estado de cada dato (glifo + nombre), la verificación, la completitud y el aviso «no subas listas de precios»; bilingüe ES/EN en las etiquetas; cada control con su etiqueta.
+- **Verificado:** `npm run build` pasa (ruta dinámica); `next start` local: sin sesión → 307 al login con `?next=/comercial/perfil`. **No** se probó el guardado de punta a punta con una sesión real (sin `DATABASE_URL` ni Supabase Auth en la sesión): lo cubren 26 pruebas nuevas (parser, componente, acción del formulario con sesión simulada) y las 14 del servicio sobre PGlite.
+- **Pendiente de esta pantalla:** mensajes de error por campo junto al control (hoy es un resumen arriba), carga de documentos que eleve un dato a «documentado», flujo de verificación y límite de tasa; selector de idioma (D13 acordó inglés mínimo solo en etiquetas).
