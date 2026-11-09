@@ -30,11 +30,11 @@ function extraerAnios(linea: string, tipo: "general" | "especifica"): number | n
   const palabra = tipo === "general" ? "general" : "espec[ií]fica";
   const antes = new RegExp(
     `(?:experiencia\\s+${palabra})[^.\\n]{0,55}?(\\d{1,2})\\s*a[nñ]os?`,
-    "i",
+    "i"
   );
   const despues = new RegExp(
     `(\\d{1,2})\\s*a[nñ]os?[^.\\n]{0,40}?(?:de\\s+)?experiencia\\s+${palabra}`,
-    "i",
+    "i"
   );
   const m = linea.match(antes) ?? linea.match(despues);
   return m ? Number(m[1]) : null;
