@@ -73,7 +73,16 @@ Solapes que exigen coordinación (no se resuelven unilateralmente):
 Fuera de límite para este trabajo (según brief §19): extractor de requisitos
 profesionales, CV, perfiles personales, candidatos, colocación.
 
-## 4. Decisiones pendientes (bloquean el paso a código)
+## 4. Decisiones D1–D15 — APROBADAS el 2026-11-09
+
+El usuario aprobó D1–D15 **con la recomendación de cada fila**. Quedan sujetas a
+sus condiciones: D3 y D5 se resuelven con el spike CI-02 (go/no-go de B); D10
+exige acuerdo con Talent Intelligence antes de cualquier migración compartida;
+D6 y D7 requieren revisión jurídica antes de monetizar. Avance: CI-01
+(taxonomía y clasificador puros, sin base de datos) en
+`src/lib/tecnologia/`.
+
+(Tabla original de decisiones, con la recomendación aprobada:)
 
 | ID | Decisión | Opciones | Recomendación |
 |---|---|---|---|
