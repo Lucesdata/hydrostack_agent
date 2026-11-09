@@ -4,12 +4,7 @@
   "description": "Registro manual de evidencia; no implica publicación, oferta de empleo ni validación automática del PDF.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "expediente",
-    "documento",
-    "estado",
-    "requisitos"
-  ],
+  "required": ["expediente", "documento", "estado", "requisitos"],
   "properties": {
     "expediente": {
       "type": "string",
@@ -18,12 +13,7 @@
     "documento": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "url",
-        "sha256",
-        "fechaConsulta",
-        "nombreArchivo"
-      ],
+      "required": ["url", "sha256", "fechaConsulta", "nombreArchivo"],
       "properties": {
         "url": {
           "type": "string",
@@ -42,16 +32,10 @@
           "minLength": 1
         },
         "version": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "observaciones": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         }
       }
     },
@@ -92,96 +76,52 @@
             "minimum": 1
           },
           "paginaImpresa": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "minimum": 1
           },
           "seccion": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "fragmento": {
             "type": "string",
             "minLength": 1
           },
           "tipo": {
-            "enum": [
-              "habilitante",
-              "puntuable",
-              "opcional",
-              "ejecucion",
-              "por_determinar"
-            ]
+            "enum": ["habilitante", "puntuable", "opcional", "ejecucion", "por_determinar"]
           },
           "revision": {
-            "enum": [
-              "pendiente",
-              "verificado",
-              "ambiguo",
-              "descartado"
-            ]
+            "enum": ["pendiente", "verificado", "ambiguo", "descartado"]
           },
           "formacion": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "experienciaGeneralAnios": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "minimum": 0
           },
           "experienciaEspecifica": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "dedicacionPorcentaje": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "minimum": 0,
             "maximum": 100
           },
           "cantidad": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "minimum": 1
           },
           "fase": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "motivoRevision": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "verificadoPor": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "fechaRevision": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date"
           }
         }
