@@ -54,7 +54,8 @@ function tipoDeRequisito(linea: string): RequisitoPersonalV0["tipo"] {
   if (/puntaje|puntuaci[oó]n|se valorar[aá]|otorga puntos|factor de evaluaci[oó]n/i.test(linea)) {
     return "puntuable";
   }
-  const exigencia = /deber[aá]|debe contar|se exige|se requiere|m[ií]nimo|obligatori|equipo m[ií]nimo/i;
+  const exigencia =
+    /deber[aá]|debe contar|se exige|se requiere|m[ií]nimo|obligatori|equipo m[ií]nimo/i;
   if (exigencia.test(linea)) {
     return "obligatorio";
   }
