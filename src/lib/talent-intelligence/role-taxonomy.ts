@@ -25,7 +25,8 @@ export type StaffFamily = (typeof STAFF_FAMILIES)[number];
 const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   {
     code: "ENG_HYD",
-    pattern: /ingenier[oa] (?:hidr[aá]ulic[oa]|de recursos h[ií]dricos)|especialista (?:en )?hidr[aá]ulic[oa]/i,
+    pattern:
+      /ingenier[oa] (?:hidr[aá]ulic[oa]|de recursos h[ií]dricos)|especialista (?:en )?hidr[aá]ulic[oa]/i,
   },
   {
     code: "ENG_SAN",
@@ -41,7 +42,8 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   { code: "OPS_PLANT", pattern: /operador(?:a)? de (?:ptap|ptar|planta de tratamiento)/i },
   {
     code: "TECH_INST",
-    pattern: /instrumentista|t[eé]cnic[oa] (?:de|en) (?:instrumentaci[oó]n|automatizaci[oó]n|control)|especialista (?:en )?scada/i,
+    pattern:
+      /instrumentista|t[eé]cnic[oa] (?:de|en) (?:instrumentaci[oó]n|automatizaci[oó]n|control)|especialista (?:en )?scada/i,
   },
   {
     code: "TECH_EM",
@@ -53,15 +55,18 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   },
   {
     code: "MGMT_PROJECT",
-    pattern: /director(?:a)? de proyecto|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
+    pattern:
+      /director(?:a)? de proyecto|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
   },
   {
     code: "ADMIN_PROC",
-    pattern: /profesional (?:de|en) (?:contrataci[oó]n|compras|presupuesto|gesti[oó]n documental)|auxiliar administrativ[oa]/i,
+    pattern:
+      /profesional (?:de|en) (?:contrataci[oó]n|compras|presupuesto|gesti[oó]n documental)|auxiliar administrativ[oa]/i,
   },
   {
     code: "SST",
-    pattern: /(?:profesional|coordinador(?:a)?|especialista) (?:en|de) (?:sst|seguridad y salud en el trabajo)/i,
+    pattern:
+      /(?:profesional|coordinador(?:a)?|especialista) (?:en|de) (?:sst|seguridad y salud en el trabajo)/i,
   },
 ];
 
