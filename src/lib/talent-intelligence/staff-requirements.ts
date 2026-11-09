@@ -9,7 +9,7 @@ export interface RequisitoPersonalV0 {
   experienciaEspecificaAnios: number | null;
   dedicacionPorcentaje: number | null;
   tipo: "obligatorio" | "puntuable" | "opcional" | "por_verificar";
-  evidencia: { fragmento: string; verificada: true };
+  evidencia: { fragmento: string; literalEnEntrada: true; documentoVerificado: false };
   version: "talent-rules-v0";
 }
 
@@ -67,7 +67,7 @@ export function extraerRequisitosPersonalDeTexto(texto: string): RequisitoPerson
       experienciaEspecificaAnios: extraerAnios(fragmento, "especifica"),
       dedicacionPorcentaje: extraerDedicacion(fragmento),
       tipo: tipoDeRequisito(fragmento),
-      evidencia: { fragmento, verificada: true },
+      evidencia: { fragmento, literalEnEntrada: true, documentoVerificado: false },
       version: "talent-rules-v0",
     });
   }
