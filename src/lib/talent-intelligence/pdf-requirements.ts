@@ -21,7 +21,7 @@ export function dividirTextoPdfEnPaginas(texto: string): PaginaDeDocumento[] {
   const fragmentos = texto.split("\f");
   // pdftotext termina normalmente con un delimitador `\f`, sin página adicional.
   if (fragmentos[fragmentos.length - 1] === "") fragmentos.pop();
-  if (fragmentos.length === 0 || fragmentos.length > 1000) {
+  if (fragmentos.length === 0 || fragmentos.length > 1000 || fragmentos.every((p) => !p.trim())) {
     throw new Error("Número de páginas PDF fuera de rango");
   }
 
