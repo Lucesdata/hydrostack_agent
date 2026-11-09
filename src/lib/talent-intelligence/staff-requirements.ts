@@ -20,9 +20,9 @@ export interface RequisitoPersonalV0 {
 const NEGACION =
   /\b(?:no se (?:requiere|exige|solicita)|sin necesidad de|no (?:es|ser[aá]) obligatorio|se excluye)\b/i;
 const PERSONAL =
-  /(?:ingenier[oa]|especialista|profesional|t[eé]cnic[oa]|operador(?:a)?|dibujante|delineante|modelador|interventor|supervisor|residente|director|gerente|auxiliar|instrumentista|coordinador)/i;
+  /(?:ingenier[oa]|especialista|profesional|t[eé]cnic[oa]|operador(?:a)?|dibujante|delineante|modelador|interventor|supervisor|residente|director|gerente|auxiliar|instrumentista|coordinador|top[oó]graf[oa]|trabajador(?:a)? social)/i;
 const REQUISITO =
-  /(?:personal|equipo|perfil|cargo|profesional|ingenier|especialista|t[eé]cnic|operador|dibujante|interventor|residente|director|coordinador|requerid|exigid|mínim|m[ií]nim)/i;
+  /(?:personal|equipo|perfil|cargo|profesional|ingenier|especialista|t[eé]cnic|operador|dibujante|interventor|residente|director|coordinador|top[oó]graf[oa]|requerid|exigid|mínim|m[ií]nim)/i;
 const DATO_PERSONAL =
   /\b(?:c[eé]dula|documento de identidad|pasaporte|tel[eé]fono|correo electr[oó]nico)\b|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i;
 
