@@ -33,24 +33,12 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   },
   { code: "ENG_ENV", pattern: /ingenier[oa] ambiental|especialista ambiental/i },
   { code: "ENG_CIV", pattern: /ingenier[oa] civil/i },
-  {
-    code: "ENG_ELEC",
-    pattern: /ingenier[oa] electricista|ingenier[oa] el[eé]ctric[oa]/i,
-  },
+  { code: "ENG_ELEC", pattern: /ingenier[oa] electricista|ingenier[oa] el[eé]ctric[oa]/i },
   { code: "ENG_MECH", pattern: /ingenier[oa] mec[aá]nic[oa]/i },
-  {
-    code: "DES_CAD",
-    pattern: /dibujante|delineante|proyectista|autocad|civil\s*3d/i,
-  },
+  { code: "DES_CAD", pattern: /dibujante|delineante|proyectista|autocad|civil\s*3d/i },
   { code: "DES_BIM", pattern: /modelador(?:a)? bim|coordinador(?:a)? bim|revit/i },
-  {
-    code: "GIS",
-    pattern: /especialista (?:en )?(?:sig|gis|geoinformaci[oó]n)|analista sig/i,
-  },
-  {
-    code: "OPS_PLANT",
-    pattern: /operador(?:a)? de (?:ptap|ptar|planta de tratamiento)/i,
-  },
+  { code: "GIS", pattern: /especialista (?:en )?(?:sig|gis|geoinformaci[oó]n)|analista sig/i },
+  { code: "OPS_PLANT", pattern: /operador(?:a)? de (?:ptap|ptar|planta de tratamiento)/i },
   {
     code: "TECH_INST",
     pattern: /instrumentista|t[eé]cnic[oa] (?:de|en) (?:instrumentaci[oó]n|automatizaci[oó]n|control)|especialista (?:en )?scada/i,
