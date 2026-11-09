@@ -23,7 +23,7 @@
 
 import type { TipoProyecto } from "@/src/lib/classify/tipo-proyecto";
 
-export const TAXONOMIA_VERSION = "1.0.0-borrador";
+export const TAXONOMIA_VERSION = "1.1.0-borrador";
 
 export type Naturaleza = "bien" | "servicio" | "mixto";
 
@@ -40,6 +40,12 @@ export interface NodoTecnologia {
   /** Términos de búsqueda sin tildes, en minúsculas. */
   es: readonly string[];
   en: readonly string[];
+  /**
+   * Frases que, si aparecen justo después del término y en la misma cláusula,
+   * lo anulan por contexto (p. ej. «sistema de filtración DE AIRE» no es
+   * filtración de agua). Sin tildes y en minúsculas.
+   */
+  contextoExcluyente?: readonly string[];
 }
 
 const TODOS: readonly TipoProyecto[] = ["acueducto", "alcantarillado", "ptap", "ptar", "otros"];
@@ -60,8 +66,10 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "sistema de bombeo",
       "electrobomba",
       "electrobombas",
+      "motobomba",
+      "moto bomba",
     ],
-    en: ["pumping station", "pumping system", "pumping equipment"],
+    en: ["pumping station", "pumping system", "pumping equipment", "motor pump"],
   },
   {
     codigo: "BOM.SUM",
@@ -70,7 +78,12 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
     nombre_en: "Submersible pumps",
     naturaleza: "bien",
     tipos: ["alcantarillado", "ptar", "acueducto"],
-    es: ["bomba sumergible", "bombas sumergibles", "motobomba sumergible"],
+    es: [
+      "bomba sumergible",
+      "bombas sumergibles",
+      "motobomba sumergible",
+      "motobombas sumergibles",
+    ],
     en: ["submersible pump", "submersible pumps"],
   },
   {
@@ -175,6 +188,7 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "lecho filtrante",
       "filtro prensa",
     ],
+    contextoExcluyente: ["de aire", "of air", "aire acondicionado", "hvac"],
     en: [
       "sand filter",
       "activated carbon filter",
@@ -233,6 +247,8 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "desinfeccion con cloro",
       "desinfeccion uv",
       "radiacion ultravioleta",
+      "insumos quimicos",
+      "reactivos quimicos",
     ],
     en: [
       "aluminium sulfate",
@@ -243,6 +259,8 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "flocculant",
       "uv disinfection",
       "chlorine dioxide",
+      "chemical inputs",
+      "treatment chemicals",
     ],
   },
   // ── 7. Tratamiento biológico ───────────────────────────────────────────────
@@ -263,6 +281,9 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "biodigestor",
       "sistema anaerobio",
       "reactor biologico",
+      "tanque septico",
+      "pozo septico",
+      "sistemas individuales de tratamiento",
     ],
     en: [
       "activated sludge",
@@ -272,6 +293,8 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "aerated lagoon",
       "digester",
       "anaerobic reactor",
+      "septic tank",
+      "individual treatment systems",
     ],
   },
   // ── 8. Instrumentación ─────────────────────────────────────────────────────
@@ -297,6 +320,10 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "turbidimetro",
       "analizador de cloro",
       "medidor de ph",
+      "equipos de medicion",
+      "equipo de medicion",
+      "medicion de caudal",
+      "medicion de caudales",
       "analizador de calidad de agua",
       "medidores de agua",
       "medidores de caudal",
@@ -313,6 +340,8 @@ export const NODOS_TECNOLOGIA: readonly NodoTecnologia[] = [
       "water quality analyzer",
       "water meter",
       "water meters",
+      "measuring equipment",
+      "flow measurement",
     ],
   },
   // ── 9. Automatización industrial ───────────────────────────────────────────

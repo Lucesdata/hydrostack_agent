@@ -30,7 +30,7 @@ import {
   type NodoTecnologia,
 } from "./taxonomia-v1";
 
-export const CLASIFICADOR_TECNOLOGIA_VERSION = "1.0.0-borrador";
+export const CLASIFICADOR_TECNOLOGIA_VERSION = "1.1.0-borrador";
 
 export interface CandidatoTecnologia {
   codigo: string;
@@ -53,7 +53,13 @@ export interface TerminoDescartado {
   codigo: string;
   termino: string;
   cita: string;
-  motivo: "negado";
+  /**
+   * `negado`: lo precede un negador. `contexto`: una frase excluyente del nodo
+   * lo sigue. `destino`: un servicio nombrado solo como destino de un suministro
+   * («suministro de herramientas PARA el mantenimiento de la planta»).
+   */
+  motivo: "negado" | "contexto" | "destino";
+  /** Negador, frase excluyente o «suministro … para», según el motivo. */
   negador: string;
 }
 
@@ -119,6 +125,43 @@ function negadorPrevio(t: string, inicio: number): string | null {
   return null;
 }
 
+/** Texto de la cláusula que contiene `pos`, hasta los separadores. */
+function clausulaDe(t: string, pos: number): { ini: number; fin: number } {
+  let ini = pos;
+  while (ini > 0 && !SEPARADORES_CLAUSULA.test(t[ini - 1])) ini--;
+  let fin = pos;
+  while (fin < t.length && !SEPARADORES_CLAUSULA.test(t[fin])) fin++;
+  return { ini, fin };
+}
+
+/** Frase excluyente del nodo dentro de los 40 caracteres siguientes, misma cláusula. */
+function contextoExcluyente(t: string, fin: number, nodo: NodoTecnologia): string | null {
+  if (!nodo.contextoExcluyente?.length) return null;
+  const { fin: finClausula } = clausulaDe(t, fin);
+  const cola = t.slice(fin, Math.min(finClausula, fin + 40));
+  for (const frase of nodo.contextoExcluyente) {
+    const i = cola.indexOf(frase);
+    if (i === -1) continue;
+    const antes = i === 0 || !ES_LETRA.test(cola[i - 1]);
+    const despIdx = i + frase.length;
+    const despues = despIdx >= cola.length || !ES_LETRA.test(cola[despIdx]);
+    if (antes && despues) return frase;
+  }
+  return null;
+}
+
+const SUMINISTRO_PARA = /\bsuministro\b[^.;:,()]*\bpara\b[^.;:,()]*$/;
+
+/**
+ * Un servicio que solo es el destino de un suministro no es lo contratado:
+ * «suministro de herramientas manuales para el mantenimiento de la planta».
+ */
+function esDestinoDeSuministro(t: string, inicio: number, nodo: NodoTecnologia): boolean {
+  if (nodo.naturaleza !== "servicio") return false;
+  const { ini } = clausulaDe(t, inicio);
+  return SUMINISTRO_PARA.test(t.slice(ini, inicio));
+}
+
 interface Terminos {
   nodo: NodoTecnologia;
   termino: string;
@@ -159,6 +202,27 @@ export function clasificarTecnologia(texto: string | null | undefined): Resultad
           cita: texto.slice(inicio, fin),
           motivo: "negado",
           negador,
+        });
+        continue;
+      }
+      const frase = contextoExcluyente(t, fin, nodo);
+      if (frase) {
+        descartados.push({
+          codigo: nodo.codigo,
+          termino,
+          cita: texto.slice(inicio, fin),
+          motivo: "contexto",
+          negador: frase,
+        });
+        continue;
+      }
+      if (esDestinoDeSuministro(t, inicio, nodo)) {
+        descartados.push({
+          codigo: nodo.codigo,
+          termino,
+          cita: texto.slice(inicio, fin),
+          motivo: "destino",
+          negador: "suministro … para",
         });
         continue;
       }

@@ -161,3 +161,48 @@ describe("clasificarTecnologia", () => {
     expect(Object.keys(c).some((k) => /precio|valor|fecha|cantidad/i.test(k))).toBe(false);
   });
 });
+
+describe("CI-01b: lagunas y falsos positivos de contexto del spike CI-02", () => {
+  it("reconoce los bienes que el v1 no veía", () => {
+    expect(
+      codigos("Mantenimiento de trampas grasas, tanques de almacenamiento, MOTO BOMBAS y bebederos")
+    ).toContain("BOM");
+    expect(codigos("Adquisición de equipos de medición para el laboratorio ambiental")).toContain(
+      "INS"
+    );
+    expect(
+      codigos("Optimizar el recurso con la medición de caudales en los acueductos rurales")
+    ).toContain("INS");
+    expect(
+      codigos("Instalación de sistemas prefabricados tipo tanque séptico en zona rural")
+    ).toContain("BIO");
+    expect(codigos("Suministro de insumos químicos para la planta")).toContain("QUI");
+    expect(codigos("Suministro de motobombas sumergibles")).toEqual(["BOM.SUM"]);
+  });
+
+  it("el sistema de filtración de AIRE no es filtración de agua", () => {
+    const r = clasificarTecnologia(
+      "Suministro e instalación de un sistema de filtración de aire del laboratorio"
+    );
+    expect(r.candidatos.map((c) => c.codigo)).not.toContain("FIL");
+    expect(r.descartados).toEqual([
+      expect.objectContaining({ codigo: "FIL", motivo: "contexto", negador: "de aire" }),
+    ]);
+    expect(codigos("Instalación de un sistema de filtración de agua cruda")).toContain("FIL");
+  });
+
+  it("un servicio que es solo el destino de un suministro no se infiere", () => {
+    const r = clasificarTecnologia(
+      "Suministro de herramientas manuales para el mantenimiento de la planta de tratamiento"
+    );
+    expect(r.candidatos.map((c) => c.codigo)).not.toContain("OYM");
+    expect(r.descartados).toEqual([expect.objectContaining({ codigo: "OYM", motivo: "destino" })]);
+  });
+
+  it("pero el servicio contratado como tal sí se infiere, y los repuestos también", () => {
+    expect(codigos("Contratar el mantenimiento preventivo de la planta de tratamiento")).toContain(
+      "OYM"
+    );
+    expect(codigos("Suministro de repuestos para agitadores de lodos")).toEqual(["OYM", "ELM"]);
+  });
+});

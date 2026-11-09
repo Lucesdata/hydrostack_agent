@@ -46,3 +46,14 @@ Consecuencia para el MVP (PRD §13): A y C siguen íntegros; B arranca como «De
 
 ## Siguiente paso propuesto
 CI-01b: ampliar el borrador del v1 con las lagunas del hallazgo 4 y los dos casos de contexto del hallazgo 3, con tests; luego el etiquetado con dos revisores.
+
+## Adenda CI-01b (2026-11-09) — correcciones del borrador
+
+Taxonomía y clasificador pasan a `1.1.0-borrador` (aún sin congelar).
+- **Lagunas cubiertas:** «equipos de medición», «medición de caudal(es)», «motobomba(s)» y «moto bomba», «tanque/pozo séptico», «sistemas individuales de tratamiento», «insumos/reactivos químicos». «Reactivos y químicos» sueltos **no** se añadieron (demasiado genéricos: reactivos clínicos).
+- **Contexto excluyente por nodo** (`contextoExcluyente`): «sistema de filtración **de aire**» ya no activa Filtración.
+- **Destino de un suministro:** un servicio que solo es el destino («suministro de herramientas **para** el mantenimiento de la planta») se descarta con motivo `destino`; el suministro de repuestos sigue infiriéndose.
+- Los descartes quedan auditables: `motivo` ∈ `negado | contexto | destino`.
+- **Re-medición M1 (n = 500):** candidatos 76 → 74 (14,8 %); bien/mixto sin cambio (2,2 %); los dos falsos positivos del hallazgo 3 desaparecen; Instrumentación 2 → 3. La cobertura de bienes **no sube**: confirma que el techo es el texto, no el diccionario.
+- **Caso abierto:** «mantenimiento de un sistema de bombeo» se infiere como Bombeo (nodo de *bien*) aunque lo contratado es un servicio sobre un equipo. Se deja visible; resolverlo exige distinguir «servicio sobre equipo» de «suministro de equipo» y se difiere al etiquetado con dos revisores.
+- 4 pruebas nuevas (25 en total del módulo); suite completa en verde.
