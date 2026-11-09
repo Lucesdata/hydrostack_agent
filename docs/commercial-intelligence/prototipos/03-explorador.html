@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Explorador de oportunidades · Prototipo CI</title>
+<link rel="stylesheet" href="prototipos.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
+<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html">Panel</a><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html" aria-current="page">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
+<main id="main">
+
+<h1>Explorador de oportunidades</h1>
+<p class="lead">Procesos y contratos en una sola lista, con la <strong>etapa</strong> siempre visible y un filtro por <strong>tecnología</strong> además del tipo de proyecto.</p>
+<div class="grid side">
+  <aside>
+    <details class="card" open><summary>Filtros</summary>
+      <label for="q">Buscar</label><input id="q" type="text" placeholder="objeto, entidad, municipio">
+      <label for="e">Etapa</label><select id="e"><option>Todas</option><option>Convocatoria (recibe ofertas)</option><option>Adjudicación</option><option>Ejecución</option><option>Cierre / histórico</option></select>
+      <label for="tp">Tipo de proyecto</label><select id="tp"><option>Todos</option><option>Acueducto</option><option>Alcantarillado</option><option>PTAP</option><option>PTAR</option><option>Otros</option></select>
+      <label for="tc">Tecnología (clasificación AquaLicita)</label><select id="tc"><option>Todas</option><option>Bombeo y equipos hidráulicos</option><option>Instrumentación</option><option>Tuberías y redes</option></select>
+      <label for="dp">Departamento</label><select id="dp"><option>Todos</option><option>Valle del Cauca</option></select>
+      <p><a class="btn" href="#">Aplicar</a></p>
+    </details>
+    <p class="note small" style="margin-top:10px"><strong>Móvil:</strong> los filtros se pliegan en una hoja inferior; la lista ocupa todo el ancho.</p>
+  </aside>
+  <section aria-label="Resultados">
+    <p class="small muted">3 resultados de ejemplo · ordenados por relevancia para tu perfil</p>
+    <article class="card" style="margin-bottom:10px">
+      <div class="row"><span class="chip info" data-g="▷">Convocatoria · recibe ofertas</span> <span class="chip neutral" data-g="">PTAR</span><span class="chip neutral" data-g="">Bombeo (AquaLicita)</span></div>
+      <h3 style="margin-top:8px">Estudios y diseños de estación de bombeo de aguas residuales</h3>
+      <p class="small muted">Entidad Ficticia de Acueducto · Antioquia · Presupuesto $480.000.000 (publicado por la entidad)</p>
+      <div class="row small"><span>Cierre de ofertas: <strong>12 días</strong></span><a href="#">Ver ficha</a><a href="#">Guardar</a></div>
+    </article>
+    <article class="card" style="margin-bottom:10px">
+      <div class="row"><span class="chip ok" data-g="▶">En ejecución</span> <span class="chip neutral" data-g="">Alcantarillado</span></div>
+      <h3 style="margin-top:8px">Reposición de redes de alcantarillado — Contratista: Consorcio Ficticio 1 (NIT 900.000.001)</h3>
+      <p class="small muted">Municipio de Ejemplo · Valle del Cauca · Firmado 14 mar 2026 · Fin previsto 30 sep 2026</p>
+      <p class="small">Estado administrativo según SECOP; <strong>no indica avance físico</strong>.</p>
+      <div class="row small"><a href="05-ficha-contrato.html">Ver ficha comercial</a><a href="#">Seguir</a></div>
+    </article>
+    <article class="card dim">
+      <div class="row"><span class="chip neutral" data-g="■">Cierre / histórico</span></div>
+      <h3 style="margin-top:8px">Mantenimiento de planta de tratamiento — Contrato terminado</h3>
+      <p class="small muted">Histórico · se muestra para análisis de mercado, no como oportunidad.</p>
+    </article>
+  </section>
+</div>
+
+</main>
+</body>
+</html>

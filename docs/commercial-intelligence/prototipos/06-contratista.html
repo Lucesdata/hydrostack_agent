@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perfil de contratista · Prototipo CI</title>
+<link rel="stylesheet" href="prototipos.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
+<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html">Panel</a><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html" aria-current="page">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
+<main id="main">
+
+<h1>Consorcio Ficticio 1</h1>
+<p class="muted small" style="margin:0">NIT 900.000.001-0 (ficticio) · Estructura plural (consorcio) · Datos públicos de SECOP</p>
+
+<div class="grid g3" style="margin-top:12px">
+  <div class="card"><h3>14 contratos</h3><p class="small muted">Adjudicados desde 2024 (oficial SECOP).</p></div>
+  <div class="card"><h3>6 entidades</h3><p class="small muted">Contratantes distintas.</p></div>
+  <div class="card"><h3>3 en ejecución</h3><p class="small muted">Estado administrativo, no avance físico.</p></div>
+</div>
+
+<h2>Contratos recientes</h2>
+<div class="tablewrap"><table><thead><tr><th>Contrato</th><th>Entidad</th><th>Etapa</th><th>Cambios</th></tr></thead><tbody>
+<tr><td><a href="05-ficha-contrato.html">Reposición de redes…</a></td><td>Municipio de Ejemplo</td><td><span class="chip ok" data-g="▶">En ejecución</span></td><td>1 prórroga</td></tr>
+<tr><td>Optimización de PTAR…</td><td>Entidad Ficticia B</td><td><span class="chip ok" data-g="▶">En ejecución</span></td><td>—</td></tr>
+<tr><td>Estudios y diseños…</td><td>Entidad Ficticia C</td><td><span class="chip neutral" data-g="■">Cerrado</span></td><td>—</td></tr>
+</tbody></table></div>
+
+<h2>Actividades y tecnologías <span class="small muted">(clasificación AquaLicita, no oficial)</span></h2>
+<div class="row"><span class="chip neutral" data-g="">Obra de redes</span><span class="chip neutral" data-g="">Bombeo (inferida)</span><span class="chip neutral" data-g="">Tuberías (inferida)</span></div>
+
+<h2>Integrantes del consorcio</h2>
+<p class="note">Sin fuente oficial verificada. Si el representante autorizado los declara, se mostrarán rotulados <strong>«declarado»</strong>, nunca como oficiales.</p>
+
+<h2>¿Eres el representante de este contratista?</h2>
+<div class="card hl">
+<ol class="steps">
+<li><strong>Solicita la representación</strong> con tu cuenta y un correo del dominio de la empresa.</li>
+<li><strong>AquaLicita verifica</strong> NIT, documento de representación y correo (revisión manual).</li>
+<li><strong>Administras</strong>: confirmas, abres o descartas las necesidades de suministro de tus contratos.</li>
+</ol>
+<p class="small muted">Puedes <strong>revocar</strong> la representación en cualquier momento; AquaLicita también puede hacerlo si hay evidencia contraria. Todo queda auditado. Estados posibles: <span class="chip warn" data-g="◌">Solicitada</span> <span class="chip ok" data-g="✓">Verificada</span> <span class="chip bad" data-g="✕">Revocada</span></p>
+<a class="btn" href="#">Solicitar representación</a>
+</div>
+<p class="small muted" style="margin-top:10px">Solo contratistas con <strong>NIT</strong>. Las personas naturales no tienen perfil comercial público.</p>
+
+</main>
+</body>
+</html>

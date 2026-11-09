@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perfil de empresa · Prototipo CI</title>
+<link rel="stylesheet" href="prototipos.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
+<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html">Panel</a><a href="02-perfil.html" aria-current="page">Perfil de empresa</a><a href="03-explorador.html">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
+<main id="main">
+
+<h1>Perfil de empresa <span class="muted small">/ Company profile</span></h1>
+<p class="lead">Cada dato lleva un estado de procedencia: <strong>declarado</strong> (lo dices tú), <strong>documentado</strong> (hay un documento) o <strong>verificado</strong> (AquaLicita lo comprobó). Lo que escribes aquí nace «declarado».</p>
+<div class="note warn"><strong>No subas listas de precios.</strong> El perfil describe capacidades, no tarifas. Los campos con precios se rechazan.</div>
+
+<form onsubmit="return false">
+<fieldset><legend>Identidad / Identity</legend>
+  <label for="rs">Razón social / Legal name</label><input id="rs" type="text" value="Acme Pumps GmbH">
+  <div class="row"><label for="pais" style="margin-right:8px">País / Country</label><select id="pais" style="max-width:240px"><option>DE · Alemania</option></select></div>
+  <label for="reg">Registro empresarial / Company registry no.</label><input id="reg" type="text" value="HRB 000000 (ficticio)">
+  <label for="web">Sitio oficial / Official website</label><input id="web" type="url" value="https://acme.example">
+  <p class="small muted">Si cambias razón social, país o registro de una empresa <strong>verificada</strong>, vuelve a revisión.</p>
+</fieldset>
+
+<fieldset><legend>Roles / Roles <span class="small muted">(puedes tener varios)</span></legend>
+  <div class="opts">
+    <label><input type="checkbox" checked> Fabricante internacional</label><label><input type="checkbox"> Fabricante colombiano</label>
+    <label><input type="checkbox"> Distribuidor autorizado</label><label><input type="checkbox"> Representante comercial</label>
+    <label><input type="checkbox"> Importador</label><label><input type="checkbox"> Integrador tecnológico</label>
+    <label><input type="checkbox"> Empresa de ingeniería</label><label><input type="checkbox"> Empresa constructora</label>
+    <label><input type="checkbox"> Servicios especializados</label><label><input type="checkbox"> Consultora</label>
+    <label><input type="checkbox"> Instalación y mantenimiento</label><label><input type="checkbox"> Operador de infraestructura</label>
+  </div>
+</fieldset>
+
+<fieldset><legend>Capacidades técnicas / Technical capabilities</legend>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Categoría</th><th>Marcas</th><th>Estado del dato</th></tr></thead>
+    <tbody>
+      <tr><td>Bombeo · Bombas sumergibles</td><td>Acme</td><td><span class="chip neutral" data-g="○">Declarado</span></td></tr>
+      <tr><td>Bombeo · Bombas dosificadoras</td><td>Acme</td><td><span class="chip info" data-g="◆">Documentado</span> <span class="small muted">ficha técnica subida</span></td></tr>
+      <tr><td>Instrumentación</td><td>—</td><td><span class="chip neutral" data-g="○">Declarado</span></td></tr>
+    </tbody></table></div>
+  <p><a class="btn ghost" href="#">+ Añadir capacidad</a> <span class="small muted">Categorías de la taxonomía tecnológica v1 (18 raíces, ES/EN).</span></p>
+</fieldset>
+
+<fieldset><legend>Cobertura territorial en Colombia</legend>
+  <div class="opts"><label><input type="checkbox"> Todo el país</label></div>
+  <p class="small muted" style="margin:.2rem 0">Sin cobertura declarada, el matching no puede filtrar por territorio.</p>
+  <div class="opts"><label><input type="checkbox" checked> Valle del Cauca (76)</label><label><input type="checkbox" checked> Cauca (19)</label><label><input type="checkbox"> Antioquia (05)</label></div>
+</fieldset>
+
+<fieldset><legend>Condiciones comerciales conocidas / Known commercial terms</legend>
+  <div class="grid g2">
+    <div><label for="id">Idiomas</label><input id="id" type="text" value="Español, English, Deutsch"></div>
+    <div><label for="mo">Monedas</label><input id="mo" type="text" value="USD, EUR"></div>
+    <div><label for="ga">Garantías</label><input id="ga" type="text" value="24 meses (declarado)"></div>
+    <div><label for="so">Soporte técnico y repuestos</label><input id="so" type="text" value="Soporte remoto; repuestos en Bogotá vía aliado"></div>
+    <div><label for="op">Operación en Colombia</label><select id="op"><option>Mediante aliado local</option><option>Directa</option></select></div>
+    <div><label for="im">Importación y entrega</label><input id="im" type="text" value="Incoterm negociable; entrega en Buenaventura"></div>
+  </div>
+</fieldset>
+<p><button class="btn" type="submit">Guardar perfil</button></p>
+</form>
+
+<h2>Verificación de la empresa</h2>
+<p class="note">Estado actual: <strong>sin verificar</strong>. La verificación la hace AquaLicita (documentos corporativos y revisión manual); <strong>no</strong> es un sello de cumplimiento legal ni comercial.</p>
+
+</main>
+</body>
+</html>

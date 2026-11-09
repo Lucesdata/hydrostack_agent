@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel empresarial · Prototipo CI</title>
+<link rel="stylesheet" href="prototipos.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
+<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html" aria-current="page">Panel</a><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
+<main id="main">
+
+<h1>Panel empresarial</h1>
+<p class="lead">Punto de entrada de una empresa comercial. Lo primero que ve es qué le falta a su perfil y qué coincidencias nuevas tiene, cada una con su evidencia.</p>
+
+<section class="card hl" aria-labelledby="p1">
+  <div class="row sp"><h2 id="p1" style="margin:0">Tu empresa: Acme Pumps GmbH <span class="muted small">(ficticia)</span></h2><span class="chip neutral" data-g="○">Declarado</span></div>
+  <p class="small muted" style="margin:.4rem 0">Verificación de la empresa: <strong>sin verificar</strong>. Las coincidencias funcionan igual; la verificación aumenta la confianza de los contratistas.</p>
+  <div class="bar-h" role="img" aria-label="Perfil completo al 60 por ciento"><i style="width:60%"></i></div>
+  <p class="small" style="margin:.4rem 0 .8rem">Perfil 60 % · Falta: <strong>cobertura territorial</strong> y <strong>2 capacidades</strong>.</p>
+  <a class="btn" href="02-perfil.html">Completar perfil</a>
+</section>
+
+<h2>Coincidencias nuevas <span class="muted small">(3)</span></h2>
+<div class="grid g3">
+  <article class="card">
+    <div class="row"><span class="chip warn" data-g="◌">Inferida</span> <span class="grade"><b>C</b><span>Evidencia</span></span></div>
+    <h3 style="margin-top:8px">Bombas sumergibles · Contrato de optimización de PTAR</h3>
+    <p class="small muted">Valle del Cauca · En ejecución · fecha fin 30 sep 2026</p>
+    <p class="small"><strong>Afinidad técnica: alta.</strong> Demanda: <em>sin confirmar</em>.</p>
+    <a href="05-ficha-contrato.html">Ver por qué</a>
+  </article>
+  <article class="card">
+    <div class="row"><span class="chip info" data-g="▷">Convocatoria</span> <span class="grade"><b>A</b><span>Evidencia</span></span></div>
+    <h3 style="margin-top:8px">Convocatoria: estación de bombeo de aguas residuales</h3>
+    <p class="small muted">Antioquia · Recibe ofertas · cierra en 12 días</p>
+    <p class="small"><strong>Afinidad técnica: media.</strong> Proceso abierto (no es una necesidad confirmada).</p>
+    <a href="03-explorador.html">Ver proceso</a>
+  </article>
+  <article class="card">
+    <div class="row"><span class="chip info" data-g="◆">Documentada</span> <span class="grade"><b>A</b><span>Evidencia</span></span></div>
+    <h3 style="margin-top:8px">Caudalímetros electromagnéticos · Reposición de redes</h3>
+    <p class="small muted">Cauca · En ejecución</p>
+    <p class="small"><strong>Afinidad técnica: media.</strong> Evidencia: ítem del pliego con cita verificada.</p>
+    <a href="04-radar-suministros.html">Ver en el radar</a>
+  </article>
+</div>
+<p class="note" style="margin-top:12px">La afinidad <strong>no es una probabilidad de venta ni de adjudicación</strong>. Mide cuánto se parece lo que ofreces a lo que el texto del contrato menciona.</p>
+
+<h2>Tu actividad</h2>
+<div class="grid g3">
+  <div class="card"><h3>12 guardados</h3><p class="small muted">Contratos, necesidades y contratistas que sigues.</p><a href="08-seguimiento.html">Ver seguimiento</a></div>
+  <div class="card"><h3>Alertas comerciales: apagadas</h3><p class="small muted">Requieren tu consentimiento expreso.</p><a href="08-seguimiento.html#consentimiento">Decidir</a></div>
+  <div class="card"><h3>Solicitudes de cotización</h3><p class="small muted">Función futura; hoy no disponible.</p><a href="09-solicitudes-futuras.html">Qué será</a></div>
+</div>
+
+</main>
+</body>
+</html>

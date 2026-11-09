@@ -84,3 +84,7 @@ pega la salida de `npm test`, `npm run build` (preview parado), `npm run lint`,
 3. Cuota actual de la base y Storage (D11).
 4. Que `npm test`/`build`/`lint` estén en verde en `main` (no se ejecutaron aquí).
 5. Aprobación del usuario sobre D1–D15 y acuerdo con TI sobre D10.
+
+## Avance CI-06 (2026-11-09) — prototipos
+
+`docs/commercial-intelligence/prototipos/` (`index.html` + 9 pantallas + `prototipos.css` + `capturas/` en móvil 390 px y escritorio 1280 px). HTML estático con **datos ficticios**, sin tocar rutas, la portada ni el hero; mismos tokens de `app/globals.css`. Verificado en Chromium: sin desbordamiento horizontal a 390 px y a 1280 px; el estado nunca va solo en color (glifo + nombre; rayado para las clasificaciones de AquaLicita); modo oscuro y movimiento reducido respetados. Cada pantalla trae su pregunta de decisión en `index.html`. **Pendiente: aprobación visual del usuario antes de CI-11.** No se probó con lector de pantalla ni se midió el contraste de los chips con las herramientas del repo (los tokens son los medidos de `globals.css`).
