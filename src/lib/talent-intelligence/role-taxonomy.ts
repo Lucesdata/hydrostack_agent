@@ -20,6 +20,10 @@ export const STAFF_FAMILIES = [
   "SST",
   "TOPO",
   "SOCIAL",
+  "GEO",
+  "HYDROLOGY",
+  "FIELD_SURVEY",
+  "FIELD_BUILD",
 ] as const;
 
 export type StaffFamily = (typeof STAFF_FAMILIES)[number];
@@ -54,12 +58,13 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   },
   {
     code: "CONS_SUP",
-    pattern: /interventor(?:a)?|supervisor(?:a)? de obra|residente de interventor[ií]a/i,
+    pattern:
+      /interventor(?:a)?|supervisor(?:a)? de obra|residente de interventor[ií]a|director(?:a)? de interventor[ií]a/i,
   },
   {
     code: "MGMT_PROJECT",
     pattern:
-      /director(?:a)? (?:de|del) proyecto|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
+      /director(?:a)? (?:de|del) proyecto|director(?:a)? de obra|gerente de proyecto|residente de obra|programador(?:a)? de obra/i,
   },
   {
     code: "ADMIN_PROC",
@@ -73,6 +78,10 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
   },
   { code: "TOPO", pattern: /top[oó]graf[oa]|topograf[ií]a/i },
   { code: "SOCIAL", pattern: /profesional social|trabajador(?:a)? social/i },
+  { code: "GEO", pattern: /especialista en geotecnia|geotecnista/i },
+  { code: "HYDROLOGY", pattern: /especialista en hidrolog[ií]a|hidr[oó]log[oa]/i },
+  { code: "FIELD_SURVEY", pattern: /cadener[oa]/i },
+  { code: "FIELD_BUILD", pattern: /maestr[oa] de obra/i },
 ];
 
 export function clasificarFamiliasPersonal(texto: string): StaffFamily[] {
