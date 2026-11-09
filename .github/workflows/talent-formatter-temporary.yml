@@ -1,0 +1,28 @@
+name: Talent Formatter Temporary
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/talent-formatter-temporary.yml"
+      - "src/lib/talent-intelligence/**"
+      - "src/__tests__/talent-intelligence/**"
+permissions:
+  contents: read
+jobs:
+  formatted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Emit canonical formatting
+        run: |
+          for f in src/lib/talent-intelligence/talent-review.ts src/__tests__/talent-intelligence/talent-review.test.ts src/__tests__/talent-intelligence/pdf-integration.test.ts; do
+            npx prettier --write "$f" >/dev/null
+            echo "FORMAT_BEGIN:$f"
+            base64 -w0 "$f"
+            echo
+            echo "FORMAT_END:$f"
+          done
