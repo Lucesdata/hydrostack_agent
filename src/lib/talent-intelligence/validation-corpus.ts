@@ -26,7 +26,11 @@ export const CORPUS_TALENT_V0 = [
     url: "https://www.findeter.gov.co/system/files/convocatorias/PAF-AASB-I-121-2022/terminos_de_referencia.pdf",
     referencia: "Anexo técnico de personal, tabla página impresa 77",
     validacionVisual: "pendiente",
-    perfilesObservados: ["director de interventoría", "residente de interventoría", "profesional social"],
+    perfilesObservados: [
+      "director de interventoría",
+      "residente de interventoría",
+      "profesional social",
+    ],
   },
   {
     id: "PAF-ATICBF-O-086-2022",
@@ -62,7 +66,11 @@ export const CORPUS_TALENT_V0 = [
     url: "https://www.findeter.gov.co/system/files/convocatorias/PAF-ATF-O-138-2015/PAF-ATF-O-138-2015%40Ep_Obra_Construccion_Etapa_Ii_Alcantarillado_Guachene.pdf",
     referencia: "Tabla de personal mínimo por fase, página impresa 10",
     validacionVisual: "pendiente",
-    perfilesObservados: ["director de proyecto", "especialista hidráulico", "especialista ambiental"],
+    perfilesObservados: [
+      "director de proyecto",
+      "especialista hidráulico",
+      "especialista ambiental",
+    ],
   },
   {
     id: "PAF-DNP-C-004-2021",
@@ -89,7 +97,11 @@ export const CORPUS_TALENT_V0 = [
     url: "https://www.findeter.gov.co/system/files/convocatorias/PAF-ATF-O-042-2016/PAF-ATF-O-042-2016%40Estudios_Previos_Definitivos.pdf",
     referencia: "Tabla personal mínimo fase I, página impresa 30",
     validacionVisual: "pendiente",
-    perfilesObservados: ["director de proyecto", "especialista hidráulico", "especialista en geotecnia"],
+    perfilesObservados: [
+      "director de proyecto",
+      "especialista hidráulico",
+      "especialista en geotecnia",
+    ],
   },
   {
     id: "PAF-ATF-130-2015",
