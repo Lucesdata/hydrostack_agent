@@ -141,3 +141,11 @@ Sin tocar la base viva ni el cron. Rellena `ci_contrato_estado` y `ci_contrato_c
 - **NO incluido, a propósito:** conexión al cron `/api/cron/tick` (decisión de despliegue aparte y las tablas aún no están en la base viva), lectura en la ficha y alertas por cambio (CI-11/CI-12).
 - **Límite conocido:** sin histórico previo, un contrato que ya había cambiado antes de la primera siembra aparece sin cambios; la línea base solo ve lo que cambie de ahora en adelante.
 - **Antes de la primera corrida real:** aplicar `0027`/`0028` (autorización expresa), correr con `--dry-run`, y vigilar el tamaño (base en 337,6 MB el 2026-11-09).
+
+## 13. Diferencia de conteo de migraciones — RESUELTA (2026-11-09)
+
+`drizzle.__drizzle_migrations` en la base viva tiene 25 filas (ids 1–25) cuyos `created_at` coinciden uno a uno con los `when` de las entradas 0–24 del journal. **Faltan las entradas 25 (`0025_indices_proceso_id_ficha`) y 26 (`0026_reparar_sedes_auditoria`)**: se aplicaron a mano (sus efectos existen: los índices de `0025`, la geografía `17001`/`15000` y la sede de Manizales de `0026`) y nunca se registraron.
+
+Consecuencia: un `npm run db:migrate` contra la base viva **volvería a ejecutar `0025` y `0026` antes de `0027`/`0028`**. Es inocuo hoy: `0025` usa `CREATE INDEX IF NOT EXISTS` y `0026` usa `INSERT … ON CONFLICT DO NOTHING` y un `UPDATE` condicionado a que el valor difiera. No se tocó la tabla de migraciones. Además `0025` crea `al_hist_proceso_idx`, cuyo estado en la base viva no verifiqué.
+
+Orden de `when` verificado: `0026` < `0027` < `0028` (monótono), así que el migrador las aplicaría en ese orden.
