@@ -1,0 +1,27 @@
+name: Talent Corpus Format Temporary
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/talent-corpus-format-temp.yml"
+      - "src/lib/talent-intelligence/validation-corpus.ts"
+permissions:
+  contents: read
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Print canonical format
+        run: |
+          f=src/lib/talent-intelligence/validation-corpus.ts
+          npx prettier --write "$f" >/dev/null
+          echo "FORMAT_BEGIN:$f"
+          base64 -w0 "$f"
+          echo
+          echo "FORMAT_END:$f"
