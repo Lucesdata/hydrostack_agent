@@ -78,7 +78,5 @@ const REGLAS: ReadonlyArray<{ code: StaffFamily; pattern: RegExp }> = [
 ];
 
 export function clasificarFamiliasPersonal(texto: string): StaffFamily[] {
-  return REGLAS.filter((regla) => regla.pattern.test(texto)).map(
-    (regla) => regla.code,
-  );
+  return REGLAS.filter((regla) => regla.pattern.test(texto)).map((regla) => regla.code);
 }
