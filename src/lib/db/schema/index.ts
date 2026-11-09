@@ -10,3 +10,4 @@ export * from "./eligibility";
 export * from "./pliego";
 export * from "./diagnostico";
 export * from "./aqualicita";
+export * from "./comercial";

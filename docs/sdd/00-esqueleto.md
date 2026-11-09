@@ -749,8 +749,11 @@ que el backfill esté verificado; después, solo `account_id`.
 
 ### 4.9 Commercial & Supply Intelligence — PROPUESTA (CI-03, 2026-11-09)
 
-> **Estado: propuesto, NO aplicado.** Ninguna de estas tablas existe en el
-> esquema Drizzle ni en la base. Entra a la fase de migración (CI-04) solo con
+> **Estado (2026-11-09): migraciones A y C GENERADAS en el repo (`drizzle/0027_ci_a_perfil_empresa`,
+> `drizzle/0028_ci_c_cambios_contrato`) y probadas en PGlite; NO aplicadas a la base viva.**
+> B, D y E siguen solo propuestas. Esquema: `src/lib/db/schema/comercial.ts`.
+> Antes de esta línea decía: «propuesto, NO aplicado. Ninguna de estas tablas existe en el
+> esquema Drizzle ni en la base». Entra a la fase de migración (CI-04) solo con
 > aprobación expresa y tras cerrar las precondiciones de
 > `docs/superpowers/plans/2026-11-09-ci-03-plan-de-datos.md` §6. Spec funcional:
 > `docs/superpowers/specs/2026-11-09-commercial-intelligence-{prd,datos}.md`.

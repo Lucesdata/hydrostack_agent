@@ -75,7 +75,7 @@ Orden de aplicación real: A → C → D → B → (E). B va después de D porqu
 1. **Aprobación explícita del usuario** para pasar a código (esta es solo documentación).
 2. **D10 acordado con Talent Intelligence**: ver §7. Mientras no lo esté, migración D y B no se generan; A y C pueden ir antes.
 3. **D11:** confirmar plan y cuota de Supabase.
-4. **Estado de migraciones:** el repo tiene 27 (`0000`–`0026`) y `drizzle.__drizzle_migrations` tiene 25 filas; los índices de `0025` sí existen en la base. Verificar que `0026_reparar_sedes_auditoria` esté aplicada y explicar la diferencia de conteo **antes** de generar una migración nueva (misma lección del SDD §10.1: no generar sobre un desfase).
+4. ~~**Estado de migraciones**~~ **(verificado 2026-11-09, ver CI-04)**: el repo tiene 27 (`0000`–`0026`) y `drizzle.__drizzle_migrations` tiene 25 filas; los índices de `0025` sí existen en la base. Verificar que `0026_reparar_sedes_auditoria` esté aplicada y explicar la diferencia de conteo **antes** de generar una migración nueva (misma lección del SDD §10.1: no generar sobre un desfase).
 5. **D13** (idioma) decidido, porque define los textos de `ci_consentimiento` (`version_texto`).
 6. Revisión legal de D6/D7 **antes de monetizar**, no antes de migrar.
 7. Pruebas de los invariantes de §4 escritas **antes** de la migración (rojas), por CONDUCTA §5.
@@ -110,3 +110,12 @@ o de cuenta; no hay datos de SECOP que perder.
 3. `npm run db:generate` → revisar el SQL; añadir a mano triggers y CHECK que Drizzle no genere.
 4. Probar en `npm run local:preparar`; **no** aplicar a la base viva sin autorización.
 5. Verificar RLS (consulta §10.3) y actualizar §10.2 del SDD con el estado real.
+
+## 10. Avance CI-04 (2026-11-09) — migraciones A y C
+
+- **Generadas, no aplicadas a la base viva:** `drizzle/0027_ci_a_perfil_empresa.sql` (7 tablas + función y dos triggers de solo anexado escritos a mano) y `drizzle/0028_ci_c_cambios_contrato.sql` (2 tablas). Solo `CREATE`; cero `ALTER` sobre tablas existentes. `drizzle-kit check` sin objeciones.
+- **Pruebas rojas primero y luego verdes:** `src/__tests__/db/comercial-a-c.db.test.ts`, 16 pruebas sobre PGlite con las migraciones reales: UNIQUE de empresa por cuenta, CHECK de país/estados/rol/DIVIPOLA/tipo de seguimiento/campo de cambio, solo-anexado de `ci_consentimiento` y `ci_auditoria`, cascada al suprimir la cuenta y RLS en todas las tablas. Suite completo en verde (194 archivos, 1.666 pruebas).
+- **Precondición 4 resuelta:** en la base viva los índices de `0025` existen y los efectos de `0026` (`geografia` 17001 y 15000, entidad de Manizales con `geografia_id=17001`) están presentes. La tabla `drizzle.__drizzle_migrations` tiene 25 filas con ids 1–25 frente a 27 archivos; la diferencia de conteo **sigue sin explicarse** (no es evidencia de que falten migraciones, pero hay que entenderla antes de aplicar `0027`).
+- **Decisión de diseño al implementar:** los triggers de solo anexado permiten el `DELETE` en cascada (`pg_trigger_depth() > 1`) para no impedir la supresión de la cuenta (derecho de supresión de datos). Un `DELETE`/`UPDATE` directo se rechaza.
+- **Pendiente para aplicar `0027`/`0028` a la base viva (requiere autorización expresa):** explicar el conteo de migraciones, D11 (plan y cuota), verificación de RLS (§10.3 del SDD) tras aplicar, y plan de carga inicial de `ci_contrato_estado` (~40.000 filas, por lotes y con vigilancia de tamaño como `backfill-tipo-proyecto.ts`). No se aplicó nada.
+- **No incluido, a propósito:** B (evidencia/necesidades/coincidencia), D (`representacion_proveedor`, D10) y E (consorcios, D3).

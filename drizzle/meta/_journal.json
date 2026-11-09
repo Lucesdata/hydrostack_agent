@@ -190,6 +190,20 @@
       "when": 1793714400000,
       "tag": "0026_reparar_sedes_auditoria",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794209714591,
+      "tag": "0027_ci_a_perfil_empresa",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794209733259,
+      "tag": "0028_ci_c_cambios_contrato",
+      "breakpoints": true
     }
   ]
 }
