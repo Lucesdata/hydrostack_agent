@@ -43,5 +43,4 @@ describe("Talent Intelligence: reutilización del extractor PDF existente", () =
     expect(resultados[0].experienciaGeneralAnios).toBeNull();
     expect(resultados[0].dedicacionPorcentaje).toBeNull();
   });
-
 });
