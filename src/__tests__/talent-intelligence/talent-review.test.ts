@@ -40,10 +40,7 @@ describe("Talent Intelligence: salida interna para revisión humana", () => {
         texto: "Se requiere ingeniero civil o ingeniero sanitario con experiencia general 5 años.",
       },
     ];
-    const [vista] = prepararRevisionPersonal(
-      extraerPersonalPorPaginas("doc-03", paginas),
-      paginas
-    );
+    const [vista] = prepararRevisionPersonal(extraerPersonalPorPaginas("doc-03", paginas), paginas);
     expect(vista.motivosRevision).toContain("cargos_multiples");
     expect(vista.experienciaGeneralAnios).toBeNull();
   });
