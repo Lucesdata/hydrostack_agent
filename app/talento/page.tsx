@@ -24,10 +24,9 @@ export default function TalentIntelligence() {
       </p>
       <h1>El equipo profesional detrás de cada proyecto</h1>
       <p>
-        Los pliegos de agua potable, saneamiento y redes pueden exigir
-        ingenieros, especialistas, técnicos y equipos de apoyo. Talent Intelligence
-        está diseñado para identificar esos requisitos, localizar su fuente y
-        facilitar su revisión documental.
+        Los pliegos de agua potable, saneamiento y redes pueden exigir ingenieros, especialistas,
+        técnicos y equipos de apoyo. Talent Intelligence está diseñado para identificar esos
+        requisitos, localizar su fuente y facilitar su revisión documental.
       </p>
       <h2>Información que buscamos estructurar</h2>
       <ul>
@@ -37,10 +36,9 @@ export default function TalentIntelligence() {
       </ul>
       <h2>Estado del servicio</h2>
       <p>
-        La extracción y las pruebas internas están implementadas. La verificación
-        de los documentos originales y la integración de resultados en la Ficha
-        Viva siguen en curso. Esta página no presenta vacantes laborales ni
-        requisitos confirmados para procesos individuales.
+        La extracción y las pruebas internas están implementadas. La verificación de los documentos
+        originales y la integración de resultados en la Ficha Viva siguen en curso. Esta página no
+        presenta vacantes laborales ni requisitos confirmados para procesos individuales.
       </p>
       <p>
         <Link href="/licitaciones">Consultar fichas de procesos →</Link>
