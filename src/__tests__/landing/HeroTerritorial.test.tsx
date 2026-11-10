@@ -75,7 +75,11 @@ describe("HeroTerritorial", () => {
     expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
     // Sin los accesos a secciones ni los tres pasos (2026-11-02).
     expect(html).not.toContain("#ficha-dinero");
-    expect(html).not.toContain("Descubre");
+    expect(html).toContain("Soluciones AquaLicita");
+    expect(html).toContain("Inteligencia Comercial");
+    expect(html).toContain("Talent Intelligence");
+    expect(html).toContain('href="/comercial"');
+    expect(html).toContain('href="/talento"');
     for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}`);
   });
 
