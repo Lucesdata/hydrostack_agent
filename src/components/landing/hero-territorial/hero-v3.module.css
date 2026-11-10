@@ -736,3 +736,17 @@
     min-height: 48px;
   }
 }
+
+
+.servicioDestacado .servicioEnlace {
+  min-height: 67px;
+  border-color: rgba(0, 217, 244, 0.46);
+  background: linear-gradient(130deg, rgba(0, 115, 155, 0.29), rgba(3, 22, 37, 0.67));
+  box-shadow: inset 2px 0 0 var(--aq-cyan);
+}
+.servicioDestacado .servicioNombre {
+  font-size: 14px;
+}
+.servicioDestacado .servicioEnlace:hover {
+  border-color: var(--aq-cyan);
+}
