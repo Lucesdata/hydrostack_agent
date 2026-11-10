@@ -1,13 +1,15 @@
 import Link from "next/link";
 import BuscadorGuiado from "./BuscadorGuiado";
 import styles from "./hero-v3.module.css";
+import { serviciosDelHero } from "@/src/lib/landing/servicios-hero";
 
 /**
  * La columna del mensaje (45 %): eyebrow, titular, frase, dos accesos y los
  * tres pasos. El buscador guiado se conserva: es el único buscador del sitio
  * (CLAUDE.md, «Un solo buscador») y su modal se abre con el botón principal.
  */
-export default function HeroMessage() {
+export default function HeroMessage({ comercialDisponible = false }) {
+  const servicios = serviciosDelHero(comercialDisponible);
   return (
     <div className={styles.mensaje}>
       <p className={styles.eyebrow}>
@@ -44,6 +46,31 @@ export default function HeroMessage() {
           Ver cómo funciona
         </Link>
       </div>
+      <nav className={styles.serviciosHero} aria-label="Servicios de AquaLicita">
+        <p className={styles.serviciosTitulo}>Soluciones AquaLicita</p>
+        <ul className={styles.serviciosLista}>
+          {servicios.map((servicio) => (
+            <li
+              key={servicio.id}
+              className={`${styles.servicioItem} ${servicio.destacado ? styles.servicioDestacado : ""}`}
+            >
+              {servicio.href ? (
+                <Link href={servicio.href} className={styles.servicioEnlace}>
+                  <span className={styles.servicioNombre}>{servicio.titulo}</span>
+                  <span className={styles.servicioDetalle}>
+                    {servicio.detalle} <span aria-hidden="true">↗</span>
+                  </span>
+                </Link>
+              ) : (
+                <span className={styles.servicioInactivo}>
+                  <span className={styles.servicioNombre}>{servicio.titulo}</span>
+                  <span className={styles.servicioDetalle}>{servicio.detalle}</span>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 }

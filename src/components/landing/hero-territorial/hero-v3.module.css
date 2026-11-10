@@ -657,3 +657,95 @@
     flex: 1 1 100%;
   }
 }
+
+/* Accesos compactos al ecosistema: secundarios respecto al mapa y CTA primario. */
+.serviciosHero {
+  width: 100%;
+  max-width: 580px;
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(174, 194, 210, 0.2);
+}
+.serviciosTitulo {
+  margin: 0 0 10px;
+  color: var(--aq-muted);
+  font:
+    600 11px/1.4 var(--font-inter),
+    sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.serviciosLista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.servicioItem {
+  min-width: 0;
+}
+.servicioEnlace,
+.servicioInactivo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 53px;
+  padding: 9px 11px;
+  border: 1px solid rgba(140, 190, 225, 0.2);
+  border-radius: 10px;
+  background: rgba(3, 22, 37, 0.42);
+  text-decoration: none;
+}
+.servicioEnlace:hover {
+  border-color: rgba(0, 217, 244, 0.65);
+  background: rgba(10, 44, 66, 0.75);
+}
+.servicioEnlace:focus-visible {
+  outline: 2px solid var(--aq-cyan);
+  outline-offset: 3px;
+}
+.servicioNombre {
+  color: var(--aq-text);
+  font:
+    600 12.5px/1.3 var(--font-inter),
+    sans-serif;
+}
+.servicioDetalle {
+  margin-top: 3px;
+  color: var(--aq-cyan);
+  font:
+    500 11px/1.3 var(--font-inter),
+    sans-serif;
+}
+.servicioInactivo {
+  border-style: dashed;
+  background: rgba(3, 22, 37, 0.27);
+}
+.servicioInactivo .servicioNombre,
+.servicioInactivo .servicioDetalle {
+  color: var(--aq-muted);
+}
+@media (max-width: 420px) {
+  .serviciosLista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .servicioEnlace,
+  .servicioInactivo {
+    min-height: 48px;
+  }
+}
+
+.servicioDestacado .servicioEnlace {
+  min-height: 67px;
+  border-color: rgba(0, 217, 244, 0.46);
+  background: linear-gradient(130deg, rgba(0, 115, 155, 0.29), rgba(3, 22, 37, 0.67));
+  box-shadow: inset 2px 0 0 var(--aq-cyan);
+}
+.servicioDestacado .servicioNombre {
+  font-size: 14px;
+}
+.servicioDestacado .servicioEnlace:hover {
+  border-color: var(--aq-cyan);
+}

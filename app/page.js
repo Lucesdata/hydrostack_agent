@@ -9,6 +9,7 @@ import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { destacadosPortada } from "@/src/lib/secop/destacados-portada";
 import { procesosDe } from "@/src/lib/landing/destacados-portada";
 import { conteosPorFamilia } from "@/src/lib/secop/conteos-familia";
+import { comercialHabilitado } from "@/src/lib/comercial/habilitado";
 
 /**
  * La portada. Es un componente de SERVIDOR y su contenido vive en
@@ -67,7 +68,7 @@ export default async function Page() {
         // Huecos de servidor: next/image y el marcado fijo no viajan en el JS del
         // navegador (presupuesto de peso de la portada).
         fondo={<HeroBackground />}
-        mensaje={<HeroMessage />}
+        mensaje={<HeroMessage comercialDisponible={comercialHabilitado()} />}
         gemelos={<DigitalTwinsPreview />}
         mapa={
           <>
