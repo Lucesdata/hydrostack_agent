@@ -9,6 +9,7 @@ import {
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { entidad, geografia, proveedor } from "./catalogos";
 import { rawRecord } from "./raw";
 
@@ -82,6 +83,14 @@ export const proceso = pgTable(
     index("proceso_tipo_proyecto_idx").on(t.tipoProyecto),
     /** Competidores comparables de la ficha: geografía + tipo (2026-10-10). */
     index("proceso_geografia_tipo_idx").on(t.geografiaId, t.tipoProyecto),
+    /**
+     * Abiertos por fecha de recepción (2026-11-10). `condicionAbierto()` recorría la tabla
+     * entera (≈3,3 s medido en la base viva) para devolver ~137 filas: el predicado de
+     * estado no es selectivo (72.811 de ~95.000), lo selectivo es `fecha_recepcion >= hoy`.
+     */
+    index("proceso_abiertos_idx")
+      .on(t.fechaRecepcion)
+      .where(sql`${t.deletedAt} IS NULL AND ${t.estadoApertura} = 'Abierto'`),
   ]
 ).enableRLS();
 
@@ -134,6 +143,14 @@ export const contrato = pgTable(
     index("contrato_estado_idx").on(t.estadoActual),
     /** Contratos de una ficha por `proceso_id`: antes recorría toda la tabla (2026-10-10). */
     index("contrato_proceso_idx").on(t.procesoId),
+    /**
+     * Contratos por fecha de firma (2026-11-10): el explorador de contratos en ejecución
+     * (CI-11c) filtra `fecha_firma >= 2026-01-01` (5.902 de 40.418) y hoy recorre la tabla
+     * (≈6,1 s medido en la base viva).
+     */
+    index("contrato_firma_idx")
+      .on(t.fechaFirma)
+      .where(sql`${t.deletedAt} IS NULL`),
   ]
 ).enableRLS();
 

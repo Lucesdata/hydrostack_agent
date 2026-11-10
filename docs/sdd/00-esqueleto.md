@@ -1128,6 +1128,7 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 | `0021_kind_warbird` | `al_sanciones` (DDL cerrado tras V-F-2) | ✅ **Aplicada 2026-09-05** |
 | `0027_ci_a_perfil_empresa` | `ci_empresa`, `ci_empresa_rol`, `ci_empresa_capacidad`, `ci_empresa_cobertura`, `ci_consentimiento`, `ci_seguimiento`, `ci_auditoria` + función y 2 triggers de solo anexado (§4.9) | ✅ **Aplicada 2026-11-09** |
 | `0028_ci_c_cambios_contrato` | `ci_contrato_estado`, `ci_contrato_cambio` (§4.9) | ✅ **Aplicada 2026-11-09** |
+| `0029_indices_abiertos_y_firma` | Índices parciales `proceso_abiertos_idx` y `contrato_firma_idx` (rendimiento del explorador, CI-11c); creados con `CONCURRENTLY` | ✅ **Aplicada 2026-11-10** |
 
 **Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
 repartidas por fase como preveía el plan original. Razón: el esqueleto es la

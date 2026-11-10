@@ -222,7 +222,11 @@ async function ejecucion(
     gte(contrato.fechaFirma, DESDE_CICLO_DE_VIDA),
     sql`coalesce(${contrato.estadoActual}, '') !~* '^(borrador|enviado proveedor|en aprobaci[oó]n)$'`,
     sql`coalesce(${contrato.estadoActual}, '') !~* '(cancel|desiert|revoc)'`,
-    sql`upper(trim(${proveedor.tipoDocumento})) = 'NIT'`,
+    // Igualdad directa y no `upper(trim(...))`: la expresión no tiene estadísticas y el
+    // planificador estimaba 83 proveedores NIT (hay 8.758), eligiendo un bucle anidado de ≈6 s.
+    // Con la columna sola usa `contrato_firma_idx` y tarda ≈90 ms (medido en la base viva el
+    // 2026-11-10). Equivalente porque `tipo_documento` es canónico (0 variantes en 16.506 filas).
+    eq(proveedor.tipoDocumento, "NIT"),
     sql`${contrato.fechaInicio} <= ${HOY_SQL}`,
     sql`(${fin} is null or ${fin} >= ${HOY_SQL})`,
     p.tipo ? inArray(proceso.tipoProyecto, [...tiposDeSistema(p.tipo)]) : undefined,

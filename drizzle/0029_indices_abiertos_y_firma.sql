@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS "contrato_firma_idx" ON "contrato" USING btree ("fecha_firma") WHERE "contrato"."deleted_at" IS NULL;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "proceso_abiertos_idx" ON "proceso" USING btree ("fecha_recepcion") WHERE "proceso"."deleted_at" IS NULL AND "proceso"."estado_apertura" = 'Abierto';

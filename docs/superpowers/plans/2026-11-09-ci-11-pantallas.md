@@ -68,3 +68,27 @@ CREATE INDEX CONCURRENTLY contrato_firma_idx ON contrato (fecha_firma)
   WHERE deleted_at IS NULL;
 ```
 Ambos son parciales y pequeños (137 filas el primero). Beneficiarían también a la vitrina, al hero y a los agregados que hoy recorren `proceso` entero.
+
+### Índices creados en la base viva (2026-11-10, autorizados por el usuario)
+Migración `drizzle/0029_indices_abiertos_y_firma.sql` (con `IF NOT EXISTS`), y el esquema Drizzle (`hechos.ts`) la refleja. En la base viva se crearon **con `CREATE INDEX CONCURRENTLY`** (sin bloquear la ingesta), uno por llamada, y se registró la migración (fila 28 de `drizzle.__drizzle_migrations`, hash del archivo).
+
+| Índice | Tamaño | Válido |
+|---|---|---|
+| `proceso_abiertos_idx` (`fecha_recepcion`, parcial: no borrado y `estado_apertura='Abierto'`) | 552 kB | sí |
+| `contrato_firma_idx` (`fecha_firma`, parcial: no borrado) | 344 kB | sí |
+
+La base pasó de 337,7 a 339,0 MB.
+
+**Antes y después** (mismas consultas, solo lectura, `EXPLAIN ANALYZE`):
+| Consulta | Antes | Después |
+|---|---|---|
+| Abiertos (`condicionAbierto()`) | 3.350 ms · 10.751 bloques | **19,7 ms** · 111 bloques |
+| Abiertos + prefiltro de tecnología | 4.845 ms | **10,7 ms** |
+| Contratos en ejecución, solo con el índice | 6.142 → 4.345 ms (**el planificador no lo usaba**) | — |
+| Contratos en ejecución con `tipo_documento = 'NIT'` | — | **89,6 ms** |
+
+**Lección:** el índice de contratos por sí solo no bastaba. `upper(trim(tipo_documento)) = 'NIT'` no tiene estadísticas: el planificador estimaba 83 proveedores NIT (hay 8.758) y elegía un bucle anidado. El explorador usa ahora la igualdad directa `tipo_documento = 'NIT'`, equivalente porque la columna es canónica (0 variantes en 16.506 filas). La vitrina y `como-se-contrato.ts` siguen con `upper(trim(...))` (fuera de alcance; pueden beneficiarse del mismo cambio).
+
+Con esto el explorador deja de depender de la caché de 10 minutos para ser usable; se conserva como protección. El tope de 8 s queda como red de seguridad.
+
+**Reversión:** `DROP INDEX CONCURRENTLY proceso_abiertos_idx; DROP INDEX CONCURRENTLY contrato_firma_idx;` y borrar la fila 28 del registro de migraciones.

@@ -204,6 +204,13 @@
       "when": 1794209733259,
       "tag": "0028_ci_c_cambios_contrato",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794285559907,
+      "tag": "0029_indices_abiertos_y_firma",
+      "breakpoints": true
     }
   ]
 }
