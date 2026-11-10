@@ -4,10 +4,10 @@ import { db } from "@/src/lib/db/client";
 import { entidad, geografia, proceso } from "@/src/lib/db/schema";
 import { condicionAbierto } from "@/src/lib/secop/agregados";
 import { claseDeEntidad } from "@/src/lib/secop/clase-entidad";
-import { ahoraEnColombia } from "@/src/lib/secop/hoy-colombia";
+import { hoyEnColombia } from "./hoy-colombia";
 
-const inicioMes = sql`date_trunc('month', ${ahoraEnColombia()})::date`;
-const inicioAnterior = sql`(date_trunc('month', ${ahoraEnColombia()}) - interval '1 month')::date`;
+const inicioMes = sql`date_trunc('month', ${hoyEnColombia()})::date`;
+const inicioAnterior = sql`(date_trunc('month', ${hoyEnColombia()}) - interval '1 month')::date`;
 /** Mes cerrado anterior en hora de Colombia (mismo criterio que las fechas SQL de abajo). */
 export function periodoAnterior(ahora: Date = new Date()): {
   anio: number;

@@ -15,12 +15,3 @@ import { sql } from "drizzle-orm";
 export function hoyEnColombia() {
   return sql`(select (now() at time zone 'America/Bogota')::date)`;
 }
-
-/**
- * «Ahora» en hora de Colombia (timestamp sin zona), con la misma regla: un subselect
- * escalar, evaluado una vez por consulta. Para `date_trunc` y comparaciones de mes; para
- * un DATE de «hoy» usar `hoyEnColombia()`.
- */
-export function ahoraEnColombia() {
-  return sql`(select now() at time zone 'America/Bogota')`;
-}
