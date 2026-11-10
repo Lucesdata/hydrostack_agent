@@ -17,6 +17,7 @@ import { entidad, geografia, proceso } from "../db/schema";
 import { condicionAbierto } from "./agregados";
 import { claseDeEntidad, CLASES_ENTIDAD, type ClaseEntidad } from "./clase-entidad";
 import type { EntidadCompradora } from "./compradores";
+import { aliasDeBusqueda } from "./alias-entidades";
 
 export const MIN_CARACTERES_BUSQUEDA = 2;
 export const MAX_RESULTADOS_BUSQUEDA = 20;
@@ -59,7 +60,12 @@ export async function buscarEntidades(
   const porNit = /^\d{6,12}$/.test(soloDigitos)
     ? sql`${entidad.nitCanonico} = ${soloDigitos.slice(0, 9)}`
     : null;
-  const coincide = porNit ? sql`(${and(...porNombre)} or ${porNit})` : and(...porNombre);
+  const alias = aliasDeBusqueda(texto);
+  const porAlias = alias ? sql`${entidad.nitCanonico} = ${alias.nit}` : null;
+  const extras = [porNit, porAlias].filter((x) => x !== null);
+  const coincide = extras.length
+    ? sql`(${and(...porNombre)} or ${sql.join(extras, sql` or `)})`
+    : and(...porNombre);
 
   // Paso 1: las entidades que coinciden (tabla pequeña, sin tocar `proceso`).
   // Unir `proceso` aquí hacía que el planificador recorriera la tabla entera por
@@ -104,7 +110,14 @@ export async function buscarEntidades(
     ...c,
     ...(porEntidad.get(c.id) ?? { n: 0, monto: "0", nConMonto: 0 }),
   }));
-  filas.sort((x, y) => y.n - x.n || (x.nombre ?? "").localeCompare(y.nombre ?? "", "es"));
+  // La entidad del alias va primero: es lo que la persona quiso decir con la sigla.
+  const fijada = (nit: string | null) => (alias && nit === alias.nit ? 0 : 1);
+  filas.sort(
+    (x, y) =>
+      fijada(x.nit) - fijada(y.nit) ||
+      y.n - x.n ||
+      (x.nombre ?? "").localeCompare(y.nombre ?? "", "es")
+  );
 
   return filas
     .map((f) => {
