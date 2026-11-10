@@ -1,0 +1,27 @@
+name: Hero CSS Format Temporary
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/hero-css-format-temp.yml"
+      - "src/components/landing/hero-territorial/hero-v3.module.css"
+permissions:
+  contents: read
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Print canonical CSS formatting
+        run: |
+          f=src/components/landing/hero-territorial/hero-v3.module.css
+          npx prettier --write "$f" >/dev/null
+          echo "FORMAT_BEGIN:$f"
+          base64 -w0 "$f"
+          echo
+          echo "FORMAT_END:$f"
