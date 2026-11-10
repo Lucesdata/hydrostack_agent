@@ -980,7 +980,8 @@ plan por PR y por rebanadas en `docs/superpowers/plans/2026-11-09-*`; esquema en
   apagada (por defecto), cada ruta `/comercial/*` responde 404. Las páginas son
   `noindex` y no hay enlaces desde el resto del sitio. **La portada y el hero no se
   tocan.** Rutas: `/comercial/contratos/[id]` (ficha comercial de contrato),
-  `/comercial/perfil` (privada; en `PROTECTED_PREFIXES`) y `/comercial/explorar`.
+  `/comercial/perfil` (privada: la página comprueba la bandera y luego la sesión; **no** va en
+  `PROTECTED_PREFIXES`, para que apagada responda 404 también al anónimo) y `/comercial/explorar`.
 - **Taxonomía tecnológica** (`src/lib/tecnologia/`): segunda clasificación,
   independiente de `tipo_proyecto` (que conserva sus cinco valores). **Vive en código
   versionado, no en tablas** (D16): las tablas guardan `nodo_codigo` + `taxonomia_version`
