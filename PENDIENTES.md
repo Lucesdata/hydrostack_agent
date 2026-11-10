@@ -16,6 +16,7 @@ viva: las cifras y los estados operativos aquí son fotografías de su fecha.
 | Datos y procedencia | §28–31, §38, §41 | Calidad de clasificación, espacio en Postgres, FK y paridad de drivers |
 | Interfaz y eficiencia | §24–26, §46, §47, §50 | Contraste, estilos heredados, funcionalidades planificadas y consultas sin consumidores |
 | Decisiones de producto | §11, §12, §14, §29–30 | Confirmar alcance y límites antes de implementar |
+| Commercial & Supply Intelligence | §60 | D10 con Talent Intelligence, etiquetado, Resend, revisión legal y encender la bandera |
 
 §19 documenta decisiones ya resueltas sobre acceso y cuota del pliego; la
 ausencia de uso real sigue siendo contexto para priorizar su prueba. §32 es
@@ -1190,3 +1191,50 @@ admite `…/auth/callback?next=…`. Después: pedir recuperación con una cuent
 leer el correo (SPF/DKIM/DMARC y texto), abrir el enlace en el mismo navegador, elegir
 contraseña, entrar con ella; y repetir con un enlace usado y desde otro navegador.
 Sin verificar aún: qué hace Supabase al pedir recuperación con el correo sin confirmar.
+
+### 60. Commercial & Supply Intelligence: lo que queda (2026-11-10)
+Rama `ccr-ea66965f-gl40ez`, sin PR ni despliegue. Resumen de lo hecho en `CLAUDE.md`
+(último bloque) y detalle en `docs/superpowers/plans/2026-11-09-*`.
+
+**Bloqueado por una decisión o una persona (no por código):**
+- **D10 con Talent Intelligence (PR #170):** `representacion_proveedor` debe ser una sola
+  tabla compartida, con un tipo común `EvidenceRef` y sin FK entre `ci_necesidad` y
+  `staff_requirement`. Sin el acuerdo no se generan las migraciones B y D, y esperan 11d
+  (radar de suministros), 11e (perfil de contratista y reclamación) y la persistencia del
+  matching.
+- **Etiquetado con dos revisores** de los 217 contratos del Valle
+  (`scripts/tecnologia-hoja-etiquetado.ts`, guía en `…-ci-02b-guia-etiquetado.md`): sin él no
+  hay cifra de precisión (umbral del PRD ≥ 80 %, hipótesis), no se congela la taxonomía y no se
+  calibran los pesos del matching.
+- **Resend operativo** (§0) para 11f (alertas comerciales con consentimiento propio).
+- **Revisión legal** de datos SECOP / datos.gov.co, libre competencia, anticorrupción y
+  sanciones **antes de monetizar** (D6, D7); confirmar el plan de Supabase (D11).
+- **Encender `CI_COMERCIAL_HABILITADO`** y hacer merge: hoy nada de esto corre en producción.
+- **Decisiones D3 y D5:** fuente oficial de integrantes de consorcio (no hay) y alcance del
+  producto B. Recomendación vigente: «go reducido» (contratos en ejecución + actividad
+  contratada; necesidades solo si el texto nombra un bien).
+
+**Trabajo de código pendiente (cuando se desbloquee):**
+- Pantallas 11d, 11e, 11f, 11g y 11h; el job que empareja empresas y objetivos en lote;
+  alertas; verificación de empresas y de representantes (quién pasa algo a `verificada`);
+  carga de documentos que eleve un dato a `documentado`; límite de tasa contra spam; selector de
+  idioma (D13, inglés mínimo); errores por campo junto al control en `/comercial/perfil`.
+- CI-09 (necesidades documentadas) depende de pliegos subidos por usuarios: hoy 0 filas.
+- Conectar `contratos:base-cambios` al cron `/api/cron/tick` y correrla la primera vez
+  (~40.000 filas, `--dry-run` primero): decisión de despliegue aparte.
+- El explorador no ordena por afinidad con el perfil (necesita el matching persistido).
+
+**Deuda técnica descubierta:**
+- **`upper(trim(tipo_documento)) = 'NIT'`** sigue en la vitrina (`vitrina.ts:178`, el único
+  sitio que queda): sin estadísticas, engaña al planificador (estima 83 NIT, hay 8.758). Cambiarlo por
+  `tipo_documento = 'NIT'` (0 variantes en 16.506 filas) debería acelerar el filtro de etapa de la vitrina; sin medir ni tocar.
+- **`0025` y `0026` sin fila propia** en `drizzle.__drizzle_migrations` (aplicadas a mano);
+  `0025` crea además `al_hist_proceso_idx`, cuyo estado en la base viva no se verificó.
+- **Base lenta en recorridos de tabla** (≈30 MB/s): otros recorridos sobre `proceso` o
+  `contrato` sin índice costarán segundos. Antes de añadir un filtro nuevo, medir con
+  `EXPLAIN ANALYZE` (solo lectura).
+- Los términos de la taxonomía salen del vocabulario del sector, no de una medición; «servicio
+  sobre equipo» (p. ej. «mantenimiento del sistema de bombeo») se infiere como bien (abierto).
+- Documentación vieja corregida el 2026-11-10: `CLAUDE.md` §2 listaba `contrato_evento`;
+  `docs/CONDUCTA.md` §5 sigue diciendo «110 archivos de prueba» (hay ~209).
+

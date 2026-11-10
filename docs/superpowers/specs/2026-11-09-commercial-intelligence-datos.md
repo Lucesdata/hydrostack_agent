@@ -32,28 +32,38 @@ Convenciones del repo: PK uuid, `text` en lugar de enum de Postgres, jsonb para
 atributos no consultados, ids nativos de SECOP como texto cuando se referencian
 desde cuentas.
 
+> **Actualizado el 2026-11-10 (CI-03/D16).** Este diagrama sustituye al borrador original:
+> la taxonomía NO tiene tablas (vive en `src/lib/tecnologia/taxonomia-v1.ts`), los nombres
+> son los de `docs/sdd/00-esqueleto.md` §4.9 (prefijo `ci_`) y las tablas aún **no
+> generadas** (B, D, E) van marcadas. La tabla de abajo, «Tablas (nombres de trabajo)», es
+> el borrador histórico: la fuente de verdad es el SDD §4.9.
+
 ```mermaid
 erDiagram
-  tec_nodo ||--o{ tec_sinonimo : tiene
-  tec_nodo ||--o{ tec_nodo_tipo : aplica
-  tec_nodo ||--o{ empresa_capacidad : ofrece
-  empresa_comercial ||--o{ empresa_capacidad : declara
-  empresa_comercial ||--o{ empresa_cobertura : cubre
-  empresa_comercial ||--o{ empresa_rol : desempena
-  usuario ||--|| empresa_comercial : administra
-  proveedor ||--o{ representacion_proveedor : reclama
+  usuario ||--o| ci_empresa : "administra (una por cuenta)"
+  ci_empresa ||--o{ ci_empresa_rol : desempena
+  ci_empresa ||--o{ ci_empresa_capacidad : declara
+  ci_empresa ||--o{ ci_empresa_cobertura : cubre
+  usuario ||--o{ ci_consentimiento : consiente
+  usuario ||--o{ ci_seguimiento : sigue
+  contrato ||--o| ci_contrato_estado : "linea base"
+  contrato ||--o{ ci_contrato_cambio : cambia
+  proveedor ||--o{ representacion_proveedor : "reclama (D, compartida con TI)"
   usuario ||--o{ representacion_proveedor : solicita
-  proveedor ||--o{ consorcio_integrante : "estructura plural"
-  contrato ||--o{ necesidad_suministro : origina
-  tec_nodo ||--o{ necesidad_suministro : clasifica
-  necesidad_suministro ||--o{ necesidad_evidencia : respalda
-  evidencia ||--o{ necesidad_evidencia : sustenta
-  necesidad_suministro ||--o{ necesidad_estado_hist : registra
-  necesidad_suministro ||--o{ coincidencia_comercial : genera
-  empresa_comercial ||--o{ coincidencia_comercial : recibe
-  empresa_comercial ||--o{ seguimiento_comercial : sigue
-  contrato ||--o{ contrato_cambio : cambia
+  proveedor ||--o{ ci_consorcio_integrante : "estructura plural (E, condicional)"
+  contrato ||--o{ ci_necesidad : "origina (B)"
+  ci_necesidad ||--o{ ci_necesidad_evidencia : "respalda (B)"
+  ci_evidencia ||--o{ ci_necesidad_evidencia : "sustenta (B)"
+  ci_necesidad ||--o{ ci_necesidad_estado_hist : "registra (B)"
+  representacion_proveedor ||--o{ ci_necesidad_estado_hist : "habilita confirmar"
+  ci_empresa ||--o{ ci_coincidencia : "recibe (B)"
+  ci_necesidad ||--o{ ci_coincidencia : "genera (B)"
+  proceso ||--o{ ci_coincidencia : "o proceso abierto (B)"
 ```
+
+Sin FK (por diseño, D16): `ci_empresa_capacidad.nodo_codigo` y `ci_necesidad.nodo_codigo`
+guardan el código de la taxonomía + `taxonomia_version` como texto; el código valida.
+`ci_auditoria` no tiene FK a `usuario` (sobrevive a la cuenta).
 
 ### Tablas (nombres de trabajo)
 

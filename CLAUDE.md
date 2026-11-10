@@ -156,8 +156,10 @@ de inmediato y mantén hasta nueva indicación.
 Entidades y flujos principales:
 
 - **Ingesta (ELT)**: SECOP/Socrata → `raw_record` (append-only) →
-  transform → entidades canónicas (`proceso`, `contrato`,
-  `contrato_evento`, `entidad`, `proveedor`, `geografia`).
+  transform → entidades canónicas (`proceso`, `contrato`, `entidad`,
+  `proveedor`, `geografia`). *(`contrato_evento` se eliminó el 2026-08-16,
+  `drizzle/0011`; sin historial de cambios de contrato hasta `ci_contrato_cambio`,
+  ver «Commercial & Supply Intelligence» al final.)*
 - **Clasificación sectorial**: la pregunta binaria "¿esto es de agua?" la
   responde hoy el filtro de la ingesta (`src/lib/secop/ingest-net.ts`). El
   clasificador versionado que iba a escribir `clasificacion_sectorial`
@@ -371,7 +373,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-11-10 (Commercial & Supply Intelligence, al final); antes, 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -966,3 +968,61 @@ y detención por visibilidad o movimiento reducido. El enlace extendido sigue
 yendo a `/proyectos-adjudicados`; el Radar conserva su imagen. El modelo mantiene
 licencia MIT de Three.js y no entra en el bundle inicial. Plan:
 `docs/superpowers/plans/2026-11-04-adjudicados-agua-viva.md`.
+
+**Commercial & Supply Intelligence (2026-11-09/10, rama `ccr-ea66965f-gl40ez`, sin PR ni
+despliegue).** Capa comercial para empresas (también internacionales) sobre el mismo
+núcleo de datos: oportunidades, suministro post-adjudicación e inteligencia de mercado.
+Documentos: auditoría, PRD, datos y spike en `docs/superpowers/specs/2026-11-09-*`;
+plan por PR y por rebanadas en `docs/superpowers/plans/2026-11-09-*`; esquema en
+`docs/sdd/00-esqueleto.md` §4.9; prototipos aprobados en
+`docs/commercial-intelligence/prototipos/`. Estado y pendientes: `PENDIENTES.md` §60.
+- **Todo detrás de `CI_COMERCIAL_HABILITADO=1`** (`src/lib/comercial/habilitado.ts`):
+  apagada (por defecto), cada ruta `/comercial/*` responde 404. Las páginas son
+  `noindex` y no hay enlaces desde el resto del sitio. **La portada y el hero no se
+  tocan.** Rutas: `/comercial/contratos/[id]` (ficha comercial de contrato),
+  `/comercial/perfil` (privada; en `PROTECTED_PREFIXES`) y `/comercial/explorar`.
+- **Taxonomía tecnológica** (`src/lib/tecnologia/`): segunda clasificación,
+  independiente de `tipo_proyecto` (que conserva sus cinco valores). **Vive en código
+  versionado, no en tablas** (D16): las tablas guardan `nodo_codigo` + `taxonomia_version`
+  como texto. `v1.1.0-borrador`: aún sin congelar ni revisión sectorial. El clasificador
+  es puro, por reglas, sin IA: negaciones («no incluye…»), contexto y «destino de un
+  suministro»; solo produce candidatos `inferida` con evidencia C y cita literal.
+  **Precisión sin medir** (falta el etiquetado de dos revisores, `…-ci-02b-guia-etiquetado.md`).
+  Hallazgo del spike: el `objeto` casi nunca nombra equipos (2–10 % de los contratos).
+- **Documentos de SECOP no descargables desde el servidor** (muro ReCaptcha; 0 procesos con
+  acceso `PUBLIC`) y `pliego_proceso`, `requisitos_proceso` y `documento` siguen a 0 filas:
+  una necesidad de suministro no puede pasar de `inferida` sin un pliego subido por usuario.
+- **Tablas `ci_*`** (migraciones `0027`, `0028`, **aplicadas a la base viva el 2026-11-09**,
+  todas con RLS): `ci_empresa*` (una por cuenta), `ci_consentimiento` y `ci_auditoria`
+  (solo anexado, por trigger; el borrado en cascada al suprimir la cuenta sí se permite),
+  `ci_seguimiento`, `ci_contrato_estado`, `ci_contrato_cambio`. **Sin aplicar y sin
+  generar:** B (`ci_evidencia`, `ci_necesidad*`, `ci_coincidencia`), D
+  (`representacion_proveedor`, **compartida con Talent Intelligence**, D10) y E
+  (`ci_consorcio_integrante`, sin fuente oficial de integrantes). Vocabulario: el código
+  llama `proveedor` al adjudicatario de SECOP; la empresa comercial es `ci_empresa`
+  (nunca extender `oferente_perfil`).
+- **Perfil de empresa** (`src/lib/empresa/`): `servicio.ts` es la única puerta de
+  `ci_empresa*`; el `usuarioId` sale solo de la sesión; lo que escribe el usuario nace
+  `declarado` (`documentado`/`verificado` solo los fija la verificación, y se conservan
+  solo si el dato no cambia); cambiar la identidad de una empresa verificada la devuelve
+  a revisión; sin campos de precio. Capacidad `empresa_perfil` (`gratis`) en `politica.ts`.
+- **Matching comercial** (`src/lib/matching-comercial/`, puro): tres salidas separadas —
+  afinidad técnica 0–100, calidad de evidencia A–D y demanda como etiqueta— y **nunca una
+  «probabilidad»**. Los pesos son hipótesis a calibrar en el piloto. Sin persistir aún.
+- **Cambios de contrato** (`src/lib/contratos/`, `npm run contratos:base-cambios`): línea
+  base acotada y log de los 20 últimos cambios por contrato; un blanco de la fuente no es un
+  cambio; un cambio detectado no es una adenda oficial. **No está conectado al cron** y
+  **no se ha corrido** (tablas vacías).
+- **Reglas que no se rompen:** solo contratistas con NIT; nunca `raw_attrs.representante_legal`
+  ni personas naturales; «estado administrativo según SECOP; no indica avance físico»; lo que
+  no existe dice «sin dato»; el estado nunca va solo en color.
+- **Índices `0029`** (creados en la base viva el 2026-11-10 con `CONCURRENTLY`):
+  `proceso_abiertos_idx` y `contrato_firma_idx`. Antes, `condicionAbierto()` recorría toda
+  la tabla (3,35 s) y los contratos en ejecución 6,1 s; ahora 20 ms y 90 ms. **Lección:**
+  `upper(trim(tipo_documento)) = 'NIT'` no tiene estadísticas y engaña al planificador;
+  `tipo_documento = 'NIT'` es equivalente (columna canónica) y sí usa el índice.
+- **Migraciones `0025` y `0026` se aplicaron a mano y no tienen fila propia** en
+  `drizzle.__drizzle_migrations`; `0027`–`0029` sí (el migrador no las repite).
+- `strict: false` en `tsconfig`: las uniones de resultado del bloque llevan
+  `errores?: undefined`/`valor?: undefined` para que `tsc` acepte leerlas tras comprobar `ok`.
+
