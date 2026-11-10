@@ -47,10 +47,13 @@ export default function HeroMessage({ comercialDisponible = false }) {
         </Link>
       </div>
       <nav className={styles.serviciosHero} aria-label="Servicios de AquaLicita">
-        <p className={styles.serviciosTitulo}>Descubre el ecosistema AquaLicita</p>
+        <p className={styles.serviciosTitulo}>Soluciones AquaLicita</p>
         <ul className={styles.serviciosLista}>
           {servicios.map((servicio) => (
-            <li key={servicio.id} className={styles.servicioItem}>
+            <li
+              key={servicio.id}
+              className={`${styles.servicioItem} ${servicio.destacado ? styles.servicioDestacado : ""}`}
+            >
               {servicio.href ? (
                 <Link href={servicio.href} className={styles.servicioEnlace}>
                   <span className={styles.servicioNombre}>{servicio.titulo}</span>
