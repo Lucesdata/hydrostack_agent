@@ -11,6 +11,7 @@ import {
   esClaseEntidad,
   MIN_CARACTERES_BUSQUEDA,
 } from "@/src/lib/secop/buscar-entidades";
+import { aliasDeBusqueda } from "@/src/lib/secop/alias-entidades";
 
 export const runtime = "nodejs";
 
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
   try {
     const entidades = await buscarEntidades(q, esClaseEntidad(claseParam) ? claseParam : null);
     return NextResponse.json(
-      { entidades },
+      { entidades, nota: aliasDeBusqueda(q)?.nota ?? null },
       { headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600" } }
     );
   } catch (error) {

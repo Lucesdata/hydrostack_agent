@@ -20,6 +20,7 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
     [seleccion, setSeleccion] = useState<string | null>(null),
     [tope, setTope] = useState(12),
     [remotas, setRemotas] = useState<EntidadVista[] | null>(null),
+    [nota, setNota] = useState<string | null>(null),
     [estado, setEstado] = useState<"idle" | "cargando" | "error">("idle");
   const texto = busqueda.trim();
   const buscando = texto.length >= MIN_BUSQUEDA;
@@ -29,6 +30,7 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
   useEffect(() => {
     if (!buscando) {
       setRemotas(null);
+      setNota(null);
       setEstado("idle");
       return;
     }
@@ -39,8 +41,9 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
         const qs = new URLSearchParams({ q: texto, clase: tipo });
         const r = await fetch(`/api/radar/entidades?${qs}`, { signal: ctl.signal });
         if (!r.ok) throw new Error(String(r.status));
-        const j = (await r.json()) as { entidades: EntidadVista[] };
+        const j = (await r.json()) as { entidades: EntidadVista[]; nota?: string | null };
         setRemotas(j.entidades);
+        setNota(j.nota ?? null);
         setEstado("idle");
       } catch (e) {
         if ((e as Error).name !== "AbortError") setEstado("error");
@@ -114,6 +117,11 @@ export default function RadarEntidades({ datos }: { datos: Compradores }) {
                   : `Resultados en todas las entidades de la base (${visibles.length}).`
               : "Ordenadas por cantidad de procesos que reciben ofertas; presupuesto acumulado de esos procesos."}
           </p>
+          {buscando && estado === "idle" && nota ? (
+            <p className="ri-muted" style={{ marginTop: 6 }}>
+              <b>Nota:</b> {nota}
+            </p>
+          ) : null}
           <div className="ri-stack" style={{ marginTop: 20 }}>
             {visibles.length === 0 && estado !== "cargando" ? (
               <p className="ri-empty">No hay entidades que coincidan con la búsqueda.</p>
