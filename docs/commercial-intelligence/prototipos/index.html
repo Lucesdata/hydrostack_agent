@@ -1,40 +1,139 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Índice de prototipos · Prototipo CI</title>
-<link rel="stylesheet" href="prototipos.css">
-</head>
-<body>
-<a class="skip" href="#main">Saltar al contenido</a>
-<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
-<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html">Panel</a><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
-<main id="main">
-
-<h1>Prototipos de Commercial &amp; Supply Intelligence</h1>
-<p class="lead">CI-06 · 9 pantallas estáticas con <strong>datos ficticios</strong>, para decidir antes de construir. Mismos tokens de color de AquaLicita; <strong>la portada y el hero territorial no se tocan</strong>: la entrada sería desde el menú de cuenta y la ficha, bajo <code>/comercial/*</code>.</p>
-<div class="note">Cómo revisar: abre cada pantalla en ancho de móvil (≈390 px) y de escritorio. Cada tarjeta de abajo indica la decisión que necesito de ti.</div>
-<div class="grid g2" style="margin-top:14px">
-<article class="card"><h3><a href="01-panel.html">Panel empresarial</a></h3><p class="small muted">Perfil incompleto primero; coincidencias con evidencia; aviso «afinidad ≠ probabilidad».</p><p class="small"><strong>Decidir:</strong> ¿El panel debe abrir con la completitud del perfil o con las coincidencias?</p></article>
-<article class="card"><h3><a href="02-perfil.html">Perfil internacional</a></h3><p class="small muted">Cada dato con estado declarado/documentado/verificado; sin precios; etiquetas ES/EN.</p><p class="small"><strong>Decidir:</strong> ¿ES/EN en todas las etiquetas o solo ES con selector de idioma? (D13)</p></article>
-<article class="card"><h3><a href="03-explorador.html">Explorador de oportunidades</a></h3><p class="small muted">Una lista con la etapa visible; filtro por tecnología además de tipo.</p><p class="small"><strong>Decidir:</strong> ¿Filtro de tecnología junto al tipo o en un panel avanzado?</p></article>
-<article class="card"><h3><a href="04-radar-suministros.html">Radar de suministros</a></h3><p class="small muted">Estados, evidencia A–D, cita literal, «falta confirmar».</p><p class="small"><strong>Decidir:</strong> ¿Mostrar «probable por tipo de obra» (evidencia D) o solo inferidas con cita?</p></article>
-<article class="card"><h3><a href="05-ficha-contrato.html">Ficha comercial de contrato</a></h3><p class="small muted">Aviso de no-avance físico, contratista NIT, necesidades, cambios, sección de Talent Intelligence reservada.</p><p class="small"><strong>Decidir:</strong> ¿Dónde ubicar la sección de personal respecto a las necesidades?</p></article>
-<article class="card"><h3><a href="06-contratista.html">Perfil de contratista</a></h3><p class="small muted">Solo NIT; integrantes «sin dato oficial»; flujo de reclamación y revocación.</p><p class="small"><strong>Decidir:</strong> ¿Basta el flujo de 3 pasos o se exige además documento firmado?</p></article>
-<article class="card"><h3><a href="07-radar-institucional.html">Radar institucional ampliado</a></h3><p class="small muted">Cifras oficiales vs clasificación AquaLicita (rayado + etiqueta).</p><p class="small"><strong>Decidir:</strong> ¿Mantener los porcentajes por tecnología con muestra pequeña o esperar más datos?</p></article>
-<article class="card"><h3><a href="08-seguimiento.html">Seguimiento y alertas</a></h3><p class="small muted">Consentimiento desmarcado y separado; cambios en línea de tiempo.</p><p class="small"><strong>Decidir:</strong> ¿Resumen diario por defecto o semanal?</p></article>
-<article class="card"><h3><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></h3><p class="small muted">Flujo y reglas; todo deshabilitado.</p><p class="small"><strong>Decidir:</strong> ¿Se muestra a usuarios finales o solo se usa para entrevistas?</p></article>
-</div>
-<h2>Principios que cumplen todas las pantallas</h2>
-<ul class="small">
-<li>El estado nunca va solo en color: cada chip lleva glifo y nombre; el rayado distingue clasificaciones.</li>
-<li>«Sin dato» en lugar de cantidades, fechas o especificaciones que no existen.</li>
-<li>«Estado administrativo según SECOP; no indica avance físico».</li>
-<li>Solo contratistas con NIT; sin representantes legales ni personas naturales.</li>
-<li>Móvil primero (columna única, tablas con desplazamiento, objetivos táctiles ≥ 44 px); modo oscuro y movimiento reducido respetados.</li>
-</ul>
-
-</main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Índice de prototipos · Prototipo CI</title>
+    <link rel="stylesheet" href="prototipos.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="proto" role="note">
+      <strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real.
+      No es una pantalla implementada.
+    </div>
+    <header class="bar">
+      <nav aria-label="Pantallas del prototipo">
+        <a href="index.html">Índice</a><a href="01-panel.html">Panel</a
+        ><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a
+        ><a href="04-radar-suministros.html">Radar de suministros</a
+        ><a href="05-ficha-contrato.html">Ficha de contrato</a
+        ><a href="06-contratista.html">Contratista</a
+        ><a href="07-radar-institucional.html">Radar institucional</a
+        ><a href="08-seguimiento.html">Seguimiento y alertas</a
+        ><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a>
+      </nav>
+    </header>
+    <main id="main">
+      <h1>Prototipos de Commercial &amp; Supply Intelligence</h1>
+      <p class="lead">
+        CI-06 · 9 pantallas estáticas con <strong>datos ficticios</strong>, para decidir antes de
+        construir. Mismos tokens de color de AquaLicita;
+        <strong>la portada y el hero territorial no se tocan</strong>: la entrada sería desde el
+        menú de cuenta y la ficha, bajo <code>/comercial/*</code>.
+      </p>
+      <div class="note">
+        Cómo revisar: abre cada pantalla en ancho de móvil (≈390 px) y de escritorio. Cada tarjeta
+        de abajo indica la decisión que necesito de ti.
+      </div>
+      <div class="grid g2" style="margin-top: 14px">
+        <article class="card">
+          <h3><a href="01-panel.html">Panel empresarial</a></h3>
+          <p class="small muted">
+            Perfil incompleto primero; coincidencias con evidencia; aviso «afinidad ≠ probabilidad».
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿El panel debe abrir con la completitud del perfil o con las
+            coincidencias?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="02-perfil.html">Perfil internacional</a></h3>
+          <p class="small muted">
+            Cada dato con estado declarado/documentado/verificado; sin precios; etiquetas ES/EN.
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿ES/EN en todas las etiquetas o solo ES con selector de
+            idioma? (D13)
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="03-explorador.html">Explorador de oportunidades</a></h3>
+          <p class="small muted">
+            Una lista con la etapa visible; filtro por tecnología además de tipo.
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Filtro de tecnología junto al tipo o en un panel avanzado?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="04-radar-suministros.html">Radar de suministros</a></h3>
+          <p class="small muted">Estados, evidencia A–D, cita literal, «falta confirmar».</p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Mostrar «probable por tipo de obra» (evidencia D) o solo
+            inferidas con cita?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="05-ficha-contrato.html">Ficha comercial de contrato</a></h3>
+          <p class="small muted">
+            Aviso de no-avance físico, contratista NIT, necesidades, cambios, sección de Talent
+            Intelligence reservada.
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Dónde ubicar la sección de personal respecto a las
+            necesidades?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="06-contratista.html">Perfil de contratista</a></h3>
+          <p class="small muted">
+            Solo NIT; integrantes «sin dato oficial»; flujo de reclamación y revocación.
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Basta el flujo de 3 pasos o se exige además documento
+            firmado?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="07-radar-institucional.html">Radar institucional ampliado</a></h3>
+          <p class="small muted">
+            Cifras oficiales vs clasificación AquaLicita (rayado + etiqueta).
+          </p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Mantener los porcentajes por tecnología con muestra pequeña o
+            esperar más datos?
+          </p>
+        </article>
+        <article class="card">
+          <h3><a href="08-seguimiento.html">Seguimiento y alertas</a></h3>
+          <p class="small muted">
+            Consentimiento desmarcado y separado; cambios en línea de tiempo.
+          </p>
+          <p class="small"><strong>Decidir:</strong> ¿Resumen diario por defecto o semanal?</p>
+        </article>
+        <article class="card">
+          <h3><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></h3>
+          <p class="small muted">Flujo y reglas; todo deshabilitado.</p>
+          <p class="small">
+            <strong>Decidir:</strong> ¿Se muestra a usuarios finales o solo se usa para entrevistas?
+          </p>
+        </article>
+      </div>
+      <h2>Principios que cumplen todas las pantallas</h2>
+      <ul class="small">
+        <li>
+          El estado nunca va solo en color: cada chip lleva glifo y nombre; el rayado distingue
+          clasificaciones.
+        </li>
+        <li>«Sin dato» en lugar de cantidades, fechas o especificaciones que no existen.</li>
+        <li>«Estado administrativo según SECOP; no indica avance físico».</li>
+        <li>Solo contratistas con NIT; sin representantes legales ni personas naturales.</li>
+        <li>
+          Móvil primero (columna única, tablas con desplazamiento, objetivos táctiles ≥ 44 px); modo
+          oscuro y movimiento reducido respetados.
+        </li>
+      </ul>
+    </main>
+  </body>
 </html>

@@ -1,49 +1,113 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Seguimiento y alertas · Prototipo CI</title>
-<link rel="stylesheet" href="prototipos.css">
-</head>
-<body>
-<a class="skip" href="#main">Saltar al contenido</a>
-<div class="proto" role="note"><strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real. No es una pantalla implementada.</div>
-<header class="bar"><nav aria-label="Pantallas del prototipo"><a href="index.html">Índice</a><a href="01-panel.html">Panel</a><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a><a href="04-radar-suministros.html">Radar de suministros</a><a href="05-ficha-contrato.html">Ficha de contrato</a><a href="06-contratista.html">Contratista</a><a href="07-radar-institucional.html">Radar institucional</a><a href="08-seguimiento.html" aria-current="page">Seguimiento y alertas</a><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a></nav></header>
-<main id="main">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Seguimiento y alertas · Prototipo CI</title>
+    <link rel="stylesheet" href="prototipos.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="proto" role="note">
+      <strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real.
+      No es una pantalla implementada.
+    </div>
+    <header class="bar">
+      <nav aria-label="Pantallas del prototipo">
+        <a href="index.html">Índice</a><a href="01-panel.html">Panel</a
+        ><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a
+        ><a href="04-radar-suministros.html">Radar de suministros</a
+        ><a href="05-ficha-contrato.html">Ficha de contrato</a
+        ><a href="06-contratista.html">Contratista</a
+        ><a href="07-radar-institucional.html">Radar institucional</a
+        ><a href="08-seguimiento.html" aria-current="page">Seguimiento y alertas</a
+        ><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a>
+      </nav>
+    </header>
+    <main id="main">
+      <h1>Seguimiento y alertas</h1>
+      <p class="lead">
+        Lo que sigues, qué cambió y cómo quieres enterarte. Los <strong>procesos</strong> se guardan
+        en «Mis procesos»; aquí van contratos, necesidades y contratistas.
+      </p>
 
-<h1>Seguimiento y alertas</h1>
-<p class="lead">Lo que sigues, qué cambió y cómo quieres enterarte. Los <strong>procesos</strong> se guardan en «Mis procesos»; aquí van contratos, necesidades y contratistas.</p>
+      <div class="grid side">
+        <section aria-label="Lo que sigues">
+          <h2 style="margin-top: 0">Cambios recientes</h2>
+          <ol class="timeline">
+            <li>
+              <strong>Necesidad suspendida</strong> — Filtración, contrato «Terminado»
+              <span class="small muted">· hoy</span>
+            </li>
+            <li>
+              <strong>Prórroga detectada</strong> en «Reposición de redes…»
+              <span class="small muted">· 02 nov</span>
+            </li>
+            <li>
+              <strong>Nueva coincidencia</strong> — Bombas sumergibles (evidencia C)
+              <span class="small muted">· 02 nov</span>
+            </li>
+          </ol>
+          <h2>Siguiendo (12)</h2>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Objeto</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Reposición de redes…</td>
+                  <td>Contrato</td>
+                  <td><a href="#">Dejar de seguir</a></td>
+                </tr>
+                <tr>
+                  <td>Bombas sumergibles</td>
+                  <td>Necesidad</td>
+                  <td><a href="#">Dejar de seguir</a></td>
+                </tr>
+                <tr>
+                  <td>Consorcio Ficticio 1</td>
+                  <td>Contratista</td>
+                  <td><a href="#">Dejar de seguir</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-<div class="grid side">
-<section aria-label="Lo que sigues">
-  <h2 style="margin-top:0">Cambios recientes</h2>
-  <ol class="timeline">
-    <li><strong>Necesidad suspendida</strong> — Filtración, contrato «Terminado» <span class="small muted">· hoy</span></li>
-    <li><strong>Prórroga detectada</strong> en «Reposición de redes…» <span class="small muted">· 02 nov</span></li>
-    <li><strong>Nueva coincidencia</strong> — Bombas sumergibles (evidencia C) <span class="small muted">· 02 nov</span></li>
-  </ol>
-  <h2>Siguiendo (12)</h2>
-  <div class="tablewrap"><table><thead><tr><th>Objeto</th><th>Tipo</th><th></th></tr></thead><tbody>
-  <tr><td>Reposición de redes…</td><td>Contrato</td><td><a href="#">Dejar de seguir</a></td></tr>
-  <tr><td>Bombas sumergibles</td><td>Necesidad</td><td><a href="#">Dejar de seguir</a></td></tr>
-  <tr><td>Consorcio Ficticio 1</td><td>Contratista</td><td><a href="#">Dejar de seguir</a></td></tr>
-  </tbody></table></div>
-</section>
-
-<section id="consentimiento" class="card hl" aria-labelledby="c1">
-  <h2 id="c1" style="margin-top:0">Alertas comerciales</h2>
-  <p class="small">Recibe un correo cuando una coincidencia nueva aparezca o un contrato que sigues cambie.</p>
-  <form onsubmit="return false">
-    <div class="opts"><label><input type="checkbox"> Quiero recibir alertas comerciales de AquaLicita por correo.</label></div>
-    <p class="small muted">Casilla <strong>desmarcada por defecto</strong>. Es independiente de las alertas de licitaciones y del correo de novedades. Texto de consentimiento v1; guardamos la fecha y la versión como prueba. Puedes darte de baja en cada correo.</p>
-    <label for="fr">Frecuencia</label><select id="fr"><option>Resumen diario</option><option>Semanal</option></select>
-    <p><button class="btn" type="submit">Guardar</button></p>
-  </form>
-  <p class="small muted">Estado actual: <strong>sin consentimiento</strong>. No se envía nada.</p>
-</section>
-</div>
-
-</main>
-</body>
+        <section id="consentimiento" class="card hl" aria-labelledby="c1">
+          <h2 id="c1" style="margin-top: 0">Alertas comerciales</h2>
+          <p class="small">
+            Recibe un correo cuando una coincidencia nueva aparezca o un contrato que sigues cambie.
+          </p>
+          <form onsubmit="return false;">
+            <div class="opts">
+              <label
+                ><input type="checkbox" /> Quiero recibir alertas comerciales de AquaLicita por
+                correo.</label
+              >
+            </div>
+            <p class="small muted">
+              Casilla <strong>desmarcada por defecto</strong>. Es independiente de las alertas de
+              licitaciones y del correo de novedades. Texto de consentimiento v1; guardamos la fecha
+              y la versión como prueba. Puedes darte de baja en cada correo.
+            </p>
+            <label for="fr">Frecuencia</label
+            ><select id="fr">
+              <option>Resumen diario</option>
+              <option>Semanal</option>
+            </select>
+            <p><button class="btn" type="submit">Guardar</button></p>
+          </form>
+          <p class="small muted">
+            Estado actual: <strong>sin consentimiento</strong>. No se envía nada.
+          </p>
+        </section>
+      </div>
+    </main>
+  </body>
 </html>
