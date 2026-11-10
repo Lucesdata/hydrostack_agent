@@ -8,8 +8,8 @@ const app = path.resolve(__dirname, "../../../app");
 describe("accesos del hero a los servicios", () => {
   it("no enlaza Comercial cuando la bandera está apagada", () => {
     const comercial = serviciosDelHero(false).find((s) => s.id === "comercial");
-    expect(comercial?.href).toBeNull();
-    expect(comercial?.detalle).toBe("En activación");
+    expect(comercial?.href).toBe("/comercial");
+    expect(comercial?.detalle).toBe("Conocer el servicio");
   });
 
   it("enlaza Comercial exclusivamente cuando está habilitado", () => {
@@ -19,8 +19,9 @@ describe("accesos del hero a los servicios", () => {
 
   it("no anuncia vacantes ni presenta Talent como producto público", () => {
     const talento = serviciosDelHero(true).find((s) => s.id === "talento");
-    expect(talento?.href).toBeNull();
-    expect(talento?.detalle).toContain("Validación");
+    expect(talento?.href).toBe("/talento");
+    expect(talento?.destacado).toBe(true);
+    expect(talento?.detalle).toContain("requisitos");
   });
 
   it("solo usa destinos que tienen una página real", () => {
@@ -39,6 +40,7 @@ describe("accesos del hero a los servicios", () => {
   it("muestra todos los servicios con identificadores únicos", () => {
     const servicios = serviciosDelHero(false);
     expect(servicios).toHaveLength(5);
+    expect(servicios.filter((s) => s.destacado).map((s) => s.id)).toEqual(["comercial", "talento"]);
     expect(new Set(servicios.map((s) => s.id)).size).toBe(servicios.length);
   });
 });
