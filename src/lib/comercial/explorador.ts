@@ -24,6 +24,7 @@ import { slugDeProceso } from "@/src/lib/secop/slug";
 import { clasificarTecnologia } from "@/src/lib/tecnologia/clasificador";
 import { NODO_POR_CODIGO } from "@/src/lib/tecnologia/taxonomia-v1";
 import { hoyEnColombia } from "./ficha-contrato";
+import { hoyEnColombia as hoySqlEnColombia } from "@/src/lib/secop/hoy-colombia";
 import {
   patronDeTecnologia,
   POR_PAGINA_EXPLORADOR,
@@ -72,7 +73,7 @@ export const TOPE_CONSULTA_MS = 8000;
 /** `db` o la transacción que lo envuelve: lo único que las consultas necesitan. */
 type Ejecutor = Pick<typeof db, "select" | "execute">;
 
-const HOY_SQL = sql`(now() at time zone 'America/Bogota')::date`;
+const HOY_SQL = hoySqlEnColombia();
 const SIN_TILDES = (texto: SQL) => sql`translate(lower(${texto}), 'áéíóúüñ', 'aeiouun')`;
 
 const num = (v: string | null): number | null => {
