@@ -32,8 +32,9 @@ const PROTECTED_PREFIXES = [
   "/diagnostico/historial",
   "/cuenta",
   "/mis-procesos",
-  // Perfil de empresa comercial (CI-11b): exige cuenta (`empresa_perfil` es `gratis`).
-  "/comercial/perfil",
+  // `/comercial/*` NO va aquí a propósito (CI-11): con la bandera `CI_COMERCIAL_HABILITADO`
+  // apagada el middleware redirigiría al anónimo al login (307) y la ruta parecería existir.
+  // Las páginas comprueban primero la bandera (404) y después la sesión (login).
 ];
 
 export async function middleware(request: NextRequest) {
