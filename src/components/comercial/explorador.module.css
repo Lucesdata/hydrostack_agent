@@ -1,0 +1,165 @@
+/* Explorador de oportunidades (CI-11c). Tokens de app/globals.css. */
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+  color: var(--ink-900);
+}
+.title {
+  font-size: 1.55rem;
+  margin: 0.2rem 0 0.4rem;
+}
+.lead {
+  color: var(--ink-600);
+  max-width: 68ch;
+  margin: 0 0 1rem;
+}
+.layout {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 860px) {
+  .layout {
+    grid-template-columns: 270px 1fr;
+    align-items: start;
+  }
+}
+.filters {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.filters summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.label {
+  display: block;
+  font-weight: 600;
+  margin: 10px 0 4px;
+  font-size: 0.9rem;
+}
+.input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--ink-300);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-900);
+  font: inherit;
+  min-height: 44px;
+}
+.input:focus-visible,
+.btn:focus-visible,
+.link:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.btn {
+  display: inline-block;
+  margin-top: 12px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 44px;
+}
+.clear {
+  margin-left: 12px;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+.summary {
+  color: var(--ink-600);
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+}
+.note {
+  border: 1px dashed var(--line);
+  background: var(--surface-alt);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  color: var(--ink-600);
+  margin: 0 0 12px;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 650;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.info {
+  color: var(--accent);
+}
+.ok {
+  color: var(--success);
+}
+.neutral {
+  color: var(--ink-600);
+}
+.cardTitle {
+  font-size: 1rem;
+  margin: 8px 0 4px;
+  line-height: 1.35;
+}
+.meta {
+  color: var(--ink-600);
+  font-size: 0.86rem;
+  margin: 0 0 4px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+.link {
+  color: var(--accent);
+  font-weight: 600;
+}
+.empty {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--surface);
+}
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+.dim {
+  color: var(--ink-300);
+}

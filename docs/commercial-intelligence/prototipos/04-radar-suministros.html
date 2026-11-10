@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Radar de suministros · Prototipo CI</title>
+    <link rel="stylesheet" href="prototipos.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="proto" role="note">
+      <strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real.
+      No es una pantalla implementada.
+    </div>
+    <header class="bar">
+      <nav aria-label="Pantallas del prototipo">
+        <a href="index.html">Índice</a><a href="01-panel.html">Panel</a
+        ><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a
+        ><a href="04-radar-suministros.html" aria-current="page">Radar de suministros</a
+        ><a href="05-ficha-contrato.html">Ficha de contrato</a
+        ><a href="06-contratista.html">Contratista</a
+        ><a href="07-radar-institucional.html">Radar institucional</a
+        ><a href="08-seguimiento.html">Seguimiento y alertas</a
+        ><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a>
+      </nav>
+    </header>
+    <main id="main">
+      <h1>Radar de suministros</h1>
+      <p class="lead">
+        Necesidades de suministro potenciales ligadas a contratos en ejecución.
+        <strong>Una mención no demuestra una compra pendiente.</strong> Cada tarjeta dice de dónde
+        sale, qué tan sólida es y qué falta confirmar.
+      </p>
+      <div class="row" style="margin-bottom: 10px">
+        <label class="small" for="fe" style="margin: 0">Estado</label>
+        <select id="fe" style="width: auto">
+          <option>Todos</option>
+          <option>Inferida</option>
+          <option>Documentada</option>
+          <option>Confirmada por contratista</option>
+          <option>Abierta a recibir propuestas</option>
+        </select>
+        <label class="small" for="fc" style="margin: 0">Evidencia mínima</label>
+        <select id="fc" style="width: auto">
+          <option>Cualquiera</option>
+          <option>B o mejor</option>
+          <option>A</option>
+        </select>
+      </div>
+      <div class="legend" role="note">
+        <span
+          ><strong>Evidencia</strong> A: documento/pliego con cita verificada · B: campo específico
+          de SECOP · C: texto libre corto · D: solo inferencia por tipo de obra</span
+        >
+      </div>
+
+      <div class="grid" style="margin-top: 12px">
+        <article class="card">
+          <div class="row sp">
+            <div class="row">
+              <span class="chip warn" data-g="◌">Inferida</span>
+              <span class="grade"><b>C</b><span>Evidencia</span></span>
+            </div>
+            <span class="small muted">Detectada 02 nov 2026 · clasificador 1.1</span>
+          </div>
+          <h3 style="margin-top: 8px">Bombeo · Bombas sumergibles</h3>
+          <p class="quote">«…SUMINISTRO DE BOMBAS SUMERGIBLES PARA LA ESTACIÓN DE REBOMBEO…»</p>
+          <p class="small muted" style="margin: 0.2rem 0">
+            Fuente: objeto del contrato (SECOP) · Contrato fin previsto 30 sep 2026 (vigente)
+          </p>
+          <dl class="kv">
+            <dt>Cantidad</dt>
+            <dd>sin dato</dd>
+            <dt>Especificaciones</dt>
+            <dd>sin dato</dd>
+            <dt>Fecha requerida</dt>
+            <dd>sin dato</dd>
+          </dl>
+          <p class="small">
+            <strong>Falta confirmar:</strong> si el contratista ya compró o cotiza este suministro.
+            <strong>Restricción:</strong> el contratista decide a quién comprar.
+          </p>
+          <div class="row">
+            <a class="btn" href="05-ficha-contrato.html">Ver contrato</a
+            ><a class="btn ghost" href="#">Seguir</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="row sp">
+            <div class="row">
+              <span class="chip info" data-g="◆">Documentada</span>
+              <span class="grade"><b>A</b><span>Evidencia</span></span>
+            </div>
+            <span class="small muted">Pliego subido por un usuario · cita verificada</span>
+          </div>
+          <h3 style="margin-top: 8px">Instrumentación · Caudalímetros electromagnéticos</h3>
+          <p class="quote">
+            «Ítem 3.4 — Caudalímetro electromagnético DN200, cantidad 6 und» (pág. 41)
+          </p>
+          <dl class="kv">
+            <dt>Cantidad</dt>
+            <dd>6 und (del pliego)</dd>
+            <dt>Especificación</dt>
+            <dd>DN200 (del pliego)</dd>
+          </dl>
+          <p class="small">
+            <strong>Falta confirmar:</strong> si el suministro sigue abierto. Solo el contratista
+            puede confirmarlo.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="row sp">
+            <div class="row">
+              <span class="chip ok" data-g="◉">Abierta a recibir propuestas</span>
+              <span class="grade"><b>A</b><span>Evidencia</span></span>
+            </div>
+            <span class="small muted">Confirmada por representante verificado</span>
+          </div>
+          <h3 style="margin-top: 8px">Tubería · Hierro dúctil DN300 — 400 m</h3>
+          <p class="small">
+            El contratista marcó esta necesidad como abierta a recibir propuestas. Contacto:
+            <em>solo mediante solicitud mediada (función futura)</em>.
+          </p>
+          <a class="btn" href="09-solicitudes-futuras.html" aria-disabled="true"
+            >Responder (próximamente)</a
+          >
+        </article>
+
+        <article class="card dim">
+          <div class="row"><span class="chip neutral" data-g="‖">Suspendida</span></div>
+          <h3 style="margin-top: 8px">Filtración · Sistema de filtración</h3>
+          <p class="small">
+            Suspendida automáticamente: el contrato cambió a «Terminado». Se conserva el historial;
+            se reactiva solo si el contrato lo hace.
+          </p>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ficha comercial de contrato · Prototipo CI</title>
+    <link rel="stylesheet" href="prototipos.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="proto" role="note">
+      <strong>PROTOTIPO · DATOS FICTICIOS.</strong> Nada aquí es una cifra, empresa o contrato real.
+      No es una pantalla implementada.
+    </div>
+    <header class="bar">
+      <nav aria-label="Pantallas del prototipo">
+        <a href="index.html">Índice</a><a href="01-panel.html">Panel</a
+        ><a href="02-perfil.html">Perfil de empresa</a><a href="03-explorador.html">Explorador</a
+        ><a href="04-radar-suministros.html">Radar de suministros</a
+        ><a href="05-ficha-contrato.html" aria-current="page">Ficha de contrato</a
+        ><a href="06-contratista.html">Contratista</a
+        ><a href="07-radar-institucional.html">Radar institucional</a
+        ><a href="08-seguimiento.html">Seguimiento y alertas</a
+        ><a href="09-solicitudes-futuras.html">Solicitudes (futuro)</a>
+      </nav>
+    </header>
+    <main id="main">
+      <h1>Reposición de redes de alcantarillado — Municipio de Ejemplo</h1>
+      <p class="muted small" style="margin: 0">
+        Contrato CO1.PCCNTR.0000001 (ficticio) · Valle del Cauca
+      </p>
+      <div class="row" style="margin: 0.6rem 0">
+        <span class="chip ok" data-g="▶">En ejecución</span
+        ><span class="chip neutral" data-g="">Alcantarillado</span>
+      </div>
+      <p class="note">
+        Estado administrativo según SECOP II. <strong>No indica avance físico de la obra</strong> ni
+        que haya compras pendientes.
+      </p>
+
+      <div class="grid g2" style="margin-top: 12px">
+        <section class="card">
+          <h2 style="margin-top: 0">Contrato</h2>
+          <dl class="kv">
+            <dt>Entidad</dt>
+            <dd>Municipio de Ejemplo</dd>
+            <dt>Valor actual</dt>
+            <dd>$1.250.000.000 <span class="small muted">(SECOP)</span></dd>
+            <dt>Firma</dt>
+            <dd>14 mar 2026</dd>
+            <dt>Fin previsto</dt>
+            <dd>30 sep 2026</dd>
+          </dl>
+          <p class="small muted">Cambios detectados: ver abajo.</p>
+        </section>
+        <section class="card">
+          <h2 style="margin-top: 0">Contratista</h2>
+          <dl class="kv">
+            <dt>Estructura</dt>
+            <dd>Consorcio Ficticio 1</dd>
+            <dt>NIT</dt>
+            <dd>900.000.001-0 <span class="small muted">(ficticio)</span></dd>
+            <dt>Integrantes</dt>
+            <dd><span class="chip neutral" data-g="">Sin dato oficial</span></dd>
+          </dl>
+          <p class="small muted">
+            Solo se nombran contratistas con NIT. No se muestran representantes legales ni personas
+            naturales.
+          </p>
+          <a href="06-contratista.html">Ver perfil del contratista</a>
+        </section>
+      </div>
+
+      <h2>Necesidades de suministro potenciales</h2>
+      <div class="tablewrap">
+        <table class="stack">
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Estado</th>
+              <th>Evidencia</th>
+              <th>Fuente (cita)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Categoría">Tuberías y redes</td>
+              <td data-label="Estado"><span class="chip warn" data-g="◌">Inferida</span></td>
+              <td data-label="Evidencia">
+                <span class="grade"><b>D</b><span>Evidencia</span></span>
+              </td>
+              <td data-label="Fuente" class="small">
+                <span class="quote" style="margin: 0">«…REPOSICIÓN DE REDES…»</span> No nombra el
+                material.
+              </td>
+            </tr>
+            <tr>
+              <td data-label="Categoría">Bombeo</td>
+              <td data-label="Estado"><span class="chip warn" data-g="◌">Inferida</span></td>
+              <td data-label="Evidencia">
+                <span class="grade"><b>C</b><span>Evidencia</span></span>
+              </td>
+              <td data-label="Fuente" class="small">
+                <span class="quote" style="margin: 0">«…ESTACIÓN DE REBOMBEO…»</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top: 8px">
+        «Probable por tipo de obra» (evidencia D) se muestra aparte, sin cantidades ni fechas.
+      </p>
+
+      <h2>Requisitos profesionales</h2>
+      <div class="card dim">
+        <p style="margin: 0">
+          <strong>Sección de Talent Intelligence</strong> — se integra mediante un contrato de
+          «proveedor de sección»; aún no disponible.
+        </p>
+        <p class="small muted" style="margin: 0.4rem 0 0">
+          Texto fijo previsto: «Los requisitos de personal no equivalen a ofertas de empleo.» Las
+          necesidades de personal y de suministro son entidades distintas.
+        </p>
+      </div>
+
+      <h2>Cambios del contrato</h2>
+      <ol class="timeline">
+        <li>
+          <strong>Prórroga detectada:</strong> fin previsto 30 jun → 30 sep 2026
+          <span class="small muted">· detectado 02 nov 2026</span>
+        </li>
+        <li>
+          <strong>Estado:</strong> «Firmado» → «En ejecución»
+          <span class="small muted">· detectado 15 abr 2026</span>
+        </li>
+      </ol>
+      <p class="small muted">Un cambio detectado no es una adenda oficial.</p>
+
+      <h2>Qué falta confirmar y restricciones</h2>
+      <ul class="small">
+        <li>Si hay compras pendientes: solo el contratista puede decirlo.</li>
+        <li>Cantidades, especificaciones y fechas: sin dato.</li>
+        <li>La plataforma no coordina precios ni muestra ofertas privadas a competidores.</li>
+      </ul>
+      <p class="row">
+        <a class="btn" href="#">Seguir este contrato</a
+        ><a class="btn ghost" href="#">Ver contratos similares</a>
+      </p>
+    </main>
+  </body>
+</html>

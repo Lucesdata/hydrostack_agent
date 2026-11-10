@@ -747,6 +747,74 @@ eventosNotificables: text("eventos_notificables").array(),
 para las otras dos). El código nuevo lee `COALESCE(account_id, usuario_id)` hasta
 que el backfill esté verificado; después, solo `account_id`.
 
+### 4.9 Commercial & Supply Intelligence — PROPUESTA (CI-03, 2026-11-09)
+
+> **Estado (2026-11-09): migraciones A y C APLICADAS a la base viva** (`drizzle/0027_ci_a_perfil_empresa`,
+> `drizzle/0028_ci_c_cambios_contrato`), con autorización expresa del usuario y verificadas (9 tablas `ci_*`, todas con RLS; 0 tablas de `public` sin RLS).
+> B, D y E siguen solo propuestas. Esquema: `src/lib/db/schema/comercial.ts`.
+> Antes de esta línea decía: «propuesto, NO aplicado. Ninguna de estas tablas existe en el
+> esquema Drizzle ni en la base». Entra a la fase de migración (CI-04) solo con
+> aprobación expresa y tras cerrar las precondiciones de
+> `docs/superpowers/plans/2026-11-09-ci-03-plan-de-datos.md` §6. Spec funcional:
+> `docs/superpowers/specs/2026-11-09-commercial-intelligence-{prd,datos}.md`.
+> Los nombres de este apartado **sustituyen** a los nombres de trabajo del
+> documento `…-datos.md` §2 (tabla de equivalencias en el plan).
+
+**Convenciones propias de este bloque**
+- Archivo nuevo `src/lib/db/schema/comercial.ts`, exportado desde `index.ts`; prefijo `ci_`. La única tabla sin prefijo es `representacion_proveedor`, porque es **compartida con Talent Intelligence** (D10).
+- Toda tabla nace con `.enableRLS()` y sin políticas (R6).
+- **La taxonomía tecnológica NO tiene tablas**: vive en código versionado (`src/lib/tecnologia/taxonomia-v1.ts`), igual que `TIPOS_PROYECTO`. Las tablas guardan `nodo_codigo` + `taxonomia_version` como `text`; la validez la comprueba el código. (Cambio respecto al borrador de `…-datos.md`, que proponía `tec_*`: nadie necesita unir taxonomía en SQL.)
+- Estados como `text` + `CHECK` **solo donde el estado es una frontera de confianza** (necesidad, representación, evidencia, estado de dato). Añadir un valor ahí exige migración, a propósito.
+- Ids de SECOP como `text`, no FK al uuid interno, cuando cuelgan de una cuenta (convención de `coincidencia`); FK real a `contrato`/`proveedor` cuando son datos públicos derivados.
+- Toda consulta sobre filas de cuenta filtra por `usuario_id` (R8, CLAUDE.md §4).
+
+#### Perfil de empresa (internacional) — migración A
+
+| Tabla | Columnas | Restricciones e índices |
+|---|---|---|
+| `ci_empresa` | `id uuid pk`; `usuario_id text not null` → `usuario.id` ON DELETE CASCADE; `razon_social text not null`; `pais text not null` (ISO 3166-1 alfa-2); `registro_empresarial text`; `sitio_oficial text`; `cobertura_nacional boolean not null default false`; `estado_verificacion text not null default 'sin_verificar'`; `atributos jsonb not null default '{}'` (cada campo `{valor, estado}`: idiomas, monedas, certificaciones, garantías, soporte, repuestos, tiempos, instalación, importación y entrega, operación directa o aliado local); `created_at`, `updated_at` | UNIQUE `(usuario_id)` (una cuenta = una empresa, V1); CHECK `char_length(pais)=2`; CHECK `estado_verificacion IN ('sin_verificar','en_revision','verificada','rechazada','revocada')`; idx `(pais)` |
+| `ci_empresa_rol` | `empresa_id` → `ci_empresa.id` CASCADE; `rol text`; `estado_dato text not null` | PK `(empresa_id, rol)`; CHECK `rol IN ('fabricante_internacional','fabricante_colombiano','distribuidor_autorizado','representante_comercial','importador','integrador_tecnologico','empresa_ingenieria','empresa_constructora','prestador_servicios_especializados','consultora','instalacion_mantenimiento','operador_infraestructura')`; CHECK `estado_dato IN ('declarado','documentado','verificado')` |
+| `ci_empresa_capacidad` | `id uuid pk`; `empresa_id` CASCADE; `nodo_codigo text not null`; `taxonomia_version text not null`; `estado_dato text not null`; `marcas text[]`; `especificaciones jsonb` (**sin precios ni listas de precios**) | UNIQUE `(empresa_id, nodo_codigo)`; idx `(nodo_codigo)`; CHECK de `estado_dato` |
+| `ci_empresa_cobertura` | `empresa_id` CASCADE; `divipola text`; `estado_dato text not null` | PK `(empresa_id, divipola)`; CHECK `divipola ~ '^[0-9]{2}([0-9]{3})?$'`; CHECK de `estado_dato` |
+| `ci_consentimiento` | `id uuid pk`; `usuario_id` CASCADE; `finalidad text`; `accion text`; `version_texto text not null`; `creado_en timestamptz default now()` | **Append-only** (evidencia de consentimiento, Ley 1581); CHECK `finalidad IN ('alertas_comerciales')`, `accion IN ('alta','baja')`; idx `(usuario_id, finalidad, creado_en DESC)`. El estado vigente es la última fila |
+| `ci_seguimiento` | `id uuid pk`; `usuario_id` CASCADE; `objeto_tipo text`; `objeto_id text not null`; `creado_en` | UNIQUE `(usuario_id, objeto_tipo, objeto_id)`; CHECK `objeto_tipo IN ('contrato','necesidad','contratista')` — los **procesos se siguen guardando por `/mis-procesos`** (`senal_usuario`), sin duplicar |
+| `ci_auditoria` | `id uuid pk`; `actor_tipo text`; `actor_id text`; `accion text not null`; `objeto_tipo text`; `objeto_id text`; `detalle jsonb` (sin datos sensibles); `creado_en` | **Append-only**; idx `(actor_id, creado_en DESC)`, `(objeto_tipo, objeto_id)` |
+
+#### Cambios de contrato — migración C
+
+| Tabla | Columnas | Restricciones e índices |
+|---|---|---|
+| `ci_contrato_estado` | `contrato_id uuid pk` → `contrato.id`; `valor_actual numeric(20,2)`; `fecha_fin_actual date`; `estado_actual text`; `visto_en timestamptz not null` | Línea base acotada (la ausencia de `contrato_evento`, §4.1): una fila por contrato, se sobrescribe en cada detección |
+| `ci_contrato_cambio` | `id uuid pk`; `contrato_id` → `contrato.id`; `campo text`; `valor_anterior text`; `valor_nuevo text`; `detectado_en timestamptz not null` | CHECK `campo IN ('valor_actual','fecha_fin_actual','estado_actual')`; UNIQUE `(contrato_id, campo, valor_nuevo)` (idempotencia); idx `(contrato_id, detectado_en DESC)`. Retención: los **20 más recientes por contrato** |
+
+#### Evidencia y necesidades de suministro — migración B
+
+| Tabla | Columnas | Restricciones e índices |
+|---|---|---|
+| `ci_evidencia` | `id uuid pk`; `tipo_fuente text not null`; `cita text not null`; `localizador jsonb not null`; `localizador_clave text not null`; `hash_texto text not null`; `verificada boolean not null default false`; `extraida_en timestamptz not null`; `version_extractor text not null`; `vigente_hasta timestamptz`; `created_at` | CHECK `tipo_fuente IN ('secop_campo','pliego_usuario','documento_oficial','declaracion_empresa','inferencia')`; CHECK `char_length(cita) <= 400`; **CHECK `NOT (tipo_fuente='inferencia' AND verificada)`**; UNIQUE `(hash_texto, localizador_clave)`. **Sin nombres ni documentos de personas** |
+| `ci_necesidad` | `id uuid pk`; `contrato_id uuid not null` → `contrato.id`; `nodo_codigo text not null`; `taxonomia_version text not null`; `clasificador_version text not null`; `estado text not null default 'inferida'`; `calidad_evidencia char(1) not null`; `cantidad numeric`; `unidad text`; `especificaciones jsonb`; `fecha_requerida date`; `estado_previo_suspension text`; `created_at`, `updated_at` | UNIQUE `(contrato_id, nodo_codigo)` (recomputar actualiza la fila y **nunca toca las que superaron `inferida`**); CHECK `estado IN ('inferida','documentada','confirmada','abierta','cubierta','descartada','suspendida','cerrada')`; CHECK `calidad_evidencia IN ('A','B','C','D')`; **CHECK `estado <> 'inferida' OR (cantidad IS NULL AND especificaciones IS NULL AND fecha_requerida IS NULL)`** (nada de cantidades inventadas); idx `(estado)`, `(nodo_codigo, estado)`, `(contrato_id)` |
+| `ci_necesidad_evidencia` | `necesidad_id` CASCADE; `evidencia_id` → `ci_evidencia.id` | PK `(necesidad_id, evidencia_id)` |
+| `ci_necesidad_estado_hist` | `id uuid pk`; `necesidad_id` CASCADE; `de text`; `a text not null`; `actor_tipo text not null`; `actor_id text`; `motivo text`; `representacion_id uuid` → `representacion_proveedor.id`; `creado_en` | **Append-only**; CHECK `actor_tipo IN ('sistema','representante_verificado','admin')`; **CHECK `a NOT IN ('confirmada','abierta') OR (actor_tipo='representante_verificado' AND representacion_id IS NOT NULL)`**; idx `(necesidad_id, creado_en)`. Un trigger `ci_necesidad_estado_guard` rechaza pasar `ci_necesidad.estado` a `confirmada`/`abierta` sin esa fila en la misma transacción |
+| `ci_coincidencia` | `id uuid pk`; `empresa_id` → `ci_empresa.id` CASCADE; `necesidad_id` → `ci_necesidad.id` CASCADE **o** `proceso_id` → `proceso.id` (exactamente uno); `version_algoritmo text`; `afinidad smallint not null`; `calidad_evidencia char(1) not null`; `explicacion jsonb not null`; `creado_en`; `vista_en` | CHECK `afinidad BETWEEN 0 AND 100`; CHECK exactamente uno de `necesidad_id`/`proceso_id`; UNIQUE parcial `(empresa_id, necesidad_id)` y `(empresa_id, proceso_id)`; idx `(empresa_id, creado_en DESC)`. Recomputar por versión **actualiza** la fila (sin crecimiento por versión). El score no es probabilidad |
+
+#### Representación de contratista (COMPARTIDA con TI, D10) — migración D
+
+| Tabla | Columnas | Restricciones e índices |
+|---|---|---|
+| `representacion_proveedor` | `id uuid pk`; `proveedor_id uuid not null` → `proveedor.id`; `usuario_id text not null` → `usuario.id` CASCADE; `estado text not null default 'solicitada'`; `metodo_verificacion text`; `nota_verificacion text` (sin datos personales de terceros); `solicitada_en`; `resuelta_en`; `resuelta_por text`; `revocada_en`; `revocada_por text`; `motivo text` | CHECK `estado IN ('solicitada','verificada','rechazada','revocada')`; UNIQUE parcial `(proveedor_id) WHERE estado='verificada'` (un representante verificado por contratista en V1); UNIQUE parcial `(proveedor_id, usuario_id) WHERE estado IN ('solicitada','verificada')`; idx `(usuario_id)`. Trigger `representacion_solo_nit`: rechaza si `proveedor.tipo_documento <> 'NIT'` (persona natural excluida, H6/D12) |
+
+#### Condicional — migración E (solo si D3 identifica fuente oficial)
+
+| Tabla | Columnas | Restricciones e índices |
+|---|---|---|
+| `ci_consorcio_integrante` | `id uuid pk`; `estructura_proveedor_id` → `proveedor.id`; `integrante_nit text not null`; `integrante_proveedor_id uuid` → `proveedor.id`; `porcentaje numeric(5,2)`; `fuente text not null`; `evidencia_id` → `ci_evidencia.id` | UNIQUE `(estructura_proveedor_id, integrante_nit)`; CHECK `porcentaje BETWEEN 0 AND 100`; CHECK `fuente IN ('oficial','declarado')`; solo NIT (sin personas naturales) |
+
+**No se tocan tablas existentes** (cero `ALTER`). RFQ (`rfq_*`) queda **solo como
+diseño** en `…-datos.md` §9: no se define DDL ni se migra.
+
+**Verificación obligatoria tras cada migración:** la consulta de §10.3 debe
+devolver 0 tablas sin RLS.
+
 ---
 
 ## 5. Pipeline de ingesta
@@ -1058,6 +1126,9 @@ psql "$DATABASE_URL" -c "\d usuario"   # debe mostrar la columna plan
 | `0019_secret_changeling` | 9 `ADD COLUMN` nullable en `coincidencia`, `envio_log`, `alerta_preferencias` + 2 FK | ✅ **Aplicada 2026-09-05** |
 | `0020_huge_ego` | `al_oferentes_historico` (DDL cerrado tras V-F-4: incluye proponentes) | ✅ **Aplicada 2026-09-05** |
 | `0021_kind_warbird` | `al_sanciones` (DDL cerrado tras V-F-2) | ✅ **Aplicada 2026-09-05** |
+| `0027_ci_a_perfil_empresa` | `ci_empresa`, `ci_empresa_rol`, `ci_empresa_capacidad`, `ci_empresa_cobertura`, `ci_consentimiento`, `ci_seguimiento`, `ci_auditoria` + función y 2 triggers de solo anexado (§4.9) | ✅ **Aplicada 2026-11-09** |
+| `0028_ci_c_cambios_contrato` | `ci_contrato_estado`, `ci_contrato_cambio` (§4.9) | ✅ **Aplicada 2026-11-09** |
+| `0029_indices_abiertos_y_firma` | Índices parciales `proceso_abiertos_idx` y `contrato_firma_idx` (rendimiento del explorador, CI-11c); creados con `CONCURRENTLY` | ✅ **Aplicada 2026-11-10** |
 
 **Las cinco tablas sin dependencia externa se crearon juntas en `0018`**, no
 repartidas por fase como preveía el plan original. Razón: el esqueleto es la

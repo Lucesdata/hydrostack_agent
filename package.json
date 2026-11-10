@@ -23,6 +23,7 @@
     "db:seed-geografia": "tsx scripts/seed-geografia.ts",
     "db:transform": "tsx scripts/run-transform.ts",
     "db:tipo-proyecto": "tsx scripts/backfill-tipo-proyecto.ts",
+    "contratos:base-cambios": "tsx scripts/ci-contratos-base.ts",
     "db:ingest": "tsx scripts/run-ingest.ts",
     "correo:exportar-marketing": "tsx scripts/correo-exportar-marketing.ts",
     "db:audit-proveedores": "tsx scripts/audit-proveedores.ts",
