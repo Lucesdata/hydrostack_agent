@@ -66,4 +66,7 @@ Mismo contrato de datos, mismas pestañas, mismo SVG de servidor; cambia cómo s
 - `vitest run`: 223 archivos, 1.891 pruebas, todas pasan (nueva: `mapa/explosion.test.ts`).
 - Chromium contra el entorno local (muestra de SECOP): sin scroll horizontal a 1440, 1280, 1024, 820 y 390; sin errores de consola; armado, puntero, región, cambio de pestaña y barra desplazada revisados en captura.
 - Alto del hero a 1440×900: 833 px (antes 940); acaba 5 px bajo el pliegue. Captura: `carta-hidrografica-1440x900.jpg`. A 1920×1080 cabe exacto.
-- **No medido**: LCP/CLS con build de producción, rendimiento en un teléfono real ni contraste automático de los colores nuevos de `hero-v3.module.css` (los de la barra sí los cubre `contraste-oscuro.test.ts`).
+- **Build de producción** (`next build` + `next start`, base local): LCP 836 ms en escritorio y 692 ms en móvil con la CPU 4× más lenta; CLS 0 y 0,0006. Primera carga de `/`: 131 kB. El elemento del LCP es un contenedor (el fondo), ya no una imagen.
+- **Movimiento reducido** (emulado): 0 animaciones activas, todo visible y sin botón de pausa (el recorrido se desactiva).
+- **Contraste**: `contraste-hero-v3.test.ts` mide tarjetas de familia, Ficha Viva, texto sobre la luz del fondo y la barra. Encontró un fallo real (texto secundario de la tarjeta de agua potable elegida, 4,37:1) y se corrigió subiéndolo a `#c3d3e0`.
+- **No medido**: rendimiento en un teléfono real y datos vivos (las cifras de la captura son de la muestra local).
