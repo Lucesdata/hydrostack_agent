@@ -87,17 +87,17 @@ describe("runSweep (D21a)", () => {
     expect(summary.reachedMaxPages).toBe(true);
   });
 
-  it("stops if the last row has no usable id (cursor would be null)", async () => {
-    // Row con id vacío → no podemos formar cursor → cortamos.
+  it("fails closed if the last row has no usable id (cursor would be null)", async () => {
+    // Row con id vacío → no podemos formar cursor → se marca fallo, no éxito.
     const { fetchPage } = fakeFetch([
       [row("A"), { id_contrato: "", ultima_actualizacion: null }],
-      [row("B")], // no llega: el cursor null cortó antes
+      [row("B")], // no llega: el cursor null produce error
     ]);
-    const summary = await runSweep(
-      { fetchPage, sink: countingSink },
-      { source: SOURCE_CONTRATOS, batchId: BATCH, pageSize: 2 }
-    );
-    expect(summary.pages).toBe(1);
-    expect(summary.totalScanned).toBe(2);
+    await expect(
+      runSweep(
+        { fetchPage, sink: countingSink },
+        { source: SOURCE_CONTRATOS, batchId: BATCH, pageSize: 2 }
+      )
+    ).rejects.toThrow("sin identificador de cursor válido");
   });
 });
