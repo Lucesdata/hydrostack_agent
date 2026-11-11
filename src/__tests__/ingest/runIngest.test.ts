@@ -135,6 +135,4 @@ describe("runIngest", () => {
       )
     ).rejects.toThrow("sin cursor keyset válido");
   });
-
-
 });
