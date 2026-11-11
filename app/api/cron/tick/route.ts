@@ -13,16 +13,16 @@
  * `/api/cron/ingest` se conserva como disparador manual de la ingesta sola.
  *
  * **Ninguna etapa aborta a las siguientes.** Cada una va en su propio try/catch y
- * el resultado se devuelve etapa a etapa. Solo un fallo de la ingesta produce
- * 500: es la que alimenta a todas las demás, y si falla el resto trabaja sobre
- * datos viejos sin saberlo.
+ * el resultado se devuelve etapa a etapa. Un fallo en cualquier etapa o una
+ * ingesta truncada genera un estado de fallo observable: un HTTP 200 solo
+ * representa una ejecución completamente satisfactoria.
  *
  * Seguridad: idéntica a `/api/cron/ingest` — `CRON_SECRET` obligatorio como
  * `Bearer`, fail-closed con 401 si la env var no está definida.
  */
 
 import { NextResponse } from "next/server";
-import { runIngestPipeline } from "@/src/lib/ingest/pipeline";
+import { runIngestPipeline, type RunOutput } from "@/src/lib/ingest/pipeline";
 import { correrDeteccionEventos } from "@/src/lib/al/eventos/correr";
 import { correrFiltrosActivos } from "@/src/lib/al/matching/correr-filtros";
 import { podarDescartes } from "@/src/lib/al/matching/registrar-descartes";
@@ -41,6 +41,16 @@ const CRON_MAX_PAGES = 120;
 
 /** Lunes. La recarga de sanciones es semanal: 2.262 filas no necesitan más. */
 const DIA_SANCIONES = 1;
+
+/** Truncar páginas no equivale a haber completado una sincronización. */
+export function ingestaTruncada(result: RunOutput | null): boolean {
+  if (!result) return false;
+  return [
+    result.procesos?.keyset,
+    result.contratos?.keyset,
+    result.contratos?.sweep,
+  ].some((run) => run?.reachedMaxPages === true);
+}
 
 type Etapa = { etapa: string; ok: boolean; resultado?: unknown; error?: string };
 
@@ -95,7 +105,9 @@ export async function GET(request: Request): Promise<Response> {
     etapas.push(await ejecutar("sanciones", () => recargarSanciones()));
   }
 
-  const status = ingesta.ok ? 200 : 500;
-  console.log("[cron/tick] done", { status, etapas: etapas.map((e) => `${e.etapa}:${e.ok}`) });
-  return NextResponse.json({ ok: ingesta.ok, etapas }, { status });
+  const partial = ingesta.ok && ingestaTruncada(ingesta.resultado as RunOutput);
+  const ok = etapas.every((etapa) => etapa.ok) && !partial;
+  const status = ok ? 200 : 500;
+  console.log("[cron/tick] done", { status, partial, etapas: etapas.map((e) => `${e.etapa}:${e.ok}`) });
+  return NextResponse.json({ ok, partial, etapas }, { status });
 }
