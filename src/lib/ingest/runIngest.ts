@@ -189,7 +189,9 @@ export async function runSweep(
     const lastId = rows[rows.length - 1][source.idField];
     cursor = typeof lastId === "string" && lastId ? lastId : null;
     if (cursor === null) {
-      throw new Error(`Sweep ${source.source}: página con registros sin identificador de cursor válido`);
+      throw new Error(
+        `Sweep ${source.source}: página con registros sin identificador de cursor válido`
+      );
     }
     if (rows.length < pageSize) break;
 
