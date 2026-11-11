@@ -98,6 +98,10 @@ export async function GET(request: Request): Promise<Response> {
 
   const partial = ingesta.ok && ingestaTruncada(ingesta.resultado as RunOutput);
   const { ok, status } = resumenTick(etapas, partial);
-  console.log("[cron/tick] done", { status, partial, etapas: etapas.map((e) => `${e.etapa}:${e.ok}`) });
+  console.log("[cron/tick] done", {
+    status,
+    partial,
+    etapas: etapas.map((e) => `${e.etapa}:${e.ok}`),
+  });
   return NextResponse.json({ ok, partial, etapas }, { status });
 }
