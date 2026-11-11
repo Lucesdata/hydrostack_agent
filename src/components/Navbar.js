@@ -61,11 +61,17 @@ const GRUPOS_CUENTA = [
 // existen. No son del catálogo de secciones porque no son del producto de
 // licitaciones: uno es informativo y el otro la guía de participación.
 const ENLACES_PORTADA = [
-  { href: "/gemelos-digitales", route: "/gemelos-digitales", label: "Gemelos digitales" },
+  {
+    href: "/gemelos-digitales",
+    route: "/gemelos-digitales",
+    label: "Gemelos digitales",
+    extra: true,
+  },
   {
     href: "/licitaciones/como-participar",
     route: "/licitaciones/como-participar",
     label: "Cómo funciona",
+    extra: true,
   },
 ];
 
@@ -211,66 +217,110 @@ const AUTH_CSS = `
 .clr-nav--oscuro .clr-nav-user-menu a[aria-current="page"]{ color: #4cc9ff; background: rgba(76,201,255,.12); }
 .clr-nav--oscuro .clr-nav-user-foot button{ color: #ff9b9b; }
 .clr-nav--oscuro .clr-nav-user-new{ color: #061423; background: #4cc9ff; }
-/* ── Tema oscuro de la portada ────────────────────────────────────────────
-   En "/" la barra se apoya sobre el hero, que es azul noche: una franja crema
-   encima lo partía en dos webs pegadas. Solo ahí: el resto del producto (la
-   ficha, las facetas, las cuentas) es claro y la barra clara le pertenece.
-   Los colores son los del hero (hero-territorial.module.css), no tokens de
-   globals.css, por la misma razón que el hero.
+/* ── Barra oscura (portada y ficha) ────────────────────────────────────────
+   En "/" y en la ficha la barra se apoya sobre una superficie azul noche: una
+   franja crema encima la partía en dos webs pegadas. El resto del producto es
+   claro y la barra clara le pertenece. Los colores son los del hero
+   (hero-territorial.module.css), no tokens de globals.css.
 
-   Píldora flotante (2026-10-04): la barra no ocupa el ancho ni se separa con
-   una línea; el <nav> pinta el fondo de la portada (#061423, igual que el
-   hero, así que no se ve) y .clr-nav-inner es la píldora, con un borde tenue y
-   un resplandor azul debajo en vez de sombra negra. Mide 16px más que
-   --nav-h: es el aire alrededor de la píldora. Enlaces al centro y el botón en
-   blanco sobre la noche, el inverso del fondo. Contrastes medidos en
-   contraste-oscuro.test.ts contra el fondo de la píldora. */
+   Tres zonas (2026-11-11): la marca con su lema debajo, los enlaces juntos en
+   una cápsula al centro y la cuenta a la derecha. Ningún enlace parte en dos
+   líneas: los dos accesos extra de la portada solo salen donde caben. Arriba
+   del todo la barra es del color con que empieza el hero, para leerse como una
+   sola pieza; al desplazar pasa a vidrio translúcido con su línea y su sombra
+   (atributo data-scrolled). Mide 16px más que --nav-h. Contrastes medidos en
+   contraste-oscuro.test.ts contra el vidrio, el caso menos favorable. */
 .clr-nav--oscuro{
-  background: rgba(3, 22, 37, 0.86);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(140, 190, 225, 0.14);
+  background: #05203a;
+  border-bottom: 1px solid transparent;
   height: calc(var(--nav-h) + 16px);
   padding: 8px var(--gutter);
+  transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+.clr-nav--oscuro[data-scrolled]{
+  background: rgba(3, 22, 37, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom-color: rgba(140, 190, 225, 0.14);
+  box-shadow: 0 14px 34px -22px rgba(0, 0, 0, 0.9);
 }
 .clr-nav--oscuro .clr-nav-inner{
   position: relative;
   max-width: 1320px; height: 100%;
-  padding: 0;
+  padding: 0; gap: 16px;
   background: transparent; border: 0; box-shadow: none;
 }
-/* Barra del boceto V3.1 (2026-11-01): plana y a todo el ancho, con la marca,
-   «INTELIGENCIA SECOP II», los enlaces en píldoras y «Crear cuenta» en cian. */
-.clr-nav-tag{ display: none; }
-.clr-nav--oscuro .clr-nav-divider{ display: block; width: 1px; height: 26px; margin: 0 18px; background: rgba(140, 190, 225, 0.3); }
-.clr-nav--oscuro .clr-nav-tag{
-  display: none; color: #aec2d2; font: 500 12px var(--font-inter), sans-serif;
-  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+/* La marca: el glifo en un azulejo luminoso y, debajo del nombre, el lema. */
+.clr-logo-words{ display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+.clr-logo-sub{ display: none; }
+.clr-nav--oscuro .clr-logo{ gap: 11px; }
+.clr-nav--oscuro .clr-logo-mark{
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(150deg, #2fe3ff 0%, #0a8fd6 55%, #0272b0 100%);
+  box-shadow: 0 8px 20px -8px rgba(0, 217, 244, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-@media (min-width: 1180px){ .clr-nav--oscuro .clr-nav-tag{ display: inline; } }
-.clr-nav--oscuro .clr-links{ margin-left: auto; margin-right: auto; }
-.clr-nav--oscuro .clr-nav-auth{ margin-left: 0; }
-.clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; }
-/* En la portada no va "En línea" (2026-09-27): su punto late sin parar y era
-   una de las 15 animaciones del primer pliegue. El resto del sitio lo conserva. */
+.clr-nav--oscuro .clr-logo-mark::after{ border-color: #00d9f4; border-radius: 13px; }
+.clr-nav--oscuro .clr-logo-text{ color: #f3f8fc; font-size: 16px; letter-spacing: -0.015em; }
+@media (min-width: 1200px){
+  .clr-nav--oscuro .clr-logo-sub{
+    display: block; margin-top: 4px; color: #aec2d2;
+    font: 600 9.5px/1 var(--font-inter), sans-serif; letter-spacing: .16em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+.clr-nav--oscuro .clr-nav-divider{ display: none; }
+/* En la portada no va "En línea" (2026-09-27): su punto late sin parar. El
+   resto del sitio lo conserva. */
 .clr-nav--oscuro .clr-status{ display: none; }
-.clr-nav--oscuro .clr-nav-link{ color: #c3d3e0; border-radius: 999px; padding: 7px 14px; }
-.clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.06); }
-.clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #00d9f4; background: rgba(0, 217, 244, 0.1); box-shadow: inset 0 0 0 1px rgba(0, 217, 244, 0.55); }
+/* Los enlaces, en una cápsula: se leen como un grupo y el activo se llena. */
+.clr-nav--oscuro .clr-links{
+  margin-left: auto; margin-right: auto; gap: 2px; padding: 4px;
+  border: 1px solid rgba(140, 190, 225, 0.16); border-radius: 999px;
+  background: rgba(8, 32, 54, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.clr-nav--oscuro .clr-nav-link{
+  color: #c3d3e0; border-radius: 999px; padding: 8px 14px; white-space: nowrap;
+  transition: color .18s, background-color .18s;
+}
+.clr-nav--oscuro .clr-nav-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.08); }
+.clr-nav--oscuro .clr-nav-link[aria-current="page"]{ color: #031625; background: #00d9f4; font-weight: 600; }
+.clr-nav--oscuro .clr-nav-link:focus-visible{ outline: 2px solid #00d9f4; outline-offset: 2px; }
 .clr-nav--oscuro .clr-nav-cote{ display: none; }
-.clr-nav--oscuro .clr-nav-auth-link{ color: #c3d3e0; }
-.clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; }
+/* Los dos accesos extra de la portada, solo donde caben en una línea. */
+@media (max-width: 1339px){ .clr-nav-link--extra{ display: none; } }
+@media (min-width: 1024px) and (max-width: 1199px){
+  .clr-nav--oscuro .clr-nav-inner{ gap: 10px; }
+  .clr-nav--oscuro .clr-nav-link{ padding: 8px 10px; font-size: 13px; }
+}
+.clr-nav--oscuro .clr-nav-auth{ margin-left: 0; gap: 6px; }
+.clr-nav--oscuro .clr-nav-auth-link{
+  color: #c3d3e0; font: 500 13.5px var(--font-inter), sans-serif;
+  padding: 9px 14px; border-radius: 999px; transition: color .18s, background-color .18s;
+}
+.clr-nav--oscuro .clr-nav-auth-link:hover{ color: #fff; background: rgba(255, 255, 255, 0.08); }
 .clr-nav--oscuro .clr-nav-auth-cta,
 .clr-nav--oscuro .clr-nav-explorar{
   font: 600 13px var(--font-inter), sans-serif; letter-spacing: 0; text-transform: none;
   color: #031625; background: #00d9f4; border-radius: 999px;
 }
-.clr-nav--oscuro .clr-nav-auth-cta{ padding: 10px 22px; font-size: 14px; }
+.clr-nav--oscuro .clr-nav-auth-cta{
+  padding: 10px 20px; font-size: 13.5px;
+  box-shadow: 0 8px 22px -10px rgba(0, 217, 244, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: background-color .18s, transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s;
+}
 .clr-nav--oscuro .clr-nav-explorar{ padding: 0 16px; }
 .clr-nav--oscuro .clr-nav-auth-cta:hover,
 .clr-nav--oscuro .clr-nav-explorar:hover{ opacity: 1; background: #4de6f8; }
-.clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); border-radius: 999px; width: 34px; height: 34px; }
+.clr-nav--oscuro .clr-nav-auth-cta:hover{ transform: translateY(-1px); }
+.clr-nav--oscuro .clr-nav-auth-link:focus-visible,
+.clr-nav--oscuro .clr-nav-auth-cta:focus-visible,
+.clr-nav--oscuro .clr-nav-explorar:focus-visible{ outline: 2px solid #f3f8fc; outline-offset: 2px; }
+.clr-nav--oscuro .clr-hamburger{ border-color: rgba(140, 190, 225, 0.3); border-radius: 999px; width: 36px; height: 36px; }
 .clr-nav--oscuro .clr-hamburger-icon span{ background: #c3d3e0; }
 .clr-nav--oscuro .clr-hamburger-icon.open span{ background: #4cc9ff; }
+@media (prefers-reduced-motion: reduce){
+  .clr-nav--oscuro, .clr-nav--oscuro *{ transition: none !important; }
+}
 /* El menú móvil cuelga de la píldora como una tarjeta redondeada, no como
    una franja de borde a borde. */
 .clr-nav--oscuro .clr-mobile-menu{
@@ -476,13 +526,28 @@ export default function Navbar() {
 
   const close = () => setOpen(false);
 
+  // La barra oscura cambia de piel al desplazar la página: arriba se funde con
+  // el hero; después pasa a vidrio con su línea (`data-scrolled`). React no
+  // vuelve a renderizar mientras el valor no cambie.
+  const [desplazada, setDesplazada] = useState(false);
+  useEffect(() => {
+    const leer = () => setDesplazada(window.scrollY > 8);
+    leer();
+    window.addEventListener("scroll", leer, { passive: true });
+    return () => window.removeEventListener("scroll", leer);
+  }, []);
+
   const isActive = (item) => path.startsWith(item.route);
   // El hero de portada y la ficha comparten la superficie oscura.
   const oscura = path === "/" || /^\/licitaciones\/[^/]*CO1\.[A-Z]+\.\d+$/i.test(path);
   const navAria = (active) => (active ? { "aria-current": "page" } : {});
 
   return (
-    <nav className={`clr-nav${oscura ? " clr-nav--oscuro" : ""}`} aria-label="Menú principal">
+    <nav
+      className={`clr-nav${oscura ? " clr-nav--oscuro" : ""}`}
+      aria-label="Menú principal"
+      data-scrolled={desplazada ? "" : undefined}
+    >
       <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
       <div className="clr-nav-inner">
         <Link href="/" className="clr-logo" onClick={close} aria-label="AquaLicita inicio">
@@ -493,7 +558,11 @@ export default function Navbar() {
               el glifo de válvula hacía de "H" inicial. Con "AquaLicita" ese
               juego no se sostiene, así que el glifo pasa a ser un ícono y el
               wordmark se escribe completo. Rebrand 2026-08-26. */}
-          <span className="clr-logo-text">AquaLicita</span>
+          <span className="clr-logo-words">
+            <span className="clr-logo-text">AquaLicita</span>
+            {/* El lema solo se pinta en la barra oscura y en pantallas anchas. */}
+            <span className="clr-logo-sub">Inteligencia SECOP II</span>
+          </span>
         </Link>
 
         <span className="clr-status" title="Sistema activo">
@@ -502,7 +571,6 @@ export default function Navbar() {
         </span>
 
         <span className="clr-nav-divider" aria-hidden="true" />
-        <span className="clr-nav-tag">Inteligencia SECOP II</span>
 
         {/* .clr-links ya trae margin-left:auto en globals.css — por eso el
             bloque de auth no lo lleva inline. */}
@@ -511,7 +579,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="clr-nav-link"
+              className={`clr-nav-link${item.extra ? " clr-nav-link--extra" : ""}`}
               onClick={close}
               {...navAria(isActive(item))}
             >

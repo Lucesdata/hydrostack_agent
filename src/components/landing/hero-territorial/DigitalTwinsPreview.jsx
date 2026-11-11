@@ -23,6 +23,7 @@ export default function DigitalTwinsPreview() {
         </Link>
       </div>
       <figure className={styles.planta}>
+        <span className={styles.plantaBase} aria-hidden="true" />
         <Image
           src="/portada/hero/planta-3d.webp"
           alt=""

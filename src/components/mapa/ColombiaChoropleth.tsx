@@ -28,6 +28,11 @@ import { FAMILIAS_DESTACADAS } from "@/src/lib/landing/destacados-portada";
 import { escalonFamiliaDe, type ConteoDepartamento } from "@/src/lib/landing/conteos-familia";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
 import { frase } from "@/src/components/landing/texto";
+import { estiloDespiece } from "@/src/lib/mapa/explosion";
+import type { CSSProperties } from "react";
+
+/** Las variables del despiece (`--ex`, `--ey`, `--i`) como `style` de React. */
+const despiece = (dpto: string) => estiloDespiece(dpto) as CSSProperties | undefined;
 
 /**
  * El mapa de procesos abiertos por departamento.
@@ -100,6 +105,9 @@ function Departamento({
         {...Object.fromEntries(
           Object.entries(capas ?? {}).map(([f, e]) => [`data-e-${f}`, String(e)])
         )}
+        // El despiece del hero (explosion.ts): hacia dónde se separa la pieza.
+        // Sin el CSS del hero no hace nada.
+        style={despiece(entrada.dpto)}
       >
         <title>{entrada.nombre}</title>
       </path>
@@ -348,7 +356,7 @@ function SenalesGrupo({ procesos }: { procesos: ProcesoPortada[] }) {
           por teclado se navega con las flechas de la ficha. */}
       <g aria-hidden="true">
         {[...anclas].map(([dpto, a]) => (
-          <g key={dpto}>
+          <g key={dpto} className="clr-mapa__pieza" style={despiece(dpto)}>
             <circle
               className="clr-mapa__ancla-zona"
               data-ancla={dpto}
@@ -435,6 +443,7 @@ function CifrasFamilia({ conteos }: { conteos: ConteoDepartamento[] }) {
               <text
                 key={c.dpto}
                 className="clr-mapa__cifra"
+                style={despiece(c.dpto)}
                 x={punto[0]}
                 y={punto[1] + DESPLAZAMIENTO_CIFRA}
                 textAnchor="middle"

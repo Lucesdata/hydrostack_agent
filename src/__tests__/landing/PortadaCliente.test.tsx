@@ -54,7 +54,10 @@ describe("PortadaCliente", () => {
     expect(html).not.toContain("Del territorio a los detalles que necesitas.");
   });
 
-  it("sin ticker ni fondo animado: la portada se aligeró (2026-09-27)", () => {
+  // El fondo «blueprint» del 2026-09-27 no vuelve. El hero tiene desde el
+  // 2026-11-11 un fondo animado propio (HeroBackground), pedido por el usuario:
+  // llega como hueco de servidor y su CSS vive en un módulo, no en línea.
+  it("sin ticker ni el fondo «blueprint»; la portada no inyecta animaciones en línea", () => {
     const html = renderToStaticMarkup(<PortadaCliente />);
     expect(html).not.toContain("Fichas recientes");
     expect(html).not.toContain("ptr-");

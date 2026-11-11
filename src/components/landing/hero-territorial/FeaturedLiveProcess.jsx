@@ -7,6 +7,7 @@ import {
   ubicacionDe,
 } from "@/src/lib/landing/proceso-portada";
 import { fechaDeCierre } from "@/src/lib/landing/destacados-portada";
+import { pastillaDe } from "./Minifichas";
 import styles from "./hero-v3.module.css";
 
 /**
@@ -18,6 +19,12 @@ import styles from "./hero-v3.module.css";
  * ocupa este sitio. El estado sale de `estadoVisible()` y el cierre de la
  * recepción de ofertas: un proceso vencido no se pinta como abierto. Sin
  * proceso, lo dice (no se rellena con otro).
+ *
+ * La tarjeta (2026-11-11) se lee como un expediente: una cinta con el tipo de
+ * obra y el número publicado del proceso, el objeto y la entidad, y tres
+ * casillas rotuladas —estado, presupuesto y recepción de ofertas—. Lleva `key`
+ * por proceso: al cambiar de pestaña entra con un fundido en vez de cambiar el
+ * texto de golpe. Todo lo que pinta sale del mismo `ProcesoPortada`.
  */
 
 /** El trazo del icono de la tarjeta, por familia (decorativo: el tipo va en el texto). */
@@ -66,7 +73,21 @@ export default function FeaturedLiveProcess({
         region
       ) : proceso ? (
         <>
-          <article className={styles.fichaTarjeta} data-familia={familiaDe(proceso.tipoProyecto)}>
+          <article
+            key={proceso.id}
+            className={styles.fichaTarjeta}
+            data-familia={familiaDe(proceso.tipoProyecto)}
+          >
+            <p className={styles.fichaCinta}>
+              <span className={styles.fichaTipo}>
+                <span aria-hidden="true" />
+                {pastillaDe(proceso.tipoProyecto)}
+              </span>
+              <span className={styles.fichaNumero}>
+                <span className="sr-only">Proceso: </span>
+                {proceso.numeroProceso}
+              </span>
+            </p>
             <span className={styles.fichaAvatar} aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
@@ -97,11 +118,20 @@ export default function FeaturedLiveProcess({
             </span>
             <ul className={styles.fichaDatos}>
               <li data-abierto={proceso.abierto ? "" : undefined}>
-                <span aria-hidden="true" />
-                {estadoVisible(proceso)}
+                <small>Estado</small>
+                <span className={styles.fichaEstado}>
+                  <span aria-hidden="true" />
+                  {estadoVisible(proceso)}
+                </span>
               </li>
-              <li>{presupuestoLargo(proceso.presupuesto)}</li>
-              <li>{cierreTexto ? `Cierre: ${cierreTexto}` : "Cierre sin fecha publicada"}</li>
+              <li>
+                <small>Presupuesto</small>
+                {presupuestoLargo(proceso.presupuesto)}
+              </li>
+              <li>
+                <small>Recepción de ofertas</small>
+                {cierreTexto ? `Cierre: ${cierreTexto}` : "Cierre sin fecha publicada"}
+              </li>
             </ul>
           </article>
         </>

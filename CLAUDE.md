@@ -373,7 +373,7 @@ territorial, paleta, perfil anónimo— están en
 
 Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
-Última actualización: 2026-11-10 (Commercial & Supply Intelligence, al final); antes, 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
+Última actualización: 2026-11-11 (hero «carta hidrográfica»); antes, 2026-11-10 (Commercial & Supply Intelligence, al final); antes, 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
 ## graphify
 
@@ -414,6 +414,19 @@ digitales» (`/gemelos-digitales`, página informativa; la planta es una
 ilustración y sus lecturas están rotuladas como demostrativas). Componentes en
 `hero-territorial/HeroTerritorialV3.jsx` y `hero-v3.module.css`; fondo y planta
 en `public/portada/hero/`. Inventario, verificación y diferencias pendientes:
+`docs/hero-v3/README.md`.
+
+**Hero «carta hidrográfica» (2026-11-11, rama `ccr-4e3c012c-il7hwe`, sin PR).** Rediseño
+visual del hero V3.1 pedido por el usuario; datos, pestañas y SVG de servidor no cambian.
+Fondo **dibujado con código y animado** (`HeroBackground.jsx`: luz, curvas de nivel de
+`scripts/portada/curvas-nivel.mjs`, trama y cauces), que sustituye a la fotografía: es la
+excepción explícita a la portada «sin fondo animado» del 2026-09-27, y por eso lo continuo
+usa solo `transform`/`opacity` y se detiene con «reducir movimiento». Mapa **despiezado**:
+cada departamento lleva `--ex`/`--ey`/`--i` (`src/lib/mapa/explosion.ts`), se arma al cargar,
+flota, se inclina hacia el puntero (`hero-territorial/escena.js`) y una baliza HTML marca el
+proceso activo; el SVG no se reordena. Tarjetas de familia con medidor de «reciben ofertas
+hoy» y barra del turno; Ficha Viva como expediente; «Pausar recorrido» junto al mapa. Barra
+oscura en tres zonas con enlaces en cápsula y `data-scrolled`. Detalle y lo no medido:
 `docs/hero-v3/README.md`.
 
 ## Landing — Hero Territorial V2 (PR #54, 2026-09-25)
