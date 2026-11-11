@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FAMILIAS } from "@/src/lib/classify/tipo-color";
-import { departamentoCorto, familiaDe, presupuestoCorto } from "@/src/lib/landing/proceso-portada";
-import { frase } from "@/src/components/landing/texto";
+import { familiaDe } from "@/src/lib/landing/proceso-portada";
 import {
   criterioDe,
   FAMILIAS_DESTACADAS,
@@ -12,7 +11,6 @@ import {
   PESTANA,
 } from "@/src/lib/landing/destacados-portada";
 import { textoConteo } from "@/src/lib/landing/conteos-familia";
-import { categoriaDe } from "./Minifichas";
 import {
   procesoDesdeObjetivo,
   regionDesdeObjetivo,
@@ -22,7 +20,7 @@ import {
 } from "./sincronia";
 import { useRegion } from "./region";
 import PanelRegion from "./PanelRegion";
-import { indiceRelativo, usePrefiereMenosMovimiento, useRecorrido } from "./recorrido";
+import { indiceRelativo } from "./recorrido";
 import { familiasPorDepartamento } from "@/src/lib/landing/grupos-portada";
 import styles from "./hero-territorial.module.css";
 import v3 from "./hero-v3.module.css";
@@ -43,10 +41,10 @@ import FeaturedLiveProcess from "./FeaturedLiveProcess";
  *
  * Un solo estado, la pestaña elegida, y **siempre hay una**: por defecto la
  * primera con proceso. La cambian las pestañas (clic o flechas del teclado),
- * señalar un anclaje o una etiqueta del mapa, y el recorrido, que pasa por las
- * pestañas con proceso cada `INTERVALO_RECORRIDO` ms y se detiene al señalar o
- * enfocar la ficha o el mapa, con «Pausar recorrido» y si el sistema pide
- * reducir el movimiento.
+ * señalar un anclaje o una etiqueta del mapa. Desde el 2026-11-11 (propuesta A,
+ * «corporativo sereno») **no hay recorrido automático**: nada cambia solo.
+ * Tampoco halo, línea de vista previa ni el bloque de soluciones: esos accesos
+ * viven en la banda bajo el hero (`SolucionesBanda`).
  *
  * Con `conteos` (PR 2, 2026-10-07) el mapa es coroplético por familia: la
  * pestaña elegida enciende su capa (`data-capa` en la raíz del mapa; el SVG ya
@@ -64,7 +62,6 @@ export default function HeroTerritorialV3({
   conteos = null,
   fondo = null,
   mensaje = null,
-  gemelos = null,
 }) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
@@ -99,34 +96,7 @@ export default function HeroTerritorialV3({
   // Un solo grupo: el mapa del servidor dibujó los tres destacados.
   useGrupoEnMapa(mapaRef, 0, familiasDpto);
 
-  // El recorrido: pausado por el botón, mientras se interactúa con el hero o
-  // si el sistema pide menos movimiento. Solo pasa por pestañas con proceso.
-  const [pausado, setPausado] = useState(false);
-  const [interactuando, setInteractuando] = useState(false);
-  const menosMovimiento = usePrefiereMenosMovimiento();
-  const ids = useMemo(() => conProceso.map((d) => d.familia), [conProceso]);
-  const hayRecorrido = !menosMovimiento && ids.length > 1;
-  const onRecorrido = useCallback((f) => setEleccion(f), []);
-  // Con una región abierta el recorrido se detiene: cambiaría la familia bajo
-  // el panel que se está leyendo.
-  useRecorrido(
-    ids,
-    onRecorrido,
-    hayRecorrido && !pausado && !interactuando && !regionAbierta,
-    activa?.familia
-  );
   const [aviso, setAviso] = useState("");
-  // Se detiene solo sobre lo que se lee —el mapa y la ficha—, no en todo el
-  // hero: en escritorio ocupa casi la pantalla y no se vería nunca.
-  const pausaAlInteractuar = {
-    onPointerEnter: () => setInteractuando(true),
-    onPointerLeave: () => setInteractuando(false),
-    onFocus: () => setInteractuando(true),
-    onBlur: (e) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) setInteractuando(false);
-    },
-  };
-  const pausar = () => setPausado((p) => !p);
   // Elegir a mano se anuncia (el recorrido no), con la pestaña y el objeto.
   const elegir = (familia) => {
     const d = lista.find((x) => x.familia === familia);
@@ -196,11 +166,6 @@ export default function HeroTerritorialV3({
             <span aria-hidden="true">→</span>
           </Link>
         ) : null}
-        {hayRecorrido ? (
-          <button type="button" className={v3.pausa} onClick={pausar}>
-            {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
-          </button>
-        ) : null}
         <Link className={v3.enlace} href="/licitaciones">
           Ver todas las fichas <span aria-hidden="true">→</span>
         </Link>
@@ -215,11 +180,11 @@ export default function HeroTerritorialV3({
         <div className={v3.grid}>
           {mensaje}
 
-          <div className={`${styles.mapPanel} ${v3.mapaZona}`} {...pausaAlInteractuar}>
+          <div className={`${styles.mapPanel} ${v3.mapaZona}`}>
             {/* Las familias van antes que el mapa en el DOM: el teclado llega a las
                 pestañas sin cruzar los 33 departamentos; la rejilla las coloca a la
                 derecha (o sobre el mapa en pantallas estrechas). */}
-            <div className={v3.familias} {...pausaAlInteractuar}>
+            <div className={v3.familias}>
               {destacados == null ? (
                 <p className={styles.notaProcesos} role="status">
                   No pudimos cargar los procesos. Inténtalo de nuevo.
@@ -235,7 +200,6 @@ export default function HeroTerritorialV3({
               )}
             </div>
             <div className={v3.mapaCol}>
-              <div className={v3.halo} aria-hidden="true" />
               <div className={v3.mapaCaja}>
                 <div
                   ref={mapaRef}
@@ -249,13 +213,6 @@ export default function HeroTerritorialV3({
                   {mapa}
                 </div>
               </div>
-              {procesoActivo ? (
-                <p className={styles.previa} aria-hidden="true">
-                  <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}
-                  {presupuestoCorto(procesoActivo.presupuesto)} ·{" "}
-                  {categoriaDe(procesoActivo.tipoProyecto)}
-                </p>
-              ) : null}
               {!mapa ? (
                 <p className={styles.noData}>El mapa no está disponible en este momento.</p>
               ) : null}
@@ -279,7 +236,7 @@ export default function HeroTerritorialV3({
           </div>
         </div>
 
-        <div className={v3.franja} {...pausaAlInteractuar}>
+        <div className={v3.franja}>
           <div
             id="aq-panel-destacado"
             role="tabpanel"
@@ -309,7 +266,6 @@ export default function HeroTerritorialV3({
               pie={pieFicha}
             />
           </div>
-          {gemelos}
         </div>
         {/* Solo al elegir a mano: el recorrido no se anuncia. */}
         <p className="sr-only" role="status">

@@ -3,11 +3,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
-import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
+import SolucionesBanda from "@/src/components/landing/hero-territorial/SolucionesBanda";
 import { procesoPortada } from "./fixtures-portada";
 
-// El mensaje y los gemelos llegan como huecos de servidor desde `app/page.js`.
-const huecos = { mensaje: <HeroMessage />, gemelos: <DigitalTwinsPreview /> };
+// El mensaje llega como hueco de servidor desde `app/page.js`.
+const huecos = { mensaje: <HeroMessage /> };
 
 /**
  * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
@@ -49,9 +49,9 @@ describe("HeroTerritorial", () => {
     expect(html.match(/<h1/g)).toHaveLength(1);
     // Sin título visible sobre las tarjetas (2026-10-04): la lista se nombra sola.
     expect(html).not.toContain("Procesos para explorar</h2>");
-    // «Ficha Viva» y «Gemelos digitales» son h2 bajo el h1; el objeto, h3.
+    // «Ficha Viva» es h2 bajo el h1; el objeto, h3. Sin gemelos en el hero (2026-11-11).
     expect(html).toContain('<h2 id="aq-ficha-titulo">Ficha Viva</h2>');
-    expect(html).toContain('<h2 id="aq-gemelos-titulo">');
+    expect(html).not.toContain("aq-gemelos-titulo");
   });
 
   it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {
@@ -75,11 +75,16 @@ describe("HeroTerritorial", () => {
     expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
     // Sin los accesos a secciones ni los tres pasos (2026-11-02).
     expect(html).not.toContain("#ficha-dinero");
-    expect(html).toContain("Soluciones AquaLicita");
-    expect(html).toContain("Inteligencia Comercial");
-    expect(html).toContain("Talent Intelligence");
-    expect(html).toContain('href="/comercial"');
-    expect(html).toContain('href="/talento"');
+    // Las soluciones ya no van en el hero: viven en la banda de debajo.
+    expect(html).not.toContain("Soluciones AquaLicita");
+    const banda = renderToStaticMarkup(<SolucionesBanda />);
+    expect(banda).toContain("Soluciones AquaLicita");
+    expect(banda).toContain("Inteligencia Comercial");
+    expect(banda).toContain("Talent Intelligence");
+    expect(banda).toContain("Gemelos digitales");
+    expect(banda).toContain('href="/comercial"');
+    expect(banda).toContain('href="/talento"');
+    expect(banda).toContain('href="/gemelos-digitales"');
     for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}`);
   });
 
@@ -125,8 +130,8 @@ describe("HeroTerritorial", () => {
     expect(sinPotable).toContain(`href="${cinco[1].href}`);
   });
 
-  it("la línea del mapa en móvil dice el proceso activo, nunca un texto de espera", () => {
-    expect(html).toContain("<strong>Valle del Cauca</strong> · $2.450 M · Agua potable");
+  it("sin la línea de vista previa del mapa (2026-11-11): la ficha lo dice todo", () => {
+    expect(html).not.toContain("<strong>Valle del Cauca</strong> · $2.450 M");
     expect(html).not.toContain("Desliza las tarjetas");
   });
 
@@ -180,10 +185,15 @@ describe("HeroTerritorial", () => {
     expect(html).not.toMatch(/\b1 – 10\b|procesos abiertos por departamento/i);
   });
 
-  it("con un solo destacado no hay recorrido; con dos o más, se puede pausar", () => {
-    expect(html).toContain("Pausar recorrido");
+  it("sin recorrido automático: nada cambia solo (2026-11-11)", () => {
+    expect(html).not.toContain("Pausar recorrido");
     const uno = renderToStaticMarkup(<HeroTerritorial destacados={conUno(cinco[0])} />);
     expect(uno).not.toContain("Pausar recorrido");
+    const fuente = readFileSync(
+      "src/components/landing/hero-territorial/HeroTerritorialV3.jsx",
+      "utf8"
+    );
+    expect(fuente).not.toContain("useRecorrido");
   });
 
   it("error de carga: aviso, sin pestañas ni tarjetas", () => {

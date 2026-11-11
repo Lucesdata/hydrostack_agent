@@ -37,7 +37,7 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   conteos?: import("@/src/lib/landing/conteos-familia").ConteoDepartamento[] | null,
  *   fondo?: import("react").ReactNode,
  *   mensaje?: import("react").ReactNode,
- *   gemelos?: import("react").ReactNode,
+ *   soluciones?: import("react").ReactNode,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
  * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
@@ -53,7 +53,7 @@ export default function LandingPage({
   conteos = null,
   fondo = null,
   mensaje = null,
-  gemelos = null,
+  soluciones = null,
 }) {
   return (
     <div
@@ -69,17 +69,19 @@ export default function LandingPage({
       <style dangerouslySetInnerHTML={{ __html: PORTADA_CSS }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
-        {/* El hero V3 (2026-11-01): mensaje, mapa con las tres familias y, en su
-            franja inferior, la Ficha Viva y los gemelos digitales. La Ficha
-            Viva absorbió a la sección FichaViva que iba justo después. */}
+        {/* El hero V3 (2026-11-01), simplificado el 2026-11-11 (propuesta A):
+            mensaje, mapa con las tres familias y, debajo, la Ficha Viva. Los
+            gemelos digitales y las soluciones salieron a la banda de abajo. */}
         <HeroTerritorialV3
           mapa={mapa}
           destacados={destacados}
           conteos={conteos}
           fondo={fondo}
           mensaje={mensaje}
-          gemelos={gemelos}
         />
+
+        {/* Las demás soluciones, en una fila de texto (2026-11-11). */}
+        {soluciones}
 
         {/* Accesos al observatorio: las rutas y sus consultas SECOP II se conservan. */}
         <section aria-label="Observatorio de contratación AquaLicita" className={styles.section}>

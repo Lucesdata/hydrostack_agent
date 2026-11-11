@@ -1,26 +1,11 @@
-import Image from "next/image";
 import styles from "./hero-v3.module.css";
 
 /**
- * El fondo del hero: un paisaje de montaña nocturno, decorativo (`alt=""`, sin
- * texto ni cifras). Va bajo todo el contenido y un degradado lo funde con el
- * azul noche de la portada para que el texto conserve su contraste. Si la
- * imagen no carga, queda el degradado de `.fondo` (un `alt` vacío no pinta
- * nada): nada se rompe. Es un componente de servidor a propósito: llega al hero
- * como hueco (`fondo`) para que `next/image` no viaje en el JS del navegador.
+ * El fondo del hero: plano, azul noche, sin imagen (2026-11-11, propuesta A).
+ * La foto de montañas competía con el texto y con el mapa; un degradado casi
+ * imperceptible basta para dar profundidad. Decorativo y sin texto. Sigue siendo
+ * un hueco de servidor (`fondo`).
  */
 export default function HeroBackground() {
-  return (
-    <div className={styles.fondo} aria-hidden="true">
-      <Image
-        src="/portada/hero/fondo-montanas.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className={styles.fondoImg}
-      />
-      <div className={styles.fondoVelo} />
-    </div>
-  );
+  return <div className={styles.fondo} aria-hidden="true" />;
 }

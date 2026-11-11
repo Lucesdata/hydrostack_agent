@@ -405,6 +405,19 @@ colores se miden en `contraste-tu-perfil.test.ts`. La miniatura del semáforo
 (`semaforo.webp`) se generó pero no se usa. No añadir precios, preguntas
 frecuentes ni mercado a la portada.
 
+**Hero «corporativo sereno» (2026-11-11, rama `ccr-b5ec5333-bebzvg`).** El usuario
+pidió un hero menos cargado y más empresarial; se eligió la propuesta A. Queda
+un primer pantallazo de tres niveles: mensaje (eyebrow de una línea, H1, frase,
+un botón principal y uno secundario), mapa con las tres pestañas de familia y
+la Ficha Viva sola debajo. **Salieron del hero:** el bloque «Soluciones» (ahora
+`SolucionesBanda`, una fila de enlaces de texto bajo el hero, mismos destinos de
+`serviciosDelHero`), Gemelos digitales (sigue en esa banda y en
+`/gemelos-digitales`; se borró `DigitalTwinsPreview`), el halo, la línea de vista
+previa móvil, el recorrido automático y «Pausar recorrido» (nada cambia solo;
+`useRecorrido` queda como hook sin uso en el hero), la foto de montañas (fondo
+plano azul noche) y el trazo bajo «saneamiento.». No añadir otra vez servicios,
+animaciones ni imágenes al primer pantallazo sin una razón medida.
+
 **Hero V3.1 (2026-11-01, rama `claude/hero-territorial-v3`, sin PR).** Sustituye la
 composición del hero: mensaje «Oportunidades reales en agua y saneamiento.», el
 mapa con las tres familias como tarjetas-pestaña (cifra real de

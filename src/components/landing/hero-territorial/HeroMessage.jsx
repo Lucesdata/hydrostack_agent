@@ -1,20 +1,18 @@
 import Link from "next/link";
 import BuscadorGuiado from "./BuscadorGuiado";
 import styles from "./hero-v3.module.css";
-import { serviciosDelHero } from "@/src/lib/landing/servicios-hero";
 
 /**
- * La columna del mensaje (45 %): eyebrow, titular, frase, dos accesos y los
- * tres pasos. El buscador guiado se conserva: es el único buscador del sitio
+ * La columna del mensaje (45 %): eyebrow, titular, frase y dos accesos (uno
+ * principal y uno en texto). Los accesos a los demás servicios salieron el
+ * 2026-11-11 a `SolucionesBanda`. El buscador guiado se conserva: es el único buscador del sitio
  * (CLAUDE.md, «Un solo buscador») y su modal se abre con el botón principal.
  */
-export default function HeroMessage({ comercialDisponible = false }) {
-  const servicios = serviciosDelHero(comercialDisponible);
+export default function HeroMessage() {
   return (
     <div className={styles.mensaje}>
       <p className={styles.eyebrow}>
-        Contratación pública <span aria-hidden="true">·</span> Agua y saneamiento{" "}
-        <span aria-hidden="true">·</span> Colombia
+        Agua y saneamiento <span aria-hidden="true">·</span> Colombia
       </p>
       <h1 id="aq-hero-title">
         <span>Oportunidades reales</span>{" "}
@@ -46,31 +44,6 @@ export default function HeroMessage({ comercialDisponible = false }) {
           Ver cómo funciona
         </Link>
       </div>
-      <nav className={styles.serviciosHero} aria-label="Servicios de AquaLicita">
-        <p className={styles.serviciosTitulo}>Soluciones AquaLicita</p>
-        <ul className={styles.serviciosLista}>
-          {servicios.map((servicio) => (
-            <li
-              key={servicio.id}
-              className={`${styles.servicioItem} ${servicio.destacado ? styles.servicioDestacado : ""}`}
-            >
-              {servicio.href ? (
-                <Link href={servicio.href} className={styles.servicioEnlace}>
-                  <span className={styles.servicioNombre}>{servicio.titulo}</span>
-                  <span className={styles.servicioDetalle}>
-                    {servicio.detalle} <span aria-hidden="true">↗</span>
-                  </span>
-                </Link>
-              ) : (
-                <span className={styles.servicioInactivo}>
-                  <span className={styles.servicioNombre}>{servicio.titulo}</span>
-                  <span className={styles.servicioDetalle}>{servicio.detalle}</span>
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
     </div>
   );
 }

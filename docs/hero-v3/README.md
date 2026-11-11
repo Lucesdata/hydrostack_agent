@@ -49,3 +49,11 @@ Se quitaron los tres pasos «Descubre → Evalúa → Sigue» del mensaje y los 
 
 ## Limpieza 3 (2026-11-02, pedido del usuario)
 Se oculta el rótulo flotante del mapa («Valle $500 M»): las etiquetas siguen en el SVG de servidor pero no se pintan.
+
+## 2026-11-11 — Propuesta A «corporativo sereno»
+
+Se simplificó el primer pantallazo: fuera el bloque de soluciones del mensaje
+(ahora `SolucionesBanda`, fila de texto bajo el hero), fuera Gemelos digitales
+de la franja, halo, línea de vista previa, recorrido automático y foto de fondo.
+La franja inferior es solo la Ficha Viva. Pruebas actualizadas; sin cambios de
+datos ni de rutas.

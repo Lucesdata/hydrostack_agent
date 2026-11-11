@@ -233,22 +233,6 @@
   opacity: 0.45;
 }
 
-/* La línea del proceso activo: solo donde la etiqueta se oculta (móvil). */
-.previa {
-  display: none;
-  min-height: 1.5em;
-  margin: 6px 0 0;
-  font:
-    13.5px/1.5 var(--font-inter),
-    sans-serif;
-  color: var(--aq-muted);
-  text-align: center;
-}
-.previa strong {
-  color: var(--aq-text);
-  font-weight: 600;
-}
-
 /* Leyenda de colores: pequeña y discreta, bajo el mapa (2026-10-04). */
 .leyenda {
   display: flex;
@@ -895,14 +879,11 @@
   }
 }
 @media (max-width: 599px) {
-  /* La etiqueta flotante taparía departamentos vecinos: se oculta y la línea
-     .previa dice el proceso activo. La ficha tiene todo. */
+  /* La etiqueta flotante taparía departamentos vecinos: se oculta.
+     La ficha tiene todo. */
   .map :global(.clr-mapa__etq),
   .map :global(.clr-mapa__etq.is-activo) {
     display: none;
-  }
-  .previa {
-    display: block;
   }
   .map :global(.clr-mapa__ancla) {
     stroke-width: 2.4;

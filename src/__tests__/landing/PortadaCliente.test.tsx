@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
-import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
 import { procesoPortada } from "./fixtures-portada";
 
 const procesos = [1, 2, 3].map((i) => procesoPortada({ id: `CO1.REQ.${i}` }));
@@ -42,15 +41,15 @@ describe("PortadaCliente", () => {
 
   it("usa el copy de la referencia aprobada", () => {
     const html = renderToStaticMarkup(
-      <PortadaCliente mensaje={<HeroMessage />} gemelos={<DigitalTwinsPreview />} />
+      <PortadaCliente mensaje={<HeroMessage />} />
     );
     expect(html).toContain("Oportunidades reales");
     expect(html).toContain("saneamiento.");
     // «Procesos para explorar» ya no es un título visible (2026-10-04).
     expect(html).not.toContain("Procesos para explorar</h2>");
-    // La Ficha Viva y los gemelos viven en la franja del hero (2026-11-01).
+    // La Ficha Viva vive bajo el hero; los gemelos ya no (2026-11-11).
     expect(html).toContain("Ficha Viva");
-    expect(html).toContain("Diseña, simula y optimiza proyectos.");
+    expect(html).not.toContain("Diseña, simula y optimiza proyectos.");
     expect(html).not.toContain("Del territorio a los detalles que necesitas.");
   });
 
