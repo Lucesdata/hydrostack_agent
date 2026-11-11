@@ -96,7 +96,7 @@ arregló el mismo día.
 ## 5. Calidad
 
 - Toda función nueva de dominio —cálculo, clasificación, matching, agregación—
-  nace con su test. El repo tiene 110 archivos de prueba; el listón está puesto.
+  nace con su test. El repo tiene 222 archivos de prueba; el listón está puesto.
 - Nada de `catch {}`. Los errores se registran y se propagan. Hoy hay cero en el
   repo y así se queda.
 - Los cambios en ingesta o extracción se instrumentan por etapa.

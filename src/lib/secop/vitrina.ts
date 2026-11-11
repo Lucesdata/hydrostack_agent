@@ -176,7 +176,7 @@ function condicionDeEtapa(etapa: EtapaFiltro): SQL {
         and c.fecha_firma is not null
         and coalesce(c.estado_actual, '') !~* '^(borrador|enviado proveedor|en aprobaci[oó]n)$'
         and coalesce(c.estado_actual, '') !~* '(cancel|desiert|revoc)'
-        and upper(trim(pv.tipo_documento)) = 'NIT'
+        and pv.tipo_documento = 'NIT'
         and ${porFechas}
     )`
   )!;
