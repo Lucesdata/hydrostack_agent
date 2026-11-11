@@ -28,6 +28,7 @@ import styles from "./hero-territorial.module.css";
 import v3 from "./hero-v3.module.css";
 import FamiliaCards from "./FamiliaCards";
 import FeaturedLiveProcess from "./FeaturedLiveProcess";
+import { useBaliza, useInclinacion } from "./escena";
 
 /**
  * El hero de la portada: «Explora el mapa. Entiende cada proceso.» con los
@@ -96,6 +97,8 @@ export default function HeroTerritorialV3({
     [conteos, procesos]
   );
   useActivoEnMapa(mapaRef, activo, familias);
+  // La baliza late sobre el anclaje que el efecto anterior marcó como activo.
+  const baliza = useBaliza(mapaRef, activo);
   // Un solo grupo: el mapa del servidor dibujó los tres destacados.
   useGrupoEnMapa(mapaRef, 0, familiasDpto);
 
@@ -104,6 +107,10 @@ export default function HeroTerritorialV3({
   const [pausado, setPausado] = useState(false);
   const [interactuando, setInteractuando] = useState(false);
   const menosMovimiento = usePrefiereMenosMovimiento();
+  // La escena: el país se inclina hacia el puntero (escena.js).
+  const escenaRef = useRef(null);
+  const cajaRef = useRef(null);
+  useInclinacion(escenaRef, cajaRef, !menosMovimiento);
   const ids = useMemo(() => conProceso.map((d) => d.familia), [conProceso]);
   const hayRecorrido = !menosMovimiento && ids.length > 1;
   const onRecorrido = useCallback((f) => setEleccion(f), []);
@@ -196,11 +203,6 @@ export default function HeroTerritorialV3({
             <span aria-hidden="true">→</span>
           </Link>
         ) : null}
-        {hayRecorrido ? (
-          <button type="button" className={v3.pausa} onClick={pausar}>
-            {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
-          </button>
-        ) : null}
         <Link className={v3.enlace} href="/licitaciones">
           Ver todas las fichas <span aria-hidden="true">→</span>
         </Link>
@@ -209,7 +211,11 @@ export default function HeroTerritorialV3({
   );
 
   return (
-    <section className={`${styles.hero} ${v3.hero}`} aria-labelledby="aq-hero-title">
+    <section
+      className={`${styles.hero} ${v3.hero}`}
+      aria-labelledby="aq-hero-title"
+      data-familia={activa?.familia ?? undefined}
+    >
       {fondo}
       <div className={styles.contenedor}>
         <div className={v3.grid}>
@@ -231,24 +237,76 @@ export default function HeroTerritorialV3({
                   conteos={conteos}
                   onElegir={elegir}
                   onTeclear={alTeclear}
+                  recorrido={hayRecorrido && !pausado && !interactuando && !regionAbierta}
                 />
               )}
             </div>
             <div className={v3.mapaCol}>
-              <div className={v3.halo} aria-hidden="true" />
-              <div className={v3.mapaCaja}>
-                <div
-                  ref={mapaRef}
-                  className={styles.map}
-                  data-capa={capa ?? undefined}
-                  data-familia={capa ?? undefined}
-                  onPointerOver={alSenalarMapa}
-                  onClick={alPulsarMapa}
-                  onFocus={alSenalarMapa}
-                >
-                  {mapa}
+              {/* La plataforma sobre la que flota el país: decorativa. */}
+              <div className={v3.plataforma} aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </div>
+              <div ref={escenaRef} className={v3.escena}>
+                <div className={v3.flota}>
+                  <div ref={cajaRef} className={v3.mapaCaja}>
+                    <div
+                      ref={mapaRef}
+                      className={styles.map}
+                      data-capa={capa ?? undefined}
+                      data-familia={capa ?? undefined}
+                      onPointerOver={alSenalarMapa}
+                      onClick={alPulsarMapa}
+                      onFocus={alSenalarMapa}
+                    >
+                      {mapa}
+                    </div>
+                    {baliza ? (
+                      <span
+                        className={v3.baliza}
+                        data-familia={baliza.familia}
+                        style={{
+                          "--bx": baliza.x.toFixed(2),
+                          "--by": baliza.y.toFixed(2),
+                          "--bex": baliza.ex.toFixed(3),
+                          "--bey": baliza.ey.toFixed(3),
+                        }}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
                 </div>
               </div>
+              {/* Qué capa pinta el mapa y cómo se abre un departamento: el gesto
+                  no se descubría solo. La capa ya la dicen las pestañas. */}
+              {/* Bajo el mapa: qué capa pinta, el control del recorrido (que es
+                  quien cambia de capa) y cómo se abre un departamento, un gesto
+                  que no se descubría solo. La capa ya la dicen las pestañas. */}
+              {capa || hayRecorrido ? (
+                <div className={v3.capaHud}>
+                  {capa ? (
+                    <span className={v3.capaNombre} data-familia={capa} aria-hidden="true">
+                      <i />
+                      Capa · <strong key={capa}>{PESTANA[capa]}</strong>
+                    </span>
+                  ) : null}
+                  {hayRecorrido ? (
+                    <button
+                      type="button"
+                      className={v3.pausa}
+                      onClick={pausar}
+                      data-pausado={pausado ? "" : undefined}
+                    >
+                      <span aria-hidden="true" />
+                      {pausado ? "Reanudar recorrido" : "Pausar recorrido"}
+                    </button>
+                  ) : null}
+                  {capa ? (
+                    <p className={v3.capaPista}>Pulsa un departamento para ver sus procesos</p>
+                  ) : null}
+                </div>
+              ) : null}
               {procesoActivo ? (
                 <p className={styles.previa} aria-hidden="true">
                   <strong>{departamentoCorto(procesoActivo.departamento)}</strong> ·{" "}

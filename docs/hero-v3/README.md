@@ -49,3 +49,21 @@ Se quitaron los tres pasos «Descubre → Evalúa → Sigue» del mensaje y los 
 
 ## Limpieza 3 (2026-11-02, pedido del usuario)
 Se oculta el rótulo flotante del mapa («Valle $500 M»): las etiquetas siguen en el SVG de servidor pero no se pintan.
+
+## Rediseño «carta hidrográfica» (2026-11-11, rama `ccr-4e3c012c-il7hwe`, pedido del usuario)
+Mismo contrato de datos, mismas pestañas, mismo SVG de servidor; cambia cómo se ve y cómo se mueve.
+
+- **Fondo original y animado** (`HeroBackground.jsx`): sin fotografía. Luz que deriva, curvas de nivel de un relieve inventado (`public/portada/hero/curvas-nivel.svg`, 9,5 kB, generado por `scripts/portada/curvas-nivel.mjs`: determinístico, no representa ningún territorio), retícula de puntos y cuatro «cauces» con un pulso de luz. `fondo-montanas.webp` ya no se usa en el hero (sigue en la sección Observatorio). El hero ya no carga una imagen con `priority`.
+- **Mapa despiezado, flotando y armado**: cada departamento lleva `--ex`/`--ey`/`--i` (`src/lib/mapa/explosion.ts`, solo en el modo `seleccion`). Al cargar, el país llega desarmado y se arma del centro hacia fuera; en reposo queda con rendijas (`--aq-despiece: 0.04`), flota sobre una plataforma, se inclina hacia el puntero (`escena.js`) y se abre un poco más al pasar por encima. El relieve sigue siendo `drop-shadow` (cada pieza tiene su canto). Una baliza HTML late sobre el anclaje del proceso activo. El SVG **no se reordena ni se transforma entero**.
+- **Texto**: el titular entra por renglones tras una máscara, «saneamiento.» lleva un brillo y su trazo se dibuja; el `h1` es el mismo marcado. Las cifras de las tarjetas cuentan al aparecer (el HTML ya trae el número final).
+- **Tarjetas**: las de familia muestran cifra, medidor de «reciben ofertas hoy» (dato de `conteosPorFamilia()`) y la barra del turno del recorrido; la Ficha Viva es un expediente con cinta (tipo y número publicado) y tres casillas rotuladas; franja en dos paneles.
+- **Recorrido**: «Pausar recorrido» pasó del pie de la ficha a la esquina del mapa, junto al rótulo de la capa y la pista «Pulsa un departamento para ver sus procesos».
+- **Barra oscura** (`Navbar.js`): marca con lema, enlaces en una cápsula (ninguno parte en dos líneas; los dos extra de la portada solo ≥ 1340 px), y vidrio al desplazar (`data-scrolled`). Vale también para la ficha.
+- **Movimiento**: lo continuo usa `transform`/`opacity` en capas propias; con «reducir movimiento» todo queda quieto y completo. Bajo 900 px no hay cauces.
+- De paso: `PanelRegion` usaba `styles.criterio` y `styles.enlaceFamilia`, que no existían; ahora sí.
+
+### Verificación
+- `vitest run`: 223 archivos, 1.891 pruebas, todas pasan (nueva: `mapa/explosion.test.ts`).
+- Chromium contra el entorno local (muestra de SECOP): sin scroll horizontal a 1440, 1280, 1024, 820 y 390; sin errores de consola; armado, puntero, región, cambio de pestaña y barra desplazada revisados en captura.
+- Alto del hero a 1440×900: 833 px (antes 940); acaba 5 px bajo el pliegue. Captura: `carta-hidrografica-1440x900.jpg`. A 1920×1080 cabe exacto.
+- **No medido**: LCP/CLS con build de producción, rendimiento en un teléfono real ni contraste automático de los colores nuevos de `hero-v3.module.css` (los de la barra sí los cubre `contraste-oscuro.test.ts`).
