@@ -40,9 +40,7 @@ describe("PortadaCliente", () => {
   });
 
   it("usa el copy de la referencia aprobada", () => {
-    const html = renderToStaticMarkup(
-      <PortadaCliente mensaje={<HeroMessage />} />
-    );
+    const html = renderToStaticMarkup(<PortadaCliente mensaje={<HeroMessage />} />);
     expect(html).toContain("Oportunidades reales");
     expect(html).toContain("saneamiento.");
     // «Procesos para explorar» ya no es un título visible (2026-10-04).
