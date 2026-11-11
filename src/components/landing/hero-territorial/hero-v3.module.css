@@ -1,5 +1,5 @@
 /* Hero territorial V3.1 (2026-11-01): mensaje · mapa con tres familias · franja
-   inferior (Ficha Viva y gemelos digitales). Convive con
+   inferior (Ficha Viva; sin gemelos desde 2026-11-11). Convive con
    hero-territorial.module.css, que conserva los tokens `--aq-*` (paleta del spec:
    fondo #031625, superficies #0a2236, acento #00d9f4, texto #f4f8fc, secundario
    #aec2d2), el mapa, la escala y el panel de región. Aquí solo la composición.
@@ -11,38 +11,14 @@
 
 /* ── Fondo ────────────────────────────────────────────────────────────────── */
 .fondo {
-  background: linear-gradient(180deg, #0a2a44 0%, #031625 70%);
+  /* Plano (2026-11-11): un azul noche con apenas un tono más arriba. */
+  background: linear-gradient(180deg, #06223a 0%, #031625 60%);
   position: absolute;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
-.fondoImg {
-  object-fit: cover;
-  object-position: 50% 0%;
-}
-/* Velo ligero: oscurece la izquierda (donde va el texto) y el borde inferior,
-   y deja el paisaje y la onda luminosa a la vista. */
-.fondoVelo {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(3, 22, 37, 0.55) 0%,
-      rgba(3, 22, 37, 0.15) 50%,
-      rgba(3, 22, 37, 0) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(3, 22, 37, 0.2) 0%,
-      rgba(3, 22, 37, 0) 30%,
-      rgba(3, 22, 37, 0) 80%,
-      #031625 100%
-    );
-}
-
 /* El filete que abre el eyebrow del hero. */
 .mensaje .eyebrow::before {
   content: "";
@@ -93,17 +69,6 @@
   display: inline-block;
   color: var(--aq-cyan);
   font-style: normal;
-}
-/* El trazo curvo bajo «saneamiento.»: decorativo, el texto sigue siendo texto. */
-.mensaje h1 em::after {
-  content: "";
-  position: absolute;
-  left: 2%;
-  right: 4%;
-  bottom: -0.16em;
-  height: 0.2em;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1 8 Q 45 1 99 4' fill='none' stroke='%2300d9f4' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
-    center / 100% 100% no-repeat;
 }
 .lead {
   max-width: 38ch;
@@ -194,28 +159,6 @@
   grid-area: mapa;
   position: relative;
   min-width: 0;
-}
-/* Los anillos del boceto detrás del país: dos elipses, una punteada, y un
-   resplandor azul. Decorativos y fuera del flujo: no mueven ni deforman nada. */
-.halo {
-  position: absolute;
-  inset: 6% -6% 0 -8%;
-  z-index: 0;
-  border: 1px solid rgba(0, 217, 244, 0.2);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 50%, rgba(0, 150, 255, 0.16), transparent 66%);
-  pointer-events: none;
-}
-.halo::after {
-  content: "";
-  position: absolute;
-  inset: 9%;
-  border: 1px dashed rgba(0, 217, 244, 0.28);
-  border-radius: 50%;
-}
-.mapaCol > :global(*):not(.halo) {
-  position: relative;
-  z-index: 1;
 }
 /* La caja tiene exactamente la proporción del viewBox del mapa (436 × 520), así
    que un porcentaje dentro de ella cae en el mismo punto del país a cualquier
@@ -324,18 +267,14 @@
     sans-serif;
 }
 
-/* ── Franja inferior: Ficha Viva · Gemelos digitales ──────────────────────── */
+/* ── Franja inferior: la Ficha Viva, sola (2026-11-11) ────────────────────── */
 .franja {
-  display: grid;
-  grid-template-columns: minmax(0, 36fr) minmax(0, 64fr);
-  column-gap: clamp(20px, 2.4vw, 40px);
-  align-items: center;
-  margin-top: clamp(8px, 1vw, 16px);
+  margin-top: clamp(16px, 2vw, 32px);
+  padding-bottom: clamp(24px, 3vw, 48px);
 }
 .franjaFicha {
   min-width: 0;
-  padding-right: clamp(16px, 2.4vw, 40px);
-  border-right: 1px solid var(--aq-line);
+  max-width: 920px;
 }
 .ficha {
   display: flex;
@@ -526,79 +465,10 @@
 .enlace:hover {
   text-decoration: underline;
 }
-.enlace:focus-visible,
-.pausa:focus-visible {
+.enlace:focus-visible {
   outline: 2px solid var(--aq-cyan);
   outline-offset: 3px;
 }
-.pausa {
-  min-height: 32px;
-  padding: 0 4px;
-  border: 0;
-  background: none;
-  color: var(--aq-muted);
-  font:
-    600 13px var(--font-inter),
-    sans-serif;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-/* Gemelos digitales: texto a la izquierda y la planta grande a la derecha,
-   que se sale un poco del margen como en el boceto. */
-.gemelos {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
-  gap: clamp(8px, 1.5vw, 24px);
-  align-items: center;
-  min-width: 0;
-}
-.gemelosTexto h2 {
-  margin: 0;
-  font:
-    700 clamp(1.6rem, 1.1rem + 1.4vw, 2.3rem)/1.1 var(--font-inter),
-    sans-serif;
-  letter-spacing: -0.02em;
-  hyphens: manual;
-}
-.gemelosTexto p:not(.eyebrow) {
-  margin: 12px 0 18px;
-  color: #cfe0ee;
-  font:
-    400 14.5px/1.5 var(--font-inter),
-    sans-serif;
-}
-.gemelosTexto .eyebrow {
-  margin-bottom: 8px;
-}
-.gemelosTexto .eyebrow::before {
-  display: none;
-}
-.planta {
-  position: relative;
-  margin: 0 calc(var(--gutter, 20px) * -0.8) 0 0;
-}
-.plantaImg {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-.demo {
-  position: absolute;
-  left: 0;
-  bottom: 2%;
-  padding: 4px 10px;
-  border: 1px solid var(--aq-line);
-  border-radius: 999px;
-  background: rgba(3, 22, 37, 0.85);
-  color: var(--aq-muted);
-  font:
-    500 11.5px/1.2 var(--font-inter),
-    sans-serif;
-}
-
 /* ── Adaptación ───────────────────────────────────────────────────────────── */
 @media (max-width: 1099px) {
   /* Las familias pasan sobre el mapa, en fila. */
@@ -625,23 +495,10 @@
   }
 }
 @media (max-width: 899px) {
-  .grid,
-  .franja {
+  .grid {
     grid-template-columns: minmax(0, 1fr);
     row-gap: 24px;
-  }
-  .franjaFicha {
-    padding-right: 0;
-    border-right: 0;
-  }
-  .planta {
-    margin-right: 0;
-  }
-  .grid {
     align-items: start;
-  }
-  .gemelos {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 599px) {
@@ -656,96 +513,4 @@
   .acciones > a {
     flex: 1 1 100%;
   }
-}
-
-/* Accesos compactos al ecosistema: secundarios respecto al mapa y CTA primario. */
-.serviciosHero {
-  width: 100%;
-  max-width: 580px;
-  margin-top: 26px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(174, 194, 210, 0.2);
-}
-.serviciosTitulo {
-  margin: 0 0 10px;
-  color: var(--aq-muted);
-  font:
-    600 11px/1.4 var(--font-inter),
-    sans-serif;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-.serviciosLista {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px 10px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-.servicioItem {
-  min-width: 0;
-}
-.servicioEnlace,
-.servicioInactivo {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 53px;
-  padding: 9px 11px;
-  border: 1px solid rgba(140, 190, 225, 0.2);
-  border-radius: 10px;
-  background: rgba(3, 22, 37, 0.42);
-  text-decoration: none;
-}
-.servicioEnlace:hover {
-  border-color: rgba(0, 217, 244, 0.65);
-  background: rgba(10, 44, 66, 0.75);
-}
-.servicioEnlace:focus-visible {
-  outline: 2px solid var(--aq-cyan);
-  outline-offset: 3px;
-}
-.servicioNombre {
-  color: var(--aq-text);
-  font:
-    600 12.5px/1.3 var(--font-inter),
-    sans-serif;
-}
-.servicioDetalle {
-  margin-top: 3px;
-  color: var(--aq-cyan);
-  font:
-    500 11px/1.3 var(--font-inter),
-    sans-serif;
-}
-.servicioInactivo {
-  border-style: dashed;
-  background: rgba(3, 22, 37, 0.27);
-}
-.servicioInactivo .servicioNombre,
-.servicioInactivo .servicioDetalle {
-  color: var(--aq-muted);
-}
-@media (max-width: 420px) {
-  .serviciosLista {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .servicioEnlace,
-  .servicioInactivo {
-    min-height: 48px;
-  }
-}
-
-.servicioDestacado .servicioEnlace {
-  min-height: 67px;
-  border-color: rgba(0, 217, 244, 0.46);
-  background: linear-gradient(130deg, rgba(0, 115, 155, 0.29), rgba(3, 22, 37, 0.67));
-  box-shadow: inset 2px 0 0 var(--aq-cyan);
-}
-.servicioDestacado .servicioNombre {
-  font-size: 14px;
-}
-.servicioDestacado .servicioEnlace:hover {
-  border-color: var(--aq-cyan);
 }

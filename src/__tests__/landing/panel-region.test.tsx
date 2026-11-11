@@ -175,7 +175,7 @@ describe("hero con regiones", () => {
     expect(readFileSync("src/components/landing/hero-territorial/region.js", "utf8")).toContain(
       "AbortController"
     );
-    // Con una región abierta el recorrido se detiene.
-    expect(hero).toMatch(/!interactuando && !regionAbierta/);
+    // Sin recorrido automático (2026-11-11): nada cambia bajo el panel abierto.
+    expect(hero).not.toContain("useRecorrido");
   });
 });
