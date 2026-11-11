@@ -40,13 +40,10 @@ describe("resultado observable del cron tick", () => {
     });
   });
 
-  it.each(["procesos", "contratos", "sweep"] as const)(
-    "detects truncation in %s",
-    (source) => {
-      expect(ingestaTruncada(corrida(source))).toBe(true);
-      expect(resumenTick([{ ok: true }], true)).toEqual({ ok: false, status: 500 });
-    }
-  );
+  it.each(["procesos", "contratos", "sweep"] as const)("detects truncation in %s", (source) => {
+    expect(ingestaTruncada(corrida(source))).toBe(true);
+    expect(resumenTick([{ ok: true }], true)).toEqual({ ok: false, status: 500 });
+  });
 
   it("does not hide downstream failures behind a successful ingestion", () => {
     expect(resumenTick([{ ok: true }, { ok: false }], false)).toEqual({
