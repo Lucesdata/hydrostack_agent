@@ -1,4 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { PgDialect } from "drizzle-orm/pg-core";
+import type { SQL } from "drizzle-orm";
 import type { RawRecordInsert } from "@/src/lib/ingest/mapRecord";
 
 const insertValuesMock = vi.fn();
@@ -55,6 +57,18 @@ describe("makeDbSink", () => {
     expect(inserted.map((r) => r.sourceRecordId).sort()).toEqual(["CO1.REQ.1", "CO1.REQ.2"]);
     expect(inserted.find((r) => r.sourceRecordId === "CO1.REQ.1")?.payloadHash).toBe("new");
     expect(n).toBe(2);
+  });
+
+  it("el upsert solo actualiza si cambió el hash o el timestamp de la fuente (no reescribe filas iguales)", async () => {
+    const sink = makeDbSink("secop_ii_contratos");
+    await sink([record({ source: "secop_ii_contratos" })]);
+
+    const conflict = onConflictMock.mock.calls[0][0] as { setWhere?: unknown; target: unknown[] };
+    expect(conflict.target).toHaveLength(2);
+    expect(conflict.setWhere).toBeDefined();
+    const { sql: text } = new PgDialect().sqlToQuery(conflict.setWhere as SQL);
+    expect(text).toContain('"payload_hash" IS DISTINCT FROM excluded.payload_hash');
+    expect(text).toContain('"source_updated_at" IS DISTINCT FROM excluded.source_updated_at');
   });
 
   it("no toca la base si el lote queda vacío", async () => {
