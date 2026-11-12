@@ -35,10 +35,10 @@ export function serviciosDelHero(comercialDisponible = false) {
       destacado: false,
     },
     {
-      id: "gemelos",
-      titulo: "Gemelos digitales",
-      detalle: "Conocer el concepto",
-      href: "/gemelos-digitales",
+      id: "marketplace",
+      titulo: "Marketplace",
+      detalle: "Explorar en el mapa",
+      href: "/marketplace",
       destacado: false,
     },
   ];

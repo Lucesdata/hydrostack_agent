@@ -28,6 +28,8 @@ const nextConfig = {
   // más cercano para que un enlace viejo nunca dé 404.
   async redirects() {
     return [
+      // 2026-11-12: el marketplace ocupa el lugar de «Gemelos digitales».
+      { source: "/gemelos-digitales", destination: "/marketplace", permanent: true },
       { source: "/asistente/:path*", destination: "/", permanent: true },
       { source: "/reportes/:path*", destination: "/", permanent: true },
       { source: "/nosotros", destination: "/", permanent: true },

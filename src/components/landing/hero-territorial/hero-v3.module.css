@@ -1,6 +1,6 @@
 /* Hero territorial — rediseño «carta hidrográfica» (2026-11-11) sobre la
    composición V3.1 (2026-11-01): mensaje · mapa con tres familias · franja
-   inferior (Ficha Viva y gemelos digitales). Convive con
+   inferior (Ficha Viva y marketplace). Convive con
    hero-territorial.module.css, que conserva los tokens `--aq-*` (fondo #031625,
    superficies #0a2236, acento #00d9f4, texto #f4f8fc, secundario #aec2d2), los
    colores del mapa por capa y el panel de región. Aquí van la composición, el
@@ -1098,7 +1098,7 @@
   }
 }
 
-/* ── Franja inferior: Ficha Viva · Gemelos digitales ──────────────────────── */
+/* ── Franja inferior: Ficha Viva · Marketplace ──────────────────────── */
 .franja {
   display: grid;
   grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
@@ -1110,7 +1110,7 @@
 /* Los dos paneles: vidrio oscuro con el borde en degradado y un filo de luz
    arriba. Sin `backdrop-filter`: detrás hay un fondo en movimiento. */
 .franjaFicha,
-.gemelos {
+.marketplace {
   position: relative;
   min-width: 0;
   border: 1px solid transparent;
@@ -1121,7 +1121,7 @@
   box-shadow: 0 24px 50px -30px rgba(0, 0, 0, 0.8);
 }
 .franjaFicha::before,
-.gemelos::before {
+.marketplace::before {
   content: "";
   position: absolute;
   top: -1px;
@@ -1467,8 +1467,8 @@
   border-right: 0;
 }
 
-/* Gemelos digitales: texto a la izquierda y la planta sobre su base de luz. */
-.gemelos {
+/* Marketplace: texto a la izquierda y las tres ilustraciones de las familias. */
+.marketplace {
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   gap: clamp(8px, 1.4vw, 20px);
@@ -1476,11 +1476,11 @@
   padding: clamp(14px, 1.4vw, 20px) 0 clamp(14px, 1.4vw, 20px) clamp(16px, 1.8vw, 26px);
   overflow: hidden;
 }
-.gemelosTexto {
+.marketplaceTexto {
   position: relative;
   z-index: 1;
 }
-.gemelosTexto h2 {
+.marketplaceTexto h2 {
   margin: 0;
   font:
     700 clamp(1.35rem, 1rem + 1vw, 1.9rem)/1.1 var(--font-inter),
@@ -1489,41 +1489,56 @@
   hyphens: manual;
   text-wrap: balance;
 }
-.gemelosTexto p:not(.eyebrow) {
+.marketplaceTexto p:not(.eyebrow) {
   margin: 10px 0 14px;
   color: #cfe0ee;
   font:
     400 14px/1.5 var(--font-inter),
     sans-serif;
 }
-.gemelosTexto .eyebrow {
+.marketplaceTexto .eyebrow {
   margin-bottom: 8px;
   font-size: 11px;
 }
-.planta {
+.fotos {
   position: relative;
   align-self: stretch;
   display: grid;
   place-items: center;
   margin: 0;
+  padding-bottom: 22px;
 }
-.plantaBase {
-  position: absolute;
-  left: 6%;
-  right: 2%;
-  bottom: 4%;
-  height: 46%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 170, 255, 0.3), transparent);
+.fotos ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.plantaImg {
+.fotos li {
   position: relative;
+  overflow: hidden;
+  border: 1px solid var(--aq-line);
+  border-radius: 12px;
+}
+.fotos img {
   display: block;
-  width: 108%;
-  max-width: none;
+  width: 100%;
   height: auto;
-  max-height: clamp(180px, 22vh, 250px);
-  object-fit: contain;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+.fotos li span {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 18px 8px 6px;
+  background: linear-gradient(180deg, transparent, rgba(3, 22, 37, 0.92));
+  color: #eef5fb;
+  font:
+    600 12px/1.2 var(--font-inter),
+    sans-serif;
 }
 .demo {
   position: absolute;
@@ -1628,9 +1643,8 @@
   .fondoVelo {
     background: linear-gradient(180deg, rgba(3, 22, 37, 0.4) 0%, transparent 40%, #031625 100%);
   }
-  .plantaImg {
-    width: 100%;
-    max-height: 260px;
+  .fotos img {
+    aspect-ratio: 4 / 3;
   }
 }
 @media (max-width: 599px) {
@@ -1648,7 +1662,7 @@
   .servicioDestacado {
     flex-basis: 100%;
   }
-  .gemelos {
+  .marketplace {
     grid-template-columns: minmax(0, 1fr);
     padding-right: clamp(16px, 1.8vw, 26px);
   }

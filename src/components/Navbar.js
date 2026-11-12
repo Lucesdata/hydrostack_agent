@@ -62,12 +62,6 @@ const GRUPOS_CUENTA = [
 // licitaciones: uno es informativo y el otro la guía de participación.
 const ENLACES_PORTADA = [
   {
-    href: "/gemelos-digitales",
-    route: "/gemelos-digitales",
-    label: "Gemelos digitales",
-    extra: true,
-  },
-  {
     href: "/licitaciones/como-participar",
     route: "/licitaciones/como-participar",
     label: "Cómo funciona",

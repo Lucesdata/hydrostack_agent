@@ -37,7 +37,7 @@ const PORTADA_CSS = `.bp-page a { text-decoration: none; cursor: pointer; }`;
  *   conteos?: import("@/src/lib/landing/conteos-familia").ConteoDepartamento[] | null,
  *   fondo?: import("react").ReactNode,
  *   mensaje?: import("react").ReactNode,
- *   gemelos?: import("react").ReactNode,
+ *   marketplace?: import("react").ReactNode,
  * }} props — `mapa` llega ya renderizado desde el servidor. Es un hueco y no un
  * import: importarlo aquí lo arrastraría al bundle del navegador. `destacados`
  * son los de `destacadosPortada()`, con cuyos procesos el servidor dibujó ese
@@ -53,7 +53,7 @@ export default function LandingPage({
   conteos = null,
   fondo = null,
   mensaje = null,
-  gemelos = null,
+  marketplace = null,
 }) {
   return (
     <div
@@ -70,7 +70,7 @@ export default function LandingPage({
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1440, margin: "0 auto" }}>
         {/* El hero V3 (2026-11-01): mensaje, mapa con las tres familias y, en su
-            franja inferior, la Ficha Viva y los gemelos digitales. La Ficha
+            franja inferior, la Ficha Viva y el marketplace. La Ficha
             Viva absorbió a la sección FichaViva que iba justo después. */}
         <HeroTerritorialV3
           mapa={mapa}
@@ -78,7 +78,7 @@ export default function LandingPage({
           conteos={conteos}
           fondo={fondo}
           mensaje={mensaje}
-          gemelos={gemelos}
+          marketplace={marketplace}
         />
 
         {/* Accesos al observatorio: las rutas y sus consultas SECOP II se conservan. */}

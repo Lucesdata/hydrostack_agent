@@ -3,7 +3,7 @@ import { ESTILOS_MAPA } from "@/src/components/mapa/estilos";
 import PortadaCliente from "@/src/components/landing/PortadaCliente";
 import HeroBackground from "@/src/components/landing/hero-territorial/HeroBackground";
 import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
-import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
+import MarketplacePreview from "@/src/components/landing/hero-territorial/MarketplacePreview";
 import { appUrl } from "@/src/lib/app-url";
 import { datasetJsonLd, jsonLdSeguro } from "@/src/lib/landing/dataset-jsonld";
 import { destacadosPortada } from "@/src/lib/secop/destacados-portada";
@@ -69,7 +69,7 @@ export default async function Page() {
         // navegador (presupuesto de peso de la portada).
         fondo={<HeroBackground />}
         mensaje={<HeroMessage comercialDisponible={comercialHabilitado()} />}
-        gemelos={<DigitalTwinsPreview />}
+        marketplace={<MarketplacePreview />}
         mapa={
           <>
             <style dangerouslySetInnerHTML={{ __html: ESTILOS_MAPA }} />
