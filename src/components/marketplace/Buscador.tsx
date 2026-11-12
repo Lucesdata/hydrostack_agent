@@ -13,29 +13,23 @@ import type { OpcionTerritorio } from "@/src/lib/marketplace/territorios";
 import { RUTA_MARKETPLACE } from "@/src/lib/marketplace/url";
 import s from "./marketplace.module.css";
 
+const FORMULARIO = "mk-busqueda";
+
 /**
  * El buscador: un formulario GET sin JavaScript (SPEC §5). Los parámetros son
  * los de la vitrina (`q`, `numero`, `tipo`, `departamento`, `presupuesto`,
  * `orden`), así que la URL es el estado y Atrás/recarga lo reconstruyen. Cambiar
  * un filtro vuelve a la página uno porque el formulario no envía `pagina`.
  */
-export default function Buscador({
-  filtros,
-  territorios,
-}: {
-  filtros: FiltrosVitrina;
-  territorios: OpcionTerritorio[];
-}) {
-  const avanzadoActivo = !!(
-    filtros.numero ||
-    filtros.departamento ||
-    filtros.presupuestoMin ||
-    filtros.orden !== "relevancia" ||
-    (filtros.tipo && !(SISTEMAS_AGRUPADOS as readonly string[]).includes(filtros.tipo))
-  );
-
+export default function Buscador({ filtros }: { filtros: FiltrosVitrina }) {
   return (
-    <form method="get" action={RUTA_MARKETPLACE} role="search" className={s.buscador}>
+    <form
+      id={FORMULARIO}
+      method="get"
+      action={RUTA_MARKETPLACE}
+      role="search"
+      className={s.buscador}
+    >
       <label htmlFor="mk-q" className={s.etiquetaBuscador}>
         Buscar por proceso, entidad o proyecto
       </label>
@@ -68,103 +62,112 @@ export default function Buscador({
           </svg>
         </button>
       </div>
-
-      {/* Se conservan los filtros que el formulario no edita. */}
-      {filtros.tipo && (SISTEMAS_AGRUPADOS as readonly string[]).includes(filtros.tipo) ? (
-        <input type="hidden" name="tipo" value={filtros.tipo} />
-      ) : null}
-
-      <details
-        key={String(avanzadoActivo)}
-        className={s.avanzados}
-        open={avanzadoActivo || undefined}
-      >
-        <summary>Filtros avanzados</summary>
-        <div className={s.rejillaFiltros}>
-          <label>
-            <span>Número de proceso</span>
-            <input
-              key={filtros.numero ?? ""}
-              name="numero"
-              type="text"
-              defaultValue={filtros.numero ?? ""}
-              maxLength={MAX_Q}
-              placeholder="CO1.REQ.… o referencia"
-              autoComplete="off"
-            />
-          </label>
-          <label>
-            <span>Departamento</span>
-            {/* `key`: los campos no controlados no releen `defaultValue` cuando el mapa
-                cambia la URL sin recargar; con la clave se vuelven a montar. */}
-            <select
-              key={filtros.departamento ?? ""}
-              name="departamento"
-              defaultValue={filtros.departamento ?? ""}
-            >
-              <option value="">Todos</option>
-              {territorios.map((t) => (
-                <option key={t.codigo} value={t.slug}>
-                  {t.nombre} ({t.total.toLocaleString("es-CO")})
-                </option>
-              ))}
-            </select>
-          </label>
-          {!filtros.tipo || !(SISTEMAS_AGRUPADOS as readonly string[]).includes(filtros.tipo) ? (
-            <label>
-              <span>Tipo de proyecto</span>
-              <select key={filtros.tipo ?? ""} name="tipo" defaultValue={filtros.tipo ?? ""}>
-                <option value="">Todos</option>
-                {SISTEMAS_AGRUPADOS.map((v) => (
-                  <option key={v} value={v}>
-                    {ETIQUETA_SISTEMA_CORTA[v]}
-                  </option>
-                ))}
-                {TIPOS_PROYECTO.map((t) => (
-                  <option key={t} value={t}>
-                    {TIPO_PROYECTO[t].label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          <label>
-            <span>Presupuesto</span>
-            <select
-              key={filtros.presupuestoMin ?? ""}
-              name="presupuesto"
-              defaultValue={filtros.presupuestoMin ?? ""}
-            >
-              <option value="">Cualquiera</option>
-              {PRESUPUESTOS_MIN.map((m) => (
-                <option key={m} value={m}>
-                  {etiquetaPresupuesto(m)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Orden</span>
-            <select key={filtros.orden} name="orden" defaultValue={filtros.orden}>
-              {ORDENES_VITRINA.map((o) => (
-                <option key={o} value={o}>
-                  {ETIQUETA_ORDEN[o]}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <p className={s.notaFiltros}>
-          Con un número de proceso se busca también entre los cerrados y se ignoran los demás
-          filtros.
-        </p>
-      </details>
-
-      {hayFiltros(filtros) ? (
-        <a className={s.limpiar} href={RUTA_MARKETPLACE}>
-          Limpiar filtros
-        </a>
-      ) : null}
     </form>
+  );
+}
+
+export function CamposFiltro({
+  filtros,
+  territorios,
+}: {
+  filtros: FiltrosVitrina;
+  territorios: OpcionTerritorio[];
+}) {
+  return (
+    <>
+      <div className={s.rejillaFiltros}>
+        <label>
+          <span>Número de proceso</span>
+          <input
+            key={filtros.numero ?? ""}
+            name="numero"
+            form={FORMULARIO}
+            type="text"
+            defaultValue={filtros.numero ?? ""}
+            maxLength={MAX_Q}
+            placeholder="CO1.REQ.… o referencia"
+            autoComplete="off"
+          />
+        </label>
+        <label>
+          <span>Departamento</span>
+          {/* `key`: los campos no controlados no releen `defaultValue` cuando el mapa
+                cambia la URL sin recargar; con la clave se vuelven a montar. */}
+          <select
+            key={filtros.departamento ?? ""}
+            name="departamento"
+            form={FORMULARIO}
+            defaultValue={filtros.departamento ?? ""}
+          >
+            <option value="">Todos</option>
+            {territorios.map((t) => (
+              <option key={t.codigo} value={t.slug}>
+                {t.nombre}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Tipo de proyecto</span>
+          <select
+            key={filtros.tipo ?? ""}
+            name="tipo"
+            form={FORMULARIO}
+            defaultValue={filtros.tipo ?? ""}
+          >
+            <option value="">Todos</option>
+            {SISTEMAS_AGRUPADOS.map((v) => (
+              <option key={v} value={v}>
+                {ETIQUETA_SISTEMA_CORTA[v]}
+              </option>
+            ))}
+            {TIPOS_PROYECTO.map((t) => (
+              <option key={t} value={t}>
+                {TIPO_PROYECTO[t].label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Presupuesto</span>
+          <select
+            key={filtros.presupuestoMin ?? ""}
+            name="presupuesto"
+            form={FORMULARIO}
+            defaultValue={filtros.presupuestoMin ?? ""}
+          >
+            <option value="">Cualquiera</option>
+            {PRESUPUESTOS_MIN.map((m) => (
+              <option key={m} value={m}>
+                {etiquetaPresupuesto(m)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Orden</span>
+          <select key={filtros.orden} name="orden" form={FORMULARIO} defaultValue={filtros.orden}>
+            {ORDENES_VITRINA.map((o) => (
+              <option key={o} value={o}>
+                {ETIQUETA_ORDEN[o]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className={s.notaFiltros}>
+        Con un número de proceso se busca también entre los cerrados y se ignoran los demás filtros.
+      </p>
+      <div className={s.accionesFiltros}>
+        <button type="submit" form={FORMULARIO} className={s.botonSecundario}>
+          Aplicar filtros
+        </button>
+        {hayFiltros(filtros) ? (
+          <a className={s.limpiar} href={RUTA_MARKETPLACE}>
+            Limpiar filtros
+          </a>
+        ) : null}
+      </div>
+    </>
   );
 }

@@ -40,15 +40,36 @@ function Icono({ familia }: { familia: FamiliaMarketplace }) {
  * acompaña siempre a su nombre y nunca es lo único que dice la familia activa
  * (`aria-current` y el trazo).
  */
-export default function Familias({ filtros }: { filtros: FiltrosVitrina }) {
+export default function Familias({
+  filtros,
+  lateral = false,
+}: {
+  filtros: FiltrosVitrina;
+  lateral?: boolean;
+}) {
   return (
-    <nav aria-label="Tipo de infraestructura" className={s.familias}>
+    <nav
+      aria-label={lateral ? "Categorías del mercado" : "Tipo de infraestructura"}
+      className={lateral ? s.familiasLaterales : s.familias}
+    >
+      {lateral ? (
+        <Link
+          href={hrefMarketplace(conTipo(filtros, null))}
+          className={s.familia}
+          data-activa={!filtros.tipo || undefined}
+          aria-current={!filtros.tipo ? "true" : undefined}
+          prefetch={false}
+        >
+          Todas las oportunidades
+        </Link>
+      ) : null}
       {FAMILIAS_CHIP.map((f) => {
         const activa = filtros.tipo === f.sistema;
         return (
           <Link
             key={f.sistema}
             href={hrefMarketplace(conTipo(filtros, activa ? null : f.sistema))}
+            prefetch={false}
             className={s.familia}
             data-activa={activa || undefined}
             aria-current={activa ? "true" : undefined}

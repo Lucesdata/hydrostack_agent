@@ -29,7 +29,7 @@ import {
   resolverDepartamento,
   type ExtraDeProceso,
 } from "./adaptador";
-import type { ConsultaMarketplace, Metricas } from "./tipos";
+import { POR_PAGINA_MARKETPLACE, type ConsultaMarketplace, type Metricas } from "./tipos";
 import { sinEtapa } from "./url";
 
 async function extrasDe(ids: string[]): Promise<Map<string, ExtraDeProceso>> {
@@ -102,7 +102,11 @@ export async function consultarMarketplace(
     const departamentoCodigo = seleccion?.codigo ?? null;
 
     const [datos, metricas, [frescura]] = await Promise.all([
-      procesosDeVitrina("abiertos", pagina, { filtros: filtrosEfectivos, departamentoCodigo }),
+      procesosDeVitrina("abiertos", pagina, {
+        filtros: filtrosEfectivos,
+        departamentoCodigo,
+        porPagina: POR_PAGINA_MARKETPLACE,
+      }),
       filtros.numero
         ? Promise.resolve<Metricas | null>(null)
         : metricasDe({ ...sinNumero, departamento: seleccion?.slug ?? null }, departamentoCodigo),

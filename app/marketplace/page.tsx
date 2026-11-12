@@ -11,11 +11,6 @@ import {
 import { filtrosDesdeParams } from "@/src/lib/secop/filtros-vitrina";
 import s from "@/src/components/marketplace/marketplace.module.css";
 
-/**
- * Vista de revisión del marketplace híbrido (Fase 4, SPEC §1). Ruta propuesta
- * para el traspaso, con `noindex`: no compite con la portada ni con la vitrina
- * mientras se revisa. Quitar el enlace de navegación (o esta ruta) la apaga.
- */
 export const metadata: Metadata = {
   title: "Marketplace de oportunidades hídricas",
   description:
@@ -45,10 +40,12 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
   return (
     // El `<main>` ya lo pone el layout.
     <div className={`${s.pagina} tema-oscuro`}>
-      <Hero datos={datos} filtros={filtros} />
-      {datos.estado === "no-disponible" ? null : (
-        <Oportunidades datos={datos} filtros={filtros} pagina={pagina} />
-      )}
+      <div className={s.catalogo}>
+        <Hero datos={datos} filtros={filtros} />
+        {datos.estado === "no-disponible" ? null : (
+          <Oportunidades datos={datos} filtros={filtros} pagina={pagina} />
+        )}
+      </div>
     </div>
   );
 }

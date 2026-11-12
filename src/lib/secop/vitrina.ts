@@ -312,8 +312,13 @@ async function conEtapaCalculada(filas: ProcesoDeVitrina[]): Promise<ProcesoDeVi
 export async function procesosDeVitrina(
   pestana: PestanaVitrina,
   pagina = 1,
-  opciones: { filtros?: FiltrosVitrina; departamentoCodigo?: string | null } = {}
+  opciones: {
+    filtros?: FiltrosVitrina;
+    departamentoCodigo?: string | null;
+    porPagina?: number;
+  } = {}
 ): Promise<PaginaDeVitrina> {
+  const porPagina = opciones.porPagina ?? POR_PAGINA_VITRINA;
   const filtros = pestana === "abiertos" ? (opciones.filtros ?? SIN_FILTROS) : SIN_FILTROS;
   const porNumero = filtros.numero ? busquedaPorNumero(filtros.numero) : null;
   const where =
@@ -344,8 +349,8 @@ export async function procesosDeVitrina(
       .leftJoin(geografia, eq(geografia.codigoDivipola, proceso.geografiaId))
       .where(where)
       .orderBy(...orden)
-      .limit(POR_PAGINA_VITRINA)
-      .offset((pagina - 1) * POR_PAGINA_VITRINA),
+      .limit(porPagina)
+      .offset((pagina - 1) * porPagina),
     // Mismos joins que la página: los filtros leen entidad y geografía.
     db
       .select({ total: sql<number>`count(*)::int` })
@@ -373,7 +378,7 @@ export async function procesosDeVitrina(
     items,
     total,
     pagina,
-    porPagina: POR_PAGINA_VITRINA,
+    porPagina,
     pestana,
     filtros,
   };

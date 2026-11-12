@@ -23,7 +23,7 @@ function hayWebGL(): boolean {
 }
 
 /**
- * Lo que el visitante ve a la derecha del hero.
+ * Vista territorial desplegable.
  *
  * Por defecto, el mapa 2D del servidor (`mapa2d`, enlaces reales). El 3D lo
  * sustituye solo si el navegador lo permite: ancho de escritorio (≥ 1024 px),
@@ -51,24 +51,28 @@ export default function EscenaTerritorial({
   const [permitido, setPermitido] = useState(false);
   const [lista, setLista] = useState(false);
   const [fallo, setFallo] = useState(false);
+  const escena = useRef<HTMLDivElement>(null);
   const controles = useRef<EscenaHandle | null>(null);
 
   useEffect(() => {
     if (fallo) return undefined;
     const ancho = window.matchMedia("(min-width: 1024px)");
     const quieto = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const panel = escena.current?.closest("details");
     let webgl: boolean | null = null;
     const evaluar = () => {
-      const ok = ancho.matches && !quieto.matches;
+      const ok = ancho.matches && !quieto.matches && (panel?.open ?? true);
       if (ok && webgl === null) webgl = hayWebGL();
       const permitir = ok && !!webgl;
       setPermitido(permitir);
       if (!permitir) setLista(false);
     };
     evaluar();
+    panel?.addEventListener("toggle", evaluar);
     ancho.addEventListener("change", evaluar);
     quieto.addEventListener("change", evaluar);
     return () => {
+      panel?.removeEventListener("toggle", evaluar);
       ancho.removeEventListener("change", evaluar);
       quieto.removeEventListener("change", evaluar);
     };
@@ -92,7 +96,7 @@ export default function EscenaTerritorial({
   const en3d = permitido && !fallo;
 
   return (
-    <div className={s.territorio3d} data-escena={lista ? "3d" : "2d"}>
+    <div ref={escena} className={s.territorio3d} data-escena={lista ? "3d" : "2d"}>
       <div className={s.mapa2dCaja} hidden={lista}>
         {mapa2d}
       </div>

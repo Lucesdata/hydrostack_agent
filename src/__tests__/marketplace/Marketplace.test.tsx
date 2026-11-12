@@ -200,11 +200,17 @@ describe("Oportunidades (destacadas y resultados)", () => {
     expect(h).toContain('href="/licitaciones"');
   });
 
+  it("el catálogo sin filtros ofrece una cuadrícula y permite seguir explorando", () => {
+    const h = render(datos());
+    expect(h).toContain('aria-label="Cuadrícula de oportunidades"');
+    expect(h).toContain('href="/marketplace?pagina=2#resultados"');
+  });
+
   it("con filtros: «Resultados», vitrina con los mismos filtros y paginación", () => {
     const h = render(datos({ total: 40 }), { ...SIN_FILTROS, tipo: "potable" }, 2);
     expect(h).toContain(">Resultados<");
     expect(h).toContain('href="/licitaciones?tipo=potable"');
-    expect(h).toContain("página 2 de 5");
+    expect(h).toContain("página 2 de 4");
     expect(h).toContain('href="/marketplace?tipo=potable#resultados"'); // anterior → página 1
     expect(h).toContain("pagina=3#resultados");
     expect(h).toContain('aria-live="polite"');
