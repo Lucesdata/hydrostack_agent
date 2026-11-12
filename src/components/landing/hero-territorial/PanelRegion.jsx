@@ -82,7 +82,11 @@ export default function PanelRegion({ dpto, nombre, familia, conteo, estado, onC
             const fecha = fechaDeCierre(p.cierre);
             return (
               <li key={p.id}>
-                <Link href={p.href} className={styles.regionObjeto} title={rotuloDeObjeto(p.objeto)}>
+                <Link
+                  href={p.href}
+                  className={styles.regionObjeto}
+                  title={rotuloDeObjeto(p.objeto)}
+                >
                   {rotuloDeObjeto(p.objeto)}
                 </Link>
                 <span className={styles.regionEntidad}>
