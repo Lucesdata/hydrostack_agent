@@ -113,6 +113,14 @@ export function makeDbSink(source: string): RawSink {
           sourceUpdatedAt: sql`excluded.source_updated_at`,
           batchId: sql`excluded.batch_id`,
         },
+        // Solo reescribe si algo cambió. Sin esto, el sweep D21a (contratos sin
+        // timestamp, ~19 mil filas) reescribía todo cada día y volvía a llenar el
+        // payload ya vaciado por el transform. Si el hash no cambió, el payload
+        // previo (o su NULL tras transformar) sigue siendo el correcto. El
+        // timestamp de la fuente se compara aparte porque no entra en el hash
+        // (es un campo volátil).
+        setWhere: sql`${rawRecord.payloadHash} IS DISTINCT FROM excluded.payload_hash
+          OR ${rawRecord.sourceUpdatedAt} IS DISTINCT FROM excluded.source_updated_at`,
       });
     return deduped.length;
   };
