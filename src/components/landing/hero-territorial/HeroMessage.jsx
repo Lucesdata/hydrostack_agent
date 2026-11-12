@@ -64,6 +64,9 @@ export default function HeroMessage({ comercialDisponible = false }) {
           </svg>
           Ver cómo funciona
         </Link>
+        <Link className={styles.ctaContorno} href="/marketplace">
+          Marketplace de oportunidades
+        </Link>
       </div>
       <nav className={styles.serviciosHero} aria-label="Servicios de AquaLicita">
         <p className={styles.serviciosTitulo}>Soluciones AquaLicita</p>
