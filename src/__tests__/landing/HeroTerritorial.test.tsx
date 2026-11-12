@@ -3,11 +3,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HeroTerritorial from "@/src/components/landing/hero-territorial/HeroTerritorialV3";
 import HeroMessage from "@/src/components/landing/hero-territorial/HeroMessage";
-import DigitalTwinsPreview from "@/src/components/landing/hero-territorial/DigitalTwinsPreview";
+import MarketplacePreview from "@/src/components/landing/hero-territorial/MarketplacePreview";
 import { procesoPortada } from "./fixtures-portada";
 
-// El mensaje y los gemelos llegan como huecos de servidor desde `app/page.js`.
-const huecos = { mensaje: <HeroMessage />, gemelos: <DigitalTwinsPreview /> };
+// El mensaje y el marketplace llega como huecos de servidor desde `app/page.js`.
+const huecos = { mensaje: <HeroMessage />, marketplace: <MarketplacePreview /> };
 
 /**
  * El hero con los tres destacados (spec 2026-10-07-hero-tres-destacados; antes,
@@ -49,9 +49,9 @@ describe("HeroTerritorial", () => {
     expect(html.match(/<h1/g)).toHaveLength(1);
     // Sin título visible sobre las tarjetas (2026-10-04): la lista se nombra sola.
     expect(html).not.toContain("Procesos para explorar</h2>");
-    // «Ficha Viva» y «Gemelos digitales» son h2 bajo el h1; el objeto, h3.
+    // «Ficha Viva» y «Marketplace» son h2 bajo el h1; el objeto, h3.
     expect(html).toContain('<h2 id="aq-ficha-titulo">Ficha Viva</h2>');
-    expect(html).toContain('<h2 id="aq-gemelos-titulo">');
+    expect(html).toContain('<h2 id="aq-marketplace-titulo">');
   });
 
   it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {

@@ -65,7 +65,7 @@ export default function HeroTerritorialV3({
   conteos = null,
   fondo = null,
   mensaje = null,
-  gemelos = null,
+  marketplace = null,
 }) {
   const [eleccion, setEleccion] = useState(null);
   const mapaRef = useRef(null);
@@ -367,7 +367,7 @@ export default function HeroTerritorialV3({
               pie={pieFicha}
             />
           </div>
-          {gemelos}
+          {marketplace}
         </div>
         {/* Solo al elegir a mano: el recorrido no se anuncia. */}
         <p className="sr-only" role="status">
