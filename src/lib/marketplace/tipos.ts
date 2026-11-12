@@ -76,3 +76,5 @@ export interface ConsultaDisponible {
 
 export type ConsultaMarketplace =
   ConsultaDisponible | { estado: "no-disponible"; consultadoEn: string };
+
+export const POR_PAGINA_MARKETPLACE = 12;

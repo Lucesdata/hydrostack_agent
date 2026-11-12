@@ -43,7 +43,6 @@ export default function TarjetaOportunidad({ o, hoy }: { o: Oportunidad; hoy: Da
   const foto = ilustracionDeTipo(o.tipo);
   const monto = montoConDato(o.precioBaseCop);
   const lugar = [o.municipio, o.departamento].filter(Boolean).join(", ");
-  const sinRecibir = vista.etapa.clave !== "abierto";
 
   return (
     <article className={s.tarjeta} data-sin-foto={foto ? undefined : true}>
@@ -74,15 +73,19 @@ export default function TarjetaOportunidad({ o, hoy }: { o: Oportunidad; hoy: Da
           >
             {tipoTexto}
           </span>
-          {sinRecibir ? <span className={s.estado}>{vista.etapa.label}</span> : null}
+          <span className={s.estado} data-abierto={vista.etapa.clave === "abierto" || undefined}>
+            {vista.etapa.label}
+          </span>
         </p>
         <h3 className={s.titulo}>
-          <Link href={o.fichaHref} title={vista.objetoOriginal ?? undefined}>
+          <Link href={o.fichaHref} title={vista.objetoOriginal ?? undefined} prefetch={false}>
             {vista.objeto}
           </Link>
         </h3>
-        <p className={s.entidad}>{vista.entidad}</p>
-        <p className={s.lugar}>
+        <p className={s.entidad} title={vista.entidad}>
+          {vista.entidad}
+        </p>
+        <p className={s.lugar} title={lugar || undefined}>
           <span className={s.rotulo}>Sede de la entidad</span> {lugar || "No informada"}
         </p>
         <dl className={s.datosTarjeta}>
