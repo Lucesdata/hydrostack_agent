@@ -123,4 +123,16 @@ describe("runIngest", () => {
     expect(summary.pages).toBe(3);
     expect(summary.reachedMaxPages).toBe(true);
   });
+  it("rejects a nonempty page without a valid keyset cursor", async () => {
+    const { fetchPage } = fakeFetch([
+      [row("A", "2024-01-01T00:00:00.000"), row("", "2024-01-02T00:00:00.000")],
+      [row("B", "2024-01-03T00:00:00.000")],
+    ]);
+    await expect(
+      runIngest(
+        { fetchPage, sink: countingSink },
+        { source: SOURCE_CONTRATOS, lastWatermark: null, batchId: BATCH, pageSize: 2 }
+      )
+    ).rejects.toThrow("sin cursor keyset válido");
+  });
 });

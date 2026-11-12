@@ -95,7 +95,9 @@ export async function runIngest(
 
     cursor = cursorFromRow(rows[rows.length - 1], source.watermarkField, source.idField);
     // Sin cursor utilizable no podemos avanzar sin arriesgar saltar/duplicar.
-    if (cursor === null) break;
+    if (cursor === null) {
+      throw new Error(`Ingesta ${source.source}: página con registros sin cursor keyset válido`);
+    }
     // Última página (incompleta) → terminamos.
     if (rows.length < pageSize) break;
 
@@ -186,7 +188,11 @@ export async function runSweep(
 
     const lastId = rows[rows.length - 1][source.idField];
     cursor = typeof lastId === "string" && lastId ? lastId : null;
-    if (cursor === null) break;
+    if (cursor === null) {
+      throw new Error(
+        `Sweep ${source.source}: página con registros sin identificador de cursor válido`
+      );
+    }
     if (rows.length < pageSize) break;
 
     if (pages >= maxPages) {
