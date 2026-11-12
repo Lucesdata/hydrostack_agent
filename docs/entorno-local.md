@@ -72,8 +72,8 @@ configurar. `.env.local` puede seguir apuntando a Supabase: `entorno.sh` define
 una captura por paso en `.local/recorrido/`:
 
 1. Sin sesión: la vitrina carga, no hay «Para ti» y «Guardar» pide entrar.
-2. El buscador (uno solo desde el 2026-10-05): el modal del hero lleva a la
-   vitrina con sus filtros, la búsqueda por número encuentra también cerrados y
+2. Los accesos del hero llevan al Marketplace y a la guía de participación.
+   En la vitrina, la búsqueda por número encuentra también cerrados y
    `/licitaciones/explorar` redirige traduciendo sus parámetros.
 3. Ana: «Para ti» con tarjetas; guardar desde una tarjeta y desde el Radar;
    lo guardado aparece en `/mis-procesos`; «Avisarme» con tipo y departamento

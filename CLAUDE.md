@@ -375,6 +375,13 @@ Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
 Última actualización: 2026-11-11 (hero «carta hidrográfica»); antes, 2026-11-10 (Commercial & Supply Intelligence, al final); antes, 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
+**CTA del hero (2026-11-12).** «Marketplace de oportunidades» enlaza a
+`/marketplace` y «Ver cómo funciona» conserva `/licitaciones/como-participar`.
+Se retira del hero el activador del buscador guiado y la fila de Soluciones
+AquaLicita. Las rutas de los servicios y la vitrina siguen disponibles. El mapa,
+las tarjetas por familia, Ficha Viva y la vista previa del Marketplace conservan
+sus fuentes y su comportamiento.
+
 **Marketplace híbrido, Fase 4 (2026-11-12, #185). El mismo día reemplaza a «Gemelos digitales»:** sale la página `/gemelos-digitales` (308 a `/marketplace`), su pestaña, su servicio y la tarjeta de la franja del hero (`MarketplacePreview`, slot `marketplace`); entran la pestaña «Marketplace» (primera del menú, catálogo `seccionesHome`) y un botón en el hero. Lo que sigue describe el marketplace.
 Ruta de revisión `/marketplace` (`noindex`, dinámica) que **no sustituye** la portada
 ni la vitrina: buscador GET con los parámetros de la vitrina, tres familias

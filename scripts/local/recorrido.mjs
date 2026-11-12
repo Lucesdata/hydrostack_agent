@@ -91,21 +91,21 @@ async function foto(page, nombre) {
   await ctx.close();
 }
 
-// 1b. Un solo buscador (2026-10-05): el modal del hero, el número y Explorar
+// 1b. Accesos de la portada y búsquedas de la vitrina
 {
   const { ctx, page } = await contexto(null);
-  await paso("buscador: el modal del hero lleva a la vitrina con los filtros", async () => {
+  await paso("hero: el acceso principal lleva al marketplace", async () => {
     await page.goto(`${BASE}/`);
-    await page.getByRole("button", { name: "Buscar procesos" }).first().click();
-    await page.getByRole("button", { name: /Agua residual/ }).click();
-    await page.locator("dialog select[name=actividad]").selectOption("obras");
-    await page.locator("dialog form[role=search] button[type=submit]").first().click();
-    await page.waitForURL(/\/licitaciones\?/);
-    const url = new URL(page.url());
-    exigir(url.pathname === "/licitaciones", `fue a ${url.pathname}`);
-    exigir(url.searchParams.get("tipo") === "residual", `tipo=${url.searchParams.get("tipo")}`);
-    exigir(url.searchParams.get("actividad") === "obras", "falta actividad");
-    await foto(page, "01b-hero-a-vitrina");
+    await page.getByRole("link", { name: "Marketplace de oportunidades", exact: true }).click();
+    await page.waitForURL(`${BASE}/marketplace`);
+    await page.getByRole("heading", { level: 1 }).waitFor();
+    await foto(page, "01b-hero-a-marketplace");
+  });
+  await paso("hero: el acceso secundario lleva a la guía", async () => {
+    await page.goto(`${BASE}/`);
+    await page.getByRole("link", { name: "Ver cómo funciona", exact: true }).click();
+    await page.waitForURL(`${BASE}/licitaciones/como-participar`);
+    await page.getByRole("heading", { level: 1 }).waitFor();
   });
   await paso("buscador: por número encuentra también cerrados", async () => {
     // Un cerrado de la muestra, para que la prueba no dependa de un id fijo.
