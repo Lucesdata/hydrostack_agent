@@ -23,8 +23,9 @@ import {
  * forma.
  */
 
-export const ANCHO_MAPA = 420;
-export const ALTO_MAPA = 520;
+import { ALTO_MAPA, ANCHO_MAPA } from "./viewbox";
+// Las medidas viven en viewbox.ts (sin geometría); aquí se reexportan.
+export { ALTO_MAPA, ANCHO_MAPA };
 export const LADO_RECUADRO = 58;
 /** Esquina del recuadro de San Andrés: arriba a la izquierda, sobre el Pacífico. */
 export const RECUADRO_X = 6;

@@ -59,3 +59,14 @@ describe("despiece del mapa", () => {
     expect(posicionEnCaja(0, 0, 43.6, 52)).toMatchObject({ ex: 10, ey: 10 });
   });
 });
+
+describe("el cliente no arrastra geometría", () => {
+  it("escena.js importa las medidas de viewbox.ts, no de módulos con GeoJSON", async () => {
+    const { readFileSync } = await import("node:fs");
+    const fuente = readFileSync("src/components/landing/hero-territorial/escena.js", "utf8");
+    expect(fuente).toContain('from "@/src/lib/mapa/viewbox"');
+    expect(fuente).not.toMatch(/mapa\/(modelo|etiquetas-procesos|recuadro-islas|rotulos)/);
+    const caja = readFileSync("src/lib/mapa/viewbox.ts", "utf8");
+    expect(caja).not.toMatch(/^import /m);
+  });
+});
