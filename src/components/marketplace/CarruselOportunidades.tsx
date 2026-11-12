@@ -53,14 +53,38 @@ export default function CarruselOportunidades({
       </ul>
       {estado.desborda ? (
         <div className={s.botonesCarrusel}>
-          <button type="button" onClick={() => mover(-1)} disabled={estado.inicio} aria-label="Oportunidades anteriores">
+          <button
+            type="button"
+            onClick={() => mover(-1)}
+            disabled={estado.inicio}
+            aria-label="Oportunidades anteriores"
+          >
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-              <path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="m14.5 6-6 6 6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <button type="button" onClick={() => mover(1)} disabled={estado.fin} aria-label="Oportunidades siguientes">
+          <button
+            type="button"
+            onClick={() => mover(1)}
+            disabled={estado.fin}
+            aria-label="Oportunidades siguientes"
+          >
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-              <path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="m9.5 6 6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>

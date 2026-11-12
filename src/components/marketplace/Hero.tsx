@@ -35,7 +35,14 @@ export default function Hero({
         <source media="(max-width: 767px)" srcSet={FONDO_HERO.movil} />
         {/* WebP ya dimensionados por viewport (inventario ASSETS.md): `next/image` no añade nada. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={FONDO_HERO.escritorio} alt="" width={1600} height={900} fetchPriority="high" decoding="async" />
+        <img
+          src={FONDO_HERO.escritorio}
+          alt=""
+          width={1600}
+          height={900}
+          fetchPriority="high"
+          decoding="async"
+        />
       </picture>
       <div className={s.velo} aria-hidden="true" />
 

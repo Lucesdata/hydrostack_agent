@@ -130,12 +130,7 @@
       "origenAncho": 1536,
       "origenAlto": 1024,
       "origenSha256": "8dfdc7e883d3ad8e09ef2e653516a0d5785e07a249bb8b374c077aa5f738afca",
-      "recortePx": [
-        1323,
-        400,
-        1467,
-        544
-      ]
+      "recortePx": [1323, 400, 1467, 544]
     },
     {
       "ruta": "referencias/materiales-territoriales.webp",

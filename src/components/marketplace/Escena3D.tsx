@@ -84,7 +84,8 @@ function formaDe(p: Poligono): THREE.Shape {
   // La forma vive en XY y se acuesta con rotateX(-90°): y = -z (el sur es +z).
   const [exterior, ...huecos] = p;
   const forma = new THREE.Shape(exterior.map(([x, z]) => new THREE.Vector2(x, -z)));
-  for (const h of huecos) forma.holes.push(new THREE.Path(h.map(([x, z]) => new THREE.Vector2(x, -z))));
+  for (const h of huecos)
+    forma.holes.push(new THREE.Path(h.map(([x, z]) => new THREE.Vector2(x, -z))));
   return forma;
 }
 
@@ -174,7 +175,10 @@ export default function Escena3D(props: Props) {
       const raiz = new THREE.Group();
       for (const p of t.poligonos) {
         if (p[0].length < 3) continue;
-        const g = new THREE.ExtrudeGeometry(formaDe(p), { depth: PROFUNDIDAD, bevelEnabled: false });
+        const g = new THREE.ExtrudeGeometry(formaDe(p), {
+          depth: PROFUNDIDAD,
+          bevelEnabled: false,
+        });
         g.rotateX(-Math.PI / 2);
         const malla = new THREE.Mesh(g, [material, materialLado]);
         malla.userData.codigo = t.codigo;
@@ -372,7 +376,8 @@ export default function Escena3D(props: Props) {
           return;
         }
       }
-      if (e.pointerType === "mouse") mostrarEtiqueta(codigoEn(e.clientX, e.clientY), e.clientX, e.clientY);
+      if (e.pointerType === "mouse")
+        mostrarEtiqueta(codigoEn(e.clientX, e.clientY), e.clientX, e.clientY);
     };
     const alSubir = (e: PointerEvent) => {
       const i = inicio;
@@ -393,7 +398,10 @@ export default function Escena3D(props: Props) {
       if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       tweens.delete("camara");
-      vista.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, vista.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
+      vista.zoom = Math.min(
+        ZOOM_MAX,
+        Math.max(ZOOM_MIN, vista.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12))
+      );
       pedir();
     };
     canvas.addEventListener("pointerdown", alBajar);
@@ -438,7 +446,9 @@ export default function Escena3D(props: Props) {
       canvas.removeEventListener("webglcontextlost", alPerder);
       geometrias.forEach((g) => g.dispose());
       grupos.forEach((g) => g.material.dispose());
-      [materialLado, materialLinea, materialMarcador, materialMarcadorSel].forEach((m) => m.dispose());
+      [materialLado, materialLinea, materialMarcador, materialMarcadorSel].forEach((m) =>
+        m.dispose()
+      );
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();

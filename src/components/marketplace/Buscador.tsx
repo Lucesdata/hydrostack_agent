@@ -57,7 +57,14 @@ export default function Buscador({
         <button type="submit" className={s.botonBuscar}>
           <span>Buscar</span>
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-            <path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M5 12h14m-5-5 5 5-5 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
@@ -67,7 +74,11 @@ export default function Buscador({
         <input type="hidden" name="tipo" value={filtros.tipo} />
       ) : null}
 
-      <details key={String(avanzadoActivo)} className={s.avanzados} open={avanzadoActivo || undefined}>
+      <details
+        key={String(avanzadoActivo)}
+        className={s.avanzados}
+        open={avanzadoActivo || undefined}
+      >
         <summary>Filtros avanzados</summary>
         <div className={s.rejillaFiltros}>
           <label>
@@ -86,7 +97,11 @@ export default function Buscador({
             <span>Departamento</span>
             {/* `key`: los campos no controlados no releen `defaultValue` cuando el mapa
                 cambia la URL sin recargar; con la clave se vuelven a montar. */}
-            <select key={filtros.departamento ?? ""} name="departamento" defaultValue={filtros.departamento ?? ""}>
+            <select
+              key={filtros.departamento ?? ""}
+              name="departamento"
+              defaultValue={filtros.departamento ?? ""}
+            >
               <option value="">Todos</option>
               {territorios.map((t) => (
                 <option key={t.codigo} value={t.slug}>
@@ -115,7 +130,11 @@ export default function Buscador({
           ) : null}
           <label>
             <span>Presupuesto</span>
-            <select key={filtros.presupuestoMin ?? ""} name="presupuesto" defaultValue={filtros.presupuestoMin ?? ""}>
+            <select
+              key={filtros.presupuestoMin ?? ""}
+              name="presupuesto"
+              defaultValue={filtros.presupuestoMin ?? ""}
+            >
               <option value="">Cualquiera</option>
               {PRESUPUESTOS_MIN.map((m) => (
                 <option key={m} value={m}>
@@ -136,7 +155,8 @@ export default function Buscador({
           </label>
         </div>
         <p className={s.notaFiltros}>
-          Con un número de proceso se busca también entre los cerrados y se ignoran los demás filtros.
+          Con un número de proceso se busca también entre los cerrados y se ignoran los demás
+          filtros.
         </p>
       </details>
 

@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 import Hero from "@/src/components/marketplace/Hero";
 import Oportunidades from "@/src/components/marketplace/Oportunidades";
 import { consultarMarketplace } from "@/src/lib/marketplace/consulta";
-import { normalizarBusqueda, hrefMarketplace, traeParametrosVacios } from "@/src/lib/marketplace/url";
+import {
+  normalizarBusqueda,
+  hrefMarketplace,
+  traeParametrosVacios,
+} from "@/src/lib/marketplace/url";
 import { filtrosDesdeParams } from "@/src/lib/secop/filtros-vitrina";
 import s from "@/src/components/marketplace/marketplace.module.css";
 

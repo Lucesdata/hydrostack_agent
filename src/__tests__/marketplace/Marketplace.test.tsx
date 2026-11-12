@@ -45,14 +45,24 @@ function datos(p: Partial<ConsultaDisponible> = {}): ConsultaDisponible {
     total: 278,
     items: [
       op(),
-      op({ id: "CO1.REQ.2", tipo: "otros", precioBaseCop: null, fichaHref: "/licitaciones/x--CO1.REQ.2" }),
+      op({
+        id: "CO1.REQ.2",
+        tipo: "otros",
+        precioBaseCop: null,
+        fichaHref: "/licitaciones/x--CO1.REQ.2",
+      }),
     ],
     porDepartamento: [
       { codigo: "76", nombre: "Valle del Cauca", slug: "valle-del-cauca", total: 42 },
       { codigo: "05", nombre: "Antioquia", slug: "antioquia", total: 100 },
     ],
     sinUbicacion: 3,
-    metricas: { abiertas: 278, entidades: 96, valorEstimadoCop: "1800000000000", procesosConValor: 250 },
+    metricas: {
+      abiertas: 278,
+      entidades: 96,
+      valorEstimadoCop: "1800000000000",
+      procesosConValor: 250,
+    },
     departamentoSeleccionado: null,
     departamentoInvalido: false,
     ...p,
@@ -127,7 +137,11 @@ describe("Hero (HTML de servidor)", () => {
     const h = hero(
       datos({
         total: 42,
-        departamentoSeleccionado: { codigo: "76", nombre: "Valle del Cauca", slug: "valle-del-cauca" },
+        departamentoSeleccionado: {
+          codigo: "76",
+          nombre: "Valle del Cauca",
+          slug: "valle-del-cauca",
+        },
       }),
       { ...SIN_FILTROS, departamento: "valle-del-cauca" }
     );
@@ -138,7 +152,10 @@ describe("Hero (HTML de servidor)", () => {
   });
 
   it("un departamento inválido se dice y se puede retirar", () => {
-    const h = hero(datos({ departamentoInvalido: true }), { ...SIN_FILTROS, departamento: "atlantida" });
+    const h = hero(datos({ departamentoInvalido: true }), {
+      ...SIN_FILTROS,
+      departamento: "atlantida",
+    });
     expect(h).toContain("no existe");
     expect(h).toContain("Retirar el filtro");
   });
@@ -151,7 +168,9 @@ describe("Hero (HTML de servidor)", () => {
 
   it("sin cobertura no inventa: «No informado» y «No disponible», no $0", () => {
     const h = hero(
-      datos({ metricas: { abiertas: 0, entidades: null, valorEstimadoCop: null, procesosConValor: 0 } })
+      datos({
+        metricas: { abiertas: 0, entidades: null, valorEstimadoCop: null, procesosConValor: 0 },
+      })
     );
     expect(h).toContain("No informado");
     expect(h).toContain("No disponible");

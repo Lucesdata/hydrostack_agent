@@ -28,11 +28,7 @@ function nivelDe(n: number, maximo: number): number {
 
 function etiqueta(nombre: string, n: number, sel: boolean): string {
   const cifra =
-    n === 0
-      ? "sin oportunidades"
-      : n === 1
-        ? "1 oportunidad"
-        : `${numero.format(n)} oportunidades`;
+    n === 0 ? "sin oportunidades" : n === 1 ? "1 oportunidad" : `${numero.format(n)} oportunidades`;
   return `${nombre}, ${cifra}${sel ? " (seleccionado)" : ""}`;
 }
 

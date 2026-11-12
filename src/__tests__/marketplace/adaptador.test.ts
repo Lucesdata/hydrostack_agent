@@ -64,12 +64,23 @@ describe("oportunidadDesdeFila", () => {
   });
 
   it("solo acepta enlaces SECOP II https del host oficial con detalle de oportunidad", () => {
-    const ok = "https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.123&isFromPublicArea=True";
+    const ok =
+      "https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC.123&isFromPublicArea=True";
     const extra = (url: string | null) => ({ referencia: null, url, departamentoCodigo: null });
     expect(oportunidadDesdeFila(fila(), extra(ok)).secopHref).toBe(ok);
-    expect(oportunidadDesdeFila(fila(), extra("http://community.secop.gov.co/x"))).toMatchObject({ secopHref: null });
-    expect(oportunidadDesdeFila(fila(), extra("https://evil.example/OpportunityDetail/?noticeUID=CO1.NTC.1")).secopHref).toBeNull();
-    expect(oportunidadDesdeFila(fila(), extra("https://community.secop.gov.co/STS/Users/Login/Index")).secopHref).toBeNull();
+    expect(oportunidadDesdeFila(fila(), extra("http://community.secop.gov.co/x"))).toMatchObject({
+      secopHref: null,
+    });
+    expect(
+      oportunidadDesdeFila(
+        fila(),
+        extra("https://evil.example/OpportunityDetail/?noticeUID=CO1.NTC.1")
+      ).secopHref
+    ).toBeNull();
+    expect(
+      oportunidadDesdeFila(fila(), extra("https://community.secop.gov.co/STS/Users/Login/Index"))
+        .secopHref
+    ).toBeNull();
     expect(oportunidadDesdeFila(fila(), extra(null)).secopHref).toBeNull();
   });
 
@@ -82,15 +93,21 @@ describe("oportunidadDesdeFila", () => {
 
 describe("metricasDesdeFila", () => {
   it("suma con cobertura y distingue 0 de no informado", () => {
-    expect(metricasDesdeFila({ abiertas: 10, entidades: 4, valor: "2500.50", conValor: 7 })).toEqual({
+    expect(
+      metricasDesdeFila({ abiertas: 10, entidades: 4, valor: "2500.50", conValor: 7 })
+    ).toEqual({
       abiertas: 10,
       entidades: 4,
       valorEstimadoCop: "2500.50",
       procesosConValor: 7,
     });
     // Ningún proceso publica precio: la suma no es «$0», es «no informado».
-    expect(metricasDesdeFila({ abiertas: 3, entidades: 2, valor: null, conValor: 0 }).valorEstimadoCop).toBeNull();
-    expect(metricasDesdeFila({ abiertas: 0, entidades: 0, valor: null, conValor: 0 }).abiertas).toBe(0);
+    expect(
+      metricasDesdeFila({ abiertas: 3, entidades: 2, valor: null, conValor: 0 }).valorEstimadoCop
+    ).toBeNull();
+    expect(
+      metricasDesdeFila({ abiertas: 0, entidades: 0, valor: null, conValor: 0 }).abiertas
+    ).toBe(0);
   });
 });
 
@@ -107,7 +124,9 @@ describe("regiones y territorio", () => {
   });
 
   it("resuelve slug conocido, región válida sin resultados y slug inválido", () => {
-    const { regiones } = regionesDesdeFilas([{ codigo: "76", nombre: "Valle del Cauca", total: 42 }]);
+    const { regiones } = regionesDesdeFilas([
+      { codigo: "76", nombre: "Valle del Cauca", total: 42 },
+    ]);
     expect(resolverDepartamento("valle-del-cauca", regiones)).toEqual({
       seleccion: { codigo: "76", nombre: "Valle del Cauca", slug: "valle-del-cauca" },
       invalido: false,
@@ -116,12 +135,17 @@ describe("regiones y territorio", () => {
     const narino = resolverDepartamento("narino", regiones);
     expect(narino.invalido).toBe(false);
     expect(narino.seleccion?.codigo).toBe("52");
-    expect(resolverDepartamento("atlantida", regiones)).toEqual({ seleccion: null, invalido: true });
+    expect(resolverDepartamento("atlantida", regiones)).toEqual({
+      seleccion: null,
+      invalido: true,
+    });
     expect(resolverDepartamento(null, regiones)).toEqual({ seleccion: null, invalido: false });
   });
 
   it("el selector ofrece los 33 y cada destino conserva los demás filtros", () => {
-    const { regiones } = regionesDesdeFilas([{ codigo: "76", nombre: "Valle del Cauca", total: 42 }]);
+    const { regiones } = regionesDesdeFilas([
+      { codigo: "76", nombre: "Valle del Cauca", total: 42 },
+    ]);
     const op = opcionesTerritorio(regiones);
     expect(op).toHaveLength(DEPARTAMENTOS_DANE.length);
     expect(op.find((o) => o.codigo === "76")?.total).toBe(42);

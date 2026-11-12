@@ -34,7 +34,8 @@ export function opcionesTerritorio(regiones: Region[]): OpcionTerritorio[] {
   });
   // Un código de la base que el catálogo DANE no conoce no se pierde.
   for (const r of regiones) {
-    if (!catalogo.has(r.codigo)) base.push({ codigo: r.codigo, nombre: r.nombre, slug: r.slug, total: r.total });
+    if (!catalogo.has(r.codigo))
+      base.push({ codigo: r.codigo, nombre: r.nombre, slug: r.slug, total: r.total });
   }
   return base.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
 }

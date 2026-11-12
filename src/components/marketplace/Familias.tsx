@@ -5,7 +5,13 @@ import { conTipo, hrefMarketplace } from "@/src/lib/marketplace/url";
 import s from "./marketplace.module.css";
 
 function Icono({ familia }: { familia: FamiliaMarketplace }) {
-  const p = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+  const p = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  } as const;
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
       {familia === "potable" ? (
@@ -13,7 +19,10 @@ function Icono({ familia }: { familia: FamiliaMarketplace }) {
       ) : familia === "residual" ? (
         <>
           <path d="M12 20v-7" {...p} />
-          <path d="M12 13c0-3.6-2.4-5.6-6-5.6 0 3.6 2.4 5.6 6 5.6Zm0 0c0-3.6 2.4-5.6 6-5.6 0 3.6-2.4 5.6-6 5.6Z" {...p} />
+          <path
+            d="M12 13c0-3.6-2.4-5.6-6-5.6 0 3.6 2.4 5.6 6 5.6Zm0 0c0-3.6 2.4-5.6 6-5.6 0 3.6-2.4 5.6-6 5.6Z"
+            {...p}
+          />
         </>
       ) : (
         <>

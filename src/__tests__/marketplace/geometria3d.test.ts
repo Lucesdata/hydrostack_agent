@@ -28,7 +28,8 @@ describe("geometría 3D (SPEC §6.1–6.2)", () => {
       expect(t.poligonos.length).toBeGreaterThan(0);
       for (const p of t.poligonos) {
         expect(p[0].length).toBeGreaterThanOrEqual(3);
-        for (const anillo of p) for (const [x, z] of anillo) expect(Number.isFinite(x + z)).toBe(true);
+        for (const anillo of p)
+          for (const [x, z] of anillo) expect(Number.isFinite(x + z)).toBe(true);
       }
     }
   });
@@ -78,7 +79,14 @@ describe("geometría 3D (SPEC §6.1–6.2)", () => {
   it("la proyección es la del mapa 2D: un punto conocido cae donde el 2D lo pone", () => {
     const p2d = crearProyeccion(BBOX_CONTINENTAL, ANCHO_MAPA, ALTO_MAPA)(-74.08, 4.6);
     const poligono = poligonoAEscena(
-      [[[-74.08, 4.6], [-74.0, 4.6], [-74.0, 4.7], [-74.08, 4.6]]],
+      [
+        [
+          [-74.08, 4.6],
+          [-74.0, 4.6],
+          [-74.0, 4.7],
+          [-74.08, 4.6],
+        ],
+      ],
       crearProyeccion(BBOX_CONTINENTAL, ANCHO_MAPA, ALTO_MAPA)
     );
     expect(poligono[0][0][0]).toBeCloseTo(p2d[0] - ANCHO_MAPA / 2, 6);
@@ -89,8 +97,19 @@ describe("geometría 3D (SPEC §6.1–6.2)", () => {
     const proyectar = (lon: number, lat: number): [number, number] => [lon, lat];
     const p = poligonoAEscena(
       [
-        [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
-        [[2, 2], [4, 2], [4, 4], [2, 2]],
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+          [0, 0],
+        ],
+        [
+          [2, 2],
+          [4, 2],
+          [4, 4],
+          [2, 2],
+        ],
       ],
       proyectar
     );
@@ -100,7 +119,17 @@ describe("geometría 3D (SPEC §6.1–6.2)", () => {
   });
 
   it("lee Polygon y MultiPolygon", () => {
-    const poly = { type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] };
+    const poly = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0],
+        ],
+      ],
+    };
     const multi = { type: "MultiPolygon", coordinates: [poly.coordinates, poly.coordinates] };
     expect(poligonosDe(poly)).toHaveLength(1);
     expect(poligonosDe(multi)).toHaveLength(2);

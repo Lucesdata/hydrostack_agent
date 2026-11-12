@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { FAMILIAS_CHIP, ILUSTRACION, familiaDeTipo, ilustracionDeTipo } from "@/src/lib/marketplace/familias";
+import {
+  FAMILIAS_CHIP,
+  ILUSTRACION,
+  familiaDeTipo,
+  ilustracionDeTipo,
+} from "@/src/lib/marketplace/familias";
 import { filtrosDesdeParams, SIN_FILTROS } from "@/src/lib/secop/filtros-vitrina";
 import { esSistema, SISTEMAS_AGRUPADOS } from "@/src/lib/secop/busqueda-guiada";
 import {
@@ -15,11 +20,24 @@ import path from "node:path";
 
 describe("URL del marketplace", () => {
   it("la URL es el estado: ida y vuelta con los parámetros de la vitrina", () => {
-    const f = { ...SIN_FILTROS, q: "ptar", tipo: "residual" as const, departamento: "antioquia", orden: "valor" as const };
+    const f = {
+      ...SIN_FILTROS,
+      q: "ptar",
+      tipo: "residual" as const,
+      departamento: "antioquia",
+      orden: "valor" as const,
+    };
     const href = hrefMarketplace(f, 2);
-    expect(href).toBe("/marketplace?q=ptar&tipo=residual&departamento=antioquia&orden=valor&pagina=2");
+    expect(href).toBe(
+      "/marketplace?q=ptar&tipo=residual&departamento=antioquia&orden=valor&pagina=2"
+    );
     const { filtros, pagina } = filtrosDesdeParams(new URLSearchParams(href.split("?")[1]));
-    expect(filtros).toMatchObject({ q: "ptar", tipo: "residual", departamento: "antioquia", orden: "valor" });
+    expect(filtros).toMatchObject({
+      q: "ptar",
+      tipo: "residual",
+      departamento: "antioquia",
+      orden: "valor",
+    });
     expect(pagina).toBe(2);
   });
 
@@ -31,7 +49,9 @@ describe("URL del marketplace", () => {
 
   it("nunca arrastra el filtro de etapa: esos procesos no son oportunidades", () => {
     expect(hrefMarketplace({ ...SIN_FILTROS, etapa: "en_ejecucion" })).toBe("/marketplace");
-    expect(hrefVitrina({ ...SIN_FILTROS, tipo: "redes", etapa: "contratado" })).toBe("/licitaciones?tipo=redes");
+    expect(hrefVitrina({ ...SIN_FILTROS, tipo: "redes", etapa: "contratado" })).toBe(
+      "/licitaciones?tipo=redes"
+    );
   });
 
   it("valida del lado servidor: enums, longitud, departamento y página", () => {
@@ -55,7 +75,9 @@ describe("URL del marketplace", () => {
     const f = normalizarBusqueda({ ...SIN_FILTROS, q: "CO1.REQ.5720221" });
     expect(f).toMatchObject({ q: null, numero: "CO1.REQ.5720221" });
     expect(normalizarBusqueda({ ...SIN_FILTROS, q: "acueducto" }).numero).toBeNull();
-    expect(normalizarBusqueda({ ...SIN_FILTROS, q: "CO1.REQ.1", numero: "X-1" }).numero).toBe("X-1");
+    expect(normalizarBusqueda({ ...SIN_FILTROS, q: "CO1.REQ.1", numero: "X-1" }).numero).toBe(
+      "X-1"
+    );
   });
 
   it("detecta parámetros vacíos del formulario GET para canonizar la URL", () => {

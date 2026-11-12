@@ -108,10 +108,18 @@ export default function EscenaTerritorial({
       ) : null}
       {lista ? (
         <div className={s.controles3d} role="group" aria-label="Vista del mapa">
-          <button type="button" onClick={() => controles.current?.acercar()} aria-label="Acercar el mapa">
+          <button
+            type="button"
+            onClick={() => controles.current?.acercar()}
+            aria-label="Acercar el mapa"
+          >
             +
           </button>
-          <button type="button" onClick={() => controles.current?.alejar()} aria-label="Alejar el mapa">
+          <button
+            type="button"
+            onClick={() => controles.current?.alejar()}
+            aria-label="Alejar el mapa"
+          >
             −
           </button>
           <button type="button" onClick={() => controles.current?.restablecer()}>

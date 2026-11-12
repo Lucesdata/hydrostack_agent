@@ -61,9 +61,27 @@ async function unProceso(v: {
 beforeAll(async () => {
   await migrate(db as never, { migrationsFolder: path.resolve(__dirname, "../../../drizzle") });
   await db.insert(geografia).values([
-    { codigoDivipola: "76001", departamentoCodigo: "76", departamentoNombre: "Valle del Cauca", municipioCodigo: "001", municipioNombre: "Cali" },
-    { codigoDivipola: "76109", departamentoCodigo: "76", departamentoNombre: "Valle del Cauca", municipioCodigo: "109", municipioNombre: "Buenaventura" },
-    { codigoDivipola: "52001", departamentoCodigo: "52", departamentoNombre: "Nariño", municipioCodigo: "001", municipioNombre: "Pasto" },
+    {
+      codigoDivipola: "76001",
+      departamentoCodigo: "76",
+      departamentoNombre: "Valle del Cauca",
+      municipioCodigo: "001",
+      municipioNombre: "Cali",
+    },
+    {
+      codigoDivipola: "76109",
+      departamentoCodigo: "76",
+      departamentoNombre: "Valle del Cauca",
+      municipioCodigo: "109",
+      municipioNombre: "Buenaventura",
+    },
+    {
+      codigoDivipola: "52001",
+      departamentoCodigo: "52",
+      departamentoNombre: "Nariño",
+      municipioCodigo: "001",
+      municipioNombre: "Pasto",
+    },
   ]);
   const [a, e] = await db
     .insert(entidad)
@@ -132,7 +150,11 @@ describe("consultarMarketplace", () => {
   });
 
   it("una región válida sin coincidencias conserva la selección y muestra cero", async () => {
-    const c = await consultarMarketplace({ ...SIN_FILTROS, departamento: "narino", tipo: "residual" });
+    const c = await consultarMarketplace({
+      ...SIN_FILTROS,
+      departamento: "narino",
+      tipo: "residual",
+    });
     if (c.estado === "no-disponible") throw new Error("la base no respondió");
     expect(c.departamentoSeleccionado?.codigo).toBe("52");
     expect(c.total).toBe(0);
@@ -193,7 +215,8 @@ describe("consultarMarketplace", () => {
   it("ignora el filtro de etapa: no son oportunidades", async () => {
     const a = await consultarMarketplace(SIN_FILTROS);
     const b = await consultarMarketplace({ ...SIN_FILTROS, etapa: "en_ejecucion" });
-    if (a.estado === "no-disponible" || b.estado === "no-disponible") throw new Error("la base no respondió");
+    if (a.estado === "no-disponible" || b.estado === "no-disponible")
+      throw new Error("la base no respondió");
     expect(b.total).toBe(a.total);
   });
 });

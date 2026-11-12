@@ -75,5 +75,4 @@ export interface ConsultaDisponible {
 }
 
 export type ConsultaMarketplace =
-  | ConsultaDisponible
-  | { estado: "no-disponible"; consultadoEn: string };
+  ConsultaDisponible | { estado: "no-disponible"; consultadoEn: string };

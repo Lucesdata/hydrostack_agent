@@ -52,14 +52,24 @@ export default function Oportunidades({
           <Link href={hrefVitrina(filtros)} className={s.verTodas}>
             Ver todas las oportunidades
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-              <path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M5 12h14m-5-5 5 5-5 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </Link>
         </header>
 
         {datos.items.length === 0 ? (
           <div className={s.vacio}>
-            <p>No encontramos procesos con esa combinación. Prueba con menos filtros o con otra palabra.</p>
+            <p>
+              No encontramos procesos con esa combinación. Prueba con menos filtros o con otra
+              palabra.
+            </p>
             <p>
               <a href={RUTA_MARKETPLACE} className={s.botonSecundario}>
                 Limpiar filtros
@@ -107,11 +117,18 @@ export default function Oportunidades({
             conjunto p6dx-8zbt
           </a>
           , licencia{" "}
-          <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://creativecommons.org/licenses/by-sa/4.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             CC BY-SA 4.0
           </a>
-          ). AquaLicita normaliza fechas, cuantías y tipo de proyecto; los documentos oficiales están en SECOP II.
-          {datos.actualizadoEn ? ` Última sincronización: ${new Date(datos.actualizadoEn).toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "medium", timeStyle: "short" })}.` : ""}{" "}
+          ). AquaLicita normaliza fechas, cuantías y tipo de proyecto; los documentos oficiales
+          están en SECOP II.
+          {datos.actualizadoEn
+            ? ` Última sincronización: ${new Date(datos.actualizadoEn).toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "medium", timeStyle: "short" })}.`
+            : ""}{" "}
           Mapa: DANE — Marco Geoestadístico Nacional 2025. Las fotografías son ilustrativas.
         </p>
       </div>

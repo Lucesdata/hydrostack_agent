@@ -83,7 +83,13 @@ export function regionesDesdeFilas(filas: FilaRegion[]): {
   let sinUbicacion = 0;
   for (const f of filas) {
     if (!f.codigo || !f.nombre) sinUbicacion += f.total;
-    else regiones.push({ codigo: f.codigo, nombre: f.nombre, slug: slugificar(f.nombre), total: f.total });
+    else
+      regiones.push({
+        codigo: f.codigo,
+        nombre: f.nombre,
+        slug: slugificar(f.nombre),
+        total: f.total,
+      });
   }
   regiones.sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre, "es"));
   return { regiones, sinUbicacion };
@@ -119,7 +125,8 @@ export function resolverDepartamento(
 ): { seleccion: RegionSeleccionada | null; invalido: boolean } {
   if (!slug) return { seleccion: null, invalido: false };
   const r = regiones.find((x) => x.slug === slug);
-  if (r) return { seleccion: { codigo: r.codigo, nombre: r.nombre, slug: r.slug }, invalido: false };
+  if (r)
+    return { seleccion: { codigo: r.codigo, nombre: r.nombre, slug: r.slug }, invalido: false };
   const d = DEPARTAMENTOS_DANE.find((x) => x.slug === slug);
   return d ? { seleccion: d, invalido: false } : { seleccion: null, invalido: true };
 }

@@ -47,8 +47,6 @@ export function normalizarBusqueda(f: FiltrosVitrina): FiltrosVitrina {
 }
 
 /** ¿Algún parámetro llegó vacío? El formulario GET los manda; la URL canónica no. */
-export function traeParametrosVacios(
-  sp: Record<string, string | string[] | undefined>
-): boolean {
+export function traeParametrosVacios(sp: Record<string, string | string[] | undefined>): boolean {
   return Object.values(sp).some((v) => (Array.isArray(v) ? v[0] : v)?.trim() === "");
 }

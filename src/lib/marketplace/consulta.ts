@@ -58,7 +58,9 @@ async function metricasDe(
     .select({
       abiertas: count(),
       entidades: countDistinct(proceso.entidadId),
-      valor: sql<string | null>`sum(${proceso.valorEstimado}) filter (where ${proceso.valorEstimado} > 0)`,
+      valor: sql<
+        string | null
+      >`sum(${proceso.valorEstimado}) filter (where ${proceso.valorEstimado} > 0)`,
       conValor: sql<number>`(count(*) filter (where ${proceso.valorEstimado} > 0))::int`,
     })
     .from(proceso)
@@ -94,7 +96,9 @@ export async function consultarMarketplace(
 
     const { seleccion, invalido } = resolverDepartamento(filtros.departamento, regiones);
     // Un slug inválido no filtra (la URL se dice «filtro inválido» y se retira).
-    const filtrosEfectivos: FiltrosVitrina = invalido ? { ...filtros, departamento: null } : filtros;
+    const filtrosEfectivos: FiltrosVitrina = invalido
+      ? { ...filtros, departamento: null }
+      : filtros;
     const departamentoCodigo = seleccion?.codigo ?? null;
 
     const [datos, metricas, [frescura]] = await Promise.all([
@@ -120,7 +124,10 @@ export async function consultarMarketplace(
     };
   } catch (error) {
     // Sin términos de búsqueda ni tokens: solo qué falló.
-    console.error("[marketplace] consulta no disponible:", error instanceof Error ? error.message : "desconocido");
+    console.error(
+      "[marketplace] consulta no disponible:",
+      error instanceof Error ? error.message : "desconocido"
+    );
     return { estado: "no-disponible", consultadoEn };
   }
 }
