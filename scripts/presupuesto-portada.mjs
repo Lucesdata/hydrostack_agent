@@ -13,8 +13,13 @@ import { readFileSync, statSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
 const PRESUPUESTO = {
-  /** Medido: 118,3 kB (Next imprime 113 kB con su propio criterio de gzip). */
-  jsPrimeraCarga: 125 * 1024,
+  /**
+   * Medido: 118,3 kB (Next imprime 113 kB con su propio criterio de gzip) hasta
+   * el hero «carta hidrográfica» (#183), que lo llevó a 138,2 kB. Límite subido
+   * a 142 kB el 2026-11-12 (decisión del usuario): ~3,8 kB de margen sobre lo
+   * medido para no volver a romper el chequeo con cada cambio menor.
+   */
+  jsPrimeraCarga: 142 * 1024,
   /** Medido: 89,1 kB — Inter (47) y JetBrains Mono 400/500 (42). */
   fuentesPrecargadas: 100 * 1024,
 };
