@@ -375,6 +375,20 @@ Estas instrucciones son **obligatorias** y definen el comportamiento del
 agente sobre este repositorio. Cualquier cambio debe documentarse aquí.
 Última actualización: 2026-11-11 (hero «carta hidrográfica»); antes, 2026-11-10 (Commercial & Supply Intelligence, al final); antes, 2026-10-07 (hero con tres destacados: una pestaña por familia con su proceso más relevante); antes, 2026-10-06 (hero con ficha central: una ficha con navegación y una sola etiqueta flotante en el mapa); antes, 2026-10-05 (minificha con tope de 236 px; vitrina: fase 0, buscador propio, tarjeta con encaje y Radar, conviviendo con el buscador guiado de Explorar; minificha con estructura de tarjeta; barra de la portada en píldora flotante; el horizonte de luz del hero se probó y se retiró el mismo día; hero con cinco minifichas, recuadro de islas y país más grande; antes, 2026-10-02: hero «Explora el mapa» y franja de la ficha; antes, 2026-10-01: bloque de decisión en la ficha; zona fuera de cobertura en revisar; plazo desde la recepción de ofertas; hero v2: vista país, semáforo en los destacados).
 
+**Marketplace híbrido, Fase 4 (2026-11-12, rama `claude/marketplace-fase4`, PR borrador).**
+Ruta de revisión `/marketplace` (`noindex`, dinámica) que **no sustituye** la portada
+ni la vitrina: buscador GET con los parámetros de la vitrina, tres familias
+(`tipo=potable|residual|redes`), indicadores y tarjetas sobre la misma consulta
+(`src/lib/marketplace/consulta.ts` reutiliza `condicionAbierto()` y
+`condicionesDeFiltros()`: lista, mapa e indicadores no pueden discrepar). Mapa 3D
+con Three.js directo (`three@0.187.0`, diferido y sin SSR, solo ≥ 1024 px, sin
+movimiento reducido y con WebGL) sobre el mismo fondo, y mapa 2D de servidor como
+alternativa; el `<select>` y la lista de departamentos son el equivalente HTML. Los
+marcadores son agregados por departamento: la ubicación es la sede de la entidad.
+Sin migraciones. Evidencia por criterio A01–A12, lo no verificado y las decisiones
+en `docs/marketplace-fase4/EVIDENCIA.md`. No implica despliegue ni aprobación con
+datos vivos.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

@@ -217,7 +217,7 @@ export function tramoDeRelevancia(): SQL<number> {
  * el slug por quien llama, que tiene la lista de departamentos; un slug que no
  * existe llega como `null` y no filtra.
  */
-function condicionesDeFiltros(f: FiltrosVitrina, departamentoCodigo: string | null) {
+export function condicionesDeFiltros(f: FiltrosVitrina, departamentoCodigo: string | null) {
   return [
     f.q
       ? or(
