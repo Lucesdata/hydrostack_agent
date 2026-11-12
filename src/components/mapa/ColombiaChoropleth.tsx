@@ -27,7 +27,7 @@ import { familiasPorDepartamento, gruposDe } from "@/src/lib/landing/grupos-port
 import { FAMILIAS_DESTACADAS } from "@/src/lib/landing/destacados-portada";
 import { escalonFamiliaDe, type ConteoDepartamento } from "@/src/lib/landing/conteos-familia";
 import type { FilaAgregado } from "@/src/lib/secop/agregados";
-import { frase } from "@/src/components/landing/texto";
+import { rotuloDeObjeto } from "@/src/components/landing/texto";
 import { estiloDespiece } from "@/src/lib/mapa/explosion";
 import type { CSSProperties } from "react";
 
@@ -397,7 +397,7 @@ function SenalesGrupo({ procesos }: { procesos: ProcesoPortada[] }) {
             data-proceso={p.id}
             data-familia={familiaDe(p.tipoProyecto)}
             // El mismo nombre accesible que el enlace de su tarjeta.
-            aria-label={`Ver ficha del proceso ${p.numeroProceso}: ${frase(p.objeto)}`}
+            aria-label={`Ver ficha del proceso ${p.numeroProceso}: ${rotuloDeObjeto(p.objeto)}`}
           >
             <rect x={x0} y={y0} width={ANCHO_FLOTANTE} height={ALTO_FLOTANTE} rx={6} />
             <circle className="clr-mapa__etq-punto" cx={x0 + 9} cy={y0 + 13} r={3.8} />

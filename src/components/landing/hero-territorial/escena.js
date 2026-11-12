@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { VIEWBOX_SELECCION } from "@/src/lib/mapa/etiquetas-procesos";
+import { VIEWBOX_SELECCION } from "@/src/lib/mapa/viewbox";
 
 /**
  * La escena del mapa del hero (2026-11-11): el país flota y se inclina un poco

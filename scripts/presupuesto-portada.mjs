@@ -13,8 +13,18 @@ import { readFileSync, statSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
 const PRESUPUESTO = {
-  /** Medido: 118,3 kB (Next imprime 113 kB con su propio criterio de gzip). */
-  jsPrimeraCarga: 125 * 1024,
+  /**
+   * Medido: 126,7 kB (Next imprime ~121 kB con su propio criterio de gzip).
+   * Subido de 125 a 128 kB el 2026-11-12 con el rediseño «carta hidrográfica»
+   * del hero (#183/#184): ~2,5 kB de código de cliente pedido por el usuario
+   * (cifras que cuentan, inclinación del mapa hacia el puntero, baliza del
+   * proceso activo, barra que cambia al desplazar). Antes del rediseño eran
+   * 124,2 kB; un import de `escena.js` que arrastraba los GeoJSON del mapa
+   * llegó a sumar 14 kB y se arregló (`src/lib/mapa/viewbox.ts`), no se
+   * absorbió en el límite. Quedan 1,3 kB de margen: la próxima subida debe
+   * justificarse igual.
+   */
+  jsPrimeraCarga: 128 * 1024,
   /** Medido: 89,1 kB — Inter (47) y JetBrains Mono 400/500 (42). */
   fuentesPrecargadas: 100 * 1024,
 };

@@ -1,4 +1,5 @@
 import { ALTO_MAPA, ANCHO_MAPA } from "./modelo";
+import { VIEWBOX_SELECCION } from "./viewbox";
 import { RECUADRO_ISLAS, recuadroIslas } from "./recuadro-islas";
 import { ANCLAS } from "./rotulos";
 
@@ -173,8 +174,8 @@ export function colocarEtiquetas(entradas: { id: string; dpto: string }[]): Etiq
  * conservan por si otro mapa las necesita.
  */
 
-/** El `viewBox` del mapa del hero: el país con un margen mínimo. */
-export const VIEWBOX_SELECCION = { x: -8, y: 0, ancho: ANCHO_MAPA + 16, alto: ALTO_MAPA } as const;
+// El `viewBox` del mapa del hero vive en viewbox.ts (sin geometría, para el cliente).
+export { VIEWBOX_SELECCION };
 export const ANCHO_FLOTANTE = 108;
 export const ALTO_FLOTANTE = 40;
 /** Distancia entre el anclaje y el borde de la caja. */
