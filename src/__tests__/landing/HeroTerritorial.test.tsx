@@ -54,14 +54,21 @@ describe("HeroTerritorial", () => {
     expect(html).toContain('<h2 id="aq-marketplace-titulo">');
   });
 
-  it("incluye búsqueda guiada y conserva el mapa sin ficha individual ni lista de departamentos", () => {
-    // Desde el 2026-10-05 el modal envía a la vitrina, el único buscador.
-    expect(html).toContain('action="/licitaciones"');
-    expect(html).not.toContain("/licitaciones/explorar");
-    expect(html).toContain('name="tipo"');
-    expect(html).toContain('name="actividad"');
-    expect(html).toContain('name="numero"');
-    expect(html).not.toContain("Busca por entidad u objeto");
+  it("prioriza el marketplace y conserva la guía como segundo acceso", () => {
+    const mensaje = renderToStaticMarkup(<HeroMessage />);
+    const enlaces = [...mensaje.matchAll(/<a[^>]*href="([^"]+)"[^>]*>/g)];
+    expect(enlaces.map((enlace) => enlace[1])).toEqual([
+      "/marketplace",
+      "/licitaciones/como-participar",
+    ]);
+    expect(mensaje).toContain("Marketplace de oportunidades");
+    expect(mensaje).toContain("Ver cómo funciona");
+    expect(mensaje).not.toMatch(
+      /Explorar oportunidades|Soluciones AquaLicita|Radar institucional|Proyectos adjudicados|Inteligencia Comercial|Talent Intelligence/
+    );
+  });
+
+  it("conserva el mapa sin ficha individual ni lista de departamentos", () => {
     expect(html).not.toContain("PROCESO SECOP II");
     expect(html).not.toContain("Objeto · Presupuesto · Plazos · Requisitos");
     expect(html).not.toContain("como lista");
@@ -75,11 +82,6 @@ describe("HeroTerritorial", () => {
     expect(html.match(new RegExp(`href="${p.href}"`, "g"))).toHaveLength(1);
     // Sin los accesos a secciones ni los tres pasos (2026-11-02).
     expect(html).not.toContain("#ficha-dinero");
-    expect(html).toContain("Soluciones AquaLicita");
-    expect(html).toContain("Inteligencia Comercial");
-    expect(html).toContain("Talent Intelligence");
-    expect(html).toContain('href="/comercial"');
-    expect(html).toContain('href="/talento"');
     for (const otro of cinco.slice(1)) expect(html).not.toContain(`href="${otro.href}`);
   });
 
