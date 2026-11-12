@@ -9,7 +9,7 @@ import {
   presupuestoLargo,
   ubicacionDe,
 } from "@/src/lib/landing/proceso-portada";
-import { frase, titulo } from "@/src/components/landing/texto";
+import { rotuloDeObjeto, titulo } from "@/src/components/landing/texto";
 import styles from "./hero-territorial.module.css";
 
 /**
@@ -82,8 +82,8 @@ export default function PanelRegion({ dpto, nombre, familia, conteo, estado, onC
             const fecha = fechaDeCierre(p.cierre);
             return (
               <li key={p.id}>
-                <Link href={p.href} className={styles.regionObjeto} title={frase(p.objeto)}>
-                  {frase(p.objeto)}
+                <Link href={p.href} className={styles.regionObjeto} title={rotuloDeObjeto(p.objeto)}>
+                  {rotuloDeObjeto(p.objeto)}
                 </Link>
                 <span className={styles.regionEntidad}>
                   {titulo(p.entidad) || "Entidad no disponible"} · {ubicacionDe(p)}

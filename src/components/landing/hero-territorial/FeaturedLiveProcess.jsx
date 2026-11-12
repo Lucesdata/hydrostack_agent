@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { frase, titulo } from "@/src/components/landing/texto";
+import { rotuloDeObjeto, titulo } from "@/src/components/landing/texto";
 import {
   estadoVisible,
   familiaDe,
@@ -44,7 +44,7 @@ export default function FeaturedLiveProcess({
   vacio = "",
   pie = null,
 }) {
-  const objeto = proceso ? frase(proceso.objeto) : "";
+  const objeto = proceso ? rotuloDeObjeto(proceso.objeto) : "";
   const cierreTexto = fechaDeCierre(cierre ?? null);
   return (
     <section className={styles.ficha} aria-labelledby="aq-ficha-titulo">

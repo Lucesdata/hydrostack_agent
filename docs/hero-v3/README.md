@@ -13,7 +13,7 @@ Implementación del boceto aprobado sobre el hero existente. Sin despliegue ni P
 ## Inventario de assets
 | Archivo | Origen | Uso |
 |---|---|---|
-| `public/portada/hero/fondo-montanas.webp` (28 KB) | boceto, imagen de fondo | `HeroBackground`, `next/image fill`, `priority`, decorativa |
+| `public/portada/hero/fondo-montanas.webp` (28 KB) | boceto, imagen de fondo | **Retirada el 2026-11-12**: ya no la usan ni el hero ni el observatorio |
 | `public/portada/hero/planta-3d.webp` (225 KB, 1200×675, RGBA) | boceto, planta 3D | `DigitalTwinsPreview`, `object-fit: contain`, decorativa |
 | mapa 3D con nubes (adjunto) | boceto | **No usado**: se conserva el SVG interactivo |
 
@@ -53,7 +53,7 @@ Se oculta el rótulo flotante del mapa («Valle $500 M»): las etiquetas siguen 
 ## Rediseño «carta hidrográfica» (2026-11-11, rama `ccr-4e3c012c-il7hwe`, pedido del usuario)
 Mismo contrato de datos, mismas pestañas, mismo SVG de servidor; cambia cómo se ve y cómo se mueve.
 
-- **Fondo original y animado** (`HeroBackground.jsx`): sin fotografía. Luz que deriva, curvas de nivel de un relieve inventado (`public/portada/hero/curvas-nivel.svg`, 9,5 kB, generado por `scripts/portada/curvas-nivel.mjs`: determinístico, no representa ningún territorio), retícula de puntos y cuatro «cauces» con un pulso de luz. `fondo-montanas.webp` ya no se usa en el hero (sigue en la sección Observatorio). El hero ya no carga una imagen con `priority`.
+- **Fondo original y animado** (`HeroBackground.jsx`): sin fotografía. Luz que deriva, curvas de nivel de un relieve inventado (`public/portada/hero/curvas-nivel.svg`, 9,5 kB, generado por `scripts/portada/curvas-nivel.mjs`: determinístico, no representa ningún territorio), retícula de puntos y cuatro «cauces» con un pulso de luz. `fondo-montanas.webp` se borró el 2026-11-12, cuando el observatorio pasó a las mismas curvas. El hero ya no carga una imagen con `priority`.
 - **Mapa despiezado, flotando y armado**: cada departamento lleva `--ex`/`--ey`/`--i` (`src/lib/mapa/explosion.ts`, solo en el modo `seleccion`). Al cargar, el país llega desarmado y se arma del centro hacia fuera; en reposo queda con rendijas (`--aq-despiece: 0.04`), flota sobre una plataforma, se inclina hacia el puntero (`escena.js`) y se abre un poco más al pasar por encima. El relieve sigue siendo `drop-shadow` (cada pieza tiene su canto). Una baliza HTML late sobre el anclaje del proceso activo. El SVG **no se reordena ni se transforma entero**.
 - **Texto**: el titular entra por renglones tras una máscara, «saneamiento.» lleva un brillo y su trazo se dibuja; el `h1` es el mismo marcado. Las cifras de las tarjetas cuentan al aparecer (el HTML ya trae el número final).
 - **Tarjetas**: las de familia muestran cifra, medidor de «reciben ofertas hoy» (dato de `conteosPorFamilia()`) y la barra del turno del recorrido; la Ficha Viva es un expediente con cinta (tipo y número publicado) y tres casillas rotuladas; franja en dos paneles.
@@ -70,3 +70,8 @@ Mismo contrato de datos, mismas pestañas, mismo SVG de servidor; cambia cómo s
 - **Movimiento reducido** (emulado): 0 animaciones activas, todo visible y sin botón de pausa (el recorrido se desactiva).
 - **Contraste**: `contraste-hero-v3.test.ts` mide tarjetas de familia, Ficha Viva, texto sobre la luz del fondo y la barra. Encontró un fallo real (texto secundario de la tarjeta de agua potable elegida, 4,37:1) y se corrigió subiéndolo a `#c3d3e0`.
 - **No medido**: rendimiento en un teléfono real y datos vivos (las cifras de la captura son de la muestra local).
+
+## Seguimiento (2026-11-12)
+- **Objetos que son solo un código.** En producción apareció «Ahcmain08-026» como título de la Ficha Viva: la fuente publica una referencia suelta como objeto. `esCodigo()` / `rotuloDeObjeto()` (`src/components/landing/texto.js`) lo rotulan «Proceso AHCMAIN08-026» en la Ficha Viva, el panel de región y el nombre accesible del mapa; una descripción real sigue saliendo como frase. No cambia la selección del destacado (la regla sigue siendo presupuesto y plazo) ni toca los datos.
+- **Observatorio.** La sección bajo el hero usa las mismas curvas de nivel (estáticas) en lugar de la fotografía, y sus tarjetas se levantan 3 px al pasar el puntero (se anula con «reducir movimiento»). Las tarjetas siguen el mockup aprobado del 2026-11-03: no se rediseñaron.
+- Sin tocar: `TuPerfil` (mockup aprobado del 2026-10-22).

@@ -23,6 +23,27 @@ export function frase(s) {
 }
 
 /**
+ * ¿El «objeto» es una descripción o solo un código? Algunas entidades publican
+ * como objeto una referencia suelta («AHCMAIN08-026»): una sola palabra, con
+ * dígitos y corta. Una descripción real tiene varias palabras o ninguna cifra
+ * pegada a letras. No decide nada del proceso: solo cómo se rotula.
+ */
+export function esCodigo(s) {
+  if (!s) return false;
+  const limpio = s.trim();
+  return !/\s/.test(limpio) && limpio.length <= 28 && /\d/.test(limpio) && /[\p{L}]/u.test(limpio);
+}
+
+/**
+ * El rótulo de un proceso en tarjetas y listas: la frase del objeto o, si es un
+ * código suelto, «Proceso CÓDIGO». Así un título nunca parece un nombre roto.
+ */
+export function rotuloDeObjeto(objeto) {
+  if (!objeto) return objeto;
+  return esCodigo(objeto) ? `Proceso ${objeto.trim().toUpperCase()}` : frase(objeto);
+}
+
+/**
  * "EMPRESA DE ACUEDUCTO DE BOGOTÁ E.S.P." → "Empresa de Acueducto de Bogotá E.S.P."
  * Con `siglas = false` (nombres de lugar) no conserva ninguna: "META" y "CALI"
  * no son siglas aunque quepan en cuatro letras.
