@@ -90,7 +90,7 @@ const BENEFICIOS = [
   {
     icono: "reloj",
     titulo: "Información actualizada",
-    texto: "Con adendas, cronogramas y estados.",
+    texto: "Con cronogramas, estados y cambios detectados en SECOP.",
   },
 ] as const;
 

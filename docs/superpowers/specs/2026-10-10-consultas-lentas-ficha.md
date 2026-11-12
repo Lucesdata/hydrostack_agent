@@ -1,7 +1,11 @@
 # Consultas lentas en la ficha: análisis (2026-10-10)
 
-Estado: **análisis, sin código ni migración.** Nada de lo propuesto está aplicado.
-Cualquier índice es una migración y, por `docs/CONDUCTA.md` §4, necesita plan aprobado.
+Estado (actualizado 2026-10-24): **análisis, parcialmente implementado.** Los índices
+propuestos entraron en main con #136 (`drizzle/0025_indices_proceso_id_ficha.sql`).
+No se verificó en esta revisión que estén aplicados en la base viva ni que hayan
+eliminado los timeouts: ver el PR B (consumo de Vercel y timeouts). Lo que sigue es el
+análisis original (2026-10-10), conservado como historia: decía «sin código ni
+migración» y que cualquier índice necesitaba plan aprobado (`docs/CONDUCTA.md` §4).
 
 ## Qué se observó
 
