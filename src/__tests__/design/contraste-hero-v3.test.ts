@@ -37,9 +37,10 @@ describe("tarjetas de familia", () => {
     it(`${nombre} llega a AA sobre la tarjeta elegida con resplandor`, () => {
       if (color.startsWith("#d") || color === "#c3d3e0") pinta(v3, color);
       for (const fam of [t["aq-potable"], t["aq-residual"], t["aq-redes"]]) {
-        expect(contraste(color, conResplandor(fam)), `${color} sobre ${fam}`).toBeGreaterThanOrEqual(
-          AA.texto
-        );
+        expect(
+          contraste(color, conResplandor(fam)),
+          `${color} sobre ${fam}`
+        ).toBeGreaterThanOrEqual(AA.texto);
       }
     });
   }
