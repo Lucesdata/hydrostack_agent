@@ -305,7 +305,9 @@ export default function Escena3D(props: Props) {
         const total = totales.get(g.codigo) ?? 0;
         const sel = g.codigo === seleccionCodigo;
         g.material.color.copy(
-          exploracionTerritorial && !sel ? COLOR.territorio : colorDe(total, maximo, sel)
+          exploracionTerritorial && !sel && total === 0
+            ? COLOR.territorio
+            : colorDe(total, maximo, sel)
         );
         if (g.marcador) {
           g.marcador.visible = total > 0 || sel;

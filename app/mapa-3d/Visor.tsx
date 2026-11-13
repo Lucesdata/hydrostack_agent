@@ -8,14 +8,13 @@ import { formatCopEscala } from "@/src/components/secop/format";
 import { DEPARTAMENTOS_DANE } from "@/src/lib/marketplace/adaptador";
 import { fechaLegible } from "@/src/lib/secop/etapa";
 import { geometria3d } from "@/src/lib/marketplace/geometria3d";
-import type { ProyectoAdjudicado } from "@/app/api/departamento/[dpto]/adjudicados/route";
+import type { ProyectoAdjudicado } from "@/app/api/mapa-3d/adjudicados/route";
 import s from "./mapa.module.css";
 
 const { ancho, alto, territorios } = geometria3d();
 const departamentos = [...DEPARTAMENTOS_DANE].sort((a, b) =>
   a.nombre.localeCompare(b.nombre, "es")
 );
-const regiones = departamentos.map(({ codigo, nombre }) => ({ codigo, nombre, total: 0 }));
 const caminos = territorios.map(({ codigo, poligonos }) => ({
   codigo,
   d: poligonos
@@ -30,9 +29,9 @@ const caminos = territorios.map(({ codigo, poligonos }) => ({
 type Resultado =
   | { estado: "cargando" }
   | { estado: "error" }
-  | { estado: "listo"; proyectos: ProyectoAdjudicado[] };
+  | { estado: "listo"; proyectos: ProyectoAdjudicado[]; periodo: string };
 
-function Proyectos({ codigo }: { codigo: string }) {
+function useProyectosNacionales() {
   const [resultado, setResultado] = useState<Resultado>({ estado: "cargando" });
   const [intento, setIntento] = useState(0);
 
@@ -40,53 +39,73 @@ function Proyectos({ codigo }: { codigo: string }) {
     const controlador = new AbortController();
     async function consultar() {
       try {
-        const respuesta = await fetch(`/api/departamento/${codigo}/adjudicados`, {
+        const respuesta = await fetch("/api/mapa-3d/adjudicados", {
           signal: controlador.signal,
         });
         if (!respuesta.ok) throw new Error(`Resumen departamental: ${respuesta.status}`);
-        const datos: { proyectos: ProyectoAdjudicado[] } = await respuesta.json();
+        const datos: { proyectos: ProyectoAdjudicado[]; periodo: string } = await respuesta.json();
         if (!Array.isArray(datos.proyectos)) throw new Error("Resumen departamental no válido");
         if (!controlador.signal.aborted) {
-          setResultado({ estado: "listo", proyectos: datos.proyectos });
+          setResultado({ estado: "listo", proyectos: datos.proyectos, periodo: datos.periodo });
         }
       } catch (error) {
         if (!controlador.signal.aborted) {
-          console.warn("[mapa-3d] No se pudo consultar el departamento", error);
+          console.warn("[mapa-3d] No se pudo consultar las adjudicaciones nacionales", error);
           setResultado({ estado: "error" });
         }
       }
     }
     void consultar();
     return () => controlador.abort();
-  }, [codigo, intento]);
+  }, [intento]);
 
+  const reintentar = () => {
+    setResultado({ estado: "cargando" });
+    setIntento((previo) => previo + 1);
+  };
+  return { resultado, reintentar };
+}
+
+function Proyectos({
+  codigo,
+  resultado,
+  reintentar,
+}: {
+  codigo: string;
+  resultado: Resultado;
+  reintentar: () => void;
+}) {
   if (resultado.estado === "cargando") return <p role="status">Consultando proyectos…</p>;
   if (resultado.estado === "error") {
     return (
       <div>
         <p role="status">Los proyectos no están disponibles en este momento.</p>
-        <button
-          type="button"
-          onClick={() => {
-            setResultado({ estado: "cargando" });
-            setIntento((previo) => previo + 1);
-          }}
-        >
+        <button type="button" onClick={reintentar}>
           Reintentar
         </button>
       </div>
     );
   }
-  if (!resultado.proyectos.length) {
+  const proyectos = codigo
+    ? resultado.proyectos.filter((proyecto) => proyecto.departamentoCodigo === codigo)
+    : resultado.proyectos;
+  if (!proyectos.length) {
     return (
-      <p role="status">No se encontraron adjudicaciones con valor publicado en este territorio.</p>
+      <p role="status">
+        {codigo
+          ? "Este territorio no tiene proyectos entre los diez seleccionados."
+          : "No se encontraron adjudicaciones para el periodo."}
+      </p>
     );
   }
   return (
-    <ul className={s.procesos} aria-label="Adjudicaciones más recientes">
-      {resultado.proyectos.map((proyecto) => (
+    <ol className={s.procesos} aria-label="Mayores adjudicaciones de Colombia">
+      {proyectos.map((proyecto) => (
         <li key={proyecto.id}>
-          <p className={s.rotulo}>{proyecto.referencia || proyecto.id}</p>
+          <p className={s.rotulo}>
+            Puesto {proyecto.puesto} · {proyecto.referencia || proyecto.id}
+          </p>
+          <p>{proyecto.departamento ?? "Sede sin ubicar"}</p>
           <p className={s.objeto}>{proyecto.objeto || "Objeto sin publicar"}</p>
           {proyecto.entidad && <p>{proyecto.entidad}</p>}
           <p>Valor adjudicado · {formatCopEscala(proyecto.valor)}</p>
@@ -142,7 +161,7 @@ function Proyectos({ codigo }: { codigo: string }) {
           )}
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }
 
@@ -154,6 +173,13 @@ export default function Visor() {
   const [Escena, setEscena] = useState<typeof Escena3D | null>(null);
   const controles = useRef<EscenaHandle | null>(null);
   const departamento = departamentos.find((d) => d.codigo === codigo);
+  const { resultado, reintentar } = useProyectosNacionales();
+  const proyectos = resultado.estado === "listo" ? resultado.proyectos : [];
+  const regiones = departamentos.map(({ codigo, nombre }) => ({
+    codigo,
+    nombre,
+    total: proyectos.filter((p) => p.departamentoCodigo === codigo).length,
+  }));
 
   useEffect(() => {
     const quieto = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -232,6 +258,7 @@ export default function Visor() {
                 key={camino.codigo}
                 d={camino.d}
                 data-codigo={camino.codigo}
+                data-con-proyectos={regiones.some((r) => r.codigo === camino.codigo && r.total > 0)}
                 data-seleccionado={codigo === camino.codigo}
                 onClick={() => seleccionar(camino.codigo)}
               />
@@ -273,21 +300,13 @@ export default function Visor() {
             </option>
           ))}
         </select>
-        <h2>{departamento?.nombre ?? "Explora por territorio"}</h2>
-        {departamento ? (
-          <>
-            <p>
-              Hasta diez adjudicaciones recientes, ubicadas por la sede de la entidad. El porcentaje
-              pagado usa el contrato firmado más reciente.
-            </p>
-            <Proyectos key={codigo} codigo={codigo} />
-          </>
-        ) : (
-          <p>
-            Elige un departamento en el mapa o en el selector para consultar sus proyectos
-            adjudicados.
-          </p>
-        )}
+        <h2>{departamento?.nombre ?? "Top 10 nacional"}</h2>
+        <p>
+          Mayores valores adjudicados del último mes cerrado
+          {resultado.estado === "listo" ? ` (${resultado.periodo})` : ""}. Ubicación según la sede
+          de la entidad.
+        </p>
+        <Proyectos codigo={codigo} resultado={resultado} reintentar={reintentar} />
       </aside>
     </div>
   );

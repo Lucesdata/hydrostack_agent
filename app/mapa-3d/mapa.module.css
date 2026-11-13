@@ -255,3 +255,8 @@
 .enlaceSecop {
   margin-inline-start: 0.85rem;
 }
+
+.mapa2d path[data-con-proyectos="true"]:not([data-seleccionado="true"]) {
+  fill: #307d9b;
+  stroke: #a1e1f5;
+}

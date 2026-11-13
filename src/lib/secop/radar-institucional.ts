@@ -46,7 +46,7 @@ const adjudicadoReal = and(
 );
 
 /** Nunca mezcla presupuesto oficial y valor de adjudicación. */
-export async function principalesAdjudicaciones(limite = 5, departamentoCodigo?: string) {
+export async function principalesAdjudicaciones(limite = 5) {
   const filas = await db
     .select({
       id: proceso.id,
@@ -64,6 +64,7 @@ export async function principalesAdjudicaciones(limite = 5, departamentoCodigo?:
       entidadId: entidad.id,
       entidadNombre: entidad.nombre,
       departamento: geografia.departamentoNombre,
+      departamentoCodigo: geografia.departamentoCodigo,
     })
     .from(proceso)
     .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
@@ -72,24 +73,13 @@ export async function principalesAdjudicaciones(limite = 5, departamentoCodigo?:
       and(
         isNull(proceso.deletedAt),
         adjudicadoReal,
-        departamentoCodigo
-          ? and(
-              eq(geografia.departamentoCodigo, departamentoCodigo),
-              lt(proceso.fechaAdjudicacion, sql`${hoyEnColombia()} + 1`)
-            )
-          : and(
-              gte(proceso.fechaAdjudicacion, inicioAnterior),
-              lt(proceso.fechaAdjudicacion, inicioMes)
-            ),
+        gte(proceso.fechaAdjudicacion, inicioAnterior),
+        lt(proceso.fechaAdjudicacion, inicioMes),
         sql`${proceso.valorAdjudicacion} > 0`,
         sql`${proceso.tipoProyecto} in ('acueducto','alcantarillado','ptap','ptar')`
       )
     )
-    .orderBy(
-      ...(departamentoCodigo ? [desc(proceso.fechaAdjudicacion)] : []),
-      desc(proceso.valorAdjudicacion),
-      desc(proceso.secopProcesoId)
-    )
+    .orderBy(desc(proceso.valorAdjudicacion), desc(proceso.secopProcesoId))
     .limit(limite * 4);
   // Un mismo contrato puede estar publicado dos veces (misma entidad y referencia): se cuenta una.
   const vistos = new Set<string>();

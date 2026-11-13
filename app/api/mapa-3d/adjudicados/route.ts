@@ -3,12 +3,14 @@ import { porcentajePagado } from "@/src/lib/secop/avance-adjudicado";
 import { etapaDeProceso } from "@/src/lib/secop/etapa";
 import { contratosDeProcesos } from "@/src/lib/secop/ficha";
 import { montoConDato } from "@/src/lib/secop/monto";
-import { principalesAdjudicaciones } from "@/src/lib/secop/radar-institucional";
-import { esCodigoDepartamento } from "@/src/lib/secop/resumen-departamento";
+import { periodoAnterior, principalesAdjudicaciones } from "@/src/lib/secop/radar-institucional";
 import { slugDeProceso } from "@/src/lib/secop/slug";
 
 export interface ProyectoAdjudicado {
   id: string;
+  puesto: number;
+  departamento: string | null;
+  departamentoCodigo: string | null;
   referencia: string | null;
   objeto: string | null;
   entidad: string | null;
@@ -26,14 +28,12 @@ export interface ProyectoAdjudicado {
   porcentajePagado: number | null;
 }
 
-export async function GET(_req: Request, { params }: { params: { dpto: string } }) {
-  if (!esCodigoDepartamento(params.dpto)) {
-    return NextResponse.json({ error: "Código de departamento no válido" }, { status: 400 });
-  }
+export const dynamic = "force-dynamic";
+export async function GET() {
   try {
-    const filas = await principalesAdjudicaciones(10, params.dpto);
+    const filas = await principalesAdjudicaciones(10);
     const porProceso = await contratosDeProcesos(filas.map((p) => p.id));
-    const proyectos: ProyectoAdjudicado[] = filas.map((p) => {
+    const proyectos: ProyectoAdjudicado[] = filas.map((p, indice) => {
       const contratos = porProceso.get(p.id) ?? [];
       const etapa = etapaDeProceso({
         estadoActual: "Seleccionado",
@@ -55,6 +55,9 @@ export async function GET(_req: Request, { params }: { params: { dpto: string } 
       const valorPagado = cifrasComparables ? montoConDato(principal.valorPagado) : null;
       return {
         id: p.secopId,
+        puesto: indice + 1,
+        departamento: p.departamento,
+        departamentoCodigo: p.departamentoCodigo,
         referencia: p.referencia,
         objeto: p.objeto,
         entidad: p.entidadNombre,
@@ -73,7 +76,7 @@ export async function GET(_req: Request, { params }: { params: { dpto: string } 
       };
     });
     return NextResponse.json(
-      { proyectos },
+      { proyectos, periodo: periodoAnterior().etiqueta },
       { headers: { "Cache-Control": "public, s-maxage=900" } }
     );
   } catch (error) {
