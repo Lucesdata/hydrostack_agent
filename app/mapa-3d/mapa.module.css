@@ -260,3 +260,154 @@
   fill: #307d9b;
   stroke: #a1e1f5;
 }
+
+.vistasMovil {
+  display: none;
+}
+.procesos li {
+  padding: 0;
+}
+.panel .fila {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  text-align: left;
+  align-items: start;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  padding: 0.85rem 0.25rem;
+  background: transparent;
+}
+.puesto {
+  color: #8fd9ef;
+  font:
+    500 0.75rem/1.6 var(--mono),
+    monospace;
+}
+.filaContenido {
+  display: grid;
+  gap: 0.3rem;
+  color: #aebfcc;
+}
+.filaContenido strong {
+  color: #edf6fa;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.filaDatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.6rem;
+  align-items: center;
+}
+.filaDatos b {
+  color: #edf6fa;
+}
+.filaDatos > span {
+  background: #193648;
+  color: #c6e5f2;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+.marcador2d {
+  cursor: pointer;
+}
+.marcador2d circle {
+  fill: #113044;
+  stroke: #a4e9ff;
+  stroke-width: 2;
+}
+.marcador2d text {
+  fill: #effbff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.marcador2d[data-activo="true"] circle,
+.marcador2d:hover circle {
+  fill: #f0bb68;
+  stroke: #f0bb68;
+}
+.marcador2d[data-activo="true"] text,
+.marcador2d:hover text {
+  fill: #121820;
+}
+
+.ficha {
+  width: min(42rem, calc(100% - 2rem));
+  max-height: 88dvh;
+  margin: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: #0e1d28;
+  color: #edf6fa;
+  border: 1px solid #476174;
+  border-radius: 1rem;
+  overflow-wrap: anywhere;
+}
+.ficha::backdrop {
+  background: rgb(3 9 15 / 76%);
+}
+.ficha header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ficha h2 {
+  color: inherit;
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  line-height: 1.2;
+  margin-block: 0.65rem;
+}
+.ficha h3 {
+  color: inherit;
+  font-size: 1rem;
+  margin: 1.1rem 0 0;
+}
+.resumenFicha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  padding: 0.85rem 0;
+  margin-top: 0.9rem;
+  border-block: 1px solid #2a4354;
+}
+.resumenFicha strong {
+  font-size: 1.15rem;
+}
+.expediente {
+  border-top: 1px solid #2a4354;
+  margin-top: 1rem;
+  padding-block: 0.65rem;
+}
+.expediente summary {
+  cursor: pointer;
+}
+.expediente p {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 800px) {
+  .vistasMovil {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .vistasMovil [aria-pressed="true"] {
+    border-color: #8fd9ef;
+    background: #193648;
+  }
+  .visor[data-vista-movil="lista"] .lienzo,
+  .visor[data-vista-movil="mapa"] .panel {
+    display: none;
+  }
+  .ficha {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+}

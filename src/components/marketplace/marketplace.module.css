@@ -920,3 +920,30 @@ a:focus-visible > .dep {
     transition: none;
   }
 }
+
+.rotuloTerritorial3d {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #a4e9ff;
+  border-radius: 50%;
+  background: #113044;
+  color: #effbff;
+  font:
+    700 12px/1 var(--font-inter),
+    sans-serif;
+  cursor: pointer;
+}
+.rotuloTerritorial3d[hidden] {
+  display: none;
+}
+.rotuloTerritorial3d[data-activo="true"],
+.rotuloTerritorial3d:hover {
+  background: #f0bb68;
+  border-color: #f0bb68;
+  color: #121820;
+  z-index: 1;
+}

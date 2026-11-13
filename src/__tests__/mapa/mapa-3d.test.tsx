@@ -11,5 +11,7 @@ describe("/mapa-3d", () => {
     expect(html).toContain('value="11"');
     expect(html).toContain('value="88"');
     expect(html).not.toContain("<canvas");
+    expect(html).toContain("Sede de la entidad contratante");
+    expect(html).toContain("Ver lista");
   });
 });

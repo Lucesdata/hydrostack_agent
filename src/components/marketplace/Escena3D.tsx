@@ -101,6 +101,7 @@ interface Grupo {
   marcador: THREE.Mesh | null;
   elevacion: number;
   centro: [number, number];
+  rotulo: HTMLDivElement | null;
 }
 
 interface Tween {
@@ -206,8 +207,15 @@ export default function Escena3D(props: Props) {
         raiz.add(marcador);
         seleccionables.push(marcador);
       }
+      const rotulo = exploracionTerritorial && marcador ? document.createElement("div") : null;
+      if (rotulo) {
+        rotulo.className = s.rotuloTerritorial3d;
+        rotulo.addEventListener("click", () => propsRef.current.onSeleccionar(t.codigo));
+        host.append(rotulo);
+      }
       escena.add(raiz);
       grupos.set(t.codigo, {
+        rotulo,
         codigo: t.codigo,
         nombre: t.nombre,
         raiz,
@@ -251,6 +259,8 @@ export default function Escena3D(props: Props) {
     let vivo = true;
     let primero = true;
 
+    const puntoRotulo = new THREE.Vector3();
+
     function cuadro(ahora: number) {
       raf = 0;
       if (!vivo) return;
@@ -261,6 +271,13 @@ export default function Escena3D(props: Props) {
       }
       ajustarCamara();
       renderer.render(escena, camara);
+      for (const { rotulo, marcador } of grupos.values()) {
+        if (!rotulo || !marcador || !rotulo.textContent) continue;
+        marcador.getWorldPosition(puntoRotulo).project(camara);
+        rotulo.style.left = `${(puntoRotulo.x + 1) * 50}%`;
+        rotulo.style.top = `${(1 - puntoRotulo.y) * 50}%`;
+        rotulo.hidden = Math.abs(puntoRotulo.x) > 1 || Math.abs(puntoRotulo.y) > 1;
+      }
       if (primero) {
         primero = false;
         propsRef.current.onLista();
@@ -309,6 +326,12 @@ export default function Escena3D(props: Props) {
             ? COLOR.territorio
             : colorDe(total, maximo, sel)
         );
+        if (g.rotulo) {
+          g.rotulo.textContent = total ? String(total) : "";
+          g.rotulo.title = `${g.nombre} · ${total} ${total === 1 ? "proyecto" : "proyectos"}`;
+          g.rotulo.dataset.activo = String(sel);
+          g.rotulo.hidden = !total;
+        }
         if (g.marcador) {
           g.marcador.visible = total > 0 || sel;
           g.marcador.material = sel ? materialMarcadorSel : materialMarcador;
@@ -481,7 +504,10 @@ export default function Escena3D(props: Props) {
       canvas.removeEventListener("wheel", alRueda);
       canvas.removeEventListener("webglcontextlost", alPerder);
       geometrias.forEach((g) => g.dispose());
-      grupos.forEach((g) => g.material.dispose());
+      grupos.forEach((g) => {
+        g.material.dispose();
+        g.rotulo?.remove();
+      });
       [materialLado, materialLinea, materialMarcador, materialMarcadorSel].forEach((m) =>
         m.dispose()
       );
