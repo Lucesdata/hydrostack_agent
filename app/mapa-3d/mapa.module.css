@@ -1,0 +1,238 @@
+.pagina {
+  color-scheme: dark;
+  font-family: var(--font-inter), sans-serif;
+  color: #edf6fa;
+  background: #08121a;
+  padding: clamp(1.25rem, 4vw, 3.75rem);
+  min-height: calc(100svh - var(--nav-h));
+}
+
+.cabecera,
+.visor,
+.creditos {
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+
+.cabecera h1 {
+  color: inherit;
+  font:
+    700 clamp(2.5rem, 5vw, 5.25rem)/0.98 var(--font-ibm-plex-sans-condensed),
+    sans-serif;
+  letter-spacing: -0.035em;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.pagina p {
+  color: #aebfcc;
+  margin: 0;
+}
+
+.pagina .rotulo {
+  display: block;
+  color: #8fd9ef;
+  font:
+    500 0.74rem/1.5 var(--mono),
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  overflow-wrap: anywhere;
+}
+
+.pagina a {
+  color: #a1e1f5;
+  text-underline-offset: 0.24em;
+}
+
+.pagina :is(button, select, a):focus-visible {
+  outline: 2px solid #f0bb68;
+  outline-offset: 3px;
+}
+
+.visor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: clamp(1rem, 2vw, 2rem);
+  align-items: start;
+}
+
+.lienzo {
+  --mk-line: #406174;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: clamp(30rem, 69svh, 53rem);
+  border: 1px solid #2a4354;
+  border-radius: 1rem;
+  background:
+    radial-gradient(ellipse at 50% 48%, #153b50 0%, transparent 67%),
+    linear-gradient(#86b8d213 1px, transparent 1px),
+    linear-gradient(90deg, #86b8d213 1px, transparent 1px), #0a1823;
+  background-size:
+    auto,
+    38px 38px,
+    38px 38px,
+    auto;
+}
+
+.mapa2d,
+.capa3d {
+  position: absolute;
+  inset: 4.25rem 0 3.15rem;
+  width: 100%;
+  height: calc(100% - 7.4rem);
+}
+
+.capa3d[data-lista="false"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mapa2d path {
+  fill: #1a4e68;
+  fill-rule: evenodd;
+  stroke: #77bfd8;
+  stroke-width: 0.75;
+  cursor: pointer;
+}
+
+.mapa2d path:hover {
+  fill: #287798;
+}
+.mapa2d path[data-seleccionado="true"] {
+  fill: #f0bb68;
+  stroke: #fff0c8;
+}
+
+.herramientas {
+  position: absolute;
+  z-index: 2;
+  inset: 0.7rem 0.7rem auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+.herramientas > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pagina :is(button, select) {
+  color: #edf6fa;
+  background: #101f2b;
+  border: 1px solid #476174;
+  border-radius: 0.45rem;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 0.4rem 0.7rem;
+}
+
+.pagina button {
+  min-width: 44px;
+  cursor: pointer;
+}
+
+.pagina button:hover {
+  background: #1a3445;
+}
+.pagina button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.pagina .indicacion {
+  position: absolute;
+  inset: auto 0.85rem 0.7rem;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.panel {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: #0e1d28;
+  border: 1px solid #2a4354;
+  border-radius: 1rem;
+  min-width: 0;
+}
+
+.panel select {
+  width: 100%;
+  margin-top: 0.45rem;
+}
+.panel h2 {
+  color: inherit;
+  margin: 1.4rem 0 0.5rem;
+  font-size: 1.6rem;
+  line-height: 1.13;
+}
+.panel p {
+  font-size: 0.89rem;
+  line-height: 1.5;
+}
+.panel > a {
+  display: inline-block;
+  margin-top: 1rem;
+}
+.panel button {
+  margin-top: 0.6rem;
+}
+
+.procesos {
+  padding: 0;
+  margin: 1rem 0 0;
+  list-style: none;
+}
+.procesos li {
+  border-top: 1px solid #2a4354;
+  padding: 0.9rem 0;
+  overflow-wrap: anywhere;
+}
+.procesos .objeto {
+  color: #edf6fa;
+  font-weight: 600;
+  margin-block: 0.3rem;
+}
+.procesos a {
+  display: inline-block;
+  margin-top: 0.4rem;
+}
+
+.pagina .creditos {
+  margin-top: 0.85rem;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 800px) {
+  .visor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lienzo {
+    height: clamp(23rem, 52svh, 30rem);
+  }
+  .mapa2d,
+  .capa3d {
+    inset-block-start: 6.7rem;
+    height: calc(100% - 9.85rem);
+  }
+}
+
+@media (max-width: 360px) {
+  .mapa2d,
+  .capa3d {
+    inset-block-start: 9.5rem;
+    height: calc(100% - 12.65rem);
+  }
+}

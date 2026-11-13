@@ -20,6 +20,7 @@ export const ETIQUETA_POR_NIVEL = {
 
 export const SECCIONES_HOME = [
   { id: "diagnostico", href: "/diagnostico", capacidad: "diagnostico", etiqueta: "sin cuenta" },
+  { id: "mapa-3d", href: "/mapa-3d", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "marketplace", href: "/marketplace", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "explorar", href: "/licitaciones", capacidad: "explorar", etiqueta: "sin cuenta" },
   { id: "informe", href: "/informe", capacidad: "explorar", etiqueta: "sin cuenta" },
@@ -120,6 +121,7 @@ export const NOMBRE_POR_ID = {
   // "Fichas de procesos" y no "Licitaciones": decisión C del 2026-09-21
   // (AUDITORIA-SPECS-LANDING-MAPA §9). La ruta /licitaciones se conserva.
   marketplace: "Marketplace",
+  "mapa-3d": "Mapa 3D de Colombia",
   explorar: "Fichas de procesos",
   compradores: "Radar institucional",
   adjudicados: "Proyectos adjudicados",
@@ -171,6 +173,7 @@ export const COLUMNAS_PIE = [
     grupo: "Explorar",
     ids: [
       "marketplace",
+      "mapa-3d",
       "explorar",
       "adjudicados",
       "compradores",

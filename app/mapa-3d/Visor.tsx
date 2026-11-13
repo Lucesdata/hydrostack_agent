@@ -1,0 +1,251 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import type Escena3D from "@/src/components/marketplace/Escena3D";
+import type { EscenaHandle } from "@/src/components/marketplace/Escena3D";
+import { formatValorProceso } from "@/src/components/secop/format";
+import { DEPARTAMENTOS_DANE } from "@/src/lib/marketplace/adaptador";
+import { geometria3d } from "@/src/lib/marketplace/geometria3d";
+import type { ResumenDepartamento } from "@/src/lib/secop/resumen-departamento";
+import s from "./mapa.module.css";
+
+const { ancho, alto, territorios } = geometria3d();
+const departamentos = [...DEPARTAMENTOS_DANE].sort((a, b) =>
+  a.nombre.localeCompare(b.nombre, "es")
+);
+const regiones = departamentos.map(({ codigo, nombre }) => ({ codigo, nombre, total: 0 }));
+const caminos = territorios.map(({ codigo, poligonos }) => ({
+  codigo,
+  d: poligonos
+    .flatMap((poligono) =>
+      poligono.map(
+        (anillo) => `M${anillo.map(([x, z]) => `${x.toFixed(1)} ${z.toFixed(1)}`).join("L")}Z`
+      )
+    )
+    .join(""),
+}));
+
+type Resultado =
+  | { estado: "cargando" }
+  | { estado: "error" }
+  | { estado: "listo"; destacados: ResumenDepartamento["destacados"] };
+
+function Oportunidades({ codigo, slug }: { codigo: string; slug: string }) {
+  const [resultado, setResultado] = useState<Resultado>({ estado: "cargando" });
+  const [intento, setIntento] = useState(0);
+
+  useEffect(() => {
+    const controlador = new AbortController();
+    async function consultar() {
+      try {
+        const respuesta = await fetch(`/api/departamento/${codigo}/resumen`, {
+          signal: controlador.signal,
+        });
+        if (!respuesta.ok) throw new Error(`Resumen departamental: ${respuesta.status}`);
+        const datos: ResumenDepartamento = await respuesta.json();
+        if (!Array.isArray(datos.destacados)) throw new Error("Resumen departamental no válido");
+        if (!controlador.signal.aborted) {
+          setResultado({ estado: "listo", destacados: datos.destacados });
+        }
+      } catch (error) {
+        if (!controlador.signal.aborted) {
+          console.warn("[mapa-3d] No se pudo consultar el departamento", error);
+          setResultado({ estado: "error" });
+        }
+      }
+    }
+    void consultar();
+    return () => controlador.abort();
+  }, [codigo, intento]);
+
+  if (resultado.estado === "cargando") return <p role="status">Consultando oportunidades…</p>;
+  if (resultado.estado === "error") {
+    return (
+      <div>
+        <p role="status">Las oportunidades no están disponibles en este momento.</p>
+        <button
+          type="button"
+          onClick={() => {
+            setResultado({ estado: "cargando" });
+            setIntento((previo) => previo + 1);
+          }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+  if (!resultado.destacados.length) {
+    return <p role="status">No hay procesos que reciban ofertas en este departamento.</p>;
+  }
+  return (
+    <>
+      <ul className={s.procesos} aria-label="Procesos destacados por presupuesto">
+        {resultado.destacados.map((proceso) => (
+          <li key={proceso.id}>
+            <p className={s.rotulo}>{proceso.referencia || proceso.id}</p>
+            <p className={s.objeto}>{proceso.objeto || "Objeto sin publicar"}</p>
+            {proceso.entidad && <p>{proceso.entidad}</p>}
+            <p>
+              {formatValorProceso({ valorAdjudicacion: null, precioBase: proceso.valorEstimado })}
+            </p>
+            {proceso.ficha && (
+              <Link
+                href={proceso.ficha}
+                prefetch={false}
+                aria-label={`Ver ficha ${proceso.referencia || proceso.id}`}
+              >
+                Ver ficha →
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+      <Link href={`/licitaciones?departamento=${slug}`} prefetch={false}>
+        Buscar en este territorio →
+      </Link>
+    </>
+  );
+}
+
+export default function Visor() {
+  const [codigo, seleccionar] = useState("");
+  const [activar3d, setActivar3d] = useState(false);
+  const [lista, setLista] = useState(false);
+  const [fallo, setFallo] = useState(false);
+  const [Escena, setEscena] = useState<typeof Escena3D | null>(null);
+  const controles = useRef<EscenaHandle | null>(null);
+  const departamento = departamentos.find((d) => d.codigo === codigo);
+
+  useEffect(() => {
+    const quieto = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!quieto.matches && window.matchMedia("(min-width: 960px)").matches) {
+      setActivar3d(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!activar3d || Escena) return;
+    let vigente = true;
+    import("@/src/components/marketplace/Escena3D")
+      .then(({ default: componente }) => {
+        if (vigente) setEscena(() => componente);
+      })
+      .catch((error) => {
+        if (vigente) {
+          console.warn("[mapa-3d] No se pudo cargar la escena", error);
+          setFallo(true);
+        }
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [activar3d, Escena]);
+
+  const mostrar3d = activar3d && lista && !fallo;
+
+  return (
+    <div className={s.visor}>
+      <div className={s.lienzo} data-vista={mostrar3d ? "3d" : "2d"}>
+        <div className={s.herramientas}>
+          <button
+            type="button"
+            disabled={fallo}
+            onClick={() => {
+              setLista(false);
+              setActivar3d(!activar3d);
+            }}
+          >
+            {activar3d && !fallo ? "Ver en 2D" : "Ver en 3D"}
+          </button>
+          {mostrar3d && (
+            <div role="group" aria-label="Controles del mapa">
+              <button
+                type="button"
+                aria-label="Acercar"
+                onClick={() => controles.current?.acercar()}
+              >
+                +
+              </button>
+              <button type="button" aria-label="Alejar" onClick={() => controles.current?.alejar()}>
+                −
+              </button>
+              <button
+                type="button"
+                aria-label="Girar el mapa"
+                onClick={() => controles.current?.girar?.()}
+              >
+                Girar
+              </button>
+              <button type="button" onClick={() => controles.current?.restablecer()}>
+                Restablecer
+              </button>
+            </div>
+          )}
+        </div>
+        {!mostrar3d && (
+          <svg
+            className={s.mapa2d}
+            viewBox={`${-ancho / 2 - 12} ${-alto / 2 - 12} ${ancho + 24} ${alto + 24}`}
+            aria-hidden="true"
+          >
+            {caminos.map((camino) => (
+              <path
+                key={camino.codigo}
+                d={camino.d}
+                data-codigo={camino.codigo}
+                data-seleccionado={codigo === camino.codigo}
+                onClick={() => seleccionar(camino.codigo)}
+              />
+            ))}
+          </svg>
+        )}
+        {activar3d && !fallo && Escena && (
+          <div className={s.capa3d} data-lista={mostrar3d}>
+            <Escena
+              regiones={regiones}
+              seleccionCodigo={codigo || null}
+              onSeleccionar={seleccionar}
+              onLista={() => setLista(true)}
+              onFallo={() => setFallo(true)}
+              controles={controles}
+              exploracionTerritorial
+            />
+          </div>
+        )}
+        <p className={s.indicacion} role="status">
+          {fallo
+            ? "Vista 2D · El mapa 3D no está disponible."
+            : mostrar3d
+              ? "Selecciona un territorio. Usa los controles para girar o acercar."
+              : activar3d
+                ? "Cargando mapa 3D…"
+                : "Vista 2D · Selecciona un territorio."}
+        </p>
+      </div>
+      <aside className={s.panel} aria-label="Oportunidades por departamento">
+        <label className={s.rotulo} htmlFor="territorio-mapa">
+          Departamento o distrito
+        </label>
+        <select id="territorio-mapa" value={codigo} onChange={(e) => seleccionar(e.target.value)}>
+          <option value="">Toda Colombia</option>
+          {departamentos.map((d) => (
+            <option key={d.codigo} value={d.codigo}>
+              {d.nombre}
+            </option>
+          ))}
+        </select>
+        <h2>{departamento?.nombre ?? "Explora por territorio"}</h2>
+        {departamento ? (
+          <>
+            <p>Procesos que reciben ofertas según la sede de la entidad.</p>
+            <Oportunidades key={codigo} codigo={codigo} slug={departamento.slug} />
+          </>
+        ) : (
+          <p>Elige un departamento en el mapa o en el selector para consultar sus oportunidades.</p>
+        )}
+      </aside>
+    </div>
+  );
+}
