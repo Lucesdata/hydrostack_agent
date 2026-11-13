@@ -236,3 +236,18 @@
     height: calc(100% - 12.65rem);
   }
 }
+
+.avance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.35rem 0.75rem;
+  padding: 0.65rem 0;
+  margin: 0;
+  font-size: 0.81rem;
+}
+.avance dt {
+  color: #aebfcc;
+}
+.avance dd {
+  margin: 0;
+}

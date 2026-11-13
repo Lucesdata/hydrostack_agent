@@ -4,8 +4,9 @@ import Visor from "./Visor";
 import s from "./mapa.module.css";
 
 export const metadata: Metadata = {
-  title: "Mapa 3D de licitaciones de agua en Colombia",
-  description: "Explora oportunidades de agua y saneamiento de SECOP II por departamento.",
+  title: "Mapa 3D de proyectos adjudicados en Colombia",
+  description:
+    "Consulta adjudicaciones de agua y saneamiento y su etapa contractual por departamento.",
   alternates: { canonical: "/mapa-3d" },
 };
 
@@ -15,10 +16,12 @@ export default function PaginaMapa() {
       <header className={s.cabecera}>
         <div>
           <p className={s.rotulo}>Colombia · SECOP II</p>
-          <h1 id="titulo-mapa">Mapa de oportunidades</h1>
-          <p>Explora la contratación de agua y saneamiento por departamento.</p>
+          <h1 id="titulo-mapa">Mapa de proyectos adjudicados</h1>
+          <p>
+            Consulta la etapa contractual y los pagos publicados de proyectos de agua y saneamiento.
+          </p>
         </div>
-        <Link href="/licitaciones">Buscar procesos →</Link>
+        <Link href="/proyectos-adjudicados">Ver adjudicaciones del mes →</Link>
       </header>
       <Visor />
       <p className={s.creditos}>

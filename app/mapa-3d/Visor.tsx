@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type Escena3D from "@/src/components/marketplace/Escena3D";
 import type { EscenaHandle } from "@/src/components/marketplace/Escena3D";
-import { formatValorProceso } from "@/src/components/secop/format";
+import { formatCopEscala } from "@/src/components/secop/format";
 import { DEPARTAMENTOS_DANE } from "@/src/lib/marketplace/adaptador";
 import { geometria3d } from "@/src/lib/marketplace/geometria3d";
-import type { ResumenDepartamento } from "@/src/lib/secop/resumen-departamento";
+import type { ProyectoAdjudicado } from "@/app/api/departamento/[dpto]/adjudicados/route";
 import s from "./mapa.module.css";
 
 const { ancho, alto, territorios } = geometria3d();
@@ -29,9 +29,9 @@ const caminos = territorios.map(({ codigo, poligonos }) => ({
 type Resultado =
   | { estado: "cargando" }
   | { estado: "error" }
-  | { estado: "listo"; destacados: ResumenDepartamento["destacados"] };
+  | { estado: "listo"; proyectos: ProyectoAdjudicado[] };
 
-function Oportunidades({ codigo, slug }: { codigo: string; slug: string }) {
+function Proyectos({ codigo }: { codigo: string }) {
   const [resultado, setResultado] = useState<Resultado>({ estado: "cargando" });
   const [intento, setIntento] = useState(0);
 
@@ -39,14 +39,14 @@ function Oportunidades({ codigo, slug }: { codigo: string; slug: string }) {
     const controlador = new AbortController();
     async function consultar() {
       try {
-        const respuesta = await fetch(`/api/departamento/${codigo}/resumen`, {
+        const respuesta = await fetch(`/api/departamento/${codigo}/adjudicados`, {
           signal: controlador.signal,
         });
         if (!respuesta.ok) throw new Error(`Resumen departamental: ${respuesta.status}`);
-        const datos: ResumenDepartamento = await respuesta.json();
-        if (!Array.isArray(datos.destacados)) throw new Error("Resumen departamental no válido");
+        const datos: { proyectos: ProyectoAdjudicado[] } = await respuesta.json();
+        if (!Array.isArray(datos.proyectos)) throw new Error("Resumen departamental no válido");
         if (!controlador.signal.aborted) {
-          setResultado({ estado: "listo", destacados: datos.destacados });
+          setResultado({ estado: "listo", proyectos: datos.proyectos });
         }
       } catch (error) {
         if (!controlador.signal.aborted) {
@@ -59,11 +59,11 @@ function Oportunidades({ codigo, slug }: { codigo: string; slug: string }) {
     return () => controlador.abort();
   }, [codigo, intento]);
 
-  if (resultado.estado === "cargando") return <p role="status">Consultando oportunidades…</p>;
+  if (resultado.estado === "cargando") return <p role="status">Consultando proyectos…</p>;
   if (resultado.estado === "error") {
     return (
       <div>
-        <p role="status">Las oportunidades no están disponibles en este momento.</p>
+        <p role="status">Los proyectos no están disponibles en este momento.</p>
         <button
           type="button"
           onClick={() => {
@@ -76,36 +76,49 @@ function Oportunidades({ codigo, slug }: { codigo: string; slug: string }) {
       </div>
     );
   }
-  if (!resultado.destacados.length) {
-    return <p role="status">No hay procesos que reciban ofertas en este departamento.</p>;
+  if (!resultado.proyectos.length) {
+    return (
+      <p role="status">No se encontraron adjudicaciones con valor publicado en este territorio.</p>
+    );
   }
   return (
-    <>
-      <ul className={s.procesos} aria-label="Procesos destacados por presupuesto">
-        {resultado.destacados.map((proceso) => (
-          <li key={proceso.id}>
-            <p className={s.rotulo}>{proceso.referencia || proceso.id}</p>
-            <p className={s.objeto}>{proceso.objeto || "Objeto sin publicar"}</p>
-            {proceso.entidad && <p>{proceso.entidad}</p>}
-            <p>
-              {formatValorProceso({ valorAdjudicacion: null, precioBase: proceso.valorEstimado })}
-            </p>
-            {proceso.ficha && (
-              <Link
-                href={proceso.ficha}
-                prefetch={false}
-                aria-label={`Ver ficha ${proceso.referencia || proceso.id}`}
-              >
-                Ver ficha →
-              </Link>
+    <ul className={s.procesos} aria-label="Adjudicaciones más recientes">
+      {resultado.proyectos.map((proyecto) => (
+        <li key={proyecto.id}>
+          <p className={s.rotulo}>{proyecto.referencia || proyecto.id}</p>
+          <p className={s.objeto}>{proyecto.objeto || "Objeto sin publicar"}</p>
+          {proyecto.entidad && <p>{proyecto.entidad}</p>}
+          <p>Valor adjudicado · {formatCopEscala(proyecto.valor)}</p>
+          <dl className={s.avance}>
+            <dt>Etapa contractual</dt>
+            <dd>{proyecto.etapa}</dd>
+            {proyecto.estadoContrato && (
+              <>
+                <dt>Estado en SECOP II</dt>
+                <dd>{proyecto.estadoContrato}</dd>
+              </>
             )}
-          </li>
-        ))}
-      </ul>
-      <Link href={`/licitaciones?departamento=${slug}`} prefetch={false}>
-        Buscar en este territorio →
-      </Link>
-    </>
+            <dt>Pagado · contrato principal</dt>
+            <dd>
+              {proyecto.porcentajePagado === null
+                ? "Sin dato"
+                : new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 }).format(
+                    proyecto.porcentajePagado
+                  ) + " %"}
+            </dd>
+            <dt>Avance físico</dt>
+            <dd>Sin dato</dd>
+          </dl>
+          <Link
+            href={proyecto.ficha}
+            prefetch={false}
+            aria-label={`Ver ficha ${proyecto.referencia || proyecto.id}`}
+          >
+            Ver ficha →
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -224,7 +237,7 @@ export default function Visor() {
                 : "Vista 2D · Selecciona un territorio."}
         </p>
       </div>
-      <aside className={s.panel} aria-label="Oportunidades por departamento">
+      <aside className={s.panel} aria-label="Proyectos adjudicados por departamento">
         <label className={s.rotulo} htmlFor="territorio-mapa">
           Departamento o distrito
         </label>
@@ -239,11 +252,17 @@ export default function Visor() {
         <h2>{departamento?.nombre ?? "Explora por territorio"}</h2>
         {departamento ? (
           <>
-            <p>Procesos que reciben ofertas según la sede de la entidad.</p>
-            <Oportunidades key={codigo} codigo={codigo} slug={departamento.slug} />
+            <p>
+              Hasta diez adjudicaciones recientes, ubicadas por la sede de la entidad. El porcentaje
+              pagado usa el contrato firmado más reciente.
+            </p>
+            <Proyectos key={codigo} codigo={codigo} />
           </>
         ) : (
-          <p>Elige un departamento en el mapa o en el selector para consultar sus oportunidades.</p>
+          <p>
+            Elige un departamento en el mapa o en el selector para consultar sus proyectos
+            adjudicados.
+          </p>
         )}
       </aside>
     </div>
