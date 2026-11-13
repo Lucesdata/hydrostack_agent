@@ -14,6 +14,13 @@ export interface ProyectoAdjudicado {
   entidad: string | null;
   valor: number;
   ficha: string;
+  secop: string | null;
+  fechaAdjudicacion: string | null;
+  fechaFirma: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  valorContrato: number | null;
+  valorPagado: number | null;
   etapa: string;
   estadoContrato: string | null;
   porcentajePagado: number | null;
@@ -40,6 +47,12 @@ export async function GET(_req: Request, { params }: { params: { dpto: string } 
         contratos,
       });
       const principal = contratos.find((contrato) => contrato === etapa.contrato);
+      const cifrasComparables =
+        principal && !etapa.contradicciones.some(({ codigo }) => codigo === "C4");
+      const valorContrato = cifrasComparables
+        ? (montoConDato(principal.valorActual) ?? montoConDato(principal.valorInicial))
+        : null;
+      const valorPagado = cifrasComparables ? montoConDato(principal.valorPagado) : null;
       return {
         id: p.secopId,
         referencia: p.referencia,
@@ -49,13 +62,14 @@ export async function GET(_req: Request, { params }: { params: { dpto: string } 
         ficha: `/licitaciones/${slugDeProceso(p.objeto, p.secopId)}`,
         etapa: etapa.nombre,
         estadoContrato: principal?.estado ?? null,
-        porcentajePagado:
-          principal && !etapa.contradicciones.some(({ codigo }) => codigo === "C4")
-            ? porcentajePagado(
-                principal.valorPagado,
-                montoConDato(principal.valorActual) ?? principal.valorInicial
-              )
-            : null,
+        secop: p.url,
+        fechaAdjudicacion: p.fecha,
+        fechaFirma: principal?.fechaFirma ?? null,
+        fechaInicio: principal?.fechaInicio ?? null,
+        fechaFin: principal?.fechaFinActual ?? principal?.fechaFinInicial ?? null,
+        valorContrato,
+        valorPagado,
+        porcentajePagado: porcentajePagado(valorPagado, valorContrato),
       };
     });
     return NextResponse.json(

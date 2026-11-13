@@ -251,3 +251,7 @@
 .avance dd {
   margin: 0;
 }
+
+.enlaceSecop {
+  margin-inline-start: 0.85rem;
+}

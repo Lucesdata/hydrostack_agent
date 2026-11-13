@@ -6,6 +6,7 @@ import type Escena3D from "@/src/components/marketplace/Escena3D";
 import type { EscenaHandle } from "@/src/components/marketplace/Escena3D";
 import { formatCopEscala } from "@/src/components/secop/format";
 import { DEPARTAMENTOS_DANE } from "@/src/lib/marketplace/adaptador";
+import { fechaLegible } from "@/src/lib/secop/etapa";
 import { geometria3d } from "@/src/lib/marketplace/geometria3d";
 import type { ProyectoAdjudicado } from "@/app/api/departamento/[dpto]/adjudicados/route";
 import s from "./mapa.module.css";
@@ -98,7 +99,25 @@ function Proyectos({ codigo }: { codigo: string }) {
                 <dd>{proyecto.estadoContrato}</dd>
               </>
             )}
-            <dt>Pagado · contrato principal</dt>
+            <dt>Fecha de adjudicación</dt>
+            <dd>{fechaLegible(proyecto.fechaAdjudicacion) ?? "Sin dato"}</dd>
+            <dt>Firma del contrato</dt>
+            <dd>{fechaLegible(proyecto.fechaFirma) ?? "Sin dato"}</dd>
+            <dt>Inicio contractual</dt>
+            <dd>{fechaLegible(proyecto.fechaInicio) ?? "Sin dato"}</dd>
+            <dt>Fin previsto</dt>
+            <dd>{fechaLegible(proyecto.fechaFin) ?? "Sin dato"}</dd>
+            <dt>Valor del contrato</dt>
+            <dd>
+              {proyecto.valorContrato === null
+                ? "Sin dato"
+                : formatCopEscala(proyecto.valorContrato)}
+            </dd>
+            <dt>Monto pagado</dt>
+            <dd>
+              {proyecto.valorPagado === null ? "Sin dato" : formatCopEscala(proyecto.valorPagado)}
+            </dd>
+            <dt>Porcentaje pagado</dt>
             <dd>
               {proyecto.porcentajePagado === null
                 ? "Sin dato"
@@ -107,7 +126,7 @@ function Proyectos({ codigo }: { codigo: string }) {
                   ) + " %"}
             </dd>
             <dt>Avance físico</dt>
-            <dd>Sin dato</dd>
+            <dd>Pendiente de verificación en campo</dd>
           </dl>
           <Link
             href={proyecto.ficha}
@@ -116,6 +135,11 @@ function Proyectos({ codigo }: { codigo: string }) {
           >
             Ver ficha →
           </Link>
+          {proyecto.secop && (
+            <a className={s.enlaceSecop} href={proyecto.secop}>
+              Ver SECOP II ↗
+            </a>
+          )}
         </li>
       ))}
     </ul>
