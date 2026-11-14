@@ -13,6 +13,7 @@ export interface ProyectoAdjudicado {
   departamentoCodigo: string | null;
   referencia: string | null;
   objeto: string | null;
+  tipo: string | null;
   entidad: string | null;
   valor: number;
   ficha: string;
@@ -60,6 +61,7 @@ export async function GET() {
         departamentoCodigo: p.departamentoCodigo,
         referencia: p.referencia,
         objeto: p.objeto,
+        tipo: p.tipo,
         entidad: p.entidadNombre,
         valor: p.valor,
         ficha: `/licitaciones/${slugDeProceso(p.objeto, p.secopId)}`,

@@ -6,6 +6,7 @@ import type Escena3D from "@/src/components/marketplace/Escena3D";
 import type { EscenaHandle } from "@/src/components/marketplace/Escena3D";
 import { formatCopEscala } from "@/src/components/secop/format";
 import { DEPARTAMENTOS_DANE } from "@/src/lib/marketplace/adaptador";
+import { TIPO_PROYECTO, type TipoProyecto } from "@/src/lib/classify/tipo-proyecto";
 import { objetoLegible } from "@/src/lib/secop/ficha-card";
 import { fechaLegible } from "@/src/lib/secop/etapa";
 import { geometria3d } from "@/src/lib/marketplace/geometria3d";
@@ -67,6 +68,20 @@ function useProyectosNacionales() {
   return { resultado, reintentar };
 }
 
+function tituloDe(proyecto: ProyectoAdjudicado) {
+  const objeto = objetoLegible(proyecto.objeto, [proyecto.departamento]);
+  if (
+    objeto.length <= 85 &&
+    !/^(convocatoria p[uú]blica|m[ií]nima cuant[ií]a|objeto (no|sin))/i.test(objeto)
+  ) {
+    return objeto;
+  }
+  const tipo = TIPO_PROYECTO[proyecto.tipo as TipoProyecto]?.label;
+  return [tipo ?? "Agua y saneamiento", proyecto.departamento ?? proyecto.entidad]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function Proyectos({
   codigo,
   resultado,
@@ -110,7 +125,7 @@ function Proyectos({
               {String(proyecto.puesto).padStart(2, "0")}
             </span>
             <span className={s.filaContenido}>
-              <strong>{objetoLegible(proyecto.objeto, [proyecto.departamento])}</strong>
+              <strong>{tituloDe(proyecto)}</strong>
               <span>{proyecto.departamento ?? "Sede sin ubicar"}</span>
               <span className={s.filaDatos}>
                 <b>{formatCopEscala(proyecto.valor)}</b>
@@ -126,23 +141,23 @@ function Proyectos({
 }
 
 function FichaProyecto({ proyecto, cerrar }: { proyecto: ProyectoAdjudicado; cerrar: () => void }) {
-  const dialogo = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const elemento = dialogo.current;
-    elemento?.showModal();
-    return () => elemento?.close();
-  }, []);
+  const volver = useRef<HTMLButtonElement>(null);
+  useEffect(() => volver.current?.focus(), [proyecto.id]);
+  const fechas = [
+    ["Adjudicación", fechaLegible(proyecto.fechaAdjudicacion)],
+    ["Firma", fechaLegible(proyecto.fechaFirma)],
+    ["Inicio contractual", fechaLegible(proyecto.fechaInicio)],
+    ["Fin previsto", fechaLegible(proyecto.fechaFin)],
+  ];
   return (
-    <dialog ref={dialogo} className={s.ficha} aria-labelledby="titulo-proyecto" onClose={cerrar}>
-      <header>
-        <p className={s.rotulo}>
-          Puesto {proyecto.puesto} · {proyecto.departamento ?? "Sede sin ubicar"}
-        </p>
-        <button type="button" onClick={() => dialogo.current?.close()} aria-label="Cerrar ficha">
-          ×
-        </button>
-      </header>
-      <h2 id="titulo-proyecto">{objetoLegible(proyecto.objeto, [proyecto.departamento])}</h2>
+    <section className={s.detalle} aria-labelledby="titulo-proyecto">
+      <button ref={volver} type="button" onClick={cerrar}>
+        ← Volver al ranking
+      </button>
+      <p className={s.rotulo}>
+        Puesto {proyecto.puesto} · {proyecto.departamento ?? "Sede sin ubicar"}
+      </p>
+      <h2 id="titulo-proyecto">{tituloDe(proyecto)}</h2>
       {proyecto.entidad && <p>{proyecto.entidad}</p>}
       <div className={s.resumenFicha}>
         <div>
@@ -154,64 +169,59 @@ function FichaProyecto({ proyecto, cerrar }: { proyecto: ProyectoAdjudicado; cer
           <strong>{proyecto.etapa}</strong>
         </div>
       </div>
-      <h3>Fechas y pagos publicados</h3>
-      <dl className={s.avance}>
-        {proyecto.estadoContrato && (
-          <>
-            <dt>Estado en SECOP II</dt>
-            <dd>{proyecto.estadoContrato}</dd>
-          </>
+      <div className={s.enlacesFicha}>
+        <Link
+          href={proyecto.ficha}
+          prefetch={false}
+          aria-label={`Ver ficha ${proyecto.referencia || proyecto.id}`}
+        >
+          Ver ficha →
+        </Link>
+        {proyecto.secop && (
+          <a className={s.enlaceSecop} href={proyecto.secop}>
+            Ver SECOP II ↗
+          </a>
         )}
-        <dt>Fecha de adjudicación</dt>
-        <dd>{fechaLegible(proyecto.fechaAdjudicacion) ?? "Sin dato"}</dd>
-        <dt>Firma del contrato</dt>
-        <dd>{fechaLegible(proyecto.fechaFirma) ?? "Sin dato"}</dd>
-        <dt>Inicio contractual</dt>
-        <dd>{fechaLegible(proyecto.fechaInicio) ?? "Sin dato"}</dd>
-        <dt>Fin previsto</dt>
-        <dd>{fechaLegible(proyecto.fechaFin) ?? "Sin dato"}</dd>
-        <dt>Valor del contrato</dt>
-        <dd>
-          {proyecto.valorContrato === null ? "Sin dato" : formatCopEscala(proyecto.valorContrato)}
-        </dd>
-        <dt>Monto pagado</dt>
-        <dd>
-          {proyecto.valorPagado === null ? "Sin dato" : formatCopEscala(proyecto.valorPagado)}
-        </dd>
-        <dt>Porcentaje pagado</dt>
-        <dd>
-          {proyecto.porcentajePagado === null
-            ? "Sin dato"
-            : new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 }).format(
-                proyecto.porcentajePagado
-              ) + " %"}
-        </dd>
-        <dt>Avance físico</dt>
-        <dd>Pendiente de verificación en campo</dd>
+      </div>
+      <h3>Cronología contractual</h3>
+      <dl className={s.avance}>
+        {fechas.map(
+          ([hito, fecha]) =>
+            fecha && (
+              <div key={hito}>
+                <dt>{hito}</dt>
+                <dd>{fecha}</dd>
+              </div>
+            )
+        )}
       </dl>
-      <Link
-        href={proyecto.ficha}
-        prefetch={false}
-        aria-label={`Ver ficha ${proyecto.referencia || proyecto.id}`}
-      >
-        Ver ficha →
-      </Link>
-      {proyecto.secop && (
-        <a className={s.enlaceSecop} href={proyecto.secop}>
-          Ver SECOP II ↗
-        </a>
+      {proyecto.estadoContrato && <p>Estado en SECOP II · {proyecto.estadoContrato}</p>}
+      <h3>Pagos publicados</h3>
+      {proyecto.valorContrato !== null && (
+        <p>Valor del contrato · {formatCopEscala(proyecto.valorContrato)}</p>
       )}
-
+      {proyecto.valorPagado === null ? (
+        <p>AquaLicita aún no dispone de datos de pago vinculados.</p>
+      ) : (
+        <p>
+          {formatCopEscala(proyecto.valorPagado)} pagados
+          {proyecto.porcentajePagado !== null &&
+            ` · ${new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 }).format(proyecto.porcentajePagado)} % del contrato`}
+        </p>
+      )}
+      <h3>Avance físico</h3>
+      <p>Pendiente de verificación en campo</p>
       <details className={s.expediente}>
         <summary>Objeto y referencia oficiales</summary>
         <p>{proyecto.referencia || proyecto.id}</p>
         {proyecto.objeto && <p>{proyecto.objeto}</p>}
       </details>
-    </dialog>
+    </section>
   );
 }
 
 export default function Visor() {
+  const origenFicha = useRef<HTMLElement | null>(null);
   const [codigo, seleccionar] = useState("");
   const [proyecto, setProyecto] = useState<ProyectoAdjudicado | null>(null);
   const [vistaMovil, setVistaMovil] = useState<"lista" | "mapa">("lista");
@@ -238,6 +248,7 @@ export default function Visor() {
   });
 
   function elegirTerritorio(codigo: string) {
+    setProyecto(null);
     seleccionar(codigo);
     setVistaMovil("lista");
   }
@@ -383,31 +394,44 @@ export default function Visor() {
         </p>
       </div>
       <aside className={s.panel} aria-label="Proyectos adjudicados por departamento">
-        <label className={s.rotulo} htmlFor="territorio-mapa">
-          Departamento o distrito
-        </label>
-        <select id="territorio-mapa" value={codigo} onChange={(e) => seleccionar(e.target.value)}>
-          <option value="">Toda Colombia</option>
-          {departamentos.map((d) => (
-            <option key={d.codigo} value={d.codigo}>
-              {d.nombre}
-            </option>
-          ))}
-        </select>
-        <h2>{departamento?.nombre ?? "Top 10 nacional"}</h2>
-        <p>
-          Mayores valores adjudicados del último mes cerrado
-          {resultado.estado === "listo" ? ` (${resultado.periodo})` : ""}. Ubicación según la sede
-          de la entidad.
-        </p>
-        <Proyectos
-          codigo={codigo}
-          resultado={resultado}
-          reintentar={reintentar}
-          abrir={setProyecto}
-        />
+        {proyecto && (
+          <FichaProyecto
+            proyecto={proyecto}
+            cerrar={() => {
+              setProyecto(null);
+              requestAnimationFrame(() => origenFicha.current?.focus());
+            }}
+          />
+        )}
+        <div hidden={!!proyecto}>
+          <label className={s.rotulo} htmlFor="territorio-mapa">
+            Departamento o distrito
+          </label>
+          <select id="territorio-mapa" value={codigo} onChange={(e) => seleccionar(e.target.value)}>
+            <option value="">Toda Colombia</option>
+            {departamentos.map((d) => (
+              <option key={d.codigo} value={d.codigo}>
+                {d.nombre}
+              </option>
+            ))}
+          </select>
+          <h2>{departamento?.nombre ?? "Top 10 nacional"}</h2>
+          <p>
+            Mayores valores adjudicados del último mes cerrado
+            {resultado.estado === "listo" ? ` (${resultado.periodo})` : ""}. Ubicación según la sede
+            de la entidad.
+          </p>
+          <Proyectos
+            codigo={codigo}
+            resultado={resultado}
+            reintentar={reintentar}
+            abrir={(elegido) => {
+              origenFicha.current = document.activeElement as HTMLElement | null;
+              setProyecto(elegido);
+            }}
+          />
+        </div>
       </aside>
-      {proyecto && <FichaProyecto proyecto={proyecto} cerrar={() => setProyecto(null)} />}
     </div>
   );
 }

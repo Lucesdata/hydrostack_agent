@@ -75,8 +75,8 @@
   border-radius: 1rem;
   background:
     radial-gradient(ellipse at 50% 48%, #153b50 0%, transparent 67%),
-    linear-gradient(#86b8d213 1px, transparent 1px),
-    linear-gradient(90deg, #86b8d213 1px, transparent 1px), #0a1823;
+    linear-gradient(#86b8d20b 1px, transparent 1px),
+    linear-gradient(90deg, #86b8d20b 1px, transparent 1px), #0a1823;
   background-size:
     auto,
     38px 38px,
@@ -337,37 +337,6 @@
   fill: #121820;
 }
 
-.ficha {
-  width: min(42rem, calc(100% - 2rem));
-  max-height: 88dvh;
-  margin: auto;
-  padding: clamp(1rem, 3vw, 2rem);
-  background: #0e1d28;
-  color: #edf6fa;
-  border: 1px solid #476174;
-  border-radius: 1rem;
-  overflow-wrap: anywhere;
-}
-.ficha::backdrop {
-  background: rgb(3 9 15 / 76%);
-}
-.ficha header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.ficha h2 {
-  color: inherit;
-  font-size: clamp(1.3rem, 3vw, 1.9rem);
-  line-height: 1.2;
-  margin-block: 0.65rem;
-}
-.ficha h3 {
-  color: inherit;
-  font-size: 1rem;
-  margin: 1.1rem 0 0;
-}
 .resumenFicha {
   display: flex;
   flex-wrap: wrap;
@@ -404,10 +373,41 @@
   .visor[data-vista-movil="mapa"] .panel {
     display: none;
   }
-  .ficha {
-    width: 100%;
-    max-width: 100%;
-    margin: auto 0 0;
-    border-radius: 1rem 1rem 0 0;
+}
+
+@media (min-width: 801px) {
+  .visor {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, 31%);
   }
+  .panel {
+    max-height: clamp(30rem, 69svh, 53rem);
+    overflow-y: auto;
+  }
+}
+
+.detalle > button {
+  margin: 0 0 1.1rem;
+}
+.detalle h2 {
+  margin-top: 0.45rem;
+}
+.detalle h3 {
+  margin: 1.25rem 0 0.3rem;
+  color: inherit;
+  font-size: 1rem;
+}
+.detalle .avance > div {
+  display: grid;
+  gap: 0.25rem;
+}
+.enlacesFicha {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.85rem;
+}
+.enlacesFicha a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
 }
