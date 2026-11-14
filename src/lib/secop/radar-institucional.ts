@@ -56,6 +56,7 @@ export async function principalesAdjudicaciones(limite = 5) {
       tipo: proceso.tipoProyecto,
       adjudicado: proceso.adjudicado,
       fecha: proceso.fechaAdjudicacion,
+      fechaPublicacion: proceso.fechaPublicacion,
       valor: proceso.valorAdjudicacion,
       presupuesto: proceso.valorEstimado,
       adjudicatario: proceso.adjudicatario,
@@ -63,6 +64,7 @@ export async function principalesAdjudicaciones(limite = 5) {
       entidadId: entidad.id,
       entidadNombre: entidad.nombre,
       departamento: geografia.departamentoNombre,
+      departamentoCodigo: geografia.departamentoCodigo,
     })
     .from(proceso)
     .leftJoin(entidad, eq(entidad.id, proceso.entidadId))
@@ -77,7 +79,7 @@ export async function principalesAdjudicaciones(limite = 5) {
         sql`${proceso.tipoProyecto} in ('acueducto','alcantarillado','ptap','ptar')`
       )
     )
-    .orderBy(desc(proceso.valorAdjudicacion))
+    .orderBy(desc(proceso.valorAdjudicacion), desc(proceso.secopProcesoId))
     .limit(limite * 4);
   // Un mismo contrato puede estar publicado dos veces (misma entidad y referencia): se cuenta una.
   const vistos = new Set<string>();

@@ -58,6 +58,9 @@ export default async function Page() {
       </header>
       <div className="ri-shell ri-section">
         <div className="ri-tabs">
+          <Link href="/mapa-3d" className="ri-tab">
+            Mapa 3D y seguimiento →
+          </Link>
           <Link href="/licitaciones/entidades" className="ri-tab">
             Radar institucional ↗
           </Link>

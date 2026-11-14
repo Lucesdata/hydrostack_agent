@@ -37,6 +37,7 @@ export interface EscenaHandle {
   acercar(): void;
   alejar(): void;
   restablecer(): void;
+  girar?(): void;
 }
 
 interface Props {
@@ -52,6 +53,8 @@ interface Props {
    * no `ref`: `next/dynamic` no reenvía `ref` al componente cargado.
    */
   controles: MutableRefObject<EscenaHandle | null>;
+  /** Visor sin coropleta: muestra geografía y habilita giro por pasos. */
+  exploracionTerritorial?: boolean;
 }
 
 const INCLINACION = (35 * Math.PI) / 180;
@@ -66,6 +69,7 @@ const DUR_CAMARA = 350;
 const COLOR = {
   vacio: new THREE.Color("#0b1c2c"),
   bajo: new THREE.Color("#14405f"),
+  territorio: new THREE.Color("#235776"),
   alto: new THREE.Color("#2a8fbf"),
   seleccion: new THREE.Color("#f0bb68"),
   lado: new THREE.Color("#0a1826"),
@@ -97,6 +101,7 @@ interface Grupo {
   marcador: THREE.Mesh | null;
   elevacion: number;
   centro: [number, number];
+  rotulo: HTMLDivElement | null;
 }
 
 interface Tween {
@@ -120,6 +125,9 @@ export default function Escena3D(props: Props) {
     const host = contenedor.current;
     if (!host) return undefined;
 
+    const exploracionTerritorial = propsRef.current.exploracionTerritorial;
+    const profundidad = exploracionTerritorial ? 19 : PROFUNDIDAD;
+    const quieto = exploracionTerritorial && window.matchMedia("(prefers-reduced-motion: reduce)");
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -128,7 +136,8 @@ export default function Escena3D(props: Props) {
         powerPreference: "low-power",
       });
       if (!renderer.getContext()) throw new Error("sin contexto");
-    } catch {
+    } catch (error) {
+      if (exploracionTerritorial) console.warn("[mapa-3d] WebGL no disponible", error);
       propsRef.current.onFallo();
       return undefined;
     }
@@ -147,17 +156,27 @@ export default function Escena3D(props: Props) {
 
     const camara = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 3000);
     const distancia = 900;
+    const inclinacion = exploracionTerritorial ? Math.PI / 4 : INCLINACION;
 
     const materialLado = new THREE.MeshStandardMaterial({
-      color: COLOR.lado,
-      roughness: 0.95,
-      metalness: 0.05,
+      color: exploracionTerritorial ? 0xffffff : COLOR.lado,
+      vertexColors: exploracionTerritorial,
+      roughness: exploracionTerritorial ? 0.36 : 0.95,
+      metalness: exploracionTerritorial ? 0.22 : 0.05,
     });
     const materialLinea = new THREE.LineBasicMaterial({
       color: COLOR.linea,
       transparent: true,
-      opacity: 0.5,
+      opacity: exploracionTerritorial ? 0.8 : 0.5,
     });
+    const materialBordeSuperior = new THREE.LineBasicMaterial({
+      color: "#8ce9fa",
+      transparent: true,
+      opacity: 0.66,
+    });
+    const baseVidrio = new THREE.Color("#081725");
+    const bordeVidrio = new THREE.Color("#368fa8");
+    const tonoVidrio = new THREE.Color();
     const materialMarcador = new THREE.MeshBasicMaterial({ color: COLOR.linea });
     const materialMarcadorSel = new THREE.MeshBasicMaterial({ color: COLOR.seleccion });
     const geoMarcador = new THREE.SphereGeometry(1, 16, 12);
@@ -169,37 +188,66 @@ export default function Escena3D(props: Props) {
     for (const t of geo.territorios) {
       const material = new THREE.MeshStandardMaterial({
         color: COLOR.vacio,
-        roughness: 0.85,
-        metalness: 0.08,
+        roughness: exploracionTerritorial ? 0.32 : 0.85,
+        metalness: exploracionTerritorial ? 0.14 : 0.08,
+        emissive: exploracionTerritorial ? "#163c50" : "#000000",
+        emissiveIntensity: 0.3,
       });
       const raiz = new THREE.Group();
       for (const p of t.poligonos) {
         if (p[0].length < 3) continue;
         const g = new THREE.ExtrudeGeometry(formaDe(p), {
-          depth: PROFUNDIDAD,
+          depth: profundidad,
           bevelEnabled: false,
         });
         g.rotateX(-Math.PI / 2);
+        if (exploracionTerritorial) {
+          const posiciones = g.getAttribute("position");
+          const colores = new Float32Array(posiciones.count * 3);
+          for (let i = 0; i < posiciones.count; i++) {
+            const altura = THREE.MathUtils.clamp(posiciones.getY(i) / profundidad, 0, 1);
+            tonoVidrio.copy(baseVidrio).lerp(bordeVidrio, altura);
+            tonoVidrio.toArray(colores, i * 3);
+          }
+          g.setAttribute("color", new THREE.BufferAttribute(colores, 3));
+          for (const anillo of p) {
+            const borde = new THREE.BufferGeometry().setFromPoints(
+              anillo.map(([x, z]) => new THREE.Vector3(x, profundidad + 0.15, z))
+            );
+            raiz.add(new THREE.LineLoop(borde, materialBordeSuperior));
+            geometrias.push(borde);
+          }
+        }
         const malla = new THREE.Mesh(g, [material, materialLado]);
         malla.userData.codigo = t.codigo;
-        const bordes = new THREE.EdgesGeometry(g, 25);
-        const lineas = new THREE.LineSegments(bordes, materialLinea);
-        raiz.add(malla, lineas);
-        geometrias.push(g, bordes);
+        raiz.add(malla);
+        geometrias.push(g);
+        if (!exploracionTerritorial) {
+          const bordes = new THREE.EdgesGeometry(g, 25);
+          raiz.add(new THREE.LineSegments(bordes, materialLinea));
+          geometrias.push(bordes);
+        }
         seleccionables.push(malla);
       }
       let marcador: THREE.Mesh | null = null;
       if (t.ancla) {
         marcador = new THREE.Mesh(geoMarcador, materialMarcador);
-        marcador.position.set(t.ancla[0], PROFUNDIDAD + 3, t.ancla[1]);
+        marcador.position.set(t.ancla[0], profundidad + 3, t.ancla[1]);
         marcador.scale.setScalar(2.6);
         marcador.userData.codigo = t.codigo;
         marcador.visible = false;
         raiz.add(marcador);
         seleccionables.push(marcador);
       }
+      const rotulo = exploracionTerritorial && marcador ? document.createElement("div") : null;
+      if (rotulo) {
+        rotulo.className = s.rotuloTerritorial3d;
+        rotulo.addEventListener("click", () => propsRef.current.onSeleccionar(t.codigo));
+        host.append(rotulo);
+      }
       escena.add(raiz);
       grupos.set(t.codigo, {
+        rotulo,
         codigo: t.codigo,
         nombre: t.nombre,
         raiz,
@@ -211,23 +259,27 @@ export default function Escena3D(props: Props) {
     }
 
     // ── Cámara ─────────────────────────────────────────────────────────────
-    const vista = { zoom: 1, panX: 0, panZ: 0 };
+    const vista = { zoom: 1, panX: 0, panZ: 0, giro: 0 };
     let ancho = 1;
     let alto = 1;
 
     function ajustarCamara() {
       const aspecto = ancho / alto;
-      const altoUtil = geo.alto * Math.cos(INCLINACION) + 4 * PROFUNDIDAD;
-      const mitad = (Math.max(altoUtil, geo.ancho / aspecto) * 1.06) / 2;
+      const altoUtil = geo.alto * Math.cos(inclinacion) + 4 * profundidad;
+      const coseno = Math.abs(Math.cos(vista.giro));
+      const seno = Math.abs(Math.sin(vista.giro));
+      const anchoGirado = geo.ancho * coseno + geo.alto * seno;
+      const altoGirado = altoUtil * coseno + geo.ancho * seno * Math.cos(inclinacion);
+      const mitad = (Math.max(altoGirado, anchoGirado / aspecto) * 1.06) / 2;
       camara.left = -mitad * aspecto;
       camara.right = mitad * aspecto;
       camara.top = mitad;
       camara.bottom = -mitad;
       camara.zoom = vista.zoom;
       camara.position.set(
-        vista.panX,
-        distancia * Math.cos(INCLINACION),
-        vista.panZ + distancia * Math.sin(INCLINACION)
+        vista.panX + distancia * Math.sin(inclinacion) * Math.sin(vista.giro),
+        distancia * Math.cos(inclinacion),
+        vista.panZ + distancia * Math.sin(inclinacion) * Math.cos(vista.giro)
       );
       camara.lookAt(vista.panX, 0, vista.panZ);
       camara.updateProjectionMatrix();
@@ -239,6 +291,8 @@ export default function Escena3D(props: Props) {
     let vivo = true;
     let primero = true;
 
+    const puntoRotulo = new THREE.Vector3();
+
     function cuadro(ahora: number) {
       raf = 0;
       if (!vivo) return;
@@ -249,6 +303,13 @@ export default function Escena3D(props: Props) {
       }
       ajustarCamara();
       renderer.render(escena, camara);
+      for (const { rotulo, marcador } of grupos.values()) {
+        if (!rotulo || !marcador || !rotulo.textContent) continue;
+        marcador.getWorldPosition(puntoRotulo).project(camara);
+        rotulo.style.left = `${(puntoRotulo.x + 1) * 50}%`;
+        rotulo.style.top = `${(1 - puntoRotulo.y) * 50}%`;
+        rotulo.hidden = Math.abs(puntoRotulo.x) > 1 || Math.abs(puntoRotulo.y) > 1;
+      }
       if (primero) {
         primero = false;
         propsRef.current.onLista();
@@ -259,7 +320,12 @@ export default function Escena3D(props: Props) {
       if (!raf && vivo) raf = requestAnimationFrame(cuadro);
     }
     function mover(clave: string, dur: number, aplicar: (p: number) => void) {
-      tweens.set(clave, { t0: performance.now(), dur, aplicar });
+      if (quieto && quieto.matches) {
+        tweens.delete(clave);
+        aplicar(1);
+      } else {
+        tweens.set(clave, { t0: performance.now(), dur, aplicar });
+      }
       pedir();
     }
 
@@ -287,7 +353,17 @@ export default function Escena3D(props: Props) {
       for (const g of grupos.values()) {
         const total = totales.get(g.codigo) ?? 0;
         const sel = g.codigo === seleccionCodigo;
-        g.material.color.copy(colorDe(total, maximo, sel));
+        g.material.color.copy(
+          exploracionTerritorial && !sel && total === 0
+            ? COLOR.territorio
+            : colorDe(total, maximo, sel)
+        );
+        if (g.rotulo) {
+          g.rotulo.textContent = total ? String(total) : "";
+          g.rotulo.title = `${g.nombre} · ${total} ${total === 1 ? "proyecto" : "proyectos"}`;
+          g.rotulo.dataset.activo = String(sel);
+          g.rotulo.hidden = !total;
+        }
         if (g.marcador) {
           g.marcador.visible = total > 0 || sel;
           g.marcador.material = sel ? materialMarcadorSel : materialMarcador;
@@ -347,7 +423,8 @@ export default function Escena3D(props: Props) {
       }
       const g = grupos.get(codigo);
       const n = totales.get(codigo) ?? 0;
-      el.textContent = `${g?.nombre ?? codigo} · ${n.toLocaleString("es-CO")}`;
+      const nombre = g?.nombre ?? codigo;
+      el.textContent = exploracionTerritorial ? nombre : `${nombre} · ${n.toLocaleString("es-CO")}`;
       el.hidden = false;
       const r = host!.getBoundingClientRect();
       el.style.transform = `translate(${Math.round(x - r.left + 14)}px, ${Math.round(y - r.top + 14)}px)`;
@@ -369,8 +446,10 @@ export default function Escena3D(props: Props) {
             tweens.delete("camara");
           }
           const porPixel = (camara.top - camara.bottom) / vista.zoom / alto;
-          vista.panX -= (e.clientX - ultimo.x) * porPixel;
-          vista.panZ -= ((e.clientY - ultimo.y) * porPixel) / Math.cos(INCLINACION);
+          const dx = (e.clientX - ultimo.x) * porPixel;
+          const dz = ((e.clientY - ultimo.y) * porPixel) / Math.cos(inclinacion);
+          vista.panX -= dx * Math.cos(vista.giro) + dz * Math.sin(vista.giro);
+          vista.panZ -= dz * Math.cos(vista.giro) - dx * Math.sin(vista.giro);
           ultimo = { x: e.clientX, y: e.clientY };
           pedir();
           return;
@@ -421,7 +500,11 @@ export default function Escena3D(props: Props) {
     api.current = {
       aplicarDatos,
       zoom: (factor) => irA(vista.zoom * factor, vista.panX, vista.panZ),
-      restablecer: () => irA(1, 0, 0),
+      restablecer: () => {
+        tweens.delete("giro");
+        vista.giro = 0;
+        irA(1, 0, 0);
+      },
     };
     aplicarDatos();
     const controles = propsRef.current.controles;
@@ -429,6 +512,14 @@ export default function Escena3D(props: Props) {
       acercar: () => api.current?.zoom(PASO_ZOOM),
       alejar: () => api.current?.zoom(1 / PASO_ZOOM),
       restablecer: () => api.current?.restablecer(),
+      girar: exploracionTerritorial
+        ? () => {
+            const desde = vista.giro;
+            mover("giro", DUR_CAMARA, (p) => {
+              vista.giro = (desde + (Math.PI / 6) * p) % (2 * Math.PI);
+            });
+          }
+        : undefined,
     };
 
     return () => {
@@ -445,10 +536,17 @@ export default function Escena3D(props: Props) {
       canvas.removeEventListener("wheel", alRueda);
       canvas.removeEventListener("webglcontextlost", alPerder);
       geometrias.forEach((g) => g.dispose());
-      grupos.forEach((g) => g.material.dispose());
-      [materialLado, materialLinea, materialMarcador, materialMarcadorSel].forEach((m) =>
-        m.dispose()
-      );
+      grupos.forEach((g) => {
+        g.material.dispose();
+        g.rotulo?.remove();
+      });
+      [
+        materialLado,
+        materialLinea,
+        materialBordeSuperior,
+        materialMarcador,
+        materialMarcadorSel,
+      ].forEach((m) => m.dispose());
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();
