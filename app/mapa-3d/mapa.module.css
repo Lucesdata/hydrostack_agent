@@ -74,14 +74,8 @@
   border: 1px solid #2a4354;
   border-radius: 1rem;
   background:
-    radial-gradient(ellipse at 50% 48%, #153b50 0%, transparent 67%),
-    linear-gradient(#86b8d20b 1px, transparent 1px),
-    linear-gradient(90deg, #86b8d20b 1px, transparent 1px), #0a1823;
-  background-size:
-    auto,
-    38px 38px,
-    38px 38px,
-    auto;
+    radial-gradient(ellipse at 49% 53%, #153d51 0%, transparent 58%),
+    radial-gradient(ellipse at 50% 90%, #102333, #070e16 74%);
 }
 
 .mapa2d,

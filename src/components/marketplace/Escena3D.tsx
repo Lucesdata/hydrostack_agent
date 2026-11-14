@@ -126,7 +126,7 @@ export default function Escena3D(props: Props) {
     if (!host) return undefined;
 
     const exploracionTerritorial = propsRef.current.exploracionTerritorial;
-    const profundidad = exploracionTerritorial ? 12 : PROFUNDIDAD;
+    const profundidad = exploracionTerritorial ? 19 : PROFUNDIDAD;
     const quieto = exploracionTerritorial && window.matchMedia("(prefers-reduced-motion: reduce)");
     let renderer: THREE.WebGLRenderer;
     try {
@@ -156,17 +156,27 @@ export default function Escena3D(props: Props) {
 
     const camara = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 3000);
     const distancia = 900;
+    const inclinacion = exploracionTerritorial ? Math.PI / 4 : INCLINACION;
 
     const materialLado = new THREE.MeshStandardMaterial({
-      color: COLOR.lado,
-      roughness: 0.95,
-      metalness: 0.05,
+      color: exploracionTerritorial ? 0xffffff : COLOR.lado,
+      vertexColors: exploracionTerritorial,
+      roughness: exploracionTerritorial ? 0.36 : 0.95,
+      metalness: exploracionTerritorial ? 0.22 : 0.05,
     });
     const materialLinea = new THREE.LineBasicMaterial({
       color: COLOR.linea,
       transparent: true,
       opacity: exploracionTerritorial ? 0.8 : 0.5,
     });
+    const materialBordeSuperior = new THREE.LineBasicMaterial({
+      color: "#8ce9fa",
+      transparent: true,
+      opacity: 0.66,
+    });
+    const baseVidrio = new THREE.Color("#081725");
+    const bordeVidrio = new THREE.Color("#368fa8");
+    const tonoVidrio = new THREE.Color();
     const materialMarcador = new THREE.MeshBasicMaterial({ color: COLOR.linea });
     const materialMarcadorSel = new THREE.MeshBasicMaterial({ color: COLOR.seleccion });
     const geoMarcador = new THREE.SphereGeometry(1, 16, 12);
@@ -178,8 +188,10 @@ export default function Escena3D(props: Props) {
     for (const t of geo.territorios) {
       const material = new THREE.MeshStandardMaterial({
         color: COLOR.vacio,
-        roughness: 0.85,
-        metalness: 0.08,
+        roughness: exploracionTerritorial ? 0.32 : 0.85,
+        metalness: exploracionTerritorial ? 0.14 : 0.08,
+        emissive: exploracionTerritorial ? "#163c50" : "#000000",
+        emissiveIntensity: 0.3,
       });
       const raiz = new THREE.Group();
       for (const p of t.poligonos) {
@@ -189,12 +201,32 @@ export default function Escena3D(props: Props) {
           bevelEnabled: false,
         });
         g.rotateX(-Math.PI / 2);
+        if (exploracionTerritorial) {
+          const posiciones = g.getAttribute("position");
+          const colores = new Float32Array(posiciones.count * 3);
+          for (let i = 0; i < posiciones.count; i++) {
+            const altura = THREE.MathUtils.clamp(posiciones.getY(i) / profundidad, 0, 1);
+            tonoVidrio.copy(baseVidrio).lerp(bordeVidrio, altura);
+            tonoVidrio.toArray(colores, i * 3);
+          }
+          g.setAttribute("color", new THREE.BufferAttribute(colores, 3));
+          for (const anillo of p) {
+            const borde = new THREE.BufferGeometry().setFromPoints(
+              anillo.map(([x, z]) => new THREE.Vector3(x, profundidad + 0.15, z))
+            );
+            raiz.add(new THREE.LineLoop(borde, materialBordeSuperior));
+            geometrias.push(borde);
+          }
+        }
         const malla = new THREE.Mesh(g, [material, materialLado]);
         malla.userData.codigo = t.codigo;
-        const bordes = new THREE.EdgesGeometry(g, 25);
-        const lineas = new THREE.LineSegments(bordes, materialLinea);
-        raiz.add(malla, lineas);
-        geometrias.push(g, bordes);
+        raiz.add(malla);
+        geometrias.push(g);
+        if (!exploracionTerritorial) {
+          const bordes = new THREE.EdgesGeometry(g, 25);
+          raiz.add(new THREE.LineSegments(bordes, materialLinea));
+          geometrias.push(bordes);
+        }
         seleccionables.push(malla);
       }
       let marcador: THREE.Mesh | null = null;
@@ -233,11 +265,11 @@ export default function Escena3D(props: Props) {
 
     function ajustarCamara() {
       const aspecto = ancho / alto;
-      const altoUtil = geo.alto * Math.cos(INCLINACION) + 4 * profundidad;
+      const altoUtil = geo.alto * Math.cos(inclinacion) + 4 * profundidad;
       const coseno = Math.abs(Math.cos(vista.giro));
       const seno = Math.abs(Math.sin(vista.giro));
       const anchoGirado = geo.ancho * coseno + geo.alto * seno;
-      const altoGirado = altoUtil * coseno + geo.ancho * seno * Math.cos(INCLINACION);
+      const altoGirado = altoUtil * coseno + geo.ancho * seno * Math.cos(inclinacion);
       const mitad = (Math.max(altoGirado, anchoGirado / aspecto) * 1.06) / 2;
       camara.left = -mitad * aspecto;
       camara.right = mitad * aspecto;
@@ -245,9 +277,9 @@ export default function Escena3D(props: Props) {
       camara.bottom = -mitad;
       camara.zoom = vista.zoom;
       camara.position.set(
-        vista.panX + distancia * Math.sin(INCLINACION) * Math.sin(vista.giro),
-        distancia * Math.cos(INCLINACION),
-        vista.panZ + distancia * Math.sin(INCLINACION) * Math.cos(vista.giro)
+        vista.panX + distancia * Math.sin(inclinacion) * Math.sin(vista.giro),
+        distancia * Math.cos(inclinacion),
+        vista.panZ + distancia * Math.sin(inclinacion) * Math.cos(vista.giro)
       );
       camara.lookAt(vista.panX, 0, vista.panZ);
       camara.updateProjectionMatrix();
@@ -415,7 +447,7 @@ export default function Escena3D(props: Props) {
           }
           const porPixel = (camara.top - camara.bottom) / vista.zoom / alto;
           const dx = (e.clientX - ultimo.x) * porPixel;
-          const dz = ((e.clientY - ultimo.y) * porPixel) / Math.cos(INCLINACION);
+          const dz = ((e.clientY - ultimo.y) * porPixel) / Math.cos(inclinacion);
           vista.panX -= dx * Math.cos(vista.giro) + dz * Math.sin(vista.giro);
           vista.panZ -= dz * Math.cos(vista.giro) - dx * Math.sin(vista.giro);
           ultimo = { x: e.clientX, y: e.clientY };
@@ -508,9 +540,13 @@ export default function Escena3D(props: Props) {
         g.material.dispose();
         g.rotulo?.remove();
       });
-      [materialLado, materialLinea, materialMarcador, materialMarcadorSel].forEach((m) =>
-        m.dispose()
-      );
+      [
+        materialLado,
+        materialLinea,
+        materialBordeSuperior,
+        materialMarcador,
+        materialMarcadorSel,
+      ].forEach((m) => m.dispose());
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();
